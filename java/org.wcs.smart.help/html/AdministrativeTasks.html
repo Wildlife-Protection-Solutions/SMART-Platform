@@ -10,11 +10,476 @@
 </head>
 
 <body>
-<h2>Administrative Tasks</h2>
+<h1>Administrator Tasks</h1>
 
 <p></p>
 
-<h4><a id="UserNames">Changing Your Username and Password</a></h4>
+<h2><a id="createca">Creating a Conservation Area</a></h2>
+
+<p>Upon initial installation of the SMART software, you will need to set up a
+new Conservation Area which involves a number of configuration components. </p>
+<ul>
+</ul>
+<ul>
+  <li>Creating a Conservation Area</li>
+  <li>Conservation Area Properties</li>
+  <li>Defining an Administrative User</li>
+  <li>Defining a Data Model</li>
+  <li>Agencies and Ranks</li>
+  <li>Employees</li>
+  <li>Stations</li>
+  <li>Patrol Types</li>
+  <li>Teams</li>
+  <li>Mandates</li>
+  <li>Other Patrol Options</li>
+  <li>Define Area Boundaries</li>
+</ul>
+
+<p>Creating a new Conservation Area is done through the Advanced... link on the
+initial start up screen.</p>
+
+<p></p>
+
+<p><strong>Initial Start Screen</strong></p>
+
+<p><img alt="advanced option" src="images/AdvancedOption.png" width="497"
+height="318" /></p>
+<ul>
+  <li><em>Click Advanced...</em></li>
+</ul>
+
+<p></p>
+
+<p><strong>SMART Advanced Options</strong></p>
+
+<p><img alt="create CA" src="images/createNewCA.png" width="443" height="318"
+/></p>
+<ul>
+  <li><em>Select Create a New Conservation Area</em></li>
+</ul>
+
+<p></p>
+
+<h4><a id="caproperties">Conservation Area Properties</a></h4>
+
+<p>The Conservation Area Properties are names and descriptors assigned to a
+specific Conservation Area. These properties can help users of the SMART
+software manage multiple conservation areas. </p>
+
+<p><img alt="CA Properties" src="images/ConservationAreaProperties.png"
+width="511" height="312" /></p>
+
+<p></p>
+<ul>
+  <li><strong>Identifier</strong>: Short Name or Identifier of Conservation
+  Area</li>
+  <li><strong>Name</strong>: Full Name of Conservation Area</li>
+  <li><strong>Description</strong>: Description of the Conservation Area</li>
+  <li><strong>Designation</strong>: Designation or Status of the Conservation
+    Area</li>
+</ul>
+
+<p></p>
+
+<h4><a id="caadminuser">Defining an Administrative User</a></h4>
+
+<p>Creating an account for the primary administrator of a newly created
+Conservation Area is required, and the fields will need to be populated before
+the software will advance. After completing the form, the primary
+administrator&rsquo;s account will be created and can be used to make any
+changes within the newly defined Conservation Area. </p>
+
+<p></p>
+
+<p><strong>Administrative User</strong></p>
+
+<p><img alt="administratve user" src="images/AdministrativeUser.png"
+width="430" height="464" /></p>
+
+<p></p>
+
+<p><strong>ID:</strong> The existing identifier of the Conservation Area
+employee. If no identifier exists, the system will generate one if left
+unedited.</p>
+
+<p><strong>Given Name(s):</strong> The given name of the employee</p>
+
+<p><strong>Family Name(s):</strong> The family name of the employee</p>
+
+<p><strong>Conservation Area Start:</strong> The start date of employment for
+the employee</p>
+
+<p><strong>Birth Date:</strong> The birth date of the employee</p>
+
+<p><strong>Gender:</strong> The gender of the employee</p>
+
+<p></p>
+
+<p><strong>Smart User Name</strong><strong>:</strong> The log-in or username
+used to access the SMART software </p>
+
+<p><strong>Smart Password:</strong> The password for the username</p>
+
+<p><strong>Re-Type Password:</strong> A confirmation of the account's
+password</p>
+
+<p></p>
+
+<h4><a id="DataModel" name="DataModel">Defining a Data Model</a></h4>
+
+<p>Upon initialization of a new Conservation Area, the primary administrator
+will need to define the data model to be used for the new Conservation Area.</p>
+
+<p></p>
+
+<p><img alt="initialize data model" src="images/initializeDataModel.png"
+width="678" height="373" /></p>
+
+<p></p>
+
+<p>This process can be accomplished by:</p>
+<ul>
+  <li><strong>Using the default IUCN data model</strong> - this option will
+    apply the SMART default data model to the new conservation area. This is
+    recommended for novice users.</li>
+  <li><strong>Using a blank data model</strong> - this option results in no
+    data model and is not recommended unless the user is prepared to manually
+    create a simple data model for a unique purpose. If this option is selected
+    though, and no data model is manually created, the administrator will be
+    able to return to this screen in the future to choose a different
+  option.</li>
+  <li><strong>Copying from an existing Conservation Area</strong> (if one has
+    been previously initialized by that instance of SMART) - this is the way to
+    use a copy of an existing data model from another Conservation Area within
+    the local SMART database. If this option is used, then an exact copy of an
+    existing data model will be created for the new Conservation Area. But at
+    that point, the two data models will be managed separately - any changes
+    that are made to either data model will only occur within the associated
+    Conservation Area. To use this option, you will have to specify the
+    existing Conservation Area, within your SMART database, that uses the data
+    model which you wish to copy to the new Conservation Area.</li>
+  <li><strong>Importing a custom data model</strong> (if a previously exported
+    XML data model file has been created) - this option allows the
+    administrator to import an XML formatted SMART Data Model. The most likely
+    scenario for using this option is when another SMART administrator has
+    provided an XML Data Model export from a separate installation of SMART.
+    Perhaps it has been provided on a memory stick or via email attachment. To
+    use this option, you will have to navigate to the location of the file.</li>
+</ul>
+
+<p>After a data model has been established it is then possible to customize the
+data model to suit the needs of a particular Conservation Area.</p>
+
+<h4><a id="AgenciesRanks" name="AgenciesRanks">Creating Agencies and
+Ranks</a></h4>
+
+<p>Employees working within a Conservation Area, and SMART users, may belong to
+a particular agency, and may have a rank within that agency. Ranks are
+associated to agencies and have to be created as an entry under a specific
+agency.</p>
+
+<p>As part of the initial setup of a Conservation Area, the list of Agencies
+and their associated Ranks is accessed through the menu &ldquo;Conservation
+Area - Agency and Rank List &hellip;&rdquo;</p>
+
+<p></p>
+
+<p><img alt="employees and ranks" src="images/employeesRanks.png" width="437"
+height="397" /></p>
+
+<p></p>
+
+<p><strong>Add Agency:</strong> Adds new agencies</p>
+
+<p><strong>Delete Agency:</strong> Deletes selected agencies</p>
+
+<p><strong>Add Rank:</strong> Creates new ranks as part of the selected
+agency</p>
+
+<p><strong>Delete Rank:</strong> Deletes selected ranks</p>
+
+<p></p>
+
+<h4><a id="Employees" name="Employees">Creating Employees</a></h4>
+
+<p>After initialization of a new Conservation Area, the Employee List contains
+the single administrator account that was created during the initialization of
+the Conservation Area. Additional employees of a Conservation Area can be
+entered individually, or through a bulk upload process.</p>
+
+<p><img alt="employee list" src="images/employeelist.png" width="800"
+height="363" /></p>
+
+<p><strong>Enter search terms:</strong> text filter to shortlist entries</p>
+
+<p><strong>Import:</strong> Brings up an interface for importing a CSV to allow
+for bulk loading of employees.</p>
+
+<p><img alt="employee import" src="images/ImportEmployeesCSV.png" width="872"
+height="272" /></p>
+
+<p><em>Sample CSV</em> (<a
+href="linked_files/empoyees.csv">employees.csv</a>)</p>
+
+<p></p>
+
+<p><strong>Edit:</strong> Brings up interface for updating information about
+the selected employee</p>
+
+<p><img alt="update employee" src="images/updateEmployee.png" width="456"
+height="534" /></p>
+
+<p></p>
+
+<p><strong>ID:</strong> The existing identifier of the Conservation Area
+employee. If no identifier exists, the system will generate one if this field
+is left unedited.</p>
+
+<p><strong>Given Name(s):</strong> The given name of the employee</p>
+
+<p><strong>Family Name(s):</strong> The family name of the employee</p>
+
+<p><strong>Conservation Area Start:</strong> The start date of employment for
+the employee</p>
+
+<p><strong>Inactive:</strong> If toggled, indicates the employee is no longer
+employed by the Conservation Area</p>
+
+<p><strong>Employment End:</strong> If the Inactive box is checked, the
+employment end date will become editable and allow for the recording of an
+employment end date</p>
+
+<p><strong>Birth Date:</strong> The birth date of the employee</p>
+
+<p><strong>Gender:</strong> The gender of the employee</p>
+
+<p></p>
+
+<p><strong>Agency:</strong> Agency of the employee</p>
+
+<p><strong>Rank:</strong> Rank of the employee</p>
+
+<p></p>
+
+<p><strong>Smart User Name</strong><strong>:</strong> The log-in or username
+used to access the SMART software </p>
+
+<p><strong>Smart Password:</strong> The password for the username</p>
+
+<p><strong>Re-Type Password:</strong> A confirmation of the account's
+password</p>
+
+<p><strong>Smart User Level:</strong> The SMART User Level is updated using
+this pull down.</p>
+
+<p></p>
+
+<p><strong>Create New:</strong> Brings up interface for updating information
+about the selected employee</p>
+
+<p><img alt="create edit employees" src="images/createEditEmployees.png"
+width="455" height="484" /></p>
+
+<p></p>
+
+<p><strong>ID:</strong> The existing identifier of the Conservation Area
+employee. If no identifier exists, the system will generate one if this field
+is left unedited.</p>
+
+<p><strong>Given Name(s):</strong> The given name of the employee</p>
+
+<p><strong>Family Name(s):</strong> The family name of the employee</p>
+
+<p><strong>Conservation Area Start:</strong> The start date of employment for
+the employee</p>
+
+<p><strong>Birth Date:</strong> The birth date of the employee</p>
+
+<p><strong>Gender:</strong> The gender of the employee</p>
+
+<p></p>
+
+<p><strong>Agency:</strong> Agency of the employee</p>
+
+<p><strong>Rank:</strong> Rank of the employee</p>
+
+<p></p>
+
+<p><strong>Smart User Name</strong><strong>:</strong> The log-in or username
+used to access the SMART software </p>
+
+<p><strong>Smart Password:</strong> The password for the username</p>
+
+<p><strong>Re-Type Password:</strong> A confirmation of the account's
+password</p>
+
+<p></p>
+
+<h4><a id="userlevels">Setting Accounts and Permissions</a></h4>
+
+<p><strong>User Levels Permissions and Restrictions</strong></p>
+
+<p>SMART accounts have varying access permissions allowing Administrators to
+assign an appropriate user level to employees. The SMART design is dynamic and
+user accounts can be updated to accommodate changes in employees' job duties.
+</p>
+
+<p></p>
+
+<p><strong>Data Entry</strong></p>
+
+<p>The data entry user level has the most restrictions in place. The menu bar
+and icons available have been customized to include only the features required
+for the account to enter patrol data.</p>
+
+<p>The data entry user level can create, export, and import patrol data; and
+can create system backups after patrol information has been completed.</p>
+
+<p></p>
+
+<p><img alt="icons data entry" src="images/icons_dataEntry.png" width="328"
+height="161" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Analyst</strong></p>
+
+<p>The analyst user level is designed for employees to create, export, import,
+and run queries and reports. The analyst user level cannot create, alter or
+delete any queries or reports that have been saved in the Conservation Area
+Queries or Conservation Area Reports. The analyst user level can run, create,
+alter or delete reports saved in the My Queries or My Reports folders. An
+analyst account cannot enter patrol data or export/import patrols.</p>
+
+<p></p>
+
+<p><img alt="icons analyst" src="images/icons_analyst.png" width="336"
+height="161" /></p>
+
+<p></p>
+
+<p><strong>Manager</strong></p>
+
+<p>The manager account can make full changes to the patrol, query, report or
+planning modules. A manager account cannot make changes to the data model, nor
+update Conservation Area nor patrol parameters.</p>
+
+<p></p>
+
+<p><strong>Administrator</strong></p>
+
+<p>The administrator account has full access to all functions and options in
+SMART.</p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="Stations">Station List</a></h4>
+
+<p>After initalization of a new Conservation Area, a list of stations is
+required. </p>
+
+<p><strong>Name</strong>: The name of the station</p>
+
+<p><strong>Description:</strong> A detailed description of the station</p>
+
+<p></p>
+
+<p><em><em>Note</em>: The language is set before entering in the name and
+description of the station.</em></p>
+
+<p><img alt="stations" src="images/stations.png" width="509" height="359" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="Projections">Managing Projections</a></h4>
+
+<p>SMART supports multiple coordinate system projections and the Administrator
+can select and set default projections. This process is not a requirement
+during the initialization of the Conservation Area.</p>
+
+<p><strong>Add</strong>: Adds projections to the Conservation Area</p>
+
+<p><strong>Delete</strong>: Deletes projections from the Conservation Area</p>
+
+<p><strong>Edit</strong>: Allows for custom parameter edits to the selected
+projection</p>
+
+<p><strong>Set Default</strong>: Sets the selected projection as default for
+the Conservation Area</p>
+
+<p></p>
+
+<p></p>
+
+<p><img alt="projection" src="images/projections.png" width="510" height="327"
+/></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="AreaBoundaries">Defining Area Boundaries</a></h4>
+
+<p>As part of the initialization process the new Conservation Area will require
+boundary files to be loaded. Not every Conservation Area will have boundary
+files for all 5 types and not all 5 are required.</p>
+
+<p>ESRI Shapefiles are the default format for loading into SMART.</p>
+
+<p></p>
+
+<p><strong>Load</strong>: Opens a window where the Administrator will select
+the ESRI Shapefile.</p>
+
+<p><strong>Clear</strong>: Clears or deletes the chosen Shapefile from the
+Conservation Area. </p>
+
+<p><strong>Change Labels</strong>: Allows the Administrator to select a
+different field that will be used for display and labelling.</p>
+
+<p><em>Note: A projection file (.prj) is required by SMART and if not present
+during the loading of the Shapefile, the application will reject the
+Shapefile.</em></p>
+
+<p></p>
+
+<p><img alt="boundaries" src="images/boundaries.png" width="510" height="336"
+/></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="Basemaps">Managing Basemaps</a></h4>
+
+<p>Basemaps are essentially saved cartographic display parameters and are
+created in the Mapping Perspective window. The Administrator can set a default
+basemap for the Conservation Area or delete basemaps from this window. This
+process is not a requirement during the initialization of the Conservation
+Area.</p>
+
+<p></p>
+
+<p><strong>Set As Default:</strong> Sets the selected basemap as the default
+for the entire Conservation Area</p>
+
+<p><strong>Delete:</strong> Deletes the selected basemap.</p>
+
+<p></p>
+
+<p><img alt="basemap" src="images/basemaps.png" width="508" height="270" /></p>
+
+<p></p>
+
+<h4><a id="UserNames">Changing Usernames and Passwords</a></h4>
 
 <p></p>
 
@@ -99,49 +564,7 @@ saving. Click on the "Save" button to create the XML data model file. Wait for
 the software to tell you that the data model has been successfully exported,
 and then click on the "OK" button.</p>
 
-<p></p>
-
-<h4><a id="ImportDataModel">Creating or Importing a Data Model</a></h4>
-
-<p>When a new Conservation Area is created, it is necessary to specify a data
-model for that Conservation Area.</p>
-
-<p>There are actually four options available to the administrator when creating
-a new Conservation Area. Click on the "Conservation Area" tab, and select "Data
-Model ...". The four options for a new Conservation Area are:</p>
-<ul>
-  <li>Use the default data model - this option will apply the SMART default
-    data model to the new conservation area. This is recommended for novice
-    users.</li>
-  <li>Use a blank data model - this option results in no data model and is not
-    recommended unless the user is prepared to manually create a simple data
-    model for a unique purpose. If this option is selected though, and no data
-    model is manually created, the administrator will be able to return to this
-    screen in the future to choose a different option.</li>
-  <li>Copy data model from an existing conservation area - this is the way to
-    use a copy of an existing data model from another Conservation Area within
-    the local SMART database. If this option is used, then an exact copy of an
-    existing data model will be created for the new Conservation Area. But at
-    that point, the two data models will be managed separately - any changes
-    that are made to either data model will only occur within the associated
-    Conservation Area. To use this option, you will have to specify the
-    existing Conservation Area, within your SMART database, that uses the data
-    model which you wish to copy to the new Conservation Area.</li>
-  <li>Import a custom data model - this option allows the administrator to
-    import an XML formatted SMART Data Model. The most likely scenario for
-    using this option is when another SMART administrator has provided an XML
-    Data Model export from a separate installation of SMART. Perhaps it has
-    been provided on a memory stick or via email attachment. To use this
-    option, you will have to navigate to the location of the file.</li>
-</ul>
-
-<p>Once one of the four options has been selected and the "Finish" button has
-been pressed, the system will create the data model for this new conservation
-area, and will show the data model screen. Select "Close" to continue.</p>
-
-<p></p>
-
-<h4>Exporting a Conservation Area</h4>
+<h4><a id="exportca">Exporting a Conservation Area</a></h4>
 
 <p>The exporting of a Conservation Area will export all of the components of a
 particular Conservation Area. This function not only allows for the archiving
@@ -217,7 +640,7 @@ currently logged into.</p>
 
 <p></p>
 
-<h4><a id="Backup">Backup the Entire System</a></h4>
+<h4><a id="Backup">System Backup</a></h4>
 
 <p>The Backup System function will create a backup file of the entire database,
 and thus it provides a backup of every Conservation Area managed by the
@@ -236,7 +659,7 @@ created the backup file. Click "OK" when you get this message.</p>
 
 <p></p>
 
-<h4><a id="AutoBackup">Configuring Automatic Backups</a></h4>
+<h4><a id="AutoBackup">Automatic Backup</a></h4>
 
 <p>Remembering to perform regular backups is critical to ensuring that data can
 be recovered in the event of a system crash. SMART has the ability to

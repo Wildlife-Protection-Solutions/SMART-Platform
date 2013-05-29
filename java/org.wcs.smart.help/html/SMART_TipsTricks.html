@@ -4,13 +4,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>Tips Tricks FAQ &amp; Other Info</title>
+  <title>Tips Tricks &amp; FAQ</title>
   <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
   <link href="smart_help.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
-<h2>Tips, Tricks, FAQ &amp; Other Info</h2>
+<h2>Tips, Tricks &amp; FAQ</h2>
 
 <p></p>
 
@@ -96,8 +96,8 @@ dialog.</p>
 <hr />
 
 <p></p>
+<a id="Q3"></a> 
 
-<a id="Q3"></a>
 <p><strong>Q .Why does SMART take a long time to load the conservation areas.
 It doesn&rsquo;t look like it is doing anything?</strong></p>
 
@@ -134,12 +134,13 @@ when areas are modified or updated.</p>
 
 <p></p>
 <hr />
+
 <p><a id="Q5"></a> </p>
 
 <p><strong>Q. Why does the importing of GPS points into a multi-leg patrol
 sometimes place them in the wrong leg?</strong></p>
 
-<p> </p>
+<p></p>
 
 <p><strong>A. If two legs share the same time range SMART does not know which
 leg to assign the points to and will pick one of the legs. Verification of the
@@ -150,28 +151,122 @@ move them to a different leg.</strong></p>
 <p></p>
 <hr />
 
-<p><strong><a id="Q6">Q. </a></strong></p>
+<p></p>
 
-<p><strong>A. </strong></p>
+<p><strong><a id="Q6">Q. When using SMART I am seeing functions in my Export
+Map dialog or when I right-click over map layers but they do not appear to do
+anything. Why are these here?</a></strong></p>
+
+<p><strong>A. If you see extra options in your Export Map dialog or other
+options in your layer right click menu, you might be experiencing issues with
+the SMART configuration settings. Try running "SMART.exe -clean to fix and
+remove the unused functions." </strong></p>
+
+<p></p>
+<hr />
 
 <p></p>
 
-<h4><a id="other">Other Info</a></h4>
+<p><strong><a id="Q7"></a>Q. If I have too many columns in my query (and i want to have these
+columns). Can I design my report in landscape format?</strong></p>
 
-<p><strong>Removed uDig Functions still appear on Mac OSX</strong></p>
+<p><strong>A. Yes. See Image.</strong></p>
 
-<p>Some existing uDig functions continue to appear in the application, and this
-causes some confusion as no functionality is associated with these options.</p>
-
-<p></p>
-
-<p>The fix for this is to run SMART with the -clean argument as follows:</p>
-
-<p>&lt;code&gt;SMART.exe -clean &lt;/code&gt;</p>
+<p><img alt="Setting Columns" src="images/FAQ1.png" width="858" /></p>
 
 <p></p>
 
 <p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q8"></a>Q. Current version shows 15 digits after decimal for distance
+covered and number of hours...I would prefer to have only two digits after
+decimal. Is it possible to do in the SMART system or it needs changes in the
+programming.</strong></p>
+
+<p><strong>A. You cannot do this in the Summary table. However if you use your
+summary in a report the reporting interface allows you to define how to format
+the number for display.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q9"></a>Q. Is it possible to copy the master page and use the same format
+for new report ?</strong></p>
+
+<p><strong>A.</strong> <strong>Use the "Export To Library" function associated
+with the Master Page:</strong></p>
+<ol>
+  <li>Right click on your Master Page</li>
+  <li>Pick 'Export To Library...'</li>
+  <li>Pick the "smart.rptlibrary" to export to (this library is automatically
+    included in all reports).</li>
+</ol>
+
+<p><strong>Then in your second report:</strong></p>
+<ol>
+  <li>Open the 'Resource Explorer' view (upper left)</li>
+  <li>Navigate to your new Master Page</li>
+  <li>Right-click and pick 'Add To Report'.</li>
+</ol>
+
+<p>This will add the master page to your second report. (see attached image).
+As a general rule items you want to share across reports should go into the
+library.</p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q10"></a>Q. What is element id in reporting section?</strong></p>
+
+<p><strong><strong>A.</strong> An identifier used by BIRT in the report design.
+You shouldn't need to modify it.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q11"></a>Q. Can you explain what are data cubes?</strong></p>
+
+<p><strong>A. </strong><strong>SMART uses BIRT for designing and running
+reports; Data Cubes are a feature of BIRT - have a look at the BIRT
+documentation under the se <!--$date=-->2013-05-29<!--$-->"</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q12"></a>Q. In the current version we can select single target type
+(Numeric/Spatial/Administrative) for each patrol team/station/conservation
+area. How to set up both numeric and spatial targets for a single patrol
+plan?</strong></p>
+
+<p><strong>A. A plan can have multiple targets. So to create both numeric and
+spatial targets you need to create two targets in two separate operations.
+First create your numeric target and hit 'Save'. Then use the 'Add Target'
+button to add another target, this time picking a spatial target.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q13"></a>Q. What does "CET" stand for in intelligence source
+field?</strong></p>
+
+<p><strong>A. <span style="font-size: 12pt">C</span>ommunity <span
+style="font-size: 12pt">E</span>xtension <span
+style="font-size: 12pt">T</span>eam - which is a separate Forest Department/
+NGO team working with local communities that can be vital source of
+intelligence.</strong></p>
 
 <p></p>
 
