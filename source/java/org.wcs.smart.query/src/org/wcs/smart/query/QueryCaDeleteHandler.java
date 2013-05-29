@@ -88,7 +88,12 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 	private void deleteQueryFolders(ConservationArea ca, Session session) throws Exception{
 		moveCrossCaQueryFolders(ca, session);
 		
-		Query q = session.createQuery("delete from QueryFolder where conservationArea = :ca"); //$NON-NLS-1$
+		//first update parent folders to null; otherwise derby throws and error
+		Query q = session.createQuery("update QueryFolder set parentFolder = null WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from QueryFolder where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
@@ -123,7 +128,14 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 		
 		//here any query folders still associated with a 
 		//user from the current conservation area can be removed
-		q = session.createQuery("delete from QueryFolder a WHERE a.uuid in (select b.uuid from QueryFolder b WHERE a.conservationArea.uuid = :ca1 and a.employee.conservationArea = :ca2)");  //$NON-NLS-1$
+		
+		//first set parent folder to null; otherwise derby throws an error 
+		q = session.createQuery("update QueryFolder set parentFolder = null WHERE uuid in (select b.uuid from QueryFolder b where b.conservationArea.uuid = :ca1 and b.employee.conservationArea = :ca2)");  //$NON-NLS-1$
+		q.setParameter("ca1", ConservationArea.MULTIPLE_CA);  //$NON-NLS-1$
+		q.setParameter("ca2", ca);  //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from QueryFolder WHERE uuid in (select b.uuid from QueryFolder b WHERE b.conservationArea.uuid = :ca1 and b.employee.conservationArea = :ca2)");  //$NON-NLS-1$
 		q.setParameter("ca1", ConservationArea.MULTIPLE_CA);  //$NON-NLS-1$
 		q.setParameter("ca2", ca);  //$NON-NLS-1$
 		q.executeUpdate();
