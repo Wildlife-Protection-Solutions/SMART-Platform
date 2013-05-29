@@ -22,9 +22,8 @@
 package org.wcs.smart.ui.internal.startup;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -40,46 +39,41 @@ public class DialogHeader extends Composite {
 
 	private Label txtHeader;
 	
-	public DialogHeader(Composite parent, int style) {
-		this(parent, style, true);
-	}
 	/**
 	 * Create the header composite.
 	 * 
 	 * @param parent parent composite
 	 * @param style composite style
 	 */
-	public DialogHeader(Composite parent, int style, boolean largeFont) {
+	public DialogHeader(Composite parent, int style) {
 		super(parent, style);
 		setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		setLayout(new FormLayout());
 		
-		Label label = new Label(this, SWT.NONE);
-		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		label.setAlignment(SWT.CENTER);
-		FormData fd_label = new FormData();
-		fd_label.top = new FormAttachment(0);
-		fd_label.bottom = new FormAttachment(100);
-		fd_label.right = new FormAttachment(100);
-		fd_label.left = new FormAttachment(0, 366);
-		label.setLayoutData(fd_label);
-		label.setImage(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON).createImage());
+		GridLayout gl = new GridLayout(2, false);
+		gl.horizontalSpacing = gl.verticalSpacing = gl.marginHeight = gl.marginWidth = 0;
+		setLayout(gl);
 		
 		txtHeader = new Label(this, SWT.NONE);
 		txtHeader.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		if (largeFont){
-			//TODO: fix font without swtresourcemanager
-			//txtHeader.setFont(SWTResourceManager.getFont("DejaVu Sans", 15, SWT.NORMAL));
-			txtHeader.setAlignment(SWT.CENTER);
-		}
+		txtHeader.setAlignment(SWT.CENTER);
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		txtHeader.setLayoutData(gd);
 		
-		FormData fd_txtHeader = new FormData();
-		fd_txtHeader.right = new FormAttachment(label, -20);
-		fd_txtHeader.bottom = new FormAttachment(100, -25);
-		fd_txtHeader.left = new FormAttachment(0, 20);
-		fd_txtHeader.top = new FormAttachment(0, 25);
-		txtHeader.setLayoutData(fd_txtHeader);
-		txtHeader.setText(""); //$NON-NLS-1$
+		Composite imageComp = new Composite(this, SWT.NONE);
+		gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 10;
+		imageComp.setLayout(gl);
+		imageComp.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		Label label = new Label(imageComp, SWT.NONE);
+		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		label.setAlignment(SWT.CENTER);
+
+		label.setImage(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON).createImage());
+		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
+		imageComp.setLayoutData(gd);
+
+		Label titleBarSeparator = new Label(this, SWT.HORIZONTAL | SWT.SEPARATOR);
+		titleBarSeparator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 	}
 
 	/**
