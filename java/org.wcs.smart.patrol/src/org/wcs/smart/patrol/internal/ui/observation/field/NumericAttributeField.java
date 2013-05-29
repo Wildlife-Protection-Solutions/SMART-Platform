@@ -24,8 +24,6 @@ package org.wcs.smart.patrol.internal.ui.observation.field;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -33,6 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.AttributeValidator;
 
 
@@ -72,7 +71,11 @@ public class NumericAttributeField implements IAttributeField<Double> {
 		if (txt.getText().trim().isEmpty()){
 			return null;
 		}
-		return Double.parseDouble(txt.getText());
+		try{
+			return Double.parseDouble(txt.getText());
+		}catch (Exception ex){
+			return null;
+		}
 	}
 
 	/**
@@ -87,24 +90,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 		txt = new Text(parent, SWT.BORDER);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txt.getLayoutData()).horizontalIndent = 5;
-		txt.addVerifyListener(new VerifyListener() {
-			@Override
-			public void verifyText(VerifyEvent e) {
-				 final String oldS = txt.getText();
-				 
-		            String newS = oldS.substring(0, e.start) + e.text + oldS.substring(e.end);
-		            if (newS.length() > 0){
-		            	try
-		            	{
-		            		Float.parseFloat(newS);
-		            	}
-		            	catch(NumberFormatException ex)
-		            	{
-		            		e.doit =false;
-		            	}
-		            }
-			}
-		});
+
 		txt.addListener(SWT.Modify, new Listener(){
 
 			@Override
@@ -128,7 +114,18 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	 */
 	@Override
 	public String validate() {
-		String error = AttributeValidator.validateAttribute(attribute, getValue());
+		String error = null;
+		if (!txt.getText().trim().isEmpty()){
+			try{
+				Double.parseDouble(txt.getText());
+			}catch (Exception ex){
+				error = Messages.NumericAttributeField_InvalidNumericAttribute;
+			}
+		}
+		if (error == null){
+			error = AttributeValidator.validateAttribute(attribute, getValue());
+		}
+		
 		if (error != null){
 			cd.setDescriptionText(error);
 			cd.show();
