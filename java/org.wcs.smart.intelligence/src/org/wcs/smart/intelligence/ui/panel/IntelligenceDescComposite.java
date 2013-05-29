@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite for collecting the intelligence description information
@@ -136,8 +137,11 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 			setErrorMessage(Messages.IntelligenceDesc_NameRequired_Error);
 			return;
 		}
-		if (shortName.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-			setErrorMessage(MessageFormat.format(Messages.IntelligenceDescComposite_NameTooLong, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
+		if (!SmartUtils.isSimpleString(shortName.getText(),
+						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
+						org.wcs.smart.ca.Label.MAX_LENGTH, 0)) {
+		
+			setErrorMessage(MessageFormat.format(Messages.IntelligenceDescComposite_NameTooLong, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH,SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			return;
 		}
 		if (description.getText().length() > Intelligence.MAX_DESCRIPTION_LENTH){
