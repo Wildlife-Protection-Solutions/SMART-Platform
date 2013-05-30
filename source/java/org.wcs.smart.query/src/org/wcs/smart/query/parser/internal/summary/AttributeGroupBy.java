@@ -334,12 +334,16 @@ public class AttributeGroupBy implements IGroupBy {
 		}
 		FilterValidator.validateAttribute(attributeKey, session);
 		if (attributeType == AttributeType.TREE){
-			for (int i = 0; i < filterHkeys.length; i ++){
-				FilterValidator.validateAttributeTreeNode(filterHkeys[i],attributeKey, session);
+			if (filterHkeys != null){
+				for (int i = 0; i < filterHkeys.length; i ++){
+					FilterValidator.validateAttributeTreeNode(filterHkeys[i],attributeKey, session);
+				}
 			}
 		}else{
-			for (int i = 0; i < filterHkeys.length; i ++){
-				FilterValidator.validateAttributeListItem(filterHkeys[i], attributeKey, session);
+			if (filterHkeys != null){
+				for (int i = 0; i < filterHkeys.length; i ++){
+					FilterValidator.validateAttributeListItem(filterHkeys[i], attributeKey, session);
+				}
 			}
 		}
 		return null;
