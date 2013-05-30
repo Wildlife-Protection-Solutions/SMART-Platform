@@ -125,7 +125,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}
 		
-		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL);
+		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		tableViewer = new TableViewer(reportedTable);
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setLabelProvider(new IntelligenceLabelProvider());
