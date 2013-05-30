@@ -16,6 +16,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
 	public static String CyberTrackerExportHandler_InfoDialog_Title;
 	public static String CyberTrackerExportHandler_TaskName;
+	public static String Elements_BooleanAttribute_No;
+	public static String Elements_BooleanAttribute_Undefined;
+	public static String Elements_BooleanAttribute_Yes;
 	public static String PatrolScreens_Comments;
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_ConfirmMessage;

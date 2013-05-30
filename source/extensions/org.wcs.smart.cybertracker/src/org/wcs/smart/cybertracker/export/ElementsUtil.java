@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.util.SmartUtils;
 
@@ -109,9 +110,9 @@ public class ElementsUtil {
 	
 	public static List<CyberTrackerId> buildAttributeBooleanElements(Elements elements) {
 		List<String> labels = new ArrayList<String>();
-		labels.add("Yes");
-		labels.add("No");
-		labels.add("Undefined");
+		labels.add(Messages.Elements_BooleanAttribute_Yes);
+		labels.add(Messages.Elements_BooleanAttribute_No);
+		labels.add(Messages.Elements_BooleanAttribute_Undefined);
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add("true"); //$NON-NLS-1$
 		tag0Values.add("false"); //$NON-NLS-1$
