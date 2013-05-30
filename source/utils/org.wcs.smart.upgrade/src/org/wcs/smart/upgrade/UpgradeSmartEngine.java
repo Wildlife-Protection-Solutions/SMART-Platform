@@ -193,10 +193,15 @@ public class UpgradeSmartEngine {
 	 * @return
 	 * @throws Exception
 	 */
+	private boolean firstConnection = true;
 	private Connection getConnection(File dbFile) throws Exception {
 		try {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
 			String dbURL = "jdbc:derby:" + dbFile.getAbsolutePath();
+			if (firstConnection){
+				dbURL += ";upgrade=true";
+				firstConnection = false;
+			}
 			Connection conn = DriverManager.getConnection(dbURL, "smart_admin",
 					"smart_derby");
 			return conn;
