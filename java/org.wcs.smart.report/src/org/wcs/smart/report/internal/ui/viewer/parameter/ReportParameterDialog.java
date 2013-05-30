@@ -84,7 +84,7 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
-		
+		parent = (Composite)super.createDialogArea(parent);
 		Composite comp = new Composite(parent, SWT.NONE);
 		
 		comp.setLayout(new GridLayout(1, false));
