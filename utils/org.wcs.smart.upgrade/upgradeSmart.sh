@@ -1,0 +1,1 @@
+java -cp %CP1%%CP2% org.wcs.smart.upgrade.UpgradeSmart %SOURCEVERSION% %TARGETVERSION% version_%TARGETVERSION%.sql $1
