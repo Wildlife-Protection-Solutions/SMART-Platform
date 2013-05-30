@@ -90,6 +90,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="Translate__TargetScreenId0" />
 						<xs:element type="xs:string" name="Translate__TargetScreenId1" />
 						<xs:element type="xs:string" name="ResultGlobalValue" />
+						<xs:element type="xs:string" name="Translate__ResultElementId" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
