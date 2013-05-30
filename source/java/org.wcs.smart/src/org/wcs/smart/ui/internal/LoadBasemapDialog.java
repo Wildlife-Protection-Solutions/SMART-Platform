@@ -101,7 +101,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 	@Override
 	protected Composite createDialogArea(Composite parent) {
 		getShell().setText(Messages.LoadBasemapDialog_Title);
-
+		setTitle(Messages.LoadBasemapDialog_Title);
 		setMessage(Messages.LoadBasemapDialog_Message);
 
 		Composite main = new Composite(parent, SWT.NONE);
@@ -186,11 +186,12 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		boolean ok = true;
 		setErrorMessage(null);
 		IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
-		if (sel.isEmpty() ){
+		if (sel.isEmpty() || !(sel.getFirstElement() instanceof BasemapDefinition) ){
 			setErrorMessage(Messages.LoadBasemapDialog_Error_BasemapNoSelected);
 			ok = false;
+		}else{
+			baseMap = (BasemapDefinition) sel.getFirstElement();
 		}
-		baseMap = (BasemapDefinition) sel.getFirstElement();
 		
 		
 		Button btn = getButton(IDialogConstants.OK_ID);
