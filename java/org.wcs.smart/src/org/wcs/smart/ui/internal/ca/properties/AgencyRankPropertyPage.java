@@ -618,7 +618,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					agencies.remove(type);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName(), ex);
+				SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
 			
@@ -670,7 +670,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			}
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		
