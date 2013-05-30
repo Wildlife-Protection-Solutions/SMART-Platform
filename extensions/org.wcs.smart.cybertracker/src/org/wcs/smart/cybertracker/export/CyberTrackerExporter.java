@@ -120,17 +120,17 @@ public class CyberTrackerExporter {
 		
 		//----------------creating Reports.xml----------------
 		List<Items.Item> columnItems = new ArrayList<Items.Item>();
-		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date"));
-		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time"));
+		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date")); //$NON-NLS-1$ //$NON-NLS-2$
+		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time")); //$NON-NLS-1$ //$NON-NLS-2$
 //		columnItems.add(ReportsObjectFactory.createColumnItem("{1C640427-4F44-4796-97A6-368469342111}", "#PatrolType"));
 //		columnItems.add(ReportsObjectFactory.createColumnItem("{1C640427-4F44-4796-97A6-368469342115}", "#PatrolTransport"));
 		for (Attribute attribute : attr2resultId.keySet()) {
 			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
 			Integer outMode = AttributeType.TEXT.equals(attribute.getType()) || AttributeType.NUMERIC.equals(attribute.getType()) ? null : ReportsObjectFactory.TAG_0_OUTPUT_MODE;
-			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode));
+			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode)); //$NON-NLS-1$
 		}
 		for (Integer level : catLevel2resultId.keySet()) {
-			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), "!!!"+CATEGORY_RESULT_PREFIX+String.valueOf(level)));
+			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), "!!!"+CATEGORY_RESULT_PREFIX+String.valueOf(level))); //$NON-NLS-1$
 			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level), 2));
 		}
 		Reports reports = ReportsObjectFactory.createReports(columnItems);
@@ -166,6 +166,7 @@ public class CyberTrackerExporter {
 	
 	private static List<Node> buildAttributeNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
 		List<Attribute> attrList = new ArrayList<Attribute>();
+		List<CyberTrackerId> booleanAttrElementIDs = null;
 		category.getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(category);
@@ -210,7 +211,10 @@ public class CyberTrackerExporter {
 			}
 			case BOOLEAN:
 			{
-				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), ElementsUtil.booleanElements(elements), resultElementId.getItemId()));
+				if (booleanAttrElementIDs == null) {
+					booleanAttrElementIDs = ElementsUtil.buildAttributeBooleanElements(elements);
+				}
+				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), booleanAttrElementIDs, resultElementId.getItemId()));
 				break;
 			}
 			default:

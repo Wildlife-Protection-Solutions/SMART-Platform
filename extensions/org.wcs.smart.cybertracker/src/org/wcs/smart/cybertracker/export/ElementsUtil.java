@@ -39,8 +39,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ElementsUtil {
 	
-	private static List<CyberTrackerId> booleanElementIDs;
-
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
 		Elements.List list = new Elements.List();
@@ -109,19 +107,15 @@ public class ElementsUtil {
 		elements.getList().getItems().getItem().add(item);
 	}
 	
-	public static List<CyberTrackerId> booleanElements(Elements elements) {
-		if (booleanElementIDs == null) {
-			List<String> labels = new ArrayList<String>();
-			labels.add("Yes");
-			labels.add("No");
-			labels.add("Undefined");
-			List<String> tag0Values = new ArrayList<String>();
-			tag0Values.add("true"); //$NON-NLS-1$
-			tag0Values.add("false"); //$NON-NLS-1$
-			tag0Values.add("null"); //$NON-NLS-1$
-			booleanElementIDs = ElementsUtil.addCustomElements(elements, labels, tag0Values);
-		}
-		return booleanElementIDs;
-
+	public static List<CyberTrackerId> buildAttributeBooleanElements(Elements elements) {
+		List<String> labels = new ArrayList<String>();
+		labels.add("Yes");
+		labels.add("No");
+		labels.add("Undefined");
+		List<String> tag0Values = new ArrayList<String>();
+		tag0Values.add("true"); //$NON-NLS-1$
+		tag0Values.add("false"); //$NON-NLS-1$
+		tag0Values.add("null"); //$NON-NLS-1$
+		return ElementsUtil.addCustomElements(elements, labels, tag0Values);
 	}
 }
