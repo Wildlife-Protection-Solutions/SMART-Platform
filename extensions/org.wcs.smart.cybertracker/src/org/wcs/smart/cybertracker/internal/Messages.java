@@ -16,6 +16,26 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
 	public static String CyberTrackerExportHandler_InfoDialog_Title;
 	public static String CyberTrackerExportHandler_TaskName;
+	public static String PatrolScreens_Comments;
+	public static String PatrolScreens_Confirm;
+	public static String PatrolScreens_ConfirmMessage;
+	public static String PatrolScreens_EndPatrol;
+	public static String PatrolScreens_IsArmed;
+	public static String PatrolScreens_Leader;
+	public static String PatrolScreens_Mandate;
+	public static String PatrolScreens_Members;
+	public static String PatrolScreens_NewObservation;
+	public static String PatrolScreens_NextTask;
+	public static String PatrolScreens_No;
+	public static String PatrolScreens_None;
+	public static String PatrolScreens_Objective;
+	public static String PatrolScreens_PatrolType;
+	public static String PatrolScreens_Pilot;
+	public static String PatrolScreens_Start_Title;
+	public static String PatrolScreens_StartPatrol;
+	public static String PatrolScreens_Station;
+	public static String PatrolScreens_Team;
+	public static String PatrolScreens_Yes;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

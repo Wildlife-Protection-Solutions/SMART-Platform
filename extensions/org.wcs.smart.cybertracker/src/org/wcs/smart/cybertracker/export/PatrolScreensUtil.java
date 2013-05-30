@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -36,6 +35,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.filter.Categories;
 import org.wcs.smart.cybertracker.model.filter.ElementFilters;
@@ -68,37 +68,37 @@ public class PatrolScreensUtil {
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		CyberTrackerId id = addSimpleNextRadioNode(startId, nodes, elements, "SMART CyberTracker", "#PatrolStart", ElementsUtil.addCustomElements(elements, "Start New Patrol"));
+		CyberTrackerId id = addSimpleNextRadioNode(startId, nodes, elements, Messages.PatrolScreens_Start_Title, "#PatrolStart", ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol)); //$NON-NLS-1$
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
 		id = addTypeTransportNodes(id, nodes, elements, patrolTypes);
 		//patrol armed
 		List<String> labelValues = new ArrayList<String>();
-		labelValues.add("Yes");
-		labelValues.add("No");
+		labelValues.add(Messages.PatrolScreens_Yes);
+		labelValues.add(Messages.PatrolScreens_No);
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add("true"); //$NON-NLS-1$
 		tag0Values.add("false"); //$NON-NLS-1$
 		List<CyberTrackerId> armedIds = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Is Armed", "#Armed", armedIds);
+		id = addSimpleNextRadioNode(id, nodes, elements, Messages.PatrolScreens_IsArmed, "#Armed", armedIds); //$NON-NLS-1$
 
-		List<CyberTrackerId> cyberTrackerIds = ElementsUtil.addCustomElements(elements, "None");
+		List<CyberTrackerId> cyberTrackerIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_None);
 		CyberTrackerId noneElemId = cyberTrackerIds.get(0);
 		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, teams));
-		id = addSimpleNextRadioNode(id, nodes, elements, "Team", "#Team", cyberTrackerIds);
+		id = addSimpleNextRadioNode(id, nodes, elements, Messages.PatrolScreens_Team, "#Team", cyberTrackerIds); //$NON-NLS-1$
 
 		cyberTrackerIds.clear();
 		cyberTrackerIds.add(noneElemId);
 		List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, stations));
-		id = addSimpleNextRadioNode(id, nodes, elements, "Station", "#Station", cyberTrackerIds);
+		id = addSimpleNextRadioNode(id, nodes, elements, Messages.PatrolScreens_Station, "#Station", cyberTrackerIds); //$NON-NLS-1$
 
 		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Mandate", "#Mandate", toCyberTrackerIds(elements, mandates));
+		id = addSimpleNextRadioNode(id, nodes, elements, Messages.PatrolScreens_Mandate, "#Mandate", toCyberTrackerIds(elements, mandates)); //$NON-NLS-1$
 
-		id = addNoteNextNode(id, nodes, elements, "Objective", "#Objective");
-		id = addNoteNextNode(id, nodes, elements, "Comments", "#Comments");
+		id = addNoteNextNode(id, nodes, elements, Messages.PatrolScreens_Objective, "#Objective"); //$NON-NLS-1$
+		id = addNoteNextNode(id, nodes, elements, Messages.PatrolScreens_Comments, "#Comments"); //$NON-NLS-1$
 
 		//getting all members names
 		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
@@ -115,10 +115,10 @@ public class PatrolScreensUtil {
 		}
 		
 		id = addMembersNode(id, nodes, memberIds);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Leader", "#Leader", memberIds, filter);
+		id = addSimpleNextRadioNode(id, nodes, elements, Messages.PatrolScreens_Leader, "#Leader", memberIds, filter); //$NON-NLS-1$
 		Node leaderNode = nodes.get(nodes.size()-1);
 		String pilotNodeId = id.getNodeId();
-		id = addSimpleNextRadioNode(id, nodes, elements, "Pilot", "#Pilot", memberIds, filter);
+		id = addSimpleNextRadioNode(id, nodes, elements, Messages.PatrolScreens_Pilot, "#Pilot", memberIds, filter); //$NON-NLS-1$
 		addNavigationFormula(leaderNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
 		
 		addTaskNode(id, nodes, elements, startId, dmRootId);
@@ -182,7 +182,7 @@ public class PatrolScreensUtil {
 		}
 		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
 		String resultElemId = createResultElement("#PatrolType", elements); //$NON-NLS-1$
-		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), "Patrol Type", typeIds, resultElemId, true);
+		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultElemId, true);
 		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
 		nodes.add(node);
@@ -202,21 +202,21 @@ public class PatrolScreensUtil {
 		List<String> values = CyberTrackerUtil.listItemIds(memberIds);
 		String trElements = CyberTrackerUtil.translateElements(memberIds);
 		String trLinks = CyberTrackerUtil.translateLinks(memberIds, false);
-		Node node = ScreensObjectFactory.createNodeChecklist(id.getNodeId(), "Members", values, trElements, trLinks);
+		Node node = ScreensObjectFactory.createNodeChecklist(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks);
 		nodes.add(node);
 		return toNextScreen(node);
 	}
 
 	private static void addTaskNode(CyberTrackerId id, List<Node> nodes, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId) {
 		CyberTrackerId confId = new CyberTrackerId();
-		Node confirmNode = ScreensObjectFactory.createNodeMsgText(confId.getNodeId(), "Confirm", "Press \"Save\" to confirm ending patrol or use back button");
+		Node confirmNode = ScreensObjectFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
 		//disable next button, enable save button,navigate on save to start point
 		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
 		control2.setShowNext("False"); //$NON-NLS-1$
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(startId.getNodeId());
 		
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, "Make Observation", "End Patrol");
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_EndPatrol);
 		List<String> values = CyberTrackerUtil.listItemIds(ids);
 		String trElements = CyberTrackerUtil.translateElements(ids);
 		//custom translate links logic
@@ -225,7 +225,7 @@ public class PatrolScreensUtil {
 		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
 		// "End Patrol" leads to confirmation screen
 		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
-		Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), "Next Task", values, trElements, links.toString(), null);
+		Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
 		nodes.add(node);
 		nodes.add(confirmNode);
 	}
