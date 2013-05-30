@@ -82,7 +82,7 @@ public class PatrolScreensUtil {
 		List<CyberTrackerId> armedIds = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 		id = addSimpleNextRadioNode(id, nodes, elements, "Is Armed", "#Armed", armedIds);
 
-		List<CyberTrackerId> cyberTrackerIds = ElementsUtil.addCustomElements(elements, "None", null);
+		List<CyberTrackerId> cyberTrackerIds = ElementsUtil.addCustomElements(elements, "None");
 		CyberTrackerId noneElemId = cyberTrackerIds.get(0);
 		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, teams));
@@ -103,12 +103,13 @@ public class PatrolScreensUtil {
 		//getting all members names
 		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
 		List<String> members = new ArrayList<String>();
+		List<String> memberTag0s = new ArrayList<String>();
 		for (Employee i : employees) {
 			members.add(i.getLabel());
+			memberTag0s.add(SmartUtils.encodeHex(i.getUuid()));
 		}
-		String[] memberNames = members.toArray(new String[members.size()]);
-		List<CyberTrackerId> memberIds = ElementsUtil.addCustomElements(elements, memberNames);
-		String filter = buildMembersFilter(id.getNodeId(), memberIds, Arrays.asList(memberNames));
+		List<CyberTrackerId> memberIds = ElementsUtil.addCustomElements(elements, members, memberTag0s);
+		String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
 		if (filter != null) {
 			filter = SmartUtils.encodeHex(filter.getBytes());
 		}
@@ -180,17 +181,16 @@ public class PatrolScreensUtil {
 			tag0Types.add(patrolType.getType().name());
 		}
 		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
-		String resultElemId = createResultElement("#PatrolType", elements);
+		String resultElemId = createResultElement("#PatrolType", elements); //$NON-NLS-1$
 		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), "Patrol Type", typeIds, resultElemId, true);
 		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
 		nodes.add(node);
 		CyberTrackerId nextId = new CyberTrackerId();
-		CyberTrackerId resultId = new CyberTrackerId();
-		ElementsUtil.addElementsItem(elements, "#PatrolTransport", resultId.getItemId()); //$NON-NLS-1$
+		String resultTransportId = createResultElement("#PatrolTransport", elements); //$NON-NLS-1$
 		for (int i = 0; i < pTypes.size(); i++) {
 			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, pTypes.get(i).getTransportTypes());
-			node = CyberTrackerUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultId.getItemId());
+			node = CyberTrackerUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
 			nodes.add(node);
 			Control control2 = ScreensObjectFactory.getNavigationControl(node);
 			control2.setTranslateNextScreenId(nextId.getNodeId());

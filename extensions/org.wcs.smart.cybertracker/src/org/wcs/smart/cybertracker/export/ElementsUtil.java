@@ -62,14 +62,6 @@ public class ElementsUtil {
 		}
 	}
 	
-	/**
-	 * For given labels function:
-	 *  - creates items
-	 *	- adds them to elements
-	 *  - returns the list of item ids
-	 * @param elements
-	 * @return
-	 */
 	public static List<CyberTrackerId> addCustomElements(Elements elements, String... labels) {
 		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
 		for (String string : labels) {
@@ -79,7 +71,15 @@ public class ElementsUtil {
 		}
 		return idList;
 	}
-
+	
+	/**
+	 * For given labels function:
+	 *  - creates items
+	 *	- adds them to elements
+	 *  - returns the list of item ids
+	 * @param elements
+	 * @return
+	 */
 	public static List<CyberTrackerId> addCustomElements(Elements elements, List<String> labels, List<String> tag0Values) {
 		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
 		if (labels.size() != tag0Values.size()) {
