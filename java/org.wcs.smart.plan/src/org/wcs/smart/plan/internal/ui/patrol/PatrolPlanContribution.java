@@ -295,7 +295,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			lbl = toolkit.createLabel(planc, Messages.PatrolPlanContribution_Description_Label);
 			lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			Text txt = toolkit.createText(planc, currentPlan.getDescription(),
-					SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
+					SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL | SWT.BORDER);
 			// txt.setEditable(false);
 			txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData) txt.getLayoutData()).heightHint = 80;
