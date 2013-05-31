@@ -80,7 +80,7 @@ public class CyberTrackerUtil {
 	public static Category buildRoot(DataModel dataModel) {
 		Category fakeRoot = new Category();
 		fakeRoot.setName("Data Model"); //$NON-NLS-1$
-//		fakeRoot.setChildren(dataModel.getCategories());
+//		fakeRoot.setActiveChildren(dataModel.getCategories());
 //		return fakeRoot;
 		//TODO: switch back to original full datamodel
 		List<Category> cats = new ArrayList<Category>();
@@ -97,6 +97,9 @@ public class CyberTrackerUtil {
 	}
 
 	private static void mapCategories(List<Category> categories, Map<Category, CyberTrackerId> map) {
+		//TODO: uncomment null check
+//		if (categories == null)
+//			return;
 		for (Category category : categories) {
 			map.put(category, new CyberTrackerId());
 			if (category.getActiveChildren() != null) {
