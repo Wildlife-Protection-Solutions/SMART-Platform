@@ -11,12 +11,17 @@
                label="Cyber Tracker">
             <command
                   commandId="org.wcs.smart.cybertracker.export"
-                  label="Export"
+                  label="Export ..."
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.cybertracker.import"
-                  label="Import"
+                  label="Import ..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.cybertracker.properties"
+                  label="Properties ..."
                   style="push">
             </command>
          </menu>
@@ -32,6 +37,10 @@
             id="org.wcs.smart.cybertracker.import"
             name="CyberTracker Import">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.properties"
+            name="Properties">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -42,6 +51,10 @@
       <handler
             class="org.wcs.smart.cybertracker.handler.CyberTrackerImportHandler"
             commandId="org.wcs.smart.cybertracker.import">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.handler.CyberTrackerPropertiesHandler"
+            commandId="org.wcs.smart.cybertracker.properties">
       </handler>
    </extension>
 
