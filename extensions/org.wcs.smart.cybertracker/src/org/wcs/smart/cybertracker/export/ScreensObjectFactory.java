@@ -23,6 +23,9 @@ package org.wcs.smart.cybertracker.export;
 
 import java.util.List;
 
+import javax.swing.text.StyledEditorKit.BoldAction;
+
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
@@ -50,6 +53,12 @@ public class ScreensObjectFactory {
                 	<Id>{D9343FB1-A4BF-4F0A-8AB3-6AB1B05D6CF8}</Id>
                 	<Name>Application 1</Name>
                 	<DataClass>TctSequence</DataClass>
+                	<Data>
+                    	<Name>Application 1</Name>
+                    	<TestTime>True</TestTime>
+                    	<BigTitle>True</BigTitle>
+                    	...
+                	</Data>
                 	<Node> ... </Node>
                 	<Node> ... </Node>
                 	...
@@ -58,7 +67,7 @@ public class ScreensObjectFactory {
     	</Root>
 	</Screens>
 	 */
-	public static Screens createScreens(List<Node> screenNodes) {
+	public static Screens createScreens(List<Node> screenNodes, CyberTrackerProperties properties) {
 		Screens screens = new Screens();
 		Screens.Root root = new Screens.Root();
 		screens.setRoot(root);
@@ -74,6 +83,16 @@ public class ScreensObjectFactory {
 		a1Node.setId("{D9343FB1-A4BF-4F0A-8AB3-6AB1B05D6CF8}"); //$NON-NLS-1$
 		a1Node.setName("Application 1"); //$NON-NLS-1$
 		a1Node.setDataClass("TctSequence"); //$NON-NLS-1$
+		if (properties != null) {
+			Node.Data a1Data = new Node.Data();
+			a1Node.setData(a1Data);
+			a1Data.setName("Application 1"); //$NON-NLS-1$
+			a1Data.setTestTime("True"); //$NON-NLS-1$
+			a1Data.setBigTitle("True"); //$NON-NLS-1$
+			a1Data.setKioskMode(Boolean.TRUE.equals(properties.getKioskMode()) ? "True" : "False");  //$NON-NLS-1$//$NON-NLS-2$
+			a1Data.setWaypointTimer(properties.getWaypointTimer());
+			a1Data.setGpsTimeZone(properties.getGpsTimeZone());
+		}
 		if (screenNodes != null) {
 			a1Node.getNode().addAll(screenNodes);
 		}
