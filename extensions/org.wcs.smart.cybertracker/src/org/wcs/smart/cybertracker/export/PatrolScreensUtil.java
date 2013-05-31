@@ -58,8 +58,9 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolScreensUtil {
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
+	private static final String GLOBAL_PATROL_ID_GENERATOR = "GLOBAL_PATROL_ID_GENERATOR"; //$NON-NLS-1$
 
-	private static final String RESULT_PATROL_START = "#PatrolStart"; //$NON-NLS-1$
+	private static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
 	private static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
 	private static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
 	private static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$
@@ -101,7 +102,7 @@ public class PatrolScreensUtil {
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		CyberTrackerId id = addSimpleNextRadioNode(startId, result, elements, Messages.PatrolScreens_Start_Title, RESULT_PATROL_START, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol));
+		CyberTrackerId id = addStartScreen(startId, result, elements);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
 		id = addTypeTransportNodes(id, result, elements, patrolTypes);
@@ -210,6 +211,16 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 
+	private static CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
+		String resultId = createResultElement(RESULT_PATROL_ID, elements);
+		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol), null);
+		addCounterFormula(node, GLOBAL_PATROL_ID_GENERATOR, resultId);
+		container.screenNodes.add(node);
+		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
+		return toNextScreen(node);
+		
+	}
+	
 	private static CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes) {
 		List<String> types = new ArrayList<String>();
 		List<String> tag0Types = new ArrayList<String>();
@@ -344,7 +355,12 @@ public class PatrolScreensUtil {
 	}
 	
 	private static void addNavigationFormula(Node node, String formula, String successId, String failId) {
-		Control formulaControl = ScreensObjectFactory.createFormulaControl12(formula, failId, successId);
+		Control formulaControl = ScreensObjectFactory.createNavFormulaControl12(formula, failId, successId);
+		node.getData().getControls().getControl().add(formulaControl);
+	}
+
+	private static void addCounterFormula(Node node, String counterName, String resultElementId) {
+		Control formulaControl = ScreensObjectFactory.createCounterFormulaControl12(counterName, resultElementId);
 		node.getData().getControls().getControl().add(formulaControl);
 	}
 	

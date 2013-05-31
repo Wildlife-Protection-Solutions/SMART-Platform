@@ -606,7 +606,6 @@ public class ScreensObjectFactory {
 	/**
 	<Control>
 	     <Type>{C26ACA43-8C7C-497C-9586-382E5BD27115}</Type>
-	     <LockProperties>Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1</LockProperties>
 	     <Id>12</Id>
 	     <Align>0</Align>
 	     <Left>4</Left>
@@ -615,14 +614,11 @@ public class ScreensObjectFactory {
 	     <Height>20</Height>
 	     <Formula>...</Formula>
 	     <Hidden>True</Hidden>
-	     <Translate__TargetScreenId0>...</Translate__TargetScreenId0>
-	     <Translate__TargetScreenId1>...</Translate__TargetScreenId1>
 	 </Control>
 	 */
-	public static Controls.Control createFormulaControl12(String formula, String id0, String id1) {
+	public static Controls.Control createFormulaControl12(String formula) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{C26ACA43-8C7C-497C-9586-382E5BD27115}"); //$NON-NLS-1$
-		control.setLockProperties("Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1"); //$NON-NLS-1$
 		control.setId(12);
 		control.setAlign(0);
 		control.setLeft(4);
@@ -631,11 +627,39 @@ public class ScreensObjectFactory {
 		control.setHeight(20);
 		control.setFormula(formula);
 		control.setHidden("True"); //$NON-NLS-1$
+		return control;
+	}
+
+	/**
+	<Control>
+		...
+	     <LockProperties>Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1</LockProperties>
+	     <Translate__TargetScreenId0>...</Translate__TargetScreenId0>
+	     <Translate__TargetScreenId1>...</Translate__TargetScreenId1>
+	 </Control>
+	 */
+	public static Controls.Control createNavFormulaControl12(String formula, String id0, String id1) {
+		Controls.Control control = createFormulaControl12(formula);
+		control.setLockProperties("Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1"); //$NON-NLS-1$
 		control.setTranslateTargetScreenId0(id0);
 		control.setTranslateTargetScreenId1(id1);
 		return control;
 	}
 
+	/**
+	<Control>
+		...
+ 		<Translate__ResultElementId>...</Translate__ResultElementId>
+		<ResultGlobalValue>...</ResultGlobalValue>
+	 </Control>
+	 */
+	public static Controls.Control createCounterFormulaControl12(String counterName, String resultElementId) {
+		String formula = counterName+"="+counterName+"+1"; //x=x+1  //$NON-NLS-1$ //$NON-NLS-2$
+		Controls.Control control = createFormulaControl12(formula);
+		control.setResultGlobalValue(counterName);
+		control.setTranslateResultElementId(resultElementId);
+		return control;
+	}
 	
 	//Util methods
 	public static Controls.Control getNavigationControl(Node node) {
