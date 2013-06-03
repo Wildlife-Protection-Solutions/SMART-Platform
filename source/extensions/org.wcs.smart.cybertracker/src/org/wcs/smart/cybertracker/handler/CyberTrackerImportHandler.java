@@ -24,6 +24,10 @@ package org.wcs.smart.cybertracker.handler;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.cybertracker.importer.CyberTrackerImportDialog;
 
 /**
  * Handler for importing data from CyberTracker application.
@@ -35,7 +39,11 @@ public class CyberTrackerImportHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		Shell shell = HandlerUtil.getActiveShell(event);
+		CyberTrackerImportDialog dialog = new CyberTrackerImportDialog(shell);
+		if (dialog.open() != IDialogConstants.OK_ID) {
+			return null;
+		}
 		return null;
 	}
 

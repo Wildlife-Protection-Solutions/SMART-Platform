@@ -21,19 +21,57 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.ca.ConservationArea;
+
 /**
  * Class responsible for representing CyberTracker Properties
  * 
  * @author elitvin
  * @since 1.0.0
  */
+@Entity
+@Table(name = "smart.cybertracker_properties")
 public class CyberTrackerProperties {
+
+	private byte[] uuid;
+	private ConservationArea conservationArea;
 	
-	private Boolean kioskMode = true;
-	private Integer waypointTimer = 50; //Track Timer 
-	private Integer gpsTimeZone = -700; //GMT/UTC time offset
+	//default properties
+	private Boolean kioskMode = false;
+	private Integer waypointTimer = 0; //Track Timer 
+	private Integer gpsTimeZone = 0; //GMT/UTC time offset
 	
+
+	@Id
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name= "uuid", strategy="uuid2")
+	public byte[] getUuid() {
+		return uuid;
+	}
+	public void setUuid(byte[] uuid) {
+		this.uuid = uuid;
+	}
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return conservationArea;
+	}
+	public void setConservationArea(ConservationArea conservationArea) {
+		this.conservationArea = conservationArea;
+	}
+	
+	@Column(name="kiosk_mode")
 	public Boolean getKioskMode() {
 		return kioskMode;
 	}
@@ -41,6 +79,7 @@ public class CyberTrackerProperties {
 		this.kioskMode = kioskMode;
 	}
 	
+	@Column(name="waypoint_timer")
 	public Integer getWaypointTimer() {
 		return waypointTimer;
 	}
@@ -48,6 +87,7 @@ public class CyberTrackerProperties {
 		this.waypointTimer = waypointTimer;
 	}
 	
+	@Column(name="gps_time_zone")
 	public Integer getGpsTimeZone() {
 		return gpsTimeZone;
 	}
@@ -55,5 +95,4 @@ public class CyberTrackerProperties {
 		this.gpsTimeZone = gpsTimeZone;
 	}
 
-	
 }

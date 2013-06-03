@@ -23,9 +23,15 @@ package org.wcs.smart.cybertracker.properties;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -33,6 +39,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -43,8 +54,11 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @since 1.0.0
  */
 public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog {
+
+	private static final Integer CT_TIME_TRACK_MIN_VALUE = 0;
+	private static final Integer CT_TIME_TRACK_MAX_VALUE = 1000;
 	
-	private static Integer[] CT_GTM_VALUES = {
+	private static final Integer[] CT_GTM_VALUES = {
 		-1200,
 		-1100,
 		-1000,
@@ -53,9 +67,9 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		-700,
 		-600,
 		-500,
-		-430,
+		-450,
 		-400,
-		-330,
+		-350,
 		-300,
 		-200,
 		-100,
@@ -64,24 +78,26 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		200,
 		300,
 		400,
-		430,
+		450,
 		500,
-		530,
-		545,
+		550,
+		575,
 		600,
-		630,
+		650,
 		700,
 		800,
 		900,
-		930,
+		950,
 		1000,
-		1030,
+		1050,
 		1100,
-		1130,
+		1150,
 		1200,
 		1300,		
 	};
 
+	private CyberTrackerProperties ctProperties;
+	
 	private Button btnKioskMode;
 	private Text txtTrackTimer;
     private ComboViewer timeOffset;
@@ -89,6 +105,14 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	
 	public CyberTrackerPropertiesDialog() {
 		super(Display.getCurrent().getActiveShell(), "CyberTracker Default Properties");
+		Session session = HibernateManager.openSession();
+		try {
+			ctProperties = CyberTrackerHibernateManager.getProperties(session);
+		} finally {
+			session.close();
+		}
+		if (ctProperties == null)
+			ctProperties = new CyberTrackerProperties();
 	}
 
 	@Override
@@ -100,11 +124,33 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		lblKioskMode.setText("Kiosk Mode:");
 
 		btnKioskMode = new Button(container, SWT.CHECK);
+		btnKioskMode.setSelection(Boolean.TRUE.equals(ctProperties.getKioskMode()));
+		btnKioskMode.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
 		
 		Label lblTrackTimer = new Label(container, SWT.NONE);
 		lblTrackTimer.setText("Track Timer:");
 
 		txtTrackTimer = new Text(container, SWT.BORDER);
+		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (ctProperties.getWaypointTimer() != null)
+			txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimer()));
+		txtTrackTimer.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setChangesMade(true);
+			}
+		});
 
 		Label lblTimeOffset = new Label(container, SWT.NONE);
 		lblTimeOffset.setText("GMT/UTC time offset:");
@@ -114,7 +160,14 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
 		timeOffset.setLabelProvider(new CyberTrackerGTMLabelProvider());
  		timeOffset.setInput(CT_GTM_VALUES);
-		timeOffset.setSelection(new StructuredSelection(0));
+		if (ctProperties.getGpsTimeZone() != null)
+			timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
+		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				setChangesMade(true);
+			}
+		});
 		
 		setTitle("CyberTracker Default Properties");
 		setMessage("Default properties that will be applied to all created CyberTracker applications");
@@ -122,10 +175,37 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		return container;
 	}
 
+	boolean validateTrackTimer(String value) {
+		try {
+			Integer result = Integer.valueOf(value);
+			return result >= CT_TIME_TRACK_MIN_VALUE && result <= CT_TIME_TRACK_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		
+	}
+	
 	@Override
 	protected boolean performSave() {
-		// TODO Auto-generated method stub
-		return true;
+		if (!validateTrackTimer(txtTrackTimer.getText())) {
+			return false;
+		}
+		ctProperties.setKioskMode(btnKioskMode.getSelection());
+		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
+		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();
+		ctProperties.setGpsTimeZone((Integer)selection.getFirstElement());
+		
+		Session session = HibernateManager.openSession();
+		try {
+			CyberTrackerHibernateManager.saveProperties(ctProperties, session);
+			setChangesMade(false);
+			return true;
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(getShell(), "Error occured while trying to save CyberTracker properties", e);
+			return false;
+		}finally {
+			session.close();
+		}
 	}
 
 
@@ -144,10 +224,19 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 					if (hour < 10)
 						s += "0"; //$NON-NLS-1$
 					s += String.valueOf(hour);
-					if (min == 0)
+					switch (min) {
+					case 0:
 						s += ":00"; //$NON-NLS-1$
-					else
-						s += ":"+min; //$NON-NLS-1$
+						break;
+					case 50:
+						s += ":30"; //$NON-NLS-1$
+						break;
+					case 75:
+						s += ":45"; //$NON-NLS-1$
+						break;
+					default:
+						break;
+					}
 				}
 				return s;
 			}
