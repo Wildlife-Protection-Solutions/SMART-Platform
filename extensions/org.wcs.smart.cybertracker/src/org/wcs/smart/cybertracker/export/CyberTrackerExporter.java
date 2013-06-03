@@ -44,10 +44,10 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.reports.Items;
 import org.wcs.smart.cybertracker.model.reports.Reports;
@@ -104,7 +104,7 @@ public class CyberTrackerExporter {
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
-		Screens screens = ScreensObjectFactory.createScreens(screenNodes, new CyberTrackerProperties());
+		Screens screens = ScreensObjectFactory.createScreens(screenNodes, CyberTrackerHibernateManager.getProperties(session));
 		monitor.worked(5);
 
 		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Screens.xml")); //$NON-NLS-1$

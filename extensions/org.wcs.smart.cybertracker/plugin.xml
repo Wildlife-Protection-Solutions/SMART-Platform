@@ -57,5 +57,11 @@
             commandId="org.wcs.smart.cybertracker.properties">
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.cybertracker.model.CyberTrackerProperties">
+      </class>
+   </extension>
 
 </plugin>
