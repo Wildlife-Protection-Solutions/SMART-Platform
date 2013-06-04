@@ -36,11 +36,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -49,7 +46,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.application.DisplayAccess;
@@ -89,7 +89,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 	private ComboViewer cmvConservationArea  = null;
 	private Label progressLabel  = null;
-	private Label lblAdvanced = null;
+	private Link lblAdvanced = null;
 	
 //	private Font newFont;
 	
@@ -176,9 +176,9 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				handleButtonOKWidgetSelected();
 			}
 		});		
-		lblAdvanced.addMouseListener(new MouseAdapter() {
+		lblAdvanced.addListener(SWT.Selection, new Listener() {
 			@Override
-			public void mouseUp(MouseEvent e) {
+			public void handleEvent(Event event) {
 				handleButtonAdvancedSelected();
 			}
 		});
@@ -344,14 +344,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(txtPassword);
 
 		
-		lblAdvanced = new Label(fCompositeLogin, SWT.NONE | SWT.READ_ONLY);
-		lblAdvanced.setText(Messages.InteractiveSplashHandler_Advanced_Label);
-		
-		
+		lblAdvanced = new Link(fCompositeLogin, SWT.NONE);
+		lblAdvanced.setText("<a>" + Messages.InteractiveSplashHandler_Advanced_Label + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		data = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
 		lblAdvanced.setLayoutData(data);
 		lblAdvanced.setVisible(true);// false
-		lblAdvanced.setCursor( new Cursor(getSplash().getDisplay(),  SWT.CURSOR_HAND));
 		widgets.add(lblAdvanced);
 		
 		Label label = new Label(fCompositeLogin, SWT.NONE);
@@ -377,6 +374,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
+		fCompositeLogin.setTabList(new Control[]{cmvConservationArea.getControl(),txtUserName, txtPassword, composite_1, lblAdvanced});
+		composite_1.setTabList(new Control[]{btnOk, btnCancel});
 		enableControls(false);
 		
 	}		
