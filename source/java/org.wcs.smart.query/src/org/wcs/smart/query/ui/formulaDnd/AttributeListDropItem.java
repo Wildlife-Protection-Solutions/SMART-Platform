@@ -96,6 +96,9 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 					if (listViewer == null || listViewer.getCombo().isDisposed()){
 						return;
 					}
+					if (currentSelection != null && !items.contains(currentSelection)){
+						items.add(currentSelection);
+					}
 					listViewer.setInput(items.toArray(new ListItem[items.size()]));
 					if (currentSelection != null){
 						listViewer.setSelection(new StructuredSelection(currentSelection));
