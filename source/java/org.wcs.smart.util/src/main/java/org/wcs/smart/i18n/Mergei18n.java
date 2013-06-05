@@ -3,8 +3,8 @@ package org.wcs.smart.i18n;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -31,11 +30,13 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-	public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java\\";
+	public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1.1.0\\source\\java";
 	
-	public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\translations\\";
+	public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1.1.0\\source\\translations\\";
 	
 	public static final String LINE_SEP = "\n";
+	
+	public static final String NATIVE2ASCII = "C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
 	
 	/**
 	 * find all plugin.properties, messages.properties or bundle.properties
@@ -107,7 +108,7 @@ public class Mergei18n {
 		
 		List<File> filesList = new ArrayList<File>();
 		
-		final String matchDir = pluginName + ".nl_";
+		final String matchDir = pluginName + ".nl";  /*ADD _XX if you want to search for a specific language */
 		for (File flangDir : transDir.listFiles()){
 			
 			
@@ -139,7 +140,6 @@ public class Mergei18n {
 			if (!f.exists() || !toMerge.exists()){
 				System.err.println("Error either source or target file does not exists. " + f.toString() + "  |  " + toMerge.toString());
 			}else{
-				System.out.println(" merging: " + toMerge);
 				mergeFile(f, toMerge);
 			}	
 		}
@@ -157,7 +157,7 @@ public class Mergei18n {
 		for (Entry<String, String> e : source.entrySet()){
 			if (!target.containsKey(e.getKey())){
 				System.out.println("add: " + e.getKey());
-				target.put(e.getKey(), e.getValue());
+				target.put(e.getKey(), "**NEW**" + e.getValue());
 				changes = true;
 			}	
 		}
@@ -166,7 +166,7 @@ public class Mergei18n {
 		for (Entry<String, String> e : target.entrySet()){
 			if (!source.containsKey(e.getKey())){
 				//this key no longer exists so we can remove it
-				System.err.println("Remove: " + e.getKey());
+				System.out.println("Remove: " + e.getKey());
 				toRemove.add(e.getKey());
 			}
 			
@@ -177,7 +177,6 @@ public class Mergei18n {
 		}
 		
 		if (changes){
-			System.out.println("writing file: " + targetFile.toString());
 			writeFile(targetFile, target);
 		}
 	}
@@ -204,24 +203,36 @@ public class Mergei18n {
 	 * reads i18n properties file
 	 */
 	private void writeFile(File f, HashMap<String, String> values) throws Exception {
-//		Properties prop = new Properties();
-//		FileWriter fr = new FileWriter(f);
-//		prop.putAll(values);
-//		prop.store(fr, null);
-//		fr.close();
-//		
-		System.out.println("Writing " + f.getPath());
-		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), "UTF-8");
-		writer.write("#Auto generated from conversion files on " + DateFormat.getDateTimeInstance().format(new Date()));
-		writer.write(Packagei18n.LINE_SEP);
-		TreeSet<String> keys = new TreeSet<String>(values.keySet());
-		for (String key : keys){
-			String value = values.get(key);
-			value = value.replaceAll("\\r\\n|\\r|\\n", "\\\\n");
-			writer.write(key + "=" + value);
-			writer.write(Packagei18n.LINE_SEP);
+		System.out.println("Writing " + f.getPath() );
+		SortedProperties properties = new SortedProperties();
+		for(String key : values.keySet()){
+			properties.put(key, values.get(key));
 		}
+		
+		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), "UTF-8");
+		properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
 		writer.close();
+		
+		String cmd = "\"" + NATIVE2ASCII + "\" -encoding utf8 \"" + f.toString() + ".temp\" " + f.toString();
+		System.out.println(cmd);
+		Process pr = Runtime.getRuntime().exec(cmd);
+		InputStream is = pr.getInputStream();
+		while(is.read() != -1){}
+		is = pr.getErrorStream();
+		while(is.read() != -1){}
+		
+		((new File(f.toString() + ".temp"))).delete();
+//		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), "UTF-8");
+//		writer.write("#Auto generated from conversion files on " + DateFormat.getDateTimeInstance().format(new Date()));
+//		writer.write(Packagei18n.LINE_SEP);
+//		TreeSet<String> keys = new TreeSet<String>(values.keySet());
+//		for (String key : keys){
+//			String value = values.get(key);
+//			value = value.replaceAll("\\r\\n|\\r|\\n", "\\\\n");
+//			writer.write(key + "=" + ConversionUtils.nativeToAscii(value));
+//			writer.write(Packagei18n.LINE_SEP);
+//		}
+//		writer.close();
 	}
 
 	public static void main(String args[]) {

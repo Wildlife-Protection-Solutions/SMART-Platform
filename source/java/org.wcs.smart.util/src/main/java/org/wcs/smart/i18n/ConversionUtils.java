@@ -58,13 +58,13 @@ public class ConversionUtils {
         if (tmp.length() == 1) {      
             sb.append("0");      
         }      
-        sb.append(tmp);      
+        sb.append(tmp.toUpperCase());      
         code = (x & 0xFF);      
         tmp = Integer.toHexString(code);      
         if (tmp.length() == 1) {      
             sb.append("0");      
         }      
-        sb.append(tmp);      
+        sb.append(tmp.toUpperCase());      
         return sb.toString();      
 	}
 }
