@@ -22,9 +22,18 @@
 package org.wcs.smart.cybertracker.importer;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -48,12 +57,20 @@ import org.eclipse.swt.widgets.Text;
  */
 public class CyberTrackerImportDialog extends TitleAreaDialog {
 
+	private Text txtFile;
+	private File selectedFile;
+	
+//	private TableViewer viewer;
+	private CTPatrolTableContainer tableContainer;
+	private CyberTrackerImporter importer = new CyberTrackerImporter();
+
 	public CyberTrackerImportDialog(Shell parentShell) {
 		super(parentShell);
 	}
-
-	private Text txtFile;
-	private File selectedFile;
+	
+	public File getSelectedFile() {
+		return selectedFile;
+	}
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
@@ -62,7 +79,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(3, false));
+		main.setLayout(new GridLayout(4, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
@@ -71,7 +88,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtFile.setText("D:");
+		txtFile.setText("D:\\raw.xml");
 		
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
@@ -103,7 +120,20 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 				}
 			}
 		});
-		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));		
+		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		Button btnImport = new Button(main, SWT.NONE);
+		btnImport.setText("Import");
+		btnImport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performImport();
+			}
+		});
+		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		tableContainer = new CTPatrolTableContainer(composite, SWT.NONE);
+		
 		setTitle("Import");
 		setMessage("Import CyberTracker raw XML");
 		super.getShell().setText("Import");
@@ -111,6 +141,26 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	}
 	
 	
+//	private void createTable(Composite parent) {
+//		viewer = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
+//		viewer.getTable().setHeaderVisible(true);
+//		viewer.getTable().setLinesVisible(true);
+//		viewer.setContentProvider(ArrayContentProvider.getInstance());
+//		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		
+//		viewer.setItemCount(0);
+//		addColumn(viewer, "da");
+//		addColumn(viewer, "net");
+//		addColumn(viewer, "mb");
+//	}
+//
+//	private void addColumn(TableViewer viewer, String name) {
+//		TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
+//	    column.getColumn().setText(name);
+//	    column.getColumn().setWidth(100);
+//	    column.setLabelProvider(new CTPatrolTableCellLabelProvider());
+//	}
+
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
@@ -122,12 +172,22 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		getButton(IDialogConstants.CANCEL_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);
 	}
+
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
+		if (IDialogConstants.OK_ID == buttonId) {
+			File file = new File(txtFile.getText());
+			if (!file.exists()) {
+				MessageDialog.openError(getShell(), "Error", "Unable to locate a file with given name.");
+				return;
+			}
+			selectedFile = file;
+			super.setReturnCode(IDialogConstants.OK_ID);
+		}
 		close();
 	}
 	
@@ -136,4 +196,34 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		return true;
 	}
 	
+	private void performImport() {
+		final File file = new File(txtFile.getText());
+		if (!file.exists()) {
+			MessageDialog.openError(getShell(), "Error", "Unable to locate a file with given name.");
+			return;
+		}
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Import data from CyberTracker into SMART", 100);
+					try {
+						List<CyberTrackerPatrol> data = importer.importData(file, monitor);
+						tableContainer.addTableData(data);
+					} catch (Exception e) {
+//						displayError("Error", "Error occured while importing data from CyberTracker into SMART.");
+						e.printStackTrace();
+						return;
+					}
+//					displayInfo("CyberTracker Import", "Import successfully completed.");
+				}
+
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 }
