@@ -149,8 +149,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				final TableViewer viewer = AttributeTable.createAttributeTable(entryComp, ob.getKey());
 				viewer.setContentProvider(ArrayContentProvider.getInstance());			
 				viewer.setInput(items.toArray());
-				GridData gd = new GridData(SWT.FILL, SWT.FILL,true, false);
-				gd.heightHint = Math.min(viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 50);
+				GridData gd = new GridData(SWT.FILL, SWT.FILL,true, true);
+				gd.heightHint = Math.min(viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, viewer.getTable().getItemHeight()*4);
 				gd.widthHint = 300;
 				viewer.getTable().setLayoutData(gd);
 				AttributeTable.resizeColumns(viewer);
