@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -85,7 +86,7 @@ public class ZipUtil {
                     //IOUtils.copy(new FileInputStream(path), zOut);
                     tOut.closeArchiveEntry();
             	}else{
-            		addFileToZip(tOut, directories[i], "", monitor); //$NON-NLS-1$
+            		addFileToZip(tOut,directories[i].getAbsoluteFile(), "", monitor); //$NON-NLS-1$
             	}
             }
             
@@ -145,6 +146,8 @@ public class ZipUtil {
                     	return false;
                     }
                 }
+            }else{
+            	throw new IllegalStateException(MessageFormat.format(Messages.ZipUtil_BackupError, new Object[]{path.toString()}));
             }
         }
         return true;

@@ -878,6 +878,7 @@ public class Messages extends NLS {
 	public static String XmlMultiExportDialog_OverwriteWarningLabel;
 	public static String XmlMultiExportDialog_SelectAllLabel;
 	public static String XmlMultiExportDialog_WarnDialog_Title;
+	public static String ZipUtil_BackupError;
 	public static String ZipUtil_Error_CreatingTempDir;
 	public static String ZipUtil_Error_UnzipFailed;
 	public static String ZipUtil_Progress_CreatingZip;
