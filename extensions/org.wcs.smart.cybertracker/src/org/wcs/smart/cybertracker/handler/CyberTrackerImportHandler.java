@@ -21,13 +21,22 @@
  */
 package org.wcs.smart.cybertracker.handler;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.cybertracker.importer.CyberTrackerImportDialog;
+import org.wcs.smart.cybertracker.importer.CyberTrackerImporter;
 
 /**
  * Handler for importing data from CyberTracker application.
@@ -36,6 +45,8 @@ import org.wcs.smart.cybertracker.importer.CyberTrackerImportDialog;
  * @since 1.0.0
  */
 public class CyberTrackerImportHandler extends AbstractHandler {
+	
+	private CyberTrackerImporter importer = new CyberTrackerImporter();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -44,7 +55,48 @@ public class CyberTrackerImportHandler extends AbstractHandler {
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}
+
+		final File file = dialog.getSelectedFile();
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Import data from CyberTracker into SMART", 100);
+					try {
+						importer.importData(file, monitor);
+					} catch (Exception e) {
+						displayError("Error", "Error occured while importing data from CyberTracker into SMART.");
+						e.printStackTrace();
+						return;
+					}
+					displayInfo("CyberTracker Import", "Import successfully completed.");
+				}
+
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
+	private void displayInfo(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
+
+	private void displayError(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
+	
 }

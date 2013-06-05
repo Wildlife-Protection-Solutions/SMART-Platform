@@ -60,17 +60,17 @@ public class PatrolScreensUtil {
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 	private static final String GLOBAL_PATROL_ID_GENERATOR = "GLOBAL_PATROL_ID_GENERATOR"; //$NON-NLS-1$
 
-	private static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
-	private static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
-	private static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
-	private static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$
-	private static final String RESULT_TEAM = "#Team"; //$NON-NLS-1$
-	private static final String RESULT_STATION = "#Station"; //$NON-NLS-1$
-	private static final String RESULT_MANDATE = "#Mandate"; //$NON-NLS-1$
-	private static final String RESULT_OBJECTIVE = "#Objective"; //$NON-NLS-1$
-	private static final String RESULT_COMMENTS = "#Comments"; //$NON-NLS-1$
-	private static final String RESULT_LEADER = "#Leader"; //$NON-NLS-1$
-	private static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
+	public static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
+	public static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
+	public static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
+	public static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$
+	public static final String RESULT_TEAM = "#Team"; //$NON-NLS-1$
+	public static final String RESULT_STATION = "#Station"; //$NON-NLS-1$
+	public static final String RESULT_MANDATE = "#Mandate"; //$NON-NLS-1$
+	public static final String RESULT_OBJECTIVE = "#Objective"; //$NON-NLS-1$
+	public static final String RESULT_COMMENTS = "#Comments"; //$NON-NLS-1$
+	public static final String RESULT_LEADER = "#Leader"; //$NON-NLS-1$
+	public static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
 	
 	/**
 	 * Contains data filled by {@link PatrolScreensUtil}

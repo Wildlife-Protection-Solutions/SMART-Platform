@@ -27,6 +27,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * CyberTracker related database functions.
@@ -68,5 +69,19 @@ public class CyberTrackerHibernateManager {
 			return false;
 		}
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public static <T> T fetchByUuid(Class<T> clazz, String uuid, Session session) {
+		if (uuid == null)
+			return null;
+		try {
+			byte[] byteUuid = SmartUtils.decodeHex(uuid);
+			Criteria query = session.createCriteria(clazz).add(Restrictions.eq("uuid", byteUuid)); //$NON-NLS-1$
+			return (T) query.uniqueResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }
