@@ -46,6 +46,7 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}
 		Employee e = (Employee)object;
 		Long cnt = (Long) session.createCriteria(Employee.class)
+				.add(Restrictions.eq("conservationArea", e.getConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.ne("uuid", e.getUuid())) //$NON-NLS-1$
 				.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)) //$NON-NLS-1$
 				.setProjection(Projections.rowCount()).uniqueResult();
