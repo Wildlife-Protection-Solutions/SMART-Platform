@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.importer;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 
 /**
  * Table containing data for imported patrols
@@ -31,15 +32,27 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
  */
 public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 
-	public CTPatrolTableCellLabelProvider() {
-		// TODO Auto-generated constructor stub
+	private CTPatrolTableColumn column;
+	
+	public CTPatrolTableCellLabelProvider(CTPatrolTableColumn column) {
+		this.column = column;
 	}
 	
 	@Override
 	public String getText(Object element) {
 		if (element instanceof CyberTrackerPatrol) {
 			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
-			return ctPatrol.getTeam().getName();
+			switch (column) {
+			case TYPE: 		return ctPatrol.getPatrolType().getGuiName();
+			case TRANSPORT:	return ctPatrol.getPatrolTransportType().getName();
+			case ARMED: 	return ctPatrol.isArmed() ? "Yes" : "No";
+			case MANDATE:	return ctPatrol.getMandate().getName();
+			case TEAM: 		return ctPatrol.getTeam().getName();
+			case STATION:	return ctPatrol.getStation().getName();
+			case OBJECTIVE: return ctPatrol.getObjective();
+			case COMMENT:	return ctPatrol.getComment();
+			}
+			return ""; //$NON-NLS-1$
 		}
 		return super.getText(element);
 	}
