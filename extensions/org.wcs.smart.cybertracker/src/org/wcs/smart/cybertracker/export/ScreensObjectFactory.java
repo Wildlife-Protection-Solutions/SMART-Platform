@@ -23,8 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import java.util.List;
 
-import javax.swing.text.StyledEditorKit.BoldAction;
-
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Node;

@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.importer;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
+import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
  * Table containing data for imported patrols
@@ -45,7 +46,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			switch (column) {
 			case TYPE: 		return ctPatrol.getPatrolType().getGuiName();
 			case TRANSPORT:	return ctPatrol.getPatrolTransportType().getName();
-			case ARMED: 	return ctPatrol.isArmed() ? "Yes" : "No";
+			case ARMED: 	return ctPatrol.isArmed() ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
 			case MANDATE:	return ctPatrol.getMandate().getName();
 			case TEAM: 		return ctPatrol.getTeam().getName();
 			case STATION:	return ctPatrol.getStation().getName();
