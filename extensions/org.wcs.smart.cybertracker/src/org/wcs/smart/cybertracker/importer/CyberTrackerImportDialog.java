@@ -60,7 +60,6 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	private Text txtFile;
 	private File selectedFile;
 	
-//	private TableViewer viewer;
 	private CTPatrolTableContainer tableContainer;
 	private CyberTrackerImporter importer = new CyberTrackerImporter();
 
@@ -140,27 +139,6 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		return composite;
 	}
 	
-	
-//	private void createTable(Composite parent) {
-//		viewer = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
-//		viewer.getTable().setHeaderVisible(true);
-//		viewer.getTable().setLinesVisible(true);
-//		viewer.setContentProvider(ArrayContentProvider.getInstance());
-//		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		
-//		viewer.setItemCount(0);
-//		addColumn(viewer, "da");
-//		addColumn(viewer, "net");
-//		addColumn(viewer, "mb");
-//	}
-//
-//	private void addColumn(TableViewer viewer, String name) {
-//		TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
-//	    column.getColumn().setText(name);
-//	    column.getColumn().setWidth(100);
-//	    column.setLabelProvider(new CTPatrolTableCellLabelProvider());
-//	}
-
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */

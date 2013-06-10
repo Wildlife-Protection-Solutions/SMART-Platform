@@ -24,31 +24,57 @@ package org.wcs.smart.cybertracker.importer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Container for table containing imported data from CyberTracker application
+ * 
  * @author elitvin
  * @since 1.0.0
  */
 public class CTPatrolTableContainer extends Composite {
-
+	
+	private static final int HEIGHT_HINT = 250;
+	
+	/**
+	 * The supported patrol types.
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	public enum CTPatrolTableColumn {
+		TYPE("Type"),
+		TRANSPORT("Transport"),
+		ARMED("Armed"),
+		MANDATE("Mandate"),
+		TEAM("Team"),
+		STATION("Station"),
+		OBJECTIVE("Objective"),
+		COMMENT("Comment");
+		
+		private String guiName;
+		CTPatrolTableColumn(String guiName){
+			this.guiName = guiName;
+		}
+		public String getGuiName(){
+			return this.guiName;
+		}
+	}
+	
 	private TableViewer viewer;
 	
-	List<CyberTrackerPatrol> tableData = new ArrayList<CyberTrackerPatrol>();
+	List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
 	
 	/**
 	 * @param parent
@@ -60,28 +86,54 @@ public class CTPatrolTableContainer extends Composite {
 	}
 	
 	private void createControls() {
-		this.setLayout(new GridLayout());
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout();
+		this.setLayout(layout);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = HEIGHT_HINT;
+		this.setLayoutData(gd);
 		
 		viewer = new TableViewer(this, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer.getTable().setLayoutData(gd);
 		
 		viewer.setItemCount(0);
-		addColumn(viewer, "da");
-		addColumn(viewer, "net");
-		addColumn(viewer, "mb");
+		addColumns(viewer);
+		viewer.setInput(tableInputData);
+		
+		Composite buttons = new Composite(this, SWT.NONE);
+		buttons.setLayout(new GridLayout(2, false));
+		buttons.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		
+		Button btnAsPatrol = new Button(buttons, SWT.NONE);
+		btnAsPatrol.setText("Add As New Patrol");
+		btnAsPatrol.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO: implement
+			}
+		});
+		btnAsPatrol.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 
-		viewer.setInput(tableData);
+		Button btnAsLeg = new Button(buttons, SWT.NONE);
+		btnAsLeg.setText("Add As New Leg");
+		btnAsLeg.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO: implement
+			}
+		});
+		btnAsLeg.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 	}
 	
-	private void addColumn(TableViewer viewer, String name) {
-		TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
-	    column.getColumn().setText(name);
-	    column.getColumn().setWidth(100);
-	    column.setLabelProvider(new CTPatrolTableCellLabelProvider());
+	private void addColumns(TableViewer viewer) {
+		for (CTPatrolTableColumn column : CTPatrolTableColumn.values()) {
+			TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
+			viewerColumn.getColumn().setText(column.getGuiName());
+			viewerColumn.getColumn().setWidth(100);
+			viewerColumn.setLabelProvider(new CTPatrolTableCellLabelProvider(column));
+		}
 	}
 
 	public TableViewer getViewer() {
@@ -89,8 +141,7 @@ public class CTPatrolTableContainer extends Composite {
 	}
 
 	public void addTableData(List<CyberTrackerPatrol> data) {
-		tableData.addAll(data);
-//		viewer.setInput(tableData);
+		tableInputData.addAll(data);
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
