@@ -414,10 +414,16 @@ public class PatrolHibernateManager extends HibernateManager{
 
 		if (saveWaypoints){
 			//save all the waypoints as well
-			for (PatrolLeg pl : patrol.getLegs()){
-				for (PatrolLegDay pld : pl.getPatrolLegDays()){
-					for (Waypoint wp: pld.getWaypoints()){
-						session.saveOrUpdate(wp);
+			if (patrol.getLegs() != null) {
+				for (PatrolLeg pl : patrol.getLegs()) {
+					if (pl.getPatrolLegDays() != null) {
+						for (PatrolLegDay pld : pl.getPatrolLegDays()) {
+							if (pld.getWaypoints() != null) {
+								for (Waypoint wp: pld.getWaypoints()){
+									session.saveOrUpdate(wp);
+								}
+							}
+						}
 					}
 				}
 			}
