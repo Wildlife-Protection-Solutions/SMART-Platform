@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 
 /**
  * Dialog for importing CyberTracker application data.

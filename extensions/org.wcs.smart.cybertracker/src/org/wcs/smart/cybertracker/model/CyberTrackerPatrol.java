@@ -19,12 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer;
+package org.wcs.smart.cybertracker.model;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
@@ -57,8 +63,11 @@ public class CyberTrackerPatrol {
 	private PatrolTransportType patrolTransportType;
 	private boolean isArmed = false;
 	private String comment;
-//	private Date startDate;
-//	private Date endDate;
+	private Date startDate;
+	private Date endDate;
+	private Employee leader;
+	private Employee pilot;
+	private List<Employee> members;
 	
 	public CyberTrackerPatrol(Map<String, E> elementsMap, List<S> patrolData) {
 		this.elementsMap = elementsMap;
@@ -79,8 +88,18 @@ public class CyberTrackerPatrol {
 		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
 		
 		for (A a : s.getA()) {
+			String i = a.getI();
 			String n = a.getN();
 			String v = a.getV();
+			
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //TODO: will this always work or CT might provide different format depending on locale settings?
+				try {
+					setStartDate(formatter.parse(v));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
 			
 			if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
 				//nothing
@@ -109,11 +128,38 @@ public class CyberTrackerPatrol {
 			} else if (PatrolScreensUtil.RESULT_COMMENTS.equals(n)) {
 				setComment(v);
 			} else if (PatrolScreensUtil.RESULT_LEADER.equals(n)) {
-				
+				setLeader(fetchFromTag0(Employee.class, v, session));
 			} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
-				
+				setPilot(fetchFromTag0(Employee.class, v, session));
+			} else if (isMemberRecord(a)) {
+				//TODO: this can be optimised and done in one select
+				Employee emp = fetchFromTag0(Employee.class, i, session);
+				if (emp != null) {
+					getMembers().add(emp);
+				}
 			}
 		}
+		
+		s = patrolData.get(0); //need to find end date
+		for (A a : s.getA()) {
+			String i = a.getI();
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT);
+				try {
+					setEndDate(formatter.parse(a.getV()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
+	}
+
+	private boolean isMemberRecord(A a) {
+		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
+			return false;
+		//TODO: check if this is really member (use tag1?)
+		return true;
 	}
 
 	private <T> T fetchFromTag0(Class<T> clazz, String v, Session session) {
@@ -195,6 +241,48 @@ public class CyberTrackerPatrol {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Employee getLeader() {
+		return leader;
+	}
+
+	public void setLeader(Employee leader) {
+		this.leader = leader;
+	}
+
+	public Employee getPilot() {
+		return pilot;
+	}
+
+	public void setPilot(Employee pilot) {
+		this.pilot = pilot;
+	}
+
+	public List<Employee> getMembers() {
+		if (members == null)
+			members = new ArrayList<Employee>();
+		return members;
+	}
+
+	public void setMembers(List<Employee> members) {
+		this.members = members;
 	}
 
 }
