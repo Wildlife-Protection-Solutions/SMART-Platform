@@ -34,11 +34,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Importer for CyberTracker application data
@@ -55,14 +54,14 @@ public class CyberTrackerImporter {
 		Data data = null;
 		FileInputStream in = new FileInputStream(file);
 		try {
-			monitor.subTask("Reading xml file data");
+			monitor.subTask(Messages.CyberTrackerImporter_Read_Xml);
 			data = readDataModel(in);
 			monitor.worked(1);
 		} finally {
 			in.close();
 		}
 		if (data == null) {
-			throw new Exception("Error reading data from file");
+			throw new Exception(Messages.CyberTrackerImporter_Read_Error);
 		}
 		
 		elementsMap = buildElementsMap(data);
@@ -74,14 +73,6 @@ public class CyberTrackerImporter {
 			patrols.add(new CyberTrackerPatrol(elementsMap, patrolsMap.get(id)));
 		}
 		return patrols;
-//		Session session = HibernateManager.openSession();
-//		session.beginTransaction();
-//		try {
-//			//do something
-//		} finally {
-//			session.getTransaction().rollback();
-//			session.close();
-//		}
 	}
 
 	
@@ -141,7 +132,6 @@ public class CyberTrackerImporter {
 	public static Data readDataModel(InputStream file) throws JAXBException {
 		JAXBContext context = JAXBContext.newInstance(Data.class);
 		Unmarshaller un = context.createUnmarshaller();	
-		@SuppressWarnings("unchecked")
 		Object o = un.unmarshal(file);
 		return (Data) o;
 	}

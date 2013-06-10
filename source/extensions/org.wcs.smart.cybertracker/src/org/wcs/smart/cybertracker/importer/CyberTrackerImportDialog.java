@@ -31,9 +31,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -48,6 +45,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
  * Dialog for importing CyberTracker application data.
@@ -82,12 +80,12 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("File:");
+		lbl.setText(Messages.CyberTrackerImportDialog_File);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtFile.setText("D:\\raw.xml");
+		txtFile.setText("D:\\raw.xml"); //$NON-NLS-1$
 		
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
@@ -101,13 +99,13 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		});
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.CyberTrackerImportDialog_Button_Browse);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
 				fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-				fd.setFilterNames(new String[]{"Xml Files (*.xml)", "All Files (*.*)"});
+				fd.setFilterNames(new String[]{Messages.CyberTrackerImportDialog_XmlFiles, Messages.CyberTrackerImportDialog_AllFiles});
 				
 				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
 					fd.setFilterPath(txtFile.getText());
@@ -122,7 +120,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Button btnImport = new Button(main, SWT.NONE);
-		btnImport.setText("Import");
+		btnImport.setText(Messages.CyberTrackerImportDialog_Button_Import);
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -133,9 +131,9 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		
 		tableContainer = new CTPatrolTableContainer(composite, SWT.NONE);
 		
-		setTitle("Import");
-		setMessage("Import CyberTracker raw XML");
-		super.getShell().setText("Import");
+		setTitle(Messages.CyberTrackerImportDialog_Title);
+		setMessage(Messages.CyberTrackerImportDialog_Message);
+		super.getShell().setText(Messages.CyberTrackerImportDialog_Title);
 		return composite;
 	}
 	
@@ -144,9 +142,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Import", true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		getButton(IDialogConstants.CANCEL_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);
 	}
@@ -157,15 +153,15 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
-		if (IDialogConstants.OK_ID == buttonId) {
-			File file = new File(txtFile.getText());
-			if (!file.exists()) {
-				MessageDialog.openError(getShell(), "Error", "Unable to locate a file with given name.");
-				return;
-			}
-			selectedFile = file;
-			super.setReturnCode(IDialogConstants.OK_ID);
-		}
+//		if (IDialogConstants.OK_ID == buttonId) {
+//			File file = new File(txtFile.getText());
+//			if (!file.exists()) {
+//				MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
+//				return;
+//			}
+//			selectedFile = file;
+//			super.setReturnCode(IDialogConstants.OK_ID);
+//		}
 		close();
 	}
 	
@@ -177,7 +173,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	private void performImport() {
 		final File file = new File(txtFile.getText());
 		if (!file.exists()) {
-			MessageDialog.openError(getShell(), "Error", "Unable to locate a file with given name.");
+			MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
 			return;
 		}
 		
@@ -186,7 +182,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Import data from CyberTracker into SMART", 100);
+					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 100);
 					try {
 						List<CyberTrackerPatrol> data = importer.importData(file, monitor);
 						tableContainer.addTableData(data);

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -36,6 +35,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
  * Container for table containing imported data from CyberTracker application
@@ -54,14 +54,14 @@ public class CTPatrolTableContainer extends Composite {
 	 * @since 1.0.0
 	 */
 	public enum CTPatrolTableColumn {
-		TYPE("Type"),
-		TRANSPORT("Transport"),
-		ARMED("Armed"),
-		MANDATE("Mandate"),
-		TEAM("Team"),
-		STATION("Station"),
-		OBJECTIVE("Objective"),
-		COMMENT("Comment");
+		TYPE(Messages.CTPatrolTableColumn_Type),
+		TRANSPORT(Messages.CTPatrolTableColumn_Transport),
+		ARMED(Messages.CTPatrolTableColumn_Armed),
+		MANDATE(Messages.CTPatrolTableColumn_Mandate),
+		TEAM(Messages.CTPatrolTableColumn_Team),
+		STATION(Messages.CTPatrolTableColumn_Station),
+		OBJECTIVE(Messages.CTPatrolTableColumn_Objective),
+		COMMENT(Messages.CTPatrolTableColumn_Comment);
 		
 		private String guiName;
 		CTPatrolTableColumn(String guiName){
@@ -107,7 +107,7 @@ public class CTPatrolTableContainer extends Composite {
 		buttons.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		
 		Button btnAsPatrol = new Button(buttons, SWT.NONE);
-		btnAsPatrol.setText("Add As New Patrol");
+		btnAsPatrol.setText(Messages.CTPatrolTableContainer_Button_AsPatrol);
 		btnAsPatrol.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -117,7 +117,7 @@ public class CTPatrolTableContainer extends Composite {
 		btnAsPatrol.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 
 		Button btnAsLeg = new Button(buttons, SWT.NONE);
-		btnAsLeg.setText("Add As New Leg");
+		btnAsLeg.setText(Messages.CTPatrolTableContainer_Button_AsLeg);
 		btnAsLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

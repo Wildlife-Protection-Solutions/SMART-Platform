@@ -4,6 +4,18 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.internal.messages"; //$NON-NLS-1$
+	public static String CTPatrolTableCellLabelProvider_Armed_No;
+	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
+	public static String CTPatrolTableColumn_Armed;
+	public static String CTPatrolTableColumn_Comment;
+	public static String CTPatrolTableColumn_Mandate;
+	public static String CTPatrolTableColumn_Objective;
+	public static String CTPatrolTableColumn_Station;
+	public static String CTPatrolTableColumn_Team;
+	public static String CTPatrolTableColumn_Transport;
+	public static String CTPatrolTableColumn_Type;
+	public static String CTPatrolTableContainer_Button_AsLeg;
+	public static String CTPatrolTableContainer_Button_AsPatrol;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
 	public static String CyberTrackerExportDialog_Err_Dialog_Message;
@@ -16,6 +28,18 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
 	public static String CyberTrackerExportHandler_InfoDialog_Title;
 	public static String CyberTrackerExportHandler_TaskName;
+	public static String CyberTrackerImportDialog_AllFiles;
+	public static String CyberTrackerImportDialog_Button_Browse;
+	public static String CyberTrackerImportDialog_Button_Import;
+	public static String CyberTrackerImportDialog_Error_Message;
+	public static String CyberTrackerImportDialog_Error_Title;
+	public static String CyberTrackerImportDialog_File;
+	public static String CyberTrackerImportDialog_Message;
+	public static String CyberTrackerImportDialog_Task_RawImport;
+	public static String CyberTrackerImportDialog_Title;
+	public static String CyberTrackerImportDialog_XmlFiles;
+	public static String CyberTrackerImporter_Read_Error;
+	public static String CyberTrackerImporter_Read_Xml;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Undefined;
 	public static String Elements_BooleanAttribute_Yes;
