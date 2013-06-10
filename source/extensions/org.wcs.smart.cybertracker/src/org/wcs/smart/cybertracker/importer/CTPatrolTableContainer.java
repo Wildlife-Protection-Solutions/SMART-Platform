@@ -21,10 +21,16 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -35,7 +41,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 
 /**
  * Container for table containing imported data from CyberTracker application
@@ -46,6 +54,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 public class CTPatrolTableContainer extends Composite {
 	
 	private static final int HEIGHT_HINT = 250;
+	private static final int COLUMN_WIDTH = 80;
 	
 	/**
 	 * The supported patrol types.
@@ -54,6 +63,8 @@ public class CTPatrolTableContainer extends Composite {
 	 * @since 1.0.0
 	 */
 	public enum CTPatrolTableColumn {
+		START_DATE(Messages.CTPatrolTableColumn_StartDate),
+		END_DATE(Messages.CTPatrolTableColumn_EndDate),
 		TYPE(Messages.CTPatrolTableColumn_Type),
 		TRANSPORT(Messages.CTPatrolTableColumn_Transport),
 		ARMED(Messages.CTPatrolTableColumn_Armed),
@@ -61,7 +72,10 @@ public class CTPatrolTableContainer extends Composite {
 		TEAM(Messages.CTPatrolTableColumn_Team),
 		STATION(Messages.CTPatrolTableColumn_Station),
 		OBJECTIVE(Messages.CTPatrolTableColumn_Objective),
-		COMMENT(Messages.CTPatrolTableColumn_Comment);
+		COMMENT(Messages.CTPatrolTableColumn_Comment),
+		LEADER(Messages.CTPatrolTableColumn_Leader),
+		PILOT(Messages.CTPatrolTableColumn_Pilot),
+		MEMBERS(Messages.CTPatrolTableColumn_Members);
 		
 		private String guiName;
 		CTPatrolTableColumn(String guiName){
@@ -73,8 +87,9 @@ public class CTPatrolTableContainer extends Composite {
 	}
 	
 	private TableViewer viewer;
+	private PatrolImporter patrolImporter;
 	
-	List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
+	private List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
 	
 	/**
 	 * @param parent
@@ -111,7 +126,7 @@ public class CTPatrolTableContainer extends Composite {
 		btnAsPatrol.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: implement
+				handleAddAsPatrol();
 			}
 		});
 		btnAsPatrol.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
@@ -127,11 +142,36 @@ public class CTPatrolTableContainer extends Composite {
 		btnAsLeg.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 	}
 	
+	protected void handleAddAsPatrol() {
+		if (patrolImporter == null)
+			patrolImporter = new PatrolImporter();
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+		try {
+			final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+						CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
+						patrolImporter.importData(ctp);
+						tableInputData.remove(ctp);
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Save patrol operation was aborted", e);
+			e.printStackTrace();
+		}
+		
+		refreshViewer();
+	}
+
 	private void addColumns(TableViewer viewer) {
 		for (CTPatrolTableColumn column : CTPatrolTableColumn.values()) {
 			TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 			viewerColumn.getColumn().setText(column.getGuiName());
-			viewerColumn.getColumn().setWidth(100);
+			viewerColumn.getColumn().setWidth(COLUMN_WIDTH);
 			viewerColumn.setLabelProvider(new CTPatrolTableCellLabelProvider(column));
 		}
 	}
@@ -142,6 +182,10 @@ public class CTPatrolTableContainer extends Composite {
 
 	public void addTableData(List<CyberTrackerPatrol> data) {
 		tableInputData.addAll(data);
+		refreshViewer();
+	}
+	
+	private void refreshViewer() {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {

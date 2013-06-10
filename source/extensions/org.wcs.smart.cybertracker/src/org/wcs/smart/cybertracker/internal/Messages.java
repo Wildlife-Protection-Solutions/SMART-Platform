@@ -8,8 +8,13 @@ public class Messages extends NLS {
 	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
 	public static String CTPatrolTableColumn_Armed;
 	public static String CTPatrolTableColumn_Comment;
+	public static String CTPatrolTableColumn_EndDate;
+	public static String CTPatrolTableColumn_Leader;
 	public static String CTPatrolTableColumn_Mandate;
+	public static String CTPatrolTableColumn_Members;
 	public static String CTPatrolTableColumn_Objective;
+	public static String CTPatrolTableColumn_Pilot;
+	public static String CTPatrolTableColumn_StartDate;
 	public static String CTPatrolTableColumn_Station;
 	public static String CTPatrolTableColumn_Team;
 	public static String CTPatrolTableColumn_Transport;

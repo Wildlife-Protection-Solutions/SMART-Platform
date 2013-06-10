@@ -36,11 +36,13 @@ import javax.xml.bind.Unmarshaller;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 
 /**
- * Importer for CyberTracker application data
+ * Importer for CyberTracker application data. 
+ * Imports from raw XML to {@link CyberTrackerPatrol} objects
  * 
  * @author elitvin
  * @since 1.0.0
