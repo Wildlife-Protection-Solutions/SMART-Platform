@@ -51,17 +51,20 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.ibm.icu.text.MessageFormat;
 
 /**
- * Importer for importing agencies and ranks data into
- * the current conservation area.
+ * Importer for importing agencies and ranks data.  This importer
+ * imports data into memory and NOT the conservation area.  The
+ * imported data is available via the getImportedData function.
  * 
  * @author elitvin
+ * @author Emily
  * @since 1.0.0
  */
 public class AgencyCsvImporter implements ICsvDataImporter {
 
 	private Map<String, Language> code2Language;
 	private Map<String, Agency> record2Agency;
-
+	private Collection<Agency> importedData;
+	
 	public AgencyCsvImporter() {
 		//nothing
 	}
@@ -70,7 +73,16 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 	public List<String> getWarnings(){
 		return null;
 	}
-
+	
+	/**
+	 * 
+	 * @return the set of agencies and associated ranks
+	 * imported
+	 */
+	public Collection<Agency> getImportedData(){
+		return importedData;
+	}
+	
 	@Override
 	public boolean importCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		if (!file.exists()){
@@ -121,17 +133,9 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 			//adding ranks end
 		}
 
-		Collection<Agency> agencies = record2Agency.values();
 		if (monitor.isCanceled()) return false;
-		try {
-			session.beginTransaction();
-			for (Agency a : agencies) {
-				session.saveOrUpdate(a);
-			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			throw new Exception(Messages.AgencyCsvImporter_Error_DatabaseSaveFailed + ex.getLocalizedMessage(), ex);
-		}
+		
+		importedData = record2Agency.values();
 		return true;
 	}
 
