@@ -15,8 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
-import opendap.servlet.GetInfoHandler;
-
 import org.eclipse.birt.report.designer.internal.ui.editors.IRelatedFileChangeResolve;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor;
@@ -107,7 +105,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				
 				if (handle.getExtensionID().startsWith(ReportManager.SMART_DATASOURCE_ID)
 					 && ne.getOldName() == null 
-					 && ne.getNewName().startsWith("Data Set") //$NON-NLS-1$
+					 && ne.getNewName().startsWith(org.eclipse.birt.report.designer.nls.Messages.getString("dataset.new.defaultName"))  //$NON-NLS-1$
 					&& !ds.getDisplayName().equals(ne.getNewName())){
 				
 					try{
