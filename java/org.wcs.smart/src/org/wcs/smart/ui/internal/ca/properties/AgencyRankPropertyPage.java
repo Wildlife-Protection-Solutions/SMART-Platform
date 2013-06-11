@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -67,6 +68,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.export.AgencyCsvImporter;
 import org.wcs.smart.export.config.impl.AgencyCsvExportConfig;
 import org.wcs.smart.export.config.impl.AgencyCsvImportConfig;
 import org.wcs.smart.export.dialog.CsvCaImportDialog;
@@ -272,15 +274,19 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), new AgencyCsvImportConfig());
+				AgencyCsvImportConfig config = new AgencyCsvImportConfig();
+				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
 				int ret = dialog.open();
 				if (ret == IDialogConstants.CANCEL_ID) {
 					return;
 				} else {
-					resetAgencyList();
-					tblAgencies.setInput(agencies);
-					tblAgencies.refresh();
-					tblRank.refresh();
+					Collection<Agency> importedData = ((AgencyCsvImporter)config.getImporter()).getImportedData();
+					if (importedData != null && importedData.size() > 0){
+						agencies.addAll(importedData);
+						tblAgencies.refresh();
+						setChangesMade(true);
+//						tblRank.refresh();
+					}
 				}
 			}
 		});

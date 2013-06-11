@@ -31,7 +31,10 @@ import org.wcs.smart.util.SmartUtils;
 
 /**
  * Configuration for current {@link CsvImportDialog} to import
- * agencies and ranks into csv file
+ * agencies and ranks into csv file.
+ * 
+ * Note the imported imports data into memory, it does not
+ * save the results to the database.
  * 
  * @author elitvin
  * @since 1.0.0
