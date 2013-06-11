@@ -442,7 +442,7 @@ public class EmployeeComposite extends Composite {
 			cdStaffId
 					.setDescriptionText(
 							MessageFormat.format(Messages.EmployeeComposite_Error_EmployeeId,
-									new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+									new Object[]{Employee.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
 		}else{
 			cdStaffId.hide();
