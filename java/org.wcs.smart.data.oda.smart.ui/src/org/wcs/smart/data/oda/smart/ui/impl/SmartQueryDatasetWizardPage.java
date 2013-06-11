@@ -333,17 +333,8 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 			// update the data set design with the
 			// query's current runtime metadata
 			updateDesign(dataSetDesign, customConn, query);
-
-			//TODO: try to update dataset name
-			if (dataSetDesign.getName().startsWith(Messages.CustomDataSetWizardPage_DefaultDataSetName)) {
-				// lets update the name
-
-				dataSetDesign.setName(query.getName() + Messages.CustomDataSetWizardPage_DataSetName_Postfix);
-				dataSetDesign.setDisplayName(query.getName() + Messages.CustomDataSetWizardPage_DataSetName_Postfix);
-				// dataSetDesign.setDisplayNameKey(query.getName() +
-				// " Data Set");
-			}
 			return true;
+			
 		} catch (OdaException e) {
 			// not able to get current metadata, reset previous derived metadata
 			dataSetDesign.setResultSets(null);
