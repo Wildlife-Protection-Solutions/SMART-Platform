@@ -124,6 +124,7 @@ public class CaInfoComposite extends Composite {
 		txtDescription.setText(""); //$NON-NLS-1$
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
 		data.horizontalIndent = indent;
+		data.widthHint = 350;
 		txtDescription.setLayoutData(data);
 		txtDescription.setTextLimit(ConservationArea.MAX_DESCRIPTION_LENGTH);
 		txtDescription.addKeyListener(changeListener);
@@ -137,8 +138,8 @@ public class CaInfoComposite extends Composite {
 		txtDesignation = new Text(this, SWT.BORDER);
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
 		data.horizontalIndent = indent;
+		data.widthHint = 350;
 		txtDesignation.setLayoutData(data);
-		
 		txtDesignation.setTextLimit(ConservationArea.MAX_DESIGNATION_LENGTH);
 		txtDesignation.addKeyListener(changeListener);
 		
