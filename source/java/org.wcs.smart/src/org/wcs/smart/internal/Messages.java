@@ -772,6 +772,10 @@ public class Messages extends NLS {
 	public static String SaveBasemapDialog_SaveButton;
 	public static String SaveBasemapDialog_Title;
 	public static String SaveMapHandler_JobName;
+	public static String SaveMapHandler_OverwriteDialogTitle;
+	public static String SaveMapHandler_OverwriteMessage;
+	public static String SaveMapHandler_SaveOkDialogTitle;
+	public static String SaveMapHandler_SaveOkMessage;
 	public static String SelectCaDialog_CaError;
 	public static String SelectCaDialog_CaLabel;
 	public static String SelectCaDialog_DialogTitle;

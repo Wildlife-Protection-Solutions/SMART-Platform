@@ -103,7 +103,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	@Override
 	protected Composite createDialogArea(Composite parent) {
 		getShell().setText(Messages.SaveBasemapDialog_Title);
-
+		setTitle(Messages.SaveBasemapDialog_Title);
 		setMessage(Messages.SaveBasemapDialog_Message);
 
 		Composite main = new Composite(parent, SWT.NONE);
