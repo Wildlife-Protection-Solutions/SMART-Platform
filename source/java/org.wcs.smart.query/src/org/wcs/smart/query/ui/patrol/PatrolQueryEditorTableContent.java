@@ -51,6 +51,7 @@ import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
+import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
  * A class that manages a table that display 
@@ -65,7 +66,7 @@ public class PatrolQueryEditorTableContent {
 	private QueryDateFilterComposite dateComposite;
 	private ProgressAreaComposite progressComp;
 	
-	private PatrolResultsTable resultsTable;
+	private QueryResultsTable resultsTable;
 	private Composite runQueryComp;
 	private Composite tableComp;;
 	private Composite stackComposite;
@@ -315,7 +316,7 @@ public class PatrolQueryEditorTableContent {
 		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberofRecordsLabel);
 		lblNumResults = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
 	
-		resultsTable = new PatrolResultsTable();
+		resultsTable = new QueryResultsTable();
 
 		TableViewer viewer = resultsTable.createTable(main);
 		viewer.getTable().setLayoutData(
@@ -349,7 +350,7 @@ public class PatrolQueryEditorTableContent {
 	/**
 	 * @return the results table
 	 */
-	public PatrolResultsTable getQueryResultsTable() {
+	public QueryResultsTable getQueryResultsTable() {
 		return resultsTable;
 	}
 	

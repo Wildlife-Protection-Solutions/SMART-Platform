@@ -74,6 +74,20 @@ public class QueryResultsTable {
 		return table;
 	}
 	
+	public void clearColumns(){
+		table.getTable().setRedraw(false);
+		for (QueryTableViewerColumn column : tableViewerColumns){
+			column.getTableColumn().getColumn().dispose();
+		}
+		tableViewerColumns = null;
+		if (getColumnSorter() != null){
+			getColumnSorter().setSortColumn(null);
+		}
+		table.getTable().setRedraw(true);
+		
+	}
+	
+	
 	public void initQuery(final SimpleQuery query){
 		if (tableViewerColumns != null){
 			//columns already created
@@ -90,6 +104,7 @@ public class QueryResultsTable {
 							return;
 						}
 						tableViewerColumns = createColumns(table,query.getQueryColumns());
+						table.refresh(true);
 					}
 				});
 				return Status.OK_STATUS;
@@ -111,7 +126,11 @@ public class QueryResultsTable {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
+						if (table.getTable().isDisposed()){
+							return;
+						}
 						tableViewerColumns = createColumns(table,query.getQueryColumns());
+						table.refresh(true);
 					}
 				});
 				return Status.OK_STATUS;
@@ -172,25 +191,29 @@ public class QueryResultsTable {
 			return;
 		}
 
-		if (queryColumns == null){
-			//show all
-			for (int i = 0; i < tableViewerColumns.length; i ++){
-				tableViewerColumns[i].show();
-			}
-		}else{
-			for (int i = 0; i < tableViewerColumns.length; i ++){
-				for (QueryColumn column :queryColumns){
-					if (column == tableViewerColumns[i].getColumn()){
-						if (queryColumns.get(i).isVisible()){
-							tableViewerColumns[i].show();
-						}else{
-							tableViewerColumns[i].hide();						
-						}
-						break;
-					}
+		table.getTable().setRedraw(false);
+		try{
+			if (queryColumns == null){
+				//show all
+				for (int i = 0; i < tableViewerColumns.length; i ++){
+					tableViewerColumns[i].show();
 				}
-				
+			}else{
+				for (int i = 0; i < tableViewerColumns.length; i ++){
+					for (QueryColumn column :queryColumns){
+						if (column == tableViewerColumns[i].getColumn()){
+							if (queryColumns.get(i).isVisible()){
+								tableViewerColumns[i].show();
+							}else{
+								tableViewerColumns[i].hide();						
+							}
+							break;
+						}
+					}		
+				}
 			}
+		}finally{
+			table.getTable().setRedraw(true);
 		}
 	}
 	

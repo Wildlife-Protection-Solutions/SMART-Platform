@@ -364,10 +364,17 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		setInput(new QueryInput(savedQuery));
 		updatePartName();
+		resultPage.getQueryResultsTable().clearColumns();
+		
 		resultPage.setQuery();
-		mapPage.setQuery();
 		
 		setDirty(false);
+		
+		//TODO: this is a bit of a hack to get the querylistview selection to be updated
+		//to the new saved-as query
+		//this cannot be called until setinput has been called
+		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID));
+		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getPart());
 	}
 
 	/**

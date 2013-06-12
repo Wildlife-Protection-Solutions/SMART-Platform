@@ -34,6 +34,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 
 /**
@@ -177,7 +178,7 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	}
 
 
-	public PatrolResultsTable getQueryResultsTable() {
+	public QueryResultsTable getQueryResultsTable() {
 		return content.getQueryResultsTable();
 	}
 	

@@ -67,7 +67,11 @@ public class QueryResultItemComparator extends ViewerComparator implements IQuer
 		this.column = sort;
 		
 		viewer.getTable().setSortDirection(direction);
-		viewer.getTable().setSortColumn(sort.getTableColumn().getColumn());
+		if (sort == null){
+			viewer.getTable().setSortColumn(null);
+		}else{
+			viewer.getTable().setSortColumn(sort.getTableColumn().getColumn());
+		}
 		viewer.refresh();
 	}
 			

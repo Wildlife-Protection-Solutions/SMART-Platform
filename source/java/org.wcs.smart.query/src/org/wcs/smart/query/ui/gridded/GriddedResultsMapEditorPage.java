@@ -254,30 +254,6 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
         refreshJob = null;
     }
     
-    public void setQuery(){
-    	if (rasterService != null){
-    		List<? extends IGeoResource> layers = rasterService.resources(null);
-			
-    		//remove layers
-    		if (layers.size() > 0){
-				IGeoResource rasterLayers = layers.get(0);
-				for( ILayer layer : getMap().getLayersInternal() ) {
-					if (layer.getID().sameFile(rasterLayers.getIdentifier())){
-                		DeleteLayerCommand cmd = new DeleteLayerCommand((Layer)layer);
-                		getMap().sendCommandASync(cmd);
-                		break;
-                	}
-                }
-			}
-			//dispose of service 
-    		rasterService.dispose(null);
-    		rasterService = null;
-    	}
-    	
-    	//create a new service
-    	addLayerJob.schedule();
-    }
-    
     /**
      * Refresh the service on the map
      */
