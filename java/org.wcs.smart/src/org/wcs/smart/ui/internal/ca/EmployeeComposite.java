@@ -499,44 +499,31 @@ public class EmployeeComposite extends Composite {
 		
 		if (chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
-					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH)) {
+					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH, Employee.MIN_SMART_ID_LENGTH)) {
 				cdSmartId.show();
 				cdSmartId.setDescriptionText(
 						MessageFormat.format(
-								Messages.EmployeeComposite_Error_InvalidUserId,
-								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
+								Messages.EmployeeComposite_Error_InvalidUserId1,
+								new Object[]{Employee.MIN_SMART_ID_LENGTH, Employee.MAX_SMART_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
 				isComplete = false;
 			}else{
 				cdSmartId.hide();
 			}
 			
-			boolean hide = true;
 			if (txtSmartPassword.getText().trim().isEmpty()
-					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
+					|| txtSmartPassword.getText().length() < Employee.MIN_SMART_PASSWORD_LENGTH || txtSmartPassword.getText().length() > Employee.MAX_SMART_PASSWORD_LENGTH) {
 				cdSmartPassword.show();
 				cdSmartPassword
 						.setDescriptionText(
 								MessageFormat.format(
-										Messages.EmployeeComposite_Error_InvalidPassword,
-										new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
+										Messages.EmployeeComposite_Error_InvalidPassword1,
+										new Object[]{Employee.MIN_SMART_PASSWORD_LENGTH, Employee.MAX_SMART_PASSWORD_LENGTH}));
 				isComplete = false;
-				hide = false;
-			}
-			if (txtSmartPassword.getText().length()< Employee.MIN_SMART_PASSWORD_LENGTH){
-				cdSmartPassword.show();
-				cdSmartPassword
-						.setDescriptionText(
-								MessageFormat.format(
-										Messages.EmployeeComposite_Error_InvalidPasswordLength,
-										new Object[]{Employee.MIN_SMART_PASSWORD_LENGTH}));
-				isComplete = false;
-				hide = false;
-			}
-			if (hide){
+			}else{
 				cdSmartPassword.hide();
 			}
 			
-			hide = true;
+			boolean hide = true;
 			if (!txtSmartPassword.getText().equals(txtSmartPassword2.getText())) {
 				isComplete = false;
 				if (!txtSmartPassword.getText().trim().isEmpty()

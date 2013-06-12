@@ -52,6 +52,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SmartUtils.RegExLevel;
 
 /**
  * Create a change user password dialog where users can
@@ -123,8 +125,8 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 						new IInputValidator() {
 							@Override
 							public String isValid(String newText) {
-								if (newText.length() < Employee.MIN_SMART_ID_LENGTH){
-									return MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserNameLength, new Object[]{ Employee.MIN_SMART_ID_LENGTH });
+								if (!SmartUtils.isSimpleString(newText, RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH, Employee.MIN_SMART_ID_LENGTH)){
+									return MessageFormat.format(Messages.ChangeUserPasswordDialog_UserNameValidationError, new Object[]{RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc, Employee.MIN_SMART_ID_LENGTH, Employee.MAX_SMART_ID_LENGTH});
 								}
 								return null;
 							}
@@ -252,9 +254,14 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 			cdPassword1.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterNewPass);
 			cdPassword1.show();
 			error = true;
+		}else if (txtPassword1.getText().length() < Employee.MIN_SMART_PASSWORD_LENGTH || txtPassword1.getText().length() > Employee.MAX_SMART_PASSWORD_LENGTH){
+			cdPassword1.setDescriptionText(MessageFormat.format(Messages.ChangeUserPasswordDialog_PasswordValidationError, new Object[]{Employee.MIN_SMART_PASSWORD_LENGTH, Employee.MAX_SMART_PASSWORD_LENGTH}));
+			cdPassword1.show();
+			error = true;
 		}else{
 			cdPassword1.hide();
 		}
+		
 		boolean hide = true;
 		if (txtPassword2.getText().length() == 0){
 			cdPassword2.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterNewPass2);

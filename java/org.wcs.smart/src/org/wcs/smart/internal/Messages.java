@@ -276,9 +276,11 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_NewPassword2_Label;
 	public static String ChangeUserPasswordDialog_PageTitle;
 	public static String ChangeUserPasswordDialog_PasswordLabel;
+	public static String ChangeUserPasswordDialog_PasswordValidationError;
 	public static String ChangeUserPasswordDialog_Updated_DialogMessage;
 	public static String ChangeUserPasswordDialog_Updated_DialogTitle;
 	public static String ChangeUserPasswordDialog_Username_Label;
+	public static String ChangeUserPasswordDialog_UserNameValidationError;
 	public static String ConservationAreaListView_CaInfo;
 	public static String ConservationAreaListView_CaLabel;
 	public static String ConservationAreaListView_ModifyLink;
@@ -487,9 +489,9 @@ public class Messages extends NLS {
 	public static String EmployeeComposite_Error_InvalidEndDate;
 	public static String EmployeeComposite_Error_InvalidFamilyName;
 	public static String EmployeeComposite_Error_InvalidGivenName;
-	public static String EmployeeComposite_Error_InvalidPassword;
+	public static String EmployeeComposite_Error_InvalidPassword1;
 	public static String EmployeeComposite_Error_InvalidStartDate;
-	public static String EmployeeComposite_Error_InvalidUserId;
+	public static String EmployeeComposite_Error_InvalidUserId1;
 	public static String EmployeeComposite_Error_PasswordsDontMatch;
 	public static String EmployeeComposite_Female_Label;
 	public static String EmployeeComposite_Inactive_Label;
