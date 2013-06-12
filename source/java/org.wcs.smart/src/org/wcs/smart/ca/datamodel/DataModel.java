@@ -58,6 +58,10 @@ public class DataModel {
 
 	private static final String VALID_DM_KEY_PATTERN = "[a-z]{1}[a-z0-9_]*"; //$NON-NLS-1$
 	
+	/*
+	 * These are keywords that cannot be used as keys; for querying purposes.
+	 */
+	private static final String[] KEYWORDS = new String[]{"and", "or", "not", "contains", "notcontains", "equals"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
 	private ConservationArea ca;	//the conservation area of the data model
 	private List<Category> categories;	//the root categories for the data model
@@ -429,6 +433,12 @@ public class DataModel {
 			key = raw.substring(0, DmObject.MAX_KEY_LENGTH);
 		}
 
+		for (String keyword: KEYWORDS){
+			if (keyword.equals(key)){
+				key = key + "_"; //$NON-NLS-1$
+				break;
+			}
+		}
 		while(checkKeyExists(key, otherValues)){
 			count ++;
 			String cnt = String.valueOf(count);
@@ -439,6 +449,7 @@ public class DataModel {
 			}
 			
 		}
+		
 		return key;
 	}
 	/*
@@ -478,6 +489,11 @@ public class DataModel {
 		}
 		if (checkKeyExists(key, otherValues)){
 			return Messages.DataModel_Error_Key_NotUnique;
+		}
+		for (String keyword: KEYWORDS){
+			if (keyword.equals(key)){
+				return MessageFormat.format(Messages.DataModel_KeywordKeyError, new Object[]{keyword});
+			}
 		}
 		return null;
 	}

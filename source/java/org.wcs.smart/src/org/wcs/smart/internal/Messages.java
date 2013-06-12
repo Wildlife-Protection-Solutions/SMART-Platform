@@ -327,6 +327,7 @@ public class Messages extends NLS {
 	public static String DataModel_Error_Key_NotUnique;
 	public static String DataModel_Error_Key_ToLong;
 	public static String DataModel_Error_LoadAggregations;
+	public static String DataModel_KeywordKeyError;
 	public static String DataModel_LoadAttribute_JobName;
 	public static String DataModel_Progress_SaveAttribute;
 	public static String DataModel_Progress_SaveCategory;

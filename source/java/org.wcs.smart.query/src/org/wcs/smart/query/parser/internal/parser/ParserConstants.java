@@ -17,163 +17,139 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int K_AND = 7;
   /** RegularExpression Id. */
-  int K_CASE = 8;
+  int K_NOT = 8;
   /** RegularExpression Id. */
-  int K_ELSE = 9;
+  int K_OR = 9;
   /** RegularExpression Id. */
-  int K_END = 10;
+  int COMMA = 10;
   /** RegularExpression Id. */
-  int K_EXISTS = 11;
+  int LESS = 11;
   /** RegularExpression Id. */
-  int K_IN = 12;
+  int LESSEQUAL = 12;
   /** RegularExpression Id. */
-  int K_NOT = 13;
+  int GREATER = 13;
   /** RegularExpression Id. */
-  int K_OR = 14;
+  int GREATEREQUAL = 14;
   /** RegularExpression Id. */
-  int K_THEN = 15;
+  int EQUAL = 15;
   /** RegularExpression Id. */
-  int K_WHEN = 16;
+  int NOTEQUAL = 16;
   /** RegularExpression Id. */
-  int COMMA = 17;
+  int NOTEQUAL2 = 17;
   /** RegularExpression Id. */
-  int LESS = 18;
+  int OPENPAREN = 18;
   /** RegularExpression Id. */
-  int LESSEQUAL = 19;
+  int CLOSEPAREN = 19;
   /** RegularExpression Id. */
-  int GREATER = 20;
+  int SLASH = 20;
   /** RegularExpression Id. */
-  int GREATEREQUAL = 21;
+  int PLUS = 21;
   /** RegularExpression Id. */
-  int EQUAL = 22;
+  int MINUS = 22;
   /** RegularExpression Id. */
-  int NOTEQUAL = 23;
+  int CONTAINS = 23;
   /** RegularExpression Id. */
-  int NOTEQUAL2 = 24;
+  int NOT_CONTAINS = 24;
   /** RegularExpression Id. */
-  int OPENPAREN = 25;
+  int STREQUALS = 25;
   /** RegularExpression Id. */
-  int CLOSEPAREN = 26;
+  int NUMBER = 26;
   /** RegularExpression Id. */
-  int OPENBRACE = 27;
+  int FLOAT = 27;
   /** RegularExpression Id. */
-  int CLOSEBRACE = 28;
+  int INTEGER = 28;
   /** RegularExpression Id. */
-  int ASTERISK = 29;
+  int DIGIT = 29;
   /** RegularExpression Id. */
-  int SLASH = 30;
+  int S_CONST_LITERAL = 30;
   /** RegularExpression Id. */
-  int PERCENT = 31;
+  int CATEGORY_KEY = 31;
   /** RegularExpression Id. */
-  int PLUS = 32;
+  int ATT_STR_KEY = 32;
   /** RegularExpression Id. */
-  int MINUS = 33;
+  int ATT_VALUE_KEY = 33;
   /** RegularExpression Id. */
-  int CONTAINS = 34;
+  int ATT_BOOL_KEY = 34;
   /** RegularExpression Id. */
-  int NOT_CONTAINS = 35;
+  int ATT_LIST_KEY = 35;
   /** RegularExpression Id. */
-  int STREQUALS = 36;
+  int ATT_TREE_KEY = 36;
   /** RegularExpression Id. */
-  int BETWEEN = 37;
+  int CAT_ATT_STR_KEY = 37;
   /** RegularExpression Id. */
-  int NUMBER = 38;
+  int CAT_ATT_VALUE_KEY = 38;
   /** RegularExpression Id. */
-  int FLOAT = 39;
+  int CAT_ATT_BOOL_KEY = 39;
   /** RegularExpression Id. */
-  int INTEGER = 40;
+  int CAT_ATT_LIST_KEY = 40;
   /** RegularExpression Id. */
-  int DIGIT = 41;
+  int CAT_ATT_TREE_KEY = 41;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 42;
+  int PATROL_BOOL_KEY = 42;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 43;
+  int DM_KEY = 43;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 44;
+  int LETTER = 44;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 45;
+  int SPECIAL_CHARS = 45;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 46;
+  int PATROL_ID_KEY = 46;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 47;
+  int PATROL_STATION_KEY = 47;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 48;
+  int PATROL_TEAM_KEY = 48;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 49;
+  int PATROL_MANDATE_KEY = 49;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 50;
+  int PATROL_TYPE_KEY = 50;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 51;
+  int PATROL_CA_KEY = 51;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 52;
+  int PATROLLEG_TRANSPORT_KEY = 52;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 53;
+  int PATROLLEG_LEADER_KEY = 53;
   /** RegularExpression Id. */
-  int PATROL_BOOL_KEY = 54;
+  int PATROLLEG_PILOT_KEY = 54;
   /** RegularExpression Id. */
-  int DM_KEY = 55;
+  int PATROLLEG_MEMBER_KEY = 55;
   /** RegularExpression Id. */
-  int LETTER = 56;
+  int PATROL_CONTRIBUTION_BOOL_KEY = 56;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 57;
+  int PATROL_CONTRIBUTION_STRING_KEY = 57;
   /** RegularExpression Id. */
-  int PATROL_ID_KEY = 58;
+  int AREA_TYPE_KEY = 58;
   /** RegularExpression Id. */
-  int PATROL_STATION_KEY = 59;
+  int AREA_KEY = 59;
   /** RegularExpression Id. */
-  int PATROL_TEAM_KEY = 60;
+  int PATROL_VALUE_ITEM = 60;
   /** RegularExpression Id. */
-  int PATROL_MANDATE_KEY = 61;
+  int PATROL_VALUE_KEY = 61;
   /** RegularExpression Id. */
-  int PATROL_TYPE_KEY = 62;
+  int SUM_CAT_VALUE_KEY = 62;
   /** RegularExpression Id. */
-  int PATROL_CA_KEY = 63;
+  int SUM_ATTRIBUTE_VALUE_KEY = 63;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY = 64;
+  int SUM_CAT_ATT_VALUE_KEY = 64;
   /** RegularExpression Id. */
-  int PATROLLEG_LEADER_KEY = 65;
+  int AGG = 65;
   /** RegularExpression Id. */
-  int PATROLLEG_PILOT_KEY = 66;
+  int DATE_GROUPBY_ITEM = 66;
   /** RegularExpression Id. */
-  int PATROLLEG_MEMBER_KEY = 67;
+  int QUERY_SPLITTER = 67;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_BOOL_KEY = 68;
+  int PATROL_UUID_GROUPBY_OPTION = 68;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_STRING_KEY = 69;
+  int PATROL_STRING_GROUPBY_OPTION = 69;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 70;
+  int CATEGORY_GROUPBY_ITEM = 70;
   /** RegularExpression Id. */
-  int AREA_KEY = 71;
+  int AREA_GROUPBY_ITEM = 71;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 72;
+  int ATTRIBUTE_GROUPBY_ITEM = 72;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 73;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 73;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 74;
-  /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 75;
-  /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 76;
-  /** RegularExpression Id. */
-  int AGG = 77;
-  /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 78;
-  /** RegularExpression Id. */
-  int QUERY_SPLITTER = 79;
-  /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 80;
-  /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 81;
-  /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 82;
-  /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 83;
-  /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 84;
-  /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 85;
-  /** RegularExpression Id. */
-  int QUOTED_STRING = 86;
+  int QUOTED_STRING = 74;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -188,15 +164,8 @@ public interface ParserConstants {
     "<LINE_COMMENT>",
     "<MULTI_LINE_COMMENT>",
     "\"and\"",
-    "\"case\"",
-    "\"else\"",
-    "\"end\"",
-    "\"exists\"",
-    "\"in\"",
     "\"not\"",
     "\"or\"",
-    "\"then\"",
-    "\"when\"",
     "\",\"",
     "\"<\"",
     "\"<=\"",
@@ -207,17 +176,12 @@ public interface ParserConstants {
     "\"<>\"",
     "\"(\"",
     "\")\"",
-    "\"{\"",
-    "\"}\"",
-    "\"*\"",
     "\"/\"",
-    "\"%\"",
     "\"+\"",
     "\"-\"",
     "\"contains\"",
     "\"notcontains\"",
     "\"equals\"",
-    "\"between\"",
     "<NUMBER>",
     "<FLOAT>",
     "<INTEGER>",
