@@ -498,6 +498,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			return;
 		}
 
+		boolean ok = MessageDialog.openConfirm(getShell(), Messages.PatrolTypePropertyPage_DeleteDialogTitle, MessageFormat.format(Messages.PatrolTypePropertyPage_DeleteWarningMessage, new Object[]{ttype.getName()}));
+		if (!ok){
+			return;
+		}
+		
 		try{
 			if (ttype.getUuid() != null){
 				if (DeleteManager.canDelete(ttype, getSession())){
@@ -513,7 +518,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(getShell(), 
-					MessageFormat.format(Messages.PatrolTypePropertyPage_Error_DeletingTransport, new Object[]{ ttype.getName()}), ex);
+					MessageFormat.format(Messages.PatrolTypePropertyPage_Error_DeletingTransport + " " + ex.getLocalizedMessage(), new Object[]{ ttype.getName()}), ex); //$NON-NLS-1$
 		}	
 		
 		transportTblViewer.refresh();
