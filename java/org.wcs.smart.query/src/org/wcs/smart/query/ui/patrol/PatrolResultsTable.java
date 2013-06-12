@@ -69,6 +69,8 @@ public class PatrolResultsTable {
 		table.setItemCount(0);
 		sorter = new QueryResultItemComparator(table);
 		table.setComparator(sorter);
+		table.setContentProvider(ArrayContentProvider.getInstance());
+		
 		return table;
 	}
 	
@@ -85,7 +87,7 @@ public class PatrolResultsTable {
 					@Override
 					public void run() {
 						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
-						table.setContentProvider(ArrayContentProvider.getInstance());
+						
 					}
 				});
 				return Status.OK_STATUS;
