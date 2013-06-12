@@ -91,10 +91,6 @@ public class GriddedTableContent {
 		setQueryName(query);
 		resultsTable.initQuery(query);
 		resultsTable.updateVisible(query.getQueryColumns());
-		
-		//clear results
-		resultsTable.setInput(null);
-		lblNumResults.setText(""); //$NON-NLS-1$
 	}
 	
 	public void setQueryName(GriddedQuery query){

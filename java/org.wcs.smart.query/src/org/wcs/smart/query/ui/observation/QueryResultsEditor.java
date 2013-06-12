@@ -388,6 +388,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		this.query = (ObservationQuery) savedQuery;
 		setInput(new QueryInput(savedQuery));
 		updatePartName();
+		page1.getQueryResultsTable().clearColumns();
 		page1.initPage();
 		
 		setDirty(false);

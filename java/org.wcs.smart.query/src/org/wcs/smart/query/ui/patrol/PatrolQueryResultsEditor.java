@@ -56,6 +56,7 @@ import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
+import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -189,7 +190,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	 * @return 
 	 * @return the query results display table
 	 */
-	public PatrolResultsTable getQueryResultsTable(){
+	public QueryResultsTable getQueryResultsTable(){
 		return this.page1.getQueryResultsTable();
 	}
 	
@@ -358,6 +359,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		this.query = (PatrolQuery) savedQuery;
 		setInput(new QueryInput(savedQuery));
 		updatePartName();
+		page1.getQueryResultsTable().clearColumns();
 		page1.setQuery();
 		
 		setDirty(false);
