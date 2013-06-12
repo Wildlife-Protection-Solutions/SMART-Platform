@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.map.internal;
 
+import java.text.MessageFormat;
+
 import net.refractions.udig.project.internal.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -31,7 +33,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -57,20 +61,34 @@ public class SaveMapHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+		final Shell shell = HandlerUtil.getActiveShell(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
 			final Map map = view.getMap();
 			if(map == null) return null;
-			SaveBasemapDialog dialog = new SaveBasemapDialog(Display.getDefault().getActiveShell());
+			SaveBasemapDialog dialog = new SaveBasemapDialog(shell);
 			if (dialog.open() != IDialogConstants.OK_ID){
 				return null;
 			}
 			final BasemapDefinition mapDef = dialog.getBasemap();
+			if (mapDef.getUuid() != null){
+				boolean ok = MessageDialog.openConfirm(shell, Messages.SaveMapHandler_OverwriteDialogTitle, MessageFormat.format(Messages.SaveMapHandler_OverwriteMessage, new Object[]{mapDef.getName()}));
+				if (!ok){
+					return null;
+				}
+			}
 			Job j = new Job(Messages.SaveMapHandler_JobName){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					MapSettings settings = MapSettings.getInstance(mapDef);
 					settings.save(map);
+					Display.getDefault().asyncExec(new Runnable(){
+
+						@Override
+						public void run() {
+							MessageDialog.openInformation(shell, Messages.SaveMapHandler_SaveOkDialogTitle, Messages.SaveMapHandler_SaveOkMessage);
+						}});
+					
 					return Status.OK_STATUS;
 				}	
 			};
