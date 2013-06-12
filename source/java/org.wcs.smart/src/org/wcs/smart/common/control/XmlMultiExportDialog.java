@@ -164,8 +164,10 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.XmlMultiExportDialog_DestinationFolderLabel + "*:"); //$NON-NLS-1$
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -205,10 +207,12 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 
 		lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.XmlMultiExportDialog_IncludeAttachmentsLabel + "**:"); //$NON-NLS-1$
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
 		btnIncludeAttachments = new Button(main, SWT.CHECK);
 		btnIncludeAttachments.setSelection(getDefaultIncludeAttachments());
 			
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		btnIncludeAttachments.setLayoutData(gd);
 		
 		filterLink = new Link(main, SWT.NONE);
@@ -266,6 +270,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 		GridLayout gl = new GridLayout(3, false);
 		gl.verticalSpacing = gl.marginLeft = gl.marginRight = gl.marginTop = gl.marginBottom = 0;
 		lowerComp.setLayout(gl);
+		lowerComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP,true,false,3,1));
 		
 		final Link selectAll = new Link(lowerComp, SWT.NONE);
 		selectAll.setText("<a>" + Messages.XmlMultiExportDialog_SelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
