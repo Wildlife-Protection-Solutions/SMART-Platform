@@ -38,7 +38,6 @@ import javax.xml.bind.Marshaller;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -66,7 +65,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerExporter {
 	
-	private static final String CATEGORY_RESULT_PREFIX = "#category"; //$NON-NLS-1$
+	private static final String CATEGORY_RESULT_PREFIX = "category"; //$NON-NLS-1$
 	
 	private static CyberTrackerId rootId;
 	private static Elements elements;
@@ -128,17 +127,17 @@ public class CyberTrackerExporter {
 		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date")); //$NON-NLS-1$ //$NON-NLS-2$
 		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time")); //$NON-NLS-1$ //$NON-NLS-2$
 		for (IdNamePair pair : patrolScreensData.resultElements) {
-			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, "!!!"+pair.name)); //$NON-NLS-1$
-			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name, ReportsObjectFactory.TAG_0_OUTPUT_MODE));
+			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
+//			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name, ReportsObjectFactory.TAG_0_OUTPUT_MODE));
 		}
 		for (Attribute attribute : attr2resultId.keySet()) {
 			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
-			Integer outMode = AttributeType.TEXT.equals(attribute.getType()) || AttributeType.NUMERIC.equals(attribute.getType()) ? null : ReportsObjectFactory.TAG_0_OUTPUT_MODE;
-			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode)); //$NON-NLS-1$
+//			Integer outMode = AttributeType.TEXT.equals(attribute.getType()) || AttributeType.NUMERIC.equals(attribute.getType()) ? null : ReportsObjectFactory.TAG_0_OUTPUT_MODE;
+//			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode)); //$NON-NLS-1$
 		}
 		for (Integer level : catLevel2resultId.keySet()) {
-			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), "!!!"+CATEGORY_RESULT_PREFIX+String.valueOf(level))); //$NON-NLS-1$
-			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level), ReportsObjectFactory.TAG_0_OUTPUT_MODE));
+			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level)));
+//			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level), ReportsObjectFactory.TAG_0_OUTPUT_MODE));
 		}
 		Reports reports = ReportsObjectFactory.createReports(columnItems);
 		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Reports.xml")); //$NON-NLS-1$
@@ -181,7 +180,7 @@ public class CyberTrackerExporter {
 		int attrListLastIndex = attrList.size() - 1;
 		for (int i = 0; i <= attrListLastIndex; i++) {
 			Attribute attribute = attrList.get(i);
-			CyberTrackerId resultElementId = getAttributeResultElementId(attribute);//new CyberTrackerId(); //id for result element in attribute screen node
+			CyberTrackerId resultElementId = getAttributeResultElementId(attribute); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
 				result.add(ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
@@ -363,7 +362,8 @@ public class CyberTrackerExporter {
 		CyberTrackerId id = attr2resultId.get(attribute);
 		if (id == null) {
 			id = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, "#"+attribute.getKeyId(), id.getItemId()); //$NON-NLS-1$
+			String uuid = SmartUtils.encodeHex(attribute.getUuid());
+			ElementsUtil.addElementsItem(elements, attribute.getKeyId(), id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG);
 			attr2resultId.put(attribute, id);
 		}
 		return id;
@@ -373,7 +373,7 @@ public class CyberTrackerExporter {
 		CyberTrackerId id = catLevel2resultId.get(level);
 		if (id == null) {
 			id = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, CATEGORY_RESULT_PREFIX+String.valueOf(level), id.getItemId());
+			ElementsUtil.addElementsItem(elements, CATEGORY_RESULT_PREFIX+String.valueOf(level), id.getItemId(), String.valueOf(level), ElementsUtil.CATEGORY_ELEMENT_TAG);
 			catLevel2resultId.put(level, id);
 		}
 		return id;
