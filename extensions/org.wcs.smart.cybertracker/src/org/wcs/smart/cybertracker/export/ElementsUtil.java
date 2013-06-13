@@ -39,6 +39,10 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class ElementsUtil {
+
+	public static final String BOOL_TRUE = "true"; //$NON-NLS-1$
+	public static final String BOOL_FALSE = "false"; //$NON-NLS-1$
+	public static final String BOOL_UNDEFINED = "null"; //$NON-NLS-1$
 	
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
@@ -114,9 +118,9 @@ public class ElementsUtil {
 		labels.add(Messages.Elements_BooleanAttribute_No);
 		labels.add(Messages.Elements_BooleanAttribute_Undefined);
 		List<String> tag0Values = new ArrayList<String>();
-		tag0Values.add("true"); //$NON-NLS-1$
-		tag0Values.add("false"); //$NON-NLS-1$
-		tag0Values.add("null"); //$NON-NLS-1$
+		tag0Values.add(BOOL_TRUE);
+		tag0Values.add(BOOL_FALSE);
+		tag0Values.add(BOOL_UNDEFINED);
 		return ElementsUtil.addCustomElements(elements, labels, tag0Values);
 	}
 }
