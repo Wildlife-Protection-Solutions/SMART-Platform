@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -42,13 +43,18 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolImporter {
+public class PatrolImporter extends SmartImporter {
 	
 	public void importData(CyberTrackerPatrol ctPatrol) {
-		Patrol patrol = buildPatrol(ctPatrol);
-
 		Session session = HibernateManager.openSession();
 		try {
+			Patrol patrol = buildPatrol(ctPatrol);
+			session.beginTransaction();
+			for (S s : ctPatrol.getPatrolData()) {
+				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
+			}
+			session.getTransaction().rollback();
+
 			session.beginTransaction();
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
@@ -95,4 +101,5 @@ public class PatrolImporter {
 		p.createLegDays();
 		return p;
 	}
+	
 }
