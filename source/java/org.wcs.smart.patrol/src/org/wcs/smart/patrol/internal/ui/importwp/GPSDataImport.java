@@ -484,7 +484,7 @@ public class GPSDataImport {
 				try {
 					// 24hr
 					SimpleDateFormat sdf = new SimpleDateFormat(
-							"dd-MMM-yy h:mm:ss"); //$NON-NLS-1$
+							"dd-MMM-yy H:mm:ss"); //$NON-NLS-1$
 					wpdt = sdf.parse(wptType.getCmt());
 				} catch (ParseException e) {
 				}
