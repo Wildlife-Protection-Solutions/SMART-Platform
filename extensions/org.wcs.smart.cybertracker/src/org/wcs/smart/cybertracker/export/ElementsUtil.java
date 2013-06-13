@@ -43,6 +43,9 @@ public class ElementsUtil {
 	public static final String BOOL_TRUE = "true"; //$NON-NLS-1$
 	public static final String BOOL_FALSE = "false"; //$NON-NLS-1$
 	public static final String BOOL_UNDEFINED = "null"; //$NON-NLS-1$
+
+	public static final String ATTRIBUTE_ELEMENT_TAG = "a"; //$NON-NLS-1$
+	public static final String CATEGORY_ELEMENT_TAG = "c"; //$NON-NLS-1$
 	
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
@@ -101,14 +104,19 @@ public class ElementsUtil {
 	}
 	
 	public static void addElementsItem(Elements elements, String name, String id) {
-		addElementsItem(elements, name, id, null);
+		addElementsItem(elements, name, id, null, null);
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0) {
+		addElementsItem(elements, name, id, tag0, null);
+	}
+
+	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1) {
 		Elements.List.Items.Item item = new Elements.List.Items.Item();
 		item.setName(name);
 		item.setId(id);
 		item.setTag0(tag0);
+		item.setTag1(tag1);
 		elements.getList().getItems().getItem().add(item);
 	}
 	
