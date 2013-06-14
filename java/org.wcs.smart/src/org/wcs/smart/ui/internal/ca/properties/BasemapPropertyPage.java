@@ -138,6 +138,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		lstBasemaps = new ListViewer(left, SWT.SINGLE | SWT.DEFAULT | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstBasemaps.getList().getLayoutData()).heightHint = 50;
+		((GridData)lstBasemaps.getList().getLayoutData()).widthHint = 100;
 		lstBasemaps.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof BasemapDefinition){
