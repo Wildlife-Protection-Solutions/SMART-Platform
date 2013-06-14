@@ -376,8 +376,14 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					try{
 						FileDataStore store = FileDataStoreFinder.getDataStore(url2);
 						collection = store.getFeatureSource().getFeatures();
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(ppd.getShell(),Messages.AreaPropertyPage_Error_ReadingFile, ex);
+					}catch (final Exception ex){
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(ppd.getShell(),Messages.AreaPropertyPage_Error_ReadingFile, ex);
+								
+							}});
+						
 						return;
 					}
 					if (collection.getSchema().getCoordinateReferenceSystem() == null){

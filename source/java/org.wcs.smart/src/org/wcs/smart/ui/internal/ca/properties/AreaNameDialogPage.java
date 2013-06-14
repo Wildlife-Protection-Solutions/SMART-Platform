@@ -132,6 +132,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 				| SWT.FULL_SELECTION);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.widthHint = 200;
+		gd.heightHint = 200;
 		tableViewer.getTable().setLayoutData(gd);
 
 		createKeyColumn();
@@ -180,9 +181,12 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 					String newId = (String) value;
 					if (newId.length() > Area.NAME_MAX_LENGTH) {
 						setErrorMessage(MessageFormat
-								.format(Messages.AreaNameDialogPage_Warning_NameTruncate,
+								.format(Messages.AreaNameDialogPage_Warning_NameTruncate1,
 										new Object[] { Area.NAME_MAX_LENGTH }));
-						newId = newId.substring(0, Area.NAME_MAX_LENGTH);
+						
+					}
+					if (l.isDefault() && newId.trim().isEmpty()){
+						setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_DefaultNameMissing, new Object[]{l.getDisplayName()}));
 					}
 
 					((Area) element).updateName(l, newId);

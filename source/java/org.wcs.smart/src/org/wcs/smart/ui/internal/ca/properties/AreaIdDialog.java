@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -85,9 +87,23 @@ public class AreaIdDialog extends TitleAreaDialog {
 
 	@Override
 	public Control createDialogArea(Composite parent){
-		Composite composite = (Composite)super.createDialogArea(parent);
+		Composite composite = (Composite) super.createDialogArea(parent);
+
+		Composite outer  = new Composite(composite, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite main = new Composite(composite, SWT.NONE);
+		//Create an outer composite for spacing
+		ScrolledComposite scrolled = new ScrolledComposite(outer, SWT.V_SCROLL | SWT.NONE);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		scrolled.setLayoutData(gd);
+		
+		// always show the focus control
+		scrolled.setShowFocusedControl(true);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		Composite main = new Composite(scrolled, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		langViewers = new ArrayList<ComboViewer>();
@@ -113,12 +129,30 @@ public class AreaIdDialog extends TitleAreaDialog {
 			lbl.setText(lang.getDisplayName() + ":"); //$NON-NLS-1$
 			createCombo(lang, main, attributes);
 		}
-		lbl = new Label(main, SWT.NONE);
+		lbl = new Label(outer, SWT.HORIZONTAL | SWT.SEPARATOR);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		lbl = new Label(outer, SWT.NONE);
 		lbl.setText("* " + Messages.AreaIdDialog_RequiredField); //$NON-NLS-1$
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 2, 1));
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 1, 1));
 		setMessage(Messages.AreaIdDialog_DialogMessage);
+		setTitle(Messages.AreaIdDialog_DialogTitle);
 		getShell().setText(Messages.AreaIdDialog_DialogTitle);
+		
+		
+		scrolled.setContent(main);
+		Point pnt = scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolled.setMinSize(pnt);
+		((GridData)scrolled.getLayoutData()).heightHint = Math.min(250, pnt.y);
+		
 		return composite; 
+	}
+	
+	@Override
+	protected Point getInitialSize(){
+		Point p = super.getInitialSize();
+		p.x = Math.min(p.x, 550);
+		return p;
 	}
 	
 	private void createCombo(Language l, Composite parent, Object[] input){
@@ -127,7 +161,9 @@ public class AreaIdDialog extends TitleAreaDialog {
 		cmbAttributes.setLabelProvider(attributeLabelProvider);
 		cmbAttributes.setInput(input);
 		cmbAttributes.getCombo().addListener(SWT.Modify, validateListener);
-		cmbAttributes.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 100;
+		cmbAttributes.getCombo().setLayoutData(gd);
 		cmbAttributes.getControl().setData(l);
 		langViewers.add(cmbAttributes);
 	}
