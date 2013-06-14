@@ -737,6 +737,7 @@ public class Messages extends NLS {
 	public static String ProjectionPropertyDialog_Error_CouldNotSave;
 	public static String ProjectionPropertyDialog_PageTitle;
 	public static String ProjectionPropertyDialog_ProjectionList_Label;
+	public static String ProjectionPropertyDialog_ProjectionParseError;
 	public static String ProjectionPropertyDialog_SetDefault_Button;
 	public static String ProjectionPropertyDialog_UnknownCode;
 	public static String Rank_Label;
