@@ -50,6 +50,7 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Transaction;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -182,6 +183,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
 		}
+		ConservationAreaManager.getInstance().fireProjectionListModified();
 		currentTransaction = getSession().beginTransaction();
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		super.setChangesMade(false);

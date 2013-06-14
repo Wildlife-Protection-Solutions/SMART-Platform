@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -49,6 +51,8 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.IProjectionListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -75,6 +79,27 @@ public class GriddedValuePanel {
 	private boolean isInitializing = false;
 	private Label lblUnits;
 	private QueryDefView parentView;
+	
+	private IProjectionListener projectionListener = new IProjectionListener() {
+		@Override
+		public void projectionsModified() {
+			Job j = new Job("reload projections"){ //$NON-NLS-1$
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					loadProjections.schedule();
+					Display.getDefault().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							selectProjection((GriddedQuery)parentView.getQuery());
+						}});
+					
+					return Status.OK_STATUS;
+				}
+			};
+			j.setSystem(true);
+			j.schedule();
+		}
+	};
 	
 	private Job loadProjections = new Job(Messages.GriddedValuePanel_LoadProjsJobName){
 
@@ -281,9 +306,19 @@ public class GriddedValuePanel {
 		Composite comp = lstValues.createComposite(right);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		
+		// Add listener for changes to projection list
+		ConservationAreaManager.getInstance().addProjectListListener(projectionListener);
+		main.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				ConservationAreaManager.getInstance().removeProjectionListnListener(projectionListener);
+			}
+		});
 		return main;
 	}
 
+	
 	private void createOrigin(Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.GriddedValuePanel_GridOriginLabel);
@@ -341,8 +376,19 @@ public class GriddedValuePanel {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (!lstProjections.getSelection().isEmpty()){
 					Object o = ((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
-					lblUnits.setText(Messages.GriddedValuePanel_UknownProjectionLabel);
+					
+					
 					if (o instanceof Projection){
+						try{
+							if (((Projection)o).getCrs().equals(((GriddedQuery)parentView.getQuery()).getCoordinateReferenceSystem())){
+								//nothing changed
+								return;
+							}
+						}catch (Exception ex){
+							//log and continue;
+							QueryPlugIn.log(ex.getMessage(), ex);
+						}
+						lblUnits.setText(Messages.GriddedValuePanel_UknownProjectionLabel);
 						try{
 							//assume units of all axis are the same
 							Unit<?> units = ((Projection)o).getCrs().getCoordinateSystem().getAxis(0).getUnit();

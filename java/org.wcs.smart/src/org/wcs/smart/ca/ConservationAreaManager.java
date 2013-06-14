@@ -61,6 +61,7 @@ public class ConservationAreaManager {
 	 */
 	private List<IAreaModifiedListener> areaListeners = new ArrayList<IAreaModifiedListener>();
 	private List<IEmployeeListener> employeeListener = new ArrayList<IEmployeeListener>();
+	private List<IProjectionListener> projectionListener = new ArrayList<IProjectionListener>();
 	
 	private static ConservationAreaManager instance = null;
 	
@@ -234,6 +235,37 @@ public class ConservationAreaManager {
 	public void fireEmployeeBeforeDelete(Employee toDelete, Session session) {
 		for(IEmployeeListener listener : employeeListener){
 			listener.beforeDelete(toDelete, session);
+		}
+	}
+	
+	
+	/**
+	 * Adds a projection list listener for changes to the conservation
+	 * area projection list.
+	 * 
+	 * @param listener project list listener
+	 */
+	public void addProjectListListener(IProjectionListener listener){
+		projectionListener.add(listener);
+	}
+	
+	/**
+	 * Removes an projection list listener.
+	 * 
+	 * @param listener
+	 */
+	public void removeProjectionListnListener(IProjectionListener listener){
+		projectionListener.remove(listener);
+	}
+	
+	/**
+	 * Fires project list listeners after the project list
+	 * has been modified and modifications saved to the 
+	 * database.
+	 */
+	public void fireProjectionListModified() {
+		for(IProjectionListener listener : projectionListener){
+			listener.projectionsModified();
 		}
 	}
 }
