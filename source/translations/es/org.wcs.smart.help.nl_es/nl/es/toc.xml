@@ -2,7 +2,7 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="SMART Help">
-   <topic href="html/Requirements.html" label="System Requirements ES">
+   <topic href="html/Requirements.html" label="System Requirements">
       <topic href="html/Requirements.html#hardware" label="Hardware / OS Requirements">
       </topic>
       <topic href="html/Requirements.html#diskspace" label="Free Disk Space">
