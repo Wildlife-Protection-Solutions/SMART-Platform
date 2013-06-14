@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -193,7 +194,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 					languages.add(l);
 					setChangesMade(true);
 				}
-				lstLang.refresh();
+				sortRefreshLanguages();
 			
 			}
 			
@@ -259,10 +260,20 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		setTitle(Messages.CaPropertyPage_PageName);
 		setMessage(Messages.CaPropertyPage_DialogMessage);
+		sortRefreshLanguages();
 		
 		return caComposite;
 	}
 
+	private void sortRefreshLanguages(){
+		Collections.sort(languages, new Comparator<Language>() {
+			@Override
+			public int compare(Language l1, Language l2) {
+				return Collator.getInstance().compare(l1.getDisplayName(), l2.getDisplayName());
+			}
+		});
+		lstLang.refresh();
+	}
 	/**
 	 * Saves the conservation area properties
 	 * to the database.
