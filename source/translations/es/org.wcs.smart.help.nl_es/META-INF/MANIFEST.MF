@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Spannish Help Translation
+Bundle-Name: Spanish Help Translation
 Bundle-SymbolicName: org.wcs.smart.help.nl_es
 Bundle-Version: 1.1.0
 Bundle-Vendor: org.wcs.smart
