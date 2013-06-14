@@ -83,6 +83,8 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 		txtName = new Text(main, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.setText(toEdit.getName());
+		((GridData)txtName.getLayoutData()).widthHint = 350;
+		txtName.addListener(SWT.Modify, this);
 		
 		lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.EditProjectionDialog_WKT_Label);
@@ -91,13 +93,16 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 		txtDef = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true,2,1);
 		gd.heightHint = 250;
+		gd.widthHint = 350;
 		txtDef.setLayoutData(gd);
 		txtDef.setText(toEdit.getDefinition());
+		txtDef.addListener(SWT.Modify, this);
 		
 		txtName.addListener(SWT.Modify, this);
 		txtDef.addListener(SWT.Modify, this);
 		
 		getShell().setText(Messages.EditProjectionDialog_Dialog_Title);
+		setTitle(Messages.EditProjectionDialog_Dialog_Title);
 		setMessage(Messages.EditProjectionDialog_Dialog_Message);
 		
 		return main;
@@ -121,7 +126,8 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 
 	@Override
 	public void handleEvent(Event event) {
-		getButton(IDialogConstants.OK_ID).setEnabled(true);
+		validate();
+		getButton(IDialogConstants.OK_ID).setEnabled(getErrorMessage() == null);
 		
 	}
 	
@@ -130,15 +136,16 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 	 * @return <code>true</code> if validates, <code>false</code>if error
 	 */
 	private boolean validate(){
-		if (txtName.getText().length() <=0 && txtName.getText().length() > Projection.MAX_NAME_LENGTH){
+		
+		if (txtName.getText().length() <=0 || txtName.getText().length() > Projection.MAX_NAME_LENGTH){
 			setErrorMessage(
-					MessageFormat.format(Messages.EditProjectionDialog_Error_NameLength, new Object[]{0, Projection.MAX_NAME_LENGTH }));
+					MessageFormat.format(Messages.EditProjectionDialog_Error_NameLength, new Object[]{1, Projection.MAX_NAME_LENGTH }));
 			return false;
 		}
 		
-		if (txtDef.getText().length() <=0 && txtDef.getText().length() > Projection.MAX_DEF_LENGTH){
+		if (txtDef.getText().length() <=0 || txtDef.getText().length() > Projection.MAX_DEF_LENGTH){
 			setErrorMessage(
-					MessageFormat.format(Messages.EditProjectionDialog_Error_DefLength, new Object[]{0, Projection.MAX_DEF_LENGTH }));
+					MessageFormat.format(Messages.EditProjectionDialog_Error_DefLength, new Object[]{1, Projection.MAX_DEF_LENGTH }));
 			return false;
 		}
 		
@@ -150,6 +157,7 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 			setErrorMessage(err + ex.getLocalizedMessage());
 			return false;
 		}
+		setErrorMessage(null);
 		return true;
 	}
 

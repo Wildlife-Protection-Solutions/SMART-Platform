@@ -99,9 +99,10 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		
-		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI);
+		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 		lstViewer.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		((GridData)lstViewer.getList().getLayoutData()).widthHint = 350;
+		((GridData)lstViewer.getList().getLayoutData()).heightHint = 100;
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.setLabelProvider(new LabelProvider(){
 			
@@ -212,13 +213,15 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				try{
 					code = CRS.lookupIdentifier(crs.getName().getAuthority(), crs, true);
 				}catch (Exception ex){
-					
+				
 				}
 				prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				prj.setDefinition(crs.toWKT());
 				getSession().save(prj);
 				projections.add(prj);
 				listModified();
+			}else{
+				SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_ProjectionParseError,null);				
 			}
 		}
 	}
