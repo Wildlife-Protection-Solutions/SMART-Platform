@@ -108,11 +108,13 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		lbl.setText(Messages.CaPropertyPage_SupportedLanguages_Label);
 		
 		Composite langComp = new Composite(caComposite, SWT.NONE);
-		langComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		langComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		langComp.setLayout(new GridLayout(2, false));
 		
 		lstLang = new ListViewer(langComp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-		lstLang.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 50;
+		lstLang.getControl().setLayoutData(gd);
 		lstLang.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof Language){
@@ -129,9 +131,11 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		Composite btnComp = new Composite(langComp, SWT.NONE);
 		btnComp.setLayout(new GridLayout(1,false));
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
 		Button btnAdd = new Button(btnComp, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -198,7 +202,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		final Button btnRemove = new Button(btnComp, SWT.PUSH);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setEnabled(false);
-		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
