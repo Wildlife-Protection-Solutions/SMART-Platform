@@ -171,7 +171,9 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		provider.setQueryValue(error == null, error);
 		if(view.getQuery() != null){
 			view.getQuery().setIsValid(error == null);
-			((SimpleQuery)view.getQuery()).setQueryFilter(query);
+			if (error == null){
+				((SimpleQuery)view.getQuery()).setQueryFilter(query);
+			}
 			if (caFilter != null){
 				ConservationAreaFilter newFilter = caFilter.getCaFilter();
 				if (newFilter != null){

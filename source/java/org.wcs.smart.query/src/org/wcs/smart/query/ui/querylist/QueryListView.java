@@ -54,6 +54,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryInput;
@@ -223,23 +224,10 @@ public class QueryListView extends ViewPart {
 		
 		loadQueriesJob.schedule();
 		
-		QueryEventManager.getInstance().addQueryChangedEvent(new IQueryListener() {
-			
-			@Override
-			public void queryRun(Query query) {
-				// TODO Auto-generated method stub
-				
-			}
-			
+		QueryEventManager.getInstance().addQueryChangedEvent(new QueryListenerAdapter() {
 			@Override
 			public void queryNameUpdated(Query query) {
 				queryList.refresh();
-			}
-			
-			@Override
-			public void queryChanged(Query query) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
 	}

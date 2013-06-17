@@ -119,9 +119,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		if (this.dragItem != null){
 			this.dragItem.dispose();
 			this.dragItem = null;
-		}
-		validate();
-		
+		}		
 	}
 	
 	/**

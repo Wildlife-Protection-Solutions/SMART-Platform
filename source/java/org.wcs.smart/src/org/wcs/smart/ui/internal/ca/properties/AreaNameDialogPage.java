@@ -190,6 +190,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 					}
 
 					((Area) element).updateName(l, newId);
+					if (l.isDefault()){
+						((Area)element).setName(newId);
+					}
 					tableViewer.refresh();
 					setDirty();
 				}

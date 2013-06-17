@@ -41,7 +41,9 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryListenerAdapter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
@@ -87,9 +89,6 @@ public class QueryDefView extends ViewPart {
 				Query q =((IQueryEditor)part).getQuery();
 				if (q != current){
 					setQuery(q);
-				}
-				if (currentPanel != null){
-					currentPanel.validate();
 				}
 			}
 		}
@@ -142,18 +141,29 @@ public class QueryDefView extends ViewPart {
 				if (q != current){
 					setQuery(q);
 				}
-				if (currentPanel != null){
-					currentPanel.validate();
-				}
 			}
 		}
 	};
+
+	/**
+	 * These events are fired when the query needs to be refreshed; perhaps a 
+	 * system key was changed etc.  This is not to be fired when the user modifies the
+	 * queries.
+	 */
+	private IQueryListener queryRefreshed = new QueryListenerAdapter() {
+		@Override
+		public void queryRefreshed(Query query) {
+			if (query.equals(current)){
+				refreshQuery();
+			}
+		}};
 
 	/**
 	 * Creates new query definition view.
 	 */
 	public QueryDefView() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
+		QueryEventManager.getInstance().addQueryChangedEvent(queryRefreshed);
 	}
 	
 	/**
@@ -168,6 +178,7 @@ public class QueryDefView extends ViewPart {
 		for (QueryDefinitionComposite comp : definitionComposites.values()){
 			comp.dispose();
 		}
+		QueryEventManager.getInstance().removeQueryChangedEvent(queryRefreshed);
 	}
 	
 	/**
@@ -175,6 +186,7 @@ public class QueryDefView extends ViewPart {
 	 */
 	public void clearQuery(){
 		currentPanel.clear();
+		validate();
 		QueryEventManager.getInstance().fireQueryChangedListeners(current);
 	}
 
@@ -267,15 +279,25 @@ public class QueryDefView extends ViewPart {
 			}
 		});
 	}
-
-	
-	
 	
 	/**
 	 * @return the drop item factory for dropping items into the query
 	 */
 	public DropItemFactory getDropItemFactory(){
 		return DropItemFactory.INSTANCE;
+	}
+	
+	
+	/**
+	 * Refreshes the current panel by clearning
+	 * the content, re-initializing it, and re-validating it
+	 * @param query
+	 */
+	private void refreshQuery(){
+		currentPanel.clear();
+		currentPanel.init();
+		showCurrentPanel();
+		validate();
 	}
 	
 	/**
@@ -304,6 +326,9 @@ public class QueryDefView extends ViewPart {
 			currentPanel = null;
 		}
 		showCurrentPanel();
+		if (currentPanel != null){
+			currentPanel.validate();
+		}
 	}
 	
 	private void showCurrentPanel(){

@@ -121,7 +121,6 @@ public class ListDropTargetPanel implements IDropPanel{
 		proxy.getWidget().setVisible(false);
 		items.clear();
 		dropTarget.redraw();
-		validate();
 	}
 	
 	/**
@@ -177,7 +176,6 @@ public class ListDropTargetPanel implements IDropPanel{
 			}
 		}
 		orderElements();
-		validate();
 	}
 	
 	/**

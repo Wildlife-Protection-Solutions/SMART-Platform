@@ -165,6 +165,7 @@ public class GriddedValuePanel {
 	public void init(GriddedQuery query) {
 		isInitializing = true;
 		lstValues.addElements(query.getValueDropItems());
+		parentView.validate();
 		txtGridSize.setText(Double.toString(query.getGridSize()));
 		selectProjection(query);
 		isInitializing = false;

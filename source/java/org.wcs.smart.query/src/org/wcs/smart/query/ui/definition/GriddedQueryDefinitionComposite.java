@@ -207,7 +207,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		provider.setQueryValue(isvalid, error);
 		if (parentView.getQuery() != null){
 			parentView.getQuery().setIsValid(isvalid);
-			((GriddedQuery)parentView.getQuery()).setQuery(query, def);
+			if (isvalid){
+				((GriddedQuery)parentView.getQuery()).setQuery(query, def);
+			}
 		}
 		return error;
 	}
