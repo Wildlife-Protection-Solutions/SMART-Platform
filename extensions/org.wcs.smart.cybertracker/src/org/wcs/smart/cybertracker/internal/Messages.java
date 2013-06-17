@@ -62,7 +62,10 @@ public class Messages extends NLS {
 	public static String PatrolScreens_None;
 	public static String PatrolScreens_Objective;
 	public static String PatrolScreens_PatrolType;
+	public static String PatrolScreens_Paused;
+	public static String PatrolScreens_PausePatrol;
 	public static String PatrolScreens_Pilot;
+	public static String PatrolScreens_ResumePatrol;
 	public static String PatrolScreens_Start_Title;
 	public static String PatrolScreens_StartPatrol;
 	public static String PatrolScreens_Station;

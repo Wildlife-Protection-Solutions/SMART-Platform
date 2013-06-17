@@ -34,8 +34,10 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.filter.Categories;
 import org.wcs.smart.cybertracker.model.filter.ElementFilters;
@@ -155,7 +157,8 @@ public class PatrolScreensUtil {
 		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
 		addNavigationFormula(leaderNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
 		
-		addTaskNode(id, result, elements, startId, dmRootId);
+		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
+		addTaskNode(id, result, elements, startId, dmRootId, ctProps.getWaypointTimer());
 		result.rootId = id;
 		return result;
 	}
@@ -215,6 +218,7 @@ public class PatrolScreensUtil {
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
 		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol), null);
 		addCounterFormula(node, GLOBAL_PATROL_ID_GENERATOR, resultId);
+		addGpsConfiguration(node, 0);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
 		return toNextScreen(node);
@@ -257,7 +261,17 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 
-	private static void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId) {
+	private static void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, Integer timer) {
+		CyberTrackerId resumeId = new CyberTrackerId();
+		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
+		List<String> resScrValues = CyberTrackerUtil.listItemIds(resScrIds);
+		String resScrTrElements = CyberTrackerUtil.translateElements(resScrIds);
+		StringBuilder resScrLinks = new StringBuilder();
+		// "Resume Patrol" leads to "Next Task" screen
+		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(id.getNodeTranslatedId());
+		Node resumeNode = ScreensObjectFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
+		addGpsConfiguration(resumeNode, 0);
+		
 		CyberTrackerId confId = new CyberTrackerId();
 		Node confirmNode = ScreensObjectFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
 		//disable next button, enable save button,navigate on save to start point
@@ -266,17 +280,21 @@ public class PatrolScreensUtil {
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(startId.getNodeId());
 		
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_EndPatrol);
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_PausePatrol, Messages.PatrolScreens_EndPatrol);
 		List<String> values = CyberTrackerUtil.listItemIds(ids);
 		String trElements = CyberTrackerUtil.translateElements(ids);
 		//custom translate links logic
 		StringBuilder links = new StringBuilder();
 		// "Make observations" leads to datamodel root
 		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
+		// "Pause Patrol (Rest)" leads to "Paused" screen
+		links.append(ids.get(1).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
 		// "End Patrol" leads to confirmation screen
-		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
+		links.append(ids.get(2).getItemTranslatedId()).append(confId.getNodeTranslatedId());
 		Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
+		addGpsConfiguration(node, timer);
 		container.screenNodes.add(node);
+		container.screenNodes.add(resumeNode);
 		container.screenNodes.add(confirmNode);
 	}
 
@@ -362,6 +380,11 @@ public class PatrolScreensUtil {
 	private static void addCounterFormula(Node node, String counterName, String resultElementId) {
 		Control formulaControl = ScreensObjectFactory.createCounterFormulaControl12(counterName, resultElementId);
 		node.getData().getControls().getControl().add(formulaControl);
+	}
+
+	private static void addGpsConfiguration(Node node, Integer timer) {
+		Control gpsConf = ScreensObjectFactory.createConfigureGPSControl13(timer);
+		node.getData().getControls().getControl().add(gpsConf);
 	}
 	
 }
