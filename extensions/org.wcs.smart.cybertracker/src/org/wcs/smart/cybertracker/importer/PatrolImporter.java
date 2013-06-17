@@ -48,14 +48,12 @@ public class PatrolImporter extends SmartImporter {
 	public void importData(CyberTrackerPatrol ctPatrol) {
 		Session session = HibernateManager.openSession();
 		try {
-			Patrol patrol = buildPatrol(ctPatrol);
 			session.beginTransaction();
+			Patrol patrol = buildPatrol(ctPatrol);
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
 			}
-			session.getTransaction().rollback();
 
-			session.beginTransaction();
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
 		} catch (final Exception e) {
