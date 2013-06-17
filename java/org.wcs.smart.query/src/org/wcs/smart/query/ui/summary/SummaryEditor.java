@@ -47,9 +47,12 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryListenerAdapter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
@@ -78,8 +81,9 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	private boolean isDirty = false;
-
-	private IQueryListener qListener = new IQueryListener() {
+	private IAreaModifiedListener areaListener = null;
+	
+	private IQueryListener qListener = new QueryListenerAdapter() {
 		@Override
 		public void queryChanged(Query query) {
 			if (query != null && query.equals(SummaryEditor.this.query)) {
@@ -145,6 +149,9 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	 */
 	public SummaryEditor() {
 		super();
+		
+		areaListener = new SummaryAreaModifiedListener(this);
+		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 
 	/**
@@ -158,6 +165,9 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			toolkit = null;
 		}
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
+		if (areaListener != null){
+			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+		}
 	}
 
 	@Override

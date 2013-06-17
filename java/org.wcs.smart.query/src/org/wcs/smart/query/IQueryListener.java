@@ -54,4 +54,10 @@ public interface IQueryListener {
 	 */
 	public void queryNameUpdated(Query query);
 	
+	/**
+	 * Fired when the query should be refreshed because of a non-user change.
+	 * <p>For example when a database key has changed.</p>
+	 * @param query
+	 */
+	public void queryRefreshed(Query query);
 }

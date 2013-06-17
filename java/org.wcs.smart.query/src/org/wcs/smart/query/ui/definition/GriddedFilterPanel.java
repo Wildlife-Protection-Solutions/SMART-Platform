@@ -142,6 +142,7 @@ public class GriddedFilterPanel {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				valueFilter.clear();
+				valueFilter.validate();
 			}
 		});
 		
@@ -193,6 +194,7 @@ public class GriddedFilterPanel {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				rateFilter.clear();
+				rateFilter.validate();
 			}
 		});
 		

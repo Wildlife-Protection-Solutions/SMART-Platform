@@ -188,6 +188,7 @@ public class SummaryValueGroupByPanel {
 		lstValues.addElements(query.getValueDropItems());
 		lstRowGroupBy.addElements(query.getRowGroupByDropItems());
 		lstColumnGroupBy.addElements(query.getColumnGroupByDropItems());
+		lstValues.validate();
 	}
 	
 	/**

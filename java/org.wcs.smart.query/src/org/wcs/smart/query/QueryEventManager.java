@@ -98,6 +98,19 @@ public class QueryEventManager {
 		}
 	}
 	
+	
+	/**
+	 * Fires query refresh listeners
+	 * 
+	 * 
+	 * @param query the query that is to be refreshsed 
+	 */
+	public void fireQueryRefreshListeners(Query query){
+		for (IQueryListener listener: listeners){
+			listener.queryRefreshed(query);
+		}
+	}
+	
 	/**
 	 * Fires all query changed listeners.
 	 * 

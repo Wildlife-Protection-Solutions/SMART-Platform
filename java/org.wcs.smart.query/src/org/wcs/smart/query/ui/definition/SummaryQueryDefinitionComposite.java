@@ -181,7 +181,10 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		provider.setQueryValue(error == null, error);
 		if (parentView.getQuery() != null){
 			parentView.getQuery().setIsValid(error == null);
-			((SummaryQuery)parentView.getQuery()).setQuery(query, def);
+			if (error == null){
+				((SummaryQuery)parentView.getQuery()).setQuery(query, def);
+			}
+			
 			if (caFilterPanel != null){
 				ConservationAreaFilter filter = caFilterPanel.getCaFilter();
 				if (filter != null){

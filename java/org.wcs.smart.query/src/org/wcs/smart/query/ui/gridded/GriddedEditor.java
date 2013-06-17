@@ -46,6 +46,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryListenerAdapter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
@@ -78,7 +79,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 
 	private boolean firstRun = true;
 	
-	private IQueryListener qListener = new IQueryListener() {
+	private IQueryListener qListener = new QueryListenerAdapter() {
 		@Override
 		public void queryChanged(Query query) {
 			if (query != null && query.equals(GriddedEditor.this.query)){
