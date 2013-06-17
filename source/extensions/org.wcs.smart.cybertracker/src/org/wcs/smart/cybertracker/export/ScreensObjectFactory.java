@@ -110,7 +110,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>13</NextId>
+            <NextId>14</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -130,7 +130,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(13);
+		data.setNextId(14);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -675,6 +675,25 @@ public class ScreensObjectFactory {
 		Controls.Control control = createFormulaControl12(formula);
 		control.setResultGlobalValue(counterName);
 		control.setTranslateResultElementId(resultElementId);
+		return control;
+	}
+
+	/**
+	<Control>
+    	<Type>{440B2C86-D385-4EFC-8ACE-5D3C0A4A016B}</Type>
+    	<Id>13</Id>
+    	<SightingAccuracy>49</SightingAccuracy> <!-- will be added as default by CyberTracker -->
+    	<SightingFixCount>1</SightingFixCount>  <!-- will be added as default by CyberTracker -->
+    	<WaypointAccuracy>49</WaypointAccuracy> <!-- will be added as default by CyberTracker -->
+    	<WaypointTimer>...</WaypointTimer>
+    	<UseRangeFinderForAltitude>False</UseRangeFinderForAltitude> <!-- will be added as default by CyberTracker -->
+	</Control>
+	 */
+	public static Controls.Control createConfigureGPSControl13(Integer timer) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{440B2C86-D385-4EFC-8ACE-5D3C0A4A016B}"); //$NON-NLS-1$
+		control.setId(13);
+		control.setWaypointTimer(timer);
 		return control;
 	}
 	
