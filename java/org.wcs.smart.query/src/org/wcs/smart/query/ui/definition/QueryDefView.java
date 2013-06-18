@@ -154,7 +154,12 @@ public class QueryDefView extends ViewPart {
 		@Override
 		public void queryRefreshed(Query query) {
 			if (query.equals(current)){
-				refreshQuery();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						refreshQuery();
+					}});
+				
 			}
 		}};
 
