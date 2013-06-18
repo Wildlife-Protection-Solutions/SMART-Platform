@@ -78,19 +78,19 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 		return true;
 	}
 
-	@Override 
-	protected Point getInitialSize() {
+	@Override
+	public Point getInitialSize(){
 		Point p = super.getInitialSize();
-		p.x = (int)(p.x * 1.2);
+		p.x = Math.min(p.x, 550);
 		return p;
 	}
-	
 	/**
 	 * Create contents of the dialog.
 	 */
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
+		
 		cip = new CategoryInfoPanel(composite, SWT.NONE, true, toUpdate.getKeyId() == null) {			
 			@Override
 			protected Collection<Category> getSiblings() {
@@ -107,7 +107,9 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 			
 		};
 		
-		cip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.widthHint = 300;
+		cip.setLayoutData(gd);
 		cip.setCategory(toUpdate, this.defaultLang);
 		
 		if (toUpdate.getKeyId() == null){

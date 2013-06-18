@@ -129,7 +129,7 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Required_Label;
 	public static String AttributeInfoPanel_Type_Label;
 	public static String AttributeInfoPanel_ValuesLabel;
-	public static String AttributeItemDialog_Dialog_Message;
+	public static String AttributeItemDialog_Dialog_Message1;
 	public static String AttributeItemDialog_Dialog_Title;
 	public static String AttributeTree_AddButton_Tooltip;
 	public static String AttributeTree_ConfirmDelete_DialogMessage;
@@ -332,6 +332,7 @@ public class Messages extends NLS {
 	public static String DataModel_Error_LoadAggregations;
 	public static String DataModel_KeywordKeyError;
 	public static String DataModel_LoadAttribute_JobName;
+	public static String DataModel_NameRequired;
 	public static String DataModel_Progress_SaveAttribute;
 	public static String DataModel_Progress_SaveCategory;
 	public static String DataModel_Progress_SaveDm;
@@ -832,7 +833,7 @@ public class Messages extends NLS {
 	public static String SmartUtils_Illegal_HexString;
 	public static String SmartUtils_ValidationMessage_1;
 	public static String SmartUtils_ValidationMessage_2;
-	public static String SmartUtils_ValidationMessage_3;
+	public static String SmartUtils_ValidationMessage_3a;
 	public static String StartUpAdvancedDialog_DialogContent_Label;
 	public static String StartUpAdvancedDialog_DialogHeader;
 	public static String StartUpAdvancedDialog_DialogTitle;

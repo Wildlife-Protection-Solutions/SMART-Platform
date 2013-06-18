@@ -39,9 +39,11 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -498,6 +500,28 @@ public class DataModel {
 		return null;
 	}
 	
+	/**
+	 * Validates a data model object name
+	 * <p>Names must not be empty, less than DmObject.MAX_NAME_LENGTH characters</p>
+	 * 
+	 * 
+	 * @param name the name to validate.
+	 * @param l the language associated with the name
+	 * @return <code>null</code> if the name is valid otherwise a string description of the error
+	 */
+	public static String validateName(String name, Language l){
+		if (!SmartUtils.isSimpleString(name.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH,0)){
+			return MessageFormat.format(
+					Messages.NameKeyComposite_Error_InvalidName,
+					new Object[]{l.getDisplayName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});
+
+		}
+		if (l.isDefault() && name.trim().length() == 0){
+			return Messages.DataModel_NameRequired;
+		}
+		
+		return null;
+	}
 	
 	/**
 	 * Saves a datamodel to the database using the given session.

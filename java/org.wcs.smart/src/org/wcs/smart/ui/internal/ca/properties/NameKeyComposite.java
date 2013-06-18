@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,9 +56,6 @@ import org.wcs.smart.ca.datamodel.HkeyObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.LanguageViewer;
-import org.wcs.smart.util.SmartUtils;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Composite that has a method to add name and key fields.
@@ -315,31 +313,24 @@ public abstract class NameKeyComposite extends Composite {
 			values.put(currentSelection, txtName.getText());
 		}
 						
-		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_KEY_LENGTH)){
-			cdKey.setDescriptionText(
-					MessageFormat.format(
-							Messages.NameKeyComposite_Error_InvalidKey,
-							new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+		String errormsg = DataModel.validateKey(txtKey.getText(), new ArrayList<DmObject>());
+		if (errormsg != null){
+			cdKey.setDescriptionText(errormsg);
 			cdKey.show();
 			error = true;
 		}else{
 			cdKey.hide();
 		}
-		
 		boolean hide = true;
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
-			
-			if (!SmartUtils.isSimpleString(type.getValue().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH)){
-				cdTxt.setDescriptionText(
-						MessageFormat.format(
-								Messages.NameKeyComposite_Error_InvalidName,
-								new Object[]{type.getKey().getDisplayName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+			errormsg = DataModel.validateName(type.getValue(), type.getKey());
+			if (errormsg != null){
+				cdTxt.setDescriptionText(errormsg);
 				cdTxt.show();
 				error = true;
 				hide = false;
-			}	
-			
+			}
 		}
 		if (hide){
 			cdTxt.hide();
