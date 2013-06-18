@@ -39,8 +39,6 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
-import org.wcs.smart.util.SmartUtils;
-
 /**
  * Page for collecting administrative plan target properties
  * @author Emily
@@ -145,7 +143,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 				||
 				targetName.getText().length() > PlanTarget.MAX_NAME_LENGTH){
 			cdTargetName.show();
-			cdTargetName.setDescriptionText(Messages.AdministrativePlanTargetPropertyPage_EmptyName_Error + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdTargetName.setDescriptionText(Messages.AdministrativePlanTargetPropertyPage_EmptyName_Error1);
 			isComplete = false;
 		}else{
 			cdTargetName.hide();

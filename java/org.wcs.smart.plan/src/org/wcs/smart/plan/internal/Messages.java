@@ -8,7 +8,7 @@ public class Messages extends NLS {
 	public static String AdministrativePlanTarget_GuiName;
 	public static String AdministrativePlanTargetPropertyPage_Achieved_Label;
 	public static String AdministrativePlanTargetPropertyPage_Description_Label;
-	public static String AdministrativePlanTargetPropertyPage_EmptyName_Error;
+	public static String AdministrativePlanTargetPropertyPage_EmptyName_Error1;
 	public static String AdministrativePlanTargetPropertyPage_Name_Label;
 	public static String ConvertedPlanExtraData_ExtraKeyFound;
 	public static String ConvertedPlanExtraData_ExtraRecordFound;
@@ -45,7 +45,7 @@ public class Messages extends NLS {
 	public static String NumericPlanTarget_TargetType_PatrolHours;
 	public static String NumericPlanTarget_TargetType_PatrolManHours;
 	public static String NumericPlanTargetPropertyPage_Description_Label;
-	public static String NumericPlanTargetPropertyPage_InvalidName_Error;
+	public static String NumericPlanTargetPropertyPage_InvalidName_Error1;
 	public static String NumericPlanTargetPropertyPage_InvalidValue_Error;
 	public static String NumericPlanTargetPropertyPage_Operator_Label;
 	public static String NumericPlanTargetPropertyPage_TargetName_Label;

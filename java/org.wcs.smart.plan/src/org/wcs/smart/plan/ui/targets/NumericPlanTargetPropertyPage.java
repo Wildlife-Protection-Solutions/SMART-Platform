@@ -48,7 +48,6 @@ import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Page for collecting numeric plan target information.
@@ -218,7 +217,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		if (targetName.getText().trim().isEmpty()
 				|| targetName.getText().length() > PlanTarget.MAX_NAME_LENGTH)  {
 			cdTargetName.show();
-			cdTargetName.setDescriptionText(Messages.NumericPlanTargetPropertyPage_InvalidName_Error + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdTargetName.setDescriptionText(Messages.NumericPlanTargetPropertyPage_InvalidName_Error1);
 			isComplete = false;
 		}else{
 			cdTargetName.hide();
