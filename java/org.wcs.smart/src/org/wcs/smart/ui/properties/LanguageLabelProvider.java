@@ -32,7 +32,7 @@ public class LanguageLabelProvider extends LabelProvider {
 			Language l = (Language) element;
 			String key = ((Language)element).getLabel();
 			if (l.isDefault()){
-				key += "**";
+				key += "**"; //$NON-NLS-1$
 			}
 			return key;
 		}
