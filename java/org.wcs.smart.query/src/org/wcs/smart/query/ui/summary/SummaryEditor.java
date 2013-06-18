@@ -60,6 +60,7 @@ import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.ui.IQueryEditor;
+import org.wcs.smart.query.ui.QueryAreaModifiedListener;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
@@ -150,7 +151,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	public SummaryEditor() {
 		super();
 		
-		areaListener = new SummaryAreaModifiedListener(this);
+		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 
@@ -450,4 +451,38 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		return (QueryInput) getEditorInput();
 	}
 	
+	@Override
+	public void reparseQuery() {
+		//running it its own job so it has its own hibernate session
+		//and does not interfere with other sessions.
+		Job j = new Job("update drop items") { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				final Session session = HibernateManager.openSession();
+				try{
+				Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							try{
+								getQuery().generateDropItems(session);
+							}catch (Exception ex){
+								QueryPlugIn.log(ex.getMessage(), ex);
+							}
+						}});
+				}finally{
+					session.close();
+				}
+						return Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			QueryPlugIn.log(e.getMessage(), e);
+		}
+				
+		QueryEventManager.getInstance().fireQueryRefreshListeners(getQuery());
+	}
 }

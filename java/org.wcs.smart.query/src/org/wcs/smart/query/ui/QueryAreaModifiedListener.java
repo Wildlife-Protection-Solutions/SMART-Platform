@@ -21,38 +21,27 @@
  */
 package org.wcs.smart.query.ui;
 
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.Area.AreaType;
 
 /**
- * All query editor should implement this interface.
- *
- * @author egouge
+ * An listener for modifications to area names,labels that refreshes the 
+ * query editor 
+ * 
+ * @author Emily
  *
  */
-public interface IQueryEditor {
+public class QueryAreaModifiedListener implements IAreaModifiedListener {
 
-	/**
-	 * @return the query being edited
-	 */
-	public Query getQuery();
+	private IQueryEditor queryEditor ;
 	
-	/**
-	 * 
-	 * @return the editor input
-	 */
-	public QueryInput getInputInternal();
+	public QueryAreaModifiedListener(IQueryEditor queryEditor){
+		this.queryEditor = queryEditor;
+	}
 	
-	
-	/**
-	 * Validates the editor input
-	 */
-	public void validate();
-	
-	/**
-	 * Re-parses the current query regenerating and ui elements.
-	 * Used when background query data changed.  For example area keys
-	 * or data model keys.
-	 */
-	public void reparseQuery();
+	@Override
+	public void areasUpdated(AreaType type) {
+		queryEditor.reparseQuery();
+	}
+
 }
