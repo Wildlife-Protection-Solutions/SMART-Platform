@@ -45,6 +45,8 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
@@ -58,6 +60,7 @@ import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryAreaModifiedListener;
+import org.wcs.smart.query.ui.QueryDataModelModifiedListener;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
@@ -81,7 +84,9 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private GriddedResultsMapEditorPage mapPage;	//map results page
 
 	private boolean firstRun = true;
+	
 	private IAreaModifiedListener areaListener = null;
+	private IDataModelListener dmListener = null;
 	
 	private IQueryListener qListener = new QueryListenerAdapter() {
 		@Override
@@ -157,6 +162,9 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		
+		dmListener = new QueryDataModelModifiedListener(this);
+		DataModelManager.getInstance().addChangeListener(dmListener);
 	}
 
 	
@@ -168,6 +176,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		super.dispose();
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
 		ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+		DataModelManager.getInstance().removeChangeListener(dmListener);
 	}
 	
 	/**
