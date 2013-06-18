@@ -67,13 +67,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		this.lang = language;
 		this.siblings = siblings;
 	}
-	
-	@Override
-	protected void configureShell(Shell shell) {
-		super.configureShell(shell);
-		shell.setText(Messages.AttributeItemDialog_Dialog_Title);
-	}
-	
+		
 	@Override
 	protected boolean isResizable() {
 		return true;
@@ -88,7 +82,9 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		Composite container = new Composite(parent, SWT.NONE);
 		
 		container.setLayout(new GridLayout(3, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.widthHint = 300;
+		container.setLayoutData(gd);
 		
 		comp = new NameKeyComposite(parent, SWT.NONE) {			
 			@Override
@@ -110,7 +106,9 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		comp.createNameKeyFields(container, true, toUpdate.getKeyId() == null);
 		comp.initFields(toUpdate, lang);
 	
-		setMessage(Messages.AttributeItemDialog_Dialog_Message);
+		setMessage(Messages.AttributeItemDialog_Dialog_Message1);
+		setTitle(Messages.AttributeItemDialog_Dialog_Title);
+		getShell().setText(Messages.AttributeItemDialog_Dialog_Title);
 		return container;
 		
 	}

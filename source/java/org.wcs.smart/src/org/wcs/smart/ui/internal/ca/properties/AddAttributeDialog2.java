@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -115,7 +116,9 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 				return siblings;
 			}};
 		
-		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
+		gd.widthHint = 200;
+		attributePanel.setLayoutData(gd);
 		attributePanel.addValidationListener(new AttributeInfoPanel.IValidationListener() {
 			@Override
 			public void validated(boolean hasError) {
@@ -165,6 +168,12 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 		return r;
 	}
 	
+	@Override
+	public Point getInitialSize(){
+		Point p = super.getInitialSize();
+		p.x = Math.min(p.x, 550);
+		return p;
+	}
 	/*
 	 * updates the attribute to update with the
 	 * information in the attribute panel
