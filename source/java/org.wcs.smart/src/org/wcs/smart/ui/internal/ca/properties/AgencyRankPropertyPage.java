@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.Collator;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.databinding.observable.list.WritableList;
@@ -307,7 +311,20 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void resetAgencyList() {
 		Session s = getSession();
 		s.beginTransaction();
-		agencies = new WritableList(HibernateManager.getAgencies(currentCa,s ), Agency.class);
+		List<Agency> lst = HibernateManager.getAgencies(currentCa,s );
+		Collections.sort(lst, new Comparator<Agency>(){
+
+			@Override
+			public int compare(Agency o1, Agency o2) {
+				String a = o1.getName();
+				if (a != null) a = a.toLowerCase();
+				String b = o2.getName();
+				if (b != null) b = b.toLowerCase();
+				return Collator.getInstance().compare(a, b);
+			}});
+		
+		agencies = new WritableList(lst, Agency.class);
+		
 		s.getTransaction().rollback();
 	}
 	
@@ -801,7 +818,12 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}else if (s1 != null && s2 == null){
 				return -1;
 			}
-			return nullStringComparator.compare(findAgencyValue(column, s1), findAgencyValue(column, s2));
+			String a = findAgencyValue(column, s1);
+			if (a != null) a = a.toLowerCase();
+			
+			String b = findAgencyValue(column, s2);
+			if (b != null) b = b.toLowerCase();
+			return nullStringComparator.compare(a,b);
 		}
 	};
 	
@@ -846,7 +868,12 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}else if (s1 != null && s2 == null){
 				return -1;
 			}
-			return nullStringComparator.compare(findRankValue(column, s1), findRankValue(column, s2));
+			String a = findRankValue(column, s1);
+			if (a != null) a = a.toLowerCase();
+			
+			String b = findRankValue(column, s2);
+			if (b != null) b = b.toLowerCase();
+			return nullStringComparator.compare(a,b);
 		}
 	};
 }

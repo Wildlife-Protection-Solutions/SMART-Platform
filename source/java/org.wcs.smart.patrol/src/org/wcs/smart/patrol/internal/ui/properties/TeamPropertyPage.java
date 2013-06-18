@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -144,6 +147,15 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates, ex);
 			return;
 		}
+		Collections.sort(ms, new Comparator<PatrolMandate>(){
+			@Override
+			public int compare(PatrolMandate o1, PatrolMandate o2) {
+				String a = o1.getName();
+				String b = o2.getName();
+				if (a != null) a = a.toLowerCase();
+				if (b != null) b= b.toLowerCase();
+				return Collator.getInstance().compare(a,b);
+			}});
 		ms.add(0, null);
 		mandates = ms.toArray(new PatrolMandate[ms.size()]);
 
@@ -176,7 +188,16 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingTeams, ex);
 			getSession().close();
 		}
-		
+		Collections.sort(teams, new Comparator<Team>(){
+
+			@Override
+			public int compare(Team o1, Team o2) {
+				String a = o1.getName();
+				String b = o2.getName();
+				if (a != null) a = a.toLowerCase();
+				if (b != null) b = b.toLowerCase();
+				return Collator.getInstance().compare(a,b);
+			}});
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -682,7 +703,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}else if (s1 != null && s2 == null){
 				return -1;
 			}			
-			return nullStringComparator.compare(findValue(column, s1),	findValue(column, s2));
+			String a = findValue(column, s1);
+			String b = findValue(column, s2);
+			if (a != null) a = a.toLowerCase();
+			if (b != null) b = b.toLowerCase();
+			return nullStringComparator.compare(a,b);
 		}
 	};
 }

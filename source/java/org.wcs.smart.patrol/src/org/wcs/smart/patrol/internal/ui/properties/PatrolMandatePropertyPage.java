@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -133,6 +136,15 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	protected Composite createContent(Composite parent) {
 
 		mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, getSession()));
+		Collections.sort(mandates, new Comparator<PatrolMandate>(){
+			@Override
+			public int compare(PatrolMandate o1, PatrolMandate o2) {
+				String a = o1.getName();
+				String b = o2.getName();
+				if (a != null) a = a.toLowerCase();
+				if (b != null) b = b.toLowerCase();
+				return Collator.getInstance().compare(a,b);
+			}});
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -562,7 +574,11 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			}else if (s1 != null && s2 == null){
 				return -1;
 			}			
-			return nullStringComparator.compare(findLangValue(column, s1),	findLangValue(column, s2));
+			String a = findLangValue(column, s1);
+			String b = findLangValue(column, s2);
+			if (a != null) a = a.toLowerCase();
+			if (b != null) b = b.toLowerCase();
+			return nullStringComparator.compare(a,b);
 		}
 	};
 }

@@ -28,7 +28,15 @@ public class LanguageLabelProvider extends LabelProvider {
 	
 	@Override
 	public String getText(Object element) {
-		return ((Language)element).getLabel();
+		if (element instanceof Language){
+			Language l = (Language) element;
+			String key = ((Language)element).getLabel();
+			if (l.isDefault()){
+				key += "**";
+			}
+			return key;
+		}
+		return super.getText(element);
 	}
 	
 }
