@@ -45,6 +45,8 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
@@ -58,6 +60,7 @@ import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryAreaModifiedListener;
+import org.wcs.smart.query.ui.QueryDataModelModifiedListener;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
@@ -77,7 +80,9 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	private PatrolQueryTableResultsPage page1;
 	private PatrolQueryMapPage page2;
 	private boolean isDirty = false;
+	
 	private IAreaModifiedListener areaListener = null;
+	private IDataModelListener dmListener = null;
 	
 	private IQueryListener qListener = new QueryListenerAdapter() {
 		
@@ -160,6 +165,9 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		
+		dmListener = new QueryDataModelModifiedListener(this);
+		DataModelManager.getInstance().addChangeListener(dmListener);
 	}
 
 	
@@ -171,6 +179,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		super.dispose();
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
 		ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+		DataModelManager.getInstance().removeChangeListener(dmListener);
 	}
 	
 	/**

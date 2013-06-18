@@ -43,9 +43,9 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.IConservationAreaConfigurationListener;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryListenerAdapter;
@@ -59,6 +59,7 @@ import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryAreaModifiedListener;
+import org.wcs.smart.query.ui.QueryDataModelModifiedListener;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querytable.QueryLazyResultsTable;
@@ -83,6 +84,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	 * Listener for changes to area names/ids
 	 */
 	private IAreaModifiedListener areaListener = null;
+	private IDataModelListener dmListener = null;
 	
 	
 	private IQueryListener qListener = new QueryListenerAdapter() {
@@ -152,37 +154,18 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			return Status.OK_STATUS;
 		}};
 		
-	private IConservationAreaConfigurationListener configListener = new IConservationAreaConfigurationListener() {
-		@Override
-		public void configurationChanged() {
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				query.generateDropItems(session);
-			} catch (Exception ex) {
-				QueryPlugIn
-						.displayLog(
-								MessageFormat
-										.format(Messages.QueryResultsEditor_Error_CouldNotParse,
-												new Object[] { query.getName() })
-										+ ex.getLocalizedMessage(), ex);
-			} finally {
-				session.getTransaction().rollback();
-				session.close();
-			}
-			QueryEventManager.getInstance().fireQueryChangedListeners(query);
-		}
-	};
 	/**
 	 * 
 	 * Creates a new editor
 	 */
 	public QueryResultsEditor() {
 		super();		
-		SmartDB.addConfigurationChangeListener(configListener);
-		
+	
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		
+		dmListener = new QueryDataModelModifiedListener(this);
+		DataModelManager.getInstance().addChangeListener(dmListener);
 	}
 
 	
@@ -193,9 +176,11 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	public void dispose() {
 		super.dispose();
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
-		SmartDB.removeConfigurationChangeListener(configListener);
 		if (areaListener != null){
 			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+		}
+		if (dmListener != null){
+			DataModelManager.getInstance().removeChangeListener(dmListener);
 		}
 	}
 	
