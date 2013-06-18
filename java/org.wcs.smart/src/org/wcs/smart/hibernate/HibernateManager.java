@@ -228,8 +228,8 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return a list of conservation areas in the database
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<ConservationArea> getConservationAreas(Session session) {
-		Query query = session.createQuery("from ConservationArea WHERE uuid != :uuid Order by id");	 //$NON-NLS-1$
+	public static List<ConservationArea> getConservationAreas(Session session) {		
+		Query query = session.createQuery("from ConservationArea WHERE uuid != :uuid Order by lower(id)");	 //$NON-NLS-1$
 		query.setParameter("uuid", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
 		List<ConservationArea> areas = query.list();
 		return areas;

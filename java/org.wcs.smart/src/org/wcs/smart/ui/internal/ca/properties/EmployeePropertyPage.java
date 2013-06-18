@@ -560,7 +560,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (s2 == null){
 			return 1;
 		}
-		return Collator.getInstance().compare(s1, s2);
+		return Collator.getInstance().compare(s1.toLowerCase(), s2.toLowerCase());
 	}
 	
 	/*

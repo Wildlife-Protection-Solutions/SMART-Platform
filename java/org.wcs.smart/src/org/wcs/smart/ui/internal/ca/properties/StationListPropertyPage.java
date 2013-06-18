@@ -23,6 +23,8 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -154,6 +156,20 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		getSession().beginTransaction();
 		try{
 			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,getSession()));
+			Collections.sort(stations, new Comparator<Station>() {
+				@Override
+				public int compare(Station o1, Station o2) {
+					String name1 = o1.getName();
+					if (name1 != null){
+						name1 = name1.toLowerCase();
+					}
+					String name2 = o2.getName();
+					if (name2 != null){
+						name2 = name2.toLowerCase();
+					}
+					return nullStringComparator.compare(name1, name2);
+				}
+			});
 		}finally{
 			getSession().getTransaction().rollback();
 		}
@@ -324,8 +340,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		stations.add(x);
 		setChangesMade(true);
 		
-		tableViewer.setSelection(new StructuredSelection(x));
 		tableViewer.refresh();
+		tableViewer.setSelection(new StructuredSelection(x));
+		
 		
 	}
 
@@ -602,7 +619,15 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}else if (s1 != null && s2 == null){
 				return -1;
 			}			
-			return nullStringComparator.compare(findLangValue(column, s1),	findLangValue(column, s2));
+			String ss1 = findLangValue(column, s1);
+			String ss2 = findLangValue(column, s2);
+			if (ss1 != null){
+				ss1 = ss1.toLowerCase();
+			}
+			if (ss2 != null){
+				ss2 = ss2.toLowerCase();
+			}
+			return nullStringComparator.compare(ss1, ss2);
 		}
 	};
 	

@@ -21,6 +21,11 @@
  */
 package org.wcs.smart.ui.properties;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -48,7 +53,18 @@ public class LanguageViewer extends ComboViewer {
 		
 		setContentProvider(ArrayContentProvider.getInstance());
 		setLabelProvider(new LanguageLabelProvider());
-		setInput(ca.getLanguages().toArray(new Language[ca.getLanguages().size()]));
+		ArrayList<Language> langs = new ArrayList<Language>();
+		langs.addAll(ca.getLanguages());
+		Collections.sort(langs, new Comparator<Language>(){
+
+			@Override
+			public int compare(Language o1, Language o2) {
+				if (o1.isDefault()) return -1;
+				if (o2.isDefault()) return 1;
+				return Collator.getInstance().compare(o1.getLabel(), o2.getLabel());
+			}});
+		
+		setInput(langs);
 		setSelection(new StructuredSelection(ca.getDefaultLanguage()));
 
 	}
