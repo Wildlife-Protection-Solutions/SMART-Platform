@@ -172,7 +172,10 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
 		getShell().setText(Messages.QueryPropertiesDialog_DialogTitle);
+		setTitle(Messages.QueryPropertiesDialog_DialogTitle);
 		setMessage(Messages.QueryPropertiesDialog_DialogMessage);
 		
 		ScrolledComposite scroll = new ScrolledComposite(parent,  SWT.V_SCROLL);
