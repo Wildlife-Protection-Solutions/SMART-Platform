@@ -21,13 +21,12 @@
  */
 package org.wcs.smart.internal.ca.datamodel.xml;
 
-import java.text.ParseException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -37,6 +36,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AggregationType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeListType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
@@ -60,31 +60,47 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 public class DataModelSmartToXmlConverter {
 
 	
-	 
-	public static org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel convert(DataModel dm) throws JAXBException, ParseException {
+	/**
+	 * Converts an smart model to xml model 
+	 * @param dm smart data model
+	 * @param monitor progress monitor
+	 * @return xml data model
+	 */
+	public static org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel convert(DataModel dm, IProgressMonitor monitor) {
 		
+		monitor.beginTask(Messages.DataModelSmartToXmlConverter_Progress_convertingDm, 3);
 		org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = new org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel();
 		
+		monitor.subTask(Messages.DataModelSmartToXmlConverter_Progress_Languages);
 		HashMap<String, Language> llookup = processLanguages(dm, xml);
-		processAttribute(dm, xml, llookup);
-		processCategories(dm, xml, llookup);
-		
+		monitor.worked(1);
+		monitor.subTask(Messages.DataModelSmartToXmlConverter_Progress_Attributes);
+		processAttribute(dm, xml, llookup, monitor);
+		monitor.worked(1);
+		monitor.subTask(Messages.DataModelSmartToXmlConverter_ProgressCategories);
+		processCategories(dm, xml, llookup, monitor);
+		monitor.worked(1);
 		return xml;
 		
 		
 	}
-	private static void processCategories(DataModel dm, org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml, HashMap<String, Language> llookup){
+	private static void processCategories(DataModel dm, 
+			org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml, 
+			HashMap<String, Language> llookup, IProgressMonitor monitor){
 	
 		if (dm.getCategories() != null){
 			CategoryTypeList ctl = new CategoryTypeList();
 			xml.setCategories(ctl);
 			for (Category child : dm.getCategories()){
-				processCategory(child, ctl.getCategories(), llookup);
+				processCategory(child, ctl.getCategories(), llookup, monitor);
 			}
 		}
 	}
 	
-	private static void processCategory(Category child, List<CategoryType> parentList, HashMap<String, Language> llookup ){
+	private static void processCategory(Category child, List<CategoryType> parentList, 
+			HashMap<String, Language> llookup, IProgressMonitor monitor ){
+		
+		monitor.subTask(MessageFormat.format(Messages.DataModelSmartToXmlConverter_ProgressCategory, new Object[]{child.getName()}));
 		CategoryType ct = new CategoryType();
 		setNames(ct.getNames(), child.getNames(), llookup);
 		ct.setIsactive(child.getIsActive());
@@ -101,7 +117,7 @@ public class DataModelSmartToXmlConverter {
 		}
 		if (child.getChildren() != null){
 			for (Category c : child.getChildren()){
-				processCategory(c, ct.getCategories(), llookup);
+				processCategory(c, ct.getCategories(), llookup, monitor);
 			}
 		}
 		parentList.add(ct);
@@ -109,11 +125,15 @@ public class DataModelSmartToXmlConverter {
 	}
 	
 	
-	private static void processAttribute(DataModel dm, org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml, HashMap<String, Language> llookup){
+	private static void processAttribute(DataModel dm, 
+			org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml, 
+			HashMap<String, Language> llookup,
+			IProgressMonitor monitor){
 		
 		AttributeListType atl = new AttributeListType();
 		xml.setAttributes(atl);
 		for (Attribute att : dm.getAttributes()){
+			monitor.subTask(MessageFormat.format(Messages.DataModelSmartToXmlConverter_ProgressAttribute, new Object[]{att.getName()}));
 			AttributeType at = new AttributeType();
 			at.setIsrequired(att.getIsRequired());
 			at.setKey(att.getKeyId());

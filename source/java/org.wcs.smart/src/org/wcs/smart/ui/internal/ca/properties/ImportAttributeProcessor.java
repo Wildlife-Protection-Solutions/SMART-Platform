@@ -96,7 +96,7 @@ public class ImportAttributeProcessor {
 				readDefaultFile();
 			}
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, Messages.ImportAttributeProcessor_ErrorReadingXml, ex);
+			SmartPlugIn.displayLog(null, Messages.ImportAttributeProcessor_ErrorReadingXml + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;
 		}
 		

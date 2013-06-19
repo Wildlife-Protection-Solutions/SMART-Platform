@@ -391,6 +391,12 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_SaveChanges_DialogMessage;
 	public static String DataModelPropertyPage_SaveChanges_DialogTitle;
 	public static String DataModelPropertyPage_XmlFile_FilterName;
+	public static String DataModelSmartToXmlConverter_Progress_Attributes;
+	public static String DataModelSmartToXmlConverter_Progress_convertingDm;
+	public static String DataModelSmartToXmlConverter_Progress_Languages;
+	public static String DataModelSmartToXmlConverter_ProgressAttribute;
+	public static String DataModelSmartToXmlConverter_ProgressCategories;
+	public static String DataModelSmartToXmlConverter_ProgressCategory;
 	public static String DataModelXmlToSmartConverter_Error_AggregationNotFound;
 	public static String DataModelXmlToSmartConverter_Error_AttributeTypeNotFound;
 	public static String DataModelXmlToSmartConverter_Error_CategoryAttributeNotFound;
@@ -869,6 +875,8 @@ public class Messages extends NLS {
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;
 	public static String UserNamePasswordDialog_Username_Label;
+	public static String XmlDataModelValidator_InvalidKey;
+	public static String XmlDataModelValidator_InvalidName;
 	public static String XmlImportDialog_AddButton;
 	public static String XmlImportDialog_Files_Label;
 	public static String XmlImportDialog_Filter_All;

@@ -422,7 +422,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						DataModel dm = ((DataModel) viewer.getInput());
 						
 						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
-						org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = DataModelSmartToXmlConverter.convert(dm);
+						org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = DataModelSmartToXmlConverter.convert(dm, monitor);
 						monitor.worked(1);
 						
 						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);

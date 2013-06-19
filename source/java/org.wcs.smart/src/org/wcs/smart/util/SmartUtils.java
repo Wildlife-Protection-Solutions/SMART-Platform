@@ -77,7 +77,7 @@ public class SmartUtils {
 		/**
 		 * Allows chars, digits, _ : & and spaces
 		 */
-		ALLOWED_CHARS_COMPLEX_REGEX(Messages.SmartUtils_ValidationMessage_3a, "[^^\\p{L}\\p{M}\\p{Nd}- :_&'<>,\\(\\)\\.\\#;]"); //$NON-NLS-1$
+		ALLOWED_CHARS_COMPLEX_REGEX(Messages.SmartUtils_ValidationMessage_3a, "[^^\\p{L}\\p{M}\\p{Nd}- :_&'<>,\\(\\)\\.\\#;\\/]"); //$NON-NLS-1$
 		
 		public final String textDesc;
 		public final String regex;
