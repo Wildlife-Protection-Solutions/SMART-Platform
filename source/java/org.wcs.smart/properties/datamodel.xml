@@ -619,13 +619,13 @@
         </attribute>
         <attribute type="LIST" isrequired="false" key="caliber">
             <names value="Caliber" language_code="en"/>
-            <values isactive="true" key="556">
+            <values isactive="true" key="c556">
                 <names value="5 56" language_code="en"/>
             </values>
-            <values isactive="true" key="762">
+            <values isactive="true" key="c762">
                 <names value="7 62" language_code="en"/>
             </values>
-            <values isactive="true" key="12guage">
+            <values isactive="true" key="guage12">
                 <names value="12 guage" language_code="en"/>
             </values>
             <values isactive="true" key="other">
