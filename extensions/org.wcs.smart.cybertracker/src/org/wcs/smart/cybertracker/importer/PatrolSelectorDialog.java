@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 
@@ -61,7 +62,7 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
         Label patrolLabel = new Label(main, SWT.NONE);
-        patrolLabel.setText("Patrol ID:");
+        patrolLabel.setText(Messages.PatrolSelectorDialog_PatrolID);
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         patrolId = new PatrolFilteredComboViewer(main);
@@ -74,10 +75,9 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 			}
 		});
 
-        
-		setTitle("Patrol selection");
-		setMessage("Select patrol to which imported data will be added as legs");
-		super.getShell().setText("Patrol selection");
+		setTitle(Messages.PatrolSelectorDialog_Title);
+		setMessage(Messages.PatrolSelectorDialog_Message);
+		super.getShell().setText(Messages.PatrolSelectorDialog_Title);
 		return composite;
 	}
 	

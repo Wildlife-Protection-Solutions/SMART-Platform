@@ -71,6 +71,9 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Station;
 	public static String PatrolScreens_Team;
 	public static String PatrolScreens_Yes;
+	public static String PatrolSelectorDialog_Message;
+	public static String PatrolSelectorDialog_PatrolID;
+	public static String PatrolSelectorDialog_Title;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
