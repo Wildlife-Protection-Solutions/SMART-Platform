@@ -70,18 +70,23 @@ public class CyberTrackerHibernateManager {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> T fetchByUuid(Class<T> clazz, String uuid, Session session) {
 		if (uuid == null)
 			return null;
 		try {
-			byte[] byteUuid = SmartUtils.decodeHex(uuid);
-			Criteria query = session.createCriteria(clazz).add(Restrictions.eq("uuid", byteUuid)); //$NON-NLS-1$
-			return (T) query.uniqueResult();
+			return fetchByUuid(clazz, SmartUtils.decodeHex(uuid), session);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T fetchByUuid(Class<T> clazz, byte[] byteUuid, Session session) {
+		if (byteUuid == null)
+			return null;
+		Criteria query = session.createCriteria(clazz).add(Restrictions.eq("uuid", byteUuid)); //$NON-NLS-1$
+		return (T) query.uniqueResult();
+	}
+	
 }

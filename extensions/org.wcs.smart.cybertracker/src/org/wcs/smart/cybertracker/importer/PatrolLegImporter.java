@@ -24,12 +24,13 @@ package org.wcs.smart.cybertracker.importer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 
 /**
  * Imports from {@link CyberTrackerPatrol} to {@link Patrol} object
@@ -38,15 +39,18 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolImporter extends SmartImporter {
-	
-	public void importData(CyberTrackerPatrol ctPatrol) {
+public class PatrolLegImporter extends SmartImporter {
+
+	public void importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
-			Patrol patrol = buildPatrol(ctPatrol);
+			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
+			PatrolLeg leg = patrol.addLeg();
+			initLegData(leg, ctPatrol);
+			leg.createLegDays();
 			for (S s : ctPatrol.getPatrolData()) {
-				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
+				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
@@ -63,25 +67,6 @@ public class PatrolImporter extends SmartImporter {
 		finally {
 			session.close();
 		}
-	}
-	
-	private Patrol buildPatrol(CyberTrackerPatrol ctPatrol) {
-		Patrol p = new Patrol();
-		p.setConservationArea(SmartDB.getCurrentConservationArea());
-		p.setPatrolType(ctPatrol.getPatrolType());
-		p.setArmed(ctPatrol.isArmed());
-		p.setTeam(ctPatrol.getTeam());
-		p.setStation(ctPatrol.getStation());
-		p.setMandate(ctPatrol.getMandate());
-		p.setObjective(ctPatrol.getObjective());
-		p.setComment(ctPatrol.getComment());
-		p.setStartDate(ctPatrol.getStartDate());
-		p.setEndDate(ctPatrol.getEndDate());
 		
-		initLegData(p.getFirstLeg(), ctPatrol);
-		
-		p.createLegDays();
-		return p;
-	}
-	
+	}	
 }
