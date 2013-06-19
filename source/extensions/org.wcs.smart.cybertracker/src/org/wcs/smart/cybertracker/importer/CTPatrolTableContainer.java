@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -44,6 +45,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.patrol.model.Patrol;
 
 /**
  * Container for table containing imported data from CyberTracker application
@@ -88,6 +90,7 @@ public class CTPatrolTableContainer extends Composite {
 	
 	private TableViewer viewer;
 	private PatrolImporter patrolImporter;
+	private PatrolLegImporter legImporter;
 	
 	private List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
 	
@@ -136,7 +139,7 @@ public class CTPatrolTableContainer extends Composite {
 		btnAsLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: implement
+				handleAddAsLeg();
 			}
 		});
 		btnAsLeg.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
@@ -167,6 +170,26 @@ public class CTPatrolTableContainer extends Composite {
 		refreshViewer();
 	}
 
+	protected void handleAddAsLeg() {
+		PatrolSelectorDialog selectorDialog = new PatrolSelectorDialog(getShell());
+		if (selectorDialog.open() != IDialogConstants.OK_ID) {
+			return;
+		}
+		if (legImporter == null)
+			legImporter = new PatrolLegImporter();
+		//TODO: implement
+
+		final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
+		Patrol patrol = selectorDialog.getSelectedPatrol();
+		for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+			CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
+			legImporter.importData(patrol, ctp);
+			tableInputData.remove(ctp);
+		}
+		
+		refreshViewer();
+	}
+	
 	private void addColumns(TableViewer viewer) {
 		for (CTPatrolTableColumn column : CTPatrolTableColumn.values()) {
 			TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);

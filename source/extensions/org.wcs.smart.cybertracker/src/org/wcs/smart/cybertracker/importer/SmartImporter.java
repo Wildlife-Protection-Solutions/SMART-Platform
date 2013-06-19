@@ -31,18 +31,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
@@ -55,6 +58,22 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  */
 public class SmartImporter {
 
+	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol) {
+		leg.setType(ctPatrol.getPatrolTransportType());
+		leg.setStartDate(ctPatrol.getStartDate());
+		leg.setEndDate(ctPatrol.getEndDate());
+		List<PatrolLegMember> legMembers = new ArrayList<PatrolLegMember>();
+		for (Employee e : ctPatrol.getMembers()) {
+			PatrolLegMember plm = new PatrolLegMember();
+			plm.setPatrolLeg(leg);
+			plm.setMember(e);
+			plm.setIsLeader(e.equals(ctPatrol.getLeader()));
+			plm.setIsPilot(e.equals(ctPatrol.getPilot()));
+			legMembers.add(plm);
+		}
+		leg.setMembers(legMembers);
+	}
+	
 	protected void addObservations(PatrolLeg leg, S s, Map<String, E> eMap, Session session) {
 		PatrolLegDay legDay = findOrAddLegDay(leg, s);
 		if (legDay == null)
