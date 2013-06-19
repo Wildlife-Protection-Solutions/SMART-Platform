@@ -24,6 +24,7 @@ package org.wcs.smart.internal.ca.datamodel.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -44,7 +45,7 @@ public class XmlSmartDataModelManager {
 	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.internal.ca.datamodel.xml.generate"; //$NON-NLS-1$
 	
 	/**
-	 * Reads a data model xml file.
+	 * Reads a data model xml file and performs validation.
 	 * <p>
 	 * User is required to close input sream.
 	 * </p>
@@ -53,11 +54,16 @@ public class XmlSmartDataModelManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static DataModel readDataModel(InputStream file) throws JAXBException{
+	public static DataModel readDataModel(InputStream file) throws JAXBException, ParseException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
 		Object o = un.unmarshal(file);
 		DataModel x = (DataModel) o;
+		
+		//validate data model
+		XmlDataModelValidator validation = new XmlDataModelValidator(x);
+		validation.validate();
+		
 		return x;
 	}
 	
@@ -77,4 +83,10 @@ public class XmlSmartDataModelManager {
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
 		marshaller.marshal(model, file);
 	}
+	
+	
+	
+	
+	
 }
+

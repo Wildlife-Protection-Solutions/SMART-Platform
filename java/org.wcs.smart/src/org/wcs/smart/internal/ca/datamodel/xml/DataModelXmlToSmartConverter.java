@@ -154,9 +154,84 @@ public class DataModelXmlToSmartConverter {
 			}
 		}
 		
+//		validate(dm);
 		return dm;
 	}
 	
+//	/**
+//	 * Performs some validation on the imported data model keys and names
+//	 * @param dm
+//	 * @throws ParseException 
+//	 */
+//	private void validate(DataModel dm) throws ParseException {
+//		// we need to do some validation here on keys and names
+//		for (Attribute attribute : dm.getAttributes()) {
+//			validate(attribute, dm.getAttributes());
+//			
+//			if (attribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST){
+//				for (AttributeListItem li : attribute.getAttributeList()){
+//					validate(li, attribute.getAttributeList());
+//				}	
+//			}
+//			
+//			if (attribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.TREE){
+//				List<AttributeTreeNode> toCheck = new ArrayList<AttributeTreeNode>();
+//				toCheck.addAll(attribute.getTree());
+//				while (toCheck.size() > 0) {
+//					AttributeTreeNode tn = toCheck.remove(0);
+//					List<AttributeTreeNode> siblings = null;
+//					if (tn.getParent() != null) {
+//						siblings = tn.getParent().getChildren();
+//					}else{
+//						siblings = attribute.getTree();
+//					}
+//					if (siblings == null) {
+//						siblings = new ArrayList<AttributeTreeNode>();
+//					}
+//					if (tn.getChildren() != null) {
+//						toCheck.addAll(tn.getChildren());
+//					}
+//					validate(tn, siblings);
+//				}
+//			}
+//		}
+//		List<Category> toCheck = new ArrayList<Category>();
+//		toCheck.addAll(dm.getCategories());
+//		while (toCheck.size() > 0) {
+//			Category c = toCheck.remove(0);
+//			List<Category> siblings = null;
+//			if (c.getParent() != null) {
+//				siblings = c.getParent().getChildren();
+//			}else{
+//				siblings = dm.getCategories();
+//			}
+//			if (siblings == null) {
+//				siblings = new ArrayList<Category>();
+//			}
+//			if (c.getChildren() != null) {
+//				toCheck.addAll(c.getChildren());
+//			}
+//			validate(c, siblings);
+//		}
+//	}
+//	
+//	private void validate(DmObject object, List<? extends DmObject> siblings) throws ParseException{
+//		String error = DataModel.validateKey(object.getKeyId(), siblings);
+//		if (error != null) {
+//			throw new ParseException(MessageFormat.format(
+//					"Data model object key {0} is invalid. {1}", new Object[] {
+//							object.getKeyId(), error }), 0);
+//		}
+//		for (org.wcs.smart.ca.Label l : object.getNames()) {
+//			error = DataModel.validateName(l.getValue(), l.getLanguage());
+//			if (error != null) {
+//				throw new ParseException(MessageFormat.format(
+//						"Data model object name {0} is invalid. {1}", new Object[] {
+//								l.getValue(), error }), 0);
+//			}
+//		}
+//	}
+//	
 	/**
 	 * Returns the language code to use as the default language.
 	 * <p>
