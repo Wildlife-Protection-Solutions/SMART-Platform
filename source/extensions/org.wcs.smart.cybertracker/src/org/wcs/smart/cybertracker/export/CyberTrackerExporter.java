@@ -44,9 +44,11 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.WinRegistry;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.reports.Items;
 import org.wcs.smart.cybertracker.model.reports.Reports;
@@ -106,7 +108,7 @@ public class CyberTrackerExporter {
 		Screens screens = ScreensObjectFactory.createScreens(screenNodes, CyberTrackerHibernateManager.getProperties(session));
 		monitor.worked(5);
 
-		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Screens.xml")); //$NON-NLS-1$
+		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_SCREENS)); //$NON-NLS-1$
 		try {
 			writeDataModel(screens, outS, Screens.class);
 		} finally {
@@ -115,7 +117,7 @@ public class CyberTrackerExporter {
 		monitor.worked(10);
 		
 		ElementsUtil.addElements(elements, keyMap);
-		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Elements.xml")); //$NON-NLS-1$
+		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_ELEMENTS)); //$NON-NLS-1$
 		try {
 			writeDataModel(elements, outE, Elements.class);
 		} finally {
@@ -124,28 +126,37 @@ public class CyberTrackerExporter {
 		
 		//----------------creating Reports.xml----------------
 		List<Items.Item> columnItems = new ArrayList<Items.Item>();
-		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date")); //$NON-NLS-1$ //$NON-NLS-2$
-		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time")); //$NON-NLS-1$ //$NON-NLS-2$
+		columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.DATE, "Date"));
+		columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.TIME, "Time"));
 		for (IdNamePair pair : patrolScreensData.resultElements) {
 			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
-//			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name, ReportsObjectFactory.TAG_0_OUTPUT_MODE));
 		}
 		for (Attribute attribute : attr2resultId.keySet()) {
 			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
-//			Integer outMode = AttributeType.TEXT.equals(attribute.getType()) || AttributeType.NUMERIC.equals(attribute.getType()) ? null : ReportsObjectFactory.TAG_0_OUTPUT_MODE;
-//			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode)); //$NON-NLS-1$
 		}
 		for (Integer level : catLevel2resultId.keySet()) {
 			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level)));
-//			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level), ReportsObjectFactory.TAG_0_OUTPUT_MODE));
 		}
 		Reports reports = ReportsObjectFactory.createReports(columnItems);
-		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Reports.xml")); //$NON-NLS-1$
+		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_REPORTS)); //$NON-NLS-1$
 		try {
 			writeDataModel(reports, outR, Reports.class);
 		} finally {
 			outR.close();
 		}
+
+		monitor.subTask("Generating CTX file...");
+		String appPath = WinRegistry.readString (WinRegistry.HKEY_CURRENT_USER,
+				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_NAME);
+		String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\generated.ctx"};
+		Process proc = Runtime.getRuntime().exec(createCommands);
+		proc.waitFor();
+
+		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()+"\\generated.ctx"};
+		proc = Runtime.getRuntime().exec(uploadCommands);
+		int code = proc.waitFor();
+		if (code != 200)
+			code++;
 		
 		monitor.done();
 		return file;

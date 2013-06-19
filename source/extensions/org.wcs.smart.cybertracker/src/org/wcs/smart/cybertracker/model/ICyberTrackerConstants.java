@@ -29,6 +29,16 @@ package org.wcs.smart.cybertracker.model;
  */
 public interface ICyberTrackerConstants {
 
+	public static final String XML_SCREENS = "Screens.xml"; //$NON-NLS-1$
+	public static final String XML_ELEMENTS = "Elements.xml"; //$NON-NLS-1$
+	public static final String XML_REPORTS = "Reports.xml"; //$NON-NLS-1$
+	
+	public static final String REG_KEY_PATH = "Software\\CyberTracker3"; //$NON-NLS-1$
+	public static final String REG_KEY_NAME = "Path"; //$NON-NLS-1$
+
+	public static final String COMMAND_CREATE = "/createctx"; //$NON-NLS-1$
+	public static final String COMMAND_UPLOAD = "/uploadpda"; //$NON-NLS-1$
+	
 	public static final String CT_DATE_FORMAT = "MM/dd/yy"; //$NON-NLS-1$
 
 	public static final String STR_TRUE = "True"; //$NON-NLS-1$
