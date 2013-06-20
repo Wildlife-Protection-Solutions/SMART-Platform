@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.importer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +38,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
+import org.wcs.smart.cybertracker.util.PdaUtil;
 
 /**
  * Importer for CyberTracker application data. 
@@ -52,11 +55,42 @@ public class CyberTrackerImporter {
 	private Map<String, Data.Elements.E> elementsMap;
 	private Map<String, List<Data.Sightings.S>> patrolsMap;
 	
+	public List<CyberTrackerPatrol> importPdaData(IProgressMonitor monitor) throws Exception {
+		monitor.subTask("Downloading data from PDA...");
+		String appPath = PdaUtil.getCTAppPath();
+		String[] downloadCommand = {appPath, ICyberTrackerConstants.COMMAND_DOWNLOAD};
+		Process proc = Runtime.getRuntime().exec(downloadCommand);
+		proc.waitFor();
+		String ctxDataPath = System.getProperty("user.home");
+		ctxDataPath += "\\Documents\\CyberTracker\\System\\Orphans";
+		File cxtDataFolder = new File(ctxDataPath);
+		File xmlTempDir = PdaUtil.createTempDirectory();
+		//scan files in this directory and obtain raw xml for them
+		monitor.subTask("Extracting raw data...");
+		for (final File file : cxtDataFolder.listFiles()) {
+			if (!file.isFile())
+				continue;
+			String xmlFilePath = file.getName();
+			xmlFilePath = xmlFilePath.substring(0, xmlFilePath.lastIndexOf(".CTX")) + ".xml";  //$NON-NLS-1$//$NON-NLS-2$
+			xmlFilePath = xmlTempDir.getAbsolutePath() + "\\" + xmlFilePath; //$NON-NLS-1$
+			String[] extractCommand = {appPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath(), ICyberTrackerConstants.COMMAND_EXPORT, xmlFilePath};
+			proc = Runtime.getRuntime().exec(extractCommand);
+			proc.waitFor();
+		}
+		
+		//now all raw xml data is in temporary directory, importing it
+		List<CyberTrackerPatrol> patrols = new ArrayList<CyberTrackerPatrol>();
+		for (final File file : xmlTempDir.listFiles()) {
+			patrols.addAll(importData(file, monitor));
+		}
+		return patrols;
+	}
+	
 	public List<CyberTrackerPatrol> importData(File file, IProgressMonitor monitor) throws Exception {
 		Data data = null;
 		FileInputStream in = new FileInputStream(file);
 		try {
-			monitor.subTask(Messages.CyberTrackerImporter_Read_Xml);
+			monitor.subTask(MessageFormat.format(Messages.CyberTrackerImporter_Read_Xml, file.getName()));
 			data = readDataModel(in);
 			monitor.worked(1);
 		} finally {

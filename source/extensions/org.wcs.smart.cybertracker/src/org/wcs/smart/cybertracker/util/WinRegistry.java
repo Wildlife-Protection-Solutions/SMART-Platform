@@ -1,7 +1,7 @@
 /*
  * http://stackoverflow.com/questions/62289/read-write-to-windows-registry-using-java
  */
-package org.wcs.smart.cybertracker;
+package org.wcs.smart.cybertracker.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
