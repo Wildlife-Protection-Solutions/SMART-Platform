@@ -130,7 +130,7 @@ public class CreateCaTest {
 	
 	public void testExportDataModel(DataModel dm, ConservationArea ca) throws Exception{
 		DataModelSmartToXmlConverter converter = new DataModelSmartToXmlConverter();
-		org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xmldm = converter.convert(dm);
+		org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xmldm = converter.convert(dm, new NullProgressMonitor());
 		
 		
 		File f = File.createTempFile("smartdm", "xml");
