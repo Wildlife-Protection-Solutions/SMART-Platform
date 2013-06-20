@@ -77,7 +77,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(4, false));
+		main.setLayout(new GridLayout(5, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
@@ -125,10 +125,20 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				performImport();
+				performImport(false);
 			}
 		});
 		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		Button btnImportPda = new Button(main, SWT.NONE);
+		btnImportPda.setText("Import From Device");
+		btnImportPda.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performImport(true);
+			}
+		});
+		btnImportPda.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		tableContainer = new CTPatrolTableContainer(composite, SWT.NONE);
 		
@@ -171,9 +181,9 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private void performImport() {
+	private void performImport(final boolean fromPda) {
 		final File file = new File(txtFile.getText());
-		if (!file.exists()) {
+		if (!fromPda && !file.exists()) {
 			MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
 			return;
 		}
@@ -185,7 +195,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 100);
 					try {
-						List<CyberTrackerPatrol> data = importer.importData(file, monitor);
+						List<CyberTrackerPatrol> data = fromPda ? importer.importPdaData(monitor) : importer.importData(file, monitor);
 						tableContainer.addTableData(data);
 					} catch (Exception e) {
 //						displayError("Error", "Error occured while importing data from CyberTracker into SMART.");

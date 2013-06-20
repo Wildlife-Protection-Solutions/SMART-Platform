@@ -45,7 +45,6 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
-import org.wcs.smart.cybertracker.WinRegistry;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
@@ -56,6 +55,8 @@ import org.wcs.smart.cybertracker.model.reports.Reports;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
+import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.cybertracker.util.WinRegistry;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
@@ -76,7 +77,7 @@ public class CyberTrackerExporter {
 	private Map<Integer, CyberTrackerId> catLevel2resultId = new HashMap<Integer, CyberTrackerUtil.CyberTrackerId>();
 
 	public int uploadPda(File file) throws Exception {
-		String appPath = getCTAppPath();
+		String appPath = PdaUtil.getCTAppPath();
 		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
 		Process proc = Runtime.getRuntime().exec(uploadCommands);
 		int code = proc.waitFor();
@@ -84,7 +85,7 @@ public class CyberTrackerExporter {
 	}
 
 	public File export(IProgressMonitor monitor) throws Exception {
-		File tempDir = createTempDirectory();
+		File tempDir = PdaUtil.createTempDirectory();
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
@@ -157,7 +158,7 @@ public class CyberTrackerExporter {
 		}
 
 		monitor.subTask("Generating CTX file...");
-		String appPath = getCTAppPath();
+		String appPath = PdaUtil.getCTAppPath();
 		String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\generated.ctx"};
 		Process proc = Runtime.getRuntime().exec(createCommands);
 		proc.waitFor();
@@ -400,20 +401,4 @@ public class CyberTrackerExporter {
 		return id;
 	}
 
-	private String getCTAppPath() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
-				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_NAME);
-	}
-	
-	public static File createTempDirectory() throws IOException {
-		final File temp;
-		temp = File.createTempFile("cybertracker", Long.toString(System.nanoTime())); //$NON-NLS-1$
-		if(!(temp.delete())) {
-			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); //$NON-NLS-1$
-		}
-		if(!(temp.mkdir())) {
-			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); //$NON-NLS-1$
-		}
-		return temp;
-	}	
 }
