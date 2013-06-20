@@ -49,7 +49,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 		setItemComparator(new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(e1.getLabel(), e2.getLabel());
+				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
 			}
 		});
 		setLabelAllText(Messages.EmployeeSelectComposite_AddEmployee_Label);

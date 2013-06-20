@@ -127,7 +127,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		Collections.sort(list, new Comparator<Employee>(){
 			@Override
 			public int compare(Employee arg0, Employee arg1) {
-				return Collator.getInstance().compare(arg0.getLabel(), arg1.getLabel());
+				return Collator.getInstance().compare(arg0.getFullLabel(), arg1.getFullLabel());
 			}});
 	}
 	

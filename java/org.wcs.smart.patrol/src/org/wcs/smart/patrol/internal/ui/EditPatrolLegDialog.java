@@ -128,7 +128,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		Collections.sort(list, new Comparator<Employee>(){
 			@Override
 			public int compare(Employee o1, Employee o2) {
-				return Collator.getInstance().compare(o1.getLabel(), o2.getLabel());
+				return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
 			}});
 	}
 	

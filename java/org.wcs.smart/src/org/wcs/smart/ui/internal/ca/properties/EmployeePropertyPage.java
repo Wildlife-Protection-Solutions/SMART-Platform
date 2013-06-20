@@ -368,7 +368,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (toDelete.size() == 1){
 			message = MessageFormat.format(
 					Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage, 
-					new Object[]{toDelete.get(0).getLabel()});
+					new Object[]{toDelete.get(0).getFullLabel()});
 		}else{
 			message = MessageFormat.format(Messages.EmployeePropertyPage_ConfirmDeleteMulti, new Object[]{toDelete.size()});
 		}
@@ -392,7 +392,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 					Transaction tx = s.beginTransaction();
 					try{
 						for (Employee del : toDelete){
-							monitor.subTask(del.getLabel());
+							monitor.subTask(del.getFullLabel());
 							String deleteError = null;
 							try{
 								//first run before delete 
@@ -400,7 +400,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 								
 								//validate delete
 								if (!DeleteManager.canDelete(del, s)){
-									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{del.getLabel()});
+									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{del.getFullLabel()});
 								}else{
 									//delete
 									if (del.equals(SmartDB.getCurrentEmployee())){
@@ -410,7 +410,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 									employees.remove(del);
 								}
 							}catch (Exception ex){
-								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{del.getLabel()}); //$NON-NLS-1$
+								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{del.getFullLabel()}); //$NON-NLS-1$
 								SmartPlugIn.log(ex.getMessage(), ex);
 							}
 							

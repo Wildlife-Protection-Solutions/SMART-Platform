@@ -114,7 +114,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 			if (pilots != null && pilots.contains(element)) {
 				text += "[" + PILOT_LABEL + "] "; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return text + ((Employee) element).getLabel();
+			return text + ((Employee) element).getFullLabel();
 		} else if (element instanceof PatrolLegMember) {
 			String text = ""; //$NON-NLS-1$
 			if (((PatrolLegMember) element).getIsLeader()) {
@@ -123,7 +123,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 			if (((PatrolLegMember) element).getIsPilot()) {
 				text += "[" + PILOT_LABEL + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return text + ((PatrolLegMember) element).getMember().getLabel();
+			return text + ((PatrolLegMember) element).getMember().getFullLabel();
 		}
 		return super.getText(element);
 	}

@@ -640,7 +640,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		if (uuid != null){
 			Employee x = (Employee) session.load(Employee.class, uuid);
 			if (x != null) {
-				return x.getLabel();
+				return x.getFullLabel();
 			}
 		}
 		return null;
