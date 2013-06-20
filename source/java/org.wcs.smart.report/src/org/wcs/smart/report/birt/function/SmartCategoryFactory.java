@@ -50,7 +50,7 @@ public class SmartCategoryFactory implements IScriptFunctionFactory {
 			public Object execute(Object[] arguments, IScriptFunctionContext context)
 					throws BirtException {
 				if (functionName.equals(SMART_USER_FUNCTION)){
-					return SmartDB.getCurrentEmployee().getGivenName() + " " + SmartDB.getCurrentEmployee().getFamilyName() + " [" + SmartDB.getCurrentEmployee().getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					return SmartDB.getCurrentEmployee().getFullLabel();
 				}else if (functionName.equals(CA_NAME_FUNCTION)){
 					return SmartDB.getCurrentConservationArea().getName();
 				}else if (functionName.equals(CA_ID_FUNCTION)){

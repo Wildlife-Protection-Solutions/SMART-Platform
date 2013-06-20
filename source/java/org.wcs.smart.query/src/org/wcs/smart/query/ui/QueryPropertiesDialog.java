@@ -236,7 +236,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblOwner = new Label(main, SWT.NONE);
 		lblOwner.setText(Messages.QueryPropertiesDialog_CreatorLabel);
 		Label lblOwnerName = new Label(main, SWT.NONE);
-		lblOwnerName.setText(query.getOwner().getLabel());
+		lblOwnerName.setText(query.getOwner().getFullLabel());
 		
 		List<AbstractQueryPropertyProvider> props = QueryPlugIn.getPropertyProviders();
 		for(AbstractQueryPropertyProvider prop: props){

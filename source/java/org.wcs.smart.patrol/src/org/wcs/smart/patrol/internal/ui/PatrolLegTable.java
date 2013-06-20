@@ -211,14 +211,14 @@ public class PatrolLegTable {
 				if (pld.getLeader() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return pld.getLeader().getMember().getLabel();
+				return pld.getLeader().getMember().getFullLabel();
 			}else if (this.column == LegColumn.ENDDATE){
 				return DATE_TIME_FORMAT.format( pld.getEndDate() );
 			}else if (this.column == LegColumn.PILOT){
 				if (pld.getPilot() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return pld.getPilot().getMember().getLabel();
+				return pld.getPilot().getMember().getFullLabel();
 			}else if (this.column == LegColumn.STARTDATE){
 				return DATE_TIME_FORMAT.format(pld.getStartDate() );
 			}else if (this.column == LegColumn.TRANSPORTTYPE){
@@ -227,7 +227,7 @@ public class PatrolLegTable {
 				StringBuilder sb = new StringBuilder();
 				sb.append(pld.getMembers().size() + ": "); //$NON-NLS-1$
 				for(PatrolLegMember member: pld.getMembers()){
-					sb.append(member.getMember().getLabel());
+					sb.append(member.getMember().getFullLabel());
 					sb.append("; "); //$NON-NLS-1$
 				}
 				return sb.toString();

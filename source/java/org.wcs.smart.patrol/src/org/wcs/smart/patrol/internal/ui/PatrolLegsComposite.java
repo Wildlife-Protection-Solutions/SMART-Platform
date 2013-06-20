@@ -479,7 +479,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					for (PatrolLegMember member : legA.getMembers()){
 						if (bMembers.contains(member.getMember())){
 							return MessageFormat.format(Messages.PatrolLegsComposite_LegError_E, 
-								new Object[]{member.getMember().getLabel(), legA.getId(), legB.getId() });
+								new Object[]{member.getMember().getFullLabel(), legA.getId(), legB.getId() });
 						}
 					}
 				}

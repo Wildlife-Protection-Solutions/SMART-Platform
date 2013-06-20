@@ -70,7 +70,7 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 					sb.append("] {"); //$NON-NLS-1$
 					sb.append(Messages.QueryReportPropertyProvider_OwnerLabel); 
 					sb.append(": "); //$NON-NLS-1$
-					sb.append(rq.getReport().getOwner().getLabel());
+					sb.append(rq.getReport().getOwner().getFullLabel());
 					sb.append( "}");  //$NON-NLS-1$
 					
 					sb.append("\n"); //$NON-NLS-1$

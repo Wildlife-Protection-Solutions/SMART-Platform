@@ -585,7 +585,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			Arrays.sort(employeeArray, new Comparator<Employee>(){
 				@Override
 				public int compare(Employee o1, Employee o2) {
-					return Collator.getInstance().compare(o1.getLabel(), o2.getLabel());
+					return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
 				}});
 			employeeList.setInput(employeeArray);
 
@@ -750,10 +750,10 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				if (((PatrolLegDay)element).getPatrolLeg().getLeader() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return ((PatrolLegDay)element).getPatrolLeg().getLeader().getMember().getLabel();
+				return ((PatrolLegDay)element).getPatrolLeg().getLeader().getMember().getFullLabel();
 			}else if (column == PatrolLegDayColumn.PILOT){
 				if (((PatrolLegDay)element).getPatrolLeg().getPilot() != null){
-					return ((PatrolLegDay)element).getPatrolLeg().getPilot().getMember().getLabel();
+					return ((PatrolLegDay)element).getPatrolLeg().getPilot().getMember().getFullLabel();
 				}
 				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.TRANSPORT){

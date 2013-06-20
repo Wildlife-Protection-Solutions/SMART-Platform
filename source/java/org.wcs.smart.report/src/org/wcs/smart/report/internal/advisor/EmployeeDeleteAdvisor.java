@@ -57,12 +57,12 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}
 		Long cnt = (Long) session.createCriteria(Report.class).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{e.getLabel(), cnt});
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{e.getFullLabel(), cnt});
 		}
 	
 		cnt = (Long) session.createCriteria(ReportFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{e.getLabel(), cnt});
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{e.getFullLabel(), cnt});
 		}
 		return null;
 	}

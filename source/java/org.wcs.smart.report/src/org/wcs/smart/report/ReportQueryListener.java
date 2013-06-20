@@ -90,7 +90,7 @@ public class ReportQueryListener implements IQueryEventListener {
 						sb.append(" ["); //$NON-NLS-1$
 						sb.append( rp.getReport().getId());
 						sb.append("] {" ); //$NON-NLS-1$
-						sb.append( rp.getReport().getOwner().getLabel());
+						sb.append( rp.getReport().getOwner().getFullLabel());
 						sb.append("}"); //$NON-NLS-1$
 						sb.append("\n"); //$NON-NLS-1$
 					}
@@ -129,7 +129,7 @@ public class ReportQueryListener implements IQueryEventListener {
 				sb.append(" ["); //$NON-NLS-1$
 				sb.append(rp.getReport().getId());
 				sb.append("] {"); //$NON-NLS-1$
-				sb.append(rp.getReport().getOwner().getLabel());
+				sb.append(rp.getReport().getOwner().getFullLabel());
 				sb.append("}"); //$NON-NLS-1$
 				sb.append("\n"); //$NON-NLS-1$
 			}

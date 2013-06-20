@@ -147,7 +147,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		Collections.sort(sortedList, new Comparator<PatrolLegMember>(){
 			@Override
 			public int compare(PatrolLegMember o1, PatrolLegMember o2) {
-				return Collator.getInstance().compare(o1.getMember().getLabel(), o2.getMember().getLabel());
+				return Collator.getInstance().compare(o1.getMember().getFullLabel(), o2.getMember().getFullLabel());
 			}});
 		WritableList wr = new WritableList((Collection<PatrolLegMember>)sortedList, PatrolLegMember.class);
 		

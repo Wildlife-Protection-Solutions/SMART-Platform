@@ -57,7 +57,7 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}else{
 			return  MessageFormat.format(
 					Messages.EmployeeDeleteAdvisor_DeleteError,
-					new Object[]{cnt, e.getLabel()});
+					new Object[]{cnt, e.getFullLabel()});
 		}
 	}
 

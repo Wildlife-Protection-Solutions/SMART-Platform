@@ -172,14 +172,25 @@ public class Employee {
 		this.dateCreated = dateCreated;
 	}
 	
+	/**
+	 * If you are creating a name label with given and family 
+	 * names use the {@link #getShortLabel()} or {@link #getFullLabel()} instead.
+	 * @return
+	 */
 	@Column(name="givenname")
 	public String getGivenName() {
 		return givenName;
 	}
+	
 	public void setGivenName(String givenName) {
 		this.givenName = givenName;
 	}
 	
+	/**
+	 * If you are creating a name label with given and family 
+	 * names use the {@link #getShortLabel()} or {@link #getFullLabel()} instead.
+	 * @return
+	 */
 	@Column(name="familyname")
 	public String getFamilyName() {
 		return familyName;
@@ -294,9 +305,46 @@ public class Employee {
 		return Arrays.hashCode(uuid);
 	}
 	
+	/**
+	 * 
+	 * @return the employee long name label which includes given name, family name and id
+	 */
 	@Transient
-	public String getLabel(){
-		return this.givenName + " " + this.familyName + " [" + this.id + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	public String getFullLabel(){
+		return formatName(this.givenName, this.familyName, this.id);
+	}
+	
+	/**
+	 * 
+	 * @return the employee short label which does not include the id; only the given and family names
+	 */
+	@Transient
+	public String getShortLabel(){
+		return formatName(this.givenName, this.familyName);
+	}
+	
+	/**
+	 * Formats a name for display on the UI.
+	 * 
+	 * @param givenName given name
+	 * @param familyName family name
+	 * @return
+	 */
+	public static String formatName(String givenName, String familyName){
+		return givenName + " " + familyName; //$NON-NLS-1$
+//		return familyName + " " + givenName; //$NON-NLS-1$
+	}
+	
+	/**
+	 * Formats a name & id for display on the UI.
+	 * 
+	 * @param givenName given name
+	 * @param familyName family name
+	 * @param id id
+	 * @return
+	 */
+	public static String formatName(String givenName, String familyName, String id){
+		return formatName(givenName, familyName) + " [" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
 

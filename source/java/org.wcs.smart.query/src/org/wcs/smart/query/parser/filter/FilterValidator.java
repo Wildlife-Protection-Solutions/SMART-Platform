@@ -174,7 +174,7 @@ public class FilterValidator {
 		if (e != null){
 			warnings.add(MessageFormat.format(
 					Messages.FilterValidator_Employee_DifferentUniqueId,
-					new Object[]{e.getLabel()}));
+					new Object[]{e.getFullLabel()}));
 			return e;
 		}
 		
@@ -182,15 +182,15 @@ public class FilterValidator {
 		if (e != null){
 			warnings.add(MessageFormat.format(
 					Messages.FilterValidator_EmployeeDifferentName,
-					new Object[]{givenName + " " + familyName + "[" + employeeId + "]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					e.getGivenName() + " " + e.getFamilyName()})); //$NON-NLS-1$
+					new Object[]{Employee.formatName(givenName, familyName, employeeId),
+					e.getShortLabel()})); 
 			return e;
 		}
 		
 		e = HibernateManager.findEmployeeByName(givenName, familyName, SmartDB.getCurrentConservationArea(), session);
 		if (e != null){
 			warnings.add(MessageFormat.format(Messages.FilterValidator_EmployeeDifferentId,
-					new Object[]{givenName + " " + familyName + "[" + employeeId + "]", e.getId()})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					new Object[]{Employee.formatName(givenName, familyName, employeeId), e.getId()}));
 			return e;
 		}
 		

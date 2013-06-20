@@ -514,7 +514,7 @@ public class PatrolQueryOptions {
 				if (x instanceof SimpleListItem){
 					return ((SimpleListItem) x).getName();
 				}else if (x instanceof Employee){
-					return ((Employee) x).getLabel();
+					return ((Employee) x).getFullLabel();
 				}
 			}
 			return null;
@@ -593,7 +593,7 @@ public class PatrolQueryOptions {
 						results.add(new ListItem(((SimpleListItem) object).getUuid(), ((SimpleListItem) object).getName()));
 					}else if (object instanceof Employee){
 						Employee e = (Employee)object;
-						results.add(new ListItem(e.getUuid(), e.getLabel()));
+						results.add(new ListItem(e.getUuid(), e.getFullLabel()));
 					}else if (object instanceof ConservationArea){
 						ConservationArea ca = (ConservationArea)object;
 						results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
@@ -671,7 +671,7 @@ public class PatrolQueryOptions {
 					this == EMPLOYEE){
 				List<Employee> employees = PatrolHibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
 				for (Employee t : employees){
-					items.add(new ListItem(t.getUuid(), t.getLabel() ));
+					items.add(new ListItem(t.getUuid(), t.getFullLabel() ));
 				}
 			}
 			return items;

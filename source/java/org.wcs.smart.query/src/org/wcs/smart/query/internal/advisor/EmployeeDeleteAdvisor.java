@@ -59,13 +59,13 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 			QueryType qt = QueryType.values()[i];
 			Long cnt = (Long) session.createCriteria(qt.getHibernateClass()).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 			if (cnt > 0){
-				return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsQueries, new Object[]{ e.getLabel(), cnt ,qt.getUiName()});
+				return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsQueries, new Object[]{ e.getFullLabel(), cnt ,qt.getUiName()});
 			}
 		}
 	
 		Long cnt = (Long) session.createCriteria(QueryFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsFolders, new Object[]{ e.getLabel(), cnt});
+			return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsFolders, new Object[]{ e.getFullLabel(), cnt});
 		}
 		return null;
 	}

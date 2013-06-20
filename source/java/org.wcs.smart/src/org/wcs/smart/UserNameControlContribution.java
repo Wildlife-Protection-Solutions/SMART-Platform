@@ -59,8 +59,8 @@ public class UserNameControlContribution extends
 		comp.setLayout(gl);
 		Label lbl = new Label(comp, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lbl.setText(SmartDB.getCurrentEmployee().getGivenName() + " " + SmartDB.getCurrentEmployee().getFamilyName()); //$NON-NLS-1$
-		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartDB.getCurrentEmployee().getLabel());
+		lbl.setText(SmartDB.getCurrentEmployee().getShortLabel());
+		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartDB.getCurrentEmployee().getFullLabel());
 		return comp;
 	}
 

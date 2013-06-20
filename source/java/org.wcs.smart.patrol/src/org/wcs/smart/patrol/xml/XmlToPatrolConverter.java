@@ -219,7 +219,7 @@ public class XmlToPatrolConverter {
 				if (e != null){
 					warnings.add(MessageFormat.format(
 							Messages.XmlToPatrolConverter_Warning_EmployeeNameDifferent,
-							new Object[]{member.getEmployeeId(), member.getGivenName() + " " + member.getFamilyName(),e.getGivenName() + " " + e.getFamilyName()}) //$NON-NLS-1$ //$NON-NLS-2$
+							new Object[]{member.getEmployeeId(), Employee.formatName(member.getGivenName(), member.getFamilyName()),e.getShortLabel()}) 
 						);
 							
 							
@@ -228,12 +228,12 @@ public class XmlToPatrolConverter {
 					if (e == null){
 						warnings.add(MessageFormat.format(
 								Messages.XmlToPatrolConverter_Warning_EmployeeNotFound,
-								new Object[]{member.getGivenName() + " " + member.getFamilyName() + " ("+ member.getEmployeeId() + ")"} //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								new Object[]{Employee.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId())}
 						));
 					}else{					
 						
 						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_EmployeeIdDifferent,
-								new Object[]{member.getGivenName() + " " + member.getFamilyName() + " ("+ member.getEmployeeId() + ")", e.getGivenName() + " " + e.getFamilyName() + " (" + e.getId() + ")"} //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+								new Object[]{Employee.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId() ), e.getFullLabel()}
 						));
 					}
 				}
