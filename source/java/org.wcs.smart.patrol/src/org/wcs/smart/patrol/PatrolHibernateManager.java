@@ -413,6 +413,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		session.saveOrUpdate(patrol);
 
 		if (saveWaypoints){
+			session.flush();
 			//save all the waypoints as well
 			if (patrol.getLegs() != null) {
 				for (PatrolLeg pl : patrol.getLegs()) {
