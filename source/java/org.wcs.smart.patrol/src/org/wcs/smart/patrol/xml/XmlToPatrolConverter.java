@@ -26,6 +26,8 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -248,7 +250,43 @@ public class XmlToPatrolConverter {
 		
 		leg.setPatrolLegDays(new ArrayList<PatrolLegDay>());
 		for (PatrolLegDayType type : xml.getDays()){
-			leg.getPatrolLegDays().add(convertPatrolLegDay(type, leg));
+			PatrolLegDay pld = convertPatrolLegDay(type, leg);
+			
+
+			if(!(pld.getDate().before(leg.getStartDate()) || pld.getDate().after(leg.getEndDate()))){
+				//ensure leg day is included in leg date range, if not don't include it
+				leg.getPatrolLegDays().add(pld);
+			}else{
+				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_DayOutsideLegRange, new Object[]{leg.getId(), pld.getDate(), leg.getStartDate(), leg.getEndDate()}));
+			}
+			
+			
+		}
+		
+		//verify if a leg day exists for each day
+		Date start = leg.getStartDate();
+		Date end = leg.getEndDate();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(start);
+		while(!cal.getTime().after(end)){
+			boolean dayfound = false;
+			for(PatrolLegDay pld : leg.getPatrolLegDays()){
+				if (pld.getDate().equals(cal.getTime())){
+					dayfound = true;
+					break;
+				}
+			}
+			if (!dayfound){
+				//create a leg for the missing day
+				PatrolLegDay missing = new PatrolLegDay();
+				missing.setDate(cal.getTime());
+				missing.setEndTime(Time.valueOf("00:00:00")); //$NON-NLS-1$
+				missing.setStartTime(missing.getEndTime());
+				missing.setPatrolLeg(leg);
+				missing.setRestMinutes(0);
+				leg.getPatrolLegDays().add(missing);
+			}
+			cal.add(Calendar.DAY_OF_MONTH, 1);
 		}
 		return leg;
 	}
