@@ -38,6 +38,9 @@ public interface ICyberTrackerConstants {
 
 	public static final String COMMAND_CREATE = "/createctx"; //$NON-NLS-1$
 	public static final String COMMAND_UPLOAD = "/uploadpda"; //$NON-NLS-1$
+	public static final String COMMAND_DOWNLOAD = "/downloadpda"; //$NON-NLS-1$
+	public static final String COMMAND_DATAFILE = "/datafile"; //$NON-NLS-1$
+	public static final String COMMAND_EXPORT = "/exportxml"; //$NON-NLS-1$
 	
 	public static final String CT_DATE_FORMAT = "MM/dd/yy"; //$NON-NLS-1$
 

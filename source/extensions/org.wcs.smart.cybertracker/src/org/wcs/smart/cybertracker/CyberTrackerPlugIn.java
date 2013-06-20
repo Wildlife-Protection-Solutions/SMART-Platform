@@ -1,5 +1,7 @@
 package org.wcs.smart.cybertracker;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -47,4 +49,22 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	public static void displayInfo(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
+
+	public static void displayError(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
+	
 }

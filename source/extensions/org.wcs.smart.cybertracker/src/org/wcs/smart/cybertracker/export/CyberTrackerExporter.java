@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,17 +70,26 @@ public class CyberTrackerExporter {
 	
 	private static final String CATEGORY_RESULT_PREFIX = "category"; //$NON-NLS-1$
 	
-	private static CyberTrackerId rootId;
-	private static Elements elements;
-	private static Map<Attribute, CyberTrackerId> attr2resultId = new HashMap<Attribute, CyberTrackerUtil.CyberTrackerId>();
-	private static Map<Integer, CyberTrackerId> catLevel2resultId = new HashMap<Integer, CyberTrackerUtil.CyberTrackerId>();
+	private CyberTrackerId rootId;
+	private Elements elements;
+	private Map<Attribute, CyberTrackerId> attr2resultId = new HashMap<Attribute, CyberTrackerUtil.CyberTrackerId>();
+	private Map<Integer, CyberTrackerId> catLevel2resultId = new HashMap<Integer, CyberTrackerUtil.CyberTrackerId>();
 
-	public static File export(File file, IProgressMonitor monitor) throws Exception {
+	public int uploadPda(File file) throws Exception {
+		String appPath = getCTAppPath();
+		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
+		Process proc = Runtime.getRuntime().exec(uploadCommands);
+		int code = proc.waitFor();
+		return code;
+	}
+
+	public File export(IProgressMonitor monitor) throws Exception {
+		File tempDir = createTempDirectory();
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			elements = ElementsUtil.buildEmptyElements();
-			return performExport(file, monitor, session);
+			return performExport(tempDir, monitor, session);
 		} finally {
 			elements = null;
 			rootId = null;
@@ -87,10 +97,11 @@ public class CyberTrackerExporter {
 			catLevel2resultId.clear();
 			session.getTransaction().rollback();
 			session.close();
+			tempDir.deleteOnExit(); //TODO: this does NOT clean out temp folder
 		}
 	}
 		
-	private static File performExport(File file, IProgressMonitor monitor, Session session) throws Exception {
+	private File performExport(File file, IProgressMonitor monitor, Session session) throws Exception {
 		DataModel dataModel = getDataModel(session);
 		monitor.worked(10);
 		
@@ -146,23 +157,22 @@ public class CyberTrackerExporter {
 		}
 
 		monitor.subTask("Generating CTX file...");
-		String appPath = WinRegistry.readString (WinRegistry.HKEY_CURRENT_USER,
-				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_NAME);
+		String appPath = getCTAppPath();
 		String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\generated.ctx"};
 		Process proc = Runtime.getRuntime().exec(createCommands);
 		proc.waitFor();
 
-		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()+"\\generated.ctx"};
-		proc = Runtime.getRuntime().exec(uploadCommands);
-		int code = proc.waitFor();
-		if (code != 200)
-			code++;
+//		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()+"\\generated.ctx"};
+//		proc = Runtime.getRuntime().exec(uploadCommands);
+//		int code = proc.waitFor();
+//		if (code != 200)
+//			code++;
 		
-		monitor.done();
-		return file;
+//		monitor.done();
+		return new File(file.getAbsolutePath()+"\\generated.ctx");
 	}
 
-	private static List<Node> buildCategoryNodes(Category category, Map<Category, CyberTrackerId> keyMap, Integer level) {
+	private List<Node> buildCategoryNodes(Category category, Map<Category, CyberTrackerId> keyMap, Integer level) {
 		List<Node> result = new ArrayList<Node>();
 		if (category == null)
 			return result;
@@ -181,7 +191,7 @@ public class CyberTrackerExporter {
 		return result;
 	}
 	
-	private static List<Node> buildAttributeNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
+	private List<Node> buildAttributeNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		List<CyberTrackerId> booleanAttrElementIDs = null;
 		category.getAllAttribute(attrList, true);
@@ -260,7 +270,7 @@ public class CyberTrackerExporter {
 	 * @param navigateId
 	 * @param hasNext
 	 */
-	private static void buildNodeNavigation(Node node, CyberTrackerId navigateId, boolean hasNext) {
+	private void buildNodeNavigation(Node node, CyberTrackerId navigateId, boolean hasNext) {
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		if (hasNext) {
 			//we have some screens after this, so displaying "Next" button
@@ -282,7 +292,7 @@ public class CyberTrackerExporter {
 	 * @param nodeId
 	 * @return
 	 */
-	private static List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, boolean hasNext) {
+	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, boolean hasNext) {
 		List<Node> result = new ArrayList<Node>();
 		List<AttributeTreeNode> activeTreeNodes = treeAttribute.getActiveTreeNodes();
 		
@@ -296,7 +306,7 @@ public class CyberTrackerExporter {
 		return result;
 	}
 	
-	private static List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, boolean hasNext) {
+	private List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, boolean hasNext) {
 		List<Node> result = new ArrayList<Node>();
 		if (treeNode == null)
 			return result;
@@ -340,14 +350,14 @@ public class CyberTrackerExporter {
 		return result;
 	}
 	
-	private static void writeDataModel(Object obj, OutputStream file, Class<?> clazz) throws JAXBException, IOException {
+	private void writeDataModel(Object obj, OutputStream file, Class<?> clazz) throws JAXBException, IOException {
 		JAXBContext context = JAXBContext.newInstance(obj.getClass());
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		marshaller.marshal(obj, file);
 	}
 
-	private static DataModel getDataModel(Session session) {
+	private DataModel getDataModel(Session session) {
 		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 		//load into memory; no-lazy loading here.
 		for (Category cat: dataModel.getCategories()){
@@ -359,7 +369,7 @@ public class CyberTrackerExporter {
 		return dataModel;
 	}
 	
-	private static void visitCategory(Category cat){
+	private void visitCategory(Category cat){
 		for (Category child : cat.getActiveChildren()){
 			visitCategory(child);
 			child.getName();
@@ -369,7 +379,7 @@ public class CyberTrackerExporter {
 		}	
 	}
 
-	private static CyberTrackerId getAttributeResultElementId(Attribute attribute) {
+	private CyberTrackerId getAttributeResultElementId(Attribute attribute) {
 		CyberTrackerId id = attr2resultId.get(attribute);
 		if (id == null) {
 			id = new CyberTrackerId();
@@ -380,7 +390,7 @@ public class CyberTrackerExporter {
 		return id;
 	}
 	
-	private static CyberTrackerId getCategoryLevelResultElementId(Integer level) {
+	private CyberTrackerId getCategoryLevelResultElementId(Integer level) {
 		CyberTrackerId id = catLevel2resultId.get(level);
 		if (id == null) {
 			id = new CyberTrackerId();
@@ -389,5 +399,21 @@ public class CyberTrackerExporter {
 		}
 		return id;
 	}
+
+	private String getCTAppPath() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_NAME);
+	}
 	
+	public static File createTempDirectory() throws IOException {
+		final File temp;
+		temp = File.createTempFile("cybertracker", Long.toString(System.nanoTime())); //$NON-NLS-1$
+		if(!(temp.delete())) {
+			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); //$NON-NLS-1$
+		}
+		if(!(temp.mkdir())) {
+			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); //$NON-NLS-1$
+		}
+		return temp;
+	}	
 }
