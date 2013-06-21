@@ -141,7 +141,7 @@ public class PatrolScreensUtil {
 		List<String> members = new ArrayList<String>();
 		List<String> memberTag0s = new ArrayList<String>();
 		for (Employee i : employees) {
-			members.add(i.getLabel());
+			members.add(i.getFullLabel());
 			memberTag0s.add(SmartUtils.encodeHex(i.getUuid()));
 		}
 		List<CyberTrackerId> memberIds = ElementsUtil.addCustomElements(elements, members, memberTag0s);

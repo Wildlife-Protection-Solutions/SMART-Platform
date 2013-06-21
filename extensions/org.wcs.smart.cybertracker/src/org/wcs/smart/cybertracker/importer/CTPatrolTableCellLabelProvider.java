@@ -72,7 +72,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 	}
 
 	private String asString(Employee employee) {
-		return employee != null ? employee.getLabel() : ""; //$NON-NLS-1$
+		return employee != null ? employee.getFullLabel() : ""; //$NON-NLS-1$
 	}
 
 	private String asString(List<Employee> employee) {

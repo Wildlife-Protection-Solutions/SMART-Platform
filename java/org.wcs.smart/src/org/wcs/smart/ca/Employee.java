@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -331,8 +332,7 @@ public class Employee {
 	 * @return
 	 */
 	public static String formatName(String givenName, String familyName){
-		return givenName + " " + familyName; //$NON-NLS-1$
-//		return familyName + " " + givenName; //$NON-NLS-1$
+		return MessageFormat.format(Messages.Employee_ShortLabel_0Given_1Family, new Object[]{givenName, familyName});
 	}
 	
 	/**
@@ -344,7 +344,7 @@ public class Employee {
 	 * @return
 	 */
 	public static String formatName(String givenName, String familyName, String id){
-		return formatName(givenName, familyName) + " [" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return MessageFormat.format(Messages.Employee_LongLabel_0Given_1Family_2Id, new Object[]{givenName, familyName, id});
 	}
 }
 

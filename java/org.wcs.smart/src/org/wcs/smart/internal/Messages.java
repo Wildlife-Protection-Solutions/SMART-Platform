@@ -487,7 +487,9 @@ public class Messages extends NLS {
 	public static String Employee_GiveName_Label;
 	public static String Employee_Id_Label;
 	public static String Employee_IsActive_Label;
+	public static String Employee_LongLabel_0Given_1Family_2Id;
 	public static String Employee_Rank_Label;
+	public static String Employee_ShortLabel_0Given_1Family;
 	public static String Employee_SmartUser_Label;
 	public static String Employee_SmartUserLevel_Label;
 	public static String EmployeeComposite_Error_InvalidPasswordLength;
