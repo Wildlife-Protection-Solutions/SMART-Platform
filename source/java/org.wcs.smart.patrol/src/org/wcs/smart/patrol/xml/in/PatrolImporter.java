@@ -298,6 +298,8 @@ public class PatrolImporter {
 			session.getTransaction().rollback();
 			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
 			return null;
+		}finally{
+			session.close();
 		}
 		monitor.worked(1);
 		return imported;

@@ -132,7 +132,9 @@ public class AddWaypointDialog extends TitleAreaDialog{
 
 		
 		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN);
-		lstProjections.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.widthHint = 100;
+		lstProjections.getControl().setLayoutData(gd);
 		lstProjections.setLabelProvider(ProjectionLabelProvider.getInstance());
 		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
 		lstProjections.setInput(projections);
@@ -218,6 +220,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		});
 		
 		setMessage(Messages.AddWaypointDialog_DialogMessage);
+		setTitle(Messages.AddWaypointDialog_DialogTitle);
 		super.getShell().setText(Messages.AddWaypointDialog_DialogTitle);
 		return parent;
 	}
