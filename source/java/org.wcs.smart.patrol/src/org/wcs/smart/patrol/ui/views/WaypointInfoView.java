@@ -47,7 +47,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -61,8 +63,10 @@ import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.WaypointAttachment;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -85,7 +89,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 
 	private Waypoint currentWp;
 	private byte[] selectedWaypointUuid;
-	
+		
 	//listener for modifications to waypoints
 	private IPatrolEventListener waypointListener = new IPatrolEventListener() {
 		@Override
@@ -98,57 +102,72 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		}
 	};
 	
+	private Composite compThumbnails;
+	
 	// job to update view
 	private Job updateUiJob = new Job(Messages.WaypointInfoView_UpdateJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (infoSection.isDisposed()) return Status.OK_STATUS;
+			
 			final HashMap<String, List<List<String[]>>> displayData = new HashMap<String, List<List<String[]>>>();
+			final List<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
+			
+			final List<Label> categoryLabels = new ArrayList<Label>();
+			final List<Label> attributeLabels = new ArrayList<Label>();
+			final List<Label> attributeValuesLabels = new ArrayList<Label>();
+			
 			Date wpDate = null;
 			
+			//load waypoint information
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
 				currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
-				if (currentWp != null){
-			
-				wpDate = currentWp.getPatrolLegDay().getDate();
-				HashMap<Category, List<List<String[]>>> data = new HashMap<Category, List<List<String[]>>>();
-				if (currentWp.getObservations() != null) {
-					for (WaypointObservation wo : currentWp.getObservations()) {
-						List<List<String[]>> ops = data.get(wo.getCategory());
-
-						if (ops == null) {
-							ops = new ArrayList<List<String[]>>();
-							data.put(wo.getCategory(), ops);
+				if (currentWp != null) {
+					wpDate = currentWp.getPatrolLegDay().getDate();
+					HashMap<Category, List<List<String[]>>> data = new HashMap<Category, List<List<String[]>>>();
+					if (currentWp.getObservations() != null) {
+						for (WaypointObservation wo : currentWp.getObservations()) {
+							List<List<String[]>> ops = data.get(wo.getCategory());
+							if (ops == null) {
+								ops = new ArrayList<List<String[]>>();
+								data.put(wo.getCategory(), ops);
+							}
+							ArrayList<String[]> attributeValues = new ArrayList<String[]>();
+							for (WaypointObservationAttribute woa : wo.getAttributes()) {
+								String[] info = new String[] {
+										woa.getAttribute().getName(),
+										woa.getAttributeValueAsString() };
+								attributeValues.add(info);
+							}
+							ops.add(attributeValues);
 						}
-						ArrayList<String[]> attributeValues = new ArrayList<String[]>();
-						for (WaypointObservationAttribute woa : wo
-								.getAttributes()) {
-							String[] info = new String[] {
-									woa.getAttribute().getName(),
-									woa.getAttributeValueAsString() };
-							attributeValues.add(info);
-						}
-						ops.add(attributeValues);
 					}
-				}
-				for (Entry<Category, List<List<String[]>>> cat : data.entrySet()){
-					Category c = (Category) s.merge(cat.getKey());
-					displayData.put(c.getFullCategoryName(), cat.getValue());
-				}
+					for (Entry<Category, List<List<String[]>>> cat : data.entrySet()) {
+						Category c = (Category) s.merge(cat.getKey());
+						displayData.put(c.getFullCategoryName(), cat.getValue());
+					}
+					//load attachment information
+					if (currentWp.getAttachments() != null){
+						for(WaypointAttachment att: currentWp.getAttachments()){
+							att.getFullFile();
+						}
+					}
 				}
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
 			}
 			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			final Date wpDate2 = wpDate;
-			Display.getDefault().asyncExec(new Runnable(){
+
+			// update ui with observation information 
+			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					
 					if (lblWaypointId.isDisposed())
 						return;
 
@@ -168,15 +187,18 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 							.entrySet()) {
 						Label lbl = toolkit.createLabel(infoSection.getBody(),SmartUtils.formatStringForLabel(cat.getKey()),SWT.WRAP);
 						lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-						 ((GridData)lbl.getLayoutData()).widthHint = 200;
+						((GridData)lbl.getLayoutData()).widthHint = 100;
 						lbl.setFont(boldFont);
+						categoryLabels.add(lbl);
 
 						Composite attributeComp = toolkit.createComposite(infoSection.getBody());
 						attributeComp.setLayout(new GridLayout(2, false));
 						((GridLayout) attributeComp.getLayout()).marginLeft = 5;
+						
+						
 						attributeComp.setLayoutData(new GridData(SWT.FILL,
 								SWT.FILL, true, false));
-
+						
 						for (int i = 0; i < cat.getValue().size(); i ++){
 							List<String[]> obs = cat.getValue().get(i);
 							Collections.sort(obs, new Comparator<String[]>() {
@@ -185,10 +207,15 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 									return Collator.getInstance().compare(o1[0], o2[0]);
 								}});
 							for (String[] att : obs){
-								Label l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[0] + ":")); //$NON-NLS-1$
-								l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-								l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[1]));
-								l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+								Label l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[0] + ":"), SWT.WRAP); //$NON-NLS-1$
+								l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+								((GridData)l.getLayoutData()).widthHint = 100;
+								attributeLabels.add(l);
+								
+								l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[1]), SWT.WRAP);
+								l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+								((GridData)l.getLayoutData()).widthHint = 100;
+								attributeValuesLabels.add(l);
 							}
 							if ( i < cat.getValue().size() - 1){
 								Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
@@ -200,14 +227,100 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 						l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 					}
 					}
+					
+			
+					if (currentWp != null && currentWp.getAttachments() != null && currentWp.getAttachments().size() > 1){
+						compThumbnails = toolkit.createComposite(infoSection.getBody());
+						compThumbnails.setLayout(new GridLayout());
+						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
+					}else{
+						compThumbnails = null;
+					}
+					
 					infoSection.getBody().pack();
 					infoSection.getBody().layout();
 					infoSection.reflow(true);
 					lblWaypointId.getParent().layout();
-				}
-				
+				}	
 			});
 			
+			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			//load thumbnails
+			if (currentWp != null && currentWp.getAttachments() != null){
+				for(WaypointAttachment att: currentWp.getAttachments()){
+					thumbnails.add(new Thumbnail(att));
+				}
+			}
+			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			if (thumbnails.size() > 0){
+				//update thumbnails
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						if (lblWaypointId.isDisposed()) return ;
+					
+						//display of loading label
+						if (compThumbnails != null) compThumbnails.dispose();
+					
+						compThumbnails = toolkit.createComposite(infoSection.getBody(), SWT.NONE);
+						GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+						gd.widthHint = 100;
+						compThumbnails.setLayoutData(gd);
+				
+						compThumbnails.setLayout(new GridLayout());
+						for (Thumbnail nail : thumbnails){
+							Composite parent = toolkit.createComposite(compThumbnails);
+							nail.createThumbnail(parent);
+						}
+				
+						Listener resize = new Listener(){
+							@Override
+							public void handleEvent(Event event) {
+								
+								int width = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x;
+								
+								for (Label l : categoryLabels){
+									((GridData)l.getLayoutData()).widthHint = width;
+								}
+								for (Label l : attributeLabels){
+									int x = l.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+									if (x > 0.5 * width){
+										x = (int)(0.5 * width);
+									}
+									((GridData)l.getLayoutData()).widthHint = x;
+								
+								}
+								
+								for (Label l : attributeValuesLabels){
+									int x = l.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+									if (x > 0.5 * width){
+										x = (int)(0.5 * width);
+									}
+									((GridData)l.getLayoutData()).widthHint = x;
+								}
+								
+								infoSection.getBody().layout(true);
+								
+								width = compThumbnails.getSize().x - infoSection.getVerticalBar().getSize().x;
+								int cols = (int)Math.floor(width / 100.0);
+								compThumbnails.setLayout(new GridLayout(cols, false));
+								
+								compThumbnails.layout(true);
+								infoSection.reflow(true);
+							}
+						};
+						compThumbnails.addListener(SWT.Resize, resize);
+						compThumbnails.layout(true);
+						infoSection.getBody().pack();
+						infoSection.getBody().layout();
+						infoSection.reflow(true);
+						lblWaypointId.getParent().layout();
+						
+					}
+				});
+			}
 			return Status.OK_STATUS;
 		}};
 	
@@ -262,11 +375,13 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		infoSection = toolkit.createScrolledForm(main);
 		gl = new GridLayout(1, false);
 		gl.marginWidth = gl.marginHeight = 0;
+		
 		infoSection.getBody().setLayout(gl);
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		infoSection.setLayoutData(gd);
 	}
+	
 	
 	
 	private void createHeader(Composite parent) {
@@ -298,7 +413,12 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	 * @param wp
 	 */
 	private void updateContents(final Waypoint wp){
+		if (selectedWaypointUuid != null && Arrays.equals(selectedWaypointUuid,wp.getUuid())){
+			//same waypoint do nothing
+			return;
+		}
 		this.selectedWaypointUuid = wp.getUuid();
+		updateUiJob.cancel();
 		updateUiJob.schedule();
 	}
 	
