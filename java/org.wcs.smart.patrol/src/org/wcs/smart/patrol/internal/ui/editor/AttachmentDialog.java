@@ -71,6 +71,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 		
 		setMessage(Messages.AttachmentDialog_DialogMessage);
 		getShell().setText(Messages.AttachmentDialog_DialogTitle);
+		setTitle(Messages.AttachmentDialog_DialogTitle);
 		return composite; 
 	}
 

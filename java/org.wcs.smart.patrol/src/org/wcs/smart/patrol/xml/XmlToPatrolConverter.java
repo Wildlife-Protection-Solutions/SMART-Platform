@@ -373,7 +373,22 @@ public class XmlToPatrolConverter {
 			for (WaypointObservationAttributeType tp : xml.getAttributes()){
 				WaypointObservationAttribute attribute = convertWaypointObservationAttribute(tp, ob);
 				if (attribute != null){
-					ob.getAttributes().add(attribute);
+					// validate to ensure the attribute does not already exist for given observation
+					boolean found = false;
+					for (WaypointObservationAttribute existing : ob.getAttributes()){
+						if (existing.getAttribute().equals(attribute.getAttribute())){
+							found = true;
+							break;
+						}
+					}
+					if (!found){
+						ob.getAttributes().add(attribute);
+					}else{
+						warnings.add(
+								MessageFormat.format(Messages.XmlToPatrolConverter_DuplicateAttributesError,
+										new Object[]{parent.getId(), DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()), attribute.getAttribute().getKeyId()})); //$NON-NLS-1$
+										
+					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XmlToPatrolConverter_Warning_NotAllDataImported, new Object[]{
