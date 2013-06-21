@@ -40,7 +40,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolImporter extends SmartImporter {
 	
-	public void importData(CyberTrackerPatrol ctPatrol) {
+	public Patrol importData(CyberTrackerPatrol ctPatrol) {
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
@@ -51,6 +51,7 @@ public class PatrolImporter extends SmartImporter {
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
+			return patrol;
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
 			Display.getDefault().syncExec(new Runnable() {
@@ -59,6 +60,7 @@ public class PatrolImporter extends SmartImporter {
 					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Failed to save patrol.", e);
 				}
 			});
+			return null;
 		}
 		finally {
 			session.close();

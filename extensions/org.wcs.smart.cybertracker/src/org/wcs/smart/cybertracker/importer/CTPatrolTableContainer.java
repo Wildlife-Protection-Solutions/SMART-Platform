@@ -22,12 +22,14 @@
 package org.wcs.smart.cybertracker.importer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -43,6 +45,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.patrol.model.Patrol;
@@ -148,7 +151,7 @@ public class CTPatrolTableContainer extends Composite {
 	protected void handleAddAsPatrol() {
 		if (patrolImporter == null)
 			patrolImporter = new PatrolImporter();
-		
+		final List<Patrol> addedList = new ArrayList<Patrol>();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
 		try {
 			final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
@@ -157,16 +160,29 @@ public class CTPatrolTableContainer extends Composite {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 						CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
-						patrolImporter.importData(ctp);
-						tableInputData.remove(ctp);
+						Patrol p = patrolImporter.importData(ctp);
+						if (p != null) {
+							addedList.add(p);
+							tableInputData.remove(ctp);
+						}
 					}
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Save patrol operation was aborted", e);
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Add patrol operation was aborted", e);
 			e.printStackTrace();
 		}
 		
+		if (!addedList.isEmpty()) {
+			String ids = ""; //$NON-NLS-1$
+			for (Iterator<Patrol> i = addedList.iterator(); i.hasNext();) {
+				Patrol p = i.next();
+				ids += p.getId();
+				if (i.hasNext())
+					ids += ", "; //$NON-NLS-1$
+			}
+			MessageDialog.openInformation(getShell(), "Add Patrol", MessageFormat.format("Patrol(s) with following id(s) were sucessfully added: {0}", ids)); 
+		}
 		refreshViewer();
 	}
 
@@ -177,16 +193,27 @@ public class CTPatrolTableContainer extends Composite {
 		}
 		if (legImporter == null)
 			legImporter = new PatrolLegImporter();
-		//TODO: implement
 
-		final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
-		Patrol patrol = selectorDialog.getSelectedPatrol();
-		for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-			CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
-			legImporter.importData(patrol, ctp);
-			tableInputData.remove(ctp);
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+		try {
+			final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
+			final Patrol patrol = selectorDialog.getSelectedPatrol();
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+						CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
+						legImporter.importData(patrol, ctp);
+						tableInputData.remove(ctp);
+					}
+					CyberTrackerPlugIn.displayInfo("Add Leg", "Add leg(s) operation completed.");
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Add leg(s) operation was aborted", e);
+			e.printStackTrace();
 		}
-		
+
 		refreshViewer();
 	}
 	
