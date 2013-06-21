@@ -221,14 +221,16 @@ public class SmartImporter {
 		wp.setObservations(new ArrayList<WaypointObservation>());
 		wp.setPatrolLegDay(pld);
 		wp.setId(pld.getWaypoints().size()+1);
-		//TODO: use real imported values
-		wp.setX(-123);
-		wp.setY(49);
+		wp.setX(0);
+		wp.setY(0);
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.TIME.equals(i)) {
 				wp.setTime(Time.valueOf(a.getV()));
-				break;
+			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
+				wp.setY(Double.valueOf(a.getV()));
+			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
+				wp.setX(Double.valueOf(a.getV()));
 			}
 		}
 		

@@ -83,5 +83,7 @@ public interface ICyberTrackerConstants {
 	public static final String DEVICE_ID = "{A0114ECC-3B0E-4FAE-9866-2381F8764D6E}"; //$NON-NLS-1$
 	public static final String DATE = "{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}"; //$NON-NLS-1$
 	public static final String TIME = "{EB86279A-E032-43D2-B4A8-8B8B2892B10E}"; //$NON-NLS-1$
-
+	public static final String LATITUDE = "{F6636A2D-2E9A-474D-A77D-2E1BAE1EF857}"; //$NON-NLS-1$
+	public static final String LONGITUDE = "{D93E86A8-2629-44FE-AFC4-2EC510FB1820}"; //$NON-NLS-1$
+	
 }
