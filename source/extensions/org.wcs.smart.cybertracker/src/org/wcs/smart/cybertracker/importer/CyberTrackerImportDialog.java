@@ -114,7 +114,6 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 				String f = fd.open();
 				if (f != null) {
 					txtFile.setText(f);
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
 				}
 			}
 		});
