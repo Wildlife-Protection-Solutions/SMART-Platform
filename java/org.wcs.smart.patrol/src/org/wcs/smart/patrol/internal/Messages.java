@@ -72,10 +72,14 @@ public class Messages extends NLS {
 	public static String DateComposite_Title;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle;
+	public static String DeletePatrolHandler_DeleteErrorMessage;
 	public static String DeletePatrolHandler_DeletePatrol_DialogMessage;
 	public static String DeletePatrolHandler_DeletePatrol_DialogTitle;
 	public static String DeletePatrolHandler_DeletePatrol_ErrorMessage;
+	public static String DeletePatrolHandler_DeleteSuccessMessage;
 	public static String DeletePatrolHandler_Error_CouldNotDeletePatrol;
+	public static String DeletePatrolHandler_MultiDeleteConfirmation;
+	public static String DeletePatrolHandler_ProgressTaskName;
 	public static String EditPatrolDateLegsDialog_Title;
 	public static String EditPatrolItemDialog_Error_CouldNoSaveChanges;
 	public static String EditPatrolItemDialog_Error_DialotTitle;
@@ -465,7 +469,7 @@ public class Messages extends NLS {
 	public static String PatrolListView_Progress_LoadingPatrols;
 	public static String PatrolListView_UpdatePatrolJobName;
 	public static String PatrolManager_Error_CouldNotDeleteFilestore;
-	public static String PatrolManager_Progress_DeletingPatrol;
+	public static String PatrolManager_Progress_DeletingPatrol1;
 	public static String PatrolManager_Progress_RemovingFileStore;
 	public static String PatrolManager_Progress_SubDeletingPatrol;
 	public static String PatrolMandate_MandateName;

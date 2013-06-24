@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol Manager for deleting patrols.
@@ -111,14 +112,15 @@ public class PatrolManager {
 			work += data.size();
 		}
 		
-		monitor.beginTask(Messages.PatrolManager_Progress_DeletingPatrol, work);
+		monitor.beginTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{SmartUtils.encodeHex(patrolUuid)}), work);
 		monitor.worked(0);
 		Patrol patrol = null;
 		Session session = HibernateManager.openSession();
 		
 		try{
 			patrol = (Patrol)session.load(Patrol.class, patrolUuid);
-		
+			monitor.setTaskName(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol.getId()}));
+			
 			// ensure can edit patrol 
 			String canEdit = canEdit(patrol, PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
 			if (canEdit != null){
@@ -157,6 +159,7 @@ public class PatrolManager {
 		if (patrol != null){
 			PatrolEventManager.getInstance().patrolDeleted(patrol);
 		}
+		monitor.done();
 	}
 	
 	/**

@@ -164,7 +164,7 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 	private PatrolEventManager.IPatrolEventListener patrolListener = new IPatrolEventListener(){
 		@Override
 		public void eventFired(int type, Object source) {
-			updateContent();
+			updateContent(1000);
 
 		}
 	};
@@ -206,7 +206,7 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 		layout.marginHeight = 0;
 		main.setLayout(layout);
 		
-		patrolListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		patrolListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		Table list = patrolListViewer.getTable();
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		list.setBounds(0, 0, 88, 68);
@@ -269,11 +269,17 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 	}
 
 	/**
-	 * Refreshes the list of patrols
+	 * updates content immediately
 	 */
 	public void updateContent(){
+		updateContent(0);
+	}
+	/**
+	 * Refreshes the list of patrols after delay
+	 */
+	public void updateContent(int delay){
 		updateJob.cancel();
-		updateJob.schedule();		
+		updateJob.schedule(delay);		
 	}
 	
 	@Override
