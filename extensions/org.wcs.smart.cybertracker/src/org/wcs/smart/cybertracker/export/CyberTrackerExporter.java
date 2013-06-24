@@ -68,7 +68,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerExporter {
 	
-	private static final String CATEGORY_RESULT_PREFIX = "category"; //$NON-NLS-1$
+	private static final String CATEGORY_RESULT_PREFIX = Messages.CyberTrackerExporter_Report_Column_Category;
 	
 	private CyberTrackerId rootId;
 	private Elements elements;
