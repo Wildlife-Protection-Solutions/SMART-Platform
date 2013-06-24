@@ -80,13 +80,13 @@ public class CyberTrackerUtil {
 	public static Category buildRoot(DataModel dataModel) {
 		Category fakeRoot = new Category();
 		fakeRoot.setName("Data Model"); //$NON-NLS-1$
-//		fakeRoot.setActiveChildren(dataModel.getCategories());
-//		return fakeRoot;
-		//TODO: switch back to original full datamodel
-		List<Category> cats = new ArrayList<Category>();
-		cats.add(dataModel.getCategories().get(0));
-		fakeRoot.setActiveChildren(cats);
+		fakeRoot.setActiveChildren(dataModel.getCategories());
 		return fakeRoot;
+		//TODO: switch back to original full datamodel
+//		List<Category> cats = new ArrayList<Category>();
+//		cats.add(dataModel.getCategories().get(0));
+//		fakeRoot.setActiveChildren(cats);
+//		return fakeRoot;
 	}
 
 	public static Map<Category, CyberTrackerId> buildMap(Category category) {
