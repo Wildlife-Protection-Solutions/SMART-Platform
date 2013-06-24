@@ -28,6 +28,15 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Label_File;
 	public static String CyberTrackerExportDialog_Message;
 	public static String CyberTrackerExportDialog_Title;
+	public static String CyberTrackerExporter_Progress_Build_Content;
+	public static String CyberTrackerExporter_Progress_Build_Mappings;
+	public static String CyberTrackerExporter_Progress_FetchDataModel;
+	public static String CyberTrackerExporter_Progress_Generate_Elements;
+	public static String CyberTrackerExporter_Progress_Generate_Reports;
+	public static String CyberTrackerExporter_Progress_Generate_Screens;
+	public static String CyberTrackerExporter_Progress_GenerateCTX;
+	public static String CyberTrackerExporter_Report_Column_Date;
+	public static String CyberTrackerExporter_Report_Column_Time;
 	public static String CyberTrackerExportHandler_ErrDialog_Message;
 	public static String CyberTrackerExportHandler_ErrDialog_Title;
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
