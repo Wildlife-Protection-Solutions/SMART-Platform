@@ -54,7 +54,7 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	public static ConservationAreaFilter parseFilter(String caFilterAsString) {
 		ConservationAreaFilter filter = new ConservationAreaFilter();
-		if (caFilterAsString == null){
+		if (caFilterAsString == null || caFilterAsString.trim().length() == 0){
 			filter.setIncludeAll(true);
 		}else{
 			filter.setIncludeAll(false);		
@@ -99,6 +99,16 @@ public class ConservationAreaFilter implements IFilter {
 	}
 	
 	private ArrayList<byte[]> caFilters = new ArrayList<byte[]>();
+	
+	/*
+	 * Applicable for cross conservation area analysis when
+	 * more than one CA is being analyzed.
+	 * List of conservation area listed in the filter but that
+	 * are not contained the the current list of conservation
+	 * areas being analyzed.  This allows the conservation
+	 * area filter to be retained when changing the conservation
+	 * areas available in the cross ca analysis.
+	 */
 	private List<byte[]> missingCas = null;
 	
 	private boolean includeAll = false;
@@ -109,7 +119,29 @@ public class ConservationAreaFilter implements IFilter {
 	public ConservationAreaFilter(){
 		
 	}
+	/**
+	 * Creates a new default conservation area filter.
+	 * <p>By default this filter includes the logged in conservation
+	 * area for single analysis, or all selected conservation areas
+	 * for multiple ca analysis</p>
+	 * 
+	 * 
+	 */
+	public ConservationAreaFilter(boolean init){
+		this();
+		if (init){
+			if (!SmartDB.isMultipleAnalysis()){
+				addConservationArea(SmartDB.getCurrentConservationArea());
+			}else{
+				setIncludeAll(true);
+			}
+		}
+	}
 	
+	/**
+	 * Refreshed the list of conservation area  CA uuids that are in the current filter but 
+	 * not int the current list of CA's being analysed.  
+	 */
 	public void refreshMissingList(){
 		if (missingCas != null){
 			caFilters.addAll(missingCas);
@@ -144,24 +176,7 @@ public class ConservationAreaFilter implements IFilter {
 		return caFilters;
 	}
 	
-	/**
-	 * Creates a new default conservation area filter.
-	 * <p>By default this filter includes the logged in conservation
-	 * area for single analysis, or all selected conservation areas
-	 * for multiple ca analysis</p>
-	 * 
-	 * 
-	 */
-	public ConservationAreaFilter(boolean init){
-		this();
-		if (init){
-			if (!SmartDB.isMultipleAnalysis()){
-				addConservationArea(SmartDB.getCurrentConservationArea());
-			}else{
-				setIncludeAll(true);
-			}
-		}
-	}
+
 	
 	/**
 	 * Adds a conservation area to the filter
@@ -201,14 +216,14 @@ public class ConservationAreaFilter implements IFilter {
 	 * 
 	 * @return CA uuids that are in the current filter but 
 	 * not the current list of CA's being analysed.  May return null
-	 * if not Cas missing
+	 * if no CA's are missing
 	 */
 	public List<byte[]> getMissingCas(){
 		return missingCas;
 	}
 	
 	/**
-	 * Sets the CAs that are in the current filter but no in the 
+	 * Sets the CAs that are in the current filter but not in the 
 	 * list of CA's being analysed.
 	 * @param missing
 	 */
@@ -221,7 +236,7 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	@Override
 	public String asString() {
-		if (includeAll){
+		if (includeAll || caFilters.isEmpty()){
 			//if we are include all conservation areas then
 			//filter is null
 			return null;
