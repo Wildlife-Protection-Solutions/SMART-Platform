@@ -49,10 +49,10 @@ public class ScreensObjectFactory {
             	<Name>Applications</Name>
             	<Node>
                 	<Id>{D9343FB1-A4BF-4F0A-8AB3-6AB1B05D6CF8}</Id>
-                	<Name>Application 1</Name>
+                	<Name>...</Name>
                 	<DataClass>TctSequence</DataClass>
                 	<Data>
-                    	<Name>Application 1</Name>
+                    	<Name>...</Name>
                     	<TestTime>True</TestTime>
                     	<BigTitle>True</BigTitle>
                     	...
@@ -79,12 +79,13 @@ public class ScreensObjectFactory {
 
 		Node a1Node = new Node();
 		a1Node.setId("{D9343FB1-A4BF-4F0A-8AB3-6AB1B05D6CF8}"); //$NON-NLS-1$
-		a1Node.setName("Application 1"); //$NON-NLS-1$
+		a1Node.setName("Application"); //$NON-NLS-1$
 		a1Node.setDataClass("TctSequence"); //$NON-NLS-1$
 		if (properties != null) {
+			a1Node.setName(properties.getApplicationName());
 			Node.Data a1Data = new Node.Data();
 			a1Node.setData(a1Data);
-			a1Data.setName("Application 1"); //$NON-NLS-1$
+			a1Data.setName(properties.getApplicationName());
 			a1Data.setTestTime("True"); //$NON-NLS-1$
 			a1Data.setBigTitle("True"); //$NON-NLS-1$
 			a1Data.setKioskMode(Boolean.TRUE.equals(properties.getKioskMode()) ? "True" : "False");  //$NON-NLS-1$//$NON-NLS-2$
