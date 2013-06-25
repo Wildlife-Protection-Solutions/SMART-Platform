@@ -77,7 +77,7 @@ public class CyberTrackerExporter {
 
 	public int uploadPda(File file) throws Exception {
 		String appPath = PdaUtil.getCTAppPath();
-		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
+		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath(), ICyberTrackerConstants.COMMAND_SILENT};
 		Process proc = Runtime.getRuntime().exec(uploadCommands);
 		int code = proc.waitFor();
 		return code;
