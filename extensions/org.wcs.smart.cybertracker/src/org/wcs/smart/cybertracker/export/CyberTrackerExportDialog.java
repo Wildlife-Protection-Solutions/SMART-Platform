@@ -22,11 +22,13 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -67,10 +69,6 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 	public CyberTrackerExportDialog(Shell parentShell) {
 		super(parentShell);
-	}
-	
-	public File getSelectedFile(){
-		return this.selectedFile;
 	}
 	
 	/**
@@ -178,23 +176,30 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			if (btnToFile.getSelection())
-				selectedFile = new File(txtFile.getText());
+			if (btnToFile.getSelection()) {
+				selectedFile = getOutputFile();
+				if (selectedFile == null) {
+					MessageDialog.openError(getShell(), Messages.CyberTrackerExportDialog_ErrDialog_Title, Messages.CyberTrackerExportDialog_Err_Dialog_Message);
+					return;
+				}
+			}
 			handleExport(btnToDevice.getSelection());
-			
-//			File file = new File(txtFile.getText());
-//			if (!file.exists()) {
-//				try {
-//					FileUtils.forceMkdir(file);
-//				} catch (IOException ex) {
-//					MessageDialog.openError(getShell(), Messages.CyberTrackerExportDialog_ErrDialog_Title, Messages.CyberTrackerExportDialog_Err_Dialog_Message);
-//					return;	
-//				}
-//			}
-//			selectedFile = file;
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
 		close();
+	}
+
+	private File getOutputFile() {
+		File file = new File(txtFile.getText());
+		if (!file.exists()) {
+			try {
+				FileUtils.forceMkdir(file);
+				return file;
+			} catch (IOException ex) {
+				return null;	
+			}
+		}
+		return file;
 	}
 	
 	private void handleExport(final boolean toDevice) {
