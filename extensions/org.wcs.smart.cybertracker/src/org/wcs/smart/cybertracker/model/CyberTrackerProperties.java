@@ -32,6 +32,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Class responsible for representing CyberTracker Properties
@@ -47,6 +48,7 @@ public class CyberTrackerProperties {
 	private ConservationArea conservationArea;
 	
 	//default properties
+	private String  applicationName = "Application";
 	private Boolean kioskMode = false;
 	private Integer waypointTimer = 0; //Track Timer 
 	private Integer gpsTimeZone = 0; //GMT/UTC time offset
@@ -95,4 +97,12 @@ public class CyberTrackerProperties {
 		this.gpsTimeZone = gpsTimeZone;
 	}
 
+	@Column(name="application_name")
+	public String getApplicationName() {
+		return applicationName;
+	}
+	
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
+	}
 }

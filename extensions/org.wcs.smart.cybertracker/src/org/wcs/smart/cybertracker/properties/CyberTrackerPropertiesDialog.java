@@ -98,6 +98,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 	private CyberTrackerProperties ctProperties;
 	
+	private Text txtAppName;
 	private Button btnKioskMode;
 	private Text txtTrackTimer;
     private ComboViewer timeOffset;
@@ -120,6 +121,20 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, false));
 
+		Label lblAppName = new Label(container, SWT.NONE);
+		lblAppName.setText("Application Name:");
+
+		txtAppName = new Text(container, SWT.BORDER);
+		txtAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (ctProperties.getApplicationName() != null)
+			txtAppName.setText(ctProperties.getApplicationName());
+		txtAppName.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setChangesMade(true);
+			}
+		});
+		
 		Label lblKioskMode = new Label(container, SWT.NONE);
 		lblKioskMode.setText("Kiosk Mode:");
 
