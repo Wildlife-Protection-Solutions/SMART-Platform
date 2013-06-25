@@ -205,6 +205,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		if (!validateTrackTimer(txtTrackTimer.getText())) {
 			return false;
 		}
+		ctProperties.setApplicationName(txtAppName.getText());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
 		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
 		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();
