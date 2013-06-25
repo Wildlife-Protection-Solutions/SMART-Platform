@@ -193,7 +193,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		File file = new File(txtFile.getText());
 		if (!file.exists()) {
 			try {
-				FileUtils.forceMkdir(file);
+				FileUtils.forceMkdir(file.getParentFile());
+				file.createNewFile();
 				return file;
 			} catch (IOException ex) {
 				return null;	
