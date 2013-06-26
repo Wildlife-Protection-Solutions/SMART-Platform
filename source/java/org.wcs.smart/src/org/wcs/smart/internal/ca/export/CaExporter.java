@@ -34,6 +34,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
@@ -99,31 +100,41 @@ public class CaExporter {
 	 */
 	public void export(File destFile, IProgressMonitor monitor) throws Exception{
 		
+		List<ICaDataExporter> exporters = getExportExtensions();
+		
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		monitor.beginTask(Messages.CaExporter_ProgressExportCA, exporters.size() + 2);
 		try{
 			File tempDir = SmartUtils.createTemporaryDirectory();
-		
-			/* write a conservation area info file */
-			writeConservationAreaInfo(tempDir, ca);
-			
-			/* run through the exporters exporting data */
-			List<ICaDataExporter> exporters = getExportExtensions();
-			ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
-			for (ICaDataExporter exporter: exporters){
-				exporter.exportData(engine, monitor);
-			}
-			
-			/* zip up files */
-			ZipUtil.createZip(tempDir.listFiles(), destFile, monitor);
-			
 			try{
-				FileUtils.deleteDirectory(tempDir);
-			}catch(Exception ex){
-				SmartPlugIn.log(Messages.CaExporter_Error_TempDirDelete + tempDir.getAbsolutePath(), ex);
+				/* write a conservation area info file */
+				writeConservationAreaInfo(tempDir, ca);
+				if (monitor.isCanceled()) return;
+				monitor.worked(1);
+			
+				/* run through the exporters exporting data */
+				
+				ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
+				for (ICaDataExporter exporter: exporters){
+					if (monitor.isCanceled()) return;
+					exporter.exportData(engine, new SubProgressMonitor(monitor, 1));
+					monitor.worked(1);
+				}
+			
+				/* zip up files */
+				if (monitor.isCanceled()) return;
+				ZipUtil.createZip(tempDir.listFiles(), destFile, new SubProgressMonitor(monitor,1));
+				monitor.worked(1);
+			}finally{
+				try{
+					FileUtils.deleteDirectory(tempDir);
+				}catch(Exception ex){
+					SmartPlugIn.log(Messages.CaExporter_Error_TempDirDelete + tempDir.getAbsolutePath(), ex);
+				}
 			}
-		
 		}finally{
+			monitor.done();
 			session.close();
 		}
 	}
