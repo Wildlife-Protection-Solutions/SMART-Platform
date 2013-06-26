@@ -173,6 +173,8 @@ public class Messages extends NLS {
 	public static String BackupDialog_BrowseButton;
 	public static String BackupDialog_Confirm_DialogTitle;
 	public static String BackupDialog_Confirm_Message;
+	public static String BackupDialog_ConfirmCreateDirMsg;
+	public static String BackupDialog_ConfirmCreateDirTitle;
 	public static String BackupDialog_CouldNotCreateOutputDir;
 	public static String BackupDialog_ErrorDialogTitle;
 	public static String BackupDialog_FileLabel;
@@ -198,6 +200,7 @@ public class Messages extends NLS {
 	public static String BasemapPropertyPage_RenameButton;
 	public static String BasemapPropertyPage_SetDefaultButton;
 	public static String CaExporter_Error_TempDirDelete;
+	public static String CaExporter_ProgressExportCA;
 	public static String CaImporter_Error_CaAlreadyExists;
 	public static String CaImporter_Error_CirculateTableDependencies;
 	public static String CaImporter_Error_CleanUpFailed;
@@ -564,6 +567,7 @@ public class Messages extends NLS {
 	public static String ExportCaHandler_DialogTitle;
 	public static String ExportCaHandler_Error_ExportFailedMessage;
 	public static String ExportCaHandler_ExportButton;
+	public static String ExportCaHandler_ExportCancelledMessage;
 	public static String ExportCaHandler_ExportComplete_DialogMessage;
 	public static String ExportCaHandler_ExportComplete_DialogTitle;
 	public static String ExportMapToImageWizard_ChooseFilenameMessage;

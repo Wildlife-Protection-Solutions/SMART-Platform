@@ -85,7 +85,13 @@ public class BackupHandler extends AbstractHandler {
 			}
 		}
 		
-		final BackupDialog dialog = new BackupDialog(shell,Messages.BackupHandler_Backup_DialogTitle, Messages.BackupHandler_Backup_DialotMessage, Messages.BackupHandler_Backup_DialogButton,DerbyBackupEngine.getDefaultFileName());
+		final BackupDialog dialog = new BackupDialog(shell,
+				Messages.BackupHandler_Backup_DialogTitle, 
+				Messages.BackupHandler_Backup_DialotMessage, 
+				Messages.BackupHandler_Backup_DialogButton,
+				"org.wcs.smart.backup.location", //$NON-NLS-1$
+				DerbyBackupEngine.getDefaultFileName()); 
+		
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}

@@ -77,7 +77,14 @@ public class ExportCaHandler extends AbstractHandler {
 			}
 		}
 				
-		final BackupDialog dialog = new BackupDialog(shell,Messages.ExportCaHandler_DialogTitle, MessageFormat.format(Messages.ExportCaHandler_DialogMessage, new Object[]{ SmartDB.getCurrentConservationArea().getName() }) , Messages.ExportCaHandler_ExportButton, CaExporter.getDefaultFileName());
+		final BackupDialog dialog = new BackupDialog(shell,
+				Messages.ExportCaHandler_DialogTitle, 
+				MessageFormat.format(Messages.ExportCaHandler_DialogMessage, 
+						new Object[]{ SmartDB.getCurrentConservationArea().getName() }),
+				Messages.ExportCaHandler_ExportButton, 
+				"org.wcs.smart.exportca.location", //$NON-NLS-1$
+				CaExporter.getDefaultFileName());
+		
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}
@@ -93,10 +100,16 @@ public class ExportCaHandler extends AbstractHandler {
 					CaExporter exporter = new CaExporter();
 					try{
 						exporter.export(f, monitor);
+						
+						String message =  Messages.ExportCaHandler_ExportComplete_DialogMessage;
+						if (monitor.isCanceled()){
+							message = Messages.ExportCaHandler_ExportCancelledMessage;
+						}
+						final String fmessage = message;
 						shell.getDisplay().syncExec(new Runnable() {
 							@Override
 							public void run() {
-								MessageDialog.openInformation(shell, Messages.ExportCaHandler_ExportComplete_DialogTitle, Messages.ExportCaHandler_ExportComplete_DialogMessage);
+								MessageDialog.openInformation(shell, Messages.ExportCaHandler_ExportComplete_DialogTitle, fmessage);
 							}
 						});
 					}catch (final Exception ex){

@@ -48,9 +48,12 @@ public class HibernateDataExporter implements ICaDataExporter {
 		List<TableInfo> info = HibernateManager.getTableInformation();
 		monitor.beginTask(Messages.HibernateDataExporter_Progress_ExportMappedTables, info.size());
 		for (TableInfo in : info) {
+			if (monitor.isCanceled()){
+				return;
+			}
 			monitor.subTask(Messages.HibernateDataExporter_SubProgress_ProcessingTable + in.getTableName());
 			monitor.worked(1);
-
+			
 			if (in.getCaPropertyName() != null) {
 				String[] columns = exportEngine.getTableColumns(in.getTableName());
 				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
@@ -68,6 +71,7 @@ public class HibernateDataExporter implements ICaDataExporter {
 				exportEngine.writeHibernateQuery(in.getTableName(), in.getClazz().getSimpleName(), columns, hqlQuery);				
 			}
 		}
+		monitor.done();
 	}
 
 }

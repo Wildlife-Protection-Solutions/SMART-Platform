@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -53,6 +54,9 @@ import com.ibm.icu.text.MessageFormat;
  */
 public class BackupDialog extends TitleAreaDialog {
 
+	/* only maintain dialog settings within the current applicaiton run */
+	private final static DialogSettings localSettings = new DialogSettings(""); //$NON-NLS-1$
+	
 	private Text txtBackupFile;
 	private File selectedFile;
 	
@@ -61,23 +65,34 @@ public class BackupDialog extends TitleAreaDialog {
 	private String buttonText;
 	private String defaultFileName;
 	
+	private String fileNameKey;
+	
+	
 	/**
 	 * @param parentShell
+	 * @param title dialog title
+	 * @param message dialog message
+	 * @param buttonText ok button text
+	 * @param fileNameKey unique key for storing & retrieving selected filename
+	 * between uses of dialog
+	 * @param deafultFileName the default filename to display
 	 */
-	public BackupDialog(Shell parentShell, String title, String message, String buttonText, String defaultFileName) {
+	public BackupDialog(Shell parentShell, String title, String message, 
+			String buttonText, String fileNameKey, String defaultFileName) {
 		super(parentShell);
 		this.title = title;
 		this.message = message;
 		this.buttonText = buttonText;
+		
+		this.fileNameKey = fileNameKey;
 		this.defaultFileName = defaultFileName;
 	}
-	
-
 	
 	/**
 	 * @return the backup file selected by the user
 	 */
 	public File getSelectedFile(){
+		localSettings.put(fileNameKey, selectedFile.getParent());
 		return this.selectedFile;
 	}
 	
@@ -96,7 +111,13 @@ public class BackupDialog extends TitleAreaDialog {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtBackupFile = new Text(main, SWT.DEFAULT);
-		txtBackupFile.setText(this.defaultFileName);
+		String set = localSettings.get(fileNameKey);
+		if (set == null || set.trim().isEmpty()){
+			txtBackupFile.setText(this.defaultFileName);
+		}else{
+			File tmp = new File(set, (new File(defaultFileName)).getName());
+			txtBackupFile.setText(tmp.toString());
+		}
 		
 		txtBackupFile.setEditable(true);
 		txtBackupFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -168,6 +189,12 @@ public class BackupDialog extends TitleAreaDialog {
 				}
 			}
 			if (!file.getParentFile().exists()){
+				if (!MessageDialog.openConfirm(getShell(), 
+						Messages.BackupDialog_ConfirmCreateDirTitle, 
+						MessageFormat.format(Messages.BackupDialog_ConfirmCreateDirMsg, 
+								new Object[]{ file.getParent()}) )){
+					return;
+				}
 				try{
 					FileUtils.forceMkdir(file.getParentFile());
 				}catch (IOException ex){
