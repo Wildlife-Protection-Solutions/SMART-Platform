@@ -26,6 +26,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -76,8 +77,9 @@ public class Thumbnail {
 	 * @param thumbnailSize
 	 */
 	public Thumbnail(ISmartAttachment attachment, int thumbnailSize){
-		this(attachment);
+		this.attachment = attachment;
 		this.thumbnailSize = thumbnailSize;
+		loadImageData();
 	}
 	
 	/**
@@ -89,11 +91,39 @@ public class Thumbnail {
 		loadImageData();
 	}
 	
+	/*
+	 * generate the thumbnail in memory 
+	 */
 	private void loadImageData(){
 		try {
-			image = new Image(Display.getDefault(), attachment.getFullFile().getAbsolutePath());
-		} catch (SWTException exception) {
+			if (attachment.getFullFile().length() > 200 * Math.pow(10, 6)) {
+				// skip images > 200MB
+				return;
+			}
 
+			Image rawImage = new Image(Display.getDefault(), attachment.getFullFile()
+					.getAbsolutePath());
+
+			//scale image
+			Rectangle bounds = rawImage.getBounds();
+			int x = 0, y = 0, width = 0, height = 0;
+			if (bounds.width > bounds.height) {
+				width = thumbnailSize;
+				height = bounds.height * thumbnailSize / bounds.width;
+				y = (thumbnailSize - height) / 2;
+			} else {
+				height = thumbnailSize;
+				width = bounds.width * thumbnailSize / bounds.height;
+				x = (thumbnailSize - width) / 2;
+			}
+			Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+			GC gc = new GC(image2);
+			gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+			rawImage.dispose();
+
+			image = image2;
+		} catch (SWTException ex) {
+			//eatme
 		}
 	}
 	
@@ -112,7 +142,7 @@ public class Thumbnail {
 			Label lbl = new Label(c, SWT.WRAP);
 			lbl.setText(attachment.getFullFile().getName());
 			lbl.setLocation(0, 0);
-			lbl.setSize(100, 100);
+			lbl.setSize(thumbnailSize, thumbnailSize);
 			lbl.addMouseListener(doubleClickListener);
 			return;
 		}
@@ -125,22 +155,7 @@ public class Thumbnail {
 					image.dispose();
 					break;
 				case SWT.Paint: {
-					Rectangle rect = c.getClientArea();
-					Rectangle bounds = image.getBounds();
-					int x = 0, y = 0, width = 0, height = 0;
-					if (bounds.width > bounds.height) {
-						width = rect.width;
-						height = bounds.height * rect.height
-								/ bounds.width;
-						y = (rect.height - height) / 2;
-					} else {
-						height = rect.height;
-						width = bounds.width * rect.width
-								/ bounds.height;
-						x = (rect.width - width) / 2;
-					}
-					e.gc.drawImage(image, 0, 0, bounds.width,
-							bounds.height, x, y, width, height);
+					e.gc.drawImage(image, 0,0);
 				}
 				}
 			}
