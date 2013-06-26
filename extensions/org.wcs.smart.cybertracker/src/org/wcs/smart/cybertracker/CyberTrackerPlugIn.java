@@ -1,6 +1,7 @@
 package org.wcs.smart.cybertracker;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -13,6 +14,10 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.cybertracker"; //$NON-NLS-1$
 
+	
+	//image registry key for cybertracker dialog image
+	public static final String CT_WIZARD_BANNER = "org.wcs.smart.cybertracker.wizban"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static CyberTrackerPlugIn plugin;
 	
@@ -49,6 +54,14 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	/**
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeImageRegistry(org.eclipse.jface.resource.ImageRegistry)
+	 */
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+	     reg.put(CT_WIZARD_BANNER, imageDescriptorFromPlugin(PLUGIN_ID, "images/wizban/cybertracker.png")); //$NON-NLS-1$
+	}
+	
 	public static void displayInfo(final String title, final String message) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override

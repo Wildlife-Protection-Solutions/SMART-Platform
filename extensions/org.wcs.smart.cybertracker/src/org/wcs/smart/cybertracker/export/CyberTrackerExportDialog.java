@@ -149,7 +149,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		setTitle(Messages.CyberTrackerExportDialog_Title);
 		setMessage(Messages.CyberTrackerExportDialog_Message);
 		super.getShell().setText(Messages.CyberTrackerExportDialog_Title);
-		
+		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
 		return composite;
 	}
 	
