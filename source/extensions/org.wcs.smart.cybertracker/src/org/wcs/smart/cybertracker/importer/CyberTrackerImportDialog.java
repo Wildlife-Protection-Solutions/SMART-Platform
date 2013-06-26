@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 
@@ -144,6 +145,8 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		setTitle(Messages.CyberTrackerImportDialog_Title);
 		setMessage(Messages.CyberTrackerImportDialog_Message);
 		super.getShell().setText(Messages.CyberTrackerImportDialog_Title);
+		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
+		
 		return composite;
 	}
 	
