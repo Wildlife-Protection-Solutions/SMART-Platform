@@ -339,6 +339,7 @@ public class Messages extends NLS {
 	public static String DataModel_Progress_SaveAttribute;
 	public static String DataModel_Progress_SaveCategory;
 	public static String DataModel_Progress_SaveDm;
+	public static String DataModel_ProgressLabel;
 	public static String DataModelExporter_Progress_DataModelTables;
 	public static String DataModelLabelProvider_RootNode_Label;
 	public static String DataModelManager_Error_DeleteAttribute;
