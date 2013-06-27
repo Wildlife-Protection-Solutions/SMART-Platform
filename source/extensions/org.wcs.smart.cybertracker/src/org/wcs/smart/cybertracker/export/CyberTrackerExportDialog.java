@@ -22,8 +22,8 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for exporting CyberTracker application data.
@@ -178,7 +179,6 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			if (btnToFile.getSelection()) {
 				selectedFile = getOutputFile();
 				if (selectedFile == null) {
-					MessageDialog.openError(getShell(), Messages.CyberTrackerExportDialog_ErrDialog_Title, Messages.CyberTrackerExportDialog_Err_Dialog_Message);
 					return;
 				}
 			}
@@ -191,12 +191,18 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	private File getOutputFile() {
 		File file = new File(txtFile.getText());
 		if (!file.exists()) {
-			try {
-				FileUtils.forceMkdir(file.getParentFile());
-				file.createNewFile();
-				return file;
-			} catch (IOException ex) {
-				return null;	
+			if (!file.getParentFile().exists()) {
+				if (MessageDialog.openQuestion(getShell(), Messages.CyberTrackerExportDialog_ConfirmOverwrite_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ConfirmCreateDir_Message, file.getParent()))) {
+					if (!SmartUtils.createDirectory(file.getParentFile())) {
+						return null;
+					}
+					return file;
+				}
+				return null;
+			}
+		} else {
+			if (!MessageDialog.openQuestion(getShell(), Messages.CyberTrackerExportDialog_ConfirmOverwrite_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ConfirmOverwrite_Message, file.toString()))) {
+				return null;
 			}
 		}
 		return file;
