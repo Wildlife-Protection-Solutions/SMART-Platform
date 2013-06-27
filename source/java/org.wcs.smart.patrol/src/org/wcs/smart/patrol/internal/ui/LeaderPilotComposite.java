@@ -210,8 +210,39 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		}
 		validate();
 	}
+	
 	/**
 	 * 
+	 * @return the selected leader
+	 */
+	public Employee getSelectedLeader(){
+		Object x = ((IStructuredSelection)patrolLeaderViewer.getSelection()).getFirstElement();
+		if (x != null && x instanceof PatrolLegMember){
+			return ((PatrolLegMember)x).getMember();
+		}else if (x != null && x instanceof Employee){
+    		return (Employee)x;
+		}
+		return null;
+	}
+	/**
+	 * 
+	 * @return the selected pilot
+	 */
+	public Employee getSelectedPilot(){
+		if (patrolPilotViewer == null){
+			return null;
+		}
+		Object x = ((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement();
+		if (x != null && x instanceof PatrolLegMember){
+			return ((PatrolLegMember)x).getMember();
+		}else if (x != null && x instanceof Employee){
+    		return (Employee)x;
+		}
+		return null;
+	}
+	
+	/**
+	 * Updates a given patrol leg with the values from the composite.
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
 	public boolean updatePatrol(PatrolLeg patrolLeg) {

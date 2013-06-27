@@ -399,6 +399,7 @@ public class Messages extends NLS {
 	public static String PatrolLegLeaderChangeDialog_Error_StartDateAfterStart;
 	public static String PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd;
 	public static String PatrolLegLeaderChangeDialog_LegIdPostfix;
+	public static String PatrolLegLeaderChangeDialog_NewLeaderRequired;
 	public static String PatrolLegLeaderChangeDialog_OpCustome;
 	public static String PatrolLegLeaderChangeDialog_OpStartOfDay;
 	public static String PatrolLegLeaderChangeDialog_Time_Label;
@@ -554,6 +555,7 @@ public class Messages extends NLS {
 	public static String PatrolTransportChangeDialog_Error_InvalidDate;
 	public static String PatrolTransportChangeDialog_Error_StartDateAfter;
 	public static String PatrolTransportChangeDialog_Error_StartDateBefore;
+	public static String PatrolTransportChangeDialog_NewTransportTypeError;
 	public static String PatrolTransportChangeDialog_StartOfDay_Op;
 	public static String PatrolTransportChangeDialog_TimeLabel;
 	public static String PatrolTransportChangeDialog_TransportChangeLegIdentifier;

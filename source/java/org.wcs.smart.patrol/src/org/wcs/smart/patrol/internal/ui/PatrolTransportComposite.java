@@ -119,10 +119,19 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	}
 
 	/**
+	 * 
+	 * @return selected transport type
+	 */
+	public PatrolTransportType getSelectedTransportType(){
+		PatrolTransportType pm = (PatrolTransportType) ((IStructuredSelection)patrolTypeViewer.getSelection()).getFirstElement();
+		return pm;
+	}
+	
+	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
 	public boolean updatePatrol(PatrolLeg patrolLeg) {
-		PatrolTransportType pm = (PatrolTransportType) ((IStructuredSelection)patrolTypeViewer.getSelection()).getFirstElement();
+		PatrolTransportType pm = getSelectedTransportType();
 		if (pm != null){
 			patrolLeg.setType(pm);
 			return true;

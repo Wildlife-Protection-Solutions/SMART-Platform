@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -130,18 +132,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		startDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Date d = SmartUtils.getDate(startDate);
-				if (d.before(existingLeg.getStartDate()) || d.after(existingLeg.getEndDate())){
-					MessageFormat.format(Messages.PatrolTransportChangeDialog_Error_InvalidDate,
-							new Object[]{DateFormat.getDateInstance().format(existingLeg.getEndDate()),
-							 DateFormat.getDateInstance().format(existingLeg.getStartDate())});
-							 
-		
-					getButton(OK).setEnabled(false);
-				}else{
-					setErrorMessage(null);
-					getButton(OK).setEnabled(true);
-				}
+				validate();
 			}
 			
 		});
@@ -175,6 +166,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		
 		/* new leader/pilot */
 		compTransportType = new PatrolTransportComposite();
+		
 		Composite c = compTransportType.createComponent(parent, SWT.NONE);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
@@ -188,9 +180,50 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 			session.close();
 		}
 		
+		compTransportType.addChangeListener(new IPatrolItemChangeListener() {
+			@Override
+			public void itemChanged() {
+				validate();	
+			}
+		});
+		
+		setTitle(Messages.PatrolTransportChangeDialog_DialogTitle);
 		super.getShell().setText(Messages.PatrolTransportChangeDialog_DialogTitle);
 		setMessage(Messages.PatrolTransportChangeDialog_DialogMessage);
 		return parent;
+	}
+	
+	public Date getNewDate(){
+		long time = SmartUtils.getDate(startDate).getTime();
+		if (opCustom.getSelection()){
+			time += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+		}
+		Date newStart = new Date( time );
+		return newStart;
+	}
+	
+	private void validate(){
+		String error = compTransportType.getErrorMessage();
+		
+		if (error == null && compTransportType.getSelectedTransportType().equals(existingLeg.getType())){
+			error = Messages.PatrolTransportChangeDialog_NewTransportTypeError;
+		}
+		
+		Date newStart = getNewDate();
+		
+		if (error == null && newStart.before(existingLeg.getStartDate())){
+			error = MessageFormat.format(
+							Messages.PatrolTransportChangeDialog_Error_StartDateAfter,
+							new Object[]{dateTimeFormatter.format(existingLeg.getStartDate()) });
+		}
+		if (error == null && newStart.after(existingLeg.getEndDate())){
+			error = MessageFormat.format(
+							Messages.PatrolTransportChangeDialog_Error_StartDateBefore,
+							new Object[]{null,dateTimeFormatter.format(existingLeg.getEndDate())});
+		}
+		
+		setErrorMessage(error);
+		getButton(IDialogConstants.OK_ID).setEnabled(error == null);
 	}
 	
 	/** 
@@ -200,27 +233,13 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 	 */
 	@Override
 	protected void okPressed() {
-		//date validation
-		long time = SmartUtils.getDate(startDate).getTime();
-		if (opCustom.getSelection()){
-			time += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+		validate();
+		if (getErrorMessage() != null){
+			MessageDialog.openError(getShell(), Messages.PatrolTransportChangeDialog_DialogTitle, getErrorMessage());
+			return;
 		}
-		Date newStart = new Date( time );
 		
-		if (newStart.before(existingLeg.getStartDate())){
-			setErrorMessage(
-					MessageFormat.format(
-							Messages.PatrolTransportChangeDialog_Error_StartDateAfter,
-							new Object[]{dateTimeFormatter.format(existingLeg.getStartDate()) }));
-			return;
-		}else if (newStart.after(existingLeg.getEndDate())){
-			setErrorMessage(
-					MessageFormat.format(
-							Messages.PatrolTransportChangeDialog_Error_StartDateBefore,
-							new Object[]{dateTimeFormatter.format(existingLeg.getEndDate())}));
-			return;
-		}
-
+		Date newStart = getNewDate();
 		//update dates, leader, & add leg
 		newLeg.setEndDate(existingLeg.getEndDate());
 		newLeg.setStartDate(newStart);
