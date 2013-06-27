@@ -43,6 +43,52 @@ import org.wcs.smart.ca.ConservationArea;
 @Table(name = "smart.cybertracker_properties")
 public class CyberTrackerProperties {
 
+	/**
+	 * Maximum length of application name field
+	 */
+	public static final int APPLICATION_NAME_MAX_LENTH = 256;
+
+	public static final int TIME_TRACK_MIN_VALUE = 0;
+	public static final int TIME_TRACK_MAX_VALUE = 1000;
+
+	public static final Integer[] GTM_VALUES = {
+		-1200,
+		-1100,
+		-1000,
+		-900,
+		-800,
+		-700,
+		-600,
+		-500,
+		-450,
+		-400,
+		-350,
+		-300,
+		-200,
+		-100,
+		0,
+		100,
+		200,
+		300,
+		400,
+		450,
+		500,
+		550,
+		575,
+		600,
+		650,
+		700,
+		800,
+		900,
+		950,
+		1000,
+		1050,
+		1100,
+		1150,
+		1200,
+		1300,		
+	};
+	
 	private byte[] uuid;
 	private ConservationArea conservationArea;
 	
