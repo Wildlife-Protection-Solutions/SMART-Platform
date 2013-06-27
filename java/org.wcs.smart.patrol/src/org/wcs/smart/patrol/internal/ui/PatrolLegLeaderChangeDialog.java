@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,6 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.internal.Messages;
@@ -59,6 +62,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	private PatrolLeg existingLeg;
 	private PatrolLeg newLeg;
+	
 	
 	private LeaderPilotComposite leaderPilotcomp;
 	private DateTime startDate;
@@ -127,16 +131,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		startDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Date d = SmartUtils.getDate(startDate);
-				if (d.before(existingLeg.getStartDate()) || d.after(existingLeg.getEndDate())){
-					setErrorMessage(MessageFormat.format
-							(Messages.PatrolLegLeaderChangeDialog_Error_InvalidDate,
-									new Object[]{DateFormat.getDateInstance().format(existingLeg.getEndDate()),DateFormat.getDateInstance().format(existingLeg.getStartDate())}));
-					getButton(OK).setEnabled(false);
-				}else{
-					setErrorMessage(null);
-					getButton(OK).setEnabled(true);
-				}
+				validate();
 			}
 			
 		});
@@ -173,12 +168,51 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		Composite c = leaderPilotcomp.createComponent(parent, SWT.NONE);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		leaderPilotcomp.setValues(this.newLeg, null);
+		leaderPilotcomp.addChangeListener(new IPatrolItemChangeListener() {
+			@Override
+			public void itemChanged() {
+				validate();
+			}
+		});
 		
-		
+		setTitle(Messages.PatrolLegLeaderChangeDialog_DialogTitle);
 		super.getShell().setText(Messages.PatrolLegLeaderChangeDialog_DialogTitle);
 		setMessage(Messages.PatrolLegLeaderChangeDialog_DialogMessage);
 		return parent;
 	}
+	
+	private void validate(){
+		String error = null;
+		Date newStart = getNewStartDate();
+	
+		error = leaderPilotcomp.getErrorMessage();
+		if (error == null && leaderPilotcomp.getSelectedLeader().equals(existingLeg.getLeader().getMember())){
+			error = Messages.PatrolLegLeaderChangeDialog_NewLeaderRequired;
+		}
+		if (newStart.before(existingLeg.getStartDate())){
+			error = MessageFormat.format(
+					Messages.PatrolLegLeaderChangeDialog_Error_StartDateAfterStart,
+					new Object[]{ dateTimeFormatter.format(existingLeg.getStartDate())}) ;
+			
+		}else if (newStart.after(existingLeg.getEndDate())){
+			error = MessageFormat.format(
+					Messages.PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd,
+					new Object[]{ dateTimeFormatter.format(existingLeg.getEndDate()) });
+		}
+
+		setErrorMessage(error);
+		getButton(IDialogConstants.OK_ID).setEnabled(error == null);
+	}
+	
+	
+	private Date getNewStartDate(){
+		long time = SmartUtils.getDate(startDate).getTime();
+		if (opCustom.getSelection()){
+			time += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+		}
+		return new Date(time);
+	}
+	
 	
 	/** 
 	 * Performs basic validation and updates the collection of legs provided to update.
@@ -188,23 +222,13 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 	@Override
 	protected void okPressed() {
 		//date validation
-		long time = SmartUtils.getDate(startDate).getTime();
-		if (opCustom.getSelection()){
-			time += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+		validate();
+		if (getErrorMessage() != null){
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.PatrolLegLeaderChangeDialog_DialogTitle, getErrorMessage());
+			return;
 		}
-		Date newStart = new Date( time );
 		
-		if (newStart.before(existingLeg.getStartDate())){
-			setErrorMessage(MessageFormat.format(
-					Messages.PatrolLegLeaderChangeDialog_Error_StartDateAfterStart,
-					new Object[]{ dateTimeFormatter.format(existingLeg.getStartDate())}) );
-			return;
-		}else if (newStart.after(existingLeg.getEndDate())){
-			setErrorMessage(MessageFormat.format(
-					Messages.PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd,
-					new Object[]{ dateTimeFormatter.format(existingLeg.getEndDate()) }));
-			return;
-		}
+		Date newStart = getNewStartDate();
 
 		//update dates, leader, & add leg
 		newLeg.setEndDate(existingLeg.getEndDate());

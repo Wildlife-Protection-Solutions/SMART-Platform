@@ -143,10 +143,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		
 		gl.marginBottom = gl.marginTop = gl.verticalSpacing = 0;
 		parent.setLayout(gl);
-		
-		setMessage(Messages.PatrolLegSplitDialog_Dialog_Message);
-		super.getShell().setText(Messages.PatrolLegSplitDialog_Dialog_Title);
-		
+				
 		employees = new ArrayList<Employee>();
 		for (PatrolLegMember member: existingLeg.getMembers()){
 			employees.add(member.getMember());
@@ -231,6 +228,10 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			groupBPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBPilot_Label, (WritableList)groupBEmployees.getInput());
 		}
 		sc.setMinSize(gB.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		setMessage(Messages.PatrolLegSplitDialog_Dialog_Message);
+		super.getShell().setText(Messages.PatrolLegSplitDialog_Dialog_Title);
+		setTitle(Messages.PatrolLegSplitDialog_Dialog_Title);
 		
 		return parent;
 	}

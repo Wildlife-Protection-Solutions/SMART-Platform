@@ -195,6 +195,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		setMessage(Messages.EditPatrolLegDialog_DialogMessage);
 		getShell().setText(Messages.EditPatrolLegDialog_DialogTitle);
+		setTitle(Messages.EditPatrolLegDialog_DialogTitle);
 		return parent;
 	}
 	
