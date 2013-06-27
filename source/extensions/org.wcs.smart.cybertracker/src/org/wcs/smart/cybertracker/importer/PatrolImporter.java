@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.importer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -57,7 +58,7 @@ public class PatrolImporter extends SmartImporter {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Failed to save patrol.", e);
+					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_Save_Error, e);
 				}
 			});
 			return null;

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -106,7 +107,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	
 	
 	public CyberTrackerPropertiesDialog() {
-		super(Display.getCurrent().getActiveShell(), "CyberTracker Default Properties");
+		super(Display.getCurrent().getActiveShell(), Messages.CyberTrackerPropertiesDialog_Title);
 		Session session = HibernateManager.openSession();
 		try {
 			ctProperties = CyberTrackerHibernateManager.getProperties(session);
@@ -123,7 +124,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		container.setLayout(new GridLayout(2, false));
 
 		Label lblAppName = new Label(container, SWT.NONE);
-		lblAppName.setText("Application Name:");
+		lblAppName.setText(Messages.CyberTrackerPropertiesDialog_AppName);
 
 		txtAppName = new Text(container, SWT.BORDER);
 		txtAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -137,7 +138,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		});
 		
 		Label lblKioskMode = new Label(container, SWT.NONE);
-		lblKioskMode.setText("Kiosk Mode:");
+		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
 
 		btnKioskMode = new Button(container, SWT.CHECK);
 		btnKioskMode.setSelection(Boolean.TRUE.equals(ctProperties.getKioskMode()));
@@ -155,7 +156,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		});
 		
 		Label lblTrackTimer = new Label(container, SWT.NONE);
-		lblTrackTimer.setText("Track Timer:");
+		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer);
 
 		txtTrackTimer = new Text(container, SWT.BORDER);
 		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -169,7 +170,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		});
 
 		Label lblTimeOffset = new Label(container, SWT.NONE);
-		lblTimeOffset.setText("GMT/UTC time offset:");
+		lblTimeOffset.setText(Messages.CyberTrackerPropertiesDialog_TimeOffset);
 
 		timeOffset = new ComboViewer(container, SWT.READ_ONLY);
 		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -185,8 +186,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});
 		
-		setTitle("CyberTracker Default Properties");
-		setMessage("Default properties that will be applied to all created CyberTracker applications");
+		setTitle(Messages.CyberTrackerPropertiesDialog_Title);
+		setMessage(Messages.CyberTrackerPropertiesDialog_Message);
 		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
 		
 		return container;
@@ -219,7 +220,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			setChangesMade(false);
 			return true;
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(getShell(), "Error occured while trying to save CyberTracker properties", e);
+			SmartPlugIn.displayLog(getShell(), Messages.CyberTrackerPropertiesDialog_Save_Error, e);
 			return false;
 		}finally {
 			session.close();

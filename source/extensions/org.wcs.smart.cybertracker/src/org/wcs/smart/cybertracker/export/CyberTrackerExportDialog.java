@@ -83,7 +83,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 		btnToDevice = new Button(main, SWT.RADIO);
 		btnToDevice.setSelection(true);
-		btnToDevice.setText("Export to Device (device must be connected to the computer)");
+		btnToDevice.setText(Messages.CyberTrackerExportDialog_ExportToDevice);
 		btnToDevice.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -93,7 +93,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		
 		btnToFile = new Button(main, SWT.RADIO);
 		btnToFile.setSelection(false);
-		btnToFile.setText("Export to CTX file");
+		btnToFile.setText(Messages.CyberTrackerExportDialog_ExportToFile);
 		btnToFile.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -111,7 +111,6 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 		txtFile = new Text(fileCmp, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtFile.setText("c:\\dev\\CyberTracker\\out\\result.ctx");
 		
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
@@ -131,7 +130,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
 				fd.setFilterExtensions(new String[]{"*.ctx", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-				fd.setFilterNames(new String[]{"CyberTracker file (*.ctx)", "All files (*.*)"});
+				fd.setFilterNames(new String[]{Messages.CyberTrackerExportDialog_CtxFile, Messages.CyberTrackerExportDialog_AllFiles});
 				
 				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
 					fd.setFilterPath(txtFile.getText());
@@ -213,8 +212,10 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 					try {
 						File generated = exporter.export(monitor);
 						if (toDevice) {
+							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
 							exporter.uploadPda(generated);
 						} else {
+							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							FileUtils.copyFile(generated, selectedFile);
 						}
 					} catch (Exception e) {

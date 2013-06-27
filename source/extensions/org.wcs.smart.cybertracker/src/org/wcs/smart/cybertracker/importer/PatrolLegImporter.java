@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.importer;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -56,7 +57,7 @@ public class PatrolLegImporter extends SmartImporter {
 			session.getTransaction().commit();
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
-			CyberTrackerPlugIn.displayError("Error", "Failed to add a leg to a patrol.");
+			CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_ErrorDialog_Title, Messages.PatrolLegImporter_ErrorDialog_Message);
 		}
 		finally {
 			session.close();

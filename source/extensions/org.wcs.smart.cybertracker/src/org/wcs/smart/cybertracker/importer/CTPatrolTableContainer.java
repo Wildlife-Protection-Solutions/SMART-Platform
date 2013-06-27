@@ -169,7 +169,7 @@ public class CTPatrolTableContainer extends Composite {
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Add patrol operation was aborted", e);
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CTPatrolTableContainer_Patrol_Error, e);
 			e.printStackTrace();
 		}
 		
@@ -181,7 +181,7 @@ public class CTPatrolTableContainer extends Composite {
 				if (i.hasNext())
 					ids += ", "; //$NON-NLS-1$
 			}
-			MessageDialog.openInformation(getShell(), "Add Patrol", MessageFormat.format("Patrol(s) with following id(s) were sucessfully added: {0}", ids)); 
+			MessageDialog.openInformation(getShell(), Messages.CTPatrolTableContainer_Patrol_Success_Title, MessageFormat.format(Messages.CTPatrolTableContainer_Patrol_Success_Message, ids)); 
 		}
 		refreshViewer();
 	}
@@ -206,11 +206,11 @@ public class CTPatrolTableContainer extends Composite {
 						legImporter.importData(patrol, ctp);
 						tableInputData.remove(ctp);
 					}
-					CyberTrackerPlugIn.displayInfo("Add Leg", "Add leg(s) operation completed.");
+					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_Leg_Success_Title, Messages.CTPatrolTableContainer_Leg_Success_Message);
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Add leg(s) operation was aborted", e);
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CTPatrolTableContainer_Leg_Error, e);
 			e.printStackTrace();
 		}
 
