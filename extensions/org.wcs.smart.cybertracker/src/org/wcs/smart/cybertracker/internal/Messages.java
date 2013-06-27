@@ -30,9 +30,10 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
+	public static String CyberTrackerExportDialog_ConfirmCreateDir_Message;
+	public static String CyberTrackerExportDialog_ConfirmOverwrite_Message;
+	public static String CyberTrackerExportDialog_ConfirmOverwrite_Title;
 	public static String CyberTrackerExportDialog_CtxFile;
-	public static String CyberTrackerExportDialog_Err_Dialog_Message;
-	public static String CyberTrackerExportDialog_ErrDialog_Title;
 	public static String CyberTrackerExportDialog_ExportToDevice;
 	public static String CyberTrackerExportDialog_ExportToFile;
 	public static String CyberTrackerExportDialog_Label_File;
