@@ -40,9 +40,10 @@ import org.wcs.smart.patrol.xml.model.WaypointType;
  * This function merges observations at a single waypoint.  It does not merge
  * observations across waypoints.
  * <p>
- * Observations are merged if they have the same category but different
- * attributes.  If any attributes overlap in a given observation the 
- * observations are not merged.
+ * Observations are merged if they have the same categories and either different
+ * attributes or the same attribute with the same attribute values.  If the same attribute has
+ * different values across and waypoint the observations are not merged.
+ * 
  * </p>
  * 
  * This xml:
@@ -58,6 +59,9 @@ import org.wcs.smart.patrol.xml.model.WaypointType;
  *		</attributes>
  *	</observations>
  *	<observations categoryKey="mammals.track.">
+ *		<attributes attributeKey="hkkspecieslist">
+ *			<itemKey>redmuntjac</itemKey>
+ *		</attributes>
  *		<attributes attributeKey="numberoftrack">
  *			<dValue>3.0</dValue>
  *		</attributes>
@@ -89,6 +93,7 @@ import org.wcs.smart.patrol.xml.model.WaypointType;
  */
 public class ObservationMerger implements IDataProcessor{
 
+	private Object NODATA = new Object();
 	
 	private void mergeObservation(PatrolType patrol){
 		
@@ -107,33 +112,72 @@ public class ObservationMerger implements IDataProcessor{
 						obs.add(wot);
 					}
 					
-					//for each category key; check to ensure attributes are unique
-					//and merge if able
+					//for each category key; check to ensure attributes are either different or have the same attribute value
 					ArrayList<WaypointObservationType> newObservations = new ArrayList<WaypointObservationType>();
 					for(Entry<String,List<WaypointObservationType>> item : maps.entrySet()){
 						List<WaypointObservationType> elements = item.getValue();
-						HashSet<String> attributeKeys = new HashSet<String>();
+						HashMap<String, Object> attributeValues = new HashMap<String,Object>();
 						boolean canMerge = true;
 						for (WaypointObservationType element : elements){
 							for (WaypointObservationAttributeType attribute : element.getAttributes()){
-								if (attributeKeys.contains(attribute.getAttributeKey())){
-									canMerge = false;
-									break;
+								if (attributeValues.containsKey(attribute.getAttributeKey())){
+									//validate that the value is the same
+									Object v = attributeValues.get(attribute.getAttributeKey());
+									if (attribute.getDValue() != null){
+										if (!attribute.getDValue().equals(v)){
+											canMerge = false;
+										}
+									}else if (attribute.getSValue() != null){
+										if (!attribute.getSValue().equals(v)){
+											canMerge = false;
+										}
+									}else if (attribute.getItemKey() != null){
+										if (!attribute.getItemKey().equals(v)){
+											canMerge = false;
+										}
+									}else if (v != NODATA){
+										canMerge = false;
+									}
+
+									if (!canMerge){
+										break;
+									}
+								}else{
+									if (attribute.getDValue() != null){
+										attributeValues.put(attribute.getAttributeKey(), attribute.getDValue());
+									}else if (attribute.getSValue() != null){
+										attributeValues.put(attribute.getAttributeKey(), attribute.getSValue());
+									}else if (attribute.getItemKey() != null){
+										attributeValues.put(attribute.getAttributeKey(), attribute.getItemKey());
+									}else{
+										attributeValues.put(attribute.getAttributeKey(), NODATA);
+									}
 								}
-								attributeKeys.add(attribute.getAttributeKey());
+							}
+							if (!canMerge){
+								break;
 							}
 						}
 						if (canMerge && elements.size() > 1){
 							WaypointObservationType main = elements.get(0);
+							HashSet<String> attKeys = new HashSet<String>();
+							for (WaypointObservationAttributeType a : main.getAttributes()){
+								attKeys.add(a.getAttributeKey());
+							}
 							for (int i = 1; i < elements.size(); i ++){
 								WaypointObservationType merge = elements.get(i);
-								main.getAttributes().addAll(merge.getAttributes());
+								for (WaypointObservationAttributeType b : merge.getAttributes()){
+									if (!attKeys.contains(b.getAttributeKey())){
+										main.getAttributes().add(b);
+										attKeys.add(b.getAttributeKey());
+									}
+								}
 							}
 							newObservations.add(main);
 							System.out.println("Observations Merged: " + patrol.getId());
 						}else{
 							if (elements.size() > 1){
-								System.out.println("Multiple observations found for category that could not be merged because same attribute exists.  Category " + item.getKey() + " waypoint id " + wp.getId() + ", " + day.getDate().toString() + ", PID: " + patrol.getId());
+								System.out.println("Multiple observations found for category that could not be merged because different attribute values exists.  Category " + item.getKey() + " waypoint id " + wp.getId() + ", " + day.getDate().toString() + ", PID: " + patrol.getId());
 							}
 							newObservations.addAll(elements);
 						}
@@ -146,6 +190,11 @@ public class ObservationMerger implements IDataProcessor{
 		
 	}
 	
+	public boolean nullEquals(Object x, Object y){
+		if (x == null && y == null) return true;
+		if (x != null && y != null) return x.equals(y);
+		return false;
+	}
 	@Override
 	public void processFile(File in, File out) throws Exception{
 		PatrolType pt = DataUtils.readPatrol(in);
