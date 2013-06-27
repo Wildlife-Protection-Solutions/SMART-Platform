@@ -9,8 +9,106 @@
 	<version>1.1.0</version>
 	<name>transforms</name>
 
-
+	<properties>
+		<package.dir>${project.build.directory}/../Target/${project.name}.${version}</package.dir>
+		<package.dir.lib>${project.build.directory}/../Target/${project.name}.${version}/lib</package.dir.lib>
+	</properties>
+	
 	<build>
 		<sourceDirectory>src/</sourceDirectory>
+		
+		
+		
+		
+		<plugins>
+			<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-jar-plugin</artifactId>
+      			<version>2.3.1</version>
+      			<configuration>
+        			<outputDirectory>${package.dir.lib}</outputDirectory>
+      			</configuration>
+    		</plugin>
+			<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-dependency-plugin</artifactId>
+        		<version>2.1</version>
+        		<executions>
+        			<execution>
+            			<id>copy-dependencies</id>
+            			<phase>package</phase>
+            			<goals>
+            				<goal>copy-dependencies</goal>
+            				</goals>
+            				<configuration>
+            					<outputDirectory>${package.dir.lib}</outputDirectory>
+            			</configuration>
+          			</execution>
+          			<execution>
+            					<id>write-classpath-windows</id>
+            					<phase>package</phase>
+            					<goals>
+              						<goal>build-classpath</goal>
+            					</goals>
+            					<configuration>
+            						<pathSeparator>;</pathSeparator>
+              						<prefix>lib</prefix>
+              						<fileSeparator>/</fileSeparator>
+            						<outputFile>${package.dir}/cp.win</outputFile>
+            					</configuration>
+          				</execution>
+          				
+        			</executions>
+        			
+      			</plugin>
+      			<plugin>
+           			<groupId>com.google.code.maven-replacer-plugin</groupId>
+           			<artifactId>replacer</artifactId>
+           			<version>1.5.2</version>
+           			<executions>
+               				<execution>
+               					<id>windows</id>
+                   				<phase>package</phase>
+                   				<goals><goal>replace</goal></goals>                   
+                   				<configuration>
+                   				    <file>run.bat</file>
+               						<outputFile>${package.dir}/run.bat</outputFile>
+               						<replacements>
+                   						<replacement>
+                       							<token>%CP1%</token>
+                       							<valueFile>${package.dir}/cp.win</valueFile>
+                   						</replacement>  
+                   						<replacement>
+                       							<token>%CP2%</token>
+                       							<value>lib/${project.build.finalName}.jar</value>
+                   						</replacement>      
+                   						
+               						</replacements>
+           					</configuration>
+               				</execution>
+               				
+           			</executions>
+       			</plugin>
+       			 <plugin>
+    				<artifactId>maven-clean-plugin</artifactId>
+    				<version>2.5</version>
+    				<executions>
+               				<execution>
+               					<id>windows</id>
+               					<phase>package</phase>
+               					<goals><goal>clean</goal></goals>
+               					<configuration>
+               						<excludeDefaultDirectories>true</excludeDefaultDirectories>
+               						<filesets>
+               							<fileset>
+               								<directory>${package.dir}</directory>
+               								<includes><include>cp.*</include></includes>
+               							</fileset>
+               						</filesets>
+               					</configuration>
+               				</execution>
+               			</executions>
+               		</plugin>
+    		</plugins>
 	</build>
 </project>
