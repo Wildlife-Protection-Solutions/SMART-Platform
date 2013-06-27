@@ -578,25 +578,35 @@ public class DataModel {
 		DataModel clone = new DataModel();
 		
 		clone.setConservationArea(newCa);
+		Language ll = ca.getDefaultLanguage();
+		for (Language l : ca.getLanguages()){
+			if (l.getCode().equals(SmartDB.getCurrentLanguage().getCode())){
+				ll = l;
+				break;
+			}
+		}
 		
 		//attributes
+		monitor.beginTask(Messages.DataModel_ProgressLabel, 2);
 		monitor.subTask(Messages.DataModel_CloneAttributes1);
 		if (this.getAttributes() != null){
 			clone.attributes = new ArrayList<Attribute>();
 			for (Attribute att: this.getAttributes()){
-				monitor.subTask(Messages.DataModel_CloneAttributes2 + att.getName());
+				monitor.subTask(Messages.DataModel_CloneAttributes2 + att.findName(ll));
 				clone.attributes.add(att.clone(newCa,defaultLang));
 			}
 		}
 		
 		//categories
 		clone.categories = new ArrayList<Category>();
+		monitor.worked(1);
 		monitor.subTask(Messages.DataModel_CloneCategories);
 		for (Category cat: this.getCategories()){
-			monitor.subTask(Messages.DataModel_CloneSubCategories + cat.getName());
+			monitor.subTask(Messages.DataModel_CloneSubCategories + cat.findName(ll));
 			clone.categories.add(cat.clone(newCa, null, clone.attributes, defaultLang));
 		}
-		
+		monitor.worked(1);
+		monitor.done();
 		return clone;
 	}
 	
