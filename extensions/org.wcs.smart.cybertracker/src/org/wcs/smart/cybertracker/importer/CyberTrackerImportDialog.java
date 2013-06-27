@@ -87,7 +87,6 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtFile.setText("D:\\raw.xml"); //$NON-NLS-1$
 		
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
