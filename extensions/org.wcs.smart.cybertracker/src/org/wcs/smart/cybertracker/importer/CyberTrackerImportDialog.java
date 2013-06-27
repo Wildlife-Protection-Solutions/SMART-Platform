@@ -131,7 +131,7 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Button btnImportPda = new Button(main, SWT.NONE);
-		btnImportPda.setText("Import From Device");
+		btnImportPda.setText(Messages.CyberTrackerImportDialog_Button_ImportFromDevice);
 		btnImportPda.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

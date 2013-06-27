@@ -56,17 +56,17 @@ public class CyberTrackerImporter {
 	private Map<String, List<Data.Sightings.S>> patrolsMap;
 	
 	public List<CyberTrackerPatrol> importPdaData(IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Downloading data from PDA...");
+		monitor.subTask(Messages.CyberTrackerImporter_Task_Download);
 		String appPath = PdaUtil.getCTAppPath();
 		String[] downloadCommand = {appPath, ICyberTrackerConstants.COMMAND_DOWNLOAD};
 		Process proc = Runtime.getRuntime().exec(downloadCommand);
 		proc.waitFor();
-		String ctxDataPath = System.getProperty("user.home");
-		ctxDataPath += "\\Documents\\CyberTracker\\System\\Orphans";
+		String ctxDataPath = System.getProperty("user.home"); //$NON-NLS-1$
+		ctxDataPath += "\\Documents\\CyberTracker\\System\\Orphans"; //$NON-NLS-1$
 		File cxtDataFolder = new File(ctxDataPath);
 		File xmlTempDir = PdaUtil.createTempDirectory();
 		//scan files in this directory and obtain raw xml for them
-		monitor.subTask("Extracting raw data...");
+		monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 		for (final File file : cxtDataFolder.listFiles()) {
 			if (!file.isFile())
 				continue;
