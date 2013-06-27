@@ -21,6 +21,11 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -57,47 +62,6 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog {
 
-	private static final Integer CT_TIME_TRACK_MIN_VALUE = 0;
-	private static final Integer CT_TIME_TRACK_MAX_VALUE = 1000;
-	
-	private static final Integer[] CT_GTM_VALUES = {
-		-1200,
-		-1100,
-		-1000,
-		-900,
-		-800,
-		-700,
-		-600,
-		-500,
-		-450,
-		-400,
-		-350,
-		-300,
-		-200,
-		-100,
-		0,
-		100,
-		200,
-		300,
-		400,
-		450,
-		500,
-		550,
-		575,
-		600,
-		650,
-		700,
-		800,
-		900,
-		950,
-		1000,
-		1050,
-		1100,
-		1150,
-		1200,
-		1300,		
-	};
-
 	private CyberTrackerProperties ctProperties;
 	
 	private Text txtAppName;
@@ -105,6 +69,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private Text txtTrackTimer;
     private ComboViewer timeOffset;
 	
+    private ControlDecoration appNameDecoration;
+    private ControlDecoration trackTimerDecoration;
 	
 	public CyberTrackerPropertiesDialog() {
 		super(Display.getCurrent().getActiveShell(), Messages.CyberTrackerPropertiesDialog_Title);
@@ -133,9 +99,21 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtAppName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				if (isAppNameValid()) {
+					appNameDecoration.hide();
+				} else {
+					appNameDecoration.show();
+				}
 				setChangesMade(true);
 			}
 		});
+
+		appNameDecoration = new ControlDecoration(txtAppName, SWT.LEFT);
+		appNameDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		appNameDecoration.setShowHover(true);
+		appNameDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_NameInvalid, CyberTrackerProperties.APPLICATION_NAME_MAX_LENTH));
+		appNameDecoration.hide();
 		
 		Label lblKioskMode = new Label(container, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
@@ -143,12 +121,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		btnKioskMode = new Button(container, SWT.CHECK);
 		btnKioskMode.setSelection(Boolean.TRUE.equals(ctProperties.getKioskMode()));
 		btnKioskMode.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setChangesMade(true);
 			}
-
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// nothing
@@ -165,9 +141,21 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtTrackTimer.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				if (isTrackTimerValid()) {
+					trackTimerDecoration.hide();
+				} else {
+					trackTimerDecoration.show();
+				}
 				setChangesMade(true);
 			}
 		});
+
+		trackTimerDecoration = new ControlDecoration(txtTrackTimer, SWT.LEFT);
+		trackTimerDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		trackTimerDecoration.setShowHover(true);
+		trackTimerDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_TrackTimerInvalid, CyberTrackerProperties.TIME_TRACK_MIN_VALUE, CyberTrackerProperties.TIME_TRACK_MAX_VALUE));
+		trackTimerDecoration.hide();
 
 		Label lblTimeOffset = new Label(container, SWT.NONE);
 		lblTimeOffset.setText(Messages.CyberTrackerPropertiesDialog_TimeOffset);
@@ -176,7 +164,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
 		timeOffset.setLabelProvider(new CyberTrackerGTMLabelProvider());
- 		timeOffset.setInput(CT_GTM_VALUES);
+ 		timeOffset.setInput(CyberTrackerProperties.GTM_VALUES);
 		if (ctProperties.getGpsTimeZone() != null)
 			timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
 		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -193,19 +181,30 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		return container;
 	}
 
-	boolean validateTrackTimer(String value) {
+	private boolean isTrackTimerValid() {
+		if (txtTrackTimer == null || txtTrackTimer.getText() == null || txtTrackTimer.getText().isEmpty())
+			return false;
 		try {
-			Integer result = Integer.valueOf(value);
-			return result >= CT_TIME_TRACK_MIN_VALUE && result <= CT_TIME_TRACK_MAX_VALUE;
+			Integer result = Integer.valueOf(txtTrackTimer.getText());
+			return result >= CyberTrackerProperties.TIME_TRACK_MIN_VALUE && result <= CyberTrackerProperties.TIME_TRACK_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
 		
 	}
+
+	private boolean isAppNameValid() {
+    	return txtAppName != null && txtAppName.getText() != null && !txtAppName.getText().isEmpty() && txtAppName.getText().length() <= CyberTrackerProperties.APPLICATION_NAME_MAX_LENTH;
+	}
+
+	private boolean validate() {
+		return isTrackTimerValid() && isAppNameValid();
+	}
 	
 	@Override
 	protected boolean performSave() {
-		if (!validateTrackTimer(txtTrackTimer.getText())) {
+		if (!validate()) {
+			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);
 			return false;
 		}
 		ctProperties.setApplicationName(txtAppName.getText());
@@ -226,7 +225,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			session.close();
 		}
 	}
-
 
 	private class CyberTrackerGTMLabelProvider extends LabelProvider {
 		@Override

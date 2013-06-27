@@ -71,12 +71,16 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Task_Download;
 	public static String CyberTrackerImporter_Task_ExtractRawData;
 	public static String CyberTrackerPropertiesDialog_AppName;
+	public static String CyberTrackerPropertiesDialog_DataNotValid;
+	public static String CyberTrackerPropertiesDialog_Error;
 	public static String CyberTrackerPropertiesDialog_KioskMode;
 	public static String CyberTrackerPropertiesDialog_Message;
+	public static String CyberTrackerPropertiesDialog_NameInvalid;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
 	public static String CyberTrackerPropertiesDialog_TimeOffset;
 	public static String CyberTrackerPropertiesDialog_Title;
 	public static String CyberTrackerPropertiesDialog_TrackTimer;
+	public static String CyberTrackerPropertiesDialog_TrackTimerInvalid;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Undefined;
 	public static String Elements_BooleanAttribute_Yes;
