@@ -76,25 +76,26 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 			if (value.isDisposed()){
 				return Status.OK_STATUS;
 			}
+			List<String> data = null;
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				final List<String> data = QueryHibernateManager.getInstance().getPatrolIds(s);
+				data = QueryHibernateManager.getInstance().getPatrolIds(s);
 				s.getTransaction().rollback();
-				Display.getDefault().asyncExec(new Runnable(){
-					@Override
-					public void run() {
-						if (value.isDisposed()){
-							return ;
-						}
-						for (String id : data){
-							value.add(id);
-						}		
-					}});
-				
 			}finally{
 				s.close();
 			}
+			final List<String> fdata = data;
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					if (value.isDisposed()){
+						return ;
+					}
+					for (String id : fdata){
+						value.add(id);
+					}		
+				}});
 			return Status.OK_STATUS;
 		}};
 		
