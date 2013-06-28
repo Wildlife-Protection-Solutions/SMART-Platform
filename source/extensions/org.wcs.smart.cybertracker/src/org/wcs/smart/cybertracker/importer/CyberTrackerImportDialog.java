@@ -109,7 +109,12 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 				fd.setFilterNames(new String[]{Messages.CyberTrackerImportDialog_XmlFiles, Messages.CyberTrackerImportDialog_AllFiles});
 				
 				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
-					fd.setFilterPath(txtFile.getText());
+					File file = new File(txtFile.getText());
+					if (file.isFile()) {
+						fd.setFilterPath(file.getParentFile().getAbsolutePath());
+					} else {
+						fd.setFilterPath(txtFile.getText());
+					}
 				}
 				String f = fd.open();
 				if (f != null) {
