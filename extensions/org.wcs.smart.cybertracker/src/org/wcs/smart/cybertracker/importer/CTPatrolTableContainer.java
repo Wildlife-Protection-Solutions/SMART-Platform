@@ -33,6 +33,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -91,9 +93,12 @@ public class CTPatrolTableContainer extends Composite {
 		}
 	}
 	
-	private TableViewer viewer;
 	private PatrolImporter patrolImporter;
 	private PatrolLegImporter legImporter;
+
+	private TableViewer viewer;
+	private Button btnAsPatrol;
+	private Button btnAsLeg;
 	
 	private List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
 	
@@ -122,12 +127,20 @@ public class CTPatrolTableContainer extends Composite {
 		viewer.setItemCount(0);
 		addColumns(viewer);
 		viewer.setInput(tableInputData);
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				boolean selected = !viewer.getSelection().isEmpty();
+				btnAsPatrol.setEnabled(selected);
+				btnAsLeg.setEnabled(selected);
+			}
+		});
 		
 		Composite buttons = new Composite(this, SWT.NONE);
 		buttons.setLayout(new GridLayout(2, false));
 		buttons.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		
-		Button btnAsPatrol = new Button(buttons, SWT.NONE);
+		btnAsPatrol = new Button(buttons, SWT.NONE);
 		btnAsPatrol.setText(Messages.CTPatrolTableContainer_Button_AsPatrol);
 		btnAsPatrol.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -136,8 +149,9 @@ public class CTPatrolTableContainer extends Composite {
 			}
 		});
 		btnAsPatrol.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		btnAsPatrol.setEnabled(false);
 
-		Button btnAsLeg = new Button(buttons, SWT.NONE);
+		btnAsLeg = new Button(buttons, SWT.NONE);
 		btnAsLeg.setText(Messages.CTPatrolTableContainer_Button_AsLeg);
 		btnAsLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -146,6 +160,7 @@ public class CTPatrolTableContainer extends Composite {
 			}
 		});
 		btnAsLeg.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		btnAsLeg.setEnabled(false);
 	}
 	
 	protected void handleAddAsPatrol() {
