@@ -28,6 +28,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -55,6 +56,7 @@ public class PatrolLegImporter extends SmartImporter {
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
+			PatrolEventManager.getInstance().patrolSaved(patrol);
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
 			CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_ErrorDialog_Title, Messages.PatrolLegImporter_ErrorDialog_Message);
