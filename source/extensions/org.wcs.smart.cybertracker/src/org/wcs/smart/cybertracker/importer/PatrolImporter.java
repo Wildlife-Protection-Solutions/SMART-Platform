@@ -29,6 +29,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -52,6 +53,7 @@ public class PatrolImporter extends SmartImporter {
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
+			PatrolEventManager.getInstance().patrolAdded(patrol);
 			return patrol;
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
