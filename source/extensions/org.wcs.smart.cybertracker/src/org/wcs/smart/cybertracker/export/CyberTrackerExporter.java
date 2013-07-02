@@ -198,8 +198,8 @@ public class CyberTrackerExporter {
 
 	private Node createNoAttributeWarnNode() {
 		CyberTrackerId warnId = new CyberTrackerId();
-		Node warnNode = ScreensObjectFactory.createNodeMsgText(warnId.getNodeId(), "Warning", "This category doesn't have any enabled attributes. Press \"Save\" to record current observation or use back button");
-		//disable next button, enable save button,navigate on save to start point
+		Node warnNode = ScreensObjectFactory.createNodeMsgText(warnId.getNodeId(), Messages.CyberTrackerExporter_NoAttributesNode_Title, Messages.CyberTrackerExporter_NoAttributesNode_Message);
+		//disable next button, enable save button, navigate on save to root point
 		Control control2 = ScreensObjectFactory.getNavigationControl(warnNode);
 		control2.setShowNext("False"); //$NON-NLS-1$
 		control2.setShowMajor("True"); //$NON-NLS-1$
