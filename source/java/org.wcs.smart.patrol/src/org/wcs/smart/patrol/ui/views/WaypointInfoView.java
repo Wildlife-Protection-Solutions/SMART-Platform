@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.ui.views;
 
-import java.text.Collator;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +55,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -121,7 +121,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			Date wpDate = null;
 			
 			//load waypoint information
-			Session s = HibernateManager.openSession();
+			final Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
 				currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
@@ -136,7 +136,29 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 								data.put(wo.getCategory(), ops);
 							}
 							ArrayList<String[]> attributeValues = new ArrayList<String[]>();
-							for (WaypointObservationAttribute woa : wo.getAttributes()) {
+							
+							//sort observation attribute based on data model order
+							Category c = (Category) s.load(Category.class, wo.getCategory().getUuid());
+							final List<Attribute> attributes = new ArrayList<Attribute>();
+							c.getAllAttribute(attributes, null);
+							List<WaypointObservationAttribute> tmp = new ArrayList<WaypointObservationAttribute>();
+							tmp.addAll(wo.getAttributes());
+							Collections.sort(tmp, new Comparator<WaypointObservationAttribute>() {
+
+								@Override
+								public int compare(
+										WaypointObservationAttribute o1,
+										WaypointObservationAttribute o2) {
+									int index1 = attributes.indexOf(o1.getAttribute());
+									int index2 = attributes.indexOf(o2.getAttribute());
+									if (index1 == index2){
+										return 0;
+									}
+									if (index1 > index2) return 1;
+									return -1;
+								}
+							});
+							for (WaypointObservationAttribute woa : tmp) {
 								String[] info = new String[] {
 										woa.getAttribute().getName(),
 										woa.getAttributeValueAsString() };
@@ -177,55 +199,48 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 					if (currentWp == null){
 						clearContents();
 					}else{
-					lblWaypointId.setText(String.valueOf(currentWp.getId()));
-					lblDateTime
-							.setText(DateFormat.getDateInstance(
-									DateFormat.SHORT).format(wpDate2)
-									+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(currentWp.getTime())); //$NON-NLS-1$
+						lblWaypointId.setText(String.valueOf(currentWp.getId()));
+						lblDateTime
+								.setText(DateFormat.getDateInstance(
+										DateFormat.SHORT).format(wpDate2)
+										+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(currentWp.getTime())); //$NON-NLS-1$
 
-					for (Entry<String, List<List<String[]>>> cat : displayData
-							.entrySet()) {
-						Label lbl = toolkit.createLabel(infoSection.getBody(),SmartUtils.formatStringForLabel(cat.getKey()),SWT.WRAP);
-						lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-						((GridData)lbl.getLayoutData()).widthHint = 100;
-						lbl.setFont(boldFont);
-						categoryLabels.add(lbl);
+						int widthHint = infoSection.getBody().getBounds().width - 20;						
+						for (Entry<String, List<List<String[]>>> cat : displayData.entrySet()) {
+							Label lbl = toolkit.createLabel(infoSection.getBody(), SmartUtils.formatStringForLabel(cat.getKey()), SWT.WRAP);
+							lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+							((GridData) lbl.getLayoutData()).widthHint = widthHint;
+							lbl.setFont(boldFont);
+							categoryLabels.add(lbl);
 
-						Composite attributeComp = toolkit.createComposite(infoSection.getBody());
-						attributeComp.setLayout(new GridLayout(2, false));
-						((GridLayout) attributeComp.getLayout()).marginLeft = 5;
-						
-						
-						attributeComp.setLayoutData(new GridData(SWT.FILL,
-								SWT.FILL, true, false));
-						
-						for (int i = 0; i < cat.getValue().size(); i ++){
-							List<String[]> obs = cat.getValue().get(i);
-							Collections.sort(obs, new Comparator<String[]>() {
-								@Override
-								public int compare(String[] o1, String[] o2) {
-									return Collator.getInstance().compare(o1[0], o2[0]);
-								}});
-							for (String[] att : obs){
-								Label l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[0] + ":"), SWT.WRAP); //$NON-NLS-1$
-								l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-								((GridData)l.getLayoutData()).widthHint = 100;
-								attributeLabels.add(l);
-								
-								l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[1]), SWT.WRAP);
-								l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-								((GridData)l.getLayoutData()).widthHint = 100;
-								attributeValuesLabels.add(l);
+							Composite attributeComp = toolkit.createComposite(infoSection.getBody());
+							attributeComp.setLayout(new GridLayout(2, false));
+							((GridLayout) attributeComp.getLayout()).marginLeft = 5;
+
+							attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+							for (int i = 0; i < cat.getValue().size(); i++) {
+								List<String[]> obs = cat.getValue().get(i);
+								for (String[] att : obs) {
+									Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(att[0] + ":"), SWT.WRAP); //$NON-NLS-1$
+									l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+									((GridData) l.getLayoutData()).widthHint = 100;
+									attributeLabels.add(l);
+
+									l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[1]), SWT.WRAP);
+									l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+									((GridData) l.getLayoutData()).widthHint = 100;
+									attributeValuesLabels.add(l);
+								}
+								if (i < cat.getValue().size() - 1) {
+									Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+									l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+								}
 							}
-							if ( i < cat.getValue().size() - 1){
-								Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-								l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-							}
+
+							Label l2 = toolkit.createLabel(infoSection.getBody(),"", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+							l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 						}
-						
-						Label l2 = toolkit.createLabel(infoSection.getBody(), "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-						l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-					}
 					}
 					
 			
