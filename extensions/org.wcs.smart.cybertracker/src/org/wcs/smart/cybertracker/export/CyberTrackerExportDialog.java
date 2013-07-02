@@ -27,7 +27,9 @@ import java.text.MessageFormat;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -58,6 +60,12 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerExportDialog extends TitleAreaDialog {
 
+	private static final String OUTPUT_FILE = "outputFile"; //$NON-NLS-1$
+
+	private static final String DEFAULT_CTX_FILENAME = "smart.ctx"; //$NON-NLS-1$
+	
+	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.cybertracker.export"); //$NON-NLS-1$
+	
 	private CyberTrackerExporter exporter = new CyberTrackerExporter();
 
 	private Button btnToDevice;
@@ -112,6 +120,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 		txtFile = new Text(fileCmp, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtFile.setText(getDefaultFileName());
 		
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
@@ -182,6 +191,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 					return;
 				}
 			}
+			dialogSettings.put(OUTPUT_FILE, selectedFile.getAbsolutePath());
 			handleExport(btnToDevice.getSelection());
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
@@ -243,4 +253,16 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		return true;
 	}
 
+	protected String getDefaultFileName() {
+		String name = dialogSettings.get(OUTPUT_FILE);
+		if (name != null)
+			return name;
+
+		name = System.getProperty("user.home"); //$NON-NLS-1$
+		if (name != null)
+			return name + "\\" + DEFAULT_CTX_FILENAME; //$NON-NLS-1$
+		
+		return DEFAULT_CTX_FILENAME;
+	}
+	
 }
