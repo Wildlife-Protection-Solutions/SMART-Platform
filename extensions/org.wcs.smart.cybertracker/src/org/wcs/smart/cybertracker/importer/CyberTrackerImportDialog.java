@@ -32,8 +32,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -42,9 +40,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -57,18 +53,11 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
  */
 public class CyberTrackerImportDialog extends TitleAreaDialog {
 
-	private Text txtFile;
-	private File selectedFile;
-	
 	private CTPatrolTableContainer tableContainer;
 	private CyberTrackerImporter importer = new CyberTrackerImporter();
 
 	public CyberTrackerImportDialog(Shell parentShell) {
 		super(parentShell);
-	}
-	
-	public File getSelectedFile() {
-		return selectedFile;
 	}
 	
 	/**
@@ -78,52 +67,9 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(5, false));
+		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.CyberTrackerImportDialog_File);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
-		txtFile = new Text(main, SWT.BORDER);
-		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		txtFile.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
-					if (getButton(IDialogConstants.OK_ID) != null) {
-						getButton(IDialogConstants.OK_ID).setEnabled(true);
-					}
-				}
-			}
-		});
-		
-		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText(Messages.CyberTrackerImportDialog_Button_Browse);
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
-				fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-				fd.setFilterNames(new String[]{Messages.CyberTrackerImportDialog_XmlFiles, Messages.CyberTrackerImportDialog_AllFiles});
-				
-				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
-					File file = new File(txtFile.getText());
-					if (file.isFile()) {
-						fd.setFilterPath(file.getParentFile().getAbsolutePath());
-					} else {
-						fd.setFilterPath(txtFile.getText());
-					}
-				}
-				String f = fd.open();
-				if (f != null) {
-					txtFile.setText(f);
-				}
-			}
-		});
-		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
 		Button btnImport = new Button(main, SWT.NONE);
 		btnImport.setText(Messages.CyberTrackerImportDialog_Button_Import);
 		btnImport.addSelectionListener(new SelectionAdapter() {
@@ -170,15 +116,6 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
-//		if (IDialogConstants.OK_ID == buttonId) {
-//			File file = new File(txtFile.getText());
-//			if (!file.exists()) {
-//				MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
-//				return;
-//			}
-//			selectedFile = file;
-//			super.setReturnCode(IDialogConstants.OK_ID);
-//		}
 		close();
 	}
 	
@@ -186,14 +123,32 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	protected boolean isResizable() {
 		return true;
 	}
+
+	private File selectFile() {
+		FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
+		fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[]{Messages.CyberTrackerImportDialog_XmlFiles, Messages.CyberTrackerImportDialog_AllFiles});
+		String f = fd.open();
+		if (f != null) {
+			return new File(f);
+		}
+		return null;
+		
+	}
 	
 	private void performImport(final boolean fromPda) {
-		final File file = new File(txtFile.getText());
-		if (!fromPda && !file.exists()) {
-			MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
-			return;
+		File dialogFile = null;
+		if (!fromPda) {
+			dialogFile = selectFile();
+			if (dialogFile == null)
+				return;
+			if (!dialogFile.exists()) {
+				MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
+				return;
+			}
 		}
 		
+		final File file = dialogFile;
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
