@@ -41,6 +41,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Task_Copy;
 	public static String CyberTrackerExportDialog_Task_Upload;
 	public static String CyberTrackerExportDialog_Title;
+	public static String CyberTrackerExporter_NoAttributesNode_Message;
+	public static String CyberTrackerExporter_NoAttributesNode_Title;
 	public static String CyberTrackerExporter_Progress_Build_Content;
 	public static String CyberTrackerExporter_Progress_Build_Mappings;
 	public static String CyberTrackerExporter_Progress_FetchDataModel;
