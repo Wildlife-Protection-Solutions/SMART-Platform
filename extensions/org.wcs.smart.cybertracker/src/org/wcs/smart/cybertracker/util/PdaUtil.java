@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.commons.io.FileUtils;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 
 /**
@@ -50,6 +51,15 @@ public class PdaUtil {
 			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); //$NON-NLS-1$
 		}
 		return temp;
+	}	
+
+	public static void deleteTempDirectory(File tempDir) {
+		try {
+			FileUtils.deleteDirectory(tempDir);
+		} catch (IOException e) {
+			//ignore
+			e.printStackTrace();
+		}
 	}	
 	
 }

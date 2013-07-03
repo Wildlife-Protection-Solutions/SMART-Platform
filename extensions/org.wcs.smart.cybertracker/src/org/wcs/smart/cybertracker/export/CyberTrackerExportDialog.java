@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -226,7 +227,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
 					try {
-						File generated = exporter.export(monitor);
+						File tempDir = PdaUtil.createTempDirectory();
+						File generated = exporter.export(tempDir, monitor);
 						if (toDevice) {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
 							exporter.uploadPda(generated);
@@ -234,6 +236,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							FileUtils.copyFile(generated, selectedFile);
 						}
+						PdaUtil.deleteTempDirectory(tempDir);
 					} catch (Exception e) {
 						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportHandler_ErrDialog_Message);
 						e.printStackTrace();
