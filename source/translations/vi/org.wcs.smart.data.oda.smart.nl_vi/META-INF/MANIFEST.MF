@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.wcs.smart.data.oda.smart Vietnamese NLS Support
+Bundle-SymbolicName: org.wcs.smart.data.oda.smart.nl_vi
+Bundle-Version: 1.1.0
+Fragment-Host: org.wcs.smart.data.oda.smart;bundle-version="1.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: org.wcs.smart
