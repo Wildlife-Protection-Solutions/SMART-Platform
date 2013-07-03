@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -60,7 +62,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class CTPatrolTableContainer extends Composite {
 	
-	private static final int HEIGHT_HINT = 250;
+	private static final int HEIGHT_HINT = 300;
 	private static final int COLUMN_WIDTH = 80;
 	
 	/**
@@ -92,13 +94,15 @@ public class CTPatrolTableContainer extends Composite {
 			return this.guiName;
 		}
 	}
-	
+
 	private PatrolImporter patrolImporter;
 	private PatrolLegImporter legImporter;
 
 	private TableViewer viewer;
 	private Button btnAsPatrol;
 	private Button btnAsLeg;
+	
+	private CyberTrackerImporter importer = new CyberTrackerImporter();
 	
 	private List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
 	
@@ -137,8 +141,28 @@ public class CTPatrolTableContainer extends Composite {
 		});
 		
 		Composite buttons = new Composite(this, SWT.NONE);
-		buttons.setLayout(new GridLayout(2, false));
-		buttons.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		buttons.setLayout(new GridLayout(4, false));
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		Button btnImport = new Button(buttons, SWT.NONE);
+		btnImport.setText(Messages.CyberTrackerImportDialog_Button_Import);
+		btnImport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performImport(false);
+			}
+		});
+		btnImport.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false));
+
+		Button btnImportPda = new Button(buttons, SWT.NONE);
+		btnImportPda.setText(Messages.CyberTrackerImportDialog_Button_ImportFromDevice);
+		btnImportPda.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performImport(true);
+			}
+		});
+		btnImportPda.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 		
 		btnAsPatrol = new Button(buttons, SWT.NONE);
 		btnAsPatrol.setText(Messages.CTPatrolTableContainer_Button_AsPatrol);
@@ -148,7 +172,7 @@ public class CTPatrolTableContainer extends Composite {
 				handleAddAsPatrol();
 			}
 		});
-		btnAsPatrol.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		btnAsPatrol.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
 		btnAsPatrol.setEnabled(false);
 
 		btnAsLeg = new Button(buttons, SWT.NONE);
@@ -159,8 +183,45 @@ public class CTPatrolTableContainer extends Composite {
 				handleAddAsLeg();
 			}
 		});
-		btnAsLeg.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		btnAsLeg.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
 		btnAsLeg.setEnabled(false);
+	}
+
+	private void performImport(final boolean fromPda) {
+		File dialogFile = null;
+		if (!fromPda) {
+			dialogFile = selectFile();
+			if (dialogFile == null)
+				return;
+			if (!dialogFile.exists()) {
+				MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
+				return;
+			}
+		}
+		
+		final File file = dialogFile;
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 100);
+					try {
+						List<CyberTrackerPatrol> data = fromPda ? importer.importPdaData(monitor) : importer.importData(file, monitor);
+						addTableData(data);
+					} catch (Exception e) {
+//						displayError("Error", "Error occured while importing data from CyberTracker into SMART.");
+						e.printStackTrace();
+						return;
+					}
+//					displayInfo("CyberTracker Import", "Import successfully completed.");
+				}
+
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 	
 	protected void handleAddAsPatrol() {
@@ -241,6 +302,17 @@ public class CTPatrolTableContainer extends Composite {
 		}
 	}
 
+	private File selectFile() {
+		FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
+		fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[]{Messages.CyberTrackerImportDialog_XmlFiles, Messages.CyberTrackerImportDialog_AllFiles});
+		String f = fd.open();
+		if (f != null) {
+			return new File(f);
+		}
+		return null;
+	}
+	
 	public TableViewer getViewer() {
 		return viewer;
 	}
