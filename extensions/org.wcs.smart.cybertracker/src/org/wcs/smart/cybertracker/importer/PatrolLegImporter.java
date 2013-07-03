@@ -56,7 +56,7 @@ public class PatrolLegImporter extends SmartImporter {
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
-			PatrolEventManager.getInstance().patrolSaved(patrol);
+			PatrolEventManager.getInstance().patrolSaved(patrol, true);
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
 			CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_ErrorDialog_Title, Messages.PatrolLegImporter_ErrorDialog_Message);
