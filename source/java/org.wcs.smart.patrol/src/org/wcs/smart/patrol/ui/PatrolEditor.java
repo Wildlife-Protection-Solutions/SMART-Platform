@@ -100,7 +100,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
 		@Override
-		public void eventFired(int attributeChanged, Object source) {
+		public void eventFired(final int attributeChanged, Object source) {
 			Patrol p = null;
 			if (source instanceof PatrolLegDay){
 				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
@@ -108,12 +108,37 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				p = (Patrol)source;
 			}
 			if (p != null && p.equals(patrol)){
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						updateSummaryPage();
-					}
-				});
+				if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG){
+					//reload patrol & update summary and day pages
+					Job j = new Job("load patrol"){ //$NON-NLS-1$
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							patrol = null;
+							getPatrol();
+							Session s = HibernateManager.openSession();
+							s.beginTransaction();
+							try{
+								s.update(patrol);
+								updateSummaryPage();
+							}finally{
+								s.close();
+							}
+							Display.getDefault().syncExec(new Runnable(){
+								@Override
+								public void run() {
+									createDayPages();
+								
+								}});
+							return Status.OK_STATUS;
+						}					
+					};
+					j.setSystem(true);
+					j.schedule();
+				
+				}else{
+					updateSummaryPage();
+				}
+
 			}
 		}
 	};
@@ -205,7 +230,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 			this.projections = tmp.toArray(new Projection[tmp.size()]);
 			session.getTransaction().commit();
-			ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+			if (ops == null){
+				ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+			}
 			session.close();
 		}
 		return this.patrol;
@@ -400,7 +427,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}finally{
 					saveSession.close();
 				}				
-				PatrolEventManager.getInstance().patrolSaved(patrol);
+				PatrolEventManager.getInstance().patrolSaved(patrol, false);
 				return Status.OK_STATUS;
 			}};
 			saveJob.schedule();
@@ -425,8 +452,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 				try{
 					if (PatrolHibernateManager.savePatrolInTransaction(patrol, saveSession, false)){
-					//saved okay
-						PatrolEventManager.getInstance().patrolSaved(patrol);
+						//saved okay
+						PatrolEventManager.getInstance().patrolSaved(patrol, false);
 					}
 				}finally{
 					if (saveSession.isOpen()){

@@ -106,9 +106,16 @@ public class PatrolEventManager {
 	
 	/**
 	 * Fires a patrol added event
+	 * @param patrol the patrol saved
+	 * @param legsModified if the dates of the patrol or the number of
+	 * legs have been modified in any way.
 	 */
-	public void patrolSaved(Patrol patrol){
-		fireListeners(EventType.PATROL_SAVED, -1, patrol);
+	public void patrolSaved(Patrol patrol, boolean legsModified){
+		if (legsModified){
+			fireListeners(EventType.PATROL_SAVED, PATROL_DATES_LEG, patrol);
+		}else{
+			fireListeners(EventType.PATROL_SAVED, -1, patrol);
+		}
 	}
 	
 	/**
