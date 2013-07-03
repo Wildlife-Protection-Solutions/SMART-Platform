@@ -83,6 +83,7 @@ public class CyberTrackerImporter {
 		for (final File file : xmlTempDir.listFiles()) {
 			patrols.addAll(importData(file, monitor));
 		}
+		PdaUtil.deleteTempDirectory(xmlTempDir);
 		return patrols;
 	}
 	
