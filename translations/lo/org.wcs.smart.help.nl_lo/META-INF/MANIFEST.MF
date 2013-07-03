@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Lao Help Translation
+Bundle-SymbolicName: org.wcs.smart.help.nl_lo
+Bundle-Version: 1.1.0
+Bundle-Vendor: org.wcs.smart
+Fragment-Host: org.wcs.smart.help;bundle-version="1.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
