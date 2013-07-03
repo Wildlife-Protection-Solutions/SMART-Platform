@@ -83,13 +83,12 @@ public class CyberTrackerExporter {
 		return code;
 	}
 
-	public File export(IProgressMonitor monitor) throws Exception {
-		File tempDir = PdaUtil.createTempDirectory();
+	public File export(File destFolder, IProgressMonitor monitor) throws Exception {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			elements = ElementsUtil.buildEmptyElements();
-			return performExport(tempDir, monitor, session);
+			return performExport(destFolder, monitor, session);
 		} finally {
 			elements = null;
 			rootId = null;
@@ -97,7 +96,6 @@ public class CyberTrackerExporter {
 			catLevel2resultId.clear();
 			session.getTransaction().rollback();
 			session.close();
-			tempDir.deleteOnExit(); //TODO: this does NOT clean out temp folder
 		}
 	}
 		
