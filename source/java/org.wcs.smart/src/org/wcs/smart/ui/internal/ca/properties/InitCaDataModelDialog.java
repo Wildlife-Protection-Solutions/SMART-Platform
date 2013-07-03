@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -358,7 +359,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							}
 						}
 						
-						dm = dmToClone.clone(ca, code, monitor);
+						dm = dmToClone.clone(ca, code, new SubProgressMonitor(monitor, 1));
 						monitor.worked(1);
 					}else if (isBlank){
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
