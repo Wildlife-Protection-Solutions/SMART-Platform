@@ -21,29 +21,14 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 
 /**
  * Dialog for importing CyberTracker application data.
@@ -52,9 +37,6 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
  * @since 1.0.0
  */
 public class CyberTrackerImportDialog extends TitleAreaDialog {
-
-	private CTPatrolTableContainer tableContainer;
-	private CyberTrackerImporter importer = new CyberTrackerImporter();
 
 	public CyberTrackerImportDialog(Shell parentShell) {
 		super(parentShell);
@@ -66,31 +48,8 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 	@Override
 	protected Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
-		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Button btnImport = new Button(main, SWT.NONE);
-		btnImport.setText(Messages.CyberTrackerImportDialog_Button_Import);
-		btnImport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performImport(false);
-			}
-		});
-		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
-		Button btnImportPda = new Button(main, SWT.NONE);
-		btnImportPda.setText(Messages.CyberTrackerImportDialog_Button_ImportFromDevice);
-		btnImportPda.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performImport(true);
-			}
-		});
-		btnImportPda.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		tableContainer = new CTPatrolTableContainer(composite, SWT.NONE);
+		new CTPatrolTableContainer(composite, SWT.NONE);
 		
 		setTitle(Messages.CyberTrackerImportDialog_Title);
 		setMessage(Messages.CyberTrackerImportDialog_Message);
@@ -124,52 +83,4 @@ public class CyberTrackerImportDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	private File selectFile() {
-		FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
-		fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{Messages.CyberTrackerImportDialog_XmlFiles, Messages.CyberTrackerImportDialog_AllFiles});
-		String f = fd.open();
-		if (f != null) {
-			return new File(f);
-		}
-		return null;
-		
-	}
-	
-	private void performImport(final boolean fromPda) {
-		File dialogFile = null;
-		if (!fromPda) {
-			dialogFile = selectFile();
-			if (dialogFile == null)
-				return;
-			if (!dialogFile.exists()) {
-				MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
-				return;
-			}
-		}
-		
-		final File file = dialogFile;
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 100);
-					try {
-						List<CyberTrackerPatrol> data = fromPda ? importer.importPdaData(monitor) : importer.importData(file, monitor);
-						tableContainer.addTableData(data);
-					} catch (Exception e) {
-//						displayError("Error", "Error occured while importing data from CyberTracker into SMART.");
-						e.printStackTrace();
-						return;
-					}
-//					displayInfo("CyberTracker Import", "Import successfully completed.");
-				}
-
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
 }
