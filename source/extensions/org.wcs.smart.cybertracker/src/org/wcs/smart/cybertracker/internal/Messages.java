@@ -14,6 +14,7 @@ public class Messages extends NLS {
 	public static String CTPatrolTableColumn_Members;
 	public static String CTPatrolTableColumn_Objective;
 	public static String CTPatrolTableColumn_Pilot;
+	public static String CTPatrolTableColumn_SightCount;
 	public static String CTPatrolTableColumn_StartDate;
 	public static String CTPatrolTableColumn_Station;
 	public static String CTPatrolTableColumn_Team;

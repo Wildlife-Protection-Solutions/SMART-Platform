@@ -176,6 +176,8 @@ public class CyberTrackerPatrol {
 	}
 
 	public List<S> getPatrolData() {
+		if (patrolData == null)
+			patrolData = new ArrayList<S>();
 		return patrolData;
 	}
 

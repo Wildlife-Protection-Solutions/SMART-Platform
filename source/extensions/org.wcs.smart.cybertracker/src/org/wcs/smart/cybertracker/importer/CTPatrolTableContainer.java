@@ -84,7 +84,8 @@ public class CTPatrolTableContainer extends Composite {
 		COMMENT(Messages.CTPatrolTableColumn_Comment),
 		LEADER(Messages.CTPatrolTableColumn_Leader),
 		PILOT(Messages.CTPatrolTableColumn_Pilot),
-		MEMBERS(Messages.CTPatrolTableColumn_Members);
+		MEMBERS(Messages.CTPatrolTableColumn_Members),
+		SIGHT_COUNT(Messages.CTPatrolTableColumn_SightCount);
 		
 		private String guiName;
 		CTPatrolTableColumn(String guiName){
