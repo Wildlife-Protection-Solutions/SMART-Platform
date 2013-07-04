@@ -26,6 +26,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +111,12 @@ public class CyberTrackerImporter {
 		for (String id : patrolsMap.keySet()) {
 			patrols.add(new CyberTrackerPatrol(elementsMap, patrolsMap.get(id)));
 		}
+		//sort patrols based on there CT id before returning
+		Collections.sort(patrols, new Comparator<CyberTrackerPatrol>() {
+			@Override
+			public int compare(CyberTrackerPatrol p1, CyberTrackerPatrol p2) {
+				return p1.getId() - p2.getId();
+			}});
 		return patrols;
 	}
 

@@ -55,6 +55,7 @@ public class CyberTrackerPatrol {
 	private Map<String, E> elementsMap;
 	private List<S> patrolData;
 	
+	private int id;
 	private Station station;
 	private Team team;
 	private String objective;
@@ -102,7 +103,8 @@ public class CyberTrackerPatrol {
 			}
 			
 			if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
-				//nothing
+				Integer ctId = Integer.valueOf(v);
+				setId(ctId != null ?  ctId : 0);
 			} else if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
 				E e = getElementsMap().get(v);
 				String tag0 = e != null ? e.getTag0() : null;
@@ -287,4 +289,11 @@ public class CyberTrackerPatrol {
 		this.members = members;
 	}
 
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
 }
