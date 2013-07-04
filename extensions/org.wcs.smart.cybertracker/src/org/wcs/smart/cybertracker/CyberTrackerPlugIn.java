@@ -168,7 +168,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 				return Status.OK_STATUS;
 			}
 		};
-//		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		j.schedule();
 	}
 }
