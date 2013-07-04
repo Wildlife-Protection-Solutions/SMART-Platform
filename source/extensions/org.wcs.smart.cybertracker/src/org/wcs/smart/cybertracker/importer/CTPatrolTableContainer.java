@@ -235,14 +235,21 @@ public class CTPatrolTableContainer extends Composite {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					int patrolsCount = selection.size();
+					int counter = 1;
+					monitor.beginTask(Messages.CTPatrolTableContainer_AddPatrol_TaskName, patrolsCount);
 					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+						monitor.subTask(MessageFormat.format(Messages.CTPatrolTableContainer_AddPatrol_SubTaskName, counter, patrolsCount));
 						CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
 						Patrol p = patrolImporter.importData(ctp);
 						if (p != null) {
 							addedList.add(p);
 							tableInputData.remove(ctp);
 						}
+						monitor.worked(1);
+						counter++;
 					}
+					monitor.done();
 				}
 			});
 		} catch (Exception e) {
@@ -278,11 +285,18 @@ public class CTPatrolTableContainer extends Composite {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					int legsCount = selection.size();
+					int counter = 1;
+					monitor.beginTask(MessageFormat.format(Messages.CTPatrolTableContainer_AddLeg_TaskName, patrol.getId()), legsCount);
 					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+						monitor.subTask(MessageFormat.format(Messages.CTPatrolTableContainer_AddLeg_SubTaskName, counter, legsCount));
 						CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
 						legImporter.importData(patrol, ctp);
 						tableInputData.remove(ctp);
+						monitor.worked(1);
+						counter++;
 					}
+					monitor.done();
 					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_Leg_Success_Title, Messages.CTPatrolTableContainer_Leg_Success_Message);
 				}
 			});
