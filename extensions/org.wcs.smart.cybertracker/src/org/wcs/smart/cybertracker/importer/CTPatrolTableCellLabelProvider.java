@@ -65,6 +65,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			case LEADER:	return asString(ctPatrol.getLeader());
 			case PILOT:		return asString(ctPatrol.getPilot());
 			case MEMBERS:	return asString(ctPatrol.getMembers());
+			case SIGHT_COUNT:return String.valueOf(ctPatrol.getPatrolData().size());
 
 			}
 		}
