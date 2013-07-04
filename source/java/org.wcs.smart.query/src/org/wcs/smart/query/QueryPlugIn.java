@@ -38,6 +38,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -290,17 +291,18 @@ public class QueryPlugIn extends AbstractUIPlugin {
 					q.executeUpdate();
 					session.getTransaction().commit();
 				}catch (Exception ex){
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
-					}
 					QueryPlugIn.log("Could not cleanup query temporary tables.", ex); //$NON-NLS-1$
 				}finally{
+					if (session.getTransaction().isActive()) {
+						session.getTransaction().rollback();
+					}
 					session.close();
 				}
 				return Status.OK_STATUS;
 			}
 			
 		};
+		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		j.schedule();
 	}
 

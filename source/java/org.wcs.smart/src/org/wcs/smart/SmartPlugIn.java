@@ -30,6 +30,7 @@ import net.refractions.udig.catalog.IService;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
@@ -122,6 +123,19 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String WIZBAN_EXPORT_IMAGE = "org.wsc.smart.WIZBAN_EXPORT_IMAGE"; //$NON-NLS-1$
 	
+	/**
+	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
+	 * might result in SQLException. This will ensure that jobs are running one by one.
+	 */
+	public static final ISchedulingRule PLUGIN_START_MUTEX = new ISchedulingRule() {
+        public boolean contains(ISchedulingRule rule) {
+            return (rule == this);
+        }
+        public boolean isConflicting(ISchedulingRule rule) {
+            return (rule == this);
+        }
+	};
+
 	public BasemapDefinition defaultDefinition = null;
 	
 	/**
