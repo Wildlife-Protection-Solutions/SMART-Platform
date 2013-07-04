@@ -71,6 +71,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Read_Xml;
 	public static String CyberTrackerImporter_Task_Download;
 	public static String CyberTrackerImporter_Task_ExtractRawData;
+	public static String CyberTrackerPlugIn_InitJob_Title;
 	public static String CyberTrackerPropertiesDialog_AppName;
 	public static String CyberTrackerPropertiesDialog_DataNotValid;
 	public static String CyberTrackerPropertiesDialog_Error;
