@@ -65,12 +65,10 @@ public class FilterDropTargetPanel implements IDropPanel {
 	private QueryDefView parentView = null;
 	
 	private TreeDropDownViewer treeEditor = null;
-	
-
 	private Set<FilterDropTargetPanel> targetPanels;
 	
 	private DropItem dragItem;
-	
+
 	/**
 	 * Creates a new drop target panel.
 	 * 
@@ -80,6 +78,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		this.targetPanels = new HashSet<FilterDropTargetPanel>();
 		targetPanels.add(this);
 	}
+	
 	
 	public void addDropTargetPanel(FilterDropTargetPanel panel){
 		this.targetPanels.add(panel);
@@ -279,6 +278,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		
 		orderElements();
 		fireQueryChangedListeners();
+
 	}
 	
 	/**
@@ -317,13 +317,11 @@ public class FilterDropTargetPanel implements IDropPanel {
 					//hide drop item and setup proxy
 					dragItem = (DropItem)selection.getFirstElement();
 				}
-				
 				if (!targetPanels.contains(dragItem.targetPanel)){
 					event.detail  = DND.DROP_NONE;
 					dragItem = null;
 					return;
 				}
-				
 				
 				if (dragItem.getWidget().isVisible()){
 					dragItem.getWidget().setVisible(false);
@@ -374,12 +372,12 @@ public class FilterDropTargetPanel implements IDropPanel {
 				if (event.detail == DND.DROP_NONE || dragItem == null){
 					return;
 				}
+
 				if (dragItem.targetPanel != FilterDropTargetPanel.this){
 					IDropPanel target =  dragItem.targetPanel;
 					dragItem.moveParent(FilterDropTargetPanel.this);
 					target.finishDrag(dragItem);
 				}
-				
 				moveElements(event.x, event.y);
 				//remove proxy and put back the drop item
 				int i = items.indexOf(proxy);
@@ -388,9 +386,13 @@ public class FilterDropTargetPanel implements IDropPanel {
 				items.remove(proxy);
 				proxy.getWidget().setVisible(false);
 				orderElements();
+				
 				dragItem = null;
 				validate();
 				
+				for(FilterDropTargetPanel target : targetPanels){
+					target.dragItem = null;
+				}
 			}
 
 			private void moveElements(int x, int y) {
