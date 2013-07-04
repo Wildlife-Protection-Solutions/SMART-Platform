@@ -20,6 +20,10 @@ public class Messages extends NLS {
 	public static String CTPatrolTableColumn_Team;
 	public static String CTPatrolTableColumn_Transport;
 	public static String CTPatrolTableColumn_Type;
+	public static String CTPatrolTableContainer_AddLeg_SubTaskName;
+	public static String CTPatrolTableContainer_AddLeg_TaskName;
+	public static String CTPatrolTableContainer_AddPatrol_SubTaskName;
+	public static String CTPatrolTableContainer_AddPatrol_TaskName;
 	public static String CTPatrolTableContainer_Button_AsLeg;
 	public static String CTPatrolTableContainer_Button_AsPatrol;
 	public static String CTPatrolTableContainer_Leg_Error;
