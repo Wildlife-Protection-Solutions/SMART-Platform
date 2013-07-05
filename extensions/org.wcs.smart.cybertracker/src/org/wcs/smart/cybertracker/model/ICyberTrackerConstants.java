@@ -44,6 +44,8 @@ public interface ICyberTrackerConstants {
 	public static final String COMMAND_DATAFILE = "/datafile"; //$NON-NLS-1$
 	public static final String COMMAND_EXPORT = "/exportxml"; //$NON-NLS-1$
 	public static final String COMMAND_SILENT = "/silent"; //$NON-NLS-1$
+
+	public static final int UPLOAD_CODE_SUCCESS = 200;
 	
 	public static final String CT_DATE_FORMAT = "MM/dd/yy"; //$NON-NLS-1$
 
