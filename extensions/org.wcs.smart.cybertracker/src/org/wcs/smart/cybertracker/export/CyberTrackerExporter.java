@@ -181,7 +181,7 @@ public class CyberTrackerExporter {
 				result.addAll(attributeNodes);
 			} else {
 				//it appeared that category has not attributes to display -> show warning screen for that case
-				result.add(createNoAttributeWarnNode());
+				result.add(createNoAttributeWarnNode(category, keyMap));
 			}
 			return result;
 		}
@@ -194,8 +194,8 @@ public class CyberTrackerExporter {
 		return result;
 	}
 
-	private Node createNoAttributeWarnNode() {
-		CyberTrackerId warnId = new CyberTrackerId();
+	private Node createNoAttributeWarnNode(Category category, Map<Category, CyberTrackerId> keyMap) {
+		CyberTrackerId warnId = keyMap.get(category);
 		Node warnNode = ScreensObjectFactory.createNodeMsgText(warnId.getNodeId(), Messages.CyberTrackerExporter_NoAttributesNode_Title, Messages.CyberTrackerExporter_NoAttributesNode_Message);
 		//disable next button, enable save button, navigate on save to root point
 		Control control2 = ScreensObjectFactory.getNavigationControl(warnNode);
