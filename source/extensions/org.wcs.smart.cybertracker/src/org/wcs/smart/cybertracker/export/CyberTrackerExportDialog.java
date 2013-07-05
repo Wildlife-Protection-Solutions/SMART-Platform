@@ -44,12 +44,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.util.SmartUtils;
 
@@ -231,7 +233,15 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 						File generated = exporter.export(tempDir, monitor);
 						if (toDevice) {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
-							exporter.uploadPda(generated);
+							final int code = exporter.uploadPda(generated);
+							if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
+								Display.getDefault().syncExec(new Runnable() {
+									@Override
+									public void run() {
+										MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code));
+									}
+								});
+							}
 						} else {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							FileUtils.copyFile(generated, selectedFile);
