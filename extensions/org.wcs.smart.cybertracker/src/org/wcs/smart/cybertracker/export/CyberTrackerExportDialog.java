@@ -191,8 +191,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				if (selectedFile == null) {
 					return;
 				}
+				dialogSettings.put(OUTPUT_FILE, selectedFile.getAbsolutePath());
 			}
-			dialogSettings.put(OUTPUT_FILE, selectedFile.getAbsolutePath());
 			handleExport(btnToDevice.getSelection());
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
