@@ -29,6 +29,8 @@ package org.wcs.smart.cybertracker.model;
  */
 public interface ICyberTrackerConstants {
 
+	public static final String MIN_VERSION = "3.306"; //$NON-NLS-1$
+	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	
 	public static final String XML_SCREENS = "Screens.xml"; //$NON-NLS-1$
