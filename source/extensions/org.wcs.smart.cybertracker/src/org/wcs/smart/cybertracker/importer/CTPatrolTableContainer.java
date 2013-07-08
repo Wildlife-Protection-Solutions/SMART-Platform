@@ -207,15 +207,21 @@ public class CTPatrolTableContainer extends Composite {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 100);
+					List<CyberTrackerPatrol> data;
 					try {
-						List<CyberTrackerPatrol> data = fromPda ? importer.importPdaData(monitor) : importer.importData(file, monitor);
+						data = fromPda ? importer.importPdaData(monitor) : importer.importData(file, monitor);
 						addTableData(data);
 					} catch (Exception e) {
 						CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportError_Message, e.getMessage()));
 						e.printStackTrace();
 						return;
 					}
-					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, Messages.CTPatrolTableContainer_ImportCompleted);
+					int count = data != null ? data.size() : 0;
+					if (count > 0) {
+						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportCompleted, count));
+					} else {
+						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, Messages.CTPatrolTableContainer_NoDataImported);
+					}
 				}
 
 			});

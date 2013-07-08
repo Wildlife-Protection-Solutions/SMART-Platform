@@ -54,6 +54,8 @@ public class PdaUtil {
 	}	
 
 	public static void deleteTempDirectory(File tempDir) {
+		if (tempDir == null)
+			return;
 		try {
 			FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
