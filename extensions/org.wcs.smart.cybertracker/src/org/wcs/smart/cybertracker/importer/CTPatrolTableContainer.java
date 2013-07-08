@@ -211,15 +211,16 @@ public class CTPatrolTableContainer extends Composite {
 						List<CyberTrackerPatrol> data = fromPda ? importer.importPdaData(monitor) : importer.importData(file, monitor);
 						addTableData(data);
 					} catch (Exception e) {
-//						displayError("Error", "Error occured while importing data from CyberTracker into SMART.");
+						CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportError_Message, e.getMessage()));
 						e.printStackTrace();
 						return;
 					}
-//					displayInfo("CyberTracker Import", "Import successfully completed.");
+					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, Messages.CTPatrolTableContainer_ImportCompleted);
 				}
 
 			});
 		} catch (Exception e) {
+			CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, Messages.CTPatrolTableContainer_Error_ImportAborted);
 			e.printStackTrace();
 		}
 
