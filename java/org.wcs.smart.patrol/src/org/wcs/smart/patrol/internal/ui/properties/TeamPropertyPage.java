@@ -401,6 +401,12 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		team.setIsActive(enable);
 		setChangesMade(true);
 		tableViewer.refresh();
+		
+		if (!enable){
+			btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		}else{
+			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		}
 	}
 	
 	/**
