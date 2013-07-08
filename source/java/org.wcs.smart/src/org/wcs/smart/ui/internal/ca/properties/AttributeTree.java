@@ -249,6 +249,7 @@ public class AttributeTree {
 				}
 				viewer.refresh();
 				fireChangeListener();
+				viewer.setSelection(viewer.getSelection());
 			}
 		});
 		
@@ -267,6 +268,7 @@ public class AttributeTree {
 				}
 				viewer.refresh();
 				fireChangeListener();
+				viewer.setSelection(viewer.getSelection());
 			}
 		});
 		

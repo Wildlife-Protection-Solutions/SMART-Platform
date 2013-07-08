@@ -298,8 +298,10 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
 				if (btnDisableTransport.getText() == DialogConstants.DISABLE_BUTTON_TEXT){
 					pt.setIsActive(false);
+					btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 				}else{
 					pt.setIsActive(true);
+					btnDisableTransport.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 				}
 				transportTblViewer.refresh();
 				setChangesMade(true);

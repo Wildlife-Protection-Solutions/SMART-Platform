@@ -376,6 +376,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					it.setIsActive(!it.getIsActive());
+					if (it.getIsActive()){
+						btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					}else{
+						btnDisableListItem.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					}
+					
 					lstAttributeList.refresh();
 					validate();
 				}
