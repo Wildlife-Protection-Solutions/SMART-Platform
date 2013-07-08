@@ -45,6 +45,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_CTCode_201;
 	public static String CyberTrackerExportDialog_CtxFile;
 	public static String CyberTrackerExportDialog_ErrDialog_UploadFailed;
+	public static String CyberTrackerExportDialog_Error_CT_NotFound;
 	public static String CyberTrackerExportDialog_ExportToDevice;
 	public static String CyberTrackerExportDialog_ExportToFile;
 	public static String CyberTrackerExportDialog_FailCreateTempFolder;

@@ -222,6 +222,11 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	}
 	
 	private void handleExport(final boolean toDevice) {
+		if (!isCyberTrackerInstalled()) {
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
+			return;
+		}
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -265,6 +270,14 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private boolean isCyberTrackerInstalled() {
+		try {
+			return PdaUtil.getCTAppPath() != null;
+		} catch (Exception e) {
+			return false;
 		}
 	}
 	
