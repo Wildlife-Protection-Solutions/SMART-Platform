@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
@@ -44,7 +45,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -228,30 +228,37 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
+					File tempDir;
 					try {
-						File tempDir = PdaUtil.createTempDirectory();
+						tempDir = PdaUtil.createTempDirectory();
+					} catch (IOException e) {
+						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_FailCreateTempFolder);
+						e.printStackTrace();
+						return;
+					}
+					
+					try {
 						File generated = exporter.export(tempDir, monitor);
 						if (toDevice) {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
 							final int code = exporter.uploadPda(generated);
 							if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
-								Display.getDefault().syncExec(new Runnable() {
-									@Override
-									public void run() {
-										MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code));
-									}
-								});
+								String codeMeaning = getCyberTrackerCodeMeaning(code);
+								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code, codeMeaning));
+								return;
 							}
 						} else {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							FileUtils.copyFile(generated, selectedFile);
 						}
-						PdaUtil.deleteTempDirectory(tempDir);
 					} catch (Exception e) {
 						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportHandler_ErrDialog_Message);
 						e.printStackTrace();
+						return;
+					} finally {
+						PdaUtil.deleteTempDirectory(tempDir);
+						monitor.done();
 					}
-					monitor.done();
 					CyberTrackerPlugIn.displayInfo(Messages.CyberTrackerExportHandler_InfoDialog_Title, Messages.CyberTrackerExportHandler_InfoDialog_Message);
 				}
 
@@ -259,8 +266,19 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
+	
+	private String getCyberTrackerCodeMeaning(int code) {
+		switch (code) {
+		case ICyberTrackerConstants.UPLOAD_CODE_CONNECT_FAIL: return Messages.CyberTrackerExportDialog_CTCode_100;
+		case ICyberTrackerConstants.UPLOAD_CODE_IMPORT_FAIL: return Messages.CyberTrackerExportDialog_CTCode_101;
+		case ICyberTrackerConstants.UPLOAD_CODE_APP_NOT_FOUND: return Messages.CyberTrackerExportDialog_CTCode_110;
+		case ICyberTrackerConstants.UPLOAD_CODE_SYNC_FAIL: return Messages.CyberTrackerExportDialog_CTCode_120;
+		case ICyberTrackerConstants.UPLOAD_CODE_CT_NOT_INSTALLED: return Messages.CyberTrackerExportDialog_CTCode_201;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
 	@Override
 	protected boolean isResizable() {
 		return true;

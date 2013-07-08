@@ -45,7 +45,13 @@ public interface ICyberTrackerConstants {
 	public static final String COMMAND_EXPORT = "/exportxml"; //$NON-NLS-1$
 	public static final String COMMAND_SILENT = "/silent"; //$NON-NLS-1$
 
-	public static final int UPLOAD_CODE_SUCCESS = 200;
+	
+	public static final int UPLOAD_CODE_CONNECT_FAIL = 100; //database connection failure
+	public static final int UPLOAD_CODE_IMPORT_FAIL = 101; //database import failure
+	public static final int UPLOAD_CODE_APP_NOT_FOUND = 110; //No applications found
+	public static final int UPLOAD_CODE_SYNC_FAIL = 120; //Failed to Sync
+	public static final int UPLOAD_CODE_CT_NOT_INSTALLED = 201; //CyberTracker was not installed on the device, so an install was triggered
+	public static final int UPLOAD_CODE_SUCCESS = 200; //The application was successfully installed on the device
 	
 	public static final String CT_DATE_FORMAT = "MM/dd/yy"; //$NON-NLS-1$
 
