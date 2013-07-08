@@ -96,11 +96,14 @@ public class CyberTrackerImporter {
 			monitor.subTask(MessageFormat.format(Messages.CyberTrackerImporter_Read_Xml, file.getName()));
 			data = readDataModel(in);
 			monitor.worked(1);
+		} catch (Exception e) {
+			e.printStackTrace();
+			data = null;
 		} finally {
 			in.close();
 		}
 		if (data == null) {
-			throw new Exception(Messages.CyberTrackerImporter_Read_Error);
+			throw new Exception(MessageFormat.format(Messages.CyberTrackerImporter_Read_Error, file.getName()));
 		}
 		
 		elementsMap = buildElementsMap(data);

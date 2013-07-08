@@ -26,6 +26,11 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_AddPatrol_TaskName;
 	public static String CTPatrolTableContainer_Button_AsLeg;
 	public static String CTPatrolTableContainer_Button_AsPatrol;
+	public static String CTPatrolTableContainer_Error_ImportAborted;
+	public static String CTPatrolTableContainer_Error_Title;
+	public static String CTPatrolTableContainer_ImportCompleted;
+	public static String CTPatrolTableContainer_ImportError_Message;
+	public static String CTPatrolTableContainer_InfoDialog_Title;
 	public static String CTPatrolTableContainer_Leg_Error;
 	public static String CTPatrolTableContainer_Leg_Success_Message;
 	public static String CTPatrolTableContainer_Leg_Success_Title;
