@@ -68,7 +68,10 @@ public class QueryFilterLabelProvider extends LabelProvider {
 			}
 			return null;
 		}else{
-			return dmLabelProvider.getImage(element);
+			Image img =  dmLabelProvider.getImage(element);
+			if (img != null){
+				return img;
+			}
 		}
 		return null;
 	}

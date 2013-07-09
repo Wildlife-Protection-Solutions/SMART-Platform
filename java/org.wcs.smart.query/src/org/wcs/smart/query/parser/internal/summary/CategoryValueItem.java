@@ -40,22 +40,6 @@ import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
  * @since 1.0.0
  */
 public class CategoryValueItem implements IValueItem {
-
-	public enum ValueType{
-		OBSERVATION("obs", Messages.CategoryValueItem_CountObservationLabel), //$NON-NLS-1$
-		WAYPOINT("wp", Messages.CategoryValueItem_CountIncidentLabel); //$NON-NLS-1$
-		
-		public String key;
-		public String guiLabel;
-		
-		private ValueType(String key, String guiLabel){
-			this.key = key;
-			this.guiLabel = guiLabel;
-		}
-	}
-
-	
-
 	/**
 	 * Creates a new category value item of the form
 	 * "category:sum:<hkey>"
@@ -69,7 +53,7 @@ public class CategoryValueItem implements IValueItem {
 	
 	private String key;
 	private String categoryHkey;
-	private ValueType type;
+	private IValueItem.ValueType type;
 	
 	/**
 	 * Creates a new category value item.

@@ -262,6 +262,7 @@ public class AttributeGroupBy implements IGroupBy {
 			if (category == null){
 				throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_CategoryNotFoundError, new Object[]{categoryHkey}));
 			}
+			category.getFullCategoryName();
 			if (attributeType == AttributeType.LIST){
 				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
 			}else{

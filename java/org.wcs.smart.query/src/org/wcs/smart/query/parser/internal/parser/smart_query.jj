@@ -64,7 +64,9 @@ TOKEN :
 |  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "nummembers" | "manhours" | "mandays") >
 |    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" < DM_KEY > >
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
-|    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":attribute:n:" < AGG > ":" < DM_KEY > >
+|    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
+|    < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
+|    < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" ) >
 | 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" ) >
 |    < QUERY_SPLITTER : "|" >
@@ -93,7 +95,8 @@ SumQueryDefinition SumQuery() :
 {	ValuePart values = null;
 	GroupByPart rowGroupBy = null;
 	GroupByPart colGroupBy = null;
-	IFilter filter = null;
+	IFilter vFilter = null;
+	IFilter rFilter = null;
 }
 {
 	values = ValuePart()
@@ -102,10 +105,15 @@ SumQueryDefinition SumQuery() :
 	< QUERY_SPLITTER >
 	colGroupBy = GroupByPart()
 	< QUERY_SPLITTER >
-	(	  filter = ExpressionPart()
+	(	  vFilter = ExpressionPart()
+	)?
+	(
+	  < QUERY_SPLITTER >
+	  (	    	rFilter = ExpressionPart()
+	   )?
 	)?
 	< EOF >
-	{    	return SumQueryDefinition.createQuery(values, rowGroupBy, colGroupBy, filter);
+	{    	return SumQueryDefinition.createQuery(values, rowGroupBy, colGroupBy, vFilter, rFilter);
 	}
 }
 
@@ -214,6 +222,16 @@ IValueItem SingleValueItem() :
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_KEY >
+		{
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
+		}
+	| 
+		< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
+		{
+			item = AttributeValueItem.createAttributeItem( token.image );
+		}
+	| 
+		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
 		{
 			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		}	 

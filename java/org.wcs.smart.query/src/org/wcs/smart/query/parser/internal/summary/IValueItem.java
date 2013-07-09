@@ -22,6 +22,7 @@
 package org.wcs.smart.query.parser.internal.summary;
 
 import org.hibernate.Session;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 
@@ -33,6 +34,20 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
  * @since 1.0.0
  */
 public interface IValueItem {
+	
+	public enum ValueType{
+		OBSERVATION("obs", Messages.CategoryValueItem_CountObservationLabel), //$NON-NLS-1$
+		WAYPOINT("wp", Messages.CategoryValueItem_CountIncidentLabel); //$NON-NLS-1$
+		
+		public String key;
+		public String guiLabel;
+		
+		private ValueType(String key, String guiLabel){
+			this.key = key;
+			this.guiLabel = guiLabel;
+		}
+	}	
+	
 	/**
 	 * @return the string representation of the item
 	 */

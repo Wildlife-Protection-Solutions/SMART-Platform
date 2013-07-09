@@ -32,28 +32,28 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 
-/**
- * A drop item for a category value item.
- * 
- * @author egouge
- * @since 1.0.0
- */
-public class CategoryValueDropItem extends AbstractValueDropItem {
+public class AttributeListValueDropItem extends AbstractValueDropItem {
 
-	private Category category = null;
-
+	private AttributeListItem item = null;
+	private Category category = null; 
+	
 	private Combo combo = null;
 	private Font smallerFont = null;
 	private int defaultSelection = 0;
 	
-	public CategoryValueDropItem(Category category) {
+	public AttributeListValueDropItem(AttributeListItem item, Category category){
+		this.item = item;
 		this.category = category;
 	}
-
+	public AttributeListValueDropItem(AttributeListItem item){
+		this.item = item;
+		this.category = null;
+	}
+	
 	/**
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
 	 */
@@ -65,39 +65,47 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		}
 	}
 	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
-	 */
 	@Override
-	public String getValueText() {
-		return combo.getItem(combo.getSelectionIndex()) + " " + category.getFullCategoryName(); //$NON-NLS-1$
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
-	 */
-	@Override
-	public String getValueQueryPart() {
+	protected String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("category:sum:"); //$NON-NLS-1$
-		CategoryValueItem.ValueType[] values = CategoryValueItem.ValueType.values();
+		if (category != null){
+			sb.append("category:");
+			sb.append(category.getHkey());
+			sb.append(":");
+		}
+		sb.append("attribute:"); //$NON-NLS-1$
+		sb.append(item.getAttribute().getType().typeKey);
+		sb.append(":sum:");
+		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
 			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
-				sb.append(values[i].key + ":"); //$NON-NLS-1$
+				sb.append(values[i].key); //$NON-NLS-1$
 				break;
 			}
 		}
-		sb.append(category.getHkey());
+		sb.append(":");
+		sb.append(item.getAttribute().getKeyId());
+		sb.append(".");
+		sb.append(item.getKeyId());
 		return sb.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse
-	 * .swt.widgets.Composite)
-	 */
+	@Override
+	protected String getValueText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(combo.getItem(combo.getSelectionIndex()));
+		sb.append(" ");
+		sb.append(item.getName());
+		sb.append(" (");
+		sb.append(item.getAttribute().getName());
+		if (category != null){
+			sb.append(" - ");
+			sb.append(category.getFullCategoryName());
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+
 	@Override
 	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
@@ -120,7 +128,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				defaultSelection = combo.getSelectionIndex();
-				CategoryValueDropItem.this.queryChanged();
+				AttributeListValueDropItem.this.queryChanged();
 			}
 		});
 		
@@ -130,21 +138,31 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		combo.setFont(smallerFont);
 		
 		Label lblText = new Label(main, SWT.NONE);
+		StringBuilder tooltip = new StringBuilder();
+		
 		StringBuilder sb = new StringBuilder();
-		sb.append(category.getFullCategoryName());
+		sb.append(item.getName());
+		sb.append(" (");
+		sb.append(item.getAttribute().getName());
+		tooltip.append(item.getAttribute().getName());
+		if (category != null){
+			sb.append(" - ");
+			sb.append(category.getName());
+			tooltip.append(" - ");
+			tooltip.append(category.getFullCategoryName());
+		}
+		sb.append(")");
 		lblText.setText( formatStringForLabel(sb.toString()));
-
+		lblText.setToolTipText(tooltip.toString());
+		
 		initDrag(main);
 		initDrag(lblText);
 
+
 	}
 
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
-	 */
 	@Override
 	protected void initializeValueData(Object data) {
-		
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
 			if (((String)data).equals(values[i].key)){

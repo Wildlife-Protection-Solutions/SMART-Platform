@@ -123,7 +123,7 @@ public class Attribute extends DmObject{
 	}
 	
 	/**
-	 * Parses the attribute type key into an attribute type.
+	 * Parses the attribute type NAME into an attribute type.
 	 * @param type attribute type (tree, list etc.)
 	 * @return attribute type or null if not found
 	 */

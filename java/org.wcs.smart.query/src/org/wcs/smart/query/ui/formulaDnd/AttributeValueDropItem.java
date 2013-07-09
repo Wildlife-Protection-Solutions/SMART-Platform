@@ -205,11 +205,16 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 		
 		Label lblText = new Label(main, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
+		StringBuilder tooltip = new StringBuilder();
 		sb.append(attribute.getName());
+		tooltip.append(attribute.getName());
 		if (category != null){
 			sb.append(" (" + category.getName() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
+			tooltip.append( " - ");
+			tooltip.append(category.getFullCategoryName());
 		}
 		lblText.setText( formatStringForLabel(sb.toString()));
+		lblText.setToolTipText(tooltip.toString());
 		
 		initDrag(main);
 		initDrag(lblText);

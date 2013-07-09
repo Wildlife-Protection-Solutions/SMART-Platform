@@ -61,10 +61,12 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	private SourceProvider provider;
 	private QueryDefView parentView;
 	private SummaryValueGroupByPanel panel;
-	private FilterDropTargetPanel filterPanel;
+	//private FilterDropTargetPanel filterPanel;
+	private GriddedFilterPanel filterPanel;
 	private TabFolder tabs;
 	private ConservationAreaFilterPanel caFilterPanel;
 
+	private boolean isInitializing = false;
 	/**
 	 * @param parent parent composite
 	 * @param parentView parent view
@@ -103,7 +105,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		pnl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
-		filterPanel = new FilterDropTargetPanel(parentView);
+		filterPanel = new GriddedFilterPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
 		item2.setText(FilterDropTargetPanel.PANEL_TITLE);
 		
@@ -149,6 +151,10 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public String validate() {
+		if (isInitializing) return null; //still initializing ; do not validate
+		//update ui components
+		filterPanel.updateFilterPanel(panel.hasRate());
+		
 		String query = panel.getQueryString() + "|" + filterPanel.getQueryString(); //$NON-NLS-1$
 		SumQueryDefinition def = null;
 		String error = null;
@@ -200,12 +206,15 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public void init() {
+		isInitializing = true;
 		SummaryQuery query = ((SummaryQuery)parentView.getQuery());
-		filterPanel.addElements(query.getFilterDropItems());
+		filterPanel.addValueFilterElements(query.getValueFilterDropItems());
+		filterPanel.addRateFilterElements(query.getRateFilterDropItems());
 		panel.init(query);
 		if (caFilterPanel != null){
 			caFilterPanel.initQuery(query);
 		}
+		isInitializing = false;
 	}
 
 	/**
@@ -217,9 +226,11 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		
 		panel.saveDropItems(query);
 		
-		List<DropItem> items = new ArrayList<DropItem>();
-		items.addAll(filterPanel.getItems());
-		query.setFilterDropItems(items);
+		List<DropItem> vItems = new ArrayList<DropItem>();
+		vItems.addAll(filterPanel.getValueItems());
+		List<DropItem> rItems = new ArrayList<DropItem>();
+		rItems.addAll(filterPanel.getRateItems());
+		query.setFilterDropItems(vItems, rItems);
 	}
 
 	/**
