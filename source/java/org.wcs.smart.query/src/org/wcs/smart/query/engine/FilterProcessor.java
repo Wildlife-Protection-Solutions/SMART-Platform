@@ -150,14 +150,27 @@ public class FilterProcessor {
 	}
 	
 	
+	/*
+	 * return the table name for the associate object 
+	 */
 	private String name(Class<?> clazz){
 		return DerbyQueryEngine2.tableNames.get(clazz);
 	}
+	
+	/*
+	 * return the sql prefix for the given class
+	 */
 	private String prefix(Class<?> clazz){
-		return DerbyQueryEngine2.tablePrefix.get(clazz);
+		return engine.prefix(clazz);
 	}
+	
+	/*
+	 * combine the table name with the table prefix for
+	 * the given class
+	 * Patrol.cass = "smart.patrol p"
+	 */
 	private String namePrefix(Class<?> clazz){
-		return name(clazz) + " " + prefix(clazz);
+		return engine.namePrefix(clazz);
 	}
 	
 	/**
@@ -217,9 +230,9 @@ public class FilterProcessor {
 		sql.append(" inner join "); //$NON-NLS-1$
 		sql.append(namePrefix(PatrolLegDay.class));
 		usedTables.add(PatrolLegDay.class);
-		sql.append(" on "); 
+		sql.append(" on ");  //$NON-NLS-1$
 		sql.append(prefix(PatrolLeg.class));
-		sql.append(".uuid = ");
+		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
 		
@@ -257,18 +270,18 @@ public class FilterProcessor {
 			}
 			usedTables.add(Waypoint.class);
 			sql.append(namePrefix(Waypoint.class));
-			sql.append(" on ");
+			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(PatrolLegDay.class));
-			sql.append(".uuid = ");
+			sql.append(".uuid = "); //$NON-NLS-1$
 			sql.append(prefix(Waypoint.class));
 			sql.append(".leg_day_uuid "); //$NON-NLS-1$
 		
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));
 			usedTables.add(WaypointObservation.class);
-			sql.append(" on ");
+			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(Waypoint.class));
-			sql.append(".uuid = ");
+			sql.append(".uuid = "); //$NON-NLS-1$
 			sql.append(prefix(WaypointObservation.class));
 			sql.append(".wp_uuid "); //$NON-NLS-1$
 		}	
@@ -374,7 +387,7 @@ public class FilterProcessor {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
-		String attributeTempTable = "query_temp_attributes_" + System.nanoTime();
+		String attributeTempTable = engine.createTempTableName();
 			
 		for (AttributeInfo key : keys){
 			monitor.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getKey());

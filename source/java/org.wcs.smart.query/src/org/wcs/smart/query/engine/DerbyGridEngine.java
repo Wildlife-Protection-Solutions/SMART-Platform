@@ -283,11 +283,11 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			if(value instanceof AttributeValueItem ){
 				AttributeValueItem tmp = (AttributeValueItem)value;
 				
-				String strAggValue = "number_value";
+				String strAggValue = "number_value"; //$NON-NLS-1$
 				strAgg = tmp.getAggregation().getName();
 				if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
-					strAgg="count";
-					strAggValue = "value";
+					strAgg="count";  //$NON-NLS-1$
+					strAggValue = "value";  //$NON-NLS-1$
 					
 				}
 				String key = tmp.getAttributeKey();
@@ -296,7 +296,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				double size = gridDef.getCellSize();
 				StringBuilder sql = new StringBuilder();
 
-				sql.append("SELECT " + strAgg + "(" + strAggValue + ") as value, tile_id"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append("SELECT " + strAgg + "(" + strAggValue + ") as value, tile_id"); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$
 				sql.append(" FROM ("); //$NON-NLS-1$
 				
 				if (tmp.getAttributeType() == AttributeType.NUMERIC){
@@ -305,116 +305,116 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					sql.append("SELECT distinct "); //$NON-NLS-1$
 					if (tmp.getValueType() == ValueType.OBSERVATION){
 						sql.append(dataTable);
-						sql.append(".ob_uuid as " + strAggValue);
+						sql.append(".ob_uuid as " + strAggValue);  //$NON-NLS-1$
 					}else{
 						sql.append(dataTable);
-						sql.append(".wp_uuid as " + strAggValue);
+						sql.append(".wp_uuid as " + strAggValue);  //$NON-NLS-1$
 					}
 				}
-				sql.append(", smart.computeTileId(");
+				sql.append(", smart.computeTileId(");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
-				sql.append(".x,");
+				sql.append(".x,");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
-				sql.append(".y,'");
-				sql.append(gridDef.getCrs().toWKT().replaceAll("'", "''"));
-				sql.append("',");
+				sql.append(".y,'");  //$NON-NLS-1$
+				sql.append(gridDef.getCrs().toWKT().replaceAll("'", "''"));  //$NON-NLS-1$  //$NON-NLS-2$
+				sql.append("',");  //$NON-NLS-1$
 				sql.append(minX);
-				sql.append( ",");
+				sql.append( ","); //$NON-NLS-1$
 				sql.append( minY);
-				sql.append( ",");
+				sql.append( ","); //$NON-NLS-1$
 				sql.append(size);
-				sql.append( ") as tile_id"); 
-				sql.append(" FROM ");
+				sql.append( ") as tile_id"); //$NON-NLS-1$ 
+				sql.append(" FROM "); //$NON-NLS-1$
 				sql.append(tableNames.get(WaypointObservation.class));
-				sql.append( " as ");
-				sql.append(tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				sql.append(" JOIN ");
-				sql.append( dataTable);
-				sql.append(" on ");
+				sql.append( " as "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(WaypointObservation.class));
-				sql.append(".uuid = ");
+				
+				sql.append(" JOIN "); //$NON-NLS-1$
+				sql.append( dataTable);
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix.get(WaypointObservation.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
 				sql.append( dataTable);
 				sql.append( ".ob_uuid"); //$NON-NLS-1$
 				
-				sql.append(" JOIN ");
+				sql.append(" JOIN "); //$NON-NLS-1$
 				sql.append(tableNames.get(WaypointObservationAttribute.class));
-				sql.append(" as ");
+				sql.append(" as "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(WaypointObservationAttribute.class));
-				sql.append(" on ");
+				sql.append(" on "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(WaypointObservation.class) );
-				sql.append(".uuid = " );
+				sql.append(".uuid = " ); //$NON-NLS-1$
 				sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 				sql.append(".observation_uuid"); //$NON-NLS-1$
 				
-				sql.append(" JOIN ");
+				sql.append(" JOIN "); //$NON-NLS-1$
 				sql.append(tableNames.get(Attribute.class));
-				sql.append(" as ");
+				sql.append(" as "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(Attribute.class));
-				sql.append(" on ");
+				sql.append(" on "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(WaypointObservationAttribute.class));
-				sql.append(".attribute_uuid = ");
+				sql.append(".attribute_uuid = "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(Attribute.class));
-				sql.append(".uuid");
+				sql.append(".uuid"); //$NON-NLS-1$
 				sql.append(" AND keyid = '" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				sql.append(" JOIN ");
+				sql.append(" JOIN "); //$NON-NLS-1$
 				sql.append(tableNames.get(Waypoint.class));
-				sql.append( " as ");
-				sql.append(tablePrefix.get(Waypoint.class));  //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(" on ");
-				sql.append(tablePrefix.get(Waypoint.class)); //$NON-NLS-1$
+				sql.append( " as "); //$NON-NLS-1$
+				sql.append(tablePrefix.get(Waypoint.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix.get(Waypoint.class)); 
 				sql.append(".uuid = "); //$NON-NLS-1$
 				sql.append(dataTable);
 				sql.append(".wp_uuid"); //$NON-NLS-1$
 				
 				if (tmp.getCategoryKey() != null){
-					sql.append(" JOIN ");
+					sql.append(" JOIN "); //$NON-NLS-1$
 					sql.append(tableNames.get(Category.class));
-					sql.append( " as ");
+					sql.append( " as "); //$NON-NLS-1$
 					sql.append(tablePrefix.get(Category.class));
-					sql.append(" on ");
+					sql.append(" on "); //$NON-NLS-1$
 					sql.append(tablePrefix.get(WaypointObservation.class));
-					sql.append(".category_uuid = ");
+					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
-					sql.append( ".uuid" );
-					sql.append(" AND Hkey >= '");
+					sql.append( ".uuid" ); //$NON-NLS-1$
+					sql.append(" AND Hkey >= '"); //$NON-NLS-1$
 					sql.append(tmp.getCategoryKey());
-					sql.append("' AND Hkey < '");
+					sql.append("' AND Hkey < '"); //$NON-NLS-1$
 					sql.append(tmp.getCategoryKey());
-					sql.append("/'"); 
+					sql.append("/'");  //$NON-NLS-1$
 				}
 				
 				if (tmp.getAttributeType() == AttributeType.LIST){
-					sql.append(" JOIN " + tableNames.get(AttributeListItem.class) );
-					sql.append(" as ");
+					sql.append(" JOIN " + tableNames.get(AttributeListItem.class) ); //$NON-NLS-1$
+					sql.append(" as "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(AttributeListItem.class));
-					sql.append(" on ");
+					sql.append(" on "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(AttributeListItem.class));
-					sql.append(".uuid = ");
+					sql.append(".uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(WaypointObservationAttribute.class));
-					sql.append(".list_element_uuid and ");
+					sql.append(".list_element_uuid and "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(AttributeListItem.class));
-					sql.append(".keyid = '" + tmp.getItemKey() + "'");
+					sql.append(".keyid = '" + tmp.getItemKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (tmp.getAttributeType() == AttributeType.TREE){
-					sql.append(" join ");
+					sql.append(" join "); //$NON-NLS-1$
 					sql.append(tableNames.get(AttributeTreeNode.class));
-					sql.append(" as ");
+					sql.append(" as "); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(" on ");
+					sql.append(" on "); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(".uuid = ");
+					sql.append(".uuid = "); //$NON-NLS-1$
 					sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
-					sql.append(" and (");
+					sql.append(" and ("); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(".hkey >= '");
+					sql.append(".hkey >= '"); //$NON-NLS-1$
 					sql.append(tmp.getItemKey());
-					sql.append("' and ");
+					sql.append("' and "); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(".hkey < '");
+					sql.append(".hkey < '"); //$NON-NLS-1$
 					sql.append(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ));
-					sql.append("/')  ");
+					sql.append("/')  "); //$NON-NLS-1$
 				}
 
 				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
