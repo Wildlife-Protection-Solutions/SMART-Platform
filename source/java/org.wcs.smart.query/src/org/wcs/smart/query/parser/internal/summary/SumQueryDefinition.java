@@ -41,15 +41,18 @@ public class SumQueryDefinition {
 	 * @param colGroupBy the column group by
 	 * @param queryFilter the filter
 	 */
-	public static final SumQueryDefinition createQuery(ValuePart valuePart, GroupByPart rowGroupBy, GroupByPart colGroupBy, IFilter queryFilter){
-		return new SumQueryDefinition(valuePart, rowGroupBy, colGroupBy, queryFilter);
+	public static final SumQueryDefinition createQuery(ValuePart valuePart, 
+			GroupByPart rowGroupBy, GroupByPart colGroupBy, 
+			IFilter valueFilter, IFilter rateFilter){
+		return new SumQueryDefinition(valuePart, rowGroupBy, colGroupBy, valueFilter, rateFilter);
 	}
 	
 	
 	private ValuePart valuePart;
 	private GroupByPart rowGroupBy;
 	private GroupByPart colGroupBy;
-	private IFilter queryFilter;
+	private IFilter valueFilter;
+	private IFilter rateFilter;
 	
 	/**
 	 * Creates a new summary query definition
@@ -58,11 +61,15 @@ public class SumQueryDefinition {
 	 * @param colGroupBy
 	 * @param queryFilter
 	 */
-	protected SumQueryDefinition (ValuePart valuePart, GroupByPart rowGroupBy, GroupByPart colGroupBy, IFilter queryFilter){
+	protected SumQueryDefinition (ValuePart valuePart, GroupByPart rowGroupBy, 
+			GroupByPart colGroupBy, 
+			IFilter valueFilter,
+			IFilter rateFilter){
 		this.valuePart = valuePart;
 		this.rowGroupBy = rowGroupBy;
 		this.colGroupBy = colGroupBy;
-		this.queryFilter = queryFilter;
+		this.valueFilter = valueFilter;
+		this.rateFilter = rateFilter;
 	}
 	
 	/**
@@ -84,16 +91,23 @@ public class SumQueryDefinition {
 		return this.colGroupBy;
 	}
 	/**
-	 * @return the query filter
+	 * @return the query value filter (numerator filter)
 	 */
-	public IFilter getQueryFilter(){
-		return this.queryFilter;
+	public IFilter getValueFilter(){
+		return this.valueFilter;
+	}
+	
+	/**
+	 * @return the rate filter (denominator filter)
+	 */
+	public IFilter getRateFilter(){
+		return this.rateFilter;
 	}
 	
 	/**
 	 * @return the string representation of the query
 	 */
 	public String asQuery(){
-		return valuePart.asString() + "|" + rowGroupBy.asString() + "|" + colGroupBy.asString() + "|" + (queryFilter == null ? "" : queryFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return valuePart.asString() + "|" + rowGroupBy.asString() + "|" + colGroupBy.asString() + "|" + (valueFilter == null ? "" : valueFilter.asString() + "|" + (rateFilter == null ? "" : rateFilter.asString())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 }

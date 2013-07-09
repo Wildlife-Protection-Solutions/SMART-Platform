@@ -222,6 +222,7 @@ public class AttributeFilter implements IFilter {
 		}else if (attributeType == AttributeType.TREE){
 //			return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') ";
 			return "( qa." + attributeKey + " >= '" + (String)value1 + "' and qa." + attributeKey + "<'" + ((String)value1).substring(0,  ((String)value1).length() -1) + "/')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		
 		}
 		return ""; //$NON-NLS-1$
 	}

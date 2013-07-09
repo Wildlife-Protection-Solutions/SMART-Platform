@@ -78,8 +78,8 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			IFilter queryFilter = summary.getQueryDefinition().getQueryFilter();
-			processFilter(queryFilter, xmlQuery, s);
+			processFilter(summary.getQueryDefinition().getValueFilter(), xmlQuery, s);
+			processFilter(summary.getQueryDefinition().getRateFilter(), xmlQuery, s);
 			
 			processGroupBy(summary.getQueryDefinition().getRowGroupByPart(), xmlQuery,s);
 			processGroupBy(summary.getQueryDefinition().getColumnGroupByPart(), xmlQuery,s);

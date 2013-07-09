@@ -25,6 +25,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -228,6 +229,44 @@ public class DropItemFactory {
 	 */
 	public DropItem createAttributeValueDropItem(CategoryAttribute catAtt){
 		return new AttributeValueDropItem(catAtt);
+	}
+	
+	/**
+	 * Creates a new value drop item that represents an datamodel
+	 * attribute list item
+	 * 
+	 * @param catAtt
+	 * @return
+	 */
+	public DropItem createAttributeListItemValueDropItem(AttributeListItem listItem){
+		return new AttributeListValueDropItem(listItem);
+	}
+
+	/**
+	 * Creates a new value drop item that represents an datamodel
+	 * attribute list item and associated category.
+	 * 
+	 */
+	public DropItem createAttributeListItemValueDropItem(AttributeListItem listItem, Category category){
+		return new AttributeListValueDropItem(listItem, category);
+	}
+	
+	/**
+	 * Creates a new value drop item that represents an datamodel tree node
+	 * attribute.
+	 * 
+	 */
+	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode node){
+		return new AttributeTreeValueDropItem(node);
+	}
+	
+	/**
+	 * Creates a new value drop item that represents an datamodel tree node
+	 * attribute and associated category.
+	 * 
+	 */
+	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode node,Category category){
+		return new AttributeTreeValueDropItem(node, category );
 	}
 	
 	/**
@@ -443,14 +482,31 @@ public class DropItemFactory {
 	private DropItem createSummaryDmDropItem(SummaryDmObject object) {
 		if (object.isValue()) {
 			if (object.getObject() instanceof Attribute) {
-				return createAttributeValueDropItem(
+				if (((Attribute)object.getObject()).getType() == AttributeType.NUMERIC){
+					return createAttributeValueDropItem(
 						(Attribute) object.getObject());
+				}
+				return null;
 			} else if (object.getObject() instanceof CategoryAttribute) {
-				return createAttributeValueDropItem(
-						(CategoryAttribute) object.getObject());
+				if (((CategoryAttribute)object.getObject()).getAttribute().getType() == AttributeType.NUMERIC){
+					return createAttributeValueDropItem((CategoryAttribute) object.getObject());
+				}
+				return null;
 			} else if (object.getObject() instanceof Category) {
 				return createCategoryValueDropItem(
 						(Category) object.getObject());
+			} else if (object.getObject() instanceof AttributeListItem){
+				if (object.getObject2() != null){
+					return createAttributeListItemValueDropItem((AttributeListItem)object.getObject(),(Category)object.getObject2());
+				}else{
+					return createAttributeListItemValueDropItem((AttributeListItem)object.getObject());
+				}
+			} else if (object.getObject() instanceof AttributeTreeNode){
+				if (object.getObject2() != null){
+					return createAttributeTreeNodeValueDropItem((AttributeTreeNode)object.getObject(), (Category)object.getObject2());
+				}else{
+					return createAttributeTreeNodeValueDropItem((AttributeTreeNode)object.getObject());
+				}
 			}
 		} else {
 			// category

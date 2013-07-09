@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -70,7 +71,19 @@ public class GriddedQueryLabelProvider extends QueryFilterLabelProvider {
 			if (obj.getObject() instanceof Attribute){
 				return ((Attribute)obj.getObject()).getName();
 			}else if (obj.getObject() instanceof AttributeTreeNode){
-				return ((AttributeTreeNode)obj.getObject()).getName();
+				String name = ((AttributeTreeNode)obj.getObject()).getName();
+				if (obj.isValue()){
+					return MessageFormat.format(Messages.GriddedQueryLabelProvider_CountCategoryLabel, new Object[]{name});
+				}else{
+					return name;
+				}
+			}else if (obj.getObject() instanceof AttributeListItem){
+				String name = ((AttributeListItem)obj.getObject()).getName();
+				if (obj.isValue()){
+					return MessageFormat.format(Messages.GriddedQueryLabelProvider_CountCategoryLabel, new Object[]{name});
+				}else{
+					return name;
+				}
 			}else if (obj.getObject() instanceof Category){
 				if (obj.isValue()){
 					return MessageFormat.format(Messages.GriddedQueryLabelProvider_CountCategoryLabel,new Object[]{((Category)obj.getObject()).getName()});

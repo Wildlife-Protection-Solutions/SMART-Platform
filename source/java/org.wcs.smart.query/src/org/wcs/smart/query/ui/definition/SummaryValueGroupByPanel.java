@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem;
 import org.wcs.smart.query.ui.formulaDnd.IValueDropItem;
@@ -113,7 +114,18 @@ public class SummaryValueGroupByPanel {
 		return main;
 	}
 	
-	
+	/**
+	 * 
+	 * @return true if one of the values has an encounter rate
+	 */
+	public boolean hasRate(){
+		for (DropItem it : lstValues.getItems()){
+			if (it instanceof AbstractValueDropItem && ((AbstractValueDropItem)it).hasEncounterRatio()){
+				return true;
+			}
+		}
+		return false;
+	}
 	private void createInnerGroupByComposite(Composite parent, QueryDefView view){
 		SashForm main = new SashForm(parent, SWT.HORIZONTAL );
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

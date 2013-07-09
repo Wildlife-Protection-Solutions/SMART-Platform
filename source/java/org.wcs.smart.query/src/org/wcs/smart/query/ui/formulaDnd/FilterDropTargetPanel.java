@@ -389,10 +389,10 @@ public class FilterDropTargetPanel implements IDropPanel {
 				
 				dragItem = null;
 				validate();
-				
 				for(FilterDropTargetPanel target : targetPanels){
 					target.dragItem = null;
 				}
+
 			}
 
 			private void moveElements(int x, int y) {

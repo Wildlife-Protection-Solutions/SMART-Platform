@@ -82,7 +82,9 @@ public class SummaryQuery extends Query {
 	@Transient
 	private List<DropItem> valueDropItems;
 	@Transient
-	private List<DropItem> filterDropItems;
+	private List<DropItem> valueFilterDropItems;
+	@Transient
+	private List<DropItem> rateFilterDropItems;
 	@Transient
 	private SummaryQueryResult lastResults;
 	
@@ -286,19 +288,28 @@ public class SummaryQuery extends Query {
 	}
 	
 	/**
-	 * @return filter drop items
+	 * @return value filter drop items
 	 */
 	@Transient
-	public List<DropItem>getFilterDropItems(){
-		return this.filterDropItems;
+	public List<DropItem>getValueFilterDropItems(){
+		return this.valueFilterDropItems;
+	}
+	
+	/**
+	 * @return rate filter drop items
+	 */
+	@Transient
+	public List<DropItem>getRateFilterDropItems(){
+		return this.rateFilterDropItems;
 	}
 	
 	/**
 	 * @param items filter drop items
 	 */
 	@Transient
-	public void setFilterDropItems(List<DropItem> items){
-		this.filterDropItems = items;
+	public void setFilterDropItems(List<DropItem> valueItems, List<DropItem> rateItems){
+		this.valueFilterDropItems = valueItems;
+		this.rateFilterDropItems = rateItems;
 	}
 	
 	/**
@@ -310,7 +321,8 @@ public class SummaryQuery extends Query {
 		clearDropItemList(rowGroupByDropItems);
 		clearDropItemList(colGroupByDropItems);
 		clearDropItemList(valueDropItems);
-		clearDropItemList(filterDropItems);
+		clearDropItemList(valueFilterDropItems);
+		clearDropItemList(rateFilterDropItems);
 		
 		if (rowGroupByDropItems == null){
 			rowGroupByDropItems = new ArrayList<DropItem>();
@@ -321,26 +333,40 @@ public class SummaryQuery extends Query {
 		if (valueDropItems == null){
 			valueDropItems = new ArrayList<DropItem>();
 		}
-		if (filterDropItems == null){
-			filterDropItems = new ArrayList<DropItem>();
+		if (valueFilterDropItems == null){
+			valueFilterDropItems = new ArrayList<DropItem>();
 		}
-		
+		if (rateFilterDropItems == null){
+			rateFilterDropItems = new ArrayList<DropItem>();
+		}
 		//---- generate drop items for filter items ----
 		Exception lastException = null;
 		try{
-			IFilter query = getQueryDefinition().getQueryFilter();
+			IFilter query = getQueryDefinition().getValueFilter();
 			if (query != null){
 				DropItem[] filterItems = query.getDropItems(session);
 				for (int i = 0; i < filterItems.length; i ++){
-					filterDropItems.add(filterItems[i]);
+					valueFilterDropItems.add(filterItems[i]);
 				}
 			}
 		}catch (Exception ex){
-			clearDropItemList(filterDropItems);
-			filterDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_FilterParseError, new Object[]{ex.getLocalizedMessage()} )));
+			clearDropItemList(valueFilterDropItems);
+			valueFilterDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_FilterParseError, new Object[]{ex.getLocalizedMessage()} )));
 			lastException = ex;
 		}
-		
+		try{
+			IFilter query = getQueryDefinition().getRateFilter();
+			if (query != null){
+				DropItem[] filterItems = query.getDropItems(session);
+				for (int i = 0; i < filterItems.length; i ++){
+					rateFilterDropItems.add(filterItems[i]);
+				}
+			}
+		}catch (Exception ex){
+			clearDropItemList(rateFilterDropItems);
+			rateFilterDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_FilterParseError, new Object[]{ex.getLocalizedMessage()} )));
+			lastException = ex;
+		}
 		//---- generate drop items for value items ----
 		try{
 			ValuePart part = getQueryDefinition().getValuePart();

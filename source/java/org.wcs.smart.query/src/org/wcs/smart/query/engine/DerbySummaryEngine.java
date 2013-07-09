@@ -58,13 +58,11 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
-import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AreaGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryGroupBy;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
-import org.wcs.smart.query.parser.internal.summary.CategoryValueItem.ValueType;
 import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
@@ -87,7 +85,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
-	
+	private String rateTable;
+	private String valueTable;
 	/**
 	 * Executes the given summary query.
 	 * 
@@ -122,8 +121,9 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
-		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
-		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
+		valueTable = createTempTableName();
+		rateTable = createTempTableName();
+		
 
 		sumResults = new SummaryQueryResult();
 		cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
@@ -141,70 +141,73 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 						return;
 					}
 					
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_CreatingObservationTable);
-					IFilter qFilter = query.getQueryDefinition().getQueryFilter();
-					if (qFilter == null){
-						qFilter = IFilter.EMPTY_FILTER;
-					}
-					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getQueryDefinition().getQueryFilter(), 
-								query.getDateFilter(), query.getConservationAreaFilterAsFilter(), monitor);
-					}
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						return;
-					}
-
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_CreatingTempTable);
-					createTemporaryTable(c);
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						return;
-					}
+					boolean needsObservationValue = false;
+					boolean needsObservationRate = false;
 					
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_PopulatingResults);
 					List<IGroupBy> all = new ArrayList<IGroupBy>();
 					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
 					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
 					GroupByPart allGroupBy = new GroupByPart(all);
 					
-					//TODO: review this needsObservation
-					//i think you only need the observations if 
-					//computing an observation value; if only computing patrol
-					//values you shouldn't need observations
-					boolean needsObservation = false;
 					for (IValueItem it : query.getQueryDefinition().getValuePart().getValueItems()){
 						if (it.hasAttribute() || it.hasCategory()){
-							needsObservation = true;
+							needsObservationValue = true;
 							break;
 						}
 					}
-					if(!needsObservation){
+					if(!needsObservationValue){
 						for (IGroupBy gp : allGroupBy.getGroupBys()){
 							if (gp.hasCategory() || gp.hasAttribute()){
-								needsObservation = true;
+								needsObservationValue = true;
 								break;
 							}
 						}
 					}
-					if (!needsObservation){
-						if (query.getQueryDefinition().getQueryFilter() != null && (
-								query.getQueryDefinition().getQueryFilter().hasAttributeFilter() || 
-								query.getQueryDefinition().getQueryFilter().hasCategoryFilter())){
-							needsObservation = true;
+					needsObservationRate = needsObservationValue;
+					if (!needsObservationValue){
+						if (query.getQueryDefinition().getValueFilter() != null && (
+								query.getQueryDefinition().getValueFilter().hasAttributeFilter() || 
+								query.getQueryDefinition().getValueFilter().hasCategoryFilter())){
+							needsObservationValue = true;
+						}
+						if (query.getQueryDefinition().getRateFilter() != null && (
+								query.getQueryDefinition().getRateFilter().hasAttributeFilter() || 
+								query.getQueryDefinition().getRateFilter().hasCategoryFilter())){
+							needsObservationRate = true;
 						}
 					}
 					
-					populateTemporaryTable(qFilter, query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false,c, needsObservation);
-					monitor.worked(1);
+					FilterProcessor dt = new FilterProcessor(valueTable, DerbySummaryEngine.this);
+					dt.processFilter(c, query.getQueryDefinition().getValueFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
+					dt.dropTemporaryTables(c);
 					if (monitor.isCanceled()){
 						return;
 					}
-					
 					monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					
-					
-					addCategoryHkey(allGroupBy, query.getQueryDefinition().getValuePart(), c);
+					String vFilter = "";
+					String rFilter = "";
+					if (query.getQueryDefinition().getValueFilter() != null){
+						vFilter = query.getQueryDefinition().getValueFilter().asString();
+					}
+					if (query.getQueryDefinition().getRateFilter() != null){
+						rFilter = query.getQueryDefinition().getRateFilter().asString();
+					}
+					if (vFilter.equals(rFilter)){
+						rateTable = valueTable;
+					}else{
+						rateTable = "summary_rate_" + System.nanoTime();
+						
+						dt = new FilterProcessor(rateTable, DerbySummaryEngine.this);
+						dt.processFilter(c, query.getQueryDefinition().getRateFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
+						dt.dropTemporaryTables(c);
+						if (monitor.isCanceled()){
+							return;
+						}
+						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+					}
 					
 					sumResults.setData(
 							computeSummaryValues(c, session, 
@@ -225,8 +228,12 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		return sumResults ;
 	}
 
+	private void dropTemporaryTables(Connection c){
+		dropTable(c, rateTable);
+		dropTable(c, valueTable);
+	}
 	
-	private void addCategoryHkey(GroupByPart groupByPart, ValuePart values, Connection c) throws SQLException{
+	private void addCategoryHkey(String tableName, GroupByPart groupByPart, ValuePart values, Connection c) throws SQLException{
 		boolean add = false;
 		for (IGroupBy groupBy : groupByPart.getGroupBys()){
 			if (groupBy.hasCategory() ){
@@ -246,7 +253,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		if (add){
 			StringBuilder sql = new StringBuilder();
 			sql.append("ALTER TABLE "); //$NON-NLS-1$
-			sql.append(queryTempTable);
+			sql.append(tableName);
 			sql.append(" ADD column cat_hkey varchar(32672)"); //$NON-NLS-1$
 			QueryPlugIn.log(sql.toString(), null);
 			
@@ -254,26 +261,22 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryTempTable);
+			sql.append(tableName);
 			sql.append(" SET cat_hkey = "); //$NON-NLS-1$
 			sql.append("(SELECT "); //$NON-NLS-1$
-			sql.append(tablePrefix.get(Category.class));
+			sql.append(prefix(Category.class));
 			sql.append(".hkey FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(Category.class));
-			sql.append(" "); //$NON-NLS-1$
-			sql.append(tablePrefix.get(Category.class));
+			sql.append(namePrefix(Category.class));
 			sql.append(", "); //$NON-NLS-1$
-			sql.append(tableNames.get(WaypointObservation.class));
-			sql.append(" "); //$NON-NLS-1$
-			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(namePrefix(WaypointObservation.class));
 			sql.append(" WHERE "); //$NON-NLS-1$
-			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(prefix(WaypointObservation.class));
 			sql.append(".uuid = "); //$NON-NLS-1$
-			sql.append(queryTempTable);
+			sql.append(tableName);
 			sql.append(".ob_uuid AND "); //$NON-NLS-1$
-			sql.append(tablePrefix.get(Category.class));
+			sql.append(prefix(Category.class));
 			sql.append(".uuid = "); //$NON-NLS-1$
-			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(prefix(WaypointObservation.class));
 			sql.append(".category_uuid )"); //$NON-NLS-1$
 			
 			QueryPlugIn.log(sql.toString(), null);
@@ -301,7 +304,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, caFilter) ; 
+			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -322,26 +325,29 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	 * @return
 	 * @throws SQLException
 	 */
-	private HashMap<SummaryResultKey, Double> computeValueItem(Connection c, 
+	private HashMap<SummaryResultKey, Double> computeValueItem(
+			Connection c, 
 			Session s,
 			GroupByPart groupBy, 
-			IValueItem it, ConservationAreaFilter caFilter) throws SQLException {
+			IValueItem it, 
+			ConservationAreaFilter caFilter,
+			String dataTable) throws SQLException {
 		
-		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(it.asString());
+		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(it.asString() + "_" + dataTable);
 		if (results != null){
 			return results;
 		}
 		if (it instanceof PatrolValueItem){
-			results = (getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it, caFilter));
+			results = (getPatrolSummaryValue(dataTable, c, s, groupBy, (PatrolValueItem)it, caFilter));
 		}else if (it instanceof AttributeValueItem){
-			results =  (getAttributeValue(c, s, groupBy, (AttributeValueItem)it, caFilter));
+			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
 		}else if (it instanceof CategoryValueItem){
-			results = (getCategoryValue(c, s, groupBy, (CategoryValueItem)it, caFilter));
+			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
 		}else if (it instanceof CombinedValueItem){
 			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
 		}
 		if (results != null){
-			cachedValueToResults.put(it.asString(), results);
+			cachedValueToResults.put(it.asString() + "_" + dataTable, results);
 		}
 		
 		return results;
@@ -357,6 +363,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	 * @throws SQLException
 	 */
 	private HashMap<SummaryResultKey, Double> getPatrolSummaryValue(
+			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
 			PatrolValueItem patrolItem, ConservationAreaFilter caFilter) throws SQLException{
@@ -364,7 +371,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder fromSql = new StringBuilder();
 		
-		fromSql.append(queryTempTable + " temp "); //$NON-NLS-1$
+		fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
 		
 		String tmp = getNameByClass(patrolItem.getOption().getOptionClass()) ;
 		if (tmp != null){
@@ -394,28 +401,28 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 
 		if (patrolItem.getOption().getOptionClass().equals(Track.class) && !hasAreaGroupBy){
 			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNames.get(Track.class));
-			fromSql.append(" "); //$NON-NLS-1$
-			fromSql.append(tablePrefix.get(Track.class) );
-			fromSql.append( " on temp.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid " ); //$NON-NLS-1$ //$NON-NLS-2$
+			fromSql.append(namePrefix(Track.class));
+			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$ 
+			fromSql.append(prefix(Track.class));
+			fromSql.append(".patrol_leg_day_uuid " ); //$NON-NLS-1$
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
 			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  || 
 			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
 			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNames.get(PatrolLegMember.class));
-			fromSql.append(" "); //$NON-NLS-1$
-			fromSql.append(tablePrefix.get(PatrolLegMember.class) );
-			fromSql.append(" on temp.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid " ); //$NON-NLS-1$ //$NON-NLS-2$
+			fromSql.append(namePrefix(PatrolLegMember.class));
+			fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
+			fromSql.append( prefix(PatrolLegMember.class));
+			fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
 			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS ||
 			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
 			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNames.get(PatrolLegDay.class));
-			fromSql.append(" "); //$NON-NLS-1$
-			fromSql.append(tablePrefix.get(PatrolLegDay.class));
-			fromSql.append( " on temp.pld_uuid = " + tablePrefix.get(PatrolLegDay.class)+ ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			fromSql.append(namePrefix(PatrolLegDay.class));
+			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
+			fromSql.append(prefix(PatrolLegDay.class));
+			fromSql.append(".uuid "); //$NON-NLS-1$ 
 		}
 		
 		StringBuilder sql = new StringBuilder();
@@ -458,89 +465,282 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	 * @throws SQLException
 	 */
 	private HashMap<SummaryResultKey, Double> getAttributeValue(
+			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
 			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
 		
-		StringBuilder fromSql = new StringBuilder();
-		
-		fromSql.append(queryTempTable + " temp "); //$NON-NLS-1$
-		StringBuilder groupBySql = new StringBuilder();
-		StringBuilder groupByInnerSql = new StringBuilder();
+		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
+			StringBuilder fromSql = new StringBuilder();
 
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
-		
-		String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
-		if (attributeItem.getCategoryKey() != null){
-			valueSql = valueSql + ",temp.cat_hkey"; //$NON-NLS-1$
-		}
-		StringBuilder valueAggSql = new StringBuilder();
-		valueAggSql.append(attributeItem.getAggregation().getName());
-		valueAggSql.append("("); //$NON-NLS-1$
-		valueAggSql.append(tablePrefix.get(WaypointObservationAttribute.class));
-		valueAggSql.append(".number_value)"); //$NON-NLS-1$
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT "); //$NON-NLS-1$
-		sql.append(groupBySql);
-		if (groupBySql.length() > 0){
-			sql.append(","); //$NON-NLS-1$
-		}
-		sql.append(valueAggSql);
-		sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
-		sql.append(groupByInnerSql);
-		if (groupByInnerSql.length() > 0){
-			sql.append(","); //$NON-NLS-1$
-		}
-		sql.append(valueSql);
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(fromSql);
-		
-		
-		sql.append(") foo"); //$NON-NLS-1$
-		
-		sql.append(" join "); //$NON-NLS-1$
-		sql.append(tableNames.get(WaypointObservationAttribute.class));
-		sql.append(" "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
-		sql.append(" on foo.ob_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
-		sql.append(".observation_uuid "); //$NON-NLS-1$
-		sql.append(" join "); //$NON-NLS-1$
-		sql.append(tableNames.get(Attribute.class));
-		sql.append(" "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Attribute.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
-		sql.append(".attribute_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Attribute.class));
-		sql.append(".uuid "); //$NON-NLS-1$
+			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
+			StringBuilder groupBySql = new StringBuilder();
+			StringBuilder groupByInnerSql = new StringBuilder();
 
-		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
-		sql.append(".number_value is not null and "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Attribute.class));
-		sql.append(".keyid = '"); //$NON-NLS-1$
-		sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
-		if (attributeItem.getCategoryKey() != null){
-			sql.append("AND ( foo.cat_hkey >= '"); //$NON-NLS-1$
-			sql.append(attributeItem.getCategoryKey());
-			sql.append("' and "); //$NON-NLS-1$
-			sql.append("foo.cat_hkey < '"); //$NON-NLS-1$
-			sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
-			sql.append("/') "); //$NON-NLS-1$
-		}
-		if (groupBySql.length() > 0){
-			sql.append(" GROUP BY " ); //$NON-NLS-1$
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql,
+					attributeItem, caFilter);
+
+			String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
+			if (attributeItem.getCategoryKey() != null) {
+				valueSql = valueSql + ",temp.cat_hkey"; //$NON-NLS-1$
+			}
+			StringBuilder valueAggSql = new StringBuilder();
+			valueAggSql.append(attributeItem.getAggregation().getName());
+			valueAggSql.append("("); //$NON-NLS-1$
+			valueAggSql.append(tablePrefix
+					.get(WaypointObservationAttribute.class));
+			valueAggSql.append(".number_value)"); //$NON-NLS-1$
+
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT "); //$NON-NLS-1$
 			sql.append(groupBySql);
+			if (groupBySql.length() > 0) {
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueAggSql);
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0) {
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+
+			sql.append(") foo"); //$NON-NLS-1$
+
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(WaypointObservationAttribute.class));
+			sql.append(" on foo.ob_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".observation_uuid "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(Attribute.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".attribute_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".number_value is not null and "); //$NON-NLS-1$
+			sql.append(prefix(Attribute.class));
+			sql.append(".keyid = '"); //$NON-NLS-1$
+			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
+			if (attributeItem.getCategoryKey() != null) {
+				sql.append(" AND ( foo.cat_hkey >= '"); //$NON-NLS-1$
+				sql.append(attributeItem.getCategoryKey());
+				sql.append("' and "); //$NON-NLS-1$
+				sql.append("foo.cat_hkey < '"); //$NON-NLS-1$
+				sql.append(attributeItem.getCategoryKey().substring(0,
+						attributeItem.getCategoryKey().length() - 1));
+				sql.append("/') "); //$NON-NLS-1$
+			}
+			if (groupBySql.length() > 0) {
+				sql.append(" GROUP BY "); //$NON-NLS-1$
+				sql.append(groupBySql);
+			}
+
+			// do something here with sql
+			QueryPlugIn.logSql(sql.toString());
+
+			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+
+			return createValueResults(rs, groupBy, attributeItem.asString());
+		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
+			StringBuilder fromSql = new StringBuilder();
+			
+			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
+			StringBuilder groupBySql = new StringBuilder();
+			StringBuilder groupByInnerSql = new StringBuilder();
+
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			
+			String valueSql = ""; //$NON-NLS-1$
+			
+			StringBuilder valueAggSql = new StringBuilder();
+			
+			if (attributeItem.getValueType() == IValueItem.ValueType.OBSERVATION){
+				valueSql = "temp.ob_uuid"; //$NON-NLS-1$
+				valueAggSql.append("count(ob_uuid)"); //$NON-NLS-1$
+			}else{
+				valueSql = "temp.wp_uuid"; //$NON-NLS-1$
+				valueAggSql.append("count(wp_uuid)"); //$NON-NLS-1$
+			}
+			
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT "); //$NON-NLS-1$
+			sql.append(groupBySql);
+			if (groupBySql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueAggSql);
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(WaypointObservationAttribute.class));
+			sql.append(" on temp.ob_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".observation_uuid "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(Attribute.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".attribute_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+			sql.append("left join ");
+			sql.append(namePrefix(AttributeListItem.class));
+			sql.append(" on ");
+			sql.append(prefix(AttributeListItem.class));
+			sql.append(".attribute_uuid = ");
+			sql.append(prefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".list_element_uuid =  "); //$NON-NLS-1$
+			sql.append(prefix(AttributeListItem.class));
+			sql.append(".uuid and ");
+			sql.append(prefix(AttributeListItem.class));
+			sql.append(".keyid = '");
+			sql.append(attributeItem.getItemKey());
+			sql.append("' and ");
+		
+			sql.append(prefix(Attribute.class));
+			sql.append(".keyid = '"); //$NON-NLS-1$
+			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
+			if (attributeItem.getCategoryKey() != null){	
+				sql.append("AND ( temp.cat_hkey >= '"); //$NON-NLS-1$
+				sql.append(attributeItem.getCategoryKey());
+				sql.append("' and "); //$NON-NLS-1$
+				sql.append("temp.cat_hkey < '"); //$NON-NLS-1$
+				sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
+				sql.append("/') "); //$NON-NLS-1$
+			}
+			sql.append(") as foo ");
+			if (groupBySql.length() > 0){
+				sql.append(" GROUP BY " ); //$NON-NLS-1$
+				sql.append(groupBySql);
+			}
+			
+			//do something here with sql
+			QueryPlugIn.logSql(sql.toString());
+			
+			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+
+			return createValueResults(rs, groupBy, attributeItem.asString());
+		} else if (attributeItem.getAttributeType() == AttributeType.TREE) {
+			StringBuilder fromSql = new StringBuilder();
+			
+			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
+			StringBuilder groupBySql = new StringBuilder();
+			StringBuilder groupByInnerSql = new StringBuilder();
+
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			
+			String valueSql = ""; //$NON-NLS-1$
+			
+			StringBuilder valueAggSql = new StringBuilder();
+			
+			if (attributeItem.getValueType() == IValueItem.ValueType.OBSERVATION){
+				valueSql = "temp.ob_uuid"; //$NON-NLS-1$
+				valueAggSql.append("count(ob_uuid)"); //$NON-NLS-1$
+			}else{
+				valueSql = "temp.wp_uuid"; //$NON-NLS-1$
+				valueAggSql.append("count(wp_uuid)"); //$NON-NLS-1$
+			}
+			
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT "); //$NON-NLS-1$
+			sql.append(groupBySql);
+			if (groupBySql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueAggSql);
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(WaypointObservationAttribute.class));
+			sql.append(" on temp.ob_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".observation_uuid "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(Attribute.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".attribute_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+			sql.append("left join ");
+			sql.append(namePrefix(AttributeTreeNode.class));
+			sql.append(" on ");
+			sql.append(prefix(AttributeTreeNode.class));
+			sql.append(".attribute_uuid = ");
+			sql.append(prefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class));
+			sql.append(".tree_node_uuid =  "); //$NON-NLS-1$
+			sql.append(prefix(AttributeTreeNode.class));
+			sql.append(".uuid and (");
+			
+			sql.append(prefix(AttributeTreeNode.class));
+			sql.append(".hkey >= '");
+			sql.append(attributeItem.getItemKey());
+			sql.append("' and ");
+			sql.append(prefix(AttributeTreeNode.class));
+			sql.append(".hkey < '");
+			sql.append(attributeItem.getItemKey().substring(0, attributeItem.getItemKey().length() -1 ));
+			sql.append("/'  ");
+			sql.append(") and ");
+		
+			sql.append(prefix(Attribute.class));
+			sql.append(".keyid = '"); //$NON-NLS-1$
+			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
+			if (attributeItem.getCategoryKey() != null){
+				sql.append("AND ( temp.cat_hkey >= '"); //$NON-NLS-1$
+				sql.append(attributeItem.getCategoryKey());
+				sql.append("' and "); //$NON-NLS-1$
+				sql.append("temp.cat_hkey < '"); //$NON-NLS-1$
+				sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
+				sql.append("/') "); //$NON-NLS-1$
+			}
+			sql.append(") as foo ");
+			if (groupBySql.length() > 0){
+				sql.append(" GROUP BY " ); //$NON-NLS-1$
+				sql.append(groupBySql);
+			}
+			
+			//do something here with sql
+			QueryPlugIn.logSql(sql.toString());
+			
+			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+
+			return createValueResults(rs, groupBy, attributeItem.asString());
 		}
 		
-		//do something here with sql
-		QueryPlugIn.logSql(sql.toString());
 		
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-
-		return createValueResults(rs, groupBy, attributeItem.asString());
+		
+		return null;
 	}
 	
 	/**
@@ -608,10 +808,10 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			GroupByPart groupBy, 
 			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
 		
-		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter);
+		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
 		HashMap<SummaryResultKey, Double> values = new HashMap<SummaryResultKey, Double>();
 		
-		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter);
+		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter, rateTable);
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		
 		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values2.entrySet().iterator(); iterator.hasNext();) {
@@ -655,13 +855,14 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	 * @throws SQLException
 	 */
 	private HashMap<SummaryResultKey, Double> getCategoryValue(
+			String dataTable,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
 			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
-		fromSql.append(queryTempTable + " temp "); //$NON-NLS-1$
+		fromSql.append(dataTable + " temp "); //$NON-NLS-1$
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
@@ -669,7 +870,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		
 		String valueSql = ""; //$NON-NLS-1$
 		StringBuilder valueAggSql = new StringBuilder();
-		if (categoryItem.getType() == ValueType.OBSERVATION){
+		if (categoryItem.getType() == IValueItem.ValueType.OBSERVATION){
 			valueSql = "temp.ob_uuid"; //$NON-NLS-1$
 			valueAggSql.append("count(ob_uuid)"); //$NON-NLS-1$
 		}else{
@@ -745,7 +946,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					//category and attribute value area group bys use the waypoint location
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
-					String areaPrefix = tablePrefix.get(Area.class)
+					String areaPrefix = prefix(Area.class)
 							+ "_" + itemcnt; //$NON-NLS-1$
 					groupByInnerSql
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
@@ -754,8 +955,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 						fromSql.append("left join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Waypoint.class));
 						fromSql.append(" "); //$NON-NLS-1$
-						fromSql.append(tablePrefix.get(Waypoint.class));
-						fromSql.append(" on temp.wp_uuid = " + tablePrefix.get(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						fromSql.append(prefix(Waypoint.class));
+						fromSql.append(" on temp.wp_uuid = " + prefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 						waypointAdd = true;
 					}
 					fromSql.append(" left join "); //$NON-NLS-1$
@@ -763,8 +964,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
 					fromSql.append(" on smart.pointinpolygon("); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(Waypoint.class) + ".x, "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(Waypoint.class) + ".y, "); //$NON-NLS-1$
+					fromSql.append(prefix(Waypoint.class) + ".x, "); //$NON-NLS-1$
+					fromSql.append(prefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null){
@@ -779,7 +980,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					//patrol value area group bys; use the track 
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
-					String areaPrefix = tablePrefix.get(Area.class)
+					String areaPrefix = prefix(Area.class)
 							+ "_" + itemcnt; //$NON-NLS-1$
 					groupByInnerSql
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
@@ -789,8 +990,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 						fromSql.append("left join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Track.class));
 						fromSql.append(" "); //$NON-NLS-1$
-						fromSql.append(tablePrefix.get(Track.class));
-						fromSql.append(" on temp.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						fromSql.append(prefix(Track.class));
+						fromSql.append(" on temp.pld_uuid = " + prefix(Track.class) + ".patrol_leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 						trackAdd = true;
 					}
 					fromSql.append(" left join "); //$NON-NLS-1$
@@ -798,7 +999,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
 					fromSql.append(" on smart.intersects("); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(Track.class) + ".geometry, "); //$NON-NLS-1$
+					fromSql.append(prefix(Track.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null ){
@@ -823,8 +1024,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(" left join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(PatrolLegMember.class));
 					fromSql.append(" "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(PatrolLegMember.class));
-					fromSql.append(" on temp.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					fromSql.append(prefix(PatrolLegMember.class));
+					fromSql.append(" on temp.pl_uuid = " + prefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else if (gb instanceof DateGroupBy){
 				DateGroupByOption op = ((DateGroupBy)gb).getOption();
@@ -853,27 +1054,26 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			
 				groupBySql.append("attribute_" + itemcnt); //$NON-NLS-1$
 				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
-					groupByInnerSql.append(tablePrefix.get(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(prefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
 					groupByInnerSql.append("smart.trimHkeyToLevel("); //$NON-NLS-1$
 					groupByInnerSql.append(((AttributeGroupBy)gb).getTreeLevel().intValue() + ","); //$NON-NLS-1$
-					groupByInnerSql.append(tablePrefix.get(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(prefix(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".hkey) as  attribute_" + itemcnt + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
 				fromSql.append(tableNames.get(WaypointObservationAttribute.class));
 				fromSql.append(" "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(prefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(" on "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(prefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".observation_uuid = temp.ob_uuid "); //$NON-NLS-1$
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					fromSql.append(" and ("); //$NON-NLS-1$
-					fromSql.append("temp.cat_hkey >= '"); //$NON-NLS-1$
+					fromSql.append(" and (temp.cat_hkey >= '"); //$NON-NLS-1$
 					fromSql.append(catkey);
 					fromSql.append("' and "); //$NON-NLS-1$
 					fromSql.append("temp.cat_hkey < '"); //$NON-NLS-1$
@@ -885,32 +1085,32 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
 					fromSql.append(tableNames.get(AttributeListItem.class));
 					fromSql.append(" "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(prefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(" on "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(prefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".uuid ="); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(prefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
 					fromSql.append(tableNames.get(AttributeTreeNode.class));
 					fromSql.append(" "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(prefix(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(" on "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(prefix(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".uuid ="); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(prefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".tree_node_uuid "); //$NON-NLS-1$
 				}
 				fromSql.append(" JOIN "); //$NON-NLS-1$
 				fromSql.append(tableNames.get(Attribute.class));
 				fromSql.append(" "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(prefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(" on "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(prefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".attribute_uuid = "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(prefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".uuid AND "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(prefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".keyid = '"); //$NON-NLS-1$
 				fromSql.append(((AttributeGroupBy)gb).getAttributeKey());
 				fromSql.append("' "); //$NON-NLS-1$
@@ -1000,7 +1200,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			return "p_uuid, pld_patrol_day"; //$NON-NLS-1$
 		case DISTANCE:
 			if (!hasAreaGroupBy){
-				return tablePrefix.get(Track.class) + ".distance as distance"; //$NON-NLS-1$
+				return prefix(Track.class) + ".distance as distance"; //$NON-NLS-1$
 			}else{
 				StringBuilder valueSql = new StringBuilder();
 				StringBuilder append = new StringBuilder();
@@ -1011,7 +1211,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					valueSql.append(".geom,"); //$NON-NLS-1$
 					append.append(")"); //$NON-NLS-1$
 				}
-				valueSql.append(tablePrefix.get(Track.class));
+				valueSql.append(prefix(Track.class));
 				valueSql.append(".geometry"); //$NON-NLS-1$
 				valueSql.append(append);
 				valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
@@ -1019,8 +1219,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			}
 		case NUM_HOURS:
 			if (!hasAreaGroupBy){
-				return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
-						tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time"; //$NON-NLS-1$
+				return prefix(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
+						prefix(PatrolLegDay.class) + ".end_time as pld_end_time"; //$NON-NLS-1$
 			}else{
 				StringBuilder append = new StringBuilder();
 				StringBuilder valueSql = new StringBuilder();
@@ -1035,17 +1235,17 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				valueSql.append(append);
 					
 				valueSql.append(","); //$NON-NLS-1$
-				valueSql.append(tablePrefix.get(Track.class));
+				valueSql.append(prefix(Track.class));
 				valueSql.append(".geometry) as hours "); //$NON-NLS-1$
 				return valueSql.toString();
 			}
 		case NUM_MEMBERS:
-			return tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+			return prefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		case MAN_HOURS:
 			if (!hasAreaGroupBy){
-				return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
-						tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
-						tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+				return prefix(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
+						prefix(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
+						prefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 			}else{
 				StringBuilder valueSql = new StringBuilder();
 				StringBuilder append = new StringBuilder();
@@ -1060,16 +1260,16 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				valueSql.append(append);
 					
 				valueSql.append(","); //$NON-NLS-1$
-				valueSql.append(tablePrefix.get(Track.class));
+				valueSql.append(prefix(Track.class));
 				valueSql.append(".geometry)"); //$NON-NLS-1$
 				valueSql.append(" as hours, "); //$NON-NLS-1$
-				valueSql.append(tablePrefix.get(PatrolLegMember.class));
+				valueSql.append(prefix(PatrolLegMember.class));
 				valueSql.append(".employee_uuid as pl_member"); //$NON-NLS-1$
 				return valueSql.toString();
 			}
 		case MAN_DAYS:
 			return "pld_patrol_day, " + //$NON-NLS-1$
-			tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+			prefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		}
 		//TODO: should not get here
 		return null;
@@ -1117,7 +1317,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	 */
 	private String getTablePrefix(PatrolGroupBy gb){
 		if (gb.getOption() == PatrolQueryOption.EMPLOYEE){
-			return tablePrefix.get(PatrolLegMember.class);
+			return prefix(PatrolLegMember.class);
 		}
 		return null;
 	}
@@ -1177,4 +1377,81 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		}
 		
 	}
+	
+	
+	@Override
+	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".id, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".end_date, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".id, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".transport_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".end_date, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
+		
+		if (includeObservations){
+			sql.append(prefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+		}else{
+			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
+		}
+		sql.append(prefix(PatrolLegMember.class) + "_leader.employee_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegMember.class) + "_pilot.employee_uuid "); //$NON-NLS-1$
+		return sql.toString();
+	}
+
+	@Override
+	protected String getTemporaryTableCreateClause(String tableName) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_id varchar(32),"); //$NON-NLS-1$
+		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
+		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_type varchar(6),"); //$NON-NLS-1$
+		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
+		sql.append("p_start_date date,"); //$NON-NLS-1$
+		sql.append("p_end_date date,"); //$NON-NLS-1$
+		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_id varchar(50),"); //$NON-NLS-1$
+		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_start_date date,"); //$NON-NLS-1$
+		sql.append("pl_end_date date,"); //$NON-NLS-1$
+		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pld_patrol_day date,"); //$NON-NLS-1$
+		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+		sql.append(")"); //$NON-NLS-1$
+		return sql.toString();
+	}
+
+	@Override
+	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+			throws SQLException {
+		super.buildTemporaryTableIndexes(c, tableName);
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+	}
+
 }

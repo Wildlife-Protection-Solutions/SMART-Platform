@@ -45,7 +45,6 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.parser.filter.IFilter;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -58,52 +57,31 @@ import org.wcs.smart.query.parser.filter.IFilter;
  */
 public class DerbyObservationEngine extends DerbyQueryEngine2 {
 
+	private String queryDataTable;
+	
+	
 	public DerbyPagedObservationResult executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+		queryDataTable = createTempTableName();
 		
-		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
-		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
 		
-		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryTempTable);
+		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable);
 		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
-
+				FilterProcessor data = new FilterProcessor(queryDataTable, DerbyObservationEngine.this);
+				
 				try {			
-					monitor.subTask(Messages.DerbyQueryEngine2_Progress_CreatingObservationTable);
-					IFilter qFilter = query.getFilter();
-					if (qFilter == null){
-						return;
-					}
-					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter(), query.getDateFilter(), 
-								query.getConservationAreaFilterAsFilter(), monitor);
-					}
-					monitor.worked(2);
-					if (monitor.isCanceled()){
-						return;
-					}
-
-					monitor.subTask(Messages.DerbyQueryEngine2_Progress_CreatingTempTable);
-					createResultTemporaryTable(c);
-					monitor.worked(2);
-					if (monitor.isCanceled()){
-						return;
-					}
-					
-					monitor.subTask(Messages.DerbyQueryEngine2_Progress_PopulatingResults);
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), true, c, true); //MUST be both true
-					monitor.worked(15);
-					if (monitor.isCanceled()){
-						return;
-					}
+					data.processFilter(c, query.getFilter(), query.getDateFilter(), 
+							query.getConservationAreaFilterAsFilter(), 
+							true, true, monitor);
 					
 					populateTemporaryTableExtra(c, session, monitor);
 					
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
-					ResultSet rs = c.createStatement().executeQuery("select count(*) from "+queryTempTable); //$NON-NLS-1$
+					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
 					try {
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
@@ -113,7 +91,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 					}
 
 					//setting waypoint count
-					rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from "+queryTempTable+") wp"); //$NON-NLS-1$ //$NON-NLS-2$
+					rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp"); //$NON-NLS-1$ //$NON-NLS-2$
 					try {
 						if (rs.next()) { 
 							result.setWpCount(rs.getInt(1));
@@ -123,6 +101,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 					}
 					
 				} finally {
+					data.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}
@@ -139,113 +118,16 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	 * @throws SQLException
 	 */
 	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		try {
-			String sql = "DROP TABLE " + observationTempTable; //$NON-NLS-1$
-			QueryPlugIn.logSql(sql);
-			c.createStatement().execute(sql);
-		} catch (Exception ex) {
-			// eatme
-		}
-		
 		if (!fullDrop)
 			return;
-
 		//original table
-		try {
-			String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
-			c.createStatement().execute(sql);
-			QueryPlugIn.logSql(sql);
-		} catch (Exception ex) {
-			// eatme
-		}
-		//list elements value table
-		try {
-			String sql = "DROP TABLE " + queryTempTable + "_LIST"; //$NON-NLS-1$ //$NON-NLS-2$
-			c.createStatement().execute(sql);
-			QueryPlugIn.logSql(sql);
-		} catch (Exception ex) {
-			// eatme
-		}
-		//tree elements value table
-		try {
-			String sql = "DROP TABLE " + queryTempTable + "_TREE"; //$NON-NLS-1$ //$NON-NLS-2$
-			c.createStatement().execute(sql);
-			QueryPlugIn.logSql(sql);
-		} catch (Exception ex) {
-			// eatme
-		}
-
-	}
-
-	/**
-	 * Creates the temporary table that holds the query results.
-	 * 
-	 * @param c database connection
-	 * @throws SQLException
-	 */
-	private void createResultTemporaryTable(Connection c) throws SQLException {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + queryTempTable + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_id varchar(32),"); //$NON-NLS-1$
-		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_type varchar(6),"); //$NON-NLS-1$
-		sql.append("p_armed boolean,"); //$NON-NLS-1$
-		sql.append("p_startdate date,"); //$NON-NLS-1$
-		sql.append("p_enddate date,"); //$NON-NLS-1$
-		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_legid varchar(50),"); //$NON-NLS-1$
-		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_date date,"); //$NON-NLS-1$ //sql.append("pld_patrol_day date,");
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-
-		sql.append("wp_id integer,"); //$NON-NLS-1$
-		sql.append("wp_x double,"); //$NON-NLS-1$
-		sql.append("wp_y double,"); //$NON-NLS-1$
-		sql.append("wp_direction real,"); //$NON-NLS-1$
-		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_time time,"); //$NON-NLS-1$
-		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
-
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
-		
-		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
-
-		sql.append(")"); //$NON-NLS-1$
-
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-		
-		//create index on observation uuid as this is used in other query joings
-		sql = new StringBuilder();
-		sql.append("create index "); //$NON-NLS-1$
-		sql.append(queryTempTable);
-		sql.append("_obuuid_idx on "); //$NON-NLS-1$
-		sql.append(queryTempTable);
-		sql.append("(ob_uuid)"); //$NON-NLS-1$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-		
-		sql = new StringBuilder();
-		sql.append("create index "); //$NON-NLS-1$
-		sql.append(queryTempTable);
-		sql.append("_ob_category_uuid_idx on "); //$NON-NLS-1$
-		sql.append(queryTempTable);
-		sql.append("(ob_category_uuid)"); //$NON-NLS-1$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+		dropTable(c, queryDataTable);
+		dropTable(c, queryDataTable + "_LIST");
+		dropTable(c, queryDataTable + "_TREE");
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryTempTable);  //$NON-NLS-1$//$NON-NLS-2$
+		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
 		try {
 			while (rs.next()) {
 				byte[] ca_uuid = rs.getBytes(1);
@@ -253,7 +135,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 				if (uuid == null || ca_uuid == null)
 					continue;
 				String name = getName(uuid, ca_uuid, session);
-				PreparedStatement statement = c.prepareStatement("UPDATE "+queryTempTable+" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				statement.setString(1, name);
 				statement.setBytes(2, uuid);
 				statement.executeUpdate();
@@ -272,14 +154,14 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		}
 		
 		for (int i = 0; i <= numCategory; i++) {
-			c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD category_"+i+" varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (numCategory < 0){
 			//nothing to update
 			return;
 		}
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
-		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryTempTable);  //$NON-NLS-1$
+		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable);  //$NON-NLS-1$
 		try {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
@@ -298,7 +180,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 						}
 						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					statement = c.prepareStatement("UPDATE "+queryTempTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					statement = c.prepareStatement("UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					num2Statement.put(count, statement);
 				}
 				
@@ -315,15 +197,15 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_station varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_team varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_mandate varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_transporttype varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_station varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_team varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_mandate varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_transporttype varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_leader varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_pilot varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD ca_id varchar(8)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD ca_name varchar(256)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_leader varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_pilot varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD ca_id varchar(8)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD ca_name varchar(256)"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if (monitor.isCanceled()){
 			return;
@@ -361,12 +243,12 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		monitor.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
-		sql.append(queryTempTable);
+		sql.append(queryDataTable);
 		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
-		sql.append(queryTempTable);
+		sql.append(queryDataTable);
 
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		String updateSql = "UPDATE "+queryTempTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		PreparedStatement leaderSt = c.prepareStatement(updateSql+"p_leader = ? where plm_leader = ?"); //$NON-NLS-1$
 		PreparedStatement pilotSt = c.prepareStatement(updateSql+"p_pilot = ? where plm_pilot = ?"); //$NON-NLS-1$
 		try {
@@ -397,17 +279,17 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryTempTable);
+			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryTempTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(DerbyQueryEngine2.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			c.createStatement().executeUpdate(sql.toString());
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryTempTable);
+			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryTempTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append(DerbyQueryEngine2.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		
@@ -447,12 +329,12 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	}
 
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryTempTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(sql);
 
-		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.P_CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryTempTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.P_CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		ResultSet rs = c.createStatement().executeQuery(sql);
-		PreparedStatement statement = c.prepareStatement("INSERT INTO "+queryTempTable+linkedData.getPostfix()+" VALUES (?, ?)"); //$NON-NLS-1$ //$NON-NLS-2$
+		PreparedStatement statement = c.prepareStatement("INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"); //$NON-NLS-1$ //$NON-NLS-2$
 		try {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
@@ -482,43 +364,6 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		}
 		return maxDepth + 1;
 	}
-
-	@Override
-	protected String buildTemporaryTableSelectClause(boolean needsObservations) {
-		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".objective, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Patrol.class) + ".end_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(PatrolLeg.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(PatrolLeg.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(PatrolLeg.class) + ".transport_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
-
-		sql.append(tablePrefix.get(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".x, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".y, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".direction, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".distance, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".time, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
-
-		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.employee_uuid as leader_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.employee_uuid as pilot_uuid "); //$NON-NLS-1$
-		return sql.toString();
-	}
 	
 	/**
 	 * Wrapper class for populating linked data (additional columns)
@@ -545,5 +390,98 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		}
 		
 		public abstract String getLabel(Session session, byte[] cauuid, byte[] keyuuid);
+	}
+
+	@Override
+	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".id, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(prefix(Patrol.class) + ".end_date, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".id, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLeg.class) + ".transport_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
+
+		sql.append(prefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".id, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".x, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".time, "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
+
+		sql.append(prefix(PatrolLegMember.class) + "_leader.employee_uuid as leader_uuid, "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegMember.class) + "_pilot.employee_uuid as pilot_uuid "); //$NON-NLS-1$
+		return sql.toString();
+	}
+
+	@Override
+	protected String getTemporaryTableCreateClause(String tableName) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_id varchar(32),"); //$NON-NLS-1$
+		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
+		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_type varchar(6),"); //$NON-NLS-1$
+		sql.append("p_armed boolean,"); //$NON-NLS-1$
+		sql.append("p_startdate date,"); //$NON-NLS-1$
+		sql.append("p_enddate date,"); //$NON-NLS-1$
+		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_legid varchar(50),"); //$NON-NLS-1$
+		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_date date,"); //$NON-NLS-1$ //sql.append("pld_patrol_day date,");
+		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+
+		sql.append("wp_id integer,"); //$NON-NLS-1$
+		sql.append("wp_x double,"); //$NON-NLS-1$
+		sql.append("wp_y double,"); //$NON-NLS-1$
+		sql.append("wp_direction real,"); //$NON-NLS-1$
+		sql.append("wp_distance real,"); //$NON-NLS-1$
+		sql.append("wp_time time,"); //$NON-NLS-1$
+		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+
+		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
+		
+		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+
+		sql.append(")"); //$NON-NLS-1$
+		return sql.toString();
+	}
+
+	@Override
+	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+			throws SQLException {
+		super.buildTemporaryTableIndexes(c, tableName);
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("create index "); //$NON-NLS-1$
+		sql.append(tableName);
+		sql.append("_ob_category_uuid_idx on "); //$NON-NLS-1$
+		sql.append(tableName);
+		sql.append("(ob_category_uuid)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+		
 	}
 }

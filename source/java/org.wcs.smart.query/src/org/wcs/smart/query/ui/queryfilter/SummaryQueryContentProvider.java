@@ -46,6 +46,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -272,13 +273,19 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
+						attribute = (Attribute) session.load(Attribute.class, attribute.getUuid());
+						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
+						attribute = (Attribute) session.load(Attribute.class, attribute.getUuid());
+						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
+						node.getAttribute().getName();
 						nodes = node.getActiveChildren();
+						
 					}
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();
@@ -315,21 +322,79 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		return results;
 	}
 	
+	private Object[] getAttributeListChildren(final SummaryDmObject parent){
+		
+		final List<AttributeListItem> kids = new ArrayList<AttributeListItem>();
+		Job j = new Job("loading list children"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
+				try{
+					
+					List<AttributeListItem> nodes = null;
+					
+					if (parent.getObject() instanceof Attribute){
+						Attribute attribute = (Attribute)parent.getObject();
+						attribute = (Attribute)session.load(Attribute.class, attribute.getUuid());
+						attribute.getName();
+						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+					}else if (parent.getObject() instanceof CategoryAttribute ){
+						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
+						attribute = (Attribute)session.load(Attribute.class, attribute.getUuid());
+						attribute.getName();
+						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+					}
+					kids.addAll(nodes);					
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					QueryPlugIn.log("Could not log list items " + ex.getLocalizedMessage(), ex);
+				}finally{
+					session.close();
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.schedule();
+		try{
+			j.join();
+		}catch (Exception ex){
+			QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsB + ex.getLocalizedMessage(), ex);
+			return null;
+		}
+		
+		if (kids == null || kids.size() == 0){
+			return null;
+		}
+		Object[] results = new Object[kids.size()];
+		int index = 0;
+		Object obj2 = parent.getObject2();
+		if (parent.getObject() instanceof CategoryAttribute){
+			obj2 = ((CategoryAttribute) parent.getObject()).getCategory();
+		}
+		
+		for (AttributeListItem kid : kids){
+			results[index++] = new SummaryDmObject(kid, obj2, parent.isValue());
+		}
+		return results;
+	}
 	
 	public Object[] getChildren(SummaryDmObject parent){
 
 		if (parent.getObject() instanceof Attribute && 
-				((Attribute)parent.getObject()).getType() == AttributeType.TREE &&
-				!parent.isValue()
-				){
+				((Attribute)parent.getObject()).getType() == AttributeType.TREE){
 			return getAttributeTreeChildren(parent);
 		}else if (parent.getObject() instanceof CategoryAttribute && 
-			((CategoryAttribute)parent.getObject()).getAttribute().getType() == AttributeType.TREE &&
-			!parent.isValue()){
-			
+			((CategoryAttribute)parent.getObject()).getAttribute().getType() == AttributeType.TREE){
 			return getAttributeTreeChildren(parent);
-		}else if (parent.getObject() instanceof AttributeTreeNode && !parent.isValue()){
+		}else if (parent.getObject() instanceof AttributeTreeNode){
 			return getAttributeTreeChildren(parent);
+		}else if (parent.getObject() instanceof Attribute && ((Attribute)parent.getObject()).getType() == AttributeType.LIST){
+			return getAttributeListChildren(parent);
+		}else if (parent.getObject() instanceof CategoryAttribute && ((CategoryAttribute)parent.getObject()).getAttribute().getType() == AttributeType.LIST){
+			return getAttributeListChildren(parent);
 		}
 		
 		Object[] kids = provider.getChildren(  parent.getObject() );
@@ -344,11 +409,15 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			boolean add = false;
 			if (parent.isValue()){
 				if (kids[i] instanceof Attribute){
-					if (( (Attribute)kids[i]).getType() == AttributeType.NUMERIC){
+					if (((Attribute)kids[i]).getType() == AttributeType.NUMERIC ||
+						((Attribute)kids[i]).getType() == AttributeType.TREE ||
+						((Attribute)kids[i]).getType() == AttributeType.LIST){
 						add = true;
 					}
 				}else if (kids[i] instanceof CategoryAttribute){
-					if (( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.NUMERIC){
+					if (((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.NUMERIC ||
+							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE ||
+							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.LIST){
 						add = true;
 					}
 				}else if (kids[i] instanceof Category){
@@ -512,7 +581,9 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//filter out numeric only
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
 					Attribute attribute = (Attribute) iterator.next();
-					if (attribute.getType() != AttributeType.NUMERIC){
+					if (attribute.getType() != AttributeType.NUMERIC && 
+							attribute.getType() != AttributeType.LIST &&
+							attribute.getType() != AttributeType.TREE){
 						iterator.remove();
 					}
 					

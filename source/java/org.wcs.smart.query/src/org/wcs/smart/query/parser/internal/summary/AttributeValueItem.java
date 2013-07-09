@@ -27,9 +27,12 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
@@ -69,11 +72,15 @@ public class AttributeValueItem implements IValueItem {
 		return new AttributeValueItem(key, true);
 	}
 	
-	public String key;
+	private String key;
 	private String categoryKey = null;
 	private String attributeKey = null;;
 	private String aggregationKey = null;
 	private Aggregation aggregation = null;
+	
+	private String itemKey = null;
+	private IValueItem.ValueType valueType;
+	private AttributeType attributeType;
 	
 	/**
 	 * Creates a new value item from the given key.
@@ -82,21 +89,64 @@ public class AttributeValueItem implements IValueItem {
 	 */
 	public AttributeValueItem(String key, boolean includeCategory){
 		this.key = key;
+		String[] bits = key.split(":"); //$NON-NLS-1$
+		
+		String attTypeKey = null;
 		if (includeCategory){
-			String[] bits = key.split(":"); //$NON-NLS-1$
-			if(!bits[3].equals("n")){ //$NON-NLS-1$
-				throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);
-			}
-			this.categoryKey = bits[1];
-			this.attributeKey = bits[5];
-			this.aggregationKey = bits[4];
+			attTypeKey = bits[3];
 		}else{
-			String[] bits = key.split(":"); //$NON-NLS-1$
-			if(!bits[1].equals("n")){ //$NON-NLS-1$
-				throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);
+			attTypeKey = bits[1];
+		}
+		this.attributeType = Attribute.decodeAttributeTypeKey(attTypeKey);
+		if(attributeType != Attribute.AttributeType.NUMERIC && 
+		   attributeType != Attribute.AttributeType.LIST &&
+		   attributeType != Attribute.AttributeType.TREE){ //$NON-NLS-1$
+			throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);
+		}
+		if (attributeType == AttributeType.NUMERIC){
+			//numeric are of the format
+			//< SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > 
+			//< SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY >
+			if (includeCategory){
+				this.categoryKey = bits[1];
+				this.attributeKey = bits[5];
+				this.aggregationKey = bits[4];
+			}else{
+				this.attributeKey = bits[3];
+				this.aggregationKey = bits[2];
 			}
-			this.attributeKey = bits[3];
-			this.aggregationKey = bits[2];
+		}else if (attributeType == AttributeType.LIST || 
+				attributeType == AttributeType.TREE ){
+				//< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
+				//< SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
+				String valueTypeKey = "";
+				if (includeCategory){
+					this.categoryKey = bits[1];
+					this.attributeKey = bits[6];
+					this.aggregationKey = bits[4];
+					valueTypeKey = bits[5];
+					
+				}else{
+					this.attributeKey = bits[4];
+					this.aggregationKey = bits[2];
+					valueTypeKey = bits[3];
+				}
+				int index = attributeKey.indexOf('.');
+				if (index <= 0){
+					//TODO: fix error message
+					throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);	
+				}
+				String temp = attributeKey;
+				attributeKey = temp.substring(0, index);
+				itemKey = temp.substring(index + 1);
+				
+				this.valueType = ValueType.OBSERVATION;
+				for (ValueType vt : ValueType.values()){
+					if (vt.key.equals(valueTypeKey)){
+						this.valueType = vt;
+						break;
+					}
+				}
 		}
 	}
 	
@@ -114,6 +164,17 @@ public class AttributeValueItem implements IValueItem {
 		return this.attributeKey;
 	}
 	
+	public ValueType getValueType(){
+		return this.valueType;
+	}
+	
+	/**
+	 * 
+	 * @return the attribute type
+	 */
+	public AttributeType getAttributeType(){
+		return this.attributeType;
+	}
 	/**
 	 * @return the category key that makes up the item or
 	 * null if no category for this item
@@ -123,20 +184,43 @@ public class AttributeValueItem implements IValueItem {
 		return this.categoryKey;
 	}
 	
+	/**
+	 * 
+	 * @return attribute item key for list and tree
+	 * attributes.
+	 */
+	public String getItemKey(){
+		return this.itemKey;
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
 	public String getName(Session session){
 		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-		
 		if (att == null){
 			return ""; //$NON-NLS-1$
 		}
+		String itemName = null;
+		if (att.getType() == AttributeType.LIST){
+			AttributeListItem it = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
+			itemName = it.getName();
+		}else if (att.getType() == AttributeType.TREE){
+			AttributeTreeNode it = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
+			itemName = it.getName();
+		}
 		StringBuilder name = new StringBuilder();
-		name.append(getAggregation().getGuiName());
+		if (valueType != null){
+			name.append(valueType.guiLabel);
+		}else if (getAggregation() != null){
+			name.append(getAggregation().getGuiName());
+		}
 		name.append(" "); //$NON-NLS-1$
-		name.append(att.getName());
+		if (itemName != null){
+			name.append(itemName);
+		}else{
+			name.append(att.getName());
+		}
 		
 		if (categoryKey != null){
 			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
@@ -153,14 +237,33 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
 	 */
 	public String getFullName(Session session){
+
+
 		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
 		if (att == null){
 			return ""; //$NON-NLS-1$
 		}
+		String itemName = null;
+		if (att.getType() == AttributeType.LIST){
+			AttributeListItem it = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
+			itemName = it.getName();
+		}else if (att.getType() == AttributeType.TREE){
+			AttributeTreeNode it = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
+			itemName = it.getName();
+		}
 		StringBuilder name = new StringBuilder();
-		name.append(getAggregation().getGuiName());
+		if (valueType != null){
+			name.append(valueType.guiLabel);
+		}else if (getAggregation() != null){
+			name.append(getAggregation().getGuiName());
+		}
 		name.append(" "); //$NON-NLS-1$
-		name.append(att.getName());
+		if (itemName != null){
+			name.append(itemName);
+			name.append(" [" + att.getName() + "] ");
+		}else{
+			name.append(att.getName());
+		}
 		
 		if (categoryKey != null){
 			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
@@ -171,6 +274,7 @@ public class AttributeValueItem implements IValueItem {
 			}
 		}
 		return name.toString();
+		
 	}
 	
 	/**
@@ -200,15 +304,43 @@ public class AttributeValueItem implements IValueItem {
 			throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AttributeNotFoundError, new Object[]{attributeKey}));
 		}
 		DropItem di = null;
-		if (categoryKey == null){
-			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
-		}else{
-			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
+		Category cat = null;
+		if (categoryKey != null){
+			cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
 			if (cat == null){
 				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_CategoryNotFoundError, new Object[]{categoryKey}));
 			}
-			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+			cat.getFullCategoryName();			
 		}
+		if (attributeType == AttributeType.NUMERIC){
+			if (cat == null){
+				di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+			}else{
+				di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+			}
+		}else if (attributeType == AttributeType.LIST){
+			AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
+			if (ali == null){
+				throw new Exception(MessageFormat.format("List item for attribute {0} and key {1} not found.", new Object[]{attributeKey, itemKey}));		
+			}
+			if (cat == null){
+				di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
+			}else{
+				di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
+			}
+			
+		}else if (attributeType == AttributeType.TREE){
+			AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
+			if (atn == null){
+				throw new Exception(MessageFormat.format("Tree node for attribute {0} and hkey {1} not found.", new Object[]{attributeKey, itemKey}));		
+			}
+			if (cat == null){
+				di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
+			}else{
+				di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
+			}
+		}
+		
 		di.initializeData(new Object[]{getDropItemInitializeData(), null});
 		return di;
 	}
@@ -217,7 +349,11 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getInitializeData()
 	 */
 	public Object getDropItemInitializeData(){
-		return getAggregation();
+		if (attributeType == AttributeType.NUMERIC){
+			return getAggregation();
+		}else{
+			return getValueType().key;
+		}
 	}
 	
 	/**
