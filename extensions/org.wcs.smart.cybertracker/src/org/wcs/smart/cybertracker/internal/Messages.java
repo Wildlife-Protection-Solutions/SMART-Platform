@@ -64,6 +64,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExporter_NoAttributesNode_Title;
 	public static String CyberTrackerExporter_Progress_Build_Content;
 	public static String CyberTrackerExporter_Progress_Build_Mappings;
+	public static String CyberTrackerExporter_Progress_Fetch_Configuration;
 	public static String CyberTrackerExporter_Progress_FetchDataModel;
 	public static String CyberTrackerExporter_Progress_Generate_Elements;
 	public static String CyberTrackerExporter_Progress_Generate_Reports;
@@ -92,6 +93,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Task_ExtractRawData;
 	public static String CyberTrackerPlugIn_InitJob_Title;
 	public static String CyberTrackerPropertiesDialog_AppName;
+	public static String CyberTrackerPropertiesDialog_AutoNext;
 	public static String CyberTrackerPropertiesDialog_DataNotValid;
 	public static String CyberTrackerPropertiesDialog_Error;
 	public static String CyberTrackerPropertiesDialog_KioskMode;

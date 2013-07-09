@@ -97,7 +97,9 @@ public class CyberTrackerProperties {
 	private Boolean kioskMode = false;
 	private Integer waypointTimer = 0; //Track Timer 
 	private Integer gpsTimeZone = 0; //GMT/UTC time offset
-	
+
+	//this value is not CT application parameter but it will be applied to all radio screens while generating application
+	private boolean autoNext = true;
 
 	@Id
 	@GeneratedValue(generator="uuid")
@@ -149,5 +151,14 @@ public class CyberTrackerProperties {
 	
 	public void setApplicationName(String applicationName) {
 		this.applicationName = applicationName;
+	}
+	
+	@Column(name="auto_next")
+	public boolean isAutoNext() {
+		return autoNext;
+	}
+	
+	public void setAutoNext(boolean autoNext) {
+		this.autoNext = autoNext;
 	}
 }

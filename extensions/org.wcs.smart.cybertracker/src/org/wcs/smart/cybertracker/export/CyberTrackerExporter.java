@@ -48,6 +48,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.reports.Items;
@@ -69,6 +70,9 @@ import org.wcs.smart.util.SmartUtils;
 public class CyberTrackerExporter {
 	
 	private static final String CATEGORY_RESULT_PREFIX = Messages.CyberTrackerExporter_Report_Column_Category;
+
+	private ScreensObjectFactory screensFactory;
+	private CyberTrackerUtil ctUtil;
 	
 	private CyberTrackerId rootId;
 	private Elements elements;
@@ -103,16 +107,20 @@ public class CyberTrackerExporter {
 	}
 		
 	private File performExport(File file, IProgressMonitor monitor, Session session) throws Exception {
+		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
+		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
+		screensFactory = new ScreensObjectFactory(ctProperties.isAutoNext());
+		ctUtil = new CyberTrackerUtil(screensFactory);
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
 		DataModel dataModel = getDataModel(session);
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
-		Category root = CyberTrackerUtil.buildRoot(dataModel);
-		Map<Category, CyberTrackerId> keyMap = CyberTrackerUtil.buildMap(root);
+		Category root = ctUtil.buildRoot(dataModel);
+		Map<Category, CyberTrackerId> keyMap = ctUtil.buildMap(root);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
-		ParolFilledDataContainer patrolScreensData = PatrolScreensUtil.buildPatrolNodes(elements, keyMap.get(root), session);
+		ParolFilledDataContainer patrolScreensData = ctUtil.buildPatrolNodes(elements, keyMap.get(root), session);
 		List<Node> screenNodes = new ArrayList<Node>();
 		screenNodes.addAll(patrolScreensData.screenNodes);
 		rootId = patrolScreensData.rootId;
@@ -121,7 +129,7 @@ public class CyberTrackerExporter {
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
-		Screens screens = ScreensObjectFactory.createScreens(screenNodes, CyberTrackerHibernateManager.getProperties(session));
+		Screens screens = screensFactory.createScreens(screenNodes, ctProperties);
 		monitor.worked(5);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
@@ -188,7 +196,7 @@ public class CyberTrackerExporter {
 			}
 			return result;
 		}
-		result.add(CyberTrackerUtil.createRadioNode(category, keyMap, getCategoryLevelResultElementId(level).getItemId()));
+		result.add(ctUtil.createRadioNode(category, keyMap, getCategoryLevelResultElementId(level).getItemId()));
 		
 		Integer nextLevel = level + 1;
 		for (Category child : category.getActiveChildren()) {
@@ -199,7 +207,7 @@ public class CyberTrackerExporter {
 
 	private Node createNoAttributeWarnNode(Category category, Map<Category, CyberTrackerId> keyMap) {
 		CyberTrackerId warnId = keyMap.get(category);
-		Node warnNode = ScreensObjectFactory.createNodeMsgText(warnId.getNodeId(), Messages.CyberTrackerExporter_NoAttributesNode_Title, Messages.CyberTrackerExporter_NoAttributesNode_Message);
+		Node warnNode = screensFactory.createNodeMsgText(warnId.getNodeId(), Messages.CyberTrackerExporter_NoAttributesNode_Title, Messages.CyberTrackerExporter_NoAttributesNode_Message);
 		//disable next button, enable save button, navigate on save to root point
 		Control control2 = ScreensObjectFactory.getNavigationControl(warnNode);
 		control2.setShowNext("False"); //$NON-NLS-1$
@@ -221,10 +229,10 @@ public class CyberTrackerExporter {
 			CyberTrackerId resultElementId = getAttributeResultElementId(attribute); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
-				result.add(ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
+				result.add(screensFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
 				break;
 			case TEXT:
-				result.add(ScreensObjectFactory.createNodeNote(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
+				result.add(screensFactory.createNodeNote(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
 				break;
 			case LIST:
 			{
@@ -235,10 +243,10 @@ public class CyberTrackerExporter {
 					tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
 				}
 				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, itemNames, tag0Values);
-				List<String> values = CyberTrackerUtil.listItemIds(ids);
-				String trElements = CyberTrackerUtil.translateElements(ids);
-				String trLinks = CyberTrackerUtil.translateLinks(ids, false);
-				Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, trElements, trLinks, resultElementId.getItemId());
+				List<String> values = ctUtil.listItemIds(ids);
+				String trElements = ctUtil.translateElements(ids);
+				String trLinks = ctUtil.translateLinks(ids, false);
+				Node node = screensFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, trElements, trLinks, resultElementId.getItemId());
 				result.add(node);
 				break;
 			}
@@ -258,7 +266,7 @@ public class CyberTrackerExporter {
 				if (booleanAttrElementIDs == null) {
 					booleanAttrElementIDs = ElementsUtil.buildAttributeBooleanElements(elements);
 				}
-				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), booleanAttrElementIDs, resultElementId.getItemId()));
+				result.add(ctUtil.createRadioNode(id.getNodeId(), attribute.getName(), booleanAttrElementIDs, resultElementId.getItemId()));
 				break;
 			}
 			default:
@@ -313,9 +321,9 @@ public class CyberTrackerExporter {
 		List<Node> result = new ArrayList<Node>();
 		List<AttributeTreeNode> activeTreeNodes = treeAttribute.getActiveTreeNodes();
 		
-		Map<AttributeTreeNode, CyberTrackerId> map = CyberTrackerUtil.buildTreeNodeMap(activeTreeNodes);
-		List<CyberTrackerId> childIds = CyberTrackerUtil.getChildrenIds(activeTreeNodes, map);
-		result.add(CyberTrackerUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null));
+		Map<AttributeTreeNode, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
+		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
+		result.add(ctUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null));
 		for (AttributeTreeNode treeNode : activeTreeNodes) {
 			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, hasNext));
 		}
@@ -334,7 +342,7 @@ public class CyberTrackerExporter {
 			CyberTrackerId id = map.get(treeNode);
 			List<CyberTrackerId> childIds = new ArrayList<CyberTrackerId>();
 			childIds.add(id);
-			Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), treeNode.getName(), childIds, resultElementId);
+			Node node = ctUtil.createRadioNode(id.getNodeId(), treeNode.getName(), childIds, resultElementId);
 			buildNodeNavigation(node, navId, hasNext);
 			result.add(node);
 			return result;
@@ -350,16 +358,16 @@ public class CyberTrackerExporter {
 		}		
 		
 		String id = map.get(treeNode).getNodeId();
-		List<CyberTrackerId> childIds = CyberTrackerUtil.getChildrenIds(treeNode.getActiveChildren(), map);
+		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(treeNode.getActiveChildren(), map);
 		if (isEndScreen) {
-			Node node = CyberTrackerUtil.createRadioNode(id, treeNode.getName(), childIds, resultElementId);
+			Node node = ctUtil.createRadioNode(id, treeNode.getName(), childIds, resultElementId);
 			buildNodeNavigation(node, navId, hasNext);
 			result.add(node);
 			return result;
 		}
 		
 		//this is NOT an end screen, proceed recursively till the end
-		result.add(CyberTrackerUtil.createRadioNode(id, treeNode.getName(), childIds, null));
+		result.add(ctUtil.createRadioNode(id, treeNode.getName(), childIds, null));
 		
 		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
 			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, hasNext));

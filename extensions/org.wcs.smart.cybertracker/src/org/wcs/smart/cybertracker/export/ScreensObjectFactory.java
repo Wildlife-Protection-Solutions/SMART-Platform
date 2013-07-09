@@ -39,6 +39,12 @@ public class ScreensObjectFactory {
 	private static final int CONTROL_2_INDEX = 0;
 	private static final int CONTROL_7_INDEX = 2;
 
+	private boolean autoRadioNext = true;
+	
+	public ScreensObjectFactory(boolean autoRadioNext) {
+		this.autoRadioNext = autoRadioNext;
+	}
+	
 	/**
 	<Screens>
     	<Root>
@@ -65,7 +71,7 @@ public class ScreensObjectFactory {
     	</Root>
 	</Screens>
 	 */
-	public static Screens createScreens(List<Node> screenNodes, CyberTrackerProperties properties) {
+	public Screens createScreens(List<Node> screenNodes, CyberTrackerProperties properties) {
 		Screens screens = new Screens();
 		Screens.Root root = new Screens.Root();
 		screens.setRoot(root);
@@ -120,7 +126,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks, String resultElement) {
+	public Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks, String resultElement) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -165,7 +171,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeChecklist(String id, String name, List<String> values, String trElements, String trLinks) {
+	public Node createNodeChecklist(String id, String name, List<String> values, String trElements, String trLinks) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -208,7 +214,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeNumber(String id, String name, String resultElementId) {
+	public Node createNodeNumber(String id, String name, String resultElementId) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -248,7 +254,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeNote(String id, String name, String resultElementId) {
+	public Node createNodeNote(String id, String name, String resultElementId) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -284,7 +290,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeMsgText(String id, String name, String text) {
+	public Node createNodeMsgText(String id, String name, String text) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -319,7 +325,7 @@ public class ScreensObjectFactory {
         <ButtonBorderWidth>0</ButtonBorderWidth>
     </Control>
 	 */
-	public static Controls.Control createControl2() {
+	public Controls.Control createControl2() {
 		Controls.Control control = new Controls.Control();
 		control.setType("{DD2F292A-4C6B-44D7-92C5-9C3922ED0350}"); //$NON-NLS-1$
 		control.setLockProperties("Show Back;Show save 1;Show save 2;Show Options;Show GPS;Show Next;Take GPS Reading;Save 1 target;Save 2 target;Skip screen;Next Screen"); //$NON-NLS-1$
@@ -347,7 +353,7 @@ public class ScreensObjectFactory {
         <Translate__Font>Arial,9,</Translate__Font>
     </Control>
 	 */
-	public static Controls.Control createControl6() {
+	public Controls.Control createControl6() {
 		Controls.Control control = new Controls.Control();
 		control.setType("{1BAF7223-9DF3-44E2-8B0E-969D951492AC}"); //$NON-NLS-1$
 		control.setId(6);
@@ -375,13 +381,13 @@ public class ScreensObjectFactory {
         <Translate__Font>MS Sans Serif,10,B</Translate__Font>
         <ItemHeight>25</ItemHeight>
         <Attribute>0</Attribute>
-        <AutoRadioNext>True</AutoRadioNext>
+        <AutoRadioNext>...</AutoRadioNext>
         <Translate__Elements>???</Translate__Elements>
         <Translate__Links>???</Translate__Links>
         <Translate__RadioElement>???</Translate__RadioElement>
     </Control>
 	 */
-	public static Controls.Control createRadioControl7(String trElements, String trLinks, String radioElement) {
+	public Controls.Control createRadioControl7(String trElements, String trLinks, String radioElement) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
 		control.setVersion(1);
@@ -395,7 +401,7 @@ public class ScreensObjectFactory {
 		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
 		control.setItemHeight(25);
 		control.setAttribute(0);
-		control.setAutoRadioNext("True"); //$NON-NLS-1$
+		control.setAutoRadioNext(autoRadioNext ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
 		control.setTranslateRadioElement(radioElement);
@@ -422,7 +428,7 @@ public class ScreensObjectFactory {
         <Translate__Links>???</Translate__Links>
     </Control>
 	 */
-	public static Controls.Control createChecklistControl7(String trElements, String trLinks) {
+	public Controls.Control createChecklistControl7(String trElements, String trLinks) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
 		control.setVersion(1);
@@ -458,7 +464,7 @@ public class ScreensObjectFactory {
         <UseScreenName>True</UseScreenName>
     </Control>
 	 */
-	public static Controls.Control createControl11() {
+	public Controls.Control createControl11() {
 		Controls.Control control = new Controls.Control();
 		control.setType("{1BAF7223-9DF3-44E2-8B0E-969D951492AC}"); //$NON-NLS-1$
 		control.setId(11);
@@ -497,7 +503,7 @@ public class ScreensObjectFactory {
         <Translate__Element>???</Translate__Element>
     </Control>
 	 */
-	public static Controls.Control createNumberControl12(String element) {
+	public Controls.Control createNumberControl12(String element) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{5D9A98BA-0F3A-4B6C-9439-7D72D6B06F9E}"); //$NON-NLS-1$
 		control.setLockProperties("Decimals;Digits;Result Element"); //$NON-NLS-1$
@@ -533,7 +539,7 @@ public class ScreensObjectFactory {
         <Translate__Element>???</Translate__Element>
     </Control>
 	 */
-	public static Controls.Control createNoteControl12(String element) {
+	public Controls.Control createNoteControl12(String element) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{49728018-D9F6-49B8-86E4-3EA49A29F4BC}"); //$NON-NLS-1$
 		control.setId(12);
@@ -568,7 +574,7 @@ public class ScreensObjectFactory {
 	    <Proportional>False</Proportional>
 	</Control>
 	 */
-	public static Controls.Control createMsgTextControl12(String text) {
+	public Controls.Control createMsgTextControl12(String text) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{A25E984A-294B-4ADF-B7F7-900C4D991DE5}"); //$NON-NLS-1$
 		control.setLockProperties("Image"); //$NON-NLS-1$
@@ -604,7 +610,7 @@ public class ScreensObjectFactory {
 	    </Control>
 	</Controls>
 	 */
-	public static Controls.Control createMsgTextControl13(String text) {
+	public Controls.Control createMsgTextControl13(String text) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{F4D19E36-BC93-4D89-B82B-1A8900710077}"); //$NON-NLS-1$
 		control.setId(13);
@@ -634,7 +640,7 @@ public class ScreensObjectFactory {
 	     <Hidden>True</Hidden>
 	 </Control>
 	 */
-	public static Controls.Control createFormulaControl12(String formula) {
+	public Controls.Control createFormulaControl12(String formula) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{C26ACA43-8C7C-497C-9586-382E5BD27115}"); //$NON-NLS-1$
 		control.setId(12);
@@ -656,7 +662,7 @@ public class ScreensObjectFactory {
 	     <Translate__TargetScreenId1>...</Translate__TargetScreenId1>
 	 </Control>
 	 */
-	public static Controls.Control createNavFormulaControl12(String formula, String id0, String id1) {
+	public Controls.Control createNavFormulaControl12(String formula, String id0, String id1) {
 		Controls.Control control = createFormulaControl12(formula);
 		control.setLockProperties("Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1"); //$NON-NLS-1$
 		control.setTranslateTargetScreenId0(id0);
@@ -671,7 +677,7 @@ public class ScreensObjectFactory {
 		<ResultGlobalValue>...</ResultGlobalValue>
 	 </Control>
 	 */
-	public static Controls.Control createCounterFormulaControl12(String counterName, String resultElementId) {
+	public Controls.Control createCounterFormulaControl12(String counterName, String resultElementId) {
 		String formula = counterName+"="+counterName+"+1"; //x=x+1  //$NON-NLS-1$ //$NON-NLS-2$
 		Controls.Control control = createFormulaControl12(formula);
 		control.setResultGlobalValue(counterName);
@@ -690,7 +696,7 @@ public class ScreensObjectFactory {
     	<UseRangeFinderForAltitude>False</UseRangeFinderForAltitude> <!-- will be added as default by CyberTracker -->
 	</Control>
 	 */
-	public static Controls.Control createConfigureGPSControl13(Integer timer) {
+	public Controls.Control createConfigureGPSControl13(Integer timer) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{440B2C86-D385-4EFC-8ACE-5D3C0A4A016B}"); //$NON-NLS-1$
 		control.setId(13);

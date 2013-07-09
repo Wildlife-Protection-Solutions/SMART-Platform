@@ -94,12 +94,21 @@ public class PatrolScreensUtil {
 		}
 	}
 
+	
+	private ScreensObjectFactory screensFactory;
+	private CyberTrackerUtil ctUtil;
+	
+	protected PatrolScreensUtil(CyberTrackerUtil ctUtil) {
+		this.ctUtil = ctUtil;
+		this.screensFactory = ctUtil.getScreensFactory();
+	}
+	
 	/**
 	 * @param screens
 	 * @param element
 	 * @return root id
 	 */
-	public static ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 		ParolFilledDataContainer result = new ParolFilledDataContainer();
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
@@ -168,20 +177,20 @@ public class PatrolScreensUtil {
 	 * @param elements
 	 * @return String id of newly created element
 	 */
-	private static String createResultElement(String name, Elements elements) {
+	private String createResultElement(String name, Elements elements) {
 		CyberTrackerId resultId = new CyberTrackerId();
 		ElementsUtil.addElementsItem(elements, name, resultId.getItemId());
 		return resultId.getItemId();
 	}
 
-	private static CyberTrackerId toNextScreen(Node node) {
+	private CyberTrackerId toNextScreen(Node node) {
 		CyberTrackerId nextId = new CyberTrackerId();
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		control2.setTranslateNextScreenId(nextId.getNodeId());
 		return nextId;
 	}
 
-	private static void applyFilter(Node node, String filter) {
+	private void applyFilter(Node node, String filter) {
 		if (filter != null) {
 			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 			control7.setFilterEnabled("True"); //$NON-NLS-1$
@@ -189,34 +198,34 @@ public class PatrolScreensUtil {
 		}
 	}
 	
-	private static CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids) {
+	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids) {
 		String resultId = createResultElement(resultElName, elements);
-		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
+		Node node = ctUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
 		return toNextScreen(node);
 	}
 
-	private static CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, String filter) {
+	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, String filter) {
 		String resultId = createResultElement(resultElName, elements);
-		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
+		Node node = ctUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
 		applyFilter(node, filter);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
 		return toNextScreen(node);
 	}
 	
-	private static CyberTrackerId addNoteNextNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName) {
+	private CyberTrackerId addNoteNextNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName) {
 		String resultId = createResultElement(resultElName, elements);
-		Node node = ScreensObjectFactory.createNodeNote(id.getNodeId(), name,  resultId);
+		Node node = screensFactory.createNodeNote(id.getNodeId(), name,  resultId);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
 		return toNextScreen(node);
 	}
 
-	private static CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
-		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol), null);
+		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol), null);
 		addCounterFormula(node, GLOBAL_PATROL_ID_GENERATOR, resultId);
 		addGpsConfiguration(node, 0);
 		container.screenNodes.add(node);
@@ -225,7 +234,7 @@ public class PatrolScreensUtil {
 		
 	}
 	
-	private static CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes) {
+	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes) {
 		List<String> types = new ArrayList<String>();
 		List<String> tag0Types = new ArrayList<String>();
 		for (PatrolType patrolType : pTypes) {
@@ -234,7 +243,7 @@ public class PatrolScreensUtil {
 		}
 		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
 		String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
-		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
+		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
 		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
 		container.screenNodes.add(node);
@@ -244,7 +253,7 @@ public class PatrolScreensUtil {
 		container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
 		for (int i = 0; i < pTypes.size(); i++) {
 			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, pTypes.get(i).getTransportTypes());
-			node = CyberTrackerUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
+			node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
 			container.screenNodes.add(node);
 			Control control2 = ScreensObjectFactory.getNavigationControl(node);
 			control2.setTranslateNextScreenId(nextId.getNodeId());
@@ -252,28 +261,28 @@ public class PatrolScreensUtil {
 		return nextId;
 	}
 
-	private static CyberTrackerId addMembersNode(CyberTrackerId id, ParolFilledDataContainer container, List<CyberTrackerId> memberIds) {
-		List<String> values = CyberTrackerUtil.listItemIds(memberIds);
-		String trElements = CyberTrackerUtil.translateElements(memberIds);
-		String trLinks = CyberTrackerUtil.translateLinks(memberIds, false);
-		Node node = ScreensObjectFactory.createNodeChecklist(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks);
+	private CyberTrackerId addMembersNode(CyberTrackerId id, ParolFilledDataContainer container, List<CyberTrackerId> memberIds) {
+		List<String> values = ctUtil.listItemIds(memberIds);
+		String trElements = ctUtil.translateElements(memberIds);
+		String trLinks = ctUtil.translateLinks(memberIds, false);
+		Node node = screensFactory.createNodeChecklist(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks);
 		container.screenNodes.add(node);
 		return toNextScreen(node);
 	}
 
-	private static void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, Integer timer) {
+	private void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, Integer timer) {
 		CyberTrackerId resumeId = new CyberTrackerId();
 		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
-		List<String> resScrValues = CyberTrackerUtil.listItemIds(resScrIds);
-		String resScrTrElements = CyberTrackerUtil.translateElements(resScrIds);
+		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
+		String resScrTrElements = ctUtil.translateElements(resScrIds);
 		StringBuilder resScrLinks = new StringBuilder();
 		// "Resume Patrol" leads to "Next Task" screen
 		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(id.getNodeTranslatedId());
-		Node resumeNode = ScreensObjectFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
+		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
 		addGpsConfiguration(resumeNode, 0);
 		
 		CyberTrackerId confId = new CyberTrackerId();
-		Node confirmNode = ScreensObjectFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
+		Node confirmNode = screensFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
 		//disable next button, enable save button,navigate on save to start point
 		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
 		control2.setShowNext("False"); //$NON-NLS-1$
@@ -281,8 +290,8 @@ public class PatrolScreensUtil {
 		control2.setTranslateMajorScreenId(startId.getNodeId());
 		
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_PausePatrol, Messages.PatrolScreens_EndPatrol);
-		List<String> values = CyberTrackerUtil.listItemIds(ids);
-		String trElements = CyberTrackerUtil.translateElements(ids);
+		List<String> values = ctUtil.listItemIds(ids);
+		String trElements = ctUtil.translateElements(ids);
 		//custom translate links logic
 		StringBuilder links = new StringBuilder();
 		// "Make observations" leads to datamodel root
@@ -291,7 +300,7 @@ public class PatrolScreensUtil {
 		links.append(ids.get(1).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
 		// "End Patrol" leads to confirmation screen
 		links.append(ids.get(2).getItemTranslatedId()).append(confId.getNodeTranslatedId());
-		Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
+		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
 		addGpsConfiguration(node, timer);
 		container.screenNodes.add(node);
 		container.screenNodes.add(resumeNode);
@@ -308,7 +317,7 @@ public class PatrolScreensUtil {
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}
 
-	private static String buildMembersFilter(String memberNodeId, List<CyberTrackerId> memberIds, List<String> memberNames) {
+	private String buildMembersFilter(String memberNodeId, List<CyberTrackerId> memberIds, List<String> memberNames) {
 		Filter filter = new Filter();
 		filter.setVersion(1);
 		
@@ -354,7 +363,7 @@ public class PatrolScreensUtil {
 		return null;
 	}
 	
-	private static String builPilotFormula(List<PatrolType> patrolTypes) {
+	private String builPilotFormula(List<PatrolType> patrolTypes) {
 		String result = ""; //$NON-NLS-1$
 		for (int i = 0; i < patrolTypes.size(); i++) {
 			patrolTypes.get(i).getType();
@@ -372,18 +381,18 @@ public class PatrolScreensUtil {
 		return result;
 	}
 	
-	private static void addNavigationFormula(Node node, String formula, String successId, String failId) {
-		Control formulaControl = ScreensObjectFactory.createNavFormulaControl12(formula, failId, successId);
+	private void addNavigationFormula(Node node, String formula, String successId, String failId) {
+		Control formulaControl = screensFactory.createNavFormulaControl12(formula, failId, successId);
 		node.getData().getControls().getControl().add(formulaControl);
 	}
 
-	private static void addCounterFormula(Node node, String counterName, String resultElementId) {
-		Control formulaControl = ScreensObjectFactory.createCounterFormulaControl12(counterName, resultElementId);
+	private void addCounterFormula(Node node, String counterName, String resultElementId) {
+		Control formulaControl = screensFactory.createCounterFormulaControl12(counterName, resultElementId);
 		node.getData().getControls().getControl().add(formulaControl);
 	}
 
-	private static void addGpsConfiguration(Node node, Integer timer) {
-		Control gpsConf = ScreensObjectFactory.createConfigureGPSControl13(timer);
+	private void addGpsConfiguration(Node node, Integer timer) {
+		Control gpsConf = screensFactory.createConfigureGPSControl13(timer);
 		node.getData().getControls().getControl().add(gpsConf);
 	}
 	
