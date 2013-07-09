@@ -118,12 +118,15 @@ public abstract class DerbyQueryEngine2 implements QueryEngine {
 		}
 	}
 
+	/**
+	 * Creates a temporary query table 
+	 * 
+	 * @return
+	 */
 	protected String createTempTableName(){
-		return "query_temp_" + System.nanoTime();
+		return "query_temp_" + System.nanoTime(); //$NON-NLS-1$
 	}
 
-
-	
 	
 	
 	/**
@@ -191,30 +194,63 @@ public abstract class DerbyQueryEngine2 implements QueryEngine {
 		return ""; //$NON-NLS-1$
 
 	}
-	
+	/**
+	 * Patrol.class = "smart.patrol p"
+	 * @param clazz
+	 * @return the table name with associated short form
+	 */
 	public String namePrefix(Class<?> clazz){
-		return tableNames.get(clazz) + " " + prefix(clazz);
+		return tableNames.get(clazz) + " " + prefix(clazz); //$NON-NLS-1$
 	}
 	
+	/**
+	 * 
+	 * @param clazz
+	 * @return the table query short form
+	 */
 	public String prefix(Class<?> clazz){
 		return tablePrefix.get(clazz);
 	}
 	
+	/**
+	 * Create the select statement to populate the temporary table
+	 * containing observation data for the query engine.
+	 * 
+	 * @param includeObservations if observation information should be included
+	 * in the output table (ob_uuid).
+	 * 
+	 * @return
+	 */
 	protected abstract String getTemporaryTableSelectClause(boolean includeObservations);
 	
+	/**
+	 * Create the temporary table for hold observation data
+	 * for querying
+	 * 
+	 * @param tableName temporary table name
+	 * @return 
+	 */
 	protected abstract String getTemporaryTableCreateClause(String tableName);
 	
+	/**
+	 * A string to append to the from clause of the select
+	 * statement to create the temporary table.
+	 * <p>Depending on the select clause additional tables may
+	 * be required.  See {@link DerbyQueryEngine2#getTemporaryTableCreateClause(String)}. </p> 
+	 * @param tables List of tables already included in the from clause
+	 * @return
+	 */
 	protected String appendFromClause(HashSet<Class<?>> tables){
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	
 	/**
 	 * By default creates an index on the ob_uuid field.  This method can be overwritten to 
-	 * create additional indexes
+	 * create additional indexes.
 	 * 
-	 * @param c
-	 * @param tableName
+	 * @param c database connection
+	 * @param tableName temporary table to create indexes on
 	 * @throws SQLException
 	 */
 	protected void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{

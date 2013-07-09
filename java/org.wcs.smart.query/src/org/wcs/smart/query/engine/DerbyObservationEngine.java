@@ -122,8 +122,8 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 			return;
 		//original table
 		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST");
-		dropTable(c, queryDataTable + "_TREE");
+		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
+		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {

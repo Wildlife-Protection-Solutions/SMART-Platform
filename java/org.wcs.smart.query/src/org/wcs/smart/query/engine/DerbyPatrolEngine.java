@@ -298,24 +298,24 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		}
 		sql.append(prefix(PatrolLegMember.class) + "_leader.employee_uuid, "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegMember.class) + "_pilot.employee_uuid, "); //$NON-NLS-1$
-		sql.append(prefix(Track.class) + ".geometry");
+		sql.append(prefix(Track.class) + ".geometry"); //$NON-NLS-1$
 		return sql.toString();
 	}
 	
 	protected String appendFromClause(HashSet<Class<?>> tables){
 		if (!tables.contains(Track.class)){
 			StringBuilder sb = new StringBuilder();
-			sb.append(" left join ");
+			sb.append(" left join "); //$NON-NLS-1$
 			sb.append(namePrefix(Track.class));
-			sb.append(" on ");
+			sb.append(" on "); //$NON-NLS-1$
 			sb.append(prefix(Track.class));
-			sb.append(".patrol_leg_day_uuid = ");
+			sb.append(".patrol_leg_day_uuid = "); //$NON-NLS-1$
 			sb.append(prefix(PatrolLegDay.class));
-			sb.append(".uuid");
+			sb.append(".uuid"); //$NON-NLS-1$
 			tables.add(Track.class);
 			return sb.toString();
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	protected void  buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
