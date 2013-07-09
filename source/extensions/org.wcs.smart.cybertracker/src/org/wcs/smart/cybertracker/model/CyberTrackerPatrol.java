@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,13 +97,15 @@ public class CyberTrackerPatrol {
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //TODO: will this always work or CT might provide different format depending on locale settings?
 				try {
-					setStartDate(formatter.parse(v));
+					Date date = combine(formatter.parse(v), getStartDate());
+					setStartDate(date);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-			}
-			
-			if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				Date date = combine(getStartDate(), Time.valueOf(v));
+				setStartDate(date);
+			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
 				Integer ctId = Integer.valueOf(v);
 				setId(ctId != null ?  ctId : 0);
 			} else if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
@@ -142,21 +145,38 @@ public class CyberTrackerPatrol {
 			}
 		}
 		
-		s = patrolData.get(0); //need to find end date
+		s = patrolData.get(patrolData.size()-1); //need to find end date
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT);
 				try {
-					setEndDate(formatter.parse(a.getV()));
+					boolean shouldBreak = getEndDate() != null; //this mean that time was recorded
+					Date date = combine(formatter.parse(a.getV()), getEndDate());
+					setEndDate(date);
+					if (shouldBreak)
+						break;
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-				break;
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				boolean shouldBreak = getEndDate() != null; //this mean that date was recorded
+				Date date = combine(getEndDate(), Time.valueOf(a.getV()));
+				setEndDate(date);
+				if (shouldBreak)
+					break;
 			}
 		}
 	}
 
+	private Date combine(Date date, Date time) {
+		if (date == null)
+			return time;
+		if (time == null)
+			return date;
+		return new Date(date.getTime() + time.getTime());
+	}
+	
 	private boolean isMemberRecord(A a) {
 		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
 			return false;

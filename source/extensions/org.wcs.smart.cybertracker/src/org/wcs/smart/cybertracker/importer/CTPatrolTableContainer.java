@@ -63,7 +63,7 @@ import org.wcs.smart.patrol.model.Patrol;
 public class CTPatrolTableContainer extends Composite {
 	
 	private static final int HEIGHT_HINT = 300;
-	private static final int COLUMN_WIDTH = 80;
+	private static final int DEFAULT_COLUMN_WIDTH = 80;
 	
 	/**
 	 * The supported patrol types.
@@ -72,27 +72,35 @@ public class CTPatrolTableContainer extends Composite {
 	 * @since 1.0.0
 	 */
 	public enum CTPatrolTableColumn {
-		START_DATE(Messages.CTPatrolTableColumn_StartDate),
-		END_DATE(Messages.CTPatrolTableColumn_EndDate),
-		TYPE(Messages.CTPatrolTableColumn_Type),
-		TRANSPORT(Messages.CTPatrolTableColumn_Transport),
-		ARMED(Messages.CTPatrolTableColumn_Armed),
-		MANDATE(Messages.CTPatrolTableColumn_Mandate),
-		TEAM(Messages.CTPatrolTableColumn_Team),
-		STATION(Messages.CTPatrolTableColumn_Station),
-		OBJECTIVE(Messages.CTPatrolTableColumn_Objective),
-		COMMENT(Messages.CTPatrolTableColumn_Comment),
-		LEADER(Messages.CTPatrolTableColumn_Leader),
-		PILOT(Messages.CTPatrolTableColumn_Pilot),
-		MEMBERS(Messages.CTPatrolTableColumn_Members),
-		SIGHT_COUNT(Messages.CTPatrolTableColumn_SightCount);
+		START_DATE	(Messages.CTPatrolTableColumn_StartDate,	120),
+		END_DATE	(Messages.CTPatrolTableColumn_EndDate,		120),
+		TYPE		(Messages.CTPatrolTableColumn_Type),
+		TRANSPORT	(Messages.CTPatrolTableColumn_Transport),
+		ARMED		(Messages.CTPatrolTableColumn_Armed, 		50),
+//		MANDATE		(Messages.CTPatrolTableColumn_Mandate),
+		TEAM		(Messages.CTPatrolTableColumn_Team),
+		STATION		(Messages.CTPatrolTableColumn_Station),
+//		OBJECTIVE	(Messages.CTPatrolTableColumn_Objective),
+		COMMENT		(Messages.CTPatrolTableColumn_Comment),
+		LEADER		(Messages.CTPatrolTableColumn_Leader),
+		PILOT		(Messages.CTPatrolTableColumn_Pilot),
+		MEMBERS		(Messages.CTPatrolTableColumn_Members),
+		SIGHT_COUNT	(Messages.CTPatrolTableColumn_SightCount, 	50);
 		
 		private String guiName;
-		CTPatrolTableColumn(String guiName){
-			this.guiName = guiName;
+		private int width;
+		CTPatrolTableColumn(String guiName) {
+			this(guiName, DEFAULT_COLUMN_WIDTH);
 		}
-		public String getGuiName(){
+		CTPatrolTableColumn(String guiName, int width) {
+			this.guiName = guiName;
+			this.width = width;
+		}
+		public String getGuiName() {
 			return this.guiName;
+		}
+		public int getWidth() {
+			return width;
 		}
 	}
 
@@ -319,7 +327,7 @@ public class CTPatrolTableContainer extends Composite {
 		for (CTPatrolTableColumn column : CTPatrolTableColumn.values()) {
 			TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 			viewerColumn.getColumn().setText(column.getGuiName());
-			viewerColumn.getColumn().setWidth(COLUMN_WIDTH);
+			viewerColumn.getColumn().setWidth(column.getWidth());
 			viewerColumn.setLabelProvider(new CTPatrolTableCellLabelProvider(column));
 		}
 	}
