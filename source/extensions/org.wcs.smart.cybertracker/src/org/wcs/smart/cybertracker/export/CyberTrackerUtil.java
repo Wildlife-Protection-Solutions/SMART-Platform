@@ -26,9 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
+import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
 
 /**
@@ -77,7 +80,23 @@ public class CyberTrackerUtil {
 		}
 	}
 
-	public static Category buildRoot(DataModel dataModel) {
+	private ScreensObjectFactory screensFactory;
+	private PatrolScreensUtil screensUtil;
+	
+	public CyberTrackerUtil(ScreensObjectFactory screensFactory) {
+		this.screensFactory = screensFactory;
+		this.screensUtil = new PatrolScreensUtil(this);
+	}
+	
+	protected ScreensObjectFactory getScreensFactory() {
+		return screensFactory;
+	}
+
+	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+		return screensUtil.buildPatrolNodes(elements, dmRootId, session);
+	}
+	
+	public Category buildRoot(DataModel dataModel) {
 		Category fakeRoot = new Category();
 		fakeRoot.setName("Data Model"); //$NON-NLS-1$
 		fakeRoot.setActiveChildren(dataModel.getActiveCategories());
@@ -89,14 +108,14 @@ public class CyberTrackerUtil {
 //		return fakeRoot;
 	}
 
-	public static Map<Category, CyberTrackerId> buildMap(Category category) {
+	public Map<Category, CyberTrackerId> buildMap(Category category) {
 		Map<Category, CyberTrackerId> map = new HashMap<Category, CyberTrackerId>();
 		map.put(category, new CyberTrackerId());
 		mapCategories(category.getActiveChildren(), map);
 		return map;
 	}
 
-	private static void mapCategories(List<Category> categories, Map<Category, CyberTrackerId> map) {
+	private void mapCategories(List<Category> categories, Map<Category, CyberTrackerId> map) {
 		for (Category category : categories) {
 			map.put(category, new CyberTrackerId());
 			if (category.getActiveChildren() != null) {
@@ -105,13 +124,13 @@ public class CyberTrackerUtil {
 		}
 	}
 
-	public static Map<AttributeTreeNode, CyberTrackerId> buildTreeNodeMap(List<AttributeTreeNode> treeNodes) {
+	public Map<AttributeTreeNode, CyberTrackerId> buildTreeNodeMap(List<AttributeTreeNode> treeNodes) {
 		Map<AttributeTreeNode, CyberTrackerId> map = new HashMap<AttributeTreeNode, CyberTrackerId>();
 		mapTreeNodes(treeNodes, map);
 		return map;
 	}
 
-	private static void mapTreeNodes(List<AttributeTreeNode> treeNodes, Map<AttributeTreeNode, CyberTrackerId> map) {
+	private void mapTreeNodes(List<AttributeTreeNode> treeNodes, Map<AttributeTreeNode, CyberTrackerId> map) {
 		if (treeNodes == null)
 			return;
 		for (AttributeTreeNode attrTreeNode : treeNodes) {
@@ -122,14 +141,14 @@ public class CyberTrackerUtil {
 		}
 	}
 	
-	public static Node createRadioNode(Category category, Map<Category, CyberTrackerId> keyMap, String resultElementId) {
+	public Node createRadioNode(Category category, Map<Category, CyberTrackerId> keyMap, String resultElementId) {
 		String id = keyMap.get(category).getNodeId();
 		String name = category.getName();
 		List<CyberTrackerId> childIds = getChildrenIds(category.getActiveChildren(), keyMap);
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
 		String trLinks = translateLinks(childIds, true);
-		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
 	}
 
 	/**
@@ -142,18 +161,18 @@ public class CyberTrackerUtil {
 	 * @param resultElement
 	 * @return
 	 */
-	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement) {
+	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement) {
 		return createRadioNode(id, name, childIds, resultElement, resultElement == null);
 	}
 
-	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement, boolean linkToNode) {
+	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement, boolean linkToNode) {
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
 		String trLinks = translateLinks(childIds, linkToNode);
-		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
 	}
 	
-	public static List<CyberTrackerId> getChildrenIds(List<?> objects, Map<?, CyberTrackerId> keyMap) {
+	public List<CyberTrackerId> getChildrenIds(List<?> objects, Map<?, CyberTrackerId> keyMap) {
 		List<CyberTrackerId> result = new ArrayList<CyberTrackerId>();
 		if (objects == null)
 			return result;
@@ -163,7 +182,7 @@ public class CyberTrackerUtil {
 		return result;
 	}
 	
-	public static List<String> listItemIds(List<CyberTrackerId> ids) {
+	public List<String> listItemIds(List<CyberTrackerId> ids) {
 		List<String> result = new ArrayList<String>();
 		for (CyberTrackerId id : ids) {
 			result.add(id.getItemId());
@@ -171,7 +190,7 @@ public class CyberTrackerUtil {
 		return result;
 	}
 	
-	public static String translateElements(List<CyberTrackerId> ids) {
+	public String translateElements(List<CyberTrackerId> ids) {
 		StringBuilder elements = new StringBuilder(); 
 		for (CyberTrackerId id : ids) {
 			elements.append(id.getItemTranslatedId());
@@ -179,7 +198,7 @@ public class CyberTrackerUtil {
 		return elements.toString();
 	}
 
-	public static String translateLinks(List<CyberTrackerId> ids, boolean linkToNode) {
+	public String translateLinks(List<CyberTrackerId> ids, boolean linkToNode) {
 		StringBuilder links = new StringBuilder(); 
 		for (CyberTrackerId id : ids) {
 			links.append(id.getItemTranslatedId());

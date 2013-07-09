@@ -65,6 +65,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private CyberTrackerProperties ctProperties;
 	
 	private Text txtAppName;
+	private Button btnAutoNext;
 	private Button btnKioskMode;
 	private Text txtTrackTimer;
     private ComboViewer timeOffset;
@@ -114,6 +115,22 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		appNameDecoration.setShowHover(true);
 		appNameDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_NameInvalid, CyberTrackerProperties.APPLICATION_NAME_MAX_LENTH));
 		appNameDecoration.hide();
+
+		Label lblAutoNext = new Label(container, SWT.NONE);
+		lblAutoNext.setText(Messages.CyberTrackerPropertiesDialog_AutoNext);
+
+		btnAutoNext = new Button(container, SWT.CHECK);
+		btnAutoNext.setSelection(ctProperties.isAutoNext());
+		btnAutoNext.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
 		
 		Label lblKioskMode = new Label(container, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
@@ -208,6 +225,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			return false;
 		}
 		ctProperties.setApplicationName(txtAppName.getText());
+		ctProperties.setAutoNext(btnAutoNext.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
 		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
 		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();

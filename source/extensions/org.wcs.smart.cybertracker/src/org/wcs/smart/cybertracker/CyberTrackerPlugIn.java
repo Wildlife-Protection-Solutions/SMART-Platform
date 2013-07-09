@@ -133,6 +133,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 									"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
 									"ca_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
 									"application_name VARCHAR(256), "+ //$NON-NLS-1$
+									"auto_next BOOLEAN, "+ //$NON-NLS-1$
 									"kiosk_mode BOOLEAN, "+ //$NON-NLS-1$
 									"waypoint_timer INTEGER, "+ //$NON-NLS-1$
 									"gps_time_zone INTEGER, "+ //$NON-NLS-1$
