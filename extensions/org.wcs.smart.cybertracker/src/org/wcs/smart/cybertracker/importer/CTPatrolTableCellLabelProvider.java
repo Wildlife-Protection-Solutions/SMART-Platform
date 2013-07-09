@@ -57,10 +57,10 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName() : ""; //$NON-NLS-1$
 			case TRANSPORT:	return ctPatrol.getPatrolTransportType() != null ? ctPatrol.getPatrolTransportType().getName() : ""; //$NON-NLS-1$
 			case ARMED: 	return ctPatrol.isArmed() ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
-			case MANDATE:	return asString(ctPatrol.getMandate());
+//			case MANDATE:	return asString(ctPatrol.getMandate());
 			case TEAM: 		return asString(ctPatrol.getTeam());
 			case STATION:	return asString(ctPatrol.getStation());
-			case OBJECTIVE: return ctPatrol.getObjective();
+//			case OBJECTIVE: return ctPatrol.getObjective();
 			case COMMENT:	return ctPatrol.getComment();
 			case LEADER:	return asString(ctPatrol.getLeader());
 			case PILOT:		return asString(ctPatrol.getPilot());
@@ -92,10 +92,10 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 	}
 
 	private String dateAsString(Date date) {
-		if (date == null){
+		if (date == null) {
 			return ""; //$NON-NLS-1$
 		}
-		return DateFormat.getDateInstance().format(date);
+		return DateFormat.getDateTimeInstance().format(date);
 	}
 	
 }
