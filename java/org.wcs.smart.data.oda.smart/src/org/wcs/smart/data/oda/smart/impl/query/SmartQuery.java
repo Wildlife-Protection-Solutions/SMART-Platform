@@ -139,7 +139,7 @@ public class SmartQuery implements IQuery {
 					throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadQuery);
 				}
 
-				// TODO:attempt to parse query
+				// attempt to parse query
 				if (smartQuery instanceof SimpleQuery) {
 					((SimpleQuery) smartQuery).getFilter();
 				} else if (smartQuery instanceof SummaryQuery) {

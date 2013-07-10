@@ -336,50 +336,42 @@ public class SmartTableQuery implements IQuery {
 
 				@Override
 				public int getParameterCount() throws OdaException {
-					// TODO Auto-generated method stub
 					return 0;
 				}
 
 				@Override
 				public int getParameterMode(int arg0) throws OdaException {
-					// TODO Auto-generated method stub
 					return 0;
 				}
 
 				@Override
 				public String getParameterName(int arg0) throws OdaException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 
 				@Override
 				public int getParameterType(int arg0) throws OdaException {
-					// TODO Auto-generated method stub
 					return 0;
 				}
 
 				@Override
 				public String getParameterTypeName(int arg0)
 						throws OdaException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 
 				@Override
 				public int getPrecision(int arg0) throws OdaException {
-					// TODO Auto-generated method stub
 					return 0;
 				}
 
 				@Override
 				public int getScale(int arg0) throws OdaException {
-					// TODO Auto-generated method stub
 					return 0;
 				}
 
 				@Override
 				public int isNullable(int arg0) throws OdaException {
-					// TODO Auto-generated method stub
 					return 0;
 				}};
 		}
