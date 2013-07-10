@@ -52,7 +52,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;

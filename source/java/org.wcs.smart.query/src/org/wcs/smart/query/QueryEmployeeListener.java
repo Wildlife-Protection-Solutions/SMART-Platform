@@ -49,7 +49,6 @@ public class QueryEmployeeListener implements IEmployeeListener {
 
 	
 	private void checkQueryType(Employee e, Session s, QueryType queryType){
-		// TODO Auto-generated method stub
 		//need to update any cross-ca queries associated with this user
 		//to another user with the same userid
 		StringBuilder innerSql = new StringBuilder();
@@ -87,7 +86,6 @@ public class QueryEmployeeListener implements IEmployeeListener {
 	}
 	
 	private void checkQueryFolder(Employee e, Session s){
-		// TODO Auto-generated method stub
 		//need to update any cross-ca queries associated with this user
 		//to another user with the same userid
 		StringBuilder innerSql = new StringBuilder();

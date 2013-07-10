@@ -60,10 +60,6 @@ import org.wcs.smart.util.SmartUtils;
  * (0,Max Y) 
  * </pre>
  * 
- * <pre>
- * Usage
- * TODO 
- * </pre>
  * 
  * 
  * @author Mauricio Pazos

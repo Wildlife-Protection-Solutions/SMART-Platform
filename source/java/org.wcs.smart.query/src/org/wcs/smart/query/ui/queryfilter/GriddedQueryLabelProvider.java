@@ -24,12 +24,14 @@ package org.wcs.smart.query.ui.queryfilter;
 import java.text.MessageFormat;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.AllCategory;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -52,6 +54,8 @@ public class GriddedQueryLabelProvider extends QueryFilterLabelProvider {
 			return super.getImage(((SummaryDmObject) element).getObject());
 		}else if (element instanceof PatrolValueOption){
 			return ((PatrolValueOption) element).getIcon();
+		}else if (element instanceof AllCategory){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 		}
 		return super.getImage(element);
 	}
@@ -60,6 +64,8 @@ public class GriddedQueryLabelProvider extends QueryFilterLabelProvider {
 	public String getText(Object element) {
 		if (element instanceof PatrolValueOption) {
 			return ((PatrolValueOption) element).getGuiName();
+		}else if (element instanceof AllCategory){
+			return MessageFormat.format(Messages.SummaryQueryLabelProvider_CountCatLabel, new Object[]{((AllCategory)element).getName()});
 		} else if (element instanceof PatrolQueryOption) {
 			return ((PatrolQueryOption) element).getGuiName();
 		} else if (element instanceof GriddedQueryContentProvider.RootNode) {

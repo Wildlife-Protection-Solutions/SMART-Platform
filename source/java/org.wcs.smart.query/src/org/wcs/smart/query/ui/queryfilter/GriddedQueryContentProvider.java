@@ -52,6 +52,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.AllCategory;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -80,7 +81,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	private RootNode dataModelValueNode = new RootNode(NodeType.DATAMODEL_VALUES);
 
 	
-	private RootNode dataModelValueCategory = new RootNode(NodeType.DATAMODEL_VALUE_CATEGORY);
+	private AllCategory dataModelValueCategory = AllCategory.INSTANCE;
 	private RootNode dataModelValueAttribute = new RootNode(NodeType.DATAMODEL_VALUE_ATTRIBUTES);
 
 	
@@ -96,7 +97,6 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		PATROL_VALUES(Messages.GriddedQueryContentProvider_PatrolValuesLabel),
 		PATROL_DATE_GROUPBYS(Messages.GriddedQueryContentProvider_DateLabel),
 		DATAMODEL_VALUES(Messages.GriddedQueryContentProvider_DataModelValuesLabel),
-		DATAMODEL_VALUE_CATEGORY(Messages.GriddedQueryContentProvider_CategoriesLabel),
 		DATAMODEL_VALUE_ATTRIBUTES(Messages.GriddedQueryContentProvider_AttributesLabel);		
 		
 		private String name;
@@ -177,7 +177,14 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof RootNode){
 			return ((RootNode)parentElement).getChildren();
-		//}else if (parentElement instanceof AREA FITLER){
+		}else if (parentElement instanceof AllCategory){
+			Object[] kids = provider.getChildren(provider.getElements(null)[0]);
+			Object[] results = new Object[kids.length];
+			for (int i = 0; i < kids.length; i ++){
+				results[i] = new SummaryDmObject((DmObject)kids[i], true);
+			}
+			//assume data model
+			return results;
 		}else if (parentElement instanceof SummaryDmObject){
 			SummaryDmObject parent = ((SummaryDmObject)parentElement);
 			return getChildren(parent);
@@ -256,7 +263,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	private Object[] getAttributeListChildren(final SummaryDmObject parent){
 		
 		final List<AttributeListItem> kids = new ArrayList<AttributeListItem>();
-		Job j = new Job("loading list children"){
+		Job j = new Job(Messages.GriddedQueryContentProvider_LoadListItemJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -280,7 +287,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log("Could not log list items " + ex.getLocalizedMessage(), ex);
+					QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingListItem + ex.getLocalizedMessage(), ex);
 				}finally{
 					session.close();
 				}
@@ -425,6 +432,8 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 			return false;
 		}else if (element instanceof PatrolValueOption){
 			return false;
+		}else if (element instanceof AllCategory){
+			return true;
 //		}else if (element instanceof DataModelItem){
 //			return false;
 		//}else if (parentElement instanceof AREA FITLER){
@@ -480,14 +489,6 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 				return dateGroupByOptions;
 			}else if (type == NodeType.DATAMODEL_VALUES){
 				return new Object[]{dataModelValueCategory, dataModelValueAttribute};
-			}else if (type == NodeType.DATAMODEL_VALUE_CATEGORY){
-				Object[] kids = provider.getChildren(provider.getElements(null)[0]);
-				Object[] results = new Object[kids.length];
-				for (int i = 0; i < kids.length; i ++){
-					results[i] = new SummaryDmObject((DmObject)kids[i], true);
-				}
-				//assume data model
-				return results;
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
 				//get all active attributes
 				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(dataModel);
@@ -542,8 +543,6 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
-			}else if (type == NodeType.DATAMODEL_VALUE_CATEGORY){
-				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 			}
 			return null;
 		}

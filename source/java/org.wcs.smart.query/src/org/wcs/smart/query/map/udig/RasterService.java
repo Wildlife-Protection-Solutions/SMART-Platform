@@ -344,8 +344,7 @@ public class RasterService extends AbstractRasterService {
 		try {
 			this.geoResources = getGeoResource();
 		} catch (Exception e) {
-			// TODO:
-			e.printStackTrace();
+			QueryPlugIn.log("Error loading resources", e); //$NON-NLS-1$
 		}
 		if (this.geoResources == null) {
 			return Collections.emptyList();

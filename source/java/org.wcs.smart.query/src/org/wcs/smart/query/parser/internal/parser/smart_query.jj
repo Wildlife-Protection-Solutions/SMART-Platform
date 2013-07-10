@@ -62,7 +62,7 @@ TOKEN :
 {
     < PATROL_VALUE_ITEM : ( "patrol:" < AGG > ":" < PATROL_VALUE_KEY > ) >
 |  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "nummembers" | "manhours" | "mandays") >
-|    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" < DM_KEY > >
+|    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
 |    < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
@@ -234,7 +234,7 @@ IValueItem SingleValueItem() :
 		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
 		{
 			item = AttributeValueItem.createCategoryAttributeItem( token.image );
-		}	 
+		} 
 	)
 	{
 		 return item;

@@ -192,7 +192,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			switch (attribute.getType()) {
 			case BOOLEAN:
 			case NUMERIC:
-				//TODO: nullify first
+				// nullify first
 				StringBuilder sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryTempTable);

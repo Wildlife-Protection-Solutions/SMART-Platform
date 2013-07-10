@@ -100,7 +100,7 @@ public class AttributeValueItem implements IValueItem {
 		this.attributeType = Attribute.decodeAttributeTypeKey(attTypeKey);
 		if(attributeType != Attribute.AttributeType.NUMERIC && 
 		   attributeType != Attribute.AttributeType.LIST &&
-		   attributeType != Attribute.AttributeType.TREE){ //$NON-NLS-1$
+		   attributeType != Attribute.AttributeType.TREE){ 
 			throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);
 		}
 		if (attributeType == AttributeType.NUMERIC){
@@ -119,7 +119,7 @@ public class AttributeValueItem implements IValueItem {
 				attributeType == AttributeType.TREE ){
 				//< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
 				//< SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
-				String valueTypeKey = "";
+				String valueTypeKey = ""; //$NON-NLS-1$
 				if (includeCategory){
 					this.categoryKey = bits[1];
 					this.attributeKey = bits[6];
@@ -133,8 +133,7 @@ public class AttributeValueItem implements IValueItem {
 				}
 				int index = attributeKey.indexOf('.');
 				if (index <= 0){
-					//TODO: fix error message
-					throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);	
+					throw new IllegalStateException(Messages.AttributeValueItem_TreeListItemParseError);	
 				}
 				String temp = attributeKey;
 				attributeKey = temp.substring(0, index);
@@ -260,7 +259,7 @@ public class AttributeValueItem implements IValueItem {
 		name.append(" "); //$NON-NLS-1$
 		if (itemName != null){
 			name.append(itemName);
-			name.append(" [" + att.getName() + "] ");
+			name.append(" [" + att.getName() + "] "); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
 			name.append(att.getName());
 		}
@@ -321,7 +320,7 @@ public class AttributeValueItem implements IValueItem {
 		}else if (attributeType == AttributeType.LIST){
 			AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
 			if (ali == null){
-				throw new Exception(MessageFormat.format("List item for attribute {0} and key {1} not found.", new Object[]{attributeKey, itemKey}));		
+				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_ListItemNotFound, new Object[]{attributeKey, itemKey}));		
 			}
 			if (cat == null){
 				di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
@@ -332,7 +331,7 @@ public class AttributeValueItem implements IValueItem {
 		}else if (attributeType == AttributeType.TREE){
 			AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
 			if (atn == null){
-				throw new Exception(MessageFormat.format("Tree node for attribute {0} and hkey {1} not found.", new Object[]{attributeKey, itemKey}));		
+				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_TreeNodeNotFound, new Object[]{attributeKey, itemKey}));		
 			}
 			if (cat == null){
 				di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);

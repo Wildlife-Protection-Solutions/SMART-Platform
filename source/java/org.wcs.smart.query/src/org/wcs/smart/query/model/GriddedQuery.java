@@ -421,8 +421,6 @@ public class GriddedQuery extends Query {
 
 	 */
 	public String validate(){
-		//TODO: validation on the query string and/or definition
-		//return the error if there is on, null if it's ok.
 		if (getQueryDefinition() != null && getQueryDefinition().getGridSize() <= 0){
 			return Messages.GriddedQuery_InvalidGridSize;
 		}

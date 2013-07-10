@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.query.parser.AllCategory;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 
@@ -53,6 +54,14 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	public CategoryValueDropItem(Category category) {
 		this.category = category;
 	}
+	
+	/**
+	 * In this case no category is supplied so it
+	 * is assume all categories are to be included
+	 */
+	public CategoryValueDropItem(){
+		this.category = null;
+	}
 
 	/**
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
@@ -70,7 +79,13 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	 */
 	@Override
 	public String getValueText() {
-		return combo.getItem(combo.getSelectionIndex()) + " " + category.getFullCategoryName(); //$NON-NLS-1$
+		String x = combo.getItem(combo.getSelectionIndex()) + " "; //$NON-NLS-1$
+		if (category != null){
+			x += category.getFullCategoryName();
+		}else{
+			x += AllCategory.INSTANCE.getName();
+		}
+		return x;
 	}
 
 	/**
@@ -87,7 +102,9 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 				break;
 			}
 		}
-		sb.append(category.getHkey());
+		if (category != null){
+			sb.append(category.getHkey());
+		}
 		return sb.toString();
 	}
 
@@ -131,7 +148,11 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		
 		Label lblText = new Label(main, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
-		sb.append(category.getFullCategoryName());
+		if (category != null){
+			sb.append(category.getFullCategoryName());
+		}else{
+			sb.append(AllCategory.INSTANCE.getName());
+		}
 		lblText.setText( formatStringForLabel(sb.toString()));
 
 		initDrag(main);

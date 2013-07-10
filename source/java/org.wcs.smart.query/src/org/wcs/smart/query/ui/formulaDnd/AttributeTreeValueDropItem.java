@@ -36,6 +36,13 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 
+/**
+ * Drop item that represents counting tree nodes & sub nodes from
+ * a tree attributes.
+ * 
+ * @author Emily
+ *
+ */
 public class AttributeTreeValueDropItem extends AbstractValueDropItem {
 
 	private AttributeTreeNode node = null;
@@ -69,23 +76,23 @@ public class AttributeTreeValueDropItem extends AbstractValueDropItem {
 	protected String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null){
-			sb.append("category:");
+			sb.append("category:"); //$NON-NLS-1$
 			sb.append(category.getHkey());
-			sb.append(":");
+			sb.append(":");//$NON-NLS-1$
 		}
 		sb.append("attribute:"); //$NON-NLS-1$
 		sb.append(node.getAttribute().getType().typeKey);
-		sb.append(":sum:");
+		sb.append(":sum:"); //$NON-NLS-1$
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
 			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
-				sb.append(values[i].key); //$NON-NLS-1$
+				sb.append(values[i].key); 
 				break;
 			}
 		}
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(node.getAttribute().getKeyId());
-		sb.append(".");
+		sb.append("."); //$NON-NLS-1$
 		sb.append(node.getHkey());
 		return sb.toString();
 	}
@@ -94,15 +101,15 @@ public class AttributeTreeValueDropItem extends AbstractValueDropItem {
 	protected String getValueText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(combo.getItem(combo.getSelectionIndex()));
-		sb.append(" ");
+		sb.append(" "); //$NON-NLS-1$
 		sb.append(node.getName());
-		sb.append(" (");
+		sb.append(" ("); //$NON-NLS-1$ 
 		sb.append(node.getAttribute().getName());
 		if (category != null){
-			sb.append(" - ");
+			sb.append(" - "); //$NON-NLS-1$
 			sb.append(category.getFullCategoryName());
 		}
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}
 
@@ -142,16 +149,16 @@ public class AttributeTreeValueDropItem extends AbstractValueDropItem {
 		StringBuilder tooltip = new StringBuilder();
 		
 		sb.append(node.getName());
-		sb.append(" (");
+		sb.append(" ("); //$NON-NLS-1$
 		sb.append(node.getAttribute().getName());
 		tooltip.append(node.getAttribute().getName());
 		if (category != null){
-			sb.append(" - ");
+			sb.append(" - "); //$NON-NLS-1$ 
 			sb.append(category.getName());
-			tooltip.append(" - ");
+			tooltip.append(" - "); //$NON-NLS-1$
 			tooltip.append(category.getFullCategoryName());
 		}
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		lblText.setText( formatStringForLabel(sb.toString()));
 		lblText.setToolTipText(tooltip.toString());
 		initDrag(main);

@@ -30,6 +30,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.parser.AllCategory;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
@@ -282,6 +283,18 @@ public class DropItemFactory {
 	}	
 	
 	/**
+	 * Creates a new category value drop item that represents
+	 * the total number of observations of the given
+	 * category.
+	 * 
+	 * @param category
+	 * @return
+	 */
+	public DropItem createCategoryValueDropItem(){
+		return new CategoryValueDropItem();
+	}	
+	
+	/**
 	 * Creates a new category group by drop item.  The category
 	 * provided should be the parent category.
 	 * 
@@ -460,6 +473,11 @@ public class DropItemFactory {
 					queryType == QueryType.SUMMARY ||
 					queryType == QueryType.GRIDDED){
 				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
+			}
+		}else if (object instanceof AllCategory){
+			if (dropType == QueryPartPanelType.SUMMARY_ITEM || 
+				dropType == QueryPartPanelType.GRIDDED_ITEM ){
+				items = new DropItem[]{createCategoryValueDropItem()};
 			}
 		}
 		if (items != null){
