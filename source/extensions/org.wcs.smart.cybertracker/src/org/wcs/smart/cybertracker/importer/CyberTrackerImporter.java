@@ -77,19 +77,12 @@ public class CyberTrackerImporter {
 		monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 		try {
 			for (final File file : cxtDataFolder.listFiles()) {
-				if (!file.isFile())
-					continue;
-				String xmlFilePath = file.getName();
-				xmlFilePath = xmlFilePath.substring(0, xmlFilePath.lastIndexOf(".CTX")) + ".xml";  //$NON-NLS-1$//$NON-NLS-2$
-				xmlFilePath = xmlTempDir.getAbsolutePath() + "\\" + xmlFilePath; //$NON-NLS-1$
-				String[] extractCommand = {appPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath(), ICyberTrackerConstants.COMMAND_EXPORT, xmlFilePath};
-				proc = Runtime.getRuntime().exec(extractCommand);
-				proc.waitFor();
+				extractRawXml(appPath, file, xmlTempDir);
 			}
 			
 			//now all raw xml data is in temporary directory, importing it
 			for (final File file : xmlTempDir.listFiles()) {
-				patrols.addAll(importData(file, monitor));
+				patrols.addAll(importXmlFileData(file, monitor));
 			}
 			return patrols;
 			
@@ -97,8 +90,31 @@ public class CyberTrackerImporter {
 			PdaUtil.deleteTempDirectory(xmlTempDir);
 		}
 	}
+
+	protected List<CyberTrackerPatrol> importFileData(File file, IProgressMonitor monitor) throws Exception {
+		if (file.getName().toLowerCase().endsWith(".ctx")) { //$NON-NLS-1$
+			return importCtxFileData(file, monitor);
+		}
+		return importXmlFileData(file, monitor);
+	}
 	
-	public List<CyberTrackerPatrol> importData(File file, IProgressMonitor monitor) throws Exception {
+	protected List<CyberTrackerPatrol> importCtxFileData(File file, IProgressMonitor monitor) throws Exception {
+		File xmlTempDir = PdaUtil.createTempDirectory();
+		try {
+			monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
+			String appPath = PdaUtil.getCTAppPath();
+			if (appPath == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
+				return new ArrayList<CyberTrackerPatrol>();
+			}
+			File xmlFile = extractRawXml(appPath, file, xmlTempDir);
+			return importXmlFileData(xmlFile, monitor);
+		} finally {
+			PdaUtil.deleteTempDirectory(xmlTempDir);
+		}
+	}
+	
+	protected List<CyberTrackerPatrol> importXmlFileData(File file, IProgressMonitor monitor) throws Exception {
 		Data data = null;
 		FileInputStream in = new FileInputStream(file);
 		try {
@@ -132,6 +148,19 @@ public class CyberTrackerImporter {
 		return patrols;
 	}
 
+
+	private File extractRawXml(String ctPath, File ctxFile, File destFolder)  throws Exception {
+		if (!ctxFile.isFile())
+			return null;
+		String xmlFilePath = ctxFile.getName();
+		xmlFilePath = xmlFilePath.substring(0, xmlFilePath.toLowerCase().lastIndexOf(".ctx")) + ".xml";  //$NON-NLS-1$//$NON-NLS-2$
+		xmlFilePath = destFolder.getAbsolutePath() + "\\" + xmlFilePath; //$NON-NLS-1$
+		String[] extractCommand = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, ctxFile.getAbsolutePath(), ICyberTrackerConstants.COMMAND_EXPORT, xmlFilePath};
+		Process proc = Runtime.getRuntime().exec(extractCommand);
+		proc.waitFor();
+		File xmlFile = new File(xmlFilePath);
+		return xmlFile.exists() ? xmlFile : null;
+	}
 	
 	private Map<String, Data.Elements.E> buildElementsMap(Data data) {
 		Map<String, Data.Elements.E> result = new HashMap<String, Data.Elements.E>();
