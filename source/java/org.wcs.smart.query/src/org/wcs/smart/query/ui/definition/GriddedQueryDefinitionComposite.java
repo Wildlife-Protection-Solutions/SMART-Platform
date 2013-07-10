@@ -59,7 +59,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	private QueryDefView parentView;
 	private GriddedValuePanel panel;
 	//private FilterDropTargetPanel filterPanel;
-	private GriddedFilterPanel filterPanel;
+	private ValueRateFilterPanel filterPanel;
 	private TabFolder tabs;
 	private boolean isInitializing = false;
 
@@ -112,7 +112,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
 		//filterPanel = new FilterDropTargetPanel(parentView);
-		filterPanel = new GriddedFilterPanel(parentView);
+		filterPanel = new ValueRateFilterPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
 		item2.setText(Messages.GriddedQueryDefinitionComposite_FilterSectionHeader);
 	

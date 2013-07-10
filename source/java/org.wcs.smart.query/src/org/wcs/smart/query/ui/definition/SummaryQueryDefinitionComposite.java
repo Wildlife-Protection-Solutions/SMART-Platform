@@ -62,7 +62,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	private QueryDefView parentView;
 	private SummaryValueGroupByPanel panel;
 	//private FilterDropTargetPanel filterPanel;
-	private GriddedFilterPanel filterPanel;
+	private ValueRateFilterPanel filterPanel;
 	private TabFolder tabs;
 	private ConservationAreaFilterPanel caFilterPanel;
 
@@ -105,7 +105,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		pnl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
-		filterPanel = new GriddedFilterPanel(parentView);
+		filterPanel = new ValueRateFilterPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
 		item2.setText(FilterDropTargetPanel.PANEL_TITLE);
 		

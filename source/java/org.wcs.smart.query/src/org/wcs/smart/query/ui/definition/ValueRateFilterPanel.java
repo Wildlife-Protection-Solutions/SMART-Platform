@@ -56,7 +56,7 @@ import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
  * @author Emily
  *
  */
-public class GriddedFilterPanel {
+public class ValueRateFilterPanel {
 
 	private FilterDropTargetPanel valueFilter = null;
 	private FilterDropTargetPanel rateFilter = null;
@@ -69,7 +69,7 @@ public class GriddedFilterPanel {
 	private Composite left;
 	private Font smallerFont = null;
 	
-	public GriddedFilterPanel(QueryDefView view){
+	public ValueRateFilterPanel(QueryDefView view){
 		this.view = view;
 	}
 	
@@ -120,7 +120,7 @@ public class GriddedFilterPanel {
 		
 		Label lblValueFilter = new Label(leftInner, SWT.NONE);
 		lblValueFilter.setText(Messages.GriddedFilterPanel_ValueFilterLabel);
-		lblValueFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblValueFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		lblValueFilter.setToolTipText(Messages.GriddedFilterPanel_ValueFilterTooltip);
 		lblValueFilter.addMouseListener(new MouseAdapter() {
 			
