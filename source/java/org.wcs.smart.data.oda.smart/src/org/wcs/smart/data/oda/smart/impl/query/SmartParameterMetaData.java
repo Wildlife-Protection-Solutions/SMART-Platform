@@ -10,7 +10,6 @@ package org.wcs.smart.data.oda.smart.impl.query;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartDriver;
-import org.wcs.smart.data.oda.smart.internal.Messages;
 
 /**
  * Implementation class of IParameterMetaData for the SMART ODA runtime driver. <br>
@@ -27,8 +26,8 @@ public class SmartParameterMetaData implements IParameterMetaData {
 	public enum Parameter {
 //		STARTDATE(Messages.SmartParameterMetaData_StartDate_ParameterName, 1, java.sql.Types.DATE), 
 //		ENDDATE(Messages.SmartParameterMetaData_EndDate_ParameterName, 2, java.sql.Types.DATE);
-		STARTDATE("Start Date", 1, java.sql.Types.DATE), 
-		ENDDATE("End Date", 2, java.sql.Types.DATE);
+		STARTDATE("Start Date", 1, java.sql.Types.DATE),  //$NON-NLS-1$
+		ENDDATE("End Date", 2, java.sql.Types.DATE); //$NON-NLS-1$
 		public String guiName;
 		public int index;
 		public int type;

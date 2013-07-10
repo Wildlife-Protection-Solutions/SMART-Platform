@@ -147,7 +147,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 				}});
 			smartTables.setInput(tables.toArray(new SmartBirtTable[tables.size()]));
 		}catch (Exception ex){
-			ex.printStackTrace();//TODO: fix me
+			Activator.log(ex.getLocalizedMessage(), ex);
 		}
 		
 		setPageComplete(false);

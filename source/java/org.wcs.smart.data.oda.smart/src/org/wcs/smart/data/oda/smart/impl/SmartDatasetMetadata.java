@@ -47,7 +47,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * org.eclipse.datatools.connectivity.oda.IDataSetMetaData#getConnection()
 	 */
 	public IConnection getConnection() throws OdaException {
-		// TODO Auto-generated method stub
 		return m_connection;
 	}
 
@@ -66,7 +65,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceMajorVersion()
 	 */
 	public int getDataSourceMajorVersion() throws OdaException {
-		// TODO Auto-generated method stub
 		return 1;
 	}
 
@@ -75,7 +73,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceMinorVersion()
 	 */
 	public int getDataSourceMinorVersion() throws OdaException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -84,7 +81,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceProductName()
 	 */
 	public String getDataSourceProductName() throws OdaException {
-		// TODO Auto-generated method stub
 		return Messages.SmartDatasetMetadata_SmartDataSourceName;
 	}
 
@@ -102,7 +98,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * org.eclipse.datatools.connectivity.oda.IDataSetMetaData#getSQLStateType()
 	 */
 	public int getSQLStateType() throws OdaException {
-		// TODO Auto-generated method stub
 		return IDataSetMetaData.sqlStateSQL99;
 	}
 
@@ -135,7 +130,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * supportsNamedParameters()
 	 */
 	public boolean supportsNamedParameters() throws OdaException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -145,7 +139,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * ()
 	 */
 	public boolean supportsInParameters() throws OdaException {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
@@ -155,7 +148,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * ()
 	 */
 	public boolean supportsOutParameters() throws OdaException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
