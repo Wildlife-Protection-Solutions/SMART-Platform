@@ -41,7 +41,8 @@ import org.wcs.smart.patrol.xml.model.WaypointType;
  * observations across waypoints.
  * <p>
  * Observations are merged if they have the same categories and either different
- * attributes or the same attribute with the same attribute values.  If the same attribute has
+ * attributes or the same attribute with the same attribute values.  
+ * If the same attribute has
  * different values across and waypoint the observations are not merged.
  * 
  * </p>
@@ -145,9 +146,9 @@ public class ObservationMerger implements IDataProcessor{
 								}else{
 									if (attribute.getDValue() != null){
 										attributeValues.put(attribute.getAttributeKey(), attribute.getDValue());
-									}else if (attribute.getSValue() != null){
+									}else if (attribute.getSValue() != null && !attribute.getSValue().isEmpty()){
 										attributeValues.put(attribute.getAttributeKey(), attribute.getSValue());
-									}else if (attribute.getItemKey() != null){
+									}else if (attribute.getItemKey() != null && !attribute.getItemKey().isEmpty()){
 										attributeValues.put(attribute.getAttributeKey(), attribute.getItemKey());
 									}else{
 										attributeValues.put(attribute.getAttributeKey(), NODATA);
