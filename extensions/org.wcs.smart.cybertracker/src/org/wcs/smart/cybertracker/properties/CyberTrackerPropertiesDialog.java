@@ -195,7 +195,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		
 		Label lblStorageTime = new Label(container, SWT.NONE);
-		lblStorageTime.setText("Storage Time (days):");
+		lblStorageTime.setText(Messages.CyberTrackerPropertiesDialog_StorageTime);
 
 		txtStorageTime = new Text(container, SWT.BORDER);
 		txtStorageTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -217,7 +217,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		storageTimeDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		storageTimeDecoration.setShowHover(true);
-		storageTimeDecoration.setDescriptionText(MessageFormat.format("Storage time must be a value between {0} and {1}", CyberTrackerProperties.STORAGE_TIME_MIN_VALUE, CyberTrackerProperties.STORAGE_TIME_MAX_VALUE));
+		storageTimeDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_StorageTimeInvalid, CyberTrackerProperties.STORAGE_TIME_MIN_VALUE, CyberTrackerProperties.STORAGE_TIME_MAX_VALUE));
 		storageTimeDecoration.hide();
 		
 		setTitle(Messages.CyberTrackerPropertiesDialog_Title);

@@ -102,6 +102,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_Message;
 	public static String CyberTrackerPropertiesDialog_NameInvalid;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
+	public static String CyberTrackerPropertiesDialog_StorageTime;
+	public static String CyberTrackerPropertiesDialog_StorageTimeInvalid;
 	public static String CyberTrackerPropertiesDialog_TimeOffset;
 	public static String CyberTrackerPropertiesDialog_Title;
 	public static String CyberTrackerPropertiesDialog_TrackTimer;
