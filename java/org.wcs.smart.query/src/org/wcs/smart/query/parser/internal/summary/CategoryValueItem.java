@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.AllCategory;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
@@ -70,7 +71,11 @@ public class CategoryValueItem implements IValueItem {
 				break;
 			}
 		}
-		this.categoryHkey = bits[3];
+		if (bits.length >= 4){
+			this.categoryHkey = bits[3];
+		}else{
+			this.categoryHkey = null;
+		}
 	}
 	
 	/**
@@ -99,6 +104,9 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
 	public String getName(Session session){
+		if (categoryHkey == null){
+			return type.guiLabel + " " + AllCategory.INSTANCE.getName(); //$NON-NLS-1$
+		}
 		Category c = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 		if (c == null){
 			return this.key;
@@ -110,6 +118,9 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
 	 */
 	public String getFullName(Session session){
+		if (categoryHkey == null){
+			return type.guiLabel + " " + AllCategory.INSTANCE.getName(); //$NON-NLS-1$
+		}
 		Category c = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 		if (c == null){
 			return this.key;
@@ -122,6 +133,9 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
+		if (categoryHkey == null){
+			return DropItemFactory.INSTANCE.createCategoryValueDropItem();
+		}
 		Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 		if (category == null){
 			throw new Exception(MessageFormat.format(Messages.CategoryValueItem_CategoryNotFoundError, new Object[]{categoryHkey}));
@@ -157,6 +171,9 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
 	 */
 	public void validateDatabase(Session session) throws Exception{
+		if (categoryHkey == null || categoryHkey.length() == 0){
+			return;
+		}
 		//ensure category key exists
 		FilterValidator.validateCategory(categoryHkey, session);
 	}

@@ -896,13 +896,18 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		sql.append(fromSql);
 		
 		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(" ("); //$NON-NLS-1$
-		sql.append("cat_hkey >= '"); //$NON-NLS-1$
-		sql.append(categoryItem.getCategoryHKey());
-		sql.append("' and "); //$NON-NLS-1$
-		sql.append("cat_hkey < '"); //$NON-NLS-1$
-		sql.append(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1));
-		sql.append("/') "); //$NON-NLS-1$	
+		String hkey = categoryItem.getCategoryHKey();
+		if (hkey == null){
+			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
+		}else{
+			sql.append(" ("); //$NON-NLS-1$
+			sql.append("cat_hkey >= '"); //$NON-NLS-1$
+			sql.append(categoryItem.getCategoryHKey());
+			sql.append("' and "); //$NON-NLS-1$
+			sql.append("cat_hkey < '"); //$NON-NLS-1$
+			sql.append(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1));
+			sql.append("/') "); //$NON-NLS-1$
+		}
 		sql.append(") foo"); //$NON-NLS-1$
 		
 		if (groupBySql.length() > 0){
@@ -1271,7 +1276,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			return "pld_patrol_day, " + //$NON-NLS-1$
 			prefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		}
-		//TODO: should not get here
+		//should not get here
 		return null;
 	}
 	

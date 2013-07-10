@@ -210,7 +210,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 		tooltip.append(attribute.getName());
 		if (category != null){
 			sb.append(" (" + category.getName() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
-			tooltip.append( " - ");
+			tooltip.append( " - "); //$NON-NLS-1$
 			tooltip.append(category.getFullCategoryName());
 		}
 		lblText.setText( formatStringForLabel(sb.toString()));

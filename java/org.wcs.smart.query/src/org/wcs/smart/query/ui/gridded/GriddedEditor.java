@@ -360,7 +360,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		updatePartName();
 		setDirty(false);
 		
-		//TODO: this is a bit of a hack to get the querylistview to be updated
+		//this is a bit of a hack to get the querylistview to be updated
 		//correctly
 		//this cannot be called until setinput has bee called
 		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID));
@@ -388,7 +388,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		setDirty(false);
 		
-		//TODO: this is a bit of a hack to get the querylistview selection to be updated
+		//this is a bit of a hack to get the querylistview selection to be updated
 		//to the new saved-as query
 		//this cannot be called until setinput has been called
 		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID));

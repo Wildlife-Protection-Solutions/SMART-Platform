@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String AbstractValueDropItem_RateofChangePerLabel;
 	public static String AddFolderHandler_CouldNotAddFolderError;
 	public static String AddFolderHandler_DefaultNewFolderName;
+	public static String AllCategory_AllCategoriesLabel;
 	public static String AreaFilter_InvalidAreaKey;
 	public static String AreaGroupBy_AreaGroupByNotFound;
 	public static String AreaGroupByItem_LoadError;
@@ -37,6 +38,9 @@ public class Messages extends NLS {
 	public static String AttributeValueItem_AttributeNotFoundError;
 	public static String AttributeValueItem_CategoryNotFoundError;
 	public static String AttributeValueItem_InvalidKey;
+	public static String AttributeValueItem_ListItemNotFound;
+	public static String AttributeValueItem_TreeListItemParseError;
+	public static String AttributeValueItem_TreeNodeNotFound;
 	public static String CaDataModelManagerImpl_LoadDataModelJobName;
 	public static String CategoryFilter_CategoryNotFound;
 	public static String CategoryFilter_InvalidPrefix;
@@ -211,8 +215,10 @@ public class Messages extends NLS {
 	public static String GriddedQueryContentProvider_CategoriesLabel;
 	public static String GriddedQueryContentProvider_DataModelValuesLabel;
 	public static String GriddedQueryContentProvider_DateLabel;
+	public static String GriddedQueryContentProvider_ErrorLoadingListItem;
 	public static String GriddedQueryContentProvider_ErrorLoadingTree;
 	public static String GriddedQueryContentProvider_LoadingText;
+	public static String GriddedQueryContentProvider_LoadListItemJobName;
 	public static String GriddedQueryContentProvider_loadingtreeJobName;
 	public static String GriddedQueryContentProvider_PatrolValuesLabel;
 	public static String GriddedQueryContentProvider_ValueOptionsLabel;
@@ -561,10 +567,12 @@ public class Messages extends NLS {
 	public static String SummaryQueryContentProvider_DateLabel;
 	public static String SummaryQueryContentProvider_ErrorLoadingTreeItemsA;
 	public static String SummaryQueryContentProvider_ErrorLoadingTreeItemsB;
+	public static String SummaryQueryContentProvider_ErrorLoadListItem;
 	public static String SummaryQueryContentProvider_GroupByCategoryAttributeLabel;
 	public static String SummaryQueryContentProvider_GroupByOpLabel;
 	public static String SummaryQueryContentProvider_LoadingText;
 	public static String SummaryQueryContentProvider_LoadingTreeJobName;
+	public static String SummaryQueryContentProvider_LoadListItemJob;
 	public static String SummaryQueryContentProvider_PatrolGroupByLabel;
 	public static String SummaryQueryContentProvider_PatrolValuesLabel;
 	public static String SummaryQueryContentProvider_ValueCategoriesAttributesLabel;

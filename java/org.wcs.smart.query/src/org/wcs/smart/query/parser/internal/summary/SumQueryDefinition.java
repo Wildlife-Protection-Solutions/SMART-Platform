@@ -108,6 +108,16 @@ public class SumQueryDefinition {
 	 * @return the string representation of the query
 	 */
 	public String asQuery(){
-		return valuePart.asString() + "|" + rowGroupBy.asString() + "|" + colGroupBy.asString() + "|" + (valueFilter == null ? "" : valueFilter.asString() + "|" + (rateFilter == null ? "" : rateFilter.asString())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		StringBuilder sb = new StringBuilder();
+		sb.append(valuePart.asString());
+		sb.append("|"); //$NON-NLS-1$
+		sb.append(rowGroupBy.asString());
+		sb.append( "|" ); //$NON-NLS-1$
+		sb.append( colGroupBy.asString() );
+		sb.append( "|" ); //$NON-NLS-1$
+		sb.append( (valueFilter == null ? "" : valueFilter.asString())); //$NON-NLS-1$
+		sb.append("|"); //$NON-NLS-1$
+		sb.append( (rateFilter == null ? "" : rateFilter.asString()));  //$NON-NLS-1$
+		return sb.toString();
 	}
 }

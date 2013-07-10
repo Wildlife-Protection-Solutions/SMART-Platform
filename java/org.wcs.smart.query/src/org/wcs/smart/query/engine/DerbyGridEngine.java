@@ -225,34 +225,6 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			
 			data.dropTemporaryTables(c);
 
-//			if (filter == null){
-//				filter = IFilter.EMPTY_FILTER;
-//			}
-//			if (filter != IFilter.EMPTY_FILTER && filter.hasAttributeFilter()) {
-//				createObservationTable(c, filter, query.getDateFilter(),
-//						query.getConservationAreaFilterAsFilter(), monitor);
-//			}
-//			monitor.worked(1);
-//			if (monitor.isCanceled()) {
-//				return null;
-//			}
-//
-//			
-//
-//			monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingTempTable);
-//			createTemporaryTableSimple(c);
-//
-//			monitor.worked(1);
-//			if (monitor.isCanceled()) {
-//				return null;
-//			}
-//
-//			monitor.subTask(Messages.DerbyGridEngine_Progress_PopulatingResults);
-//			populateTemporaryTable(filter, query.getDateFilter(),
-//					query.getConservationAreaFilterAsFilter(), false, c,
-//					needsObservation);
-//			monitor.worked(1);
-
 			if (monitor.isCanceled()) {
 				return null;
 			}
@@ -423,9 +395,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			}else if(value instanceof CategoryValueItem){
 				CategoryValueItem tmp = (CategoryValueItem)value;
 				strAgg = "count"; //$NON-NLS-1$
-				String hkey = tmp.getCategoryHKey();
-				String hkey_max = hkey.substring(0,(hkey.length()-1)) + "/"; //$NON-NLS-1$
-					
+				
 				double minX = gridDef.getOriginX();
 				double minY = gridDef.getOriginY();
 				double size = gridDef.getCellSize();
@@ -451,7 +421,16 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						+ ".category_uuid = " //$NON-NLS-1$
 						+ tablePrefix.get(Category.class)
 						+ ".uuid" //$NON-NLS-1$
-						+ " AND Hkey >= '" + hkey + "' AND Hkey < '" + hkey_max + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						+ " AND "); //$NON-NLS-1$
+				if (tmp.getCategoryHKey() != null){
+					sql.append("hkey >= '"); //$NON-NLS-1$
+					sql.append(tmp.getCategoryHKey());
+					sql.append("' AND hkey < '"); //$NON-NLS-1$
+					sql.append(tmp.getCategoryHKey().substring(0,  tmp.getCategoryHKey().length()-1));
+					sql.append("/'");  //$NON-NLS-1$
+				}else{
+					sql.append(" hkey is not null "); //$NON-NLS-1$
+				}
 				
 				sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class)  //$NON-NLS-1$ //$NON-NLS-2$
 						+ " on " + tablePrefix.get(Waypoint.class) //$NON-NLS-1$

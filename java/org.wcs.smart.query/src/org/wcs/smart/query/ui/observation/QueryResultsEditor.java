@@ -398,7 +398,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		
 		setDirty(false);
 		
-		//TODO: this is a bit of a hack to get the querylistview to be updated
+		//this is a bit of a hack to get the querylistview to be updated
 		//correctly
 		//this cannot be called until setinput has bee called
 		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID));

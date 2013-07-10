@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *
@@ -19,33 +18,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */package org.wcs.smart.query;
+ */
 
-import org.wcs.smart.query.model.Query;
+package org.wcs.smart.query.parser;
+
+import org.wcs.smart.query.internal.Messages;
 
 /**
- * An adapter to simplify query event listeners that do not need all 
- * events defined in the IQueryListener interface.
+ * Query item to represent all categories.
  * 
  * @author Emily
  *
  */
-public abstract class QueryListenerAdapter implements IQueryListener {
+public class AllCategory {
 
-	@Override
-	public void queryChanged(Query query) {
+	public final static AllCategory INSTANCE = new AllCategory();
+	
+	/**
+	 * Private class; a single instance is shared
+	 */
+	private AllCategory(){
+		
 	}
-
-	@Override
-	public void queryRun(Query query) {
+	
+	/**
+	 * Name to display on gui.
+	 * @return
+	 */
+	public String getName(){
+		return Messages.AllCategory_AllCategoriesLabel;
 	}
-
-	@Override
-	public void queryNameUpdated(Query query) {
-	}
-
-	@Override
-	public void queryRefreshed(Query query) {
-	}
-
 }
