@@ -69,9 +69,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private Button btnKioskMode;
 	private Text txtTrackTimer;
     private ComboViewer timeOffset;
+    private Text txtStorageTime;
 	
     private ControlDecoration appNameDecoration;
     private ControlDecoration trackTimerDecoration;
+    private ControlDecoration storageTimeDecoration;
 	
 	public CyberTrackerPropertiesDialog() {
 		super(Display.getCurrent().getActiveShell(), Messages.CyberTrackerPropertiesDialog_Title);
@@ -190,6 +192,33 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				setChangesMade(true);
 			}
 		});
+
+		
+		Label lblStorageTime = new Label(container, SWT.NONE);
+		lblStorageTime.setText("Storage Time (days):");
+
+		txtStorageTime = new Text(container, SWT.BORDER);
+		txtStorageTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtStorageTime.setText(String.valueOf(ctProperties.getStorageTime()));
+		txtStorageTime.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isStorageTimeValid()) {
+					storageTimeDecoration.hide();
+				} else {
+					storageTimeDecoration.show();
+				}
+				setChangesMade(true);
+			}
+
+		});
+
+		storageTimeDecoration = new ControlDecoration(txtStorageTime, SWT.LEFT);
+		storageTimeDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		storageTimeDecoration.setShowHover(true);
+		storageTimeDecoration.setDescriptionText(MessageFormat.format("Storage time must be a value between {0} and {1}", CyberTrackerProperties.STORAGE_TIME_MIN_VALUE, CyberTrackerProperties.STORAGE_TIME_MAX_VALUE));
+		storageTimeDecoration.hide();
 		
 		setTitle(Messages.CyberTrackerPropertiesDialog_Title);
 		setMessage(Messages.CyberTrackerPropertiesDialog_Message);
@@ -207,15 +236,25 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		} catch (NumberFormatException e) {
 			return false;
 		}
-		
 	}
 
+	private boolean isStorageTimeValid() {
+		if (txtStorageTime == null || txtStorageTime.getText() == null || txtStorageTime.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtStorageTime.getText());
+			return result >= CyberTrackerProperties.STORAGE_TIME_MIN_VALUE && result <= CyberTrackerProperties.STORAGE_TIME_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	
 	private boolean isAppNameValid() {
     	return txtAppName != null && txtAppName.getText() != null && !txtAppName.getText().isEmpty() && txtAppName.getText().length() <= CyberTrackerProperties.APPLICATION_NAME_MAX_LENTH;
 	}
 
 	private boolean validate() {
-		return isTrackTimerValid() && isAppNameValid();
+		return isTrackTimerValid() && isAppNameValid() && isStorageTimeValid();
 	}
 	
 	@Override
@@ -230,6 +269,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
 		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();
 		ctProperties.setGpsTimeZone((Integer)selection.getFirstElement());
+		ctProperties.setStorageTime(Integer.valueOf(txtStorageTime.getText()));
 		
 		Session session = HibernateManager.openSession();
 		try {
