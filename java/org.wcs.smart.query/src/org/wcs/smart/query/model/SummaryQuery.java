@@ -339,6 +339,11 @@ public class SummaryQuery extends Query {
 		if (rateFilterDropItems == null){
 			rateFilterDropItems = new ArrayList<DropItem>();
 		}
+		
+		if (getQueryDefinition() == null){
+			//no query items
+			return;
+		}
 		//---- generate drop items for filter items ----
 		Exception lastException = null;
 		try{

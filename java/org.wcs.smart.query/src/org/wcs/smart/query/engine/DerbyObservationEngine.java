@@ -127,19 +127,29 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
+		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
+		QueryPlugIn.logSql(sql);
+		ResultSet rs = c.createStatement().executeQuery(sql);
 		try {
+			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			int count = 0;
 			while (rs.next()) {
 				byte[] ca_uuid = rs.getBytes(1);
 				byte[] uuid = rs.getBytes(2);
 				if (uuid == null || ca_uuid == null)
 					continue;
 				String name = getName(uuid, ca_uuid, session);
-				PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				statement.setString(1, name);
 				statement.setBytes(2, uuid);
-				statement.executeUpdate();
+				statement.addBatch();
+				count ++;
+				if (count > 100){
+					statement.executeBatch();
+					count = 0;
+				}				
 			}
+			statement.executeBatch();
+			
 		} finally {
 			rs.close();
 		}
@@ -154,14 +164,19 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		}
 		
 		for (int i = 0; i <= numCategory; i++) {
-			c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String sql = "ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			QueryPlugIn.logSql(sql);
+			c.createStatement().execute(sql);
 		}
 		if (numCategory < 0){
 			//nothing to update
 			return;
 		}
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
-		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable);  //$NON-NLS-1$
+		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
+		QueryPlugIn.logSql(sql);
+		ResultSet rs = c.createStatement().executeQuery(sql);
+		
 		try {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
@@ -180,7 +195,10 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 						}
 						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					statement = c.prepareStatement("UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					sql = "UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					QueryPlugIn.logSql(sql);
+					statement = c.prepareStatement(sql);
+					
 					num2Statement.put(count, statement);
 				}
 				
@@ -197,15 +215,21 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_station varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_team varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_mandate varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_transporttype varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_leader varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD p_pilot varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD ca_id varchar(8)"); //$NON-NLS-1$ //$NON-NLS-2$
-		c.createStatement().execute("ALTER TABLE "+queryDataTable+" ADD ca_name varchar(256)"); //$NON-NLS-1$ //$NON-NLS-2$
+		String[][] columnsToAdd = new String[][]{
+				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_transporttype","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_leader","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+		};
+		for (int i = 0; i < columnsToAdd.length; i ++){
+			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			QueryPlugIn.logSql(sql);
+			c.createStatement().execute(sql);
+		}
 		
 		if (monitor.isCanceled()){
 			return;
@@ -246,25 +270,40 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		sql.append(queryDataTable);
 		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
-
+		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
-		PreparedStatement leaderSt = c.prepareStatement(updateSql+"p_leader = ? where plm_leader = ?"); //$NON-NLS-1$
-		PreparedStatement pilotSt = c.prepareStatement(updateSql+"p_pilot = ? where plm_pilot = ?"); //$NON-NLS-1$
+		
+		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
+		String q2 = updateSql + "p_pilot = ? where plm_pilot = ?"; //$NON-NLS-1$
+		QueryPlugIn.logSql(q1);
+		QueryPlugIn.logSql(q2);
+		PreparedStatement leaderSt = c.prepareStatement(q1);
+		PreparedStatement pilotSt = c.prepareStatement(q2);
+		int cnt = 0;
 		try {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				String name = getEmployeeName(uuid, session);
+				
 				if (name != null) {
 					leaderSt.setString(1, name);
 					leaderSt.setBytes(2, uuid);
-					leaderSt.executeUpdate();
-					
+					leaderSt.addBatch();
+
 					pilotSt.setString(1, name);
 					pilotSt.setBytes(2, uuid);
-					pilotSt.executeUpdate();
+					pilotSt.addBatch();
+					cnt++;
+					if (cnt >= 100){
+						pilotSt.executeBatch();
+						leaderSt.executeBatch();
+						cnt = 0;
+					}
 				}
 			}
+			pilotSt.executeBatch();
+			leaderSt.executeBatch();
 		} finally {
 			rs.close();
 		}
@@ -283,13 +322,16 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(DerbyQueryEngine2.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
+			
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(DerbyQueryEngine2.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		
@@ -330,11 +372,17 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
 		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql);
 
 		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.P_CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql);
-		PreparedStatement statement = c.prepareStatement("INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql.toString());
+		PreparedStatement statement = c.prepareStatement(sql);
+		int count = 0;
 		try {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
@@ -343,9 +391,15 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 					String value = linkedData.getLabel(session, cauuid, uuid);
 					statement.setBytes(1, uuid);
 					statement.setString(2, value);
-					statement.executeUpdate();
+					statement.addBatch();
+					count++;
+					if (count >= 100){
+						statement.executeBatch();
+						count = 0;
+					}
 				}
 			}
+			statement.executeBatch();
 		} finally {
 			rs.close();
 		}
