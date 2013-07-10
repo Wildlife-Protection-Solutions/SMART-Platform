@@ -60,7 +60,6 @@ public class ImportReportHandler extends AbstractHandler {
 			return null;
 		}
 		
-		//TODO: run in progress monitor dialog
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(parent);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {

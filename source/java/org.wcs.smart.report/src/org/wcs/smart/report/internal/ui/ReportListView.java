@@ -107,7 +107,6 @@ public class ReportListView extends ViewPart {
 		
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
-			//TODO: link the current view to the report selection
 			if (partRef.getId().equals(ReportView.ID)){
 				
 				IWorkbenchPart part = partRef.getPart(false);
@@ -230,9 +229,6 @@ public class ReportListView extends ViewPart {
 		reportList.setCellEditors(new CellEditor[] { new TextCellEditor(reportList.getTree()) });
 		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		reportList.setCellModifier(new ReportItemNameCellEditor());
-		
-		//TODO: add support for multi-selection
-		//TreeViewerFocusCellManager focusCellManager
 		
 		new TreeViewerFocusCellManager
 				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));
