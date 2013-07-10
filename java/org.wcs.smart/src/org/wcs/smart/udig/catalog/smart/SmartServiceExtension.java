@@ -9,6 +9,7 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
 
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -65,7 +66,7 @@ public class SmartServiceExtension implements ServiceExtension {
 			byte[] buuid = SmartUtils.decodeHex(scauuid);
 			params.put(CA_UUID_KEY, buuid);
 		}catch (Exception ex){
-			//TODO: do something here
+			SmartPlugIn.log("Error parsing ca uuid.", ex); //$NON-NLS-1$
 		}
 		return params;
 	}

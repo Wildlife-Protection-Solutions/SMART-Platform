@@ -45,10 +45,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
-
-	//TODO: REVIEW IF THESE SHOULD BE CACHED IN MEMORY OR NOT
 	private SimpleFeatureType ftype;
-	
 	private Session session = null;
 	private ScrollableResults itemCursor = null;
 		

@@ -126,7 +126,6 @@ public class FilterComposite extends Composite {
 		setLayout(layout);
 		
 		if (useNativeSearchField(this)){
-			//TODO: Test this mac or maybe linux
 			txtFilter = new Text(this, SWT.SINGLE | SWT.SEARCH | SWT.ICON_CANCEL);
 			txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}else{

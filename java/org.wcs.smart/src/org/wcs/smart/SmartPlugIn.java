@@ -205,14 +205,13 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		try {
-			//TODO: review this requirement
 			// clean out the catalog
 			List<IResolve> members = CatalogPlugin.getDefault().getLocalCatalog().members(null);
 			for (IResolve member : members) {
 				CatalogPlugin.getDefault().getLocalCatalog().remove((IService) member.resolve(IService.class, null));
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log(ex.getMessage(), ex);
 		}
 
 		plugin = null;
