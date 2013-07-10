@@ -90,7 +90,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 		ReportEventManager.getInstance().addReportListener(this);
 	}
 
-	//TODO: this is a hack to name the
+	//This listener is a hack to name the
 	//smart query datasources with the query name
 	//I couldn't figure out how to do this any other way.
 	private Listener nameChangeListener = new Listener(){
@@ -354,7 +354,6 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
-						//TODO figure out how to remove this from the perspective editor tracker
 						getSite().getPage().closeEditor(RCPMultiPageReportEditor.this, false);
 					}
 				});

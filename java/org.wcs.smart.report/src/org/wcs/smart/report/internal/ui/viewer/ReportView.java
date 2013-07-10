@@ -229,10 +229,7 @@ public class ReportView extends ViewPart implements IReportListener{
 	}
 	
 	private HashMap<String, Object> getParameters() throws Exception{
-		//TODO: perhaps we can save the parameters and re-use them if report refreshed
-		//or at least provide as defaults
-		ParameterCollecter paramCollector = new ParameterCollecter();
-		
+		ParameterCollecter paramCollector = new ParameterCollecter();	
 		HashMap<String, Object> selectedParams = paramCollector.getParameters(new Report[]{report});
 		return selectedParams;
 	}

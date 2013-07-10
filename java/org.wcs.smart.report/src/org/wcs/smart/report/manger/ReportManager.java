@@ -253,7 +253,6 @@ public class ReportManager {
 								ri,
 								IReportEditorContants.DESIGN_EDITOR_ID);
 				if (editor instanceof RCPMultiPageReportEditor){
-					//TODO: test this
 					((RCPMultiPageReportEditor) editor).refreshMarkers(editor.getEditorInput());
 				}
 				
