@@ -351,7 +351,9 @@ public class GriddedQuery extends Query {
 		if (valueFilterDropItems == null){
 			valueFilterDropItems = new ArrayList<DropItem>();
 		}
-
+		if (getQueryDefinition() == null){
+			return;
+		}
 		Exception lastException = null;
 		try{
 			//---- generate drop items for value filter
