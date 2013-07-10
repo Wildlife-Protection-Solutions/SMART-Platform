@@ -51,6 +51,9 @@ public class CyberTrackerProperties {
 	public static final int TIME_TRACK_MIN_VALUE = 0;
 	public static final int TIME_TRACK_MAX_VALUE = 1000;
 
+	public static final int STORAGE_TIME_MIN_VALUE = 0;
+	public static final int STORAGE_TIME_MAX_VALUE = 365;
+	
 	public static final Integer[] GTM_VALUES = {
 		-1200,
 		-1100,
@@ -100,6 +103,8 @@ public class CyberTrackerProperties {
 
 	//this value is not CT application parameter but it will be applied to all radio screens while generating application
 	private boolean autoNext = true;
+	
+	private int storageTime = 30; //indicates how many days ctx files will be stored in SMART storage
 
 	@Id
 	@GeneratedValue(generator="uuid")
@@ -160,5 +165,14 @@ public class CyberTrackerProperties {
 	
 	public void setAutoNext(boolean autoNext) {
 		this.autoNext = autoNext;
+	}
+	
+	@Column(name="storage_time")
+	public int getStorageTime() {
+		return storageTime;
+	}
+	
+	public void setStorageTime(int storageTime) {
+		this.storageTime = storageTime;
 	}
 }
