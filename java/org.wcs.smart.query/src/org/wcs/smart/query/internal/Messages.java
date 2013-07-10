@@ -84,8 +84,6 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Error_PatrolValueNotSupported;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;
-	public static String DerbyGridEngine_Progress_CreatingTempTable;
-	public static String DerbyGridEngine_Progress_PopulatingResults;
 	public static String DerbyGridEngine_Progress_RunningQuery;
 	public static String DerbyObservationEngine_Progress_CaInfo;
 	public static String DerbyObservationEngine_Progress_CategoryData;
@@ -97,14 +95,8 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_Progress_TeamData;
 	public static String DerbyObservationEngine_Progress_TransportData;
 	public static String DerbyObservationEngine_Progress_TreeAttributesData;
-	public static String DerbyPatrolEngine_Progress_CreatingObservationTable;
-	public static String DerbyPatrolEngine_Progress_CreatingTempTable;
 	public static String DerbyPatrolEngine_Progress_LoadingResults;
-	public static String DerbyPatrolEngine_Progress_PopulatingResults;
 	public static String DerbyPatrolEngine_Progress_RunningQuery;
-	public static String DerbyQueryEngine2_Progress_CreatingObservationTable;
-	public static String DerbyQueryEngine2_Progress_CreatingTempTable;
-	public static String DerbyQueryEngine2_Progress_PopulatingResults;
 	public static String DerbyQueryEngine2_Progress_ProcessingAttribute;
 	public static String DerbyQueryEngine2_Progress_ProcessingAttributes;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
@@ -113,7 +105,6 @@ public class Messages extends NLS {
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
-	public static String DerbySummaryEngine_Progress_PopulatingResults;
 	public static String DerbySummaryEngine_Progress_ProcessingValue;
 	public static String DerbySummaryEngine_Progress_RunningQuery;
 	public static String DropItem_deleteitemTooltip;
@@ -215,7 +206,6 @@ public class Messages extends NLS {
 	public static String GriddedQuery_ValueFilterParseError;
 	public static String GriddedQuery_ValueParseError;
 	public static String GriddedQueryContentProvider_AttributesLabel;
-	public static String GriddedQueryContentProvider_CategoriesLabel;
 	public static String GriddedQueryContentProvider_DataModelValuesLabel;
 	public static String GriddedQueryContentProvider_DateLabel;
 	public static String GriddedQueryContentProvider_ErrorLoadingListItem;
@@ -386,7 +376,6 @@ public class Messages extends NLS {
 	public static String PatrolQueryResultsEditor_MapTabName;
 	public static String PatrolQueryResultsEditor_RunQueryJobName;
 	public static String PatrolQueryResultsEditor_TableTabName;
-	public static String PatrolResultsTable_InitTableJobName;
 	public static String ProgressAreaComposite_QueryCancelledMsg;
 	public static String ProgressAreaComposite_QueryCancelledStatus;
 	public static String Query_DefaultQueryName;
@@ -578,7 +567,6 @@ public class Messages extends NLS {
 	public static String SummaryQueryContentProvider_LoadListItemJob;
 	public static String SummaryQueryContentProvider_PatrolGroupByLabel;
 	public static String SummaryQueryContentProvider_PatrolValuesLabel;
-	public static String SummaryQueryContentProvider_ValueCategoriesAttributesLabel;
 	public static String SummaryQueryContentProvider_ValueOpsLabel;
 	public static String SummaryQueryDefinitionComposite_Error_EmptyQuery;
 	public static String SummaryQueryDefinitionComposite_NoValueError;
