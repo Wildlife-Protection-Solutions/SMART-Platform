@@ -180,7 +180,6 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 			public void focusGained(FocusEvent e) {
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
-					//TODO: Test on MAC
 					public void run() {
 						txtText.selectAll();
 					}
