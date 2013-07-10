@@ -73,7 +73,6 @@ public class Messages extends NLS {
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle;
 	public static String DeletePatrolHandler_DeleteErrorMessage;
-	public static String DeletePatrolHandler_DeletePatrol_DialogMessage;
 	public static String DeletePatrolHandler_DeletePatrol_DialogTitle;
 	public static String DeletePatrolHandler_DeletePatrol_ErrorMessage;
 	public static String DeletePatrolHandler_DeleteSuccessMessage;
@@ -395,7 +394,6 @@ public class Messages extends NLS {
 	public static String PatrolLegLeaderChangeDialog_DateChange_Label;
 	public static String PatrolLegLeaderChangeDialog_DialogMessage;
 	public static String PatrolLegLeaderChangeDialog_DialogTitle;
-	public static String PatrolLegLeaderChangeDialog_Error_InvalidDate;
 	public static String PatrolLegLeaderChangeDialog_Error_StartDateAfterStart;
 	public static String PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd;
 	public static String PatrolLegLeaderChangeDialog_LegIdPostfix;
@@ -552,7 +550,6 @@ public class Messages extends NLS {
 	public static String PatrolTransportChangeDialog_DateLabel;
 	public static String PatrolTransportChangeDialog_DialogMessage;
 	public static String PatrolTransportChangeDialog_DialogTitle;
-	public static String PatrolTransportChangeDialog_Error_InvalidDate;
 	public static String PatrolTransportChangeDialog_Error_StartDateAfter;
 	public static String PatrolTransportChangeDialog_Error_StartDateBefore;
 	public static String PatrolTransportChangeDialog_NewTransportTypeError;

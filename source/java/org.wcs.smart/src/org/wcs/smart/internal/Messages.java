@@ -26,7 +26,6 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog2_EditAttribute_DialogTitle;
 	public static String AddAttributeDialog2_New_DialogMessage;
 	public static String Agency_AgencyName;
-	public static String AgencyCsvImporter_Error_DatabaseSaveFailed;
 	public static String AgencyCsvImporter_Error_IncorrectFieldsNumber;
 	public static String AgencyCsvImporter_LanguageDialog_Message;
 	public static String AgencyCsvImporter_LanguageDialog_Title;
@@ -274,7 +273,6 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Error_NewPassNotSame;
 	public static String ChangeUserPasswordDialog_Error_PassNotSame;
 	public static String ChangeUserPasswordDialog_Error_UserExists;
-	public static String ChangeUserPasswordDialog_Error_UserNameLength;
 	public static String ChangeUserPasswordDialog_Modify_Button;
 	public static String ChangeUserPasswordDialog_NewPassword_Label;
 	public static String ChangeUserPasswordDialog_NewPassword2_Label;
@@ -497,7 +495,6 @@ public class Messages extends NLS {
 	public static String Employee_ShortLabel_0Given_1Family;
 	public static String Employee_SmartUser_Label;
 	public static String Employee_SmartUserLevel_Label;
-	public static String EmployeeComposite_Error_InvalidPasswordLength;
 	public static String EmployeeComposite_AutoAssignId_Label;
 	public static String EmployeeComposite_Error_EmployeeId;
 	public static String EmployeeComposite_Error_InvalidBirthDate;
@@ -732,7 +729,6 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_ChangeKey_ConfirmDialog_Title;
 	public static String NameKeyComposite_ChangeKey_Dialog_Message;
 	public static String NameKeyComposite_ChangeKey_Dialog_Title;
-	public static String NameKeyComposite_Error_InvalidKey;
 	public static String NameKeyComposite_Error_InvalidName;
 	public static String NameKeyComposite_Error_KeyNotEmpty;
 	public static String NameKeyComposite_Error_NameNotBlank;

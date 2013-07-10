@@ -7,8 +7,6 @@ public class Messages extends NLS {
 	public static String SmartConnection_Error_DatasetNotSupported;
 	public static String SmartDatasetMetadata_SmartDataSourceName;
 	public static String SmartDriver_Underfined_MappingType;
-	public static String SmartParameterMetaData_EndDate_ParameterName;
-	public static String SmartParameterMetaData_StartDate_ParameterName;
 	public static String SmartQuery_Error_CouldNoLoadMetadata;
 	public static String SmartQuery_Error_CouldNoLoadQuery;
 	public static String SmartQuery_LoadQuery_JobName;
