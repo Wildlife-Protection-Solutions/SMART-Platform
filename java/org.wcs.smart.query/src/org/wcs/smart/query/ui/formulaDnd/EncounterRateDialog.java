@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -91,10 +92,17 @@ public class EncounterRateDialog extends TitleAreaDialog{
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
+		parent = (Composite)super.createDialogArea(parent);
+		
 		main = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout(1, false);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginHeight = gl.marginWidth = 20;
 		main.setLayout(gl);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		Label lbl2 = new Label(main, SWT.WRAP);
+		lbl2.setText(Messages.EncounterRateDialog_RateValueLabel + "*"); //$NON-NLS-1$
 		
 		viewer = new ComboViewer(main, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -111,10 +119,19 @@ public class EncounterRateDialog extends TitleAreaDialog{
 				return super.getText(element);
 			}
 		});
+				
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		viewer.setInput(encounterRateOptions);
-		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		viewer.getCombo().select(0);
+		
+		new Label(main, SWT.NONE);
+		
+		Label lbl = new Label(main, SWT.WRAP);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false,2,1);
+		gd.widthHint = main.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		lbl.setText("*" + Messages.EncounterRateDialog_RateValueInfo); //$NON-NLS-1$
+		lbl.setLayoutData(gd);
 		
 		setMessage(Messages.EncounterRateDialog_DialogMessage);
 		setTitle(ENCOUNTER_RATE);

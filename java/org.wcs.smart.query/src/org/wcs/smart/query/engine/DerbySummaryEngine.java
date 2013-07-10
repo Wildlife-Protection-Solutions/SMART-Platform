@@ -333,7 +333,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			ConservationAreaFilter caFilter,
 			String dataTable) throws SQLException {
 		
-		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(it.asString() + "_" + dataTable); //$NON-NLS-1$
+		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
+		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(cacheKey); 
 		if (results != null){
 			return results;
 		}
@@ -347,7 +348,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
 		}
 		if (results != null){
-			cachedValueToResults.put(it.asString() + "_" + dataTable, results); //$NON-NLS-1$
+			cachedValueToResults.put(cacheKey, results); 
 		}
 		
 		return results;
@@ -809,34 +810,23 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
 		
 		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
-		HashMap<SummaryResultKey, Double> values = new HashMap<SummaryResultKey, Double>();
-		
-		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter, rateTable);
-		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
-		
-		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values2.entrySet().iterator(); iterator.hasNext();) {
-			Entry<SummaryResultKey, Double> type = iterator.next();
-
-			SummaryResultKey newKey = new SummaryResultKey(type.getKey());
-			newKey.setValueKey(item.asString());
-			
-			values.put(newKey, type.getValue());
+		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
+		if (values2.values().size() != 1){
+			throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterComputation);
 		}
-		
+		Double denominator = values2.values().iterator().next();
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+
 		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
-			Entry<SummaryResultKey, Double> type = iterator.next();
-			
+			Entry<SummaryResultKey, Double> type = iterator.next();			
 			SummaryResultKey key = new SummaryResultKey(type.getKey());
 			key.setValueKey(item.asString());
 			
 			Double value = type.getValue();
-			Double v2 = values.get(key);
-			if (v2 == null ){
-				value = null;
-			}else if (v2 == 0){
+			if (denominator == 0){
 				value = Double.NaN;
-			}else if (value != null){
-				value = (value / v2);
+			}else{
+				value = value / denominator;
 			}
 			results.put(key, value);
 		}

@@ -52,7 +52,7 @@ import org.wcs.smart.query.ui.definition.QueryDefView;
  */
 public class FilterDropTargetPanel implements IDropPanel {
 
-	public static final String PANEL_TITLE = Messages.FilterDropTargetPanel_QueryFilterPanelTitle;
+	public static final String PANEL_TITLE = Messages.FilterDropTargetPanel_QueryFilterPanelTitle1;
 	
 	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 	

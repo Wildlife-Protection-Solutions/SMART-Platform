@@ -109,6 +109,7 @@ public class Messages extends NLS {
 	public static String DerbyQueryEngine2_Progress_ProcessingAttributes;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
 	public static String DerbyQueryResult_CleanUpJob_Title;
+	public static String DerbySummaryEngine_InvalidRateFilterComputation;
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
@@ -123,6 +124,8 @@ public class Messages extends NLS {
 	public static String EncounterRateDialog_EncounterRateLabel;
 	public static String EncounterRateDialog_Error_NoSelection;
 	public static String EncounterRateDialog_ErrorDialogTitle;
+	public static String EncounterRateDialog_RateValueInfo;
+	public static String EncounterRateDialog_RateValueLabel;
 	public static String ExportQueryLocationPage_AllFilesFilterName;
 	public static String ExportQueryLocationPage_BrowseButton;
 	public static String ExportQueryLocationPage_DialogMessage;
@@ -141,7 +144,7 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_OverwriteDialogMessage;
 	public static String ExportQueryWizard_OverwriteDialogTitle;
 	public static String ExportQueryWizard_WindowTitle;
-	public static String FilterDropTargetPanel_QueryFilterPanelTitle;
+	public static String FilterDropTargetPanel_QueryFilterPanelTitle1;
 	public static String FilterValidator_AttributeListItemNotFound;
 	public static String FilterValidator_AttributeNotFound;
 	public static String FilterValidator_AttributeTreeNodeNotFound;
