@@ -325,9 +325,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							String error = MessageFormat.format(Messages.InitCaDataModelDialog_Error_Cloning, new Object[]{ ca.getNameLabel()}); 
 							throw new InvocationTargetException(new IllegalStateException(error),error);
 						}
-						//TODO: this needs to be tested when we support multiple languages
+						
 						boolean hasLang = false;
-
 						monitor.subTask(Messages.InitCaDataModelDialog_Progress_CloneLanguages);
 						for (Language lang: caToCloneFrom.getLanguages()){
 							if (lang.getCode().equals(ca.getDefaultLanguage().getCode())){

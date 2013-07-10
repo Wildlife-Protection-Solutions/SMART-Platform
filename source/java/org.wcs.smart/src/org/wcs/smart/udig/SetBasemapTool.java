@@ -89,8 +89,6 @@ public class SetBasemapTool extends AbstractActionTool{
 	 */
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	
