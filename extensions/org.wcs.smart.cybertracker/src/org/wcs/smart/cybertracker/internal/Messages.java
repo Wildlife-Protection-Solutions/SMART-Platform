@@ -26,6 +26,7 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_AddPatrol_TaskName;
 	public static String CTPatrolTableContainer_Button_AsLeg;
 	public static String CTPatrolTableContainer_Button_AsPatrol;
+	public static String CTPatrolTableContainer_CyberTrackerFiles;
 	public static String CTPatrolTableContainer_Error_ImportAborted;
 	public static String CTPatrolTableContainer_Error_Title;
 	public static String CTPatrolTableContainer_ImportCompleted;
@@ -38,6 +39,7 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_Patrol_Error;
 	public static String CTPatrolTableContainer_Patrol_Success_Message;
 	public static String CTPatrolTableContainer_Patrol_Success_Title;
+	public static String CTPatrolTableContainer_SupportedFiles;
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
