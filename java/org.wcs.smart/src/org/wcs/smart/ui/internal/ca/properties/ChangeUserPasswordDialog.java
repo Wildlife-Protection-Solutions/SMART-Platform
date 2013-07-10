@@ -92,6 +92,13 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		}
 		return session;
 	}
+	
+	@Override
+	public boolean close(){
+		changesMade = false;
+		return super.close();  
+	}
+	
 	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
@@ -258,6 +265,10 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 			cdPassword1.setDescriptionText(MessageFormat.format(Messages.ChangeUserPasswordDialog_PasswordValidationError, new Object[]{Employee.MIN_SMART_PASSWORD_LENGTH, Employee.MAX_SMART_PASSWORD_LENGTH}));
 			cdPassword1.show();
 			error = true;
+		}else if (txtPassword1.getText().equals(txtCurrentPassword.getText())){
+			cdPassword1.setDescriptionText(Messages.ChangeUserPasswordDialog_PasswordDifferentError);
+			error = true;
+			cdPassword1.show();
 		}else{
 			cdPassword1.hide();
 		}
