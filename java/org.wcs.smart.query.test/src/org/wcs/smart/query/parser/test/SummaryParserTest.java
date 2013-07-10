@@ -39,6 +39,36 @@ import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 public class SummaryParserTest {
 
 	@Test
+	public void testFilters() throws Exception{
+		String valuePart = "patrol:sum:numdays"; 
+		String rowGroupByPart = "";
+		String colGroupByPart = "";
+		String valueFilter = "";
+		String rateFilter = "";
+		String query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + valueFilter + "|" + rateFilter;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
+		
+		
+		valuePart = "patrol:sum:numdays"; 
+		rowGroupByPart = "patrol:id:\"0001\":\"0002\"";
+		colGroupByPart = "";//"patrol:station:\"\",date:month";
+		valueFilter = "category:threats.biologicalresourceuse.species.pigs";
+		rateFilter = "attribute:n:size > 1.2";
+		query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + valueFilter + "|" + rateFilter;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertEquals(test.getValueFilter().asString(), valueFilter);
+		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
+	}
+	
+	@Test
 	public void testPatrolTypeGroupBy() throws Exception{
 		String valuePart = "patrol:sum:numdays"; 
 		String rowGroupByPart = "patrol:patroltype:\"AIR\":\"GROUND\"";
@@ -49,7 +79,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		
 		valuePart = "patrol:sum:numdays"; 
@@ -61,7 +92,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	@Test
@@ -71,12 +103,13 @@ public class SummaryParserTest {
 		String rowGroupByPart = "patrol:station:abcdef:efghi,date:month";
 		String colGroupByPart = "";//"patrol:station:\"\",date:month";
 		String queryPart = "patrol:station equals \"station1\"";
-		String query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + queryPart;
+		String query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + queryPart + "|";
 		SumQueryDefinition test = parseQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertEquals(test.getQueryFilter().asString(), queryPart);
+		Assert.assertEquals(test.getValueFilter().asString(), queryPart);
+		Assert.assertNull(test.getRateFilter());
 		
 		
 		valuePart = "patrol:sum:numdays,patrol:sum:distance"; 
@@ -88,7 +121,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -104,8 +138,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
-		
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -121,7 +155,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "patrol:sum:numdays,patrol:min:numnights"; 
 		rowGroupByPart = "";
@@ -132,7 +167,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "patrol:max:distance,patrol:avg:numhours,category:sum:obs:pigs.fish.blue"; 
 		rowGroupByPart = "";
@@ -143,7 +179,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "category:max:pigs.fish.blue"; 
 		rowGroupByPart = "";
@@ -180,7 +217,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	@Test
@@ -195,7 +233,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "";
@@ -206,7 +245,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = ""; 
 		colGroupByPart = "patrol:station:,patrol:mandate:,patrol:other:";
@@ -230,7 +270,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = ""; 
 		rowGroupByPart = "patrol:id:\"adfsf3234nasdf2345\":\"2342146af\",patrol:team:23423fadv";
@@ -241,7 +282,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = ""; 
 		rowGroupByPart = "";
@@ -252,7 +294,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = ""; 
 		rowGroupByPart = "date:month,date:year"; //,date:week
@@ -263,7 +306,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = ""; 
 		rowGroupByPart = "date:month";
@@ -274,7 +318,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -307,7 +352,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "attribute:n:max:age,attribute:n:avg:size";
 		rowGroupByPart = "";
@@ -318,7 +364,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "category:threats.pigs.normal:attribute:n:max:age";
 		rowGroupByPart = "";
@@ -329,7 +376,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -345,7 +393,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "category:sum:obs:threats.";
 		rowGroupByPart = "";
@@ -356,7 +405,20 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
+		
+		valuePart = "category:sum:obs:";
+		rowGroupByPart = "";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	@Test
@@ -371,8 +433,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
-		
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	@Test
@@ -387,7 +449,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:0:threat.pigs.funny.1:threat.pigs.funny.2";
@@ -398,7 +461,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:2:threat.pigs.funny.1,category:3:threat.old.fun:threat.old.fun.a.:threat.old.fun.b:threat.old.fun.c";
@@ -409,7 +473,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -425,7 +490,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "attribute:l:type:a:b";
@@ -436,7 +502,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "attribute:l:type:a,attribute:l:type:a:b:c,attribute:l:type:";
@@ -447,7 +514,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:threat.pigs.:attribute:l:type:";
@@ -458,7 +526,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:1:attribute:l:type:a:b";
@@ -469,7 +538,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:threat.pigs.:attribute:l:type:a,category:threat.pigs.:attribute:l:type:a:b:c,attribute:l:type:";
@@ -480,7 +550,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -497,7 +568,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "attribute:t:type:1:a:b";
@@ -508,7 +580,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "attribute:t:type:4:a,attribute:t:type:1:a:b:c,attribute:l:type:";
@@ -519,7 +592,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:threat.pigs.:attribute:t:type:1:";
@@ -530,7 +604,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:threat.pgis.:attribute:t:type:1:a:b";
@@ -541,7 +616,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "category:threat.pigs.:attribute:t:type:1:a,category:threat.pigs.:attribute:t:type:1:a:b:c,attribute:l:type:";
@@ -552,7 +628,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	@Test
@@ -567,7 +644,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "area:error:ca1:ca2:";
@@ -591,7 +669,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "area:ADMIN:admin1";
@@ -602,7 +681,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "area:PATRL:p1:p2:p3:p4:p5:p6";
@@ -613,7 +693,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "";
 		rowGroupByPart = "area:MNGT:m1:m2";
@@ -624,7 +705,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 	}
 	
 	
@@ -638,6 +720,7 @@ public class SummaryParserTest {
 		GridQueryDefinition test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertNull(test.getValueFilter());
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "attribute:n:sum:age";
 		queryFilter = "patrol:station equals \"station1\"";
@@ -646,8 +729,27 @@ public class SummaryParserTest {
 		test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getValueFilter().asString(), queryFilter);
+		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "attribute:n:sum:age";
+		queryFilter = "patrol:station equals \"station1\"";
+		rateFilter =  "patrol:station equals \"station4\"";
+		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
+		test = parseGridQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getValueFilter().asString(), queryFilter);
+		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
+		
+		valuePart = "category:sum:wp:";
+		queryFilter = "patrol:station equals \"station1\"";
+		rateFilter =  "patrol:station equals \"station4\"";
+		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
+		test = parseGridQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getValueFilter().asString(), queryFilter);
+		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
+		
+		valuePart = "category:sum:obs:";
 		queryFilter = "patrol:station equals \"station1\"";
 		rateFilter =  "patrol:station equals \"station4\"";
 		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
