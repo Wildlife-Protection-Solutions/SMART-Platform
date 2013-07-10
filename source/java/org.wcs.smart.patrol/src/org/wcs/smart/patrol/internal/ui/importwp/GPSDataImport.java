@@ -538,8 +538,7 @@ public class GPSDataImport {
 		try{
 			id = Integer.parseInt(wptType.getName());
 		}catch (Exception ex){}
-			
-		//TODO: projection
+
 		Waypoint waypoint = new Waypoint();
 		if (wpdt != null){
 			waypoint.setTime( new Time(wpdt.getTime()) );

@@ -238,7 +238,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			}
 		}
 		
-		if (importedData  == null || (importedData instanceof Collection &&  ((Collection)importedData).size() == 0 )){
+		if (importedData  == null || (importedData instanceof Collection &&  ((Collection<?>)importedData).size() == 0 )){
 			MessageDialog.openWarning(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new Object[]{this.type.guiName, this.type }));
 			return false;
 		}
@@ -283,7 +283,6 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 						if (type == GPSDataImport.ImportType.WAYPOINT){
 							allWaypoints = GPSDataImport.getWaypointsGpx(filenames, monitor);
 						}else if (type == GPSDataImport.ImportType.TRACK){
-							//TODO: TRACK FIX THIS
 							allWaypoints = GPSDataImport.getTrackPoints(filenames, monitor);
 						}
 					}

@@ -283,7 +283,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_Other+ t.getLocalizedMessage(), t);
 								}
 							} catch (Exception ex) {
-								//TODO: Should we fail the program here??
 								SmartPatrolPlugIn.log("Failure",ex); //$NON-NLS-1$
 							}
 
