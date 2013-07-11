@@ -101,7 +101,6 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		public void queryRun(Query query) {
 			if (query != null && query.equals(GriddedEditor.this.query)){
 				refreshQuery();
-				GriddedEditor.this.firstRun = false;
 			}
 		}
 		
@@ -153,6 +152,38 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			
 			return Status.OK_STATUS;
 		}};
+		
+		
+		/* run query job */
+		private Job runQueryJob = new Job(Messages.GriddedEditor_RunQueryJob) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				setName(Messages.GriddedEditor_RunQueryJob + query.getName());
+				IProgressMonitor mymonitor = resultPage.createProgressMonitor();
+				boolean isFirstRun = firstRun;
+				GriddedEditor.this.firstRun = false;
+				
+				try {
+					Collection<GridResultItem> results = query.getQueryResults(mymonitor);
+					if (monitor.isCanceled() | mymonitor.isCanceled()){
+						return Status.CANCEL_STATUS;
+					}
+					resultPage.updateAndShowTable(results, mymonitor);
+				} catch (Exception ex) {
+					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+					if (ex.getCause() != null){
+						message += ex.getCause().getLocalizedMessage();
+					}else{
+						message += ex.getLocalizedMessage();
+					}
+					QueryPlugIn.displayLog(message, ex);
+					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);
+				}
+				mapPage.refresh(isFirstRun);
+				return Status.OK_STATUS;
+			}
+		};
 		
 	/**
 	 * Creates a new editor
@@ -279,6 +310,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * Re-run the query and refresh the results.
 	 */
 	public void refreshQuery(){
+		runQueryJob.cancel();
 		//update date filter
 		getQueryInternal().setDateFilter(resultPage.getDateFilter());
 		
@@ -291,30 +323,6 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		resultPage.showProgressArea();
 		
 		//run query
-		final IProgressMonitor mymonitor = resultPage.createProgressMonitor();
-		final boolean isFirstRun = this.firstRun;
-		Job runQueryJob = new Job(Messages.GriddedEditor_RunQueryJob + this.query.getName()) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					Collection<GridResultItem> results = query.getQueryResults(mymonitor);
-					
-					resultPage.updateAndShowTable(results, mymonitor);
-				} catch (Exception ex) {
-					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
-					if (ex.getCause() != null){
-						message += ex.getCause().getLocalizedMessage();
-					}else{
-						message += ex.getLocalizedMessage();
-					}
-					QueryPlugIn.displayLog(message, ex);
-					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);
-				}
-				mapPage.refresh(isFirstRun);
-				return Status.OK_STATUS;
-			}
-		};
 		runQueryJob.schedule();
 	}
 

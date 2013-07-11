@@ -61,6 +61,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.model.SummaryQueryResult;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryAreaModifiedListener;
 import org.wcs.smart.query.ui.QueryDataModelModifiedListener;
@@ -148,6 +149,24 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			return Status.OK_STATUS;
 		}
 	};
+	
+	Job runQueryJob = new Job(Messages.SummaryEditor_RunQueryJobName) {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			setName(Messages.SummaryEditor_RunQueryJobName + getQuery().getName());
+			try {
+				IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
+				SummaryQueryResult results = query.getQueryResults(mymonitor);
+				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					return Status.CANCEL_STATUS;
+				}
+				resultsArea.updateAndShowTable(results);
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorRunningQuery, ex);
+			}
+			return Status.OK_STATUS;
+		}
+	};
 
 	/**
 	 * Creates a new editor
@@ -179,6 +198,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		if (dmListener != null){
 			DataModelManager.getInstance().removeChangeListener(dmListener);
 		}
+		runQueryJob.cancel();
 	}
 
 	@Override
@@ -250,6 +270,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	 * Re-run the query and refresh the results.
 	 */
 	public void refreshQuery() {
+		runQueryJob.cancel();
 		// update date filter
 		getQueryInternal().setDateFilter(dateFilterComposite.getDateFilter());
 
@@ -259,33 +280,8 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 							Messages.SummaryEditor_QueryError);
 			return;
 		}
-
 		// show progress area
 		resultsArea.showProgressArea();
-
-		// run query
-		final IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
-
-		Job runQueryJob = new Job(Messages.SummaryEditor_RunQueryJobName + getQuery().getName()) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					// List<QueryResultItem> results =
-					// query.getQueryResults(mymonitor);
-					// resultsArea.updateAndShowTable(results);
-
-					resultsArea.updateAndShowTable(query
-							.getQueryResults(mymonitor));
-
-				} catch (Exception ex) {
-					QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorRunningQuery, ex);
-					// resultsArea.updateAndShowTable(new
-					// ArrayList<QueryResultItem>());
-				}
-				return Status.OK_STATUS;
-			}
-		};
 		runQueryJob.schedule();
 	}
 

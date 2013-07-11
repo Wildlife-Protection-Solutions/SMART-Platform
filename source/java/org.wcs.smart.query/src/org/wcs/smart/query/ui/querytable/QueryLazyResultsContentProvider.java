@@ -84,6 +84,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput == null || newInput instanceof IPagedQueryResultSet) {
 			if (input != null && !input.equals(newInput)) {
+				loadingIndexes.clear();
 				input.destroy();
 			}
 			input = (IPagedQueryResultSet) newInput;

@@ -84,6 +84,27 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	private IAreaModifiedListener areaListener = null;
 	private IDataModelListener dmListener = null;
 	
+	
+	Job runQueryJob = new Job(Messages.PatrolQueryResultsEditor_RunQueryJobName) {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			setName(Messages.PatrolQueryResultsEditor_RunQueryJobName + query.getName());
+			IProgressMonitor mymonitor = page1.createProgressMonitor();
+			try {
+				Collection<QueryResultItem> results = query.getQueryResults(mymonitor);
+				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					return Status.CANCEL_STATUS;
+				}
+				page1.updateAndShowTable(results, mymonitor);
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_ErrorRunningQuery, ex);
+				page1.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
+			}
+			page2.refresh();
+			return Status.OK_STATUS;
+		}
+	};
+	
 	private IQueryListener qListener = new QueryListenerAdapter() {
 		
 		@Override
@@ -180,6 +201,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
 		ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
 		DataModelManager.getInstance().removeChangeListener(dmListener);
+		runQueryJob.cancel();
 	}
 	
 	/**
@@ -288,40 +310,20 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	 * Re-run the query and refresh the results.
 	 */
 	public void refreshQuery(){
+		runQueryJob.cancel();
+		
 		//update date filter
 		getQueryInternal().setDateFilter(page1.getDateFilter());
-		
 		if (!getQuery().isValid()){
 			MessageDialog.openError(getSite().getShell(), Messages.PatrolQueryResultsEditor_Error_DialogTitle, Messages.PatrolQueryResultsEditor_InvalidQueryError);
 			return;
 		}
-		
 		//clear current results
 		if (query.getLastResults() != null){
 			query.getLastResults().clear();
 		}
 		page1.getQueryResultsTable().setInput(null);
-		
-		//show progress area
 		page1.showProgressArea();
-		
-		//run query
-		final IProgressMonitor mymonitor = page1.createProgressMonitor();
-		Job runQueryJob = new Job(Messages.PatrolQueryResultsEditor_RunQueryJobName + this.query.getName()) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					Collection<QueryResultItem> results = query.getQueryResults(mymonitor);
-					page1.updateAndShowTable(results, mymonitor);
-				} catch (Exception ex) {
-					QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_ErrorRunningQuery, ex);
-					page1.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
-				}
-				page2.refresh();
-				return Status.OK_STATUS;
-			}
-		};
 		runQueryJob.schedule();
 	}
 
