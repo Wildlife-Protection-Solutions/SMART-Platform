@@ -53,7 +53,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_CTCode_201;
 	public static String CyberTrackerExportDialog_CtxFile;
 	public static String CyberTrackerExportDialog_ErrDialog_UploadFailed;
+	public static String CyberTrackerExportDialog_Error_CopyFailed;
 	public static String CyberTrackerExportDialog_Error_CT_NotFound;
+	public static String CyberTrackerExportDialog_Error_UploadFailed;
 	public static String CyberTrackerExportDialog_ExportToDevice;
 	public static String CyberTrackerExportDialog_ExportToFile;
 	public static String CyberTrackerExportDialog_FailCreateTempFolder;
@@ -62,6 +64,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Task_Copy;
 	public static String CyberTrackerExportDialog_Task_Upload;
 	public static String CyberTrackerExportDialog_Title;
+	public static String CyberTrackerExporter_Error_GenerateCtxFail;
+	public static String CyberTrackerExporter_Error_WriteXMmlFail;
 	public static String CyberTrackerExporter_NoAttributesNode_Message;
 	public static String CyberTrackerExporter_NoAttributesNode_Title;
 	public static String CyberTrackerExporter_Progress_Build_Content;
@@ -139,6 +143,8 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Station;
 	public static String PatrolScreens_Team;
 	public static String PatrolScreens_Yes;
+	public static String PatrolScreensUtil_Error_TransportNotSet;
+	public static String PatrolScreensUtil_Error_TypesNotSet;
 	public static String PatrolSelectorDialog_Message;
 	public static String PatrolSelectorDialog_PatrolID;
 	public static String PatrolSelectorDialog_Title;

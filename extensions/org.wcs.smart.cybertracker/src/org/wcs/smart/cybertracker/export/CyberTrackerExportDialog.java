@@ -241,25 +241,37 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 						e.printStackTrace();
 						return;
 					}
-					
+	
 					try {
 						File generated = exporter.export(tempDir, monitor);
+						if (generated == null) {
+							return; //error is supposed to be tracked inside export call
+						}
 						if (toDevice) {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
-							final int code = exporter.uploadPda(generated);
-							if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
-								String codeMeaning = getCyberTrackerCodeMeaning(code);
-								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code, codeMeaning));
+							try {
+								final int code = exporter.uploadPda(generated);
+								if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
+									String codeMeaning = getCyberTrackerCodeMeaning(code);
+									CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code, codeMeaning));
+									return;
+								}
+							} catch (Exception e) {
+								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_UploadFailed);
+								e.printStackTrace();
 								return;
 							}
+
 						} else {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
-							FileUtils.copyFile(generated, selectedFile);
+							try {
+								FileUtils.copyFile(generated, selectedFile);
+							} catch (IOException e) {
+								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_CopyFailed);
+								e.printStackTrace();
+								return;
+							}
 						}
-					} catch (Exception e) {
-						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportHandler_ErrDialog_Message);
-						e.printStackTrace();
-						return;
 					} finally {
 						PdaUtil.deleteTempDirectory(tempDir);
 						monitor.done();
