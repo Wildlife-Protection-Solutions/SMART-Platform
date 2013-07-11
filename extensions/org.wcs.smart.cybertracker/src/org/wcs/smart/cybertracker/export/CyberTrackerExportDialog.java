@@ -28,6 +28,9 @@ import java.text.MessageFormat;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -64,7 +67,8 @@ import org.wcs.smart.util.SmartUtils;
 public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 	private static final String OUTPUT_FILE = "outputFile"; //$NON-NLS-1$
-
+	private static final String LAUNCH_CT   = "launchCT"; //$NON-NLS-1$
+	
 	private static final String DEFAULT_CTX_FILENAME = "smart.ctx"; //$NON-NLS-1$
 	
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.cybertracker.export"); //$NON-NLS-1$
@@ -76,6 +80,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 	private Text txtFile;
 	private Button btnBrowse;	
+
+	private Button btnLaunchCT;
 	
 	private File selectedFile;
 
@@ -112,8 +118,14 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				exportOptionChanged();
 			}
 		});
+
+		Composite toFileCmp = new Composite(main, SWT.NONE);
+		GridLayout fileCmpLayout = new GridLayout(1, false);
+		fileCmpLayout.marginLeft = 5;
+		toFileCmp.setLayout(fileCmpLayout);
+		toFileCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite fileCmp = new Composite(main, SWT.NONE);
+		Composite fileCmp = new Composite(toFileCmp, SWT.NONE);
 		fileCmp.setLayout(new GridLayout(3, false));
 		fileCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -156,6 +168,11 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			}
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		btnLaunchCT = new Button(toFileCmp, SWT.CHECK);
+		btnLaunchCT.setText(Messages.CyberTrackerExportDialog_LaunchInCyberTracker);
+		btnLaunchCT.setSelection(getDefaultLaunchCT());
+		
 		exportOptionChanged();
 		
 		setTitle(Messages.CyberTrackerExportDialog_Title);
@@ -168,6 +185,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	private void exportOptionChanged() {
 		txtFile.setEnabled(btnToFile.getSelection());
 		btnBrowse.setEnabled(btnToFile.getSelection());
+		btnLaunchCT.setEnabled(btnToFile.getSelection());
 	}
 	
 	/**
@@ -194,6 +212,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 					return;
 				}
 				dialogSettings.put(OUTPUT_FILE, selectedFile.getAbsolutePath());
+				dialogSettings.put(LAUNCH_CT, Boolean.valueOf(btnLaunchCT.getSelection()));
 			}
 			handleExport(btnToDevice.getSelection());
 			super.setReturnCode(IDialogConstants.OK_ID);
@@ -226,6 +245,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
 			return;
 		}
+		final boolean launch = !toDevice && btnLaunchCT.getSelection();
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -277,6 +297,10 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 						monitor.done();
 					}
 					CyberTrackerPlugIn.displayInfo(Messages.CyberTrackerExportHandler_InfoDialog_Title, Messages.CyberTrackerExportHandler_InfoDialog_Message);
+					if (launch) {
+						Job job = new LaunchCTJob(selectedFile);
+						job.schedule();
+					}
 				}
 
 			});
@@ -320,5 +344,34 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		
 		return DEFAULT_CTX_FILENAME;
 	}
+
+	protected boolean getDefaultLaunchCT() {
+		String name = dialogSettings.get(LAUNCH_CT);
+		return "true".equals(name); //$NON-NLS-1$
+	}
 	
+	private class LaunchCTJob extends Job {
+
+		private File file;
+		
+		public LaunchCTJob(File file) {
+			super(Messages.CyberTrackerExportDialog_Job_LaunchCT);
+			this.file = file;
+		}
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try {
+				String ctPath = PdaUtil.getCTAppPath();
+				String[] uploadCommands = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath()};
+				Process proc = Runtime.getRuntime().exec(uploadCommands);
+				proc.waitFor();
+			} catch (Exception e) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_LaunchCT);
+				e.printStackTrace();
+			}
+			return Status.OK_STATUS;
+		}
+	}
+
 }
