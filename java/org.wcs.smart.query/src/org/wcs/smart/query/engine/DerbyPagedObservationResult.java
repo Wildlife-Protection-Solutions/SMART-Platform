@@ -188,7 +188,13 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			}
 			String key = sortColumn.getKey();
 			key = key.split(":")[1]; //$NON-NLS-1$
-			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
+			session.beginTransaction();
+			Attribute attribute = null;
+			try{
+				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
+			}catch (Exception ex){
+				session.getTransaction().commit();
+			}
 			switch (attribute.getType()) {
 			case BOOLEAN:
 			case NUMERIC:

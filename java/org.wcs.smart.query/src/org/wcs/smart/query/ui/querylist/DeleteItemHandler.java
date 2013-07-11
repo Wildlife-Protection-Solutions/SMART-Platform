@@ -22,7 +22,9 @@
 package org.wcs.smart.query.ui.querylist;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -63,8 +65,10 @@ public class DeleteItemHandler extends AbstractHandler {
 			return null;
 		}
 		
-		IStructuredSelection selection = (IStructuredSelection)thisSelection;
-		
+		//iterator in reverse order to try to remove leaf items before parent items
+		@SuppressWarnings("unchecked")
+		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
+		Collections.reverse(selection);
 		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();			
