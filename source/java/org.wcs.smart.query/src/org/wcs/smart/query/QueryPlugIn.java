@@ -357,7 +357,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLog(final String message, Throwable t){
 		log(message, t);
-		Display.getDefault().asyncExec(new Runnable(){
+		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.QueryPlugIn_Error_DialogTitle, message);
