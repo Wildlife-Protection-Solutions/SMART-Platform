@@ -86,6 +86,29 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	private IAreaModifiedListener areaListener = null;
 	private IDataModelListener dmListener = null;
 	
+	/**
+	 * Job to run the query and refresh the results
+	 */
+	private Job runQueryJob = new Job(Messages.QueryResultsEditor_RunQueryJobName) {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			runQueryJob.setName(Messages.QueryResultsEditor_RunQueryJobName + query.getName());
+			final IProgressMonitor mymonitor = page1.createProgressMonitor();
+			try {
+				IObservationPagedQueryResultSet results = (IObservationPagedQueryResultSet) query.getPagedQueryResults(mymonitor);
+				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					return Status.CANCEL_STATUS;
+				}
+				page1.updateAndShowTable(results, mymonitor);
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);
+				page1.updateAndShowTable(null, mymonitor);
+			}
+			page2.refresh();
+			return Status.OK_STATUS;
+		}
+	};
 	
 	private IQueryListener qListener = new QueryListenerAdapter() {
 		@Override
@@ -182,6 +205,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		if (dmListener != null){
 			DataModelManager.getInstance().removeChangeListener(dmListener);
 		}
+		runQueryJob.cancel();
 	}
 	
 	/**
@@ -309,6 +333,9 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	 * Re-run the query and refresh the results.
 	 */
 	public void refreshQuery(){
+		//cancel existing run query job.
+		runQueryJob.cancel();
+		
 		//update date filter
 		((ObservationQuery)getQuery()).setDateFilter(page1.getDateFilter());
 		
@@ -318,30 +345,14 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		}
 		
 		//clear existing results
-		page1.getQueryResultsTable().setInput((IPagedQueryResultSet)null);
-		
+		page1.getQueryResultsTable().setInput((IPagedQueryResultSet)null);	
 		//show progress area
 		page1.showProgressArea();
-		
-		//run query
-		final IProgressMonitor mymonitor = page1.createProgressMonitor();
-		Job runQueryJob = new Job(Messages.QueryResultsEditor_RunQueryJobName + this.query.getName()) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					IObservationPagedQueryResultSet results = (IObservationPagedQueryResultSet) query.getPagedQueryResults(mymonitor);
-					page1.updateAndShowTable(results, mymonitor);
-				} catch (Exception ex) {
-					QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);
-					page1.updateAndShowTable(null, mymonitor);
-				}
-				page2.refresh();
-				return Status.OK_STATUS;
-			}
-		};
+	
 		runQueryJob.schedule();
 	}
+	
+
 
 	@Override
 	public boolean isSaveAsAllowed() {

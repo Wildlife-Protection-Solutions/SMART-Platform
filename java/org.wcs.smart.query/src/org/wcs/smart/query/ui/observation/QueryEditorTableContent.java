@@ -63,7 +63,7 @@ public class QueryEditorTableContent {
 	
 	private QueryLazyResultsTable resultsTable;
 	private Composite runQueryComp;
-	private Composite tableComp;;
+	private Composite tableComp;
 	private Composite stackComposite;
 	private Form frmQueryArea;
 	private QueryResultsEditor editor;
