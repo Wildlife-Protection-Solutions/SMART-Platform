@@ -42,7 +42,8 @@ public class ElementsUtil {
 
 	public static final String BOOL_TRUE = "true"; //$NON-NLS-1$
 	public static final String BOOL_FALSE = "false"; //$NON-NLS-1$
-	public static final String BOOL_UNDEFINED = "null"; //$NON-NLS-1$
+	
+	public static final String NULL_VALUE = "null"; //$NON-NLS-1$
 
 	public static final String ATTRIBUTE_ELEMENT_TAG = "a"; //$NON-NLS-1$
 	public static final String CATEGORY_ELEMENT_TAG = "c"; //$NON-NLS-1$
@@ -119,16 +120,20 @@ public class ElementsUtil {
 		item.setTag1(tag1);
 		elements.getList().getItems().getItem().add(item);
 	}
+
+	public static CyberTrackerId buildAttributeUndefinedBooleanElement(Elements elements) {
+		CyberTrackerId id = new CyberTrackerId();
+		addElementsItem(elements, Messages.Elements_BooleanAttribute_Undefined, id.getItemId(), NULL_VALUE);
+		return id;
+	}
 	
 	public static List<CyberTrackerId> buildAttributeBooleanElements(Elements elements) {
 		List<String> labels = new ArrayList<String>();
 		labels.add(Messages.Elements_BooleanAttribute_Yes);
 		labels.add(Messages.Elements_BooleanAttribute_No);
-		labels.add(Messages.Elements_BooleanAttribute_Undefined);
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add(BOOL_TRUE);
 		tag0Values.add(BOOL_FALSE);
-		tag0Values.add(BOOL_UNDEFINED);
 		return ElementsUtil.addCustomElements(elements, labels, tag0Values);
 	}
 }
