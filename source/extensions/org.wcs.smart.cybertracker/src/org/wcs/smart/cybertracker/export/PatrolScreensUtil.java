@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
@@ -47,6 +49,7 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.SmartUtils;
@@ -116,6 +119,11 @@ public class PatrolScreensUtil {
 		CyberTrackerId id = addStartScreen(startId, result, elements);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+		String errorMsg = validatePatrolTypes(patrolTypes);
+		if (errorMsg != null) {
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg);
+			return null;
+		}
 		id = addTypeTransportNodes(id, result, elements, patrolTypes);
 		//patrol armed
 		List<String> labelValues = new ArrayList<String>();
@@ -236,6 +244,40 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 		
 	}
+
+	private String validatePatrolTypes(List<PatrolType> pTypes) {
+		if (pTypes == null || pTypes.isEmpty())
+			return Messages.PatrolScreensUtil_Error_TypesNotSet;
+		for (PatrolType patrolType : pTypes) {
+			boolean invalid = true;
+			if (patrolType.getTransportTypes() != null) {
+				for (PatrolTransportType transportType : patrolType.getTransportTypes()) {
+					if (transportType.getIsActive()) {
+						//there is an active transport for this patrol type -> it is valid
+						invalid = false;
+						break;
+					}
+				}
+			}
+			
+			if (invalid) {
+				return MessageFormat.format(Messages.PatrolScreensUtil_Error_TransportNotSet, patrolType.getType().getGuiName());
+			}
+		}
+		return null;
+	}
+
+	private List<PatrolTransportType> getActiveTransportTypes(PatrolType patrolType) {
+		List<PatrolTransportType> list = new ArrayList<PatrolTransportType>();
+		if (patrolType.getTransportTypes() == null)
+			return list;
+		for (PatrolTransportType transportType : patrolType.getTransportTypes()) {
+			if (transportType.getIsActive()) {
+				list.add(transportType);
+			}
+		}
+		return list;
+	}
 	
 	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes) {
 		List<String> types = new ArrayList<String>();
@@ -255,7 +297,7 @@ public class PatrolScreensUtil {
 		String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
 		container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
 		for (int i = 0; i < pTypes.size(); i++) {
-			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, pTypes.get(i).getTransportTypes());
+			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)));
 			node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
 			container.screenNodes.add(node);
 			Control control2 = ScreensObjectFactory.getNavigationControl(node);

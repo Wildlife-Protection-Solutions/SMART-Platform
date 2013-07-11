@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
@@ -90,7 +91,7 @@ public class CyberTrackerExporter {
 		return code;
 	}
 
-	public File export(File destFolder, IProgressMonitor monitor) throws Exception {
+	public File export(File destFolder, IProgressMonitor monitor) {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
@@ -106,7 +107,7 @@ public class CyberTrackerExporter {
 		}
 	}
 		
-	private File performExport(File file, IProgressMonitor monitor, Session session) throws Exception {
+	private File performExport(File file, IProgressMonitor monitor, Session session) {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
 		screensFactory = new ScreensObjectFactory(ctProperties.isAutoNext());
@@ -121,6 +122,10 @@ public class CyberTrackerExporter {
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
 		ParolFilledDataContainer patrolScreensData = ctUtil.buildPatrolNodes(elements, keyMap.get(root), session);
+		if (patrolScreensData == null) {
+			//failed to generate patrol data
+			return null;
+		}
 		List<Node> screenNodes = new ArrayList<Node>();
 		screenNodes.addAll(patrolScreensData.screenNodes);
 		rootId = patrolScreensData.rootId;
@@ -132,51 +137,66 @@ public class CyberTrackerExporter {
 		Screens screens = screensFactory.createScreens(screenNodes, ctProperties);
 		monitor.worked(5);
 
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
-		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_SCREENS)); //$NON-NLS-1$
 		try {
-			writeDataModel(screens, outS, Screens.class);
-		} finally {
-			outS.close();
+			//----------------creating Screens.xml----------------
+			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
+			BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_SCREENS)); //$NON-NLS-1$
+			try {
+				writeDataModel(screens, outS, Screens.class);
+			} finally {
+				outS.close();
+			}
+			monitor.worked(10);
+			
+			//----------------creating Elements.xml----------------
+			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
+			ElementsUtil.addElements(elements, keyMap);
+			BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_ELEMENTS)); //$NON-NLS-1$
+			try {
+				writeDataModel(elements, outE, Elements.class);
+			} finally {
+				outE.close();
+			}
+			
+			//----------------creating Reports.xml----------------
+			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Reports);
+			List<Items.Item> columnItems = new ArrayList<Items.Item>();
+			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.DATE, Messages.CyberTrackerExporter_Report_Column_Date));
+			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.TIME, Messages.CyberTrackerExporter_Report_Column_Time));
+			for (IdNamePair pair : patrolScreensData.resultElements) {
+				columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
+			}
+			for (Attribute attribute : attr2resultId.keySet()) {
+				columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
+			}
+			for (Integer level : catLevel2resultId.keySet()) {
+				columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level)));
+			}
+			Reports reports = ReportsObjectFactory.createReports(columnItems);
+			BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_REPORTS)); //$NON-NLS-1$
+			try {
+				writeDataModel(reports, outR, Reports.class);
+			} finally {
+				outR.close();
+			}
+			
+		} catch (Exception e) {
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_WriteXMmlFail);
+			e.printStackTrace();
+			return null;
 		}
-		monitor.worked(10);
 		
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
-		ElementsUtil.addElements(elements, keyMap);
-		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_ELEMENTS)); //$NON-NLS-1$
-		try {
-			writeDataModel(elements, outE, Elements.class);
-		} finally {
-			outE.close();
-		}
-		
-		//----------------creating Reports.xml----------------
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Reports);
-		List<Items.Item> columnItems = new ArrayList<Items.Item>();
-		columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.DATE, Messages.CyberTrackerExporter_Report_Column_Date));
-		columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.TIME, Messages.CyberTrackerExporter_Report_Column_Time));
-		for (IdNamePair pair : patrolScreensData.resultElements) {
-			columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
-		}
-		for (Attribute attribute : attr2resultId.keySet()) {
-			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
-		}
-		for (Integer level : catLevel2resultId.keySet()) {
-			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level)));
-		}
-		Reports reports = ReportsObjectFactory.createReports(columnItems);
-		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_REPORTS)); //$NON-NLS-1$
-		try {
-			writeDataModel(reports, outR, Reports.class);
-		} finally {
-			outR.close();
-		}
-
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_GenerateCTX);
-		String appPath = PdaUtil.getCTAppPath();
-		String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME}; //$NON-NLS-1$
-		Process proc = Runtime.getRuntime().exec(createCommands);
-		proc.waitFor();
+		try {
+			String appPath = PdaUtil.getCTAppPath();
+			String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME}; //$NON-NLS-1$
+			Process proc = Runtime.getRuntime().exec(createCommands);
+			proc.waitFor();
+		} catch (Exception e) {
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_GenerateCtxFail);
+			e.printStackTrace();
+			return null;
+		}
 
 		return new File(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME); //$NON-NLS-1$
 	}
