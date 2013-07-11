@@ -55,11 +55,14 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_ErrDialog_UploadFailed;
 	public static String CyberTrackerExportDialog_Error_CopyFailed;
 	public static String CyberTrackerExportDialog_Error_CT_NotFound;
+	public static String CyberTrackerExportDialog_Error_LaunchCT;
 	public static String CyberTrackerExportDialog_Error_UploadFailed;
 	public static String CyberTrackerExportDialog_ExportToDevice;
 	public static String CyberTrackerExportDialog_ExportToFile;
 	public static String CyberTrackerExportDialog_FailCreateTempFolder;
+	public static String CyberTrackerExportDialog_Job_LaunchCT;
 	public static String CyberTrackerExportDialog_Label_File;
+	public static String CyberTrackerExportDialog_LaunchInCyberTracker;
 	public static String CyberTrackerExportDialog_Message;
 	public static String CyberTrackerExportDialog_Task_Copy;
 	public static String CyberTrackerExportDialog_Task_Upload;
