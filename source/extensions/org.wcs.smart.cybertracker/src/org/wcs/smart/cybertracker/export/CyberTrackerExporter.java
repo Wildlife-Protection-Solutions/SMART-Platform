@@ -338,7 +338,14 @@ public class CyberTrackerExporter {
 	 */
 	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, boolean hasNext) {
 		List<Node> result = new ArrayList<Node>();
-		List<AttributeTreeNode> activeTreeNodes = treeAttribute.getActiveTreeNodes();
+		List<AttributeTreeNode> activeTreeNodes = new ArrayList<AttributeTreeNode>();
+		if (!treeAttribute.getIsRequired()) {
+			//adding fake "None (no value)" option
+			AttributeTreeNode noneTreeNode = new AttributeTreeNode();
+			noneTreeNode.setName(Messages.Elements_TreeAttribute_NoValue);
+			activeTreeNodes.add(noneTreeNode);
+		}
+		activeTreeNodes.addAll(treeAttribute.getActiveTreeNodes());
 		
 		Map<AttributeTreeNode, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
