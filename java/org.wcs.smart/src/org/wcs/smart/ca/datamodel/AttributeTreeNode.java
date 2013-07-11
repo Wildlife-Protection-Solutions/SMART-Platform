@@ -32,6 +32,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -51,6 +52,8 @@ import org.wcs.smart.ca.ConservationArea;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AttributeTreeNode extends DmObject implements HkeyObject{
 
+	private static final String FULL_NAME_SEPARATOR = " - "; //$NON-NLS-1$
+	
 	private Attribute attribute = null;
 	private int nodeOrder;
 	private List<AttributeTreeNode> children = new ArrayList<AttributeTreeNode>();
@@ -180,6 +183,20 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	@Column(name="is_active")
 	public boolean getIsActive(){
 		return this.isActive;
+	}
+	
+	/**
+	 * 
+	 * @return the attribute name concatenated with
+	 * all parent attribute names.
+	 */
+	@Transient
+	public String getFullCategoryName(){
+		if (parent == null){
+			return getName();
+		}else{
+			return getName() + FULL_NAME_SEPARATOR + parent.getFullCategoryName(); 
+		}
 	}
 	
 	/**

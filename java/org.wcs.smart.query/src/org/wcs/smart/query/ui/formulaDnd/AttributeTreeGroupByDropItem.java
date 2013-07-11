@@ -146,7 +146,11 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		try {
 			List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute.getUuid(), level, true);
 			for (AttributeTreeNode it : nodes) {
-				items.add(new ListItem(null, it.getName(), it.getHkey()));
+				String name = it.getName();
+				if (it.getParent() != null){
+					name += "   (" + it.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
+				}
+				items.add(new ListItem(null, name, it.getHkey()));
 			}
 			session.getTransaction().rollback();
 			session.close();
