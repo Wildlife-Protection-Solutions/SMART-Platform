@@ -139,8 +139,11 @@ public class PatrolScreensUtil {
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, stations));
 		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds);
 
+		cyberTrackerIds.clear();
+		cyberTrackerIds.add(noneElemId);
 		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, toCyberTrackerIds(elements, mandates));
+		cyberTrackerIds.addAll(toCyberTrackerIds(elements, mandates));
+		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds);
 
 		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE);
 		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS);
