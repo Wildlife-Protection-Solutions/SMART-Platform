@@ -449,6 +449,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					}
 				}
 			}
+			
 			Object[] kids = getChildren(element);
 			if (kids == null || kids.length == 0){
 				return false;

@@ -519,6 +519,12 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					}else{
 						return false;
 					}
+				}else if (((SummaryDmObject) element).getObject() instanceof CategoryAttribute){
+					if (((CategoryAttribute)((SummaryDmObject) element).getObject()).getAttribute().getType() == AttributeType.TREE){
+						return true;
+					}else{
+						return false;
+					}
 				}
 			}
 			Object[] kids = getChildren(element);

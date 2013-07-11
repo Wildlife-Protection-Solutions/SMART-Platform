@@ -91,7 +91,11 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		s.beginTransaction();
 		try{
 			for(Category child : QueryDataModelManager.getInstance().getCategories(s, level)){
-				items.add(new ListItem(null, child.getFullCategoryName(), child.getHkey()));
+				String name = child.getName();
+				if (child.getParent() != null){
+					name += "   (" + child.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
+				}
+				items.add(new ListItem(null, name, child.getHkey())); 
 			}
 			s.getTransaction().rollback();
 			s.close();
