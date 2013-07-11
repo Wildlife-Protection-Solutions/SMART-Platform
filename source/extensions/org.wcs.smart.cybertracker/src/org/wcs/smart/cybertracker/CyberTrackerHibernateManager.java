@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
@@ -71,7 +72,7 @@ public class CyberTrackerHibernateManager {
 	}
 
 	public static <T> T fetchByUuid(Class<T> clazz, String uuid, Session session) {
-		if (uuid == null)
+		if (uuid == null || uuid.isEmpty() || ElementsUtil.NULL_VALUE.equals(uuid))
 			return null;
 		try {
 			return fetchByUuid(clazz, SmartUtils.decodeHex(uuid), session);

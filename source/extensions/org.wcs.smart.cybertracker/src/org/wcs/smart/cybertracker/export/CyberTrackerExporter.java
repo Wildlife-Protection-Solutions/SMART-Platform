@@ -220,6 +220,7 @@ public class CyberTrackerExporter {
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		List<CyberTrackerId> boolNonRqAttrElementIDs = null;
+		CyberTrackerId listNullElement = null;
 		category.getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(category);
@@ -244,6 +245,12 @@ public class CyberTrackerExporter {
 					tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
 				}
 				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, itemNames, tag0Values);
+				if (!attribute.getIsRequired()) {
+					if (listNullElement == null) {
+						listNullElement = ElementsUtil.buildAttributeNullElement(elements, Messages.Elements_ListAttribute_NoValue);
+					}
+					ids.add(0, listNullElement);
+				}
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
@@ -274,7 +281,7 @@ public class CyberTrackerExporter {
 					if (boolNonRqAttrElementIDs == null) {
 						boolNonRqAttrElementIDs = new ArrayList<CyberTrackerId>(3);
 						boolNonRqAttrElementIDs.addAll(boolRqAttrElementIDs);
-						boolNonRqAttrElementIDs.add(ElementsUtil.buildAttributeUndefinedBooleanElement(elements));
+						boolNonRqAttrElementIDs.add(ElementsUtil.buildAttributeNullElement(elements, Messages.Elements_BooleanAttribute_Undefined));
 					}
 					elemIds = boolNonRqAttrElementIDs;
 				}

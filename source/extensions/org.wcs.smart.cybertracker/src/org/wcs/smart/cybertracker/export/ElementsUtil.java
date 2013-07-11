@@ -121,9 +121,9 @@ public class ElementsUtil {
 		elements.getList().getItems().getItem().add(item);
 	}
 
-	public static CyberTrackerId buildAttributeUndefinedBooleanElement(Elements elements) {
+	public static CyberTrackerId buildAttributeNullElement(Elements elements, String name) {
 		CyberTrackerId id = new CyberTrackerId();
-		addElementsItem(elements, Messages.Elements_BooleanAttribute_Undefined, id.getItemId(), NULL_VALUE);
+		addElementsItem(elements, name, id.getItemId(), NULL_VALUE);
 		return id;
 	}
 	
