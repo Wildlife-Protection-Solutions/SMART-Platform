@@ -111,6 +111,7 @@ public class Messages extends NLS {
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Undefined;
 	public static String Elements_BooleanAttribute_Yes;
+	public static String Elements_ListAttribute_NoValue;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;
 	public static String PatrolLegImporter_ErrorDialog_Title;
