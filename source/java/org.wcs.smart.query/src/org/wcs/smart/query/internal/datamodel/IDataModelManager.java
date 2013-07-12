@@ -118,7 +118,7 @@ public interface IDataModelManager {
 	 * @return
 	 */
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session,
-			byte[] uuid, int level, boolean active);
+			Attribute attribute, int level, boolean active);
 
 	
 	/**

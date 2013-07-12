@@ -226,7 +226,7 @@ public class AttributeGroupBy implements IGroupBy {
 		}else if (att.getType() == AttributeType.TREE){
 			if (filterHkeys == null){
 				//get all attribute nodes with given hkey length
-				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att, treeLevel, true)){
 					items.add(new ListItem(null, child.getName(), child.getHkey()));
 				}
 			}else{
@@ -234,7 +234,7 @@ public class AttributeGroupBy implements IGroupBy {
 				for (int i = 0; i < filterHkeys.length; i ++){
 					keys.add(filterHkeys[i]);
 				}
-				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att, treeLevel, true)){
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	
 					}
@@ -296,7 +296,7 @@ public class AttributeGroupBy implements IGroupBy {
 					keys.add(filterHkeys[i]);
 				}
 				ArrayList<ListItem> items = new ArrayList<ListItem>();
-				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute.getUuid(), treeLevel, true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute, treeLevel, true)){
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	
 					}

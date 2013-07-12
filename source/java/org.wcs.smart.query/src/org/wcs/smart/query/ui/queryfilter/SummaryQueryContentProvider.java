@@ -56,6 +56,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.AllCategory;
@@ -281,19 +282,18 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
-						attribute = (Attribute) session.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
+						attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
+//						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						attribute = (Attribute) session.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
+						attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
+//						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
 						node.getAttribute().getName();
 						nodes = node.getActiveChildren();
-						
 					}
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();
@@ -343,14 +343,16 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					List<AttributeListItem> nodes = null;
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
-						attribute = (Attribute)session.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+						for(AttributeListItem it : nodes){
+							it.getAttribute().getName();
+						}
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						attribute = (Attribute)session.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+						for(AttributeListItem it : nodes){
+							it.getAttribute().getName();
+						}
 					}
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();

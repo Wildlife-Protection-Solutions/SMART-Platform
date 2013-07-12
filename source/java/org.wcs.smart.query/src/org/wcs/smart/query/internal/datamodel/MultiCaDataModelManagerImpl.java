@@ -255,18 +255,18 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level, boolean active){
-		Attribute a = (Attribute) session.get(Attribute.class, uuid);
+	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, Attribute attribute, int level, boolean active){
 		String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :key and smart.hkeyLength(a.hkey) = :level AND b.conservationArea in (:cas) group by a.hkey having count(*) = :cnt";//$NON-NLS-1$
 		Query q = session.createQuery(query);
-		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
+		q.setParameter("key", attribute.getKeyId());//$NON-NLS-1$
 		q.setParameter("level", level);//$NON-NLS-1$
 		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas());//$NON-NLS-1$
 		q.setInteger("cnt", SmartDB.getConservationAreaConfiguration().getCaCount());//$NON-NLS-1$
 		List<String> hkeys = q.list();
 			
-		q = session.createQuery("FROM AttributeTreeNode a WHERE a.attribute.uuid = :uuid and hkey in (:hkeys)");//$NON-NLS-1$
-		q.setParameter("uuid" ,uuid);//$NON-NLS-1$
+		q = session.createQuery("FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and hkey in (:hkeys)");//$NON-NLS-1$
+		q.setParameter("attributeKey", attribute.getKeyId());//$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("hkeys", hkeys);//$NON-NLS-1$
 		List<AttributeTreeNode> nodes = q.list();
 		return nodes;
