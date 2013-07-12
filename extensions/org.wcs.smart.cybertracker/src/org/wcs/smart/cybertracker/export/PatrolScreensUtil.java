@@ -63,7 +63,6 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolScreensUtil {
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
-	private static final String GLOBAL_PATROL_ID_GENERATOR = "GLOBAL_PATROL_ID_GENERATOR"; //$NON-NLS-1$
 
 	public static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
 	public static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
@@ -237,7 +236,7 @@ public class PatrolScreensUtil {
 	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol), null);
-		addCounterFormula(node, GLOBAL_PATROL_ID_GENERATOR, resultId);
+		addUniqueAttrubute(node, resultId);
 		addGpsConfiguration(node, 0);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
@@ -431,14 +430,14 @@ public class PatrolScreensUtil {
 		node.getData().getControls().getControl().add(formulaControl);
 	}
 
-	private void addCounterFormula(Node node, String counterName, String resultElementId) {
-		Control formulaControl = screensFactory.createCounterFormulaControl12(counterName, resultElementId);
-		node.getData().getControls().getControl().add(formulaControl);
-	}
-
 	private void addGpsConfiguration(Node node, Integer timer) {
 		Control gpsConf = screensFactory.createConfigureGPSControl13(timer);
 		node.getData().getControls().getControl().add(gpsConf);
+	}
+
+	private void addUniqueAttrubute(Node node, String resultElementId) {
+		Control uniqueAttr = screensFactory.createUniqueAttrubuteControl12(resultElementId);
+		node.getData().getControls().getControl().add(uniqueAttr);
 	}
 	
 }
