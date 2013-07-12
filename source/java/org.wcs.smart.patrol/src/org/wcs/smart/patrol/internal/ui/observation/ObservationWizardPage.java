@@ -78,8 +78,10 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		PatternFilter patternFilter = new PatternFilter();
 		
 		searchTree = new SearchTree(main,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER  | SWT.MULTI, patternFilter);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 400;
+		searchTree.setLayoutData(gd);
 		dmTreeViewer = searchTree.getViewer();
-		dmTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dmTreeViewer.setContentProvider(new DataModelContentProvider(true, true));
 		dmTreeViewer.setLabelProvider(new DataModelLabelProvider());
 		dmTreeViewer.setAutoExpandLevel(3);

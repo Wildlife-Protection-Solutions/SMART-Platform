@@ -65,13 +65,16 @@ import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
@@ -337,13 +340,10 @@ public class SearchTree extends Composite {
 	 * @return the tree
 	 */
 	protected Control createTreeControl(Composite parent, int style) {
-		Composite treeComp = new Composite(parent, SWT.NONE);
-		treeComp.setLayout(new GridLayout(3, false));
+		final Composite treeComp = new Composite(parent, SWT.NONE);
 		treeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		treeViewer = doCreateTreeViewer(treeComp, style);
-		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
-		treeViewer.getControl().setLayoutData(data);
 		treeViewer.getControl().addDisposeListener(new DisposeListener() {
 			/*
 			 * (non-Javadoc)
@@ -377,8 +377,23 @@ public class SearchTree extends Composite {
 		
 		selectedList = new WritableList();
 		listViewer = doCreateListViewer(treeComp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-		data = new GridData(SWT.FILL, SWT.FILL, true, true);
-		listViewer.getControl().setLayoutData(data);
+
+		treeComp.addListener(SWT.Resize, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				Rectangle compSize = treeComp.getClientArea();
+				int width = compSize.width;
+				int height = compSize.height;
+				Point btnSize = treeComp.getChildren()[1].computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				
+				int columnWidth = (width - btnSize.x) / 2;
+				
+				treeComp.getChildren()[0].setBounds(0, 0, columnWidth, height);
+				treeComp.getChildren()[1].setBounds(columnWidth, (height - btnSize.y) / 2, btnSize.x, height);
+				treeComp.getChildren()[2].setBounds(columnWidth + btnSize.x, 0, columnWidth, height);
+				
+			}});
 		
 		return treeViewer.getControl();
 	}
@@ -386,7 +401,7 @@ public class SearchTree extends Composite {
 	private void createButtonPanel(Composite parent){	
 		Composite buttonPnl = new Composite(parent, SWT.NONE);
 		buttonPnl.setLayout(new GridLayout(1, false));
-		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+//		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		
 		Button btnAdd = new Button(buttonPnl, SWT.PUSH);
 		btnAdd.setText(" > "); //$NON-NLS-1$
@@ -423,6 +438,7 @@ public class SearchTree extends Composite {
 				selectedList.clear();
 			}
 		});
+		
 	}
 	
 	/**

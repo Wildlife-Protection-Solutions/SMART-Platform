@@ -43,8 +43,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.WaypointObservation;
@@ -84,8 +86,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	
 	@Override
 	public void createControl(Composite parent) {
-		
-		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL);
+		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolled.setShowFocusedControl(true);
 		scrolled.setExpandHorizontal(true);
@@ -106,8 +107,9 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			Composite lblComp = new Composite(entryComp, SWT.NONE);
 			lblComp.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 			lblComp.setLayout(new GridLayout(3, false));
-			Label lbl = new Label(lblComp, SWT.NONE);
-			
+			entryComp.pack();
+		
+			Label lbl = new Label(lblComp, SWT.WRAP);
 			if (boldFont == null){
 				FontData boldFontData= lbl.getFont().getFontData()[0];
 				boldFontData.setStyle(SWT.BOLD); 
@@ -116,7 +118,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			lbl.setFont(boldFont);
 			lbl.setText(SmartUtils.formatStringForLabel(ob.getKey().getFullCategoryName()));
 			lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
-			
+			//((GridData)lbl.getLayoutData()).widthHint = 200;
 			Link lnkDelete = new Link(lblComp, SWT.NONE);
 			lnkDelete.setText("<a>" + DialogConstants.DELETE_BUTTON_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkDelete.addSelectionListener(new SelectionAdapter() {
@@ -188,7 +190,27 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		
 		scrolled.setContent(main);
 		setControl(scrolled);
-		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));	
+
+		
+		int width = 400;
+		int height = main.computeSize(width, SWT.DEFAULT).y;
+		scrolled.setMinSize(width, height);
+
+		
+		//for scrollbar and wrapping labels
+		final Composite mParent = main;
+		final ScrolledComposite mScrolled = scrolled;
+		parent.addListener(SWT.Resize, new Listener(){
+			int width = -1;
+			@Override
+			public void handleEvent(Event event) {		
+				int newWidth = mParent.getSize().x;
+			    if (newWidth != width) {
+			        mScrolled.setMinHeight(mParent.computeSize(newWidth, SWT.DEFAULT).y);
+			        width = newWidth;
+			    }
+			}});
+		parent.layout(true);
 	}
 	
 	
