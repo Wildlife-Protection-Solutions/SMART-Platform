@@ -143,7 +143,11 @@ public class CyberTrackerImporter {
 		Collections.sort(patrols, new Comparator<CyberTrackerPatrol>() {
 			@Override
 			public int compare(CyberTrackerPatrol p1, CyberTrackerPatrol p2) {
-				return p1.getId() - p2.getId();
+				if (p1.getStartDate() == null)
+					return -1;
+				if (p2.getStartDate() == null)
+					return 1;
+				return p1.getStartDate().compareTo(p2.getStartDate());
 			}});
 		return patrols;
 	}

@@ -670,20 +670,20 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
-	/**
-	<Control>
-		...
- 		<Translate__ResultElementId>...</Translate__ResultElementId>
-		<ResultGlobalValue>...</ResultGlobalValue>
-	 </Control>
-	 */
-	public Controls.Control createCounterFormulaControl12(String counterName, String resultElementId) {
-		String formula = counterName+"="+counterName+"+1"; //x=x+1  //$NON-NLS-1$ //$NON-NLS-2$
-		Controls.Control control = createFormulaControl12(formula);
-		control.setResultGlobalValue(counterName);
-		control.setTranslateResultElementId(resultElementId);
-		return control;
-	}
+//	/**
+//	<Control>
+//		...
+// 		<Translate__ResultElementId>...</Translate__ResultElementId>
+//		<ResultGlobalValue>...</ResultGlobalValue>
+//	 </Control>
+//	 */
+//	public Controls.Control createCounterFormulaControl12(String counterName, String resultElementId) {
+//		String formula = counterName+"="+counterName+"+1"; //x=x+1  //$NON-NLS-1$ //$NON-NLS-2$
+//		Controls.Control control = createFormulaControl12(formula);
+//		control.setResultGlobalValue(counterName);
+//		control.setTranslateResultElementId(resultElementId);
+//		return control;
+//	}
 
 	/**
 	<Control>
@@ -703,6 +703,25 @@ public class ScreensObjectFactory {
 		control.setWaypointTimer(timer);
 		return control;
 	}
+	
+	/**
+	 * see "Actions" -> "Add Attribute" in CyberTracker
+    <Control>
+    	<Type>{B76D0BF3-F4AC-44FF-A1E6-02707127C949}</Type>
+    	<Id>12</Id>
+    	<Translate__ElementId>...</Translate__ElementId>
+    	<Unique>True</Unique>
+    </Control>
+	 */
+	public Controls.Control createUniqueAttrubuteControl12(String resultElement) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{B76D0BF3-F4AC-44FF-A1E6-02707127C949}"); //$NON-NLS-1$
+		control.setId(12);
+		control.setTranslateElementId(resultElement);
+		control.setUnique("True"); //$NON-NLS-1$
+		return control;
+	}
+
 	
 	//Util methods
 	public static Controls.Control getNavigationControl(Node node) {
