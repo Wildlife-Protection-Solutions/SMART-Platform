@@ -77,6 +77,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 	public void dispose() {
 		if (input != null) {
 			input.destroy();
+			input = null;
 		}
 	}
 
@@ -197,6 +198,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (input == null){return;}
 					if (viewer != null && viewer.getTable() != null && !viewer.getTable().isDisposed()) {
 						for (int i = 0; i < data.size(); i++) {
 							viewer.replace(data.get(i), i+from); //replacing current item and several nearby
