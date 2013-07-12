@@ -85,7 +85,7 @@ public class ProjectionDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		 Composite composite = (Composite)super.createDialogArea(parent);
 	
-		 lst = new ListViewer(composite, SWT.NONE | SWT.V_SCROLL);
+		 lst = new ListViewer(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		 lst.setContentProvider(ArrayContentProvider.getInstance());
 		 lst.setLabelProvider(new LabelProvider(){
 			 @Override
