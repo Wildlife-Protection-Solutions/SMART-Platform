@@ -189,10 +189,10 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level, boolean active){
+	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, Attribute attribute, int level, boolean active){
 		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active"; //$NON-NLS-1$
 		Query q = session.createQuery(query);
-		q.setParameter("uuid", uuid); //$NON-NLS-1$
+		q.setParameter("uuid", attribute.getUuid()); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
 		q.setParameter("active", active); //$NON-NLS-1$
 		List<AttributeTreeNode> nodes = q.list();
