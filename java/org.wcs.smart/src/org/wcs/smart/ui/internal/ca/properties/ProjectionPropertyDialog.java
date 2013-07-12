@@ -100,7 +100,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		
-		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstViewer.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getList().getLayoutData()).widthHint = 350;
 		((GridData)lstViewer.getList().getLayoutData()).heightHint = 100;

@@ -88,14 +88,15 @@ public class CsvFileComposite extends Composite {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		btnHasHeader = new Button(this, SWT.CHECK);
-		String hasHeaderText = config.getHasHeaderText();
-		if (hasHeaderText == null) {
-			hasHeaderText = ""; //$NON-NLS-1$
+		if (config.includeHasHeader()){
+			btnHasHeader = new Button(this, SWT.CHECK);
+			String hasHeaderText = config.getHasHeaderText();
+			if (hasHeaderText == null) {
+				hasHeaderText = ""; //$NON-NLS-1$
+			}
+			btnHasHeader.setText(hasHeaderText);
+			btnHasHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		}
-		btnHasHeader.setText(hasHeaderText);
-		btnHasHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-		btnHasHeader.setVisible(config.includeHasHeader());
 		
 		txtInfo = new Text(this, SWT.WRAP | SWT.READ_ONLY);
 		txtInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
@@ -120,8 +121,10 @@ public class CsvFileComposite extends Composite {
 		super.setEnabled(enabled);
 		lblFile.setEnabled(enabled);
 		txtFile.setEnabled(enabled);
-		btnHasHeader.setEnabled(enabled);
 		txtInfo.setEnabled(enabled);
 		btnBrowse.setEnabled(enabled);
+		if (btnHasHeader != null){
+			btnHasHeader.setEnabled(enabled);
+		}
 	}
 }
