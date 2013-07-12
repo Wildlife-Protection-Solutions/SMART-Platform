@@ -144,6 +144,12 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	 */
 	@Override
 	public void createControl(Composite parent) {
+		//parent.setLayout(new GridLayout(1,false));
+		Composite page = new Composite(parent, SWT.NONE);
+		page.setLayout(new GridLayout(1,false));
+		page.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		setControl(page);
+		
 		this.currentCategory = ((ObservationWizard)getWizard()).getCategoryToProcess(index);
 		catAttributes = findAttributes(currentCategory);
 		requiresObservation = false;
@@ -156,39 +162,45 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		}
 	
-		Label lbl = null;
-		ScrolledComposite scComp = new ScrolledComposite(parent, SWT.V_SCROLL);
+		Composite top = new Composite(page, SWT.NONE);
+		top.setLayout(new GridLayout(1,false));
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite main = new Composite(scComp, SWT.NONE);
-		main.setLayout(new GridLayout(1, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	
-		scComp.setContent(main);
-		scComp.setExpandVertical(true);
-		scComp.setExpandHorizontal(true);
-		setControl(scComp);
+		Label lbl = null;
+		
+		
 		
 		//get existing observations 
 		Collection<WaypointObservation> currentObservations = ((ObservationWizard)getWizard()).getWaypointObservation(currentCategory);
 		
-		Composite header = new Composite(main, SWT.NONE);
+		Composite header = new Composite(top, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.horizontalSpacing = gl.verticalSpacing = gl.marginBottom = gl.marginTop = gl.marginHeight = gl.marginWidth = gl.marginLeft = gl.marginRight = 0;
 		header.setLayout(gl);
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lbl = new Label(header, SWT.NONE);
+		lbl = new Label(header, SWT.WRAP);
 		lbl.setText( SmartUtils.formatStringForLabel(currentCategory.getName()));
 		lbl.setFont(getBoldFont(lbl));
 		lbl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, false));
+		((GridData)lbl.getLayoutData()).widthHint = 200;
 		
 		lbl = new Label(header, SWT.NONE);
 		lbl.setText(MessageFormat.format(Messages.AttributeWizardPage_PageNumberLabel, new Object[]{(index+1),((ObservationWizard)getWizard()).getCategoryCount()}));
 		lbl.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL, false, false));
 		
-		lbl = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl = new Label(top, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		ScrolledComposite scComp = new ScrolledComposite(top, SWT.V_SCROLL);
+		scComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite main = new Composite(scComp, SWT.NONE);
+		main.setLayout(new GridLayout(1, false));
+		
+		scComp.setContent(main);
+		scComp.setExpandVertical(true);
+		scComp.setExpandHorizontal(true);
 		createAttributeFields(main);
 		if (!currentCategory.getIsMultiple()){
 			if (currentObservations != null && currentObservations.size() > 0){
@@ -196,8 +208,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				editObservation(ob);
 			}
 		}else{
-			//multiple observations
-
 			//create button panel
 			Composite buttons= new Composite(main, SWT.NONE);
 			buttons.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
@@ -223,21 +233,32 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 			});
 			
-			lbl = new Label(main, SWT.NONE);
-			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			//multiple observations
+			Composite bottomPanel = new Composite(page, SWT.NONE);
+			bottomPanel.setLayout(new GridLayout(1, false));
+			bottomPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-			lbl = new Label(main, SWT.HORIZONTAL | SWT.SEPARATOR);
+			
+			
+			//lbl = new Label(bottomPanel, SWT.NONE);
+			//lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+			lbl = new Label(bottomPanel, SWT.HORIZONTAL | SWT.SEPARATOR);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)lbl.getLayoutData()).verticalIndent = 10;
 			
-			createObservationTable(main);
+			createObservationTable(bottomPanel);
 			if (currentObservations != null){
 				this.observations.addAll(currentObservations);
 				AttributeTable.resizeColumns(attributeTable);
 			}
 			
 		}
+		page.pack();
+		page.layout(true);
+		
 		scComp.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
 		setTitle(Messages.AttributeWizardPage_PageTitle);
 		setMessage(MessageFormat.format(Messages.AttributeWizardPage_PageMessage, new Object[]{currentCategory.getFullCategoryName()}));
 		validate();
@@ -335,10 +356,11 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		comp.setLayout(new GridLayout(2,false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label lbl = new Label(comp, SWT.NONE);
+		Label lbl = new Label(comp, SWT.WRAP);
 		lbl.setText(SmartUtils.formatStringForLabel(
 				MessageFormat.format(Messages.AttributeWizardPage_CategoryObservations_Label, new Object[]{currentCategory.getName()})));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 200;
 		lbl.setFont(getBoldFont(lbl));
 		
 		observations = new WritableList();
@@ -347,6 +369,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		attributeTable.setInput(observations);
 		attributeTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)attributeTable.getTable().getLayoutData()).widthHint = 200;
+		((GridData)attributeTable.getTable().getLayoutData()).heightHint = 90;
 		
 		Composite buttons = new Composite(comp, SWT.NONE);
 		buttons.setLayout(new GridLayout(1, false));
