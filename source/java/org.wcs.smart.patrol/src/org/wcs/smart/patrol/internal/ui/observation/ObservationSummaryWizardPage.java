@@ -85,7 +85,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	}
 	
 	@Override
-	public void createControl(Composite parent) {
+	public void createControl(final Composite parent) {
 		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolled.setShowFocusedControl(true);
@@ -118,7 +118,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			lbl.setFont(boldFont);
 			lbl.setText(SmartUtils.formatStringForLabel(ob.getKey().getFullCategoryName()));
 			lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
-			//((GridData)lbl.getLayoutData()).widthHint = 200;
+			((GridData)lbl.getLayoutData()).widthHint = 400;
+			
 			Link lnkDelete = new Link(lblComp, SWT.NONE);
 			lnkDelete.setText("<a>" + DialogConstants.DELETE_BUTTON_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkDelete.addSelectionListener(new SelectionAdapter() {
@@ -210,6 +211,15 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			        width = newWidth;
 			    }
 			}});
+
+		parent.addListener(SWT.Paint, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				int newWidth = mParent.getSize().x;
+				mScrolled.setMinHeight(mParent.computeSize(newWidth,SWT.DEFAULT).y);
+				parent.removeListener(SWT.Paint, this);
+			}
+		});
 		parent.layout(true);
 	}
 	
