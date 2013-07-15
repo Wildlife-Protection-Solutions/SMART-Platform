@@ -147,7 +147,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * 
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		p.setStartDate(getStartDate());
 		p.setEndDate(getEndDate());		
 		if (p.getLegs().size() == 1){

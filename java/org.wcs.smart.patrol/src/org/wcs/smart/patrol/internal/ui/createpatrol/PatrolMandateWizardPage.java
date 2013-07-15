@@ -72,8 +72,8 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
-		if (mandateComp.updatePatrol(p)){
+	public boolean updateModel(Patrol p, Session session) {
+		if (mandateComp.updatePatrol(p, session)){
 			setPageComplete(true);
 			return true;
 		}else{

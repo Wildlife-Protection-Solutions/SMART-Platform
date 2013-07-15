@@ -99,7 +99,7 @@ public class CommentComposite extends PatrolItemComposite implements ModifyListe
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		p.setComment(txtComment.getText());
 		return true;
 	}

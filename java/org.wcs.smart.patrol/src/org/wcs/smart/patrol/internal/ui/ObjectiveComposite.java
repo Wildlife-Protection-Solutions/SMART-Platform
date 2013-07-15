@@ -100,7 +100,7 @@ public class ObjectiveComposite extends PatrolItemComposite implements ModifyLis
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		p.setObjective(txtObjective.getText());
 		return true;
 	}

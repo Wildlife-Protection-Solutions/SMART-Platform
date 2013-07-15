@@ -30,7 +30,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
@@ -77,13 +76,12 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 	}
 	
 	@Override
-	public boolean updateModel(Patrol p) {
+	public boolean updateModel(Patrol p, Session session) {
 		lastSelection = getSelectedPlan();
 		if (lastSelection != null) {
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
+			session.beginTransaction();
 			try {
-				Plan plan = (Plan) s.get(Plan.class, lastSelection.getUuid());
+				Plan plan = (Plan) session.get(Plan.class, lastSelection.getUuid());
 				if (plan != null) {
 					if (plan.getStation() != null) {
 						Station x = plan.getStation();
@@ -97,7 +95,7 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 					}
 				}
 			} finally {
-				s.close();
+				session.getTransaction().rollback();
 			}
 
 		}

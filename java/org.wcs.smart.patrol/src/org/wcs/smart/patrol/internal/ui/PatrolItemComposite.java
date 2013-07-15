@@ -38,7 +38,7 @@ import org.wcs.smart.patrol.model.Patrol;
 public abstract class PatrolItemComposite {
 	
 	private List<IPatrolItemChangeListener> listeners = new ArrayList<IPatrolItemChangeListener>();
-	private String errorMessage = null;
+	protected String errorMessage = null;
 	
 	/**
 	 * Creates the component.
@@ -62,11 +62,15 @@ public abstract class PatrolItemComposite {
 	/**
 	 * Update the patrol with the values provided
 	 * by the user.
+	 * <p>The open database session can be used to validate
+	 * objects against the database if required.</p>
 	 * 
+	 * @param p patrol object to update
+	 * @param session current database connection; not in transaction
 	 * @return <code>true</code> if successfully updated <code>false</code> if could not update patrol
-	 * @param p
+	 * 
 	 */
-	public abstract boolean updatePatrol(Patrol p);
+	public abstract boolean updatePatrol(Patrol p, Session session);
 	
 	/**
 	 * 

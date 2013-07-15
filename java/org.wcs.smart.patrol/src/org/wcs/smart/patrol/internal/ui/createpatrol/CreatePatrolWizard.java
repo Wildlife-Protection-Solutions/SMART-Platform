@@ -231,7 +231,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	@Override
 	public boolean performFinish() {
 		if (lastPage instanceof NewPatrolWizardPage) {
-			((NewPatrolWizardPage) lastPage).updateModel(this.patrol);
+			((NewPatrolWizardPage) lastPage).updateModel(this.patrol, getSession());
 		}
 
 		
@@ -284,7 +284,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		
 		if (event.getCurrentPage() instanceof NewPatrolWizardPage) {
 			boolean movingNext = event.getTargetPage().equals(((WizardPage)event.getCurrentPage()).getNextPage());
-			boolean update = ((NewPatrolWizardPage) event.getCurrentPage()).updateModel(patrol); 
+			boolean update = ((NewPatrolWizardPage) event.getCurrentPage()).updateModel(patrol, getSession()); 
 			if (movingNext && !update) {
 				//only if moving to the next page to we disallow this event; if moving backwards we are ok
 				event.doit = false;

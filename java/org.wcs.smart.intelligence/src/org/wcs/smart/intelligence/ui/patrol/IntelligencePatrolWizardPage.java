@@ -66,7 +66,7 @@ public class IntelligencePatrolWizardPage extends NewPatrolWizardPage {
 	}
 
 	@Override
-	public boolean updateModel(Patrol p) {
+	public boolean updateModel(Patrol p, Session session) {
 		return content.updateModel(p);
 	}
 

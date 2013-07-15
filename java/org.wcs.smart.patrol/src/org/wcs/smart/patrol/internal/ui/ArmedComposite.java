@@ -106,7 +106,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		p.setArmed(btnYes.getSelection());
 		return true;
 	}

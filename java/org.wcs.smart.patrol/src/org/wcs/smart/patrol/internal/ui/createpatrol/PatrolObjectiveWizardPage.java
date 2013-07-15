@@ -74,8 +74,8 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
-		return objectiveComp.updatePatrol(p);
+	public boolean updateModel(Patrol p, Session session) {
+		return objectiveComp.updatePatrol(p, session);
 	}
 	
 	/**

@@ -95,7 +95,6 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		
 		Session s = getSession();
 		try{
-		//	s.saveOrUpdate(patrol);
 			item.setValues(patrol, s);
 		}finally{
 			if (s.isOpen()){
@@ -110,7 +109,6 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	public Session getSession(){
 		if (session == null || !session.isOpen()){
 			session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-//			session.update(ca);
 		}
 		return session;
 	}
@@ -122,8 +120,6 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave() {
-		//this trick is done to ensure that hibernate session will be closed after save
-		//as some listeners might open another session
 		if (savePatrolInternal()) {
 			setChangesMade(false);
 			PatrolEventManager.getInstance().patrolChanged(item.getAttribute(), patrol);
@@ -136,7 +132,9 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		Session s = getSession();
 		try{
 			try{
-				item.updatePatrol(patrol);
+				if (!item.updatePatrol(patrol, s)){
+					return false;
+				}
 			}catch (PatrolSaveException ex){
 				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getLocalizedMessage());
 				return false;
