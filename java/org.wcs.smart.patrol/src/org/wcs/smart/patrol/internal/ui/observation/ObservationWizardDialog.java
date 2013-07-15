@@ -68,7 +68,9 @@ public class ObservationWizardDialog extends WizardDialog {
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		p.x = Math.min(p.x, 700);
+		
+		p.x = Math.min(p.x, 800);
+		p.y = Math.min(p.y, 700);
 		return p;
 	}
 	
