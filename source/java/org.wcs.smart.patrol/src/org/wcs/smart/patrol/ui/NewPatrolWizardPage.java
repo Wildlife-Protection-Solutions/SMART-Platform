@@ -48,11 +48,14 @@ public abstract class NewPatrolWizardPage extends WizardPage {
 	/**
 	 * Updates the current patrol with the new values inputed
 	 * in the patrol page.
+	 * <p>The open database session can be used to validate
+	 * objects against the database if required.</p>
 	 * 
-	 * @param p patrol to update
+	 * @param p patrol object to update
+	 * @param session current database connection; not in transaction
 	 * @return <code>true</code> if model updated; <code>false</code> if error 
 	 */
-	public abstract boolean updateModel(Patrol p);
+	public abstract boolean updateModel(Patrol p, Session session);
 
 	/**
 	 * Updates the current page gui components with the values

@@ -116,7 +116,7 @@ public class StationComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		Object station = (Object)((IStructuredSelection)stationList.getSelection()).getFirstElement();
 		if (station != null && station instanceof Station){
 			p.setStation((Station)station);

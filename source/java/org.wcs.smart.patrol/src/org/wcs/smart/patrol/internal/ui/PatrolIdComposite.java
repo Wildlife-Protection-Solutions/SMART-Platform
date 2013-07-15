@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui;
 
 import java.text.MessageFormat;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -32,9 +33,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -106,9 +110,20 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
+		String newPatrolId = txtPatrolId.getText().trim();
+		
+		long count = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("id", newPatrolId)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
+		if (count !=0){
+			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
+					Messages.PatrolIdComposite_WarningDialogTitle, 
+					MessageFormat.format(Messages.PatrolIdComposite_DuplicateIdWarning, new Object[]{newPatrolId}))){
+				return false;
+			}
+		}
+		
 		if(validate()){
-			p.setId(txtPatrolId.getText().trim());
+			p.setId(newPatrolId);
 			return true;
 		}else{
 			return false;
@@ -131,20 +146,22 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	public int getAttribute() {
 		return PatrolEventManager.PATROL_ID;
 	}
+	
 	public boolean validate() {
 		boolean isValid = true;
-		
+		errorMessage = null;
 		if (! SmartUtils.isSimpleString(txtPatrolId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
 			cdPatrolId.show();
-			cdPatrolId.setDescriptionText(
-				MessageFormat.format(Messages.PatrolIdComposite_Error_InvalidId,
-						new Object[]{Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+			errorMessage = MessageFormat.format(Messages.PatrolIdComposite_Error_InvalidId,
+					new Object[]{Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});
+			cdPatrolId.setDescriptionText(errorMessage);
 			isValid = false;
 		}else{
 			cdPatrolId.hide();
 		}
 		return isValid;
 	}
+	
 	protected ControlDecoration createDecoration(Control control){
 		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
 		cd.setImage(FieldDecorationRegistry.getDefault()

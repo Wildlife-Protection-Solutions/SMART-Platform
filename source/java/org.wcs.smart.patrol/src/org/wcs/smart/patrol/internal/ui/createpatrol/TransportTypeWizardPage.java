@@ -90,8 +90,8 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
-		if (transportType.updatePatrol(p)){
+	public boolean updateModel(Patrol p, Session session) {
+		if (transportType.updatePatrol(p, session)){
 			setPageComplete(true);
 			return true;
 		}else{

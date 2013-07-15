@@ -96,8 +96,8 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
-		return legComposite.updatePatrol(p);
+	public boolean updateModel(Patrol p, Session session) {
+		return legComposite.updatePatrol(p, session);
 	}	
 	
 	/**

@@ -145,7 +145,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
+	public boolean updateModel(Patrol p, Session session) {
 		if (btnNo.getSelection()){
 			if (p.getLegs().size() > 1){
 				PatrolLeg leg1 = p.getLegs().get(0);

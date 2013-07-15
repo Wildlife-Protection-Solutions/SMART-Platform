@@ -145,7 +145,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
 		if (empListComposite.getSelectedItems().size() <= 0){
@@ -157,7 +157,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 			firstLeg.addPatrolLegMember(e);
 		}
     	
-		leaderPilotComp.updatePatrol(p);
+		leaderPilotComp.updatePatrol(p, session);
 		return true;
 	}
 

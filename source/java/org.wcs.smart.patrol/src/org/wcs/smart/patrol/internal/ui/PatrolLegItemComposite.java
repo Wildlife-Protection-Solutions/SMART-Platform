@@ -30,7 +30,7 @@ public abstract class PatrolLegItemComposite extends PatrolItemComposite{
 	}
 
 	@Override
-	public boolean updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p, Session session) {
 		if (patrolLeg == null){
 			return updatePatrol(p.getFirstLeg());
 		}else{

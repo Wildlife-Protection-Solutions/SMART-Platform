@@ -324,9 +324,11 @@ public class Messages extends NLS {
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
 	public static String PatrolHibernateManager_Error_CouldNoSavePatrol;
 	public static String PatrolHibernateManager_Error_ToManyPatrolOptions;
+	public static String PatrolIdComposite_DuplicateIdWarning;
 	public static String PatrolIdComposite_Error_InvalidId;
 	public static String PatrolIdComposite_Id_Label;
 	public static String PatrolIdComposite_Title;
+	public static String PatrolIdComposite_WarningDialogTitle;
 	public static String PatrolIdWizardPage_PageMessage;
 	public static String PatrolIdWizardPage_Title;
 	public static String PatrolImporter_ConfirmationMessage;

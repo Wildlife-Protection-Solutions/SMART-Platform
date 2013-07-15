@@ -65,8 +65,8 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
-		if (patrolIdComp.updatePatrol(p)){
+	public boolean updateModel(Patrol p, Session session) {
+		if (patrolIdComp.updatePatrol(p, session)){
 			setPageComplete(true);
 			return true;
 		}else{

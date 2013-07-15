@@ -71,8 +71,8 @@ public class CommentWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
-		return commentComp.updatePatrol(p);
+	public boolean updateModel(Patrol p, Session session) {
+		return commentComp.updatePatrol(p, session);
 	}
 	
 	/**

@@ -114,7 +114,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	public boolean updateModel(Patrol p) {
+	public boolean updateModel(Patrol p, Session session) {
 		for (Button btn: btnTypes){
 			if (btn.getSelection()){
 				p.setPatrolType(  ((PatrolType)btn.getData()).getType() );
