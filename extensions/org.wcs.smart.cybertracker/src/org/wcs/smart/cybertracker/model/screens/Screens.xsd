@@ -20,11 +20,15 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element type="xs:string" name="Name" />
+						<xs:element type="xs:double" name="SightingAccuracy" minOccurs="0" />
+						<xs:element type="xs:int" name="SightingFixCount" minOccurs="0" />
 						<xs:element type="xs:int" name="WaypointTimer" minOccurs="0" />
 						<xs:element type="xs:string" name="TestTime" />
 						<xs:element type="xs:int" name="GpsTimeZone" minOccurs="0" />
+						<xs:element type="xs:int" name="GpsSkipTimeout" minOccurs="0" />
 						<xs:element type="xs:string" name="KioskMode" />
 						<xs:element type="xs:string" name="BigTitle" />
+						<xs:element type="xs:string" name="BigScroller" />
 						<xs:element type="xs:int" name="NextId" minOccurs="0" />
 						<xs:element type="xs:string" name="TemplateId" />
 						<xs:element type="cts:Controls" name="Controls" minOccurs="0"/>
