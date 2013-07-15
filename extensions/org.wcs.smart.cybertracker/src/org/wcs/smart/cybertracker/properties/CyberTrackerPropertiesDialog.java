@@ -66,13 +66,25 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	
 	private Text txtAppName;
 	private Button btnAutoNext;
+
+	private Button btnLargeScrollBars;
 	private Button btnKioskMode;
+
+	private Text txtSightingAccuracy;
+	private Text txtSightingFixCount;
 	private Text txtTrackTimer;
     private ComboViewer timeOffset;
+    private Text txtSkipButtonTimeout;
+    
     private Text txtStorageTime;
 	
     private ControlDecoration appNameDecoration;
+    
+    private ControlDecoration sightingAccuracyDecoration;
+    private ControlDecoration sightingFixCountDecoration;
     private ControlDecoration trackTimerDecoration;
+    private ControlDecoration skipButtonTimeoutDecoration;
+    
     private ControlDecoration storageTimeDecoration;
 	
 	public CyberTrackerPropertiesDialog() {
@@ -133,12 +145,28 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				// nothing
 			}
 		});
+
+		Label lblLargeScrollBars = new Label(container, SWT.NONE);
+		lblLargeScrollBars.setText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars);
+
+		btnLargeScrollBars = new Button(container, SWT.CHECK);
+		btnLargeScrollBars.setSelection(ctProperties.isLargeScrollBars());
+		btnLargeScrollBars.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
 		
 		Label lblKioskMode = new Label(container, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
 
 		btnKioskMode = new Button(container, SWT.CHECK);
-		btnKioskMode.setSelection(Boolean.TRUE.equals(ctProperties.getKioskMode()));
+		btnKioskMode.setSelection(ctProperties.isKioskMode());
 		btnKioskMode.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -149,6 +177,59 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				// nothing
 			}
 		});
+
+		Label lblSigtingAccuracy = new Label(container, SWT.NONE);
+		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
+
+		txtSightingAccuracy = new Text(container, SWT.BORDER);
+		txtSightingAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (ctProperties.getSightingAccuracy() != null)
+			txtSightingAccuracy.setText(String.valueOf(ctProperties.getSightingAccuracy()));
+		txtSightingAccuracy.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isSigtingAccuracyValid()) {
+					sightingAccuracyDecoration.hide();
+				} else {
+					sightingAccuracyDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		sightingAccuracyDecoration = new ControlDecoration(txtSightingAccuracy, SWT.LEFT);
+		sightingAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		sightingAccuracyDecoration.setShowHover(true);
+		sightingAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingAccuracyIvalid, CyberTrackerProperties.SIGHTING_ACCURACY_MIN_VALUE, CyberTrackerProperties.SIGHTING_ACCURACY_MAX_VALUE));
+		sightingAccuracyDecoration.hide();
+		
+
+		Label lblSightingFixCount = new Label(container, SWT.NONE);
+		lblSightingFixCount.setText(Messages.CyberTrackerPropertiesDialog_SightingFixCount);
+
+		txtSightingFixCount = new Text(container, SWT.BORDER);
+		txtSightingFixCount.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (ctProperties.getSightingFixCount() != null)
+			txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
+		txtSightingFixCount.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isSigtingFixCountValid()) {
+					sightingFixCountDecoration.hide();
+				} else {
+					sightingFixCountDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		sightingFixCountDecoration = new ControlDecoration(txtSightingFixCount, SWT.LEFT);
+		sightingFixCountDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		sightingFixCountDecoration.setShowHover(true);
+		sightingFixCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingFixCountInvalid, CyberTrackerProperties.SIGHTING_FIX_COUNT_MIN_VALUE, CyberTrackerProperties.SIGHTING_FIX_COUNT_MAX_VALUE));
+		sightingFixCountDecoration.hide();
 		
 		Label lblTrackTimer = new Label(container, SWT.NONE);
 		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer);
@@ -193,6 +274,33 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});
 
+
+		Label lblSkipButtonTimeout = new Label(container, SWT.NONE);
+		lblSkipButtonTimeout.setText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout);
+
+		txtSkipButtonTimeout = new Text(container, SWT.BORDER);
+		txtSkipButtonTimeout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (ctProperties.getSkipButtonTimeout() != null)
+			txtSkipButtonTimeout.setText(String.valueOf(ctProperties.getSkipButtonTimeout()));
+		txtSkipButtonTimeout.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isSkipButtonTimeoutValid()) {
+					skipButtonTimeoutDecoration.hide();
+				} else {
+					skipButtonTimeoutDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		skipButtonTimeoutDecoration = new ControlDecoration(txtSkipButtonTimeout, SWT.LEFT);
+		skipButtonTimeoutDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		skipButtonTimeoutDecoration.setShowHover(true);
+		skipButtonTimeoutDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeoutInvalid, CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MIN_VALUE, CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MAX_VALUE));
+		skipButtonTimeoutDecoration.hide();
+		
 		
 		Label lblStorageTime = new Label(container, SWT.NONE);
 		lblStorageTime.setText(Messages.CyberTrackerPropertiesDialog_StorageTime);
@@ -227,6 +335,39 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		return container;
 	}
 
+	private boolean isSigtingAccuracyValid() {
+		if (txtSightingAccuracy == null || txtSightingAccuracy.getText() == null || txtSightingAccuracy.getText().isEmpty())
+			return false;
+		try {
+			Double result = Double.valueOf(txtSightingAccuracy.getText());
+			return result >= CyberTrackerProperties.SIGHTING_ACCURACY_MIN_VALUE && result <= CyberTrackerProperties.SIGHTING_ACCURACY_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	private boolean isSigtingFixCountValid() {
+		if (txtSightingFixCount == null || txtSightingFixCount.getText() == null || txtSightingFixCount.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtSightingFixCount.getText());
+			return result >= CyberTrackerProperties.SIGHTING_FIX_COUNT_MIN_VALUE && result <= CyberTrackerProperties.SIGHTING_FIX_COUNT_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	private boolean isSkipButtonTimeoutValid() {
+		if (txtSkipButtonTimeout == null || txtSkipButtonTimeout.getText() == null || txtSkipButtonTimeout.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtSkipButtonTimeout.getText());
+			return result >= CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MIN_VALUE && result <= CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	
 	private boolean isTrackTimerValid() {
 		if (txtTrackTimer == null || txtTrackTimer.getText() == null || txtTrackTimer.getText().isEmpty())
 			return false;
@@ -254,7 +395,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	}
 
 	private boolean validate() {
-		return isTrackTimerValid() && isAppNameValid() && isStorageTimeValid();
+		return isAppNameValid() && isStorageTimeValid() && 
+				isSigtingAccuracyValid() && isSigtingFixCountValid() && isTrackTimerValid() && isSkipButtonTimeoutValid();
 	}
 	
 	@Override
@@ -265,10 +407,17 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		}
 		ctProperties.setApplicationName(txtAppName.getText());
 		ctProperties.setAutoNext(btnAutoNext.getSelection());
+		
+		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
+		
+		ctProperties.setSightingAccuracy(Double.valueOf(txtSightingAccuracy.getText()));
+		ctProperties.setSightingFixCount(Integer.valueOf(txtSightingFixCount.getText()));
 		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
 		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();
 		ctProperties.setGpsTimeZone((Integer)selection.getFirstElement());
+		ctProperties.setSkipButtonTimeout(Integer.valueOf(txtSkipButtonTimeout.getText()));
+		
 		ctProperties.setStorageTime(Integer.valueOf(txtStorageTime.getText()));
 		
 		Session session = HibernateManager.openSession();

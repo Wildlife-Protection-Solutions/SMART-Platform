@@ -94,9 +94,14 @@ public class ScreensObjectFactory {
 			a1Data.setName(properties.getApplicationName());
 			a1Data.setTestTime("True"); //$NON-NLS-1$
 			a1Data.setBigTitle("True"); //$NON-NLS-1$
-			a1Data.setKioskMode(Boolean.TRUE.equals(properties.getKioskMode()) ? "True" : "False");  //$NON-NLS-1$//$NON-NLS-2$
+			a1Data.setKioskMode(properties.isKioskMode() ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+			a1Data.setBigScroller(properties.isLargeScrollBars() ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			a1Data.setSightingAccuracy(properties.getSightingAccuracy());
+			a1Data.setSightingFixCount(properties.getSightingFixCount());
 			a1Data.setWaypointTimer(properties.getWaypointTimer());
 			a1Data.setGpsTimeZone(properties.getGpsTimeZone());
+			a1Data.setGpsSkipTimeout(properties.getSkipButtonTimeout());
 		}
 		if (screenNodes != null) {
 			a1Node.getNode().addAll(screenNodes);
