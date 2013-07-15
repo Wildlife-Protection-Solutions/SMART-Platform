@@ -133,11 +133,15 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 									"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
 									"ca_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
 									"storage_time INTEGER, "+ //$NON-NLS-1$
+									"large_scroll_bars BOOLEAN, "+ //$NON-NLS-1$
 									"auto_next BOOLEAN, "+ //$NON-NLS-1$
 									"application_name VARCHAR(256), "+ //$NON-NLS-1$
 									"kiosk_mode BOOLEAN, "+ //$NON-NLS-1$
+									"sighting_accuracy DOUBLE, "+ //$NON-NLS-1$
+									"sighting_fix_count INTEGER, "+ //$NON-NLS-1$
 									"waypoint_timer INTEGER, "+ //$NON-NLS-1$
 									"gps_time_zone INTEGER, "+ //$NON-NLS-1$
+									"skip_button_timeout INTEGER, "+ //$NON-NLS-1$
 									"PRIMARY KEY (UUID))"; //$NON-NLS-1$
 
 							String alterSql = "ALTER TABLE smart.cybertracker_properties "+ //$NON-NLS-1$
