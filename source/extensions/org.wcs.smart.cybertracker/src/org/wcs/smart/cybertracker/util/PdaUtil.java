@@ -26,7 +26,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
+import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class containing utility methods to work with PDA + CyberTracker application.
@@ -52,6 +55,26 @@ public class PdaUtil {
 		}
 		return temp;
 	}	
+
+	public static String getRegistryKey(ConservationArea ca) {
+		return ICyberTrackerConstants.REG_KEY_SMART + SmartUtils.encodeHex(ca.getUuid());
+	}
+
+	public static String getFilestore(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+				ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
+	}
+	
+	public static void updateRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
+		String filestoreStr = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
+		filestoreStr = filestoreStr + File.separator + SmartUtils.getDirectoryPath(ca.getUuid()) + File.separator + "downloadpda";
+		File filestore = new File(filestoreStr);
+		if (!filestore.exists())
+			filestore.mkdirs();
+
+		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
+				getRegistryKey(ca), filestore.getCanonicalPath());
+	}
 
 	public static void deleteTempDirectory(File tempDir) {
 		if (tempDir == null)
