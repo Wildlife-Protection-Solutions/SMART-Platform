@@ -128,12 +128,16 @@ public class ObservationMerger implements IDataProcessor{
 										if (!attribute.getDValue().equals(v)){
 											canMerge = false;
 										}
-									}else if (attribute.getSValue() != null){
+									}else if (attribute.getSValue() != null && !attribute.getSValue().isEmpty()){
 										if (!attribute.getSValue().equals(v)){
 											canMerge = false;
 										}
-									}else if (attribute.getItemKey() != null){
+									}else if (attribute.getItemKey() != null  && !attribute.getItemKey().isEmpty()){
 										if (!attribute.getItemKey().equals(v)){
+											canMerge = false;
+										}
+									}else if (attribute.isBValue() != null){
+										if (!v.equals(attribute.isBValue())){
 											canMerge = false;
 										}
 									}else if (v != NODATA){
@@ -150,6 +154,9 @@ public class ObservationMerger implements IDataProcessor{
 										attributeValues.put(attribute.getAttributeKey(), attribute.getSValue());
 									}else if (attribute.getItemKey() != null && !attribute.getItemKey().isEmpty()){
 										attributeValues.put(attribute.getAttributeKey(), attribute.getItemKey());
+									}else if (attribute.isBValue() != null){
+										attributeValues.put(attribute.getAttributeKey(), attribute.isBValue());
+									
 									}else{
 										attributeValues.put(attribute.getAttributeKey(), NODATA);
 									}
