@@ -32,6 +32,7 @@ public interface ICyberTrackerConstants {
 	public static final String MIN_VERSION = "3.307"; //$NON-NLS-1$
 	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
+	public static final String SMART_CTX_DOWNLOAD_FOLDER = "downloadpda"; //$NON-NLS-1$
 	
 	public static final String XML_SCREENS = "Screens.xml"; //$NON-NLS-1$
 	public static final String XML_ELEMENTS = "Elements.xml"; //$NON-NLS-1$

@@ -67,7 +67,7 @@ public class PdaUtil {
 	
 	public static void updateRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
 		String filestoreStr = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		filestoreStr = filestoreStr + File.separator + SmartUtils.getDirectoryPath(ca.getUuid()) + File.separator + "downloadpda";
+		filestoreStr = filestoreStr + File.separator + SmartUtils.getDirectoryPath(ca.getUuid()) + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
 		File filestore = new File(filestoreStr);
 		if (!filestore.exists())
 			filestore.mkdirs();
