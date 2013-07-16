@@ -32,6 +32,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:int" name="NextId" minOccurs="0" />
 						<xs:element type="xs:string" name="TemplateId" />
 						<xs:element type="cts:Controls" name="Controls" minOccurs="0"/>
+						<xs:element type="xs:string" name="DownloadTargetKey" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
