@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -45,6 +46,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Importer for CyberTracker application data. 
@@ -66,12 +68,13 @@ public class CyberTrackerImporter {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
 			return patrols;
 		}
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		PdaUtil.updateRegistryKey(ca);
 		String[] downloadCommand = {appPath, ICyberTrackerConstants.COMMAND_DOWNLOAD};
 		Process proc = Runtime.getRuntime().exec(downloadCommand);
 		proc.waitFor();
-		String ctxDataPath = System.getProperty("user.home"); //$NON-NLS-1$
-		ctxDataPath += "\\Documents\\CyberTracker\\Smart"; //$NON-NLS-1$
-		File cxtDataFolder = new File(ctxDataPath);
+
+		File cxtDataFolder = new File(PdaUtil.getFilestore(ca));
 		File xmlTempDir = PdaUtil.createTempDirectory();
 		//scan files in this directory and obtain raw xml for them
 		monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);

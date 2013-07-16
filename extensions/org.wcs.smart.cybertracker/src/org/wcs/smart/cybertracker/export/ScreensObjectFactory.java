@@ -24,9 +24,13 @@ package org.wcs.smart.cybertracker.export;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
+import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Factory for creating common screens objects.
@@ -91,6 +95,7 @@ public class ScreensObjectFactory {
 			a1Node.setName(properties.getApplicationName());
 			Node.Data a1Data = new Node.Data();
 			a1Node.setData(a1Data);
+			a1Data.setDownloadTargetKey(PdaUtil.getRegistryKey(SmartDB.getCurrentConservationArea()));
 			a1Data.setName(properties.getApplicationName());
 			a1Data.setTestTime("True"); //$NON-NLS-1$
 			a1Data.setBigTitle("True"); //$NON-NLS-1$
