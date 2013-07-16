@@ -82,10 +82,7 @@ public class CyberTrackerExporter {
 
 	public int uploadPda(File file) throws Exception {
 		String appPath = PdaUtil.getCTAppPath();
-		//TODO: what folder to use as destination????
-		String ctxDataPath = System.getProperty("user.home"); //$NON-NLS-1$
-		ctxDataPath += "\\Documents\\CyberTracker\\Smart"; //$NON-NLS-1$
-		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath(), ctxDataPath};
+		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
 		Process proc = Runtime.getRuntime().exec(uploadCommands);
 		int code = proc.waitFor();
 		return code;
