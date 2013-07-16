@@ -24,13 +24,11 @@ package org.wcs.smart.cybertracker.export;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
-import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Factory for creating common screens objects.
