@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.filter;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -204,8 +207,27 @@ public class CategoryAttributeFilter implements IFilter{
 	 */
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
-		Category c = categoryFilter.getCategory(session);
-		Attribute att = attributeFilter.getAttribute(session);
+		Category c = null;
+		Attribute att = null;
+		
+		session.beginTransaction();
+		try{
+			c = categoryFilter.getCategory(session);
+			att = attributeFilter.getAttribute(session);
+
+			boolean found = false;
+			for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){
+				if (a.getKeyId().equals(att.getKeyId())){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				throw new Exception(MessageFormat.format(Messages.CategoryAttributeFilter_MissingCategoryAttribute, new Object[]{c.getKeyId(), att.getKeyId()}));
+			}
+		}finally{
+			session.getTransaction().rollback();
+		}
 		
 		CategoryAttribute ca = new CategoryAttribute(c,  att);
 		DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(ca);

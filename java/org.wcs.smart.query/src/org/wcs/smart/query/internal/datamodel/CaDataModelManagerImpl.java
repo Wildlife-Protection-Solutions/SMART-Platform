@@ -22,6 +22,7 @@
 package org.wcs.smart.query.internal.datamodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -222,6 +223,26 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		
 	}
 	
+	
+	/**
+	 * Finds all attributes associated with the given category
+	 * hkey or parent key.
+	 * 
+	 * @param categoryHkey
+	 * @return
+	 */
+	@Override
+	public Collection<Attribute> getAttributes(Session session, String categoryHkey){
+		List<Attribute> attributes = new ArrayList<Attribute>();
+		Category c = getCategory(session, categoryHkey);
+		while (c != null){
+			for(CategoryAttribute a : c.getAttributes()){
+				attributes.add(a.getAttribute());
+			}
+			c = c.getParent();
+		}
+		return attributes;
+	}
 	
 	/**
 	 * 

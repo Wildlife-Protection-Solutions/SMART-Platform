@@ -23,6 +23,7 @@ package org.wcs.smart.query.internal.datamodel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
@@ -424,9 +426,29 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 
 		Collections.reverse(values);
 		return values.toArray(new String[values.size()]);
-		
-		
 	}
+	
+	
+	/**
+	 * Finds all attributes associated with the given category
+	 * hkey or parent key.
+	 * 
+	 * @param categoryHkey
+	 * @return
+	 */
+	@Override
+	public Collection<Attribute> getAttributes(Session session, String categoryHkey){
+		List<Attribute> attributes = new ArrayList<Attribute>();
+		Category c = getCategory(session, categoryHkey);
+		while (c != null){
+			for(CategoryAttribute a : c.getAttributes()){
+				attributes.add(a.getAttribute());
+			}
+			c = c.getParent();
+		}
+		return attributes;
+	}
+	
 	private Category findCategory(String hkey, List<Category> categories){
 		if (categories == null){
 			return null;

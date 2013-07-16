@@ -22,6 +22,7 @@
 
 package org.wcs.smart.query.internal.datamodel;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -107,6 +108,14 @@ public interface IDataModelManager {
 	 */
 	public Attribute getAttribute(Session session, Attribute attribute);
 
+	/**
+	 * Finds all attributes associated with the given category
+	 * hkey or any of it's parents
+	 * 
+	 * @param categoryHkey
+	 * @return collection of attributes
+	 */
+	public Collection<Attribute> getAttributes(Session session, String categoryHkey);
 	/**
 	 * 
 	 * Gets all the attribute tree nodes at a given level in the data tree.

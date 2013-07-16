@@ -42,6 +42,7 @@ public class Messages extends NLS {
 	public static String AttributeValueItem_TreeListItemParseError;
 	public static String AttributeValueItem_TreeNodeNotFound;
 	public static String CaDataModelManagerImpl_LoadDataModelJobName;
+	public static String CategoryAttributeFilter_MissingCategoryAttribute;
 	public static String CategoryFilter_CategoryNotFound;
 	public static String CategoryFilter_InvalidPrefix;
 	public static String CategoryGroupBy_CategoryNotFoundError;
