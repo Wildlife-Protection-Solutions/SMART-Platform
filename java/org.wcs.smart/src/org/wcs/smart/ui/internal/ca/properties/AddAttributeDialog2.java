@@ -179,7 +179,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	 * information in the attribute panel
 	 */
 	private void updateAttribute(){
-		attributePanel.updateAttribute(toUpdate);
+		attributePanel.updateAttribute(toUpdate, currentSession);
 	}
 	
 	@Override
