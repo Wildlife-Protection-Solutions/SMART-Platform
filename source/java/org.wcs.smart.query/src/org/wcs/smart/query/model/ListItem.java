@@ -43,6 +43,7 @@ public class ListItem implements Comparable<ListItem>{
 	private byte[] uuid;
 	private String name;
 	private String key;
+	private String shortName;
 	
 	/**
 	 * Creates a new list item with a name. 
@@ -76,6 +77,35 @@ public class ListItem implements Comparable<ListItem>{
 		this.uuid = uuid;
 		this.name = name;
 		this.key = key;
+	}
+	
+	/**
+	 * Creates a new list item
+	 * 
+	 * @param name
+	 * @param key
+	 */
+	public ListItem(byte[] uuid, String name, String key, String shortName){
+		this.uuid = uuid;
+		this.name = name;
+		this.key = key;
+		this.shortName = shortName;
+	}
+	
+	/**
+	 * Updates the name
+	 * @param newName
+	 */
+	public void updateName(String newName){
+		this.name = newName;
+	}
+	
+	/**
+	 * Short name associated with list item
+	 * @return
+	 */
+	public String getShortName(){
+		return this.shortName;
 	}
 	
 	/**

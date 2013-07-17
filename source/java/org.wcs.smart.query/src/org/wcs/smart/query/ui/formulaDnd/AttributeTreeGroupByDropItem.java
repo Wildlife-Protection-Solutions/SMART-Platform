@@ -150,7 +150,12 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 				if (it.getParent() != null){
 					name += "   (" + it.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
 				}
-				items.add(new ListItem(null, name, it.getHkey()));
+				items.add(new ListItem(null, name, it.getHkey(), it.getName()));
+			}
+			for (ListItem filter: filters){
+				if (!items.contains(filter)){
+					items.add(filter);
+				}
 			}
 			session.getTransaction().rollback();
 			session.close();
@@ -300,6 +305,12 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 						}
 					}else{
 						filters.addAll(dialog.getAllOptions());
+					}
+					//update the name to the short name for ui
+					for (ListItem filter : filters){
+						if (filter.getShortName() != null){
+							filter.updateName(filter.getShortName());
+						}
 					}
 					
 					updateLabel();

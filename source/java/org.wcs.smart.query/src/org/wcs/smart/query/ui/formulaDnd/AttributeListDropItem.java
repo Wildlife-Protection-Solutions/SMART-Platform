@@ -86,6 +86,11 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 				for (AttributeListItem item : litems){
 					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
 				}
+				
+				if (currentSelection != null && !items.contains(currentSelection)){
+					//item is not longer active; but still in query
+					items.add(currentSelection);
+				}
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
