@@ -489,6 +489,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try {
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
@@ -501,6 +502,9 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 						}
 					});
 				} finally {
+					try{
+						session.getTransaction().rollback();
+					}catch(Exception ex){}
 					session.close();
 				}
 				return Status.OK_STATUS;

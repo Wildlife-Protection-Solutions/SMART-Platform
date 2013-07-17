@@ -465,6 +465,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try{
 				Display.getDefault().syncExec(new Runnable(){
 						@Override
@@ -476,9 +477,12 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 							}
 						}});
 				}finally{
+					try{
+						session.getTransaction().rollback();
+					}catch(Exception ex){}
 					session.close();
 				}
-						return Status.OK_STATUS;
+				return Status.OK_STATUS;
 			}
 		};
 		j.setSystem(true);
