@@ -25,6 +25,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -48,10 +52,10 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
@@ -75,7 +79,32 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	private Label label;
 	private TableViewer tableViewer;
 
-	List<Intelligence> intelligenceList;
+	private List<Intelligence> intelligenceList;
+	
+	private Job updateJob = new Job("Update Motivation Intelligence "){ //$NON-NLS-1$
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			intelligenceList = IntelligenceHibernateManager.getMotivatedIntelligences(patrol);
+			Collections.sort(intelligenceList, new IntelligenceNameComparator());
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					if (intelligenceList.isEmpty()) {
+						label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
+						tableViewer.getControl().setVisible(false);
+						((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
+						((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
+					} else {
+						label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
+						tableViewer.getControl().setVisible(true);
+						tableViewer.setInput(intelligenceList.toArray());
+						((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
+						((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
+					}
+					main.getParent().getParent().layout(true,true);
+				}});
+			return Status.OK_STATUS;
+		}};
 
 	/**
 	 * listener for intelligence change events.
@@ -116,6 +145,7 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 				openCurrentItem();
 			}
 		});
+		tableViewer.setInput(new Object[]{Messages.MotivationIntelligenceContribution_LoadingText});
 
 		//listeners
 		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
@@ -143,21 +173,8 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	}
 
 	protected void updateControls() {
-		intelligenceList = IntelligenceHibernateManager.getMotivatedIntelligences(patrol);
-		Collections.sort(intelligenceList, new IntelligenceNameComparator());
-		if (intelligenceList.isEmpty()) {
-			label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
-			tableViewer.getControl().setVisible(false);
-			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
-			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
-		} else {
-			label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
-			tableViewer.getControl().setVisible(true);
-			tableViewer.setInput(intelligenceList.toArray());
-			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
-			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
-		}
-		main.getParent().getParent().layout(true,true);
+		updateJob.setSystem(true);
+		updateJob.schedule();
 	}
 	
 	/**
