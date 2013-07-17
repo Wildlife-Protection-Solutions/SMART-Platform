@@ -477,8 +477,9 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try{
-				Display.getDefault().syncExec(new Runnable(){
+					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							try{
@@ -488,9 +489,12 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 							}
 						}});
 				}finally{
+					try{
+						session.getTransaction().rollback();
+					}catch (Exception ex){}
 					session.close();
 				}
-						return Status.OK_STATUS;
+				return Status.OK_STATUS;
 			}
 		};
 		j.setSystem(true);

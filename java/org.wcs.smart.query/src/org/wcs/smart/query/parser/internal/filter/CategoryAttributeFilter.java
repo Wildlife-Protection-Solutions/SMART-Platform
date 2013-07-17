@@ -210,23 +210,18 @@ public class CategoryAttributeFilter implements IFilter{
 		Category c = null;
 		Attribute att = null;
 		
-		session.beginTransaction();
-		try{
-			c = categoryFilter.getCategory(session);
-			att = attributeFilter.getAttribute(session);
+		c = categoryFilter.getCategory(session);
+		att = attributeFilter.getAttribute(session);
 
-			boolean found = false;
-			for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){
-				if (a.getKeyId().equals(att.getKeyId())){
-					found = true;
-					break;
-				}
+		boolean found = false;
+		for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){
+			if (a.getKeyId().equals(att.getKeyId())){
+				found = true;
+				break;
 			}
-			if (!found){
-				throw new Exception(MessageFormat.format(Messages.CategoryAttributeFilter_MissingCategoryAttribute, new Object[]{c.getKeyId(), att.getKeyId()}));
-			}
-		}finally{
-			session.getTransaction().rollback();
+		}
+		if (!found){
+			throw new Exception(MessageFormat.format(Messages.CategoryAttributeFilter_MissingCategoryAttribute, new Object[]{c.getKeyId(), att.getKeyId()}));
 		}
 		
 		CategoryAttribute ca = new CategoryAttribute(c,  att);
