@@ -350,35 +350,6 @@ public class Attribute extends DmObject{
 		this.activeTootTreeNodes = activeTootTreeNodes;
 	}
 	
-	
-	public void moveAttributeTreeNode(AttributeTreeNode toMove, AttributeTreeNode to, boolean before){
-		if (to.equals(toMove)){
-			return;
-		}
-		List<AttributeTreeNode> siblings = null;
-		if (toMove.getParent() == null){
-			siblings = this.rootTreeNodes;
-		}else{
-			siblings = toMove.getParent().getChildren();
-		}
-		
-		
-		siblings.remove(toMove);
-		int index = siblings.indexOf(to);
-		if (before){
-			siblings.add(index, toMove);
-		}else{
-			siblings.add(index + 1, toMove);
-		}
-		
-		//reset numbers
-		for (int i = 0; i < siblings.size(); i ++){
-			siblings.get(i).setNodeOrder(i);
-		}
-		
-		
-	}
-	
 	/**
 	 * Clones an attribute.
 	 * @param newCa the new conservation area to associated with the attribute
@@ -387,7 +358,7 @@ public class Attribute extends DmObject{
 	 */
 	public Attribute clone(ConservationArea newCa, String defaultLang){
 		Attribute clone = new Attribute();
-		clone.copyValues(this, newCa, ca, defaultLang);
+		clone.copyValues(this, newCa, defaultLang);
 		clone.setConservationArea(newCa);
 		clone.setIsRequired(this.isRequired);
 		if (this.maxValue != null){
@@ -423,4 +394,32 @@ public class Attribute extends DmObject{
 		return clone;
 	}
 
+	public static void moveAttributeTreeNode(List<AttributeTreeNode> rootNodes, AttributeTreeNode toMove, 
+			AttributeTreeNode to, boolean before){
+		if (to.equals(toMove)){
+			return;
+		}
+		List<AttributeTreeNode> siblings = null;
+		if (toMove.getParent() == null){
+			siblings = rootNodes;
+		}else{
+			siblings = toMove.getParent().getChildren();
+		}
+		
+		
+		siblings.remove(toMove);
+		int index = siblings.indexOf(to);
+		if (before){
+			siblings.add(index, toMove);
+		}else{
+			siblings.add(index + 1, toMove);
+		}
+		
+		//reset numbers
+		for (int i = 0; i < siblings.size(); i ++){
+			siblings.get(i).setNodeOrder(i);
+		}
+		
+		
+	}
 }

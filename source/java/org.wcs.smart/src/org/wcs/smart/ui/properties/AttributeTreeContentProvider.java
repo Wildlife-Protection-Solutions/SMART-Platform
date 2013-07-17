@@ -74,6 +74,7 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	/**
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput instanceof Attribute){
@@ -145,13 +146,6 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 			return false;
 		}
 		return children.length > 0;
-		
-//		if (element instanceof AttributeTreeNode){
-//			return ((AttributeTreeNode)element).getChildren() != null && ((AttributeTreeNode)element).getChildren().size() > 0; 
-//		}else if (element instanceof RootNode){
-//			return attribute.getTree() != null && attribute.getTree().size() > 0;
-//		}
-//		return false;
 	}
 	
 	/**
