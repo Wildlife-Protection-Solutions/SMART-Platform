@@ -83,6 +83,7 @@ public class AttributeTree {
 	private AttributeTreeChangeListener listener = null;
 	private Session currentSession = null;
 	
+	private Attribute attribute;
 	/**
 	 * Sets the listener fired when modifications occur.  
 	 * @param listener
@@ -97,30 +98,83 @@ public class AttributeTree {
 		}
 	}
 	
+	/**
+	 * Update the key associated with the attribute.
+	 * <p>
+	 * This is done so if the attribute key is updated
+	 * then tree nodes are imported the correct
+	 * file will be searched for.
+	 * </p>
+	 * 
+	 * @param newKey new attribute key
+	 */
+	public void updateAttributeKey(String newKey){
+		if (this.attribute != null){
+			this.attribute.setKeyId(newKey);
+		}
+	}
+	
 	public void refresh(Language newLanguage){
 		((AttributeTreeLabelProvider)viewer.getLabelProvider()).setLanguage(newLanguage);
 		viewer.refresh();
 	}
 	/**
-	 * Sets the attribute input to the attribute tree
+	 * Sets the attribute input to the attribute tree.  Attribute
+	 * tree nodes are cloned for working on; this is done inside a progress
+	 * monitor.  When complete the cloned nodes should be merged back
+	 * into the original nodes.
 	 * 
 	 * @param attribute
 	 * @param currentSession current hibernate session
 	 */
 	public void setInput(Attribute attribute, Session currentSession){
 		this.currentSession = currentSession;
-		viewer.setInput(attribute);
+		this.attribute = attribute;
+		final List<AttributeTreeNode> clonedroots = new ArrayList<AttributeTreeNode>();
+		if (attribute.getTree() != null) {
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
+					.getDefault().getActiveShell());
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
+
+					@Override
+					public void run(IProgressMonitor monitor)
+							throws InvocationTargetException,
+							InterruptedException {
+						monitor.setTaskName(Messages.AttributeTree_LoadAttributeTreeMessage);
+
+						for (AttributeTreeNode node : AttributeTree.this.attribute.getTree()) {
+							AttributeTreeNode cloned = node.clone(
+									AttributeTree.this.attribute.getConservationArea(),
+									AttributeTree.this.attribute.getConservationArea(), 
+									null,
+									AttributeTree.this.attribute.getConservationArea().getDefaultLanguage().getCode(),
+									null, true);
+							clonedroots.add(cloned);
+						}
+
+					}
+				});
+			} catch (Exception ex) {
+				SmartPlugIn.displayLog(Display.getDefault().getActiveShell(),
+						Messages.AttributeTree_LoadErrorMessage, ex);
+			}
+		}
+		
+		viewer.setInput(clonedroots);
 		refreshTree();
 	}
 
-	
 	/**
 	 * 
-	 * @return attribute associated with attribute tree
+	 * @return the list of root nodes
 	 */
-	public Attribute getAttribute(){
-		return (Attribute)viewer.getInput();
+	@SuppressWarnings("unchecked")
+	public List<AttributeTreeNode> getRootNodes(){
+		return (List<AttributeTreeNode>)viewer.getInput();
 	}
+	
+
 	
 	/**
 	 * 
@@ -207,9 +261,9 @@ public class AttributeTree {
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				ImportAttributeProcessor processor = new ImportAttributeProcessor((Attribute)viewer.getInput());
+				ImportAttributeProcessor processor = new ImportAttributeProcessor(attribute, getRootNodes());
 				processor.importAttribute();
-				viewer.setInput((Attribute)viewer.getInput());
+				viewer.setInput(getRootNodes());
 				fireChangeListener();
 				viewer.expandToLevel(2);
 			}
@@ -243,8 +297,7 @@ public class AttributeTree {
 		btnDisableAll.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Attribute att = (Attribute) viewer.getInput();
-				for (AttributeTreeNode node : att.getTree()){
+				for (AttributeTreeNode node : getRootNodes()){
 					disableNode(node, false);
 				}
 				viewer.refresh();
@@ -261,9 +314,7 @@ public class AttributeTree {
 		btnEnableeAll.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Attribute att = (Attribute) viewer.getInput();
-				if (att.getTree() == null) return;
-				for (AttributeTreeNode node : att.getTree()){
+				for (AttributeTreeNode node : getRootNodes()){
 					enableAll(node);
 				}
 				viewer.refresh();
@@ -373,10 +424,7 @@ public class AttributeTree {
 								node.setParent(null);
 								node.setAttribute(null);
 							}else{
-								if (node.getAttribute().getActiveTreeNodes() != null){
-									node.getAttribute().getActiveTreeNodes().remove(node);
-								}
-								node.getAttribute().getTree().remove(node);
+								getRootNodes().remove(node);
 								node.setAttribute(null);
 							}
 						}
@@ -474,11 +522,10 @@ public class AttributeTree {
 	 */
 	private void editItem(TreeViewer viewer, Language currentLanguage){
 		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-		Attribute a = (Attribute)viewer.getInput();
 		if (x instanceof AttributeTreeNode){
 			List<? extends DmObject> siblings = null;
 			if ( ((AttributeTreeNode)x).getParent() == null){
-				siblings = a.getTree();
+				siblings = getRootNodes();
 			}else{
 				siblings = ((AttributeTreeNode)x).getParent().getChildren();
 			}
@@ -497,12 +544,12 @@ public class AttributeTree {
 	 */
 	private void addItem(Language currentLanguage){
 		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-		Attribute a = (Attribute)viewer.getInput();
+		
 		if (x instanceof AttributeTreeContentProvider.RootNode || x instanceof AttributeTreeNode){
 			List<? extends DmObject> siblings = null;
 			AttributeTreeNode parent = null;
 			if (x instanceof AttributeTreeContentProvider.RootNode){
-				siblings = a.getTree();
+				siblings = getRootNodes();
 			}else{
 				siblings = ((AttributeTreeNode)x).getChildren();
 				parent = ((AttributeTreeNode)x);
@@ -510,7 +557,6 @@ public class AttributeTree {
 			
 			AttributeTreeNode it = new AttributeTreeNode();
 			it.setParent(parent);
-			it.setAttribute(a);
 			
 			AttributeItemDialog dd = new AttributeItemDialog(Display.getCurrent().getActiveShell(), it, siblings, currentLanguage);
 			int ret = dd.open();
@@ -525,11 +571,7 @@ public class AttributeTree {
 				}
 				parent.getChildren().add(it);
 			}else{
-				if (a.getTree() == null){
-					a.setTree(new ArrayList<AttributeTreeNode>());
-					viewer.setInput((Attribute)viewer.getInput());
-				}
-				a.getTree().add(it);
+				getRootNodes().add(it);
 			}
 			viewer.setExpandedState(x, true);
 			
@@ -629,6 +671,7 @@ class AttributeTreeDropListener extends ViewerDropAdapter {
 	/**
 	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean performDrop(Object data) {
 
@@ -641,7 +684,7 @@ class AttributeTreeDropListener extends ViewerDropAdapter {
 		int loc = getCurrentLocation();
 		if (obj instanceof AttributeTreeNode
 				&& getCurrentTarget() instanceof AttributeTreeNode) {
-			((Attribute) viewer.getInput()).moveAttributeTreeNode(
+			Attribute.moveAttributeTreeNode((List<AttributeTreeNode>)viewer.getInput(),
 					(AttributeTreeNode) obj,
 					(AttributeTreeNode) getCurrentTarget(),
 					loc == LOCATION_BEFORE);

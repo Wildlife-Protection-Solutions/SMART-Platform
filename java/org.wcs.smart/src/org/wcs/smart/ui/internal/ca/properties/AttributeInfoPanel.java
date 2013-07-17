@@ -177,11 +177,10 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/* Name & Key */
 		createNameKeyFields(this, canEdit, createNew);
 		txtKey.addListener(SWT.Modify, new Listener(){
-
 			@Override
 			public void handleEvent(Event event) {
 				if (AttributeInfoPanel.this.attTree != null){
-					AttributeInfoPanel.this.attTree.getAttribute().setKeyId(txtKey.getText());
+					AttributeInfoPanel.this.attTree.updateAttributeKey(txtKey.getText());
 				}
 			}});
 		
@@ -232,7 +231,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		lblNewLabel_3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblNewLabel_3.setText(Messages.AttributeInfoPanel_Min_Label);
 		
-		txtMinValue = new Text(numericComposite, SWT.NONE);
+		txtMinValue = new Text(numericComposite, SWT.BORDER);
 		txtMinValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 		if (canEdit){
@@ -630,7 +629,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			cdMaxValue.hide();
 			cdAttList.hide();
 			if (this.attTree != null){
-				if (this.attTree.getAttribute().getTree() == null || this.attTree.getAttribute().getTree().size() == 0){
+				if (this.attTree.getRootNodes().size() == 0){
+//				if (this.attTree.getAttribute().getTree() == null || this.attTree.getAttribute().getTree().size() == 0){
 					cdAttTree.setDescriptionText(Messages.AttributeInfoPanel_Error_OneTreeNodeRequired);
 					cdAttTree.show();
 					error = false;
@@ -771,10 +771,14 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * 
 	 * @param att attribute to update
 	 */
-	public void updateAttribute(Attribute att, Session session){
+	public void updateAttribute(Attribute att, final Session session){
 		updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
+		if (att.getUuid() == null){
+			session.saveOrUpdate(att);
+		}
+		session.flush();
 		
 		if (att.getType().equals(Attribute.AttributeType.NUMERIC)){
 			if (att.getAggregations() == null){
@@ -826,28 +830,64 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
 			if(attTree != null){
-				List<AttributeTreeNode> root = attTree.getAttribute().getTree();
-				if (root != null){
-					for (AttributeTreeNode n : root){
-						setAttribute(att, n);
-					}
+				final Attribute thisAttribute = att;
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				try {
+					pmd.run(true, false, new IRunnableWithProgress() {
+						
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+								InterruptedException {
+							monitor.setTaskName(Messages.AttributeInfoPanel_SavingProgressMessage);
+							if (thisAttribute.getTree() == null){
+								thisAttribute.setTree(new ArrayList<AttributeTreeNode>());
+							}else{
+								thisAttribute.getTree().clear();
+							}
+							List<AttributeTreeNode> root = attTree.getRootNodes();
+							if (root != null){
+								for (AttributeTreeNode n : root){
+									AttributeTreeNode mergedNode = updateAttributeTreeNode(thisAttribute, n, session);
+									thisAttribute.getTree().add(mergedNode);
+								}
+							}
+							session.flush();
+						}
+					});
+				} catch (Exception ex) {
+					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.AttributeInfoPanel_SaveErrorMessage, ex);
 				}
-				att.setTree(root);
+				
 			}
 		}
 	}
 	
 
-	private void setAttribute(Attribute newAttribute, AttributeTreeNode node){
-		if (!node.getAttribute().equals(newAttribute)){
-			node.setAttribute(newAttribute);
-			if (node.getChildren() != null){
-				for (AttributeTreeNode child : node.getChildren()){
-					setAttribute(newAttribute, child);
-				}
+	private AttributeTreeNode updateAttributeTreeNode(Attribute newAttribute, AttributeTreeNode node, Session session){
+		
+		
+		List<AttributeTreeNode> kids = new ArrayList<AttributeTreeNode>();
+		if (node.getChildren() != null){
+			for (AttributeTreeNode child : node.getChildren()){
+				AttributeTreeNode n = updateAttributeTreeNode(newAttribute, child, session);
+				kids.add(n);
 			}
 		}
+		if (node.getUuid() != null){
+			node = (AttributeTreeNode) session.merge(node);
+			node.setAttribute(newAttribute);
+		}else{
+			node.setAttribute(newAttribute);
+			session.saveOrUpdate(node);
+		}
 		
+		for ( org.wcs.smart.ca.Label l : node.getNames()){
+			l.setElement(node);
+		}
+		node.getChildren().clear();
+		node.getChildren().addAll(kids);
+		
+		return node;
 	}
 		
 	/**

@@ -109,7 +109,7 @@ public class AttributeListItem extends DmObject{
 	public AttributeListItem clone(Attribute newAtt, ConservationArea oldCa, String defaultLang){
 		AttributeListItem clone = new AttributeListItem();
 
-		clone.copyValues(this, newAtt.getConservationArea(), oldCa, defaultLang);
+		clone.copyValues(this, newAtt.getConservationArea(), defaultLang);
 		clone.setAttribute(newAtt);
 		clone.setIsActive(this.isActive);
 		

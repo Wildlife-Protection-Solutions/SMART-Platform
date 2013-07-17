@@ -200,17 +200,35 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	}
 	
 	/**
-	 * Clones an attribute tree node
+	 * Clones an attribute tree node and children nodes excluding the uuid field
 	 * @param newCa the new conservation area to associated with the tree node
 	 * @param oldCa the conservation area of the object being cloned 
 	 * @param parent the attribute tree parent node 
 	 * @return a cloned attribute tree node
 	 */
-	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, String defaultLang,  Attribute clonedAttribute  ){
-		AttributeTreeNode clone = new AttributeTreeNode();
-		clone.copyValues(this, newCa, oldCa, defaultLang);
-		clone.setIsActive(this.isActive);
+	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, 
+			String defaultLang,  Attribute clonedAttribute  ){
+		return clone(newCa, oldCa, parent, defaultLang, clonedAttribute, false);
+	}
+	/**
+	 * Clones the attribute tree node and children nodes
+	 * @param newCa conservation area cloning to (may be same as oldCa)
+	 * @param oldCa original conservation area cloning from
+	 * @param parent parent tree node
+	 * @param defaultLang defaultLanguage to copy labels from
+	 * @param clonedAttribute parent attribute tree node
+	 * @param copyUuid if uuid field should be cloned as well
+	 * @return
+	 */
+	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, 
+			String defaultLang,  Attribute clonedAttribute, boolean copyUuid  ){
 		
+		AttributeTreeNode clone = new AttributeTreeNode();
+		clone.copyValues(this, newCa, defaultLang);
+		if (copyUuid){
+			clone.setUuid(getUuid());
+		}
+		clone.setIsActive(this.isActive);
 		clone.setNodeOrder(this.getNodeOrder());
 		clone.setParent(parent);
 		clone.setAttribute(clonedAttribute);
@@ -218,7 +236,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		if (this.getChildren() != null){
 			clone.setChildren(new ArrayList<AttributeTreeNode>());
 			for (AttributeTreeNode node : this.getChildren()){
-				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang, clonedAttribute));
+				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang, clonedAttribute, copyUuid));
 			}
 		}
 		clone.updateHkey();

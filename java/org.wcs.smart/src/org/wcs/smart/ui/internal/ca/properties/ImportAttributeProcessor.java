@@ -66,11 +66,12 @@ public class ImportAttributeProcessor {
 	private DataModel xmlDataModel = null;
 	private Attribute attribute;
 	private AttributeType matchedAttribute;
-	
+	private List<AttributeTreeNode> workingRoots = null;
 	private String defaultLangCode = null;
 	
-	public ImportAttributeProcessor(Attribute attribute){
+	public ImportAttributeProcessor(Attribute attribute, List<AttributeTreeNode> workingRootNodes){
 		this.attribute = attribute;
+		this.workingRoots = workingRootNodes;
 	}
 	
 	
@@ -116,15 +117,15 @@ public class ImportAttributeProcessor {
 		for (TreeNodeType root : roots){
 			newNodes.add(convertNodeCascade(root, null));
 		}
-			
-		if (attribute.getTree() == null){
-			attribute.setTree(new ArrayList<AttributeTreeNode>());
+		
+		if (workingRoots == null){
+			workingRoots = new ArrayList<AttributeTreeNode>();
 		}
 		//merge
 		for(AttributeTreeNode newNode : newNodes){
 			boolean found = false;
 
-			for (AttributeTreeNode existing : attribute.getTree()){
+			for (AttributeTreeNode existing : workingRoots){
 				if (existing.getKeyId().equals(newNode.getKeyId())){
 					found = true;
 					mergeNodes(existing, newNode);
@@ -133,8 +134,8 @@ public class ImportAttributeProcessor {
 			}
 			if (!found){
 				newNode.updateHkey();
-				attribute.getTree().add(newNode);
-				newNode.setNodeOrder(attribute.getTree().size());
+				workingRoots.add(newNode);
+				newNode.setNodeOrder(workingRoots.size());
 			}
 		}
 		

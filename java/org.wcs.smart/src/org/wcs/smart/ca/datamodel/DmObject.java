@@ -209,29 +209,22 @@ public class DmObject extends HasLabel{
 	 * 
 	 * @param oldObject  Old object to copy values from 
 	 * @param newCa the conservation area associated with the new object
-	 * @param oldCa the conservation area associated with the old object
 	 */
-	protected void copyValues(DmObject oldObject, ConservationArea newCa, ConservationArea oldCa, String defaultLang){
+	protected void copyValues(DmObject oldObject, ConservationArea newCa, String defaultLang){
 		this.keyid = oldObject.keyid;
 		this.name = oldObject.name;
 		
 		this.setNames(new HashSet<Label>());
+		
 		if (oldObject.getNames() != null){
 			for (Label l : oldObject.getNames()){
 				if (l.getLanguage().getCode().equals(defaultLang)){
-					Label lblClone = new Label();
-					lblClone.setValue(l.getValue());
-					lblClone.setLanguage(newCa.getDefaultLanguage());
-					lblClone.setElement(this);
-					this.getNames().add(lblClone);
+					this.updateName(newCa.getDefaultLanguage(), l.getValue());
 				}
 				for (Language lang : newCa.getLanguages()){
 					if (l.getLanguage().isSame(lang) ){
-						Label lblClone = new Label();
-						lblClone.setValue(l.getValue());
-						lblClone.setLanguage(lang);
-						lblClone.setElement(this);
-						this.getNames().add(lblClone);
+						this.updateName(lang, l.getValue());
+						break;
 					}
 				}
 			}

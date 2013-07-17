@@ -358,7 +358,7 @@ RETURNS NULL ON NULL INPUT;
 	public Category clone(ConservationArea newCa, Category parent, List<Attribute> clonedAttributes, String defaultLang){
 		
 		Category clone = new Category();
-		clone.copyValues(this, newCa, ca, defaultLang);
+		clone.copyValues(this, newCa, defaultLang);
 		
 		clone.setCategoryOrder(this.getCategoryOrder());
 		clone.setChildren(children);
