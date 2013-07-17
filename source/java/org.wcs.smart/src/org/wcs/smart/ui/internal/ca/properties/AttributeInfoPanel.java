@@ -24,7 +24,6 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -205,7 +204,6 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/* Numeric Attribute Options */
 		numericComposite = new Composite(optionComposite, SWT.NONE);
 		numericComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-//		numericComposite.setBounds(0, 0, 64, 64);
 		numericComposite.setLayout(new GridLayout(2, false));
 		
 		Label lblAggregations = new Label(numericComposite, SWT.NONE);
@@ -234,9 +232,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		lblNewLabel_3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblNewLabel_3.setText(Messages.AttributeInfoPanel_Min_Label);
 		
-		txtMinValue = new Text(numericComposite, SWT.BORDER);
+		txtMinValue = new Text(numericComposite, SWT.NONE);
 		txtMinValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-//		txtMinValue.setBounds(0, 0, 76, 21);
 		
 		if (canEdit){
 			cdMinValue = createDecoration(txtMinValue);
@@ -250,12 +247,10 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		Label lblNewLabel_4 = new Label(numericComposite, SWT.NONE);
 		lblNewLabel_4.setAlignment(SWT.RIGHT);
-//		lblNewLabel_4.setBounds(0, 0, 55, 15);
 		lblNewLabel_4.setText(Messages.AttributeInfoPanel_Max_Label);
 		
 		txtMaxValue = new Text(numericComposite, SWT.BORDER);
 		txtMaxValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-//		txtMaxValue.setBounds(0, 0, 76, 21);
 		
 		if (canEdit){
 			cdMaxValue = createDecoration(txtMaxValue);		
@@ -275,16 +270,13 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/*   Text Attribute Options */
 		textComposite = new Composite(optionComposite, SWT.NONE);
 		textComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-//		textComposite.setBounds(0, 0, 64, 64);
 		textComposite.setLayout(new GridLayout(2, false));
 		
 		Label lblNewLabel_5 = new Label(textComposite, SWT.NONE);
-//		lblNewLabel_5.setBounds(0, 0, 55, 15);
 		lblNewLabel_5.setText(Messages.AttributeInfoPanel_Regex_Label);
 		
 		txtRegex = new Text(textComposite, SWT.BORDER);
 		txtRegex.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-//		txtRegex.setBounds(0, 0, 76, 21);
 		if (!canEdit){
 			txtRegex.setEditable(false);
 		}
@@ -293,20 +285,18 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/*   List Attribute Options */
 		listComposite = new Composite(optionComposite, SWT.NONE);
 		listComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		//listComposite.setBounds(0, 0, 64, 64);
 		listComposite.setLayout(new GridLayout(3, false));
 		
 		Label lblValues = new Label(listComposite, SWT.NONE);
 		lblValues.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		//lblValues.setBounds(0, 0, 55, 15);
 		lblValues.setText(Messages.AttributeInfoPanel_ValuesLabel);
 		
 		lstAttributeList = new TableViewer(listComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		Table list = lstAttributeList.getTable();
-		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		((GridData)list.getLayoutData()).heightHint = 80;
+		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+//		((GridData)list.getLayoutData()).heightHint = 500;
 		((GridData)list.getLayoutData()).widthHint = 100;
-		//list.setBounds(0, 0, 88, 68);
+
 		lstAttributeList.setContentProvider(new ObservableListContentProvider());
 		lstAttributeList.setInput(attributeList);
 		if (canEdit){
@@ -350,7 +340,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					validate();
 				}
 			});
-			Button btnEditList = new Button(buttonPanel, SWT.NONE);
+			final Button btnEditList = new Button(buttonPanel, SWT.NONE);
 			btnEditList.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 			btnEditList.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			btnEditList.addSelectionListener(new SelectionAdapter() {
@@ -368,6 +358,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					validate();
 				}
 			});
+			btnEditList.setEnabled(false);
+			
 			btnDisableListItem = new Button(buttonPanel, SWT.NONE);
 			btnDisableListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 			btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
@@ -386,6 +378,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					validate();
 				}
 			});
+			btnDisableListItem.setEnabled(false);
 			
 			btnDeleteListItem = new Button(buttonPanel, SWT.NONE);
 			btnDeleteListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
@@ -430,6 +423,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					});
 				}
 			});
+			btnDeleteListItem.setEnabled(false);
 			
 			lstAttributeList.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
@@ -437,6 +431,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					btnDisableListItem.setEnabled(it != null);
 					btnDeleteListItem.setEnabled(it != null);
+					btnEditList.setEnabled(it != null);
 					if (it != null && it.getIsActive()){
 						btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}else{
@@ -741,10 +736,18 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 								}
 							}
 						});
-				Collection<AttributeListItem> collection = att.getAttributeList();
-				attributeList = new WritableList(collection,
-						AttributeListItem.class);
+
+				//create a cloned copy for working with
+				ArrayList<AttributeListItem> items = new ArrayList<AttributeListItem>();
+				for (AttributeListItem item : att.getAttributeList()){
+					AttributeListItem clone = item.clone(att, att.getConservationArea(), att.getConservationArea().getDefaultLanguage().getCode());
+					clone.setUuid(item.getUuid());
+					items.add(clone);
+				}
+				
+				attributeList = new WritableList(items,AttributeListItem.class);
 				lstAttributeList.setInput(attributeList);
+
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
 				
@@ -768,7 +771,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * 
 	 * @param att attribute to update
 	 */
-	public void updateAttribute(Attribute att){
+	public void updateAttribute(Attribute att, Session session){
 		updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
@@ -806,10 +809,21 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				att.getAttributeList().clear();
 			}
 			for (int i = 0; i < attributeList.size(); i ++){
-				((AttributeListItem)attributeList.get(i)).setListOrder(i);
-				((AttributeListItem)attributeList.get(i)).setAttribute(att);
-				att.getAttributeList().add((AttributeListItem)attributeList.get(i));
+				AttributeListItem item = (AttributeListItem) attributeList.get(i);
+				
+				item.setListOrder(i);
+				item.setAttribute(att);
+				
+				if (item.getUuid() != null){
+					item = (AttributeListItem) session.merge(item);	
+				}
+				for ( org.wcs.smart.ca.Label l : item.getNames()){
+					l.setElement(item);
+				}
+				att.getAttributeList().add(item);
+				session.flush();
 			}
+			
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
 			if(attTree != null){
 				List<AttributeTreeNode> root = attTree.getAttribute().getTree();

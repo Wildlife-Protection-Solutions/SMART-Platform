@@ -453,6 +453,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (restart[0]){
 			//restart
 			PlatformUI.getWorkbench().restart();
+			return;
 		}
 		tblEmployee.refresh();
 	}

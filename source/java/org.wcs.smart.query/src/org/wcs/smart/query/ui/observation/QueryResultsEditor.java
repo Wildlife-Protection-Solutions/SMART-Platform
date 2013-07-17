@@ -489,20 +489,21 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final Session session = HibernateManager.openSession();
-				try{
-				Display.getDefault().syncExec(new Runnable(){
+				try {
+					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							try{
+							try {
 								getQuery().generateDropItems(session);
-							}catch (Exception ex){
+							} catch (Exception ex) {
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}
-						}});
-				}finally{
+						}
+					});
+				} finally {
 					session.close();
 				}
-						return Status.OK_STATUS;
+				return Status.OK_STATUS;
 			}
 		};
 		j.setSystem(true);
