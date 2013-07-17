@@ -101,6 +101,14 @@ public class AttributeListGroupByDropItem extends DropItem implements
 			for (AttributeListItem it : listitems){
 				items.add(new ListItem(null, it.getName(), it.getKeyId()));
 			}
+			if (filters != null){
+				for(ListItem filter : filters){
+					//add disabled items
+					if (!items.contains(filter)){
+						items.add(filter);
+					}
+				}
+			}
 			session.getTransaction().rollback();
 			session.close();
 		}catch (Exception ex){

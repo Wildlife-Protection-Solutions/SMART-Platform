@@ -864,7 +864,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	
 
 	private AttributeTreeNode updateAttributeTreeNode(Attribute newAttribute, AttributeTreeNode node, Session session){
-		
+		node.setAttribute(newAttribute);
 		
 		List<AttributeTreeNode> kids = new ArrayList<AttributeTreeNode>();
 		if (node.getChildren() != null){
@@ -875,9 +875,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}
 		if (node.getUuid() != null){
 			node = (AttributeTreeNode) session.merge(node);
-			node.setAttribute(newAttribute);
 		}else{
-			node.setAttribute(newAttribute);
 			session.saveOrUpdate(node);
 		}
 		

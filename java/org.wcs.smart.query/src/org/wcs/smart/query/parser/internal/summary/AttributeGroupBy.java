@@ -279,11 +279,9 @@ public class AttributeGroupBy implements IGroupBy {
 			if (filterHkeys != null){
 				ArrayList<ListItem> items = new ArrayList<ListItem>();
 				for (int i = 0; i < filterHkeys.length ; i++){
-					for (AttributeListItem ali : QueryDataModelManager.getInstance().getAttributeListItems(attribute, session)){
-						if (ali.getKeyId().equals(filterHkeys[i])){
-							items.add(new ListItem(null, ali.getName(), ali.getKeyId()));
-							break;
-						}
+					AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attribute.getKeyId(), filterHkeys[i]);
+					if (ali != null){
+						items.add(new ListItem(null, ali.getName(), ali.getKeyId()));
 					}
 				}
 				it.initializeData(items);
@@ -296,11 +294,13 @@ public class AttributeGroupBy implements IGroupBy {
 					keys.add(filterHkeys[i]);
 				}
 				ArrayList<ListItem> items = new ArrayList<ListItem>();
-				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute, treeLevel, true)){
-					if (keys.contains(child.getHkey())){
-						items.add(new ListItem(null, child.getName(), child.getHkey()));	
+				for (String hkey : keys){
+					AttributeTreeNode item = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attribute.getKeyId(), hkey);
+					if (item != null){
+						items.add(new ListItem(null, item.getName(), item.getHkey()));
 					}
 				}
+				
 				it.initializeData(items);
 			}
 		}
