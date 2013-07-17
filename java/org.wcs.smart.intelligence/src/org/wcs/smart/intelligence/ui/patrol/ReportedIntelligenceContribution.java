@@ -24,6 +24,10 @@ package org.wcs.smart.intelligence.ui.patrol;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -102,6 +106,37 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		}
 	};
 	
+	// job update intelligence records
+	private Job updateControlsJob = new Job("updating reported intelligence"){ //$NON-NLS-1$  this is a system job
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final List<Intelligence> data = IntelligenceHibernateManager.getReportedIntelligences(patrol);
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					if (data.isEmpty()) {
+						label.setText(Messages.ReportedIntelligenceContribution_NothingReported_Label);
+						tableViewer.getControl().setVisible(false);
+						btnOpen.setVisible(false);
+						((GridData) tableViewer.getControl().getLayoutData()).heightHint = 0;
+						((GridData) tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
+					} else {
+						label.setText(Messages.ReportedIntelligenceContribution_IntelligenceReported_Label);
+						tableViewer.getControl().setVisible(true);
+						tableViewer.setInput(data.toArray());
+						btnOpen.setVisible(true);
+						((GridData) tableViewer.getControl().getLayoutData()).heightHint = 75;
+						((GridData) tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
+					}
+					main.getParent().getParent().layout(true, true);
+				}
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
+	
 	public ReportedIntelligenceContribution() {}
 
 	@Override
@@ -142,6 +177,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 				openCurrentItem();
 			}
 		});
+		tableViewer.setInput(new String[]{Messages.ReportedIntelligenceContribution_LoadingText});
 
 		btnOpen = toolkit.createButton(main, Messages.ReportedIntelligenceContribution_Open_Button, SWT.PUSH);
 		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -180,23 +216,10 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		updateControls();
 	}
 
+	
 	protected void updateControls() {
-		List<Intelligence> data = IntelligenceHibernateManager.getReportedIntelligences(patrol);
-		if (data.isEmpty()) {
-			label.setText(Messages.ReportedIntelligenceContribution_NothingReported_Label);
-			tableViewer.getControl().setVisible(false);
-			btnOpen.setVisible(false);
-			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
-			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
-		} else {
-			label.setText(Messages.ReportedIntelligenceContribution_IntelligenceReported_Label);
-			tableViewer.getControl().setVisible(true);
-			tableViewer.setInput(data.toArray());
-			btnOpen.setVisible(true);
-			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
-			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
-		}
-		main.getParent().getParent().layout(true, true);
+		updateControlsJob.setSystem(true);
+		updateControlsJob.schedule();
 	}
 
 	private void createIntelligence() {

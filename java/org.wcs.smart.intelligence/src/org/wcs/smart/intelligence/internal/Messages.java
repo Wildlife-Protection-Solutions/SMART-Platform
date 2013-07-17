@@ -266,6 +266,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceWizard_Title;
 
+	public static String MotivationIntelligenceContribution_LoadingText;
+
 	public static String MotivationIntelligenceContribution_Motivated_Label;
 
 	public static String MotivationIntelligenceContribution_Name;
@@ -309,6 +311,8 @@ public class Messages extends NLS {
 	public static String ReportedIntelligenceContribution_Create_Button_Tooltip;
 
 	public static String ReportedIntelligenceContribution_IntelligenceReported_Label;
+
+	public static String ReportedIntelligenceContribution_LoadingText;
 
 	public static String ReportedIntelligenceContribution_Name;
 
