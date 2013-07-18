@@ -36,6 +36,10 @@ public class DataUtils {
 	}
 	
 	public static void processConfiguration(String args[], IDataProcessor processor){
+		processConfiguration(args, processor, true);
+	}
+	
+	public static void processConfiguration(String args[], IDataProcessor processor, boolean printInfo){
 		if (args.length != 2){
 			System.out.println("Invalid usage.  Must provide both input and output file");
 			System.exit(1);
@@ -59,7 +63,9 @@ public class DataUtils {
 		if (f1.isFile()){
 			try{
 				processor.processFile(f1, f2);
-				System.out.println("Processed file wrote results to :" +f2.toString());
+				if (printInfo){
+					System.out.println("Processed file wrote results to :" +f2.toString());
+				}
 			}catch (Exception ex){
 				ex.printStackTrace();
 				System.out.println("Failed to process file: " + f2.toString() + ". " + ex.getMessage());
@@ -71,8 +77,10 @@ public class DataUtils {
 					try{
 						File output = new File(f2, file.getName());
 						processor.processFile(file, output);
-						System.out.println("Processed file " + file.getName() + " - wrote results to " + output.toString());
 						processed++;
+						if (printInfo){
+							System.out.println("Processed file " + file.getName() + " - wrote results to " + output.toString());
+						}
 					}catch (Exception ex){
 						ex.printStackTrace();
 						System.out.println("Failed to process file: " + f2.toString() + ". " + ex.getMessage());
