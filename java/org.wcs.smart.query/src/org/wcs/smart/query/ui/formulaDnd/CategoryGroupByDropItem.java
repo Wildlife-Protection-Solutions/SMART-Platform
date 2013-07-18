@@ -262,9 +262,9 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 			}
 		});
 		
-		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
-		toolTip.setText(Messages.CategoryGroupByDropItem_IncludedLabel);
-		toolTip.setAutoHide(false);
+		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
+		toolTip.setMessage(Messages.CategoryGroupByDropItem_IncludedLabel);
+		toolTip.setAutoHide(true);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
 			@Override

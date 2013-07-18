@@ -64,6 +64,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -143,8 +144,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	/**
 	 * Creates a new agency and rank property page
 	 */
-	public AgencyRankPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.AgencyRankPropertyPage_DialogTitle);
+	public AgencyRankPropertyPage(Shell parent) {
+		super(parent, Messages.AgencyRankPropertyPage_DialogTitle);
 		toDelete = new HashSet<Agency>();
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}

@@ -67,6 +67,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -133,8 +134,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	/**
 	 * Create the property page.
 	 */
-	public StationListPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.StationListPropertyPage_Dialog_Title);
+	public StationListPropertyPage(Shell parent) {
+		super(parent, Messages.StationListPropertyPage_Dialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 		uuidGenerator = UUIDGenerator
 				.buildSessionFactoryUniqueIdentifierGenerator();

@@ -24,7 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ui.internal.ca.properties.ChangeUserPasswordDialog;
 
 /**
@@ -38,7 +38,7 @@ public class ChangeUserNameHandler extends AbstractHandler {
 
 		@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ChangeUserPasswordDialog dialog = new ChangeUserPasswordDialog(Display.getCurrent().getActiveShell());
+		ChangeUserPasswordDialog dialog = new ChangeUserPasswordDialog(HandlerUtil.getActiveShell(event));
 		dialog.open();
 		return null;
 	}

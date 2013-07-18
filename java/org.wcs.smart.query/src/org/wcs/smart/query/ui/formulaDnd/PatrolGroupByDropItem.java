@@ -172,7 +172,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 			}
 		});
 		
-		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
+		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
 		toolTip.setText(Messages.PatrolGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();

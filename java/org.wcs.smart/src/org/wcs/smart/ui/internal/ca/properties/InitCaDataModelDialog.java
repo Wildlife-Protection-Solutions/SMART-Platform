@@ -90,8 +90,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 	/**
 	 * @param parentShell
 	 */
-	public InitCaDataModelDialog(Session session) {
-		super(Display.getCurrent().getActiveShell());
+	public InitCaDataModelDialog(Shell parent, Session session) {
+		super(parent);
 		this.ca = SmartDB.getCurrentConservationArea();
 		this.session = session;
 	}

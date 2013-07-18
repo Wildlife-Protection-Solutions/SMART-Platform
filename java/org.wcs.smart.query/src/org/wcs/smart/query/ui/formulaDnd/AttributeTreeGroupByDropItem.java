@@ -320,7 +320,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 			}
 		});
 		
-		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
+		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
 		toolTip.setText(Messages.AttributeTreeGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();

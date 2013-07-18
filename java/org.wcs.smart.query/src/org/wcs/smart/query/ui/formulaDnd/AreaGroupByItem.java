@@ -264,7 +264,7 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 			}
 		});
 		
-		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
+		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
 		toolTip.setText(Messages.CategoryGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
