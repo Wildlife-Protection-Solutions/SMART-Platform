@@ -42,7 +42,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -69,9 +69,8 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	private ListViewer lstBasemaps;
 	private List<BasemapDefinition> basemaps;
 	
-	public BasemapPropertyPage() {
-		super(Display.getCurrent().getActiveShell(),
-				Messages.BasemapPropertyPage_Dialog_Title);
+	public BasemapPropertyPage(Shell parent) {
+		super(parent, Messages.BasemapPropertyPage_Dialog_Title);
 
 	}
 

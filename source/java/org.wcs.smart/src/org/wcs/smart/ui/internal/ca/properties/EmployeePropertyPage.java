@@ -67,6 +67,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -162,8 +163,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	/**
 	 * Creates a new agency and rank property page
 	 */
-	public EmployeePropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.EmployeePropertyPage_Dialog_Title);
+	public EmployeePropertyPage(Shell parent) {
+		super(parent, Messages.EmployeePropertyPage_Dialog_Title);
 
 		//load the current ca
 		this.currentCa = (ConservationArea) getSession().load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());

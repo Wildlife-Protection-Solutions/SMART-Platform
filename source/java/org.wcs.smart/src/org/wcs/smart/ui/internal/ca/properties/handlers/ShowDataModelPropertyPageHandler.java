@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
@@ -60,10 +59,10 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
+		final Shell parentShell = HandlerUtil.getActiveShell(event);
+		dialog = new DataModelPropertyPage( parentShell );
 		
-		dialog = new DataModelPropertyPage( Display.getCurrent().getActiveShell());
-		
-		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(parentShell);
 		try {
 			ppd.run();
 		} catch (Exception ex) {
@@ -71,14 +70,14 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 				loadedSession.getTransaction().rollback();
 			}
 			loadedSession.close();
-			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
+			SmartPlugIn.displayLog(parentShell, Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
 			return null;
 		}
 		
 		DataModel dataModel = ppd.dm;
 		if ( dataModel == null || dataModel.getCategories() == null || dataModel.getCategories().size() == 0 ){
 			//no datamodel; ask user to init
-			InitCaDataModelDialog dd = new InitCaDataModelDialog(loadedSession);
+			InitCaDataModelDialog dd = new InitCaDataModelDialog(parentShell, loadedSession);
 			if (dd.open() == Window.CANCEL){
 				loadedSession.close();
 				return null;
@@ -92,7 +91,7 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 					loadedSession.getTransaction().rollback();
 				}
 				loadedSession.close();
-				SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
+				SmartPlugIn.displayLog(parentShell, Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
 				return null;
 			}
 			

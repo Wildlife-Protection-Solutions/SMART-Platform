@@ -44,8 +44,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.geotools.referencing.CRS;
 import org.hibernate.Transaction;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -75,8 +75,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	
 	private Transaction currentTransaction = null;
 	
-	public ProjectionPropertyDialog() {
-		super(Display.getDefault().getActiveShell(), Messages.ProjectionPropertyDialog_Dialog_Title);
+	public ProjectionPropertyDialog(Shell parent) {
+		super(parent, Messages.ProjectionPropertyDialog_Dialog_Title);
 		
 	}
 

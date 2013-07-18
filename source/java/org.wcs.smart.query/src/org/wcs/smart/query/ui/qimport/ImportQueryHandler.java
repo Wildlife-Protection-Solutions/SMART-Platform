@@ -25,6 +25,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
@@ -43,6 +44,7 @@ public class ImportQueryHandler extends AbstractHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		Shell parent = HandlerUtil.getActiveShell(event);
 		
 		try {
 			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
@@ -61,7 +63,7 @@ public class ImportQueryHandler extends AbstractHandler {
 		}
 		
 		ImportQueryWizard wizard = new ImportQueryWizard();
-		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+		WizardDialog wd = new WizardDialog(parent, wizard);
 		wd.open();
 		return null;
 	}

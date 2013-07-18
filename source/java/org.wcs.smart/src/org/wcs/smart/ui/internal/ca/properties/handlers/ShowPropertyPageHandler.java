@@ -25,6 +25,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.AreaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
@@ -49,21 +51,22 @@ public class ShowPropertyPageHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		Shell parentShell = HandlerUtil.getActiveShell(event);
 		Dialog dialog = null;
 		if (page.equals(CaPropertyPage.class)){
-			dialog = new CaPropertyPage();
+			dialog = new CaPropertyPage(parentShell);
 		}else if (page.equals(StationListPropertyPage.class)){
-			dialog = new StationListPropertyPage();
+			dialog = new StationListPropertyPage(parentShell);
 		}else if (page.equals(AgencyRankPropertyPage.class)){
-			dialog = new AgencyRankPropertyPage();
+			dialog = new AgencyRankPropertyPage(parentShell);
 		}else if (page.equals(EmployeePropertyPage.class)){
-			dialog = new EmployeePropertyPage();
+			dialog = new EmployeePropertyPage(parentShell);
 		}else if (page.equals(AreaPropertyPage.class)){
-			dialog = new AreaPropertyPage();
+			dialog = new AreaPropertyPage(parentShell);
 		}else if (page.equals(BasemapPropertyPage.class)){
-			dialog = new BasemapPropertyPage();
+			dialog = new BasemapPropertyPage(parentShell);
 		}else if (page.equals(ProjectionPropertyDialog.class)){
-			dialog = new ProjectionPropertyDialog();
+			dialog = new ProjectionPropertyDialog(parentShell);
 		}
 		if (dialog != null){
 			dialog.open();

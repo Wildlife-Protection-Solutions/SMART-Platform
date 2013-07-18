@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -109,9 +110,8 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 
 	private ConservationArea currentCa = null;
 	
-	public AreaPropertyPage() {
-		super(Display.getCurrent().getActiveShell(),
-				Messages.AreaPropertyPage_Dialog_Title);
+	public AreaPropertyPage(Shell parent) {
+		super(parent, Messages.AreaPropertyPage_Dialog_Title);
 		currentCa = SmartDB.getCurrentConservationArea();
 	}
 

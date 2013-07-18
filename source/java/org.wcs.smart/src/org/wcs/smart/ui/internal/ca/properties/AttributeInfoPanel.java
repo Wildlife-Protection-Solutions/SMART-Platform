@@ -927,6 +927,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		 */
 		@Override
 		public Color getForeground(Object element) {
+			if (!lstAttributeList.getControl().isEnabled()) return null;
+			
 			AttributeListItem it = (AttributeListItem)element;
 			if (it.getIsActive()){
 				return BLACK;

@@ -197,6 +197,7 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	
 	@Override
 	protected boolean isResizable() {
-		return true;
+		//return true;
+		return false;
 	}
 }

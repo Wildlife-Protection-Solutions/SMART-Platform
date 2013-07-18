@@ -46,8 +46,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.hibernate.Session;
@@ -81,8 +81,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	/**
 	 * Creates a new dialog
 	 */
-	public CaPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.CaPropertyPage_Dialog_Title);
+	public CaPropertyPage(Shell parent) {
+		super(parent, Messages.CaPropertyPage_Dialog_Title);
 		this.ca = SmartDB.getCurrentConservationArea();
 	}
 
