@@ -39,15 +39,15 @@ public class EmptyObservationFinder implements IDataProcessor {
 	@Override
 	public void processFile(File in, File out) throws Exception {
 		PatrolType pt = DataUtils.readPatrol(in);
-		findObservation(pt);
+		findObservation(pt, in.toString());
 	}
 
-	private void findObservation(PatrolType pt) {
+	private void findObservation(PatrolType pt, String fileName) {
 		for(PatrolLegType leg: pt.getLegs()){
 			for (PatrolLegDayType day : leg.getDays()){
 				for (WaypointType wp : day.getWaypoints()){
 					if (wp.getObservations().size() == 0){
-						System.out.println(day.getDate() + "," + wp.getTime() + "," + wp.getId() + "," + wp.getX() + "," + wp.getY());
+						System.out.println(pt.getId() + "," + day.getDate() + "," + wp.getTime() + "," + wp.getId() + "," + wp.getX() + "," + wp.getY() + "," + fileName);
 					}
 				}
 			}
