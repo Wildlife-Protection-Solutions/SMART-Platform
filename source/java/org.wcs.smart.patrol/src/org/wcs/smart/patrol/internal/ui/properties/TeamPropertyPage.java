@@ -168,12 +168,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				UUIDGenerationStrategy.class.getName());
 		uuidGenerator.configure(new BinaryType(), prop, null);
 	}
-
-	@Override
-	public boolean  close(){
-		boolean canClose = super.close();
-		return canClose;
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)

@@ -123,11 +123,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
-	@Override
-	public boolean  close(){
-		boolean canClose = super.close();
-		return canClose;
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
