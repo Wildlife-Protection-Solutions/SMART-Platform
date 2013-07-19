@@ -44,13 +44,11 @@ public class HasLabel {
 	
 	private byte[] uuid;
 	
+	/**
+	 * Creates a new label class
+	 */
 	public  HasLabel(){}
-	
-	public  HasLabel(byte[] uuid){
-		this.uuid = uuid;
-		
-	}
-	
+
 	/**
 	 * 
 	 * @return the uuid for the list element
