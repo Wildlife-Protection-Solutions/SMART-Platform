@@ -190,7 +190,7 @@ public class GriddedValuePanel {
 			if (defaultP==null){
 				defaultP=ps.get(0);
 			}
-			if (query.getCoordinateReferenceSystem() != null) {
+			if (query != null && query.getCoordinateReferenceSystem() != null) {
 				
 				boolean found = false;
 				//search for projection
@@ -379,7 +379,7 @@ public class GriddedValuePanel {
 					Object o = ((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
 					
 					
-					if (o instanceof Projection){
+					if (o instanceof Projection && ((GriddedQuery)parentView.getQuery() != null)){
 						try{
 							if (((Projection)o).getCrs().equals(((GriddedQuery)parentView.getQuery()).getCoordinateReferenceSystem())){
 								//nothing changed

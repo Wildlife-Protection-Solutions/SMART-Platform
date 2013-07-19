@@ -200,7 +200,7 @@ public class QueryDefView extends ViewPart {
 	 * Validates the current query
 	 */
 	public void validate(){
-		currentPanel.validate();
+		if (currentPanel != null ) { currentPanel.validate(); }
 	}
 	
 	/**
