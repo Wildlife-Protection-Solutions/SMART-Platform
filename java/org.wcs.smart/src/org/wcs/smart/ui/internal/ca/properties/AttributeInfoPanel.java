@@ -690,6 +690,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		this.currentDisplayLang = language;
 		
 		chRequired.setSelection(att.getIsRequired());
+		if (att.getUuid() != null){
+			cmbType.getControl().setEnabled(false);
+		}
 		
 		if (att.getType() != null) {
 			cmbType.setSelection(new StructuredSelection(att.getType()));
@@ -765,6 +768,34 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}
 	}
 	
+	private void clearAttributeList(Attribute att){
+		if (att.getAttributeList()== null){
+			return;
+		}
+		for (AttributeListItem it : att.getAttributeList()){
+			it.setAttribute(null);
+		}
+		att.getAttributeList().clear();
+	}
+	private void clearAttributeTree(Attribute att){
+		List<AttributeTreeNode> toprocess = new ArrayList<AttributeTreeNode>();
+		if (att.getTree() == null){
+			return;
+		}
+		for(AttributeTreeNode node : att.getTree()){
+			toprocess.add(node);
+		}
+		while(toprocess.size() > 0){
+			AttributeTreeNode node = toprocess.remove(0);
+			node.setAttribute(null);
+			node.setParent(null);
+			if (node.getChildren() != null){
+				toprocess.addAll(node.getChildren());
+				node.setChildren(null);
+			}
+		}
+	}
+	
 	/**
 	 * Updates the given attribute with the contents of the 
 	 * gui components.
@@ -781,6 +812,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		session.flush();
 		
 		if (att.getType().equals(Attribute.AttributeType.NUMERIC)){
+			att.setMaxValue(null);
+			att.setMinValue(null);
+			att.setRegex(null);
+			clearAttributeTree(att);
+			clearAttributeList(att);
+			
 			if (att.getAggregations() == null){
 				att.setAggregations(new ArrayList<Aggregation>());
 			}
@@ -803,10 +840,29 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			if (txtMinValue.getText().length() > 0){
 				att.setMinValue(Double.valueOf(txtMinValue.getText()));
 			}
+		}else if (att.getType().equals(Attribute.AttributeType.BOOLEAN)){
+			att.setAggregations(null);
+			att.setMaxValue(null);
+			att.setMinValue(null);
+			att.setRegex(null);
+			att.setTree(null);
+			clearAttributeTree(att);
+			clearAttributeList(att);
 		}else if (att.getType().equals(Attribute.AttributeType.TEXT)){
+			att.setAggregations(null);
+			att.setMaxValue(null);
+			att.setMinValue(null);
+			att.setRegex(null);
+			att.setTree(null);
+			clearAttributeTree(att);
+			clearAttributeList(att);
 			att.setRegex(txtRegex.getText());
 		}else if (att.getType().equals(Attribute.AttributeType.LIST)){
-			
+			att.setAggregations(null);
+			att.setMaxValue(null);
+			att.setMinValue(null);
+			att.setRegex(null);
+			clearAttributeTree(att);
 			if (att.getAttributeList() == null){
 				att.setAttributeList(new ArrayList<AttributeListItem>());
 			}else{
@@ -829,6 +885,11 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			}
 			
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
+			att.setAggregations(null);
+			att.setMaxValue(null);
+			att.setMinValue(null);
+			att.setRegex(null);
+			clearAttributeList(att);
 			if(attTree != null){
 				final Attribute thisAttribute = att;
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
