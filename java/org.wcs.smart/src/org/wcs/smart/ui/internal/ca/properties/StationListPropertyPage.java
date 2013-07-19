@@ -200,8 +200,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		composite2.setLayout(tableLayout);
 		
-		tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.MULTI
-				| SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 
 		createColumns(tableViewer);
 
@@ -300,7 +299,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		return container;
 
 	}
-
 	
 	private void deleteStation(){
 		Station s = (Station) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
@@ -417,11 +415,19 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private void updateLangValue(Column type, Station stn, String newValue) {
 		Language lang = cmbLanguage.getCurrentSelection();
 		if (type == Column.NAME) {
+			if (stn.findName(lang).equals(newValue)){
+				//no modification made
+				return;
+			}
 			if (validate(type, stn, newValue) == null){
 				stn.updateName(lang, newValue.trim());
 				setChangesMade(true);
 			}
 		} else if (type == Column.DESCIPTION) {
+			if (newValue.equals(stn.findDescriptionNull(lang))){
+				//no modification made
+				return;
+			}
 			if (validate(type, stn, newValue) == null){
 				stn.updateDescription(lang, newValue.trim());
 				setChangesMade(true);

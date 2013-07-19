@@ -135,6 +135,9 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	 */
 	@Override
 	public boolean close(){
+		//ensure all edits are finished
+		getButtonBar().setFocus();
+
 		if (changesMade){
 			if (!validateSave()){
 				return false;

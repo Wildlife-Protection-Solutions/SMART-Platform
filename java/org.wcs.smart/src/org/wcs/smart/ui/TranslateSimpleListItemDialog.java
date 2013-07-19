@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -49,6 +50,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -66,7 +68,8 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 	private SimpleListItem item;
 	private org.wcs.smart.ca.Label[] input;
 	
-
+	private boolean isDirty = false;
+	
 	/**
 	 * @param parentShell parent shell
 	 * @param item item to update
@@ -119,10 +122,42 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		return ok;
 	}
 	
-	protected void okPressed() {
-		if (!validate()){
-			return ;
+	@Override
+	protected void createButtonsForButtonBar(Composite parent){
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);
+	}
+	
+	@Override
+	public boolean close(){
+		getButtonBar().setFocus();
+		
+		if (isDirty){
+			MessageDialog md = new MessageDialog(getShell(), Messages.AbstractPropertyJHeaderDialog_ConfirmSave_DialogTitle, null, Messages.AbstractPropertyJHeaderDialog_ConfirmSave_DialogMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			int ret = md.open();
+			if (ret == 2){
+				//cancel
+				return false;
+			}else if (ret == 0){
+				//yes
+				if (save()){
+					setReturnCode(IDialogConstants.OK_ID);
+					return super.close();
+				}else{
+					return false;
+				}
+			}
 		}
+		return super.close();
+	}
+	
+	
+	private boolean save(){
+		if (!validate()){
+			return false;
+		}
+		
 		HashMap<Language, String> values = new HashMap<Language, String>();
 		for (int i = 0; i < input.length;i++){
 			if (((org.wcs.smart.ca.Label)input[i]).getValue().length() > 0){
@@ -162,8 +197,15 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 			}
 		}
 		this.item.getNames().removeAll(toRemove);
-		
-		super.okPressed();
+		setDirty(false);
+		return true;
+	}
+	
+	@Override
+	protected void okPressed() {
+		if (save()){
+			super.okPressed();
+		}
 	}
 
 	@Override
@@ -231,6 +273,11 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		return true;
 	}
 	
+	private void setDirty(boolean isDirty){
+		this.isDirty = isDirty;
+		getButton(IDialogConstants.CANCEL_ID).setEnabled(isDirty);
+	}
+	
 	/**
 	 * Agency table editor 
 	 * 
@@ -248,9 +295,16 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		
 		@Override
 		protected void setValue(Object element, Object value) {
+			String newValue = (String)value;
+			String oldValue = ((org.wcs.smart.ca.Label)element).getValue();
+			if (newValue.equals(oldValue)){
+				//nothing to update
+				return;
+			}
 			((org.wcs.smart.ca.Label)element).setValue((String)value);
 			viewer.refresh();
 			TranslateSimpleListItemDialog.this.validate();
+			TranslateSimpleListItemDialog.this.setDirty(true);
 		}
 		
 		@Override

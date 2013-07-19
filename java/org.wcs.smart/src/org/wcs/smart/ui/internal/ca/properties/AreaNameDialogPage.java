@@ -305,6 +305,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	
 	@Override
 	protected void buttonPressed(int buttonId) {
+		//update focus to ensure editing is completed
+		getButtonBar().setFocus();
+		
 		if (buttonId == IDialogConstants.CANCEL_ID){
 			if (dirty){
 				if (!MessageDialog.openConfirm(getShell(), Messages.AreaNameDialogPage_ConfirmClose_DialogTitle, Messages.AreaNameDialogPage_ConfirmClose_DialogMessage)){
