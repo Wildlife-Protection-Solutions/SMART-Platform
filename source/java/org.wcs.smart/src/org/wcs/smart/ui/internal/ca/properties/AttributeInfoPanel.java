@@ -768,6 +768,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}
 	}
 	
+	/*
+	 * clears attribute list
+	 */
 	private void clearAttributeList(Attribute att){
 		if (att.getAttributeList()== null){
 			return;
@@ -777,6 +780,10 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}
 		att.getAttributeList().clear();
 	}
+	
+	/*
+	 * clears all tree nodes
+	 */
 	private void clearAttributeTree(Attribute att){
 		List<AttributeTreeNode> toprocess = new ArrayList<AttributeTreeNode>();
 		if (att.getTree() == null){
