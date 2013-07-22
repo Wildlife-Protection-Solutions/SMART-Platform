@@ -100,6 +100,13 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Read_Xml;
 	public static String CyberTrackerImporter_Task_Download;
 	public static String CyberTrackerImporter_Task_ExtractRawData;
+	public static String CyberTrackerPatrol_Error_Transport;
+	public static String CyberTrackerPatrol_Warn_Leader;
+	public static String CyberTrackerPatrol_Warn_Mandate;
+	public static String CyberTrackerPatrol_Warn_Member;
+	public static String CyberTrackerPatrol_Warn_Pilot;
+	public static String CyberTrackerPatrol_Warn_Station;
+	public static String CyberTrackerPatrol_Warn_Team;
 	public static String CyberTrackerPlugIn_InitJob_Title;
 	public static String CyberTrackerPropertiesDialog_AppName;
 	public static String CyberTrackerPropertiesDialog_AutoNext;
