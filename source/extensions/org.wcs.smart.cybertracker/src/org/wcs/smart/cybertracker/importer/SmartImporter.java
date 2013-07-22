@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.importer;
 
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,14 +31,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
@@ -58,6 +62,8 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  */
 public class SmartImporter {
 
+	private List<String> warnings = new ArrayList<String>();
+	
 	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol) {
 		leg.setType(ctPatrol.getPatrolTransportType());
 		leg.setStartDate(ctPatrol.getStartDate());
@@ -87,9 +93,11 @@ public class SmartImporter {
 		List<A> aList = fetchObservationRecords(s, eMap);
 		if (aList.isEmpty())
 			return;
+		Category category = fetchCategory(aList, eMap, session);
+		if (category == null)
+			return;
 		WaypointObservation obs = new WaypointObservation();
 		obs.setWaypoint(wp);
-		Category category = fetchCategory(aList, eMap, session);
 		obs.setCategory(category);
 		obs.setAttributes(fetchAttributes(obs, aList, eMap, session));
 		
@@ -117,9 +125,20 @@ public class SmartImporter {
 			if (!ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
 				continue;
 			
+			String tag0 = e.getTag0();
+			if (tag0 == null || tag0.isEmpty()) {
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AttributeTag0_Missing, e.getN()));
+				continue;
+			}
+
+			Attribute attr = CyberTrackerHibernateManager.fetchByUuid(Attribute.class, e.getTag0(), session);
+			if (attr == null) {
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoAttributeInDatamodel, e.getN(), e.getTag0()));
+				continue;
+			}
+
 			WaypointObservationAttribute wpoa = new WaypointObservationAttribute();
 			wpoa.setObservation(obs);
-			Attribute attr = CyberTrackerHibernateManager.fetchByUuid(Attribute.class, e.getTag0(), session);
 			wpoa.setAttribute(attr);
 			switch (attr.getType()) {
 			case NUMERIC:
@@ -132,6 +151,10 @@ public class SmartImporter {
 			{
 				E eLst = eMap.get(a.getV());
 				AttributeListItem item = CyberTrackerHibernateManager.fetchByUuid(AttributeListItem.class, eLst.getTag0(), session);
+				if (item == null) {
+					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoListAttrItemInDatamodel, e.getN(), eLst.getN(), eLst.getTag0()));
+					continue;
+				}
 				wpoa.setAttributeListItem(item);
 				break;
 			}
@@ -139,6 +162,10 @@ public class SmartImporter {
 			{
 				E eTr = eMap.get(a.getV());
 				AttributeTreeNode item = CyberTrackerHibernateManager.fetchByUuid(AttributeTreeNode.class, eTr.getTag0(), session);
+				if (item == null) {
+					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoTreeAttrItemInDatamodel, e.getN(), eTr.getN(), eTr.getTag0()));
+					continue;
+				}
 				wpoa.setAttributeTreeNode(item);
 				break;
 			}
@@ -180,10 +207,21 @@ public class SmartImporter {
 			return null;
 		
 		E e = eMap.get(v);
-		if (e == null)
+		if (e == null) {
+			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ElementNotDefined, v));
 			return null;
+		}
+		String tag0 = e.getTag0();
+		if (tag0 == null || tag0.isEmpty()) {
+			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_CategoryTag0_Missing, e.getN()));
+			return null;
+		}
 		
-		return CyberTrackerHibernateManager.fetchByUuid(Category.class, e.getTag0(), session);
+		Category category = CyberTrackerHibernateManager.fetchByUuid(Category.class, e.getTag0(), session);
+		if (category == null)
+			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoCategoryInDatamodel, e.getN(), e.getTag0()));
+
+		return category;
 	}
 
 	private PatrolLegDay findOrAddLegDay(PatrolLeg leg, S s) {
@@ -249,4 +287,29 @@ public class SmartImporter {
 			return null;
 		}
 	}
+	
+	protected void displayWarnings() {
+		if (getWarnings() != null && getWarnings().size() > 0) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					WarningDialog wdialog = new WarningDialog(Display.getDefault().getActiveShell(), Messages.SmartImporter_WarnDialog_Title, Messages.SmartImporter_WarnDialog_Message, getWarnings());
+					wdialog.open();
+				}
+			});
+		}
+	}
+	
+	public List<String> getWarnings() {
+		return warnings;
+	}
+	
+	protected void addWarning(String warning) {
+		warnings.add(warning);
+	}
+	
+	protected void clearWarning() {
+		warnings.clear();
+	}
+
 }
