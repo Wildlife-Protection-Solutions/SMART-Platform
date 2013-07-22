@@ -43,6 +43,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 public class PatrolLegImporter extends SmartImporter {
 
 	public void importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
+		clearWarning();
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
@@ -53,6 +54,7 @@ public class PatrolLegImporter extends SmartImporter {
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}
+			displayWarnings();
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
