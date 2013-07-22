@@ -44,6 +44,9 @@ public class PatrolImporter extends SmartImporter {
 	
 	public Patrol importData(CyberTrackerPatrol ctPatrol) {
 		clearWarning();
+		for (String warning : ctPatrol.getWarnings()) {
+			addWarning(warning);
+		}
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
