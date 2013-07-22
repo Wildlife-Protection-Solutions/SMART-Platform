@@ -27,8 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -55,16 +53,16 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			case START_DATE:return dateAsString(ctPatrol.getStartDate());
 			case END_DATE: 	return dateAsString(ctPatrol.getEndDate());
 			case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName() : ""; //$NON-NLS-1$
-			case TRANSPORT:	return ctPatrol.getPatrolTransportType() != null ? ctPatrol.getPatrolTransportType().getName() : ""; //$NON-NLS-1$
+			case TRANSPORT:	return ctPatrol.getCtTransport();
 			case ARMED: 	return ctPatrol.isArmed() ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
 //			case MANDATE:	return asString(ctPatrol.getMandate());
-			case TEAM: 		return asString(ctPatrol.getTeam());
-			case STATION:	return asString(ctPatrol.getStation());
+			case TEAM: 		return ctPatrol.getCtTeam();
+			case STATION:	return ctPatrol.getCtStation();
 //			case OBJECTIVE: return ctPatrol.getObjective();
 			case COMMENT:	return ctPatrol.getComment();
-			case LEADER:	return asString(ctPatrol.getLeader());
-			case PILOT:		return asString(ctPatrol.getPilot());
-			case MEMBERS:	return asString(ctPatrol.getMembers());
+			case LEADER:	return ctPatrol.getCtLeader();
+			case PILOT:		return ctPatrol.getCtPilot();
+			case MEMBERS:	return asString(ctPatrol.getCtMembers());
 			case SIGHT_COUNT:return String.valueOf(ctPatrol.getPatrolData().size());
 
 			}
@@ -72,24 +70,35 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 		return super.getText(element);
 	}
 
-	private String asString(Employee employee) {
-		return employee != null ? employee.getFullLabel() : ""; //$NON-NLS-1$
-	}
-
-	private String asString(List<Employee> employee) {
+	private String asString(List<String> members) {
 		StringBuilder result = new StringBuilder();
-		for (Iterator<Employee> i = employee.iterator(); i.hasNext();) {
-			Employee e = i.next();
-			result.append(asString(e));
+		for (Iterator<String> i = members.iterator(); i.hasNext();) {
+			String e = i.next();
+			result.append(e);
 			if (i.hasNext())
 				result.append("; "); //$NON-NLS-1$
 		}
 		return result.toString();
 	}
-	
-	private String asString(SimpleListItem item) {
-		return item != null ? item.getName() : ""; //$NON-NLS-1$
-	}
+
+//	private String asString(Employee employee) {
+//		return employee != null ? employee.getFullLabel() : ""; //$NON-NLS-1$
+//	}
+//
+//	private String asString(List<Employee> employee) {
+//		StringBuilder result = new StringBuilder();
+//		for (Iterator<Employee> i = employee.iterator(); i.hasNext();) {
+//			Employee e = i.next();
+//			result.append(asString(e));
+//			if (i.hasNext())
+//				result.append("; "); //$NON-NLS-1$
+//		}
+//		return result.toString();
+//	}
+//	
+//	private String asString(SimpleListItem item) {
+//		return item != null ? item.getName() : ""; //$NON-NLS-1$
+//	}
 
 	private String dateAsString(Date date) {
 		if (date == null) {
