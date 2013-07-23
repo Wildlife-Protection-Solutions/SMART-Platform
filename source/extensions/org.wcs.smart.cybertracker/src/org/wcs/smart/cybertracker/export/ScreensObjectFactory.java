@@ -179,7 +179,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public Node createNodeChecklist(String id, String name, List<String> values, String trElements, String trLinks) {
+	public Node createNodeChecklist(String id, String name, List<String> values, String trElements, String trLinks, Integer minChecks) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -196,7 +196,7 @@ public class ScreensObjectFactory {
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
-		controls.getControl().add(createChecklistControl7(trElements, trLinks));
+		controls.getControl().add(createChecklistControl7(trElements, trLinks, minChecks));
 		controls.getControl().add(createControl11());
 		data.setControls(controls);
 		node.setData(data);
@@ -432,11 +432,12 @@ public class ScreensObjectFactory {
         <Version>1</Version>
         <Attribute>0</Attribute>
         <ListMode>1</ListMode>
+        <MinChecks>???</MinChecks>
         <Translate__Elements>???</Translate__Elements>
         <Translate__Links>???</Translate__Links>
     </Control>
 	 */
-	public Controls.Control createChecklistControl7(String trElements, String trLinks) {
+	public Controls.Control createChecklistControl7(String trElements, String trLinks, Integer minChecks) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
 		control.setVersion(1);
@@ -451,6 +452,7 @@ public class ScreensObjectFactory {
 		control.setItemHeight(25);
 		control.setAttribute(0);
 		control.setListMode(1);
+		control.setMinChecks(minChecks);
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
 		return control;
