@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,8 +56,23 @@ import org.wcs.smart.patrol.model.Team;
  */
 public class CyberTrackerPatrol {
 	
-	private List<String> errors = new ArrayList<String>();
-	private List<String> warnings = new ArrayList<String>();
+	public enum PatrolMeta {
+		START_DATE,
+		END_DATE,
+		TYPE,
+		TRANSPORT,
+		ARMED,
+		MANDATE,
+		TEAM,
+		STATION,
+		OBJECTIVE,
+		COMMENT,
+		LEADER,
+		PILOT,
+		MEMBERS
+	}
+
+	private Map<PatrolMeta, List<String>> problems = new HashMap<PatrolMeta, List<String>>();
 	
 	private Map<String, E> elementsMap;
 	private List<S> patrolData;
@@ -130,7 +146,7 @@ public class CyberTrackerPatrol {
 				E e = getElementsMap().get(v);
 				PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
 				if (transportType == null)
-					addError(MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
+					addProblem(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
 				setCtTransport(e.getN());
 				setPatrolTransportType(transportType);
 			} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
@@ -143,21 +159,21 @@ public class CyberTrackerPatrol {
 				E e = getElementsMap().get(v);
 				Team t = fetchFromTag0(Team.class, e, session);
 				if (t == null && e.getTag0() != null)
-					addWarning(MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
+					addProblem(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
 				setCtTeam(e.getN());
 				setTeam(t);
 			} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
 				E e = getElementsMap().get(v);
 				Station st = fetchFromTag0(Station.class, e, session);
 				if (st == null && e.getTag0() != null)
-					addWarning(MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
+					addProblem(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
 				setCtStation(e.getN());
 				setStation(st);
 			} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
 				E e = getElementsMap().get(v);
 				PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
 				if (m == null && e.getTag0() != null)
-					addWarning(MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
+					addProblem(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
 				setMandate(m);
 			} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
 				setObjective(v);
@@ -167,21 +183,21 @@ public class CyberTrackerPatrol {
 				E e = getElementsMap().get(v);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
-					addWarning(MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
+					addProblem(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
 				setCtLeader(e.getN());
 				setLeader(emp);
 			} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
 				E e = getElementsMap().get(v);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
-					addWarning(MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
+					addProblem(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
 				setCtPilot(e.getN());
 				setPilot(emp);
 			} else if (isMemberRecord(a)) {
 				E e = getElementsMap().get(i);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
-					addWarning(MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, e.getN()));
+					addProblem(PatrolMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, e.getN()));
 				getCtMembers().add(e.getN());
 				if (emp != null) {
 					getMembers().add(emp);
@@ -236,20 +252,31 @@ public class CyberTrackerPatrol {
 		return null;
 	}
 
-	protected void addError(String error) {
-		errors.add(error);
+	protected void addProblem(PatrolMeta area, String problem) {
+		if (!problems.containsKey(area))
+			problems.put(area, new ArrayList<String>());
+		problems.get(area).add(problem);
 	}
 	
-	protected void addWarning(String warning) {
-		warnings.add(warning);
-	}
-
 	public List<String> getErrors() {
-		return errors;
+		if (problems.containsKey(PatrolMeta.TRANSPORT))
+			return problems.get(PatrolMeta.TRANSPORT);
+		return new ArrayList<String>();
 	}
 	
 	public List<String> getWarnings() {
+		List<String> warnings = new ArrayList<String>();
+		for (PatrolMeta area : PatrolMeta.values()) {
+			if (area == PatrolMeta.TRANSPORT)
+				continue;
+			if (problems.containsKey(area))
+				warnings.addAll(problems.get(area));
+		}
 		return warnings;
+	}
+	
+	public Map<PatrolMeta, List<String>> getProblems() {
+		return problems;
 	}
 	
 	public Map<String, E> getElementsMap() {
