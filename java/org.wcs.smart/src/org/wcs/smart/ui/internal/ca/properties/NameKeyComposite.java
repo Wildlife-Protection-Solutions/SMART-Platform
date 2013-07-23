@@ -72,8 +72,6 @@ public abstract class NameKeyComposite extends Composite {
 	protected ControlDecoration cdKey;
 	protected ControlDecoration cdTxt;
 	
-	private String originalKey = null;
-	
 	protected LanguageViewer langViewer = null;
 	private Language currentSelection = null;
 	private HashMap<Language, String> values = null;
@@ -126,7 +124,6 @@ public abstract class NameKeyComposite extends Composite {
 		
 		if (txtKey != null && dmObject.getKeyId() != null){
 			txtKey.setText(dmObject.getKeyId());
-			originalKey = dmObject.getKeyId();
 		}
 		
 		if (txtName != null ){
@@ -264,13 +261,15 @@ public abstract class NameKeyComposite extends Composite {
 									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Message)) {
 						return;
 					}
+					final String thisKey = txtKey.getText();
 					InputDialog id = new InputDialog(getShell(), Messages.NameKeyComposite_ChangeKey_Dialog_Title,
 							Messages.NameKeyComposite_ChangeKey_Dialog_Message,
 							txtKey.getText(), new IInputValidator() {
 
 								@Override
 								public String isValid(String newText) {
-									if (originalKey != null && originalKey.equals(newText)){
+									//if (originalKey != null && originalKey.equals(newText)){
+									if (thisKey != null && thisKey.equals(newText)){
 										//same key
 										return ""; //$NON-NLS-1$
 									}
