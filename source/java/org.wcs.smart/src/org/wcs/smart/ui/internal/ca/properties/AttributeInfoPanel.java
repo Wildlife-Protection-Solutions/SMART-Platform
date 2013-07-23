@@ -785,10 +785,11 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * clears all tree nodes
 	 */
 	private void clearAttributeTree(Attribute att){
-		List<AttributeTreeNode> toprocess = new ArrayList<AttributeTreeNode>();
 		if (att.getTree() == null){
 			return;
 		}
+
+		List<AttributeTreeNode> toprocess = new ArrayList<AttributeTreeNode>();
 		for(AttributeTreeNode node : att.getTree()){
 			toprocess.add(node);
 		}
@@ -800,7 +801,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				toprocess.addAll(node.getChildren());
 				node.setChildren(null);
 			}
+			node.getChildren().clear();
 		}
+		att.getTree().clear();
 	}
 	
 	/**
@@ -852,7 +855,6 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			att.setMaxValue(null);
 			att.setMinValue(null);
 			att.setRegex(null);
-			att.setTree(null);
 			clearAttributeTree(att);
 			clearAttributeList(att);
 		}else if (att.getType().equals(Attribute.AttributeType.TEXT)){
@@ -860,7 +862,6 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			att.setMaxValue(null);
 			att.setMinValue(null);
 			att.setRegex(null);
-			att.setTree(null);
 			clearAttributeTree(att);
 			clearAttributeList(att);
 			att.setRegex(txtRegex.getText());
@@ -928,6 +929,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				
 			}
 		}
+		session.flush();
 	}
 	
 
