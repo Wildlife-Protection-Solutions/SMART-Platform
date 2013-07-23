@@ -175,7 +175,7 @@ public class SmartImporter {
 			{
 				E eLst = eMap.get(a.getV());
 				AttributeListItem item = CyberTrackerHibernateManager.fetchByUuid(AttributeListItem.class, eLst.getTag0(), session);
-				if (item == null) {
+				if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eLst.getTag0())) {
 					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoListAttrItemInDatamodel, e.getN(), eLst.getN(), eLst.getTag0()));
 					continue;
 				}
@@ -186,7 +186,7 @@ public class SmartImporter {
 			{
 				E eTr = eMap.get(a.getV());
 				AttributeTreeNode item = CyberTrackerHibernateManager.fetchByUuid(AttributeTreeNode.class, eTr.getTag0(), session);
-				if (item == null) {
+				if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eTr.getTag0())) {
 					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoTreeAttrItemInDatamodel, e.getN(), eTr.getN(), eTr.getTag0()));
 					continue;
 				}

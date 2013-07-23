@@ -71,8 +71,12 @@ public class CyberTrackerHibernateManager {
 		}
 	}
 
+	public static boolean isEmptyTag0(String uuid) {
+		return uuid == null || uuid.isEmpty() || ElementsUtil.NULL_VALUE.equals(uuid);
+	}
+	
 	public static <T> T fetchByUuid(Class<T> clazz, String uuid, Session session) {
-		if (uuid == null || uuid.isEmpty() || ElementsUtil.NULL_VALUE.equals(uuid))
+		if (isEmptyTag0(uuid))
 			return null;
 		try {
 			return fetchByUuid(clazz, SmartUtils.decodeHex(uuid), session);
