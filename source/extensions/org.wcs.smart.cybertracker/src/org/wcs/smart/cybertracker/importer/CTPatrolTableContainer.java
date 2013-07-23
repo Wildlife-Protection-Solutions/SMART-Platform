@@ -304,17 +304,20 @@ public class CTPatrolTableContainer extends Composite {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					int legsCount = selection.size();
 					int counter = 1;
+					int successCount = 0;
 					monitor.beginTask(MessageFormat.format(Messages.CTPatrolTableContainer_AddLeg_TaskName, patrol.getId()), legsCount);
 					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 						monitor.subTask(MessageFormat.format(Messages.CTPatrolTableContainer_AddLeg_SubTaskName, counter, legsCount));
 						CyberTrackerPatrol ctp = (CyberTrackerPatrol) i.next();
-						legImporter.importData(patrol, ctp);
-						tableInputData.remove(ctp);
+						if (legImporter.importData(patrol, ctp)) {
+							successCount++;
+							tableInputData.remove(ctp);
+						}
 						monitor.worked(1);
 						counter++;
 					}
 					monitor.done();
-					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_Leg_Success_Title, Messages.CTPatrolTableContainer_Leg_Success_Message);
+					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_Leg_Success_Title, MessageFormat.format(Messages.CTPatrolTableContainer_Leg_Success_Message, successCount, patrol.getId()));
 				}
 			});
 		} catch (Exception e) {

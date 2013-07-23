@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
@@ -43,13 +44,17 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
@@ -64,8 +69,27 @@ public class SmartImporter {
 
 	private List<String> warnings = new ArrayList<String>();
 	
+	protected boolean fixTransportError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session, ctPatrol.getPatrolType());
+				List<String> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
+				String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0) : null;
+				TransportSelectorDialog selectorDialog = new TransportSelectorDialog(Display.getDefault().getActiveShell(), types, message);
+				if (selectorDialog.open() != IDialogConstants.OK_ID) {
+					return;
+				}
+				leg.setType(selectorDialog.getSelectedTransportType());
+			}
+		});
+		return leg.getType() != null;
+	}
+	
 	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol) {
-		leg.setType(ctPatrol.getPatrolTransportType());
+		if (ctPatrol.getPatrolTransportType() != null) {
+			leg.setType(ctPatrol.getPatrolTransportType());
+		}
 		leg.setStartDate(ctPatrol.getStartDate());
 		leg.setEndDate(ctPatrol.getEndDate());
 		List<PatrolLegMember> legMembers = new ArrayList<PatrolLegMember>();
