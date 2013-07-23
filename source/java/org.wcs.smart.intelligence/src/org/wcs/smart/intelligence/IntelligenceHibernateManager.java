@@ -238,9 +238,13 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static List<Intelligence> getReportedIntelligences(Patrol patrol) {
 		Session session = SmartHibernateManager.openSession();
+		session.beginTransaction();
 		try {
 			return getReportedIntelligences(patrol, session);
 		} finally {
+			try{
+				session.getTransaction().rollback();
+			}catch(Exception ex){}
 			session.close();
 		}
 	}
@@ -266,9 +270,13 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
 		Session session = SmartHibernateManager.openSession();
+		session.beginTransaction();
 		try {
 			return getMotivatedIntelligences(patrol, session);
 		} finally {
+			try{
+				session.getTransaction().rollback();
+			}catch (Exception ex){}
 			session.close();
 		}
 	}
