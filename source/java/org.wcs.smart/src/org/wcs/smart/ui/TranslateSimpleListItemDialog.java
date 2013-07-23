@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.ui;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -51,6 +54,7 @@ import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.LanguageLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -66,7 +70,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 
 	private TableViewer tblViewer;
 	private SimpleListItem item;
-	private org.wcs.smart.ca.Label[] input;
+	private List<org.wcs.smart.ca.Label> input;
 	
 	private boolean isDirty = false;
 	
@@ -78,22 +82,31 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		super(parentShell);
 
 		this.item = item;
-		input = new org.wcs.smart.ca.Label[SmartDB.getCurrentConservationArea().getLanguages().size()];
-		int i = 0;
+		input = new ArrayList<org.wcs.smart.ca.Label>(SmartDB.getCurrentConservationArea().getLanguages().size());
 		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()){
 			org.wcs.smart.ca.Label copy = new org.wcs.smart.ca.Label();
 			copy.setValue(item.findName(l));
 			copy.setLanguage(l);
-			input[i++] = copy;
+			input.add(copy);
 		}
+		
+		//sort so default language is first in the list
+		Collections.sort(input, new Comparator<org.wcs.smart.ca.Label>() {
+			@Override
+			public int compare(org.wcs.smart.ca.Label l0, org.wcs.smart.ca.Label l1) {
+				if (l0.getLanguage().isDefault()){
+					return 1;
+				}
+				return Collator.getInstance().compare(l0.getLanguage().getDisplayName(), l1.getLanguage().getDisplayName());
+			}
+		});;
 		
 	}
 
 	private boolean validate(){
 		boolean ok = true;
 		setErrorMessage(null);
-		for(int i = 0 ; i < input.length;i++){
-			org.wcs.smart.ca.Label lbl = input[i];
+		for (org.wcs.smart.ca.Label lbl : input){
 		
 			if (lbl.getLanguage().isDefault() && lbl.getValue().length() == 0){
 		
@@ -159,9 +172,9 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		}
 		
 		HashMap<Language, String> values = new HashMap<Language, String>();
-		for (int i = 0; i < input.length;i++){
-			if (((org.wcs.smart.ca.Label)input[i]).getValue().length() > 0){
-				values.put(((org.wcs.smart.ca.Label)input[i]).getLanguage(), ((org.wcs.smart.ca.Label)input[i]).getValue());
+		for(org.wcs.smart.ca.Label lbl : input){
+			if (lbl.getValue().length() > 0){
+				values.put(lbl.getLanguage(), lbl.getValue());
 			}
 		}
 				
@@ -231,13 +244,10 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		column.setResizable(true);
 		column.setMoveable(true);
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
+			LanguageLabelProvider ll = new LanguageLabelProvider();
 			@Override
 			public String getText(Object element) {
-				String x = ((org.wcs.smart.ca.Label)element).getLanguage().getDisplayName();
-				if (x == null){
-					return ""; //$NON-NLS-1$
-				}
-				return x;
+				return ll.getText(((org.wcs.smart.ca.Label)element).getLanguage());
 			}
 			 
 		});
