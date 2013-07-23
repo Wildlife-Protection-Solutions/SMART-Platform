@@ -26,9 +26,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -41,6 +42,10 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
  * @since 1.0.0
  */
 public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
+	
+	private static final int IMAGE_SIZE = 12;
+	private static final Image ERROR_IMAGE = new Image(Display.getDefault(), Display.getDefault().getSystemImage(SWT.ICON_ERROR).getImageData().scaledTo(IMAGE_SIZE, IMAGE_SIZE));
+	private static final Image WARN_IMAGE  = new Image(Display.getDefault(), Display.getDefault().getSystemImage(SWT.ICON_WARNING).getImageData().scaledTo(IMAGE_SIZE, IMAGE_SIZE));
 
 	private CTPatrolTableColumn column;
 	
@@ -82,8 +87,8 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			if (!ctPatrol.getProblems().containsKey(meta))
 				return null;
 			switch (column) {
-			case TRANSPORT:	return FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
-			default: return FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage();
+			case TRANSPORT:	return ERROR_IMAGE;
+			default: return WARN_IMAGE;
 			}
 		}
 		return null;
