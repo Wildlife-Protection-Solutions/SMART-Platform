@@ -26,10 +26,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 
 /**
  * Table containing data for imported patrols
@@ -62,43 +65,78 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			case COMMENT:	return ctPatrol.getComment();
 			case LEADER:	return ctPatrol.getCtLeader();
 			case PILOT:		return ctPatrol.getCtPilot();
-			case MEMBERS:	return asString(ctPatrol.getCtMembers());
+			case MEMBERS:	return asString(ctPatrol.getCtMembers(), "; "); //$NON-NLS-1$
 			case SIGHT_COUNT:return String.valueOf(ctPatrol.getPatrolData().size());
-
 			}
 		}
 		return super.getText(element);
 	}
 
-	private String asString(List<String> members) {
+	@Override
+	public Image getImage(Object element) {
+		PatrolMeta meta = toMeta(column);
+		if (meta == null)
+			return null;
+		if (element instanceof CyberTrackerPatrol) {
+			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
+			if (!ctPatrol.getProblems().containsKey(meta))
+				return null;
+			switch (column) {
+			case TRANSPORT:	return FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+			default: return FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getToolTipText(Object element) {
+		if (element instanceof CyberTrackerPatrol) {
+			String result = ""; //$NON-NLS-1$
+			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
+			if (column == CTPatrolTableColumn.MEMBERS) {
+				result = asString(ctPatrol.getCtMembers(), "\n"); //$NON-NLS-1$
+			} else {
+				result = getText(element);
+			}
+			PatrolMeta meta = toMeta(column);
+			if (meta == null)
+				return result;
+			if (!ctPatrol.getProblems().containsKey(meta))
+				return result;
+			result += "\n"; //$NON-NLS-1$
+			result += column == CTPatrolTableColumn.TRANSPORT ? Messages.CTPatrolTableCellLabelProvider_Tooltip_Error : Messages.CTPatrolTableCellLabelProvider_Tooltip_Warning;
+			for (String problem : ctPatrol.getProblems().get(meta)) {
+				result += "\n" + problem; //$NON-NLS-1$
+			}
+			return result;
+		}		
+		return super.getToolTipText(element);
+	}
+
+	private PatrolMeta toMeta(CTPatrolTableColumn column) {
+		switch (column) {
+		case TRANSPORT:	return PatrolMeta.TRANSPORT;
+		case TEAM: 		return PatrolMeta.TEAM;
+		case STATION:	return PatrolMeta.STATION;
+		case LEADER:	return PatrolMeta.LEADER;
+		case PILOT:		return PatrolMeta.PILOT;
+		case MEMBERS:	return PatrolMeta.MEMBERS;
+		default: break;
+		}
+		return null;
+	}
+	
+	private String asString(List<String> members, String separator) {
 		StringBuilder result = new StringBuilder();
 		for (Iterator<String> i = members.iterator(); i.hasNext();) {
 			String e = i.next();
 			result.append(e);
 			if (i.hasNext())
-				result.append("; "); //$NON-NLS-1$
+				result.append(separator);
 		}
 		return result.toString();
 	}
-
-//	private String asString(Employee employee) {
-//		return employee != null ? employee.getFullLabel() : ""; //$NON-NLS-1$
-//	}
-//
-//	private String asString(List<Employee> employee) {
-//		StringBuilder result = new StringBuilder();
-//		for (Iterator<Employee> i = employee.iterator(); i.hasNext();) {
-//			Employee e = i.next();
-//			result.append(asString(e));
-//			if (i.hasNext())
-//				result.append("; "); //$NON-NLS-1$
-//		}
-//		return result.toString();
-//	}
-//	
-//	private String asString(SimpleListItem item) {
-//		return item != null ? item.getName() : ""; //$NON-NLS-1$
-//	}
 
 	private String dateAsString(Date date) {
 		if (date == null) {
