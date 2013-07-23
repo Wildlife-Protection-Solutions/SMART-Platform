@@ -433,14 +433,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.core.filesystem.win32.x86_64.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.core.jobs.nl_ru"
          download-size="0"
          install-size="0"
@@ -450,14 +442,6 @@
 
    <plugin
          id="org.eclipse.core.net.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.net.win32.x86_64.nl_ru"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -577,14 +561,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.win32.win32.x86_64.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.preferences.nl_ru"
          download-size="0"
          install-size="0"
@@ -602,14 +578,6 @@
 
    <plugin
          id="org.eclipse.equinox.security.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.security.win32.x86_64.nl_ru"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -737,14 +705,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.swt.win32.win32.x86_64.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.text.nl_ru"
          download-size="0"
          install-size="0"
@@ -855,7 +815,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-   
+
    <plugin
          id="org.eclipse.birt.doc.nl_ru"
          download-size="0"
