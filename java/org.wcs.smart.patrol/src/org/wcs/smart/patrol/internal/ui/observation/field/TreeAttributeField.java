@@ -173,6 +173,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		txtText.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
+				
 				validate();
 			}
 			
@@ -228,10 +229,10 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 				if (e.keyCode != SWT.CR){
 					//any key that is not cr and changes
 					//the text field should display the tree
+					txtText.setData(null);
 					if (!tree.getText().equals(txtText.getText())){
 						//text has changed
 						tree.setText(txtText.getText());
-						txtText.setData(null);
 						if (!tree.isVisible()){
 							showTree(false);
 						}
@@ -349,6 +350,8 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 			
 		}
 		this.lastValidSelection = this.originalValue;
+		validate();
+		
 	}
 
 	/**
