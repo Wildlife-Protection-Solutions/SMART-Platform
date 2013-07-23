@@ -51,6 +51,10 @@ public class PatrolImporter extends SmartImporter {
 		try {
 			session.beginTransaction();
 			Patrol patrol = buildPatrol(ctPatrol);
+			if (patrol.getFirstLeg().getType() == null) {
+				if(!fixTransportError(patrol.getFirstLeg(), ctPatrol, session))
+					return null;
+			}
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
 			}

@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
-import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -42,7 +43,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
  */
 public class PatrolLegImporter extends SmartImporter {
 
-	public void importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
+	public boolean importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
 		clearWarning();
 		Session session = HibernateManager.openSession();
 		try {
@@ -50,7 +51,12 @@ public class PatrolLegImporter extends SmartImporter {
 			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
 			PatrolLeg leg = patrol.addLeg();
 			initLegData(leg, ctPatrol);
+			if (leg.getType() == null) {
+				if(!fixTransportError(leg, ctPatrol, session))
+					return false;
+			}
 			leg.createLegDays();
+			
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}
@@ -59,9 +65,16 @@ public class PatrolLegImporter extends SmartImporter {
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
 			PatrolEventManager.getInstance().patrolSaved(patrol, true);
+			return true;
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
-			CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_ErrorDialog_Title, Messages.PatrolLegImporter_ErrorDialog_Message);
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.PatrolLegImporter_ErrorDialog_Message, e);
+				}
+			});
+			return false;
 		}
 		finally {
 			session.close();

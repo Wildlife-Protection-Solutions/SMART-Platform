@@ -138,7 +138,6 @@ public class Messages extends NLS {
 	public static String Elements_TreeAttribute_NoValue;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;
-	public static String PatrolLegImporter_ErrorDialog_Title;
 	public static String PatrolScreens_Comments;
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_ConfirmMessage;
@@ -176,6 +175,10 @@ public class Messages extends NLS {
 	public static String SmartImporter_Warn_NoTreeAttrItemInDatamodel;
 	public static String SmartImporter_WarnDialog_Message;
 	public static String SmartImporter_WarnDialog_Title;
+	public static String TransportSelectorDialog_Message;
+	public static String TransportSelectorDialog_SpecifyTransport_Label;
+	public static String TransportSelectorDialog_Title;
+	public static String TransportSelectorDialog_TransportType;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
