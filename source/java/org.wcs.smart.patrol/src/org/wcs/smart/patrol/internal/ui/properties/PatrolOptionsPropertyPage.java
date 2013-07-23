@@ -145,8 +145,14 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			public void modifyText(ModifyEvent e) {
 				setChangesMade(true);
 				try{
-					Integer.parseInt(txtEditTime.getText());
-					cdEditTime.hide();
+					int edittime = Integer.parseInt(txtEditTime.getText());
+					if (edittime < -1){
+						cdEditTime.show();
+						cdEditTime.setDescriptionText(Messages.PatrolOptionsPropertyPage_Error_EditTime);
+					}else{
+						cdEditTime.hide();
+					}
+					
 				}catch (Exception ex){
 					cdEditTime.show();
 					cdEditTime.setDescriptionText(Messages.PatrolOptionsPropertyPage_Error_InvalidInteger);
