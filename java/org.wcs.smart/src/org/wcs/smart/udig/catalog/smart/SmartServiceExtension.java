@@ -20,7 +20,10 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class SmartServiceExtension implements ServiceExtension {
-    public static final String KEY = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
+	
+
+
+	public static final String KEY = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
    
     /**
      * Service parameter conservation area uuid key
@@ -31,6 +34,14 @@ public class SmartServiceExtension implements ServiceExtension {
      *URLS for smart services are of the form
      *smart://smartdb/CAUUID#TYPE
      */
+	/**
+	 * SMART service url host
+	 */
+    private static final String HOST = "smartdb"; //$NON-NLS-1$
+    /**
+     * SMART service url protocol
+     */
+	private static final String PROTOCOL = "smart"; //$NON-NLS-1$
 	
     @Override
 	public IService createService(URL id, Map<String, Serializable> params) {
@@ -47,9 +58,21 @@ public class SmartServiceExtension implements ServiceExtension {
 	}
 
 	@Override
-	public Map<String, Serializable> createParams(URL url) {	
-		return createParamsFromUrl(url);
+	public Map<String, Serializable> createParams(URL url) {
+		if (isValid(url)){
+			return createParamsFromUrl(url);
+		}
+		return null;
 
+	}
+	
+	private boolean isValid(URL url){
+		if (url.getProtocol().equals(PROTOCOL)){
+			if (url.getHost().equals(HOST)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static Map<String, Serializable> createParamsFromUrl(URL url){
@@ -81,7 +104,7 @@ public class SmartServiceExtension implements ServiceExtension {
 		if (params.get(CA_UUID_KEY) == null || !(params.get(CA_UUID_KEY) instanceof byte[])){
 			return null;
 		}
-		String url = "smart://smartdb/" + SmartUtils.encodeHex((byte[])params.get(CA_UUID_KEY)) ; //$NON-NLS-1$
+		String url = PROTOCOL + "://" + HOST + "/" + SmartUtils.encodeHex((byte[])params.get(CA_UUID_KEY)) ; //$NON-NLS-1$ //$NON-NLS-2$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
