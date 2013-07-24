@@ -80,6 +80,8 @@ public class CyberTrackerExporter {
 	private Map<Attribute, CyberTrackerId> attr2resultId = new HashMap<Attribute, CyberTrackerUtil.CyberTrackerId>();
 	private Map<Integer, CyberTrackerId> catLevel2resultId = new HashMap<Integer, CyberTrackerUtil.CyberTrackerId>();
 
+	private CyberTrackerId newWpResultId;
+	
 	public int uploadPda(File file) throws Exception {
 		String appPath = PdaUtil.getCTAppPath();
 		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
@@ -93,8 +95,11 @@ public class CyberTrackerExporter {
 		session.beginTransaction();
 		try {
 			elements = ElementsUtil.buildEmptyElements();
+			newWpResultId = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
 			return performExport(destFolder, monitor, session);
 		} finally {
+			newWpResultId = null;
 			elements = null;
 			rootId = null;
 			attr2resultId.clear();
@@ -169,6 +174,7 @@ public class CyberTrackerExporter {
 			for (Integer level : catLevel2resultId.keySet()) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level)));
 			}
+			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), PatrolScreensUtil.RESULT_NEW_WAYPOINT));
 			Reports reports = ReportsObjectFactory.createReports(columnItems);
 			BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_REPORTS)); //$NON-NLS-1$
 			try {
@@ -280,10 +286,7 @@ public class CyberTrackerExporter {
 				//NOTE: This is a special case as we might have multiple ending screens!!!
 				String nodeId = id.getNodeId();
 				id = new CyberTrackerId(); //this id will be used for next screen
-				boolean hasNext = i != attrListLastIndex;
-				CyberTrackerId navId = hasNext ? id : startId;
-
-				result.addAll(buildAttributeTreeNodes(attribute, nodeId, navId, resultElementId.getItemId(), hasNext));
+				result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId()));
 				break;
 			}
 			case BOOLEAN:
@@ -315,36 +318,43 @@ public class CyberTrackerExporter {
 				id = new CyberTrackerId(); //this id will be used for next screen
 				if (!result.isEmpty()) {
 					Node lastNode = result.get(result.size()-1);
-					boolean hasNext = i != attrListLastIndex;
-					CyberTrackerId navId = hasNext ? id : startId;
-					buildNodeNavigation(lastNode, navId, hasNext);
+					Control control2 = ScreensObjectFactory.getNavigationControl(lastNode);
+					//reference to "Next" screen
+					control2.setTranslateNextScreenId(id.getNodeId());
 				}
 			}
 		}
+		result.add(createLastNode(id, startId));
 		return result;
 	}
 
 	/**
-	 * Adds "Next" or "Save" button to screen depending on input parameters
+	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
 	 * 
-	 * @param node
-	 * @param navigateId
-	 * @param hasNext
+	 * @param id
+	 * @param startId
 	 */
-	private void buildNodeNavigation(Node node, CyberTrackerId navigateId, boolean hasNext) {
+	private Node createLastNode(CyberTrackerId id, CyberTrackerId startId) {
+		//patrol armed
+		List<String> labelValues = new ArrayList<String>();
+		labelValues.add(Messages.CyberTrackerExporter_Waypoint_SaveAsNew);
+		labelValues.add(Messages.CyberTrackerExporter_Waypoint_AddToLast);
+		List<String> tag0Values = new ArrayList<String>();
+		tag0Values.add("true"); //$NON-NLS-1$
+		tag0Values.add("false"); //$NON-NLS-1$
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+
+		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, ids, newWpResultId.getItemId());
+		
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
-		if (hasNext) {
-			//we have some screens after this, so displaying "Next" button
-			control2.setTranslateNextScreenId(navigateId.getNodeId());
-		} else {
-			//this is the last screen and we need to show "Save" button
-			control2.setShowMajor("True"); //$NON-NLS-1$
-			control2.setShowMinor("True"); //$NON-NLS-1$
-			control2.setShowNext("False"); //$NON-NLS-1$
-			control2.setTranslateNextScreenId(null); //no next button at last screen
-			control2.setTranslateMajorScreenId(rootId.getNodeId());
-			control2.setTranslateMinorScreenId(navigateId.getNodeId());
-		}
+		//this is the last screen and we need to show "Save" button
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setShowMinor("True"); //$NON-NLS-1$
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setTranslateNextScreenId(null); //no next button at last screen
+		control2.setTranslateMajorScreenId(rootId.getNodeId());
+		control2.setTranslateMinorScreenId(startId.getNodeId());
+		return node;
 	}
 	
 	/**
@@ -353,7 +363,7 @@ public class CyberTrackerExporter {
 	 * @param nodeId
 	 * @return
 	 */
-	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, boolean hasNext) {
+	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId) {
 		List<Node> result = new ArrayList<Node>();
 		List<AttributeTreeNode> activeTreeNodes = new ArrayList<AttributeTreeNode>();
 		if (!treeAttribute.getIsRequired()) {
@@ -368,13 +378,13 @@ public class CyberTrackerExporter {
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
 		result.add(ctUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null));
 		for (AttributeTreeNode treeNode : activeTreeNodes) {
-			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, hasNext));
+			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId));
 		}
 		ElementsUtil.addElements(elements, map);
 		return result;
 	}
 	
-	private List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, boolean hasNext) {
+	private List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId) {
 		List<Node> result = new ArrayList<Node>();
 		if (treeNode == null)
 			return result;
@@ -386,7 +396,8 @@ public class CyberTrackerExporter {
 			List<CyberTrackerId> childIds = new ArrayList<CyberTrackerId>();
 			childIds.add(id);
 			Node node = ctUtil.createRadioNode(id.getNodeId(), treeNode.getName(), childIds, resultElementId);
-			buildNodeNavigation(node, navId, hasNext);
+			Control control2 = ScreensObjectFactory.getNavigationControl(node);
+			control2.setTranslateNextScreenId(navId.getNodeId());
 			result.add(node);
 			return result;
 		}
@@ -404,7 +415,8 @@ public class CyberTrackerExporter {
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(treeNode.getActiveChildren(), map);
 		if (isEndScreen) {
 			Node node = ctUtil.createRadioNode(id, treeNode.getName(), childIds, resultElementId);
-			buildNodeNavigation(node, navId, hasNext);
+			Control control2 = ScreensObjectFactory.getNavigationControl(node);
+			control2.setTranslateNextScreenId(navId.getNodeId());
 			result.add(node);
 			return result;
 		}
@@ -413,7 +425,7 @@ public class CyberTrackerExporter {
 		result.add(ctUtil.createRadioNode(id, treeNode.getName(), childIds, null));
 		
 		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
-			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, hasNext));
+			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId));
 		}		
 		return result;
 	}

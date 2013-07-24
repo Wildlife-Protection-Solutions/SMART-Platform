@@ -76,6 +76,8 @@ public class PatrolScreensUtil {
 	public static final String RESULT_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
 	
+	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
+
 	/**
 	 * Contains data filled by {@link PatrolScreensUtil}
 	 * @author elitvin
