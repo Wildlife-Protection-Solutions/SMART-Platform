@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.ru"
       label="SMART Russian Language Pack"
-      version="1.0.5">
+      version="1.1.1">
 
    <description url="http://www.example.com/description">
       Complete Russian language pack includes required BIRT language fragements and eclipse fragments.
