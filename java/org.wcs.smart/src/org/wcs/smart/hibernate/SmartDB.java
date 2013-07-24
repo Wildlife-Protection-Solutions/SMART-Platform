@@ -243,8 +243,9 @@ public class SmartDB {
 			}
 			currentLanguage = HibernateManager.findLanguage(l, getCurrentConservationArea());
 			if (currentLanguage == null){
-				currentLanguage = new Language();
-				currentLanguage.setUuid(new byte[]{-1});
+				Language temp = new Language();
+				temp.setUuid(new byte[]{-1});
+				currentLanguage = temp;
 			}
 		}
 		return currentLanguage;

@@ -25,6 +25,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 /**
  * Displays patrol filter dialog for patrol list view.
@@ -37,7 +38,7 @@ public class ShowPatrolFilterHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		PatrolListView view = (PatrolListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(PatrolListView.ID);
-		PatrolFilterDialog pfd = new PatrolFilterDialog(view.getViewSite().getShell(), view);
+		PatrolFilterDialog pfd = new PatrolFilterDialog(HandlerUtil.getActiveShell(event), view);
 		pfd.open();
 		return null;
 	}
