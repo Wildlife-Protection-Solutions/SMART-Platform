@@ -29,10 +29,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.hibernate.Session;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.job.SaveIntelligenceJob;
@@ -48,8 +45,6 @@ import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelTyp
  *
  */
 public class NewIntelligenceWizard extends Wizard implements IPageChangingListener {
-    
-    private Session session = null;
 
     private Intelligence intelligence = null;
 
@@ -112,19 +107,6 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
 		return false;
     }
 
-    /**
-     * Creates a new session and attaches the current conservation area.
-     * 
-     * @return
-     */
-    public Session getSession() {
-    	if (session == null || !session.isOpen()) {
-    		session = SmartHibernateManager.openSession(new AttachmentInterceptor());
-    		session.update(intelligence.getConservationArea());
-    	}
-    	return session;
-    }
-
     @Override
     public void handlePageChanging(PageChangingEvent event) {
         if (event.getCurrentPage() instanceof IntelligenceWizardPage) {
@@ -145,17 +127,6 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
 
     public Intelligence getIntelligence() {
 		return intelligence;
-	}
-    
-	/**
-	 * Closes the active session
-	 */
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (session != null && session.isOpen()) {
-			session.close();
-		}
 	}
 
 }

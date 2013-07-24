@@ -52,26 +52,6 @@ import org.wcs.smart.util.SmartUtils;
 public class IntelligenceHibernateManager extends HibernateManager {
 
 	/**
-	 * Loads patrols from database 
-	 * 
-	 * @param session session 
-	 * @return list of patrols
-	 */
-	public static List<Patrol> getPatrols(){
-		Session session = SmartHibernateManager.openSession();
-		try {
-			ConservationArea ca = SmartDB.getCurrentConservationArea();
-			Criteria query = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Patrol> list = query.list();
-			return list;
-		} finally {
-			session.close();
-		}
-	}
-
-
-	/**
 	 * Returns all intelligences
 	 * 
 	 * @param session

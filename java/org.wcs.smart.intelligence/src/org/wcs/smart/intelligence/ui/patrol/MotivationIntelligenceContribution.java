@@ -89,6 +89,9 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
+					if (tableViewer.getControl().isDisposed()){
+						return;
+					}
 					if (intelligenceList.isEmpty()) {
 						label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 						tableViewer.getControl().setVisible(false);

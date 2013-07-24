@@ -213,66 +213,34 @@ public class IntelligenceViewFilter {
 		return receivedDateFilter;
 	}
 
-	public void setReceivedDateFilter(DateFilter receivedDateFilter) {
-		this.receivedDateFilter = receivedDateFilter;
-	}
-
 	public Date getReceivedDateStart() {
 		return receivedDateStart;
-	}
-
-	public void setReceivedDateStart(Date receivedDateStart) {
-		this.receivedDateStart = receivedDateStart;
 	}
 
 	public Date getReceivedDateEnd() {
 		return receivedDateEnd;
 	}
 
-	public void setReceivedDateEnd(Date receivedDateEnd) {
-		this.receivedDateEnd = receivedDateEnd;
-	}
-
 	public DateFilter getRelevantDateFilter() {
 		return relevantDateFilter;
-	}
-
-	public void setRelevantDateFilter(DateFilter relevantDateFilter) {
-		this.relevantDateFilter = relevantDateFilter;
 	}
 
 	public Date getRelevantDateStart() {
 		return relevantDateStart;
 	}
 
-	public void setRelevantDateStart(Date relevantDateStart) {
-		this.relevantDateStart = relevantDateStart;
-	}
-
 	public Date getRelevantDateEnd() {
 		return relevantDateEnd;
-	}
-
-	public void setRelevantDateEnd(Date relevantDateEnd) {
-		this.relevantDateEnd = relevantDateEnd;
 	}
 
 	public StringComparison getNameComparison() {
 		return nameComparison;
 	}
 
-	public void setNameComparison(StringComparison nameComparison) {
-		this.nameComparison = nameComparison;
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public void setSortByField(SortBy field){
 		this.sortBy = field;
 	}
