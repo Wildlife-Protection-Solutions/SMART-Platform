@@ -169,6 +169,7 @@ public class Messages extends NLS {
 	public static String PatrolSelectorDialog_Message;
 	public static String PatrolSelectorDialog_PatrolID;
 	public static String PatrolSelectorDialog_Title;
+	public static String SmartImporter_Warn_AddToWaypointTimeframe;
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
 	public static String SmartImporter_Warn_CategoryTag0_Missing;
 	public static String SmartImporter_Warn_ElementNotDefined;
@@ -176,6 +177,7 @@ public class Messages extends NLS {
 	public static String SmartImporter_Warn_NoCategoryInDatamodel;
 	public static String SmartImporter_Warn_NoListAttrItemInDatamodel;
 	public static String SmartImporter_Warn_NoTreeAttrItemInDatamodel;
+	public static String SmartImporter_Warn_WrongFirstWaypoint;
 	public static String SmartImporter_WarnDialog_Message;
 	public static String SmartImporter_WarnDialog_Title;
 	public static String TransportSelectorDialog_Message;
