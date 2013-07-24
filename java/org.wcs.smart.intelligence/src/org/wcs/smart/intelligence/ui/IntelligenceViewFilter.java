@@ -98,9 +98,9 @@ public class IntelligenceViewFilter {
 		
 		//name
 		if (label) {
-		    str.append("AND  lbl.id.element.uuid = i.uuid AND lbl.id.language = :language"); //$NON-NLS-1$
+		    str.append("AND  lbl.id.element.uuid = i.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
 		    if (nameComparison != null && name != null) {
-		    	str.append("AND lower(lbl.value) like :name");  //$NON-NLS-1$
+		    	str.append("AND lower(lbl.value) like :name ");  //$NON-NLS-1$
 		    }
 		}
 		
