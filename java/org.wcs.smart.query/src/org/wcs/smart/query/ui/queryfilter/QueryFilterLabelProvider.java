@@ -27,7 +27,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.DataModelItem;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 

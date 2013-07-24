@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.report;
 
-import org.wcs.smart.report.internal.Messages;
 
 /**
  * Report parameters shared by most smart reports.

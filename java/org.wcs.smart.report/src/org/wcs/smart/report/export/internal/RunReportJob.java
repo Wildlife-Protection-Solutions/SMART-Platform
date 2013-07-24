@@ -23,8 +23,6 @@ package org.wcs.smart.report.export.internal;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
