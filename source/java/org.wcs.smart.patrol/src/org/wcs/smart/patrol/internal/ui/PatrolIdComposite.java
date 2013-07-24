@@ -113,7 +113,13 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	public boolean updatePatrol(Patrol p, Session session) {
 		String newPatrolId = txtPatrolId.getText().trim();
 		
-		long count = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("id", newPatrolId)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
+		session.beginTransaction();
+		long count = 0;
+		try{
+			count = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("id", newPatrolId)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
+		}finally{
+			session.getTransaction().rollback();
+		}
 		if (count !=0){
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
 					Messages.PatrolIdComposite_WarningDialogTitle, 

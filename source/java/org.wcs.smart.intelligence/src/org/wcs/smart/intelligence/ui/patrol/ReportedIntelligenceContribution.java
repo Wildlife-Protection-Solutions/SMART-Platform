@@ -114,6 +114,9 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (tableViewer.getControl().isDisposed()){
+						return;
+					}
 					if (data.isEmpty()) {
 						label.setText(Messages.ReportedIntelligenceContribution_NothingReported_Label);
 						tableViewer.getControl().setVisible(false);
