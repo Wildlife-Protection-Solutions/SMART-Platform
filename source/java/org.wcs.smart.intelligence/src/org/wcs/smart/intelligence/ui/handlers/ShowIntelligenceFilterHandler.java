@@ -26,6 +26,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.ui.IntelligenceFilterDialog;
 import org.wcs.smart.intelligence.ui.IntelligenceListView;
 
@@ -44,7 +45,7 @@ public class ShowIntelligenceFilterHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IntelligenceListView view = (IntelligenceListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IntelligenceListView.ID);
 		
-		IntelligenceFilterDialog filterDialog = new IntelligenceFilterDialog(view.getViewSite().getShell(), view);
+		IntelligenceFilterDialog filterDialog = new IntelligenceFilterDialog(HandlerUtil.getActiveShell(event), view);
 		int ret = filterDialog.open();
 		if (ret == Dialog.OK) {
 			view.updateContent();

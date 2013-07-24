@@ -166,7 +166,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 				
 				try {
 					Collection<GridResultItem> results = query.getQueryResults(mymonitor);
-					if (monitor.isCanceled() | mymonitor.isCanceled()){
+					if (monitor.isCanceled() || mymonitor.isCanceled()){
 						return Status.CANCEL_STATUS;
 					}
 					resultPage.updateAndShowTable(results, mymonitor);
