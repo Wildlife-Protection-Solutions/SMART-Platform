@@ -84,6 +84,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerExporter_Report_Column_Category;
 	public static String CyberTrackerExporter_Report_Column_Date;
 	public static String CyberTrackerExporter_Report_Column_Time;
+	public static String CyberTrackerExporter_Waypoint_AddToLast;
+	public static String CyberTrackerExporter_Waypoint_SaveAsNew;
+	public static String CyberTrackerExporter_Waypoint_ScreenTitle;
 	public static String CyberTrackerExportHandler_ErrDialog_Message;
 	public static String CyberTrackerExportHandler_ErrDialog_Title;
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
