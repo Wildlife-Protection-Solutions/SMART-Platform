@@ -21,6 +21,10 @@
  */
 package org.wcs.smart;
 
+import net.refractions.udig.catalog.internal.ui.CatalogView;
+import net.refractions.udig.project.ui.internal.LayersView;
+
+import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.wcs.smart.ui.map.MapView;
@@ -41,9 +45,10 @@ public class DefaultPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(false);
 		
 		layout.addView(MapView.ID, IPageLayout.LEFT, 0.8f, IPageLayout.ID_EDITOR_AREA);
-		layout.addView( "net.refractions.udig.project.ui.layerManager", IPageLayout.LEFT, 0.2f, MapView.ID); //$NON-NLS-1$
-	//	layout.addView(MapView.ID, IPageLayout.RIGHT, 2, TempView.ID);
-		
+		IFolderLayout leftFolder = layout.createFolder("org.wcs.smart.DefaultPerspective.leftFolder", IPageLayout.LEFT, 0.2f, MapView.ID); //$NON-NLS-1$
+		leftFolder.addView(LayersView.ID); 
+		leftFolder.addPlaceholder(CatalogView.VIEW_ID);
+
 		layout.getViewLayout(MapView.ID).setCloseable(false);
 	}
 
