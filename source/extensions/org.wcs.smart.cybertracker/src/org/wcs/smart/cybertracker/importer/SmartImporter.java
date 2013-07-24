@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
@@ -66,6 +67,8 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  * @since 1.0.0
  */
 public class SmartImporter {
+	
+	private static final int WARN_WP_TIME_FRAME = 10; //in minutes
 
 	private List<String> warnings = new ArrayList<String>();
 	
@@ -109,7 +112,7 @@ public class SmartImporter {
 		if (legDay == null)
 			return;
 		
-		Waypoint wp = findOrAddWaypoint(legDay, s);
+		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
 		addObservations(wp, s, eMap, session);
 	}
 
@@ -274,11 +277,12 @@ public class SmartImporter {
 		return pld;
 	}
 
-	protected Waypoint findOrAddWaypoint(PatrolLegDay pld, S s) {
+	protected Waypoint findOrAddWaypoint(PatrolLegDay pld, S s, Map<String, E> eMap) {
 		if (pld.getWaypoints() == null)
 			pld.setWaypoints(new ArrayList<Waypoint>());
-		
-		//TODO: when to add multiple observations to the same waypoint? x&y are the same?
+
+		boolean newWp = true;
+
 		Waypoint wp = new Waypoint();
 		wp.setObservations(new ArrayList<WaypointObservation>());
 		wp.setPatrolLegDay(pld);
@@ -293,11 +297,34 @@ public class SmartImporter {
 				wp.setY(Double.valueOf(a.getV()));
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
 				wp.setX(Double.valueOf(a.getV()));
+			} else if (PatrolScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
+				E e = eMap.get(a.getV());
+				newWp = "true".equals(e.getTag0()); //$NON-NLS-1$
 			}
 		}
+
+		if (newWp) {
+			pld.getWaypoints().add(wp);
+			return wp;
+		}
 		
-		pld.getWaypoints().add(wp);
-		return wp;
+		//below is "Add To Last Waypoint" case
+		if (pld.getWaypoints().isEmpty()) {
+			addWarning(Messages.SmartImporter_Warn_WrongFirstWaypoint);
+			pld.getWaypoints().add(wp);
+			return wp;
+		}
+		
+		Waypoint lastWp = pld.getWaypoints().get(pld.getWaypoints().size()-1);
+		if (wp.getTime() != null) {
+			if (lastWp.getTime() == null)
+				lastWp.setTime(wp.getTime());
+			long delta = Math.abs(wp.getTime().getTime() - lastWp.getTime().getTime());
+			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
+			}
+		}
+		return lastWp;
 	}
 	
 	protected Date toDate(String strDate) {
