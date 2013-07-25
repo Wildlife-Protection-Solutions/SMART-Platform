@@ -40,7 +40,6 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
@@ -371,17 +370,23 @@ public class SmartImporter {
 			return null;
 		}
 	}
-	
-	protected void displayWarnings() {
+
+	/**
+	 * Displays warnings dialog if warnings present and returns if user choose to proceed with import
+	 * @return
+	 */
+	protected boolean displayWarnings() {
+		final boolean[] isOk = {true};
 		if (getWarnings() != null && getWarnings().size() > 0) {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					WarningDialog wdialog = new WarningDialog(Display.getDefault().getActiveShell(), Messages.SmartImporter_WarnDialog_Title, Messages.SmartImporter_WarnDialog_Message, getWarnings());
-					wdialog.open();
+					ImportWarningDialog wdialog = new ImportWarningDialog(Display.getDefault().getActiveShell(), Messages.SmartImporter_WarnDialog_Title, Messages.SmartImporter_WarnDialog_Message, getWarnings());
+					isOk[0] = wdialog.open() == IDialogConstants.OK_ID;
 				}
 			});
 		}
+		return isOk[0];
 	}
 	
 	public List<String> getWarnings() {

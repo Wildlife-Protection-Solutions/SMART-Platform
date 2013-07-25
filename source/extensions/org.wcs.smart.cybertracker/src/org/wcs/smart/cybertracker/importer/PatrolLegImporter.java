@@ -79,7 +79,9 @@ public class PatrolLegImporter extends SmartImporter {
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}
-			displayWarnings();
+
+			if (!displayWarnings())
+				return false;
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
