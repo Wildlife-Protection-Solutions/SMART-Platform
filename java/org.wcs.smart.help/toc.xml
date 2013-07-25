@@ -160,6 +160,10 @@
       <topic href="html/SMART_TipsTricks.html#Tips" label="Tips &amp; Tricks">
          <topic href="html/SMART_TipsTricks.html#ShiftSelect" label="Checkbox List Select">
          </topic>
+         <topic href="html/SMART_TipsTricks.html#ReportDateTimeOrder" label="Ordering Dates &amp; Times in Report Charts">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#FilterSearching" label="Data Model &amp; Filter Searching">
+         </topic>
       </topic>
       <topic href="html/SMART_TipsTricks.html#FAQ" label="FAQ">
          <topic href="html/SMART_TipsTricks.html#Q1" label="Graticule Errors">
@@ -189,6 +193,20 @@
          <topic href="html/SMART_TipsTricks.html#Q13" label="What does &quot;CET&quot; stand for?">
          </topic>
          <topic href="html/SMART_TipsTricks.html#Q14" label="GPSBabel On Mac">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q15" label="Import Patrol Patrol Type Not Found">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q16" label="Adding Totals or Averages to Summary Query">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q17" label="Summarizing Report Columns">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q18" label="SMART won&apos;t start">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q19" label="Adding Patrol ID Filter to Report">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q20" label="Adding Trendline to Report Chart">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q22" label="Report Date Ranges and Internationalization">
          </topic>
       </topic>
    </topic>

@@ -64,3 +64,11 @@ td{
 img{
 	border: 1px solid black;
 }
+
+.code{
+	border: 1px solid #BBBBBB;
+	padding: 5px;
+	margin-left:20px;
+	margin-right:20px;
+	background: #F5F5F5;
+}
