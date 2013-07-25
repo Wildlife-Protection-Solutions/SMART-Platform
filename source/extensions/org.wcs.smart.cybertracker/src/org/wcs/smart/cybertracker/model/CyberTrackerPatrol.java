@@ -25,7 +25,6 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
+import org.wcs.smart.cybertracker.importer.SmartImporter;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -112,11 +112,14 @@ public class CyberTrackerPatrol {
 			session.close();
 		}
 	}
-	
+
 	private void initMetaData(Session session) {
 		if (patrolData.isEmpty())
 			return;
 		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
+		Date date = null;
+		Time time = null;
+		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
 		
 		for (A a : s.getA()) {
 			String i = a.getI();
@@ -124,16 +127,13 @@ public class CyberTrackerPatrol {
 			String v = a.getV();
 			
 			if (ICyberTrackerConstants.DATE.equals(i)) {
-				DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //TODO: will this always work or CT might provide different format depending on locale settings?
 				try {
-					Date date = combine(formatter.parse(v), getStartDate());
-					setStartDate(date);
+					date = formatter.parse(v);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				Date date = combine(getStartDate(), Time.valueOf(v));
-				setStartDate(date);
+				time = Time.valueOf(v);
 			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
 				setId(v);
 			} else if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
@@ -204,39 +204,30 @@ public class CyberTrackerPatrol {
 				}
 			}
 		}
+		setStartDate(SmartImporter.combine(date, time));
+		date = null;
+		time = null;
 		
 		s = patrolData.get(patrolData.size()-1); //need to find end date
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
-				DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT);
 				try {
-					boolean shouldBreak = getEndDate() != null; //this mean that time was recorded
-					Date date = combine(formatter.parse(a.getV()), getEndDate());
-					setEndDate(date);
-					if (shouldBreak)
+					date = formatter.parse(a.getV());
+					if (time != null)
 						break;
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				boolean shouldBreak = getEndDate() != null; //this mean that date was recorded
-				Date date = combine(getEndDate(), Time.valueOf(a.getV()));
-				setEndDate(date);
-				if (shouldBreak)
+				time = Time.valueOf(a.getV());
+				if (date != null)
 					break;
 			}
 		}
+		setEndDate(SmartImporter.combine(date, time));
 	}
 
-	private Date combine(Date date, Date time) {
-		if (date == null)
-			return time;
-		if (time == null)
-			return date;
-		return new Date(date.getTime() + time.getTime());
-	}
-	
 	private boolean isMemberRecord(A a) {
 		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
 			return false;

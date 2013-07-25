@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,26 @@ public class SmartImporter {
 	private static final int WARN_WP_TIME_FRAME = 10; //in minutes
 
 	private List<String> warnings = new ArrayList<String>();
+
+	public static DateFormat createCyberTrackerDateFormatter() {
+		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //TODO: will this always work or CT might provide different format depending on locale settings?
+		return formatter;
+	}
+
+	public static Date combine(Date date, Time time) {
+		if (date == null)
+			return time;
+		if (time == null)
+			return date;
+		Calendar timeCalendar = Calendar.getInstance();
+		timeCalendar.setTime(time);
+		Calendar dateCalendar = Calendar.getInstance();
+		dateCalendar.setTime(date);
+		dateCalendar.add(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
+		dateCalendar.add(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+		dateCalendar.add(Calendar.SECOND, timeCalendar.get(Calendar.SECOND));
+		return dateCalendar.getTime();
+	}
 	
 	protected boolean fixTransportError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session) {
 		Display.getDefault().syncExec(new Runnable() {
@@ -252,29 +273,41 @@ public class SmartImporter {
 	}
 
 	private PatrolLegDay findOrAddLegDay(PatrolLeg leg, S s) {
-		//TODO: update time for PatrolLegDay
 		Date date = null;
+		Time time = null;
 		for (A a : s.getA()) {
-			if (ICyberTrackerConstants.DATE.equals(a.getI())) {
+			String i = a.getI();
+			if (ICyberTrackerConstants.DATE.equals(i)) {
 				date = toDate(a.getV());
-				break;
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				time = Time.valueOf(a.getV());
 			}
 		}
 		
-		if (date == null)
+		if (date == null || time == null)
 			return null;
-
-		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-			if (pld.getDate().equals(date))
-				return pld;
-		}
 		
+		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+			if (pld.getDate().equals(date)) {
+				applyPatrolLegDayTime(pld, time);
+				return pld;
+			}
+		}
+
 		PatrolLegDay pld = new PatrolLegDay();
 		pld.setPatrolLeg(leg);
 		pld.setDate(date);
+		applyPatrolLegDayTime(pld, time);
 		
 		leg.getPatrolLegDays().add(pld);
 		return pld;
+	}
+
+	private void applyPatrolLegDayTime(PatrolLegDay pld, Time time) {
+		if (pld.getStartTime() == null || pld.getStartTime().getTime() > time.getTime())
+			pld.setStartTime(time);
+		if (pld.getEndTime() == null || pld.getEndTime().getTime() < time.getTime())
+			pld.setEndTime(time);
 	}
 
 	protected Waypoint findOrAddWaypoint(PatrolLegDay pld, S s, Map<String, E> eMap) {
@@ -330,7 +363,7 @@ public class SmartImporter {
 	protected Date toDate(String strDate) {
 		if (strDate == null)
 			return null;
-		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT);
+		DateFormat formatter = createCyberTrackerDateFormatter();
 		try {
 			return formatter.parse(strDate);
 		} catch (ParseException e) {
