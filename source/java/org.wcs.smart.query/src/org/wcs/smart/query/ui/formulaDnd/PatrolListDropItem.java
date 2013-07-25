@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
