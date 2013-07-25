@@ -141,6 +141,8 @@ public class Messages extends NLS {
 	public static String Elements_TreeAttribute_NoValue;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;
+	public static String PatrolLegImporter_Warn_TimeGap_End;
+	public static String PatrolLegImporter_Warn_TimeGap_Start;
 	public static String PatrolScreens_Comments;
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_ConfirmMessage;
