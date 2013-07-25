@@ -65,6 +65,11 @@ img{
 	border: 1px solid black;
 }
 
+hr{
+	margin-top: 20px;
+	margin-bottom: 20px;
+
+}
 .code{
 	border: 1px solid #BBBBBB;
 	padding: 5px;
