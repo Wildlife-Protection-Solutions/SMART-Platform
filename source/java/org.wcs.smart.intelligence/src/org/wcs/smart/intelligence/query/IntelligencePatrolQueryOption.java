@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -82,11 +83,12 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 	@Override
 	public List<ListItem> getAllActiveValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		items.add(ANY_INTELLIGENCE_ITEM);
 		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
 		for (Intelligence i : inteligenceList) {
 			items.add(new ListItem(i.getUuid(), i.getName()));
 		}
+		Collections.sort(items);
+		items.add(0,ANY_INTELLIGENCE_ITEM);
 		return items;
 	}
 	

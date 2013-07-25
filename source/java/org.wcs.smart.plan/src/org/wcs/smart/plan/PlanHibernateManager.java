@@ -70,23 +70,6 @@ public class PlanHibernateManager{
 	
 	private static NumberFormat PLAN_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 
-	
-	/**
-	 * 
-	 * @param s
-	 * @return an array of plans without any parents.
-	 */
-	public static List<Plan> getAllRootPlans(Session s){
-		s.beginTransaction();
-		try{
-			@SuppressWarnings("unchecked")
-			List<Plan> plans = s.createCriteria(Plan.class).add(Restrictions.isNull("parent")).list(); //$NON-NLS-1$
-			return plans;
-		}finally{
-			s.getTransaction().rollback();
-		}
-	}
-	
 	/**
 	 * 
 	 * @param s

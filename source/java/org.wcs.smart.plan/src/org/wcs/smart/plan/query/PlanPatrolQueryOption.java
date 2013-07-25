@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.plan.query;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -83,11 +86,22 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 	@Override
 	public List<ListItem> getAllActiveValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		items.add(ANY_PATROL_ITEM);
+		
 		List<Plan> plans = PlanHibernateManager.getPlans(SmartDB.getCurrentConservationArea(), session);
+		Collections.sort(plans, new Comparator<Plan>(){
+
+			@Override
+			public int compare(Plan plan1, Plan plan2) {
+				int d = -plan1.getStartDate().compareTo(plan2.getStartDate());
+				if (d != 0) return d;
+				return Collator.getInstance().compare(plan1.getName(), plan2.getName());
+			}});
+		
 		for (Plan plan : plans) {
 			items.add(new ListItem(plan.getUuid(), Plan.generateLabel(plan.getId(), plan.getName())));
 		}
+		
+		items.add(0,ANY_PATROL_ITEM);
 		return items;
 	}
 	

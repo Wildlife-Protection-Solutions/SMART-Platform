@@ -233,19 +233,6 @@ public class Plan extends SimpleListItem {
 		this.activeEmployees = activeEmployees;
 	}
 	
-
-	/**
-	 * Adds a new plan target
-	 * @param t
-	 */
-	@Transient
-	public void addTarget(PlanTarget t){
-		if(targets == null){
-			targets = new ArrayList<PlanTarget>();
-		}
-		targets.add(t);
-	}
-
 	/**
 	 * 
 	 * @return plan targets

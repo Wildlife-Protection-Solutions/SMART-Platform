@@ -82,7 +82,6 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 			s.beginTransaction();
 			try{
 				final List<ListItem> items = option.getAllActiveValues(s);
-				Collections.sort(items);
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {

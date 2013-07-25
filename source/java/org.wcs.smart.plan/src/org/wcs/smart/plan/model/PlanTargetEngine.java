@@ -156,7 +156,7 @@ public class PlanTargetEngine {
 			if (total < value) {
 				complete = true;
 			} else {
-				incompleteMsg = Messages.PlanTargetEngine_Missed_Message + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				incompleteMsg = Status.INCOMPLETE.guiName + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				complete = false;
 			}
 		} else if (op == Operator.NOEQUAL) {
