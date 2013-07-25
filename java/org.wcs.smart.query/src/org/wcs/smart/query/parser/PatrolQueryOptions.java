@@ -674,6 +674,7 @@ public class PatrolQueryOptions {
 					items.add(new ListItem(t.getUuid(), t.getFullLabel() ));
 				}
 			}
+			Collections.sort(items);
 			return items;
 		}
 		

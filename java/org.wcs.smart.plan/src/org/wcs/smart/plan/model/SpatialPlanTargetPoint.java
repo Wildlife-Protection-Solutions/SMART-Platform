@@ -87,7 +87,7 @@ public class SpatialPlanTargetPoint implements ISmartPoint {
 	}
 	
 	/**
-	 * Clones the target point coying the x, y, and plantarget values.
+	 * Clones the target point copying the x, y, and plan target values.
 	 * Uuid is not copied.
 	 */
 	public SpatialPlanTargetPoint clone(){

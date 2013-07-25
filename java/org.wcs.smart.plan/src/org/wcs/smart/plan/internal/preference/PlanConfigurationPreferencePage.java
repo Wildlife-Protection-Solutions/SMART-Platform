@@ -78,7 +78,7 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 	@Override
 	protected Control createContents(Composite parent) {
 		final Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
+		main.setLayout(new GridLayout(3, false));
 
 		Label distanceLabel = new Label(main, SWT.NONE);
 		distanceLabel.setText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_Label);
@@ -95,7 +95,7 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 		distancDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		distancDecoration.setShowHover(true);
-		distancDecoration.setDescriptionText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message);
+		distancDecoration.setDescriptionText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_DecorationMessage);
 		//distancDecoration.hide();
 
 		txtDistanceToComplete.addModifyListener(new ModifyListener() {
@@ -112,6 +112,9 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 		//init with values
 		int propValue = SmartPlanPlugIn.getDefault().getPreferenceStore().getInt(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE);
 		txtDistanceToComplete.setText(String.valueOf(propValue));
+		
+		Label lblMeter = new Label(main, SWT.NONE);
+		lblMeter.setText(Messages.PlanConfigurationPreferencePage_METER_LABEL);
 		
 		return main;
 	}
@@ -155,7 +158,10 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 
 	private boolean isDistanceToCompleteValid() {
 		try {
-			Integer.parseInt(txtDistanceToComplete.getText());
+			int number = Integer.parseInt(txtDistanceToComplete.getText());
+			if (number < 0){
+				return false;
+			}
 		} catch (Exception e) {
 			return false;
 		}
