@@ -1,8 +1,11 @@
 package org.wcs.smart.cybertracker;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -176,5 +179,15 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		};
 		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		j.schedule();
+	}
+	
+	private void cleanStorage(File folder, int dayLimit) {
+		long current = new Date().getTime();
+		long bound = dayLimit * 24 * 60 * 60 * 1000;
+		for (File file : folder.listFiles()) {
+			if (current - file.lastModified() > bound) {
+				FileUtils.deleteQuietly(file);
+			}
+		}
 	}
 }

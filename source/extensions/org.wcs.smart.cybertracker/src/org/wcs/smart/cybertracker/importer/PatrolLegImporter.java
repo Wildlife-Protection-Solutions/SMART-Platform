@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
+
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -33,6 +37,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Imports from {@link CyberTrackerPatrol} to {@link Patrol} object
@@ -56,6 +61,20 @@ public class PatrolLegImporter extends SmartImporter {
 					return false;
 			}
 			leg.createLegDays();
+
+			if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
+				if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))
+					addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_Start, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getEndDate())));
+				patrol.setStartDate(leg.getStartDate());
+				
+			}
+
+			if (patrol.getEndDate().getTime() < leg.getEndDate().getTime()) {
+				if (!isValidTimeDelta(patrol.getEndDate(), leg.getStartDate()))
+					addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_End, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getStartDate())));
+				patrol.setEndDate(leg.getEndDate());
+			}
+			
 			
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
@@ -79,6 +98,14 @@ public class PatrolLegImporter extends SmartImporter {
 		finally {
 			session.close();
 		}
-		
-	}	
+	}
+
+	//ensures that gap between dates is less than a day
+	//(in this case we will not have a gap after adding leg to the patrol)
+	private boolean isValidTimeDelta(Date from, Date to) {
+		from = SmartUtils.getDatePart(from, false);
+		to = SmartUtils.getDatePart(to, false);
+		long delta = to.getTime() - from.getTime();
+		return delta <= 1000 * 60 * 60 * 24; //more that a day
+	}
 }
