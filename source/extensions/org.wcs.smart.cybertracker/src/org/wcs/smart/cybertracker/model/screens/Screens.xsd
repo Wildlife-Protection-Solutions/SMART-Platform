@@ -110,6 +110,11 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="Unique" />
 						<xs:element type="xs:int" name="MinChecks" minOccurs="0"/>
 						<xs:element type="xs:int" name="MaxChecks" minOccurs="0"/>
+						<xs:element type="xs:int" name="ButtonSpacingX" minOccurs="0"/>
+						<xs:element type="xs:int" name="ButtonSpacingY" minOccurs="0"/>
+						<xs:element type="xs:int" name="Decimals" minOccurs="0"/>
+						<xs:element type="xs:int" name="Password" minOccurs="0"/>
+						<xs:element type="xs:int" name="PasswordAutoNext" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>

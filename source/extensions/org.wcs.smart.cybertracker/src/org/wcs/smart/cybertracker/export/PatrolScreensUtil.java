@@ -40,6 +40,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.filter.Categories;
 import org.wcs.smart.cybertracker.model.filter.ElementFilters;
@@ -237,12 +238,19 @@ public class PatrolScreensUtil {
 
 	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
-		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol), null);
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_ExitCyberTracker);
+		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		addUniqueAttrubute(node, resultId);
 		addGpsConfiguration(node, 0);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
-		return toNextScreen(node);
+
+		Node pwdNode = screensFactory.createNodePassword(ids.get(1).getNodeId(), Messages.PatrolScreens_Exit_Title);
+		container.screenNodes.add(pwdNode);
+		Control control2 = ScreensObjectFactory.getNavigationControl(pwdNode);
+		control2.setShowNext(ICyberTrackerConstants.STR_FALSE);
+		
+		return ids.get(0);
 		
 	}
 

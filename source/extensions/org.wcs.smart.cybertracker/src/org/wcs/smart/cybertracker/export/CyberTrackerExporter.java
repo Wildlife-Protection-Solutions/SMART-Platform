@@ -112,7 +112,7 @@ public class CyberTrackerExporter {
 	private File performExport(File file, IProgressMonitor monitor, Session session) {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
-		screensFactory = new ScreensObjectFactory(ctProperties.isAutoNext());
+		screensFactory = new ScreensObjectFactory(ctProperties);
 		ctUtil = new CyberTrackerUtil(screensFactory);
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
 		DataModel dataModel = getDataModel(session);

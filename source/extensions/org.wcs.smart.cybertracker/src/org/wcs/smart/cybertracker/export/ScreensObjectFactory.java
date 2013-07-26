@@ -41,10 +41,10 @@ public class ScreensObjectFactory {
 	private static final int CONTROL_2_INDEX = 0;
 	private static final int CONTROL_7_INDEX = 2;
 
-	private boolean autoRadioNext = true;
+	private CyberTrackerProperties ctProperties;
 	
-	public ScreensObjectFactory(boolean autoRadioNext) {
-		this.autoRadioNext = autoRadioNext;
+	public ScreensObjectFactory(CyberTrackerProperties properties) {
+		this.ctProperties = properties;
 	}
 	
 	/**
@@ -318,6 +318,42 @@ public class ScreensObjectFactory {
 		
 		return node;
 	}
+
+	/**
+    <Node>
+        <Id>???</Id>
+        <Name>???</Name>
+        <DataClass>TctScreen</DataClass>
+        <Data>
+            <NextId>14</NextId>
+            <TemplateId>{E4BCC108-0A78-4290-AD57-E6E94190A7A9}</TemplateId>
+            <Name>???</Name>
+            <Controls>
+                <Control>...</Control>
+                ...
+        </Data>
+    </Node>
+	 */
+	public Node createNodePassword(String id, String name) {
+		Node node = new Node();
+		node.setId(id);
+		node.setName(name);
+		node.setDataClass("TctScreen"); //$NON-NLS-1$
+
+		Node.Data data = new Node.Data();
+		data.setNextId(14);
+		data.setTemplateId("{E4BCC108-0A78-4290-AD57-E6E94190A7A9}"); //$NON-NLS-1$
+		data.setName(name);
+		Controls controls = new Controls();
+		controls.getControl().add(createControl2());
+		controls.getControl().add(createControl6());
+		controls.getControl().add(createControl11());
+		controls.getControl().add(createNumpadPasswordExitControl12(ctProperties.getExitPin()));
+		data.setControls(controls);
+		node.setData(data);
+		
+		return node;
+	}
 	
 	/**
 	<Control>
@@ -409,7 +445,7 @@ public class ScreensObjectFactory {
 		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
 		control.setItemHeight(25);
 		control.setAttribute(0);
-		control.setAutoRadioNext(autoRadioNext ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+		control.setAutoRadioNext(ctProperties.isAutoNext() ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
 		control.setTranslateRadioElement(radioElement);
@@ -536,6 +572,55 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+    <Control>
+	    <Type>{5D9A98BA-0F3A-4B6C-9439-7D72D6B06F9E}</Type>
+	    <LockProperties>Decimals;Digits;Font;Formula mode;Minimum value;Maximum value;Require non-zero;Require set value</LockProperties>
+	    <Id>12</Id>
+	    <Align>5</Align>
+	    <Left>0</Left>
+	    <Top>34</Top>
+	    <Width>240</Width>
+	    <Height>262</Height>
+	    <Translate__Font>Arial,18,B</Translate__Font>
+	    <Caption>Enter pin</Caption>
+	    <ButtonSpacingX>0</ButtonSpacingX>
+	    <ButtonSpacingY>0</ButtonSpacingY>
+	    <Translate__ButtonFont>MS Sans Serif,18,B</Translate__ButtonFont>
+	    <DisplayHeight>50</DisplayHeight>
+	    <Decimals>2</Decimals>
+	    <MinValue>0</MinValue>
+	    <Password>???</Password>
+	    <PasswordAutoNext>2</PasswordAutoNext>
+    </Control>
+	 */
+
+	public Controls.Control createNumpadPasswordExitControl12(Integer password) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{5D9A98BA-0F3A-4B6C-9439-7D72D6B06F9E}"); //$NON-NLS-1$
+		control.setLockProperties("Decimals;Digits;Font;Formula mode;Minimum value;Maximum value;Require non-zero;Require set value"); //$NON-NLS-1$
+		control.setId(12);
+		control.setAlign(5);
+		control.setLeft(0);
+		control.setTop(34);
+		control.setWidth(240);
+		control.setHeight(262);
+		control.setTranslateFont("MS Sans Serif,18,B"); //$NON-NLS-1$
+		control.setCaption("Enter pin"); //$NON-NLS-1$
+		control.setButtonSpacingX(0);
+		control.setButtonSpacingY(0);
+//		control.setButtonWidth(50);
+//		control.setButtonHeight(40);
+//		control.setButtonBorderStyle(3);
+		control.setTranslateButtonFont("MS Sans Serif,18,B"); //$NON-NLS-1$
+		control.setDisplayHeight(50);
+		control.setDecimals(2);
+		control.setMinValue(0);
+		control.setPassword(password);
+		control.setPasswordAutoNext(2);
+		return control;
+	}
+	
 	/**
     <Control>
         <Type>{49728018-D9F6-49B8-86E4-3EA49A29F4BC}</Type>
