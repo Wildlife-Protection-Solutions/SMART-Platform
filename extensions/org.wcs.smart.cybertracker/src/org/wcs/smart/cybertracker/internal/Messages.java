@@ -117,6 +117,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_AutoNext;
 	public static String CyberTrackerPropertiesDialog_DataNotValid;
 	public static String CyberTrackerPropertiesDialog_Error;
+	public static String CyberTrackerPropertiesDialog_ExitPin;
+	public static String CyberTrackerPropertiesDialog_ExitPinInvalid;
 	public static String CyberTrackerPropertiesDialog_KioskMode;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars;
 	public static String CyberTrackerPropertiesDialog_Message;

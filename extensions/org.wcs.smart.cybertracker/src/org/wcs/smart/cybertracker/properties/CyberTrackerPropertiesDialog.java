@@ -69,6 +69,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 	private Button btnLargeScrollBars;
 	private Button btnKioskMode;
+	private Text txtExitPin;
 
 	private Text txtSightingAccuracy;
 	private Text txtSightingFixCount;
@@ -79,6 +80,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     private Text txtStorageTime;
 	
     private ControlDecoration appNameDecoration;
+    private ControlDecoration exitPinDecoration;
     
     private ControlDecoration sightingAccuracyDecoration;
     private ControlDecoration sightingFixCountDecoration;
@@ -178,6 +180,31 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});
 
+		Label lblExitPin = new Label(container, SWT.NONE);
+		lblExitPin.setText(Messages.CyberTrackerPropertiesDialog_ExitPin);
+
+		txtExitPin = new Text(container, SWT.BORDER);
+		txtExitPin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtExitPin.setText(String.valueOf(ctProperties.getExitPin()));
+		txtExitPin.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isExitPinValid()) {
+					exitPinDecoration.hide();
+				} else {
+					exitPinDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		exitPinDecoration = new ControlDecoration(txtExitPin, SWT.LEFT);
+		exitPinDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		exitPinDecoration.setShowHover(true);
+		exitPinDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_ExitPinInvalid, CyberTrackerProperties.EXIT_PIN_MIN_VALUE, CyberTrackerProperties.EXIT_PIN_MAX_VALUE));
+		exitPinDecoration.hide();
+		
 		Label lblSigtingAccuracy = new Label(container, SWT.NONE);
 		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
 
@@ -335,6 +362,17 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		return container;
 	}
 
+	private boolean isExitPinValid() {
+		if (txtExitPin == null || txtExitPin.getText() == null || txtExitPin.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtExitPin.getText());
+			return result >= CyberTrackerProperties.EXIT_PIN_MIN_VALUE && result <= CyberTrackerProperties.EXIT_PIN_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	private boolean isSigtingAccuracyValid() {
 		if (txtSightingAccuracy == null || txtSightingAccuracy.getText() == null || txtSightingAccuracy.getText().isEmpty())
 			return false;
@@ -395,7 +433,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	}
 
 	private boolean validate() {
-		return isAppNameValid() && isStorageTimeValid() && 
+		return isAppNameValid() && isStorageTimeValid() && isExitPinValid() &&
 				isSigtingAccuracyValid() && isSigtingFixCountValid() && isTrackTimerValid() && isSkipButtonTimeoutValid();
 	}
 	
@@ -410,6 +448,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
+		ctProperties.setExitPin(Integer.valueOf(txtExitPin.getText()));
 		
 		ctProperties.setSightingAccuracy(Double.valueOf(txtSightingAccuracy.getText()));
 		ctProperties.setSightingFixCount(Integer.valueOf(txtSightingFixCount.getText()));
