@@ -1,11 +1,8 @@
 package org.wcs.smart.cybertracker;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -140,6 +137,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 									"auto_next BOOLEAN, "+ //$NON-NLS-1$
 									"application_name VARCHAR(256), "+ //$NON-NLS-1$
 									"kiosk_mode BOOLEAN, "+ //$NON-NLS-1$
+									"exit_pin INTEGER, "+ //$NON-NLS-1$
 									"sighting_accuracy DOUBLE, "+ //$NON-NLS-1$
 									"sighting_fix_count INTEGER, "+ //$NON-NLS-1$
 									"waypoint_timer INTEGER, "+ //$NON-NLS-1$
@@ -181,13 +179,4 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		j.schedule();
 	}
 	
-	private void cleanStorage(File folder, int dayLimit) {
-		long current = new Date().getTime();
-		long bound = dayLimit * 24 * 60 * 60 * 1000;
-		for (File file : folder.listFiles()) {
-			if (current - file.lastModified() > bound) {
-				FileUtils.deleteQuietly(file);
-			}
-		}
-	}
 }
