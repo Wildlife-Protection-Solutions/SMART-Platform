@@ -147,6 +147,8 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_ConfirmMessage;
 	public static String PatrolScreens_EndPatrol;
+	public static String PatrolScreens_Exit_Title;
+	public static String PatrolScreens_ExitCyberTracker;
 	public static String PatrolScreens_IsArmed;
 	public static String PatrolScreens_Leader;
 	public static String PatrolScreens_Mandate;

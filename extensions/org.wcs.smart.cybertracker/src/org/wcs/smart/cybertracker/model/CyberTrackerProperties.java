@@ -29,6 +29,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
@@ -109,6 +110,7 @@ public class CyberTrackerProperties {
 	
 	private boolean largeScrollBars = false;
 	private boolean kioskMode = false;
+	private int exitPin = 1234;
 	
 	private Double sightingAccuracy = 49.0;
 	private Integer sightingFixCount = 1;
@@ -221,4 +223,15 @@ public class CyberTrackerProperties {
 	public void setStorageTime(int storageTime) {
 		this.storageTime = storageTime;
 	}
+
+//	@Column(name="exit_pin")
+	@Transient
+	public int getExitPin() {
+		return exitPin;
+	}
+	@Transient
+	public void setExitPin(int exitPin) {
+		this.exitPin = exitPin;
+	}
+
 }
