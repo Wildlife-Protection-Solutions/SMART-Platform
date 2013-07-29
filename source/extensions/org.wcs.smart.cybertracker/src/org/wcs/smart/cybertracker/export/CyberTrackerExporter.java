@@ -81,6 +81,8 @@ public class CyberTrackerExporter {
 	private Map<Integer, CyberTrackerId> catLevel2resultId = new HashMap<Integer, CyberTrackerUtil.CyberTrackerId>();
 
 	private CyberTrackerId newWpResultId;
+	private List<CyberTrackerId> newWpElementsIds;
+
 	
 	public int uploadPda(File file) throws Exception {
 		String appPath = PdaUtil.getCTAppPath();
@@ -97,9 +99,11 @@ public class CyberTrackerExporter {
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
+			newWpElementsIds = createNewWpElementsIds(elements);
 			return performExport(destFolder, monitor, session);
 		} finally {
 			newWpResultId = null;
+			newWpElementsIds = null;
 			elements = null;
 			rootId = null;
 			attr2resultId.clear();
@@ -328,6 +332,16 @@ public class CyberTrackerExporter {
 		return result;
 	}
 
+	private List<CyberTrackerId> createNewWpElementsIds(Elements elements2) {
+		List<String> labelValues = new ArrayList<String>();
+		labelValues.add(Messages.CyberTrackerExporter_Waypoint_SaveAsNew);
+		labelValues.add(Messages.CyberTrackerExporter_Waypoint_AddToLast);
+		List<String> tag0Values = new ArrayList<String>();
+		tag0Values.add("true"); //$NON-NLS-1$
+		tag0Values.add("false"); //$NON-NLS-1$
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+	}
+	
 	/**
 	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
 	 * 
@@ -335,16 +349,9 @@ public class CyberTrackerExporter {
 	 * @param startId
 	 */
 	private Node createLastNode(CyberTrackerId id, CyberTrackerId startId) {
-		//patrol armed
-		List<String> labelValues = new ArrayList<String>();
-		labelValues.add(Messages.CyberTrackerExporter_Waypoint_SaveAsNew);
-		labelValues.add(Messages.CyberTrackerExporter_Waypoint_AddToLast);
-		List<String> tag0Values = new ArrayList<String>();
-		tag0Values.add("true"); //$NON-NLS-1$
-		tag0Values.add("false"); //$NON-NLS-1$
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
-
-		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, ids, newWpResultId.getItemId());
+		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
+		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
+		ScreensObjectFactory.addControlToNode(node, menoControl);
 		
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		//this is the last screen and we need to show "Save" button

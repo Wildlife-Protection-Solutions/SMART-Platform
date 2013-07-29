@@ -701,7 +701,7 @@ public class ScreensObjectFactory {
 	        <Width>236</Width>
 	        <Height>258</Height>
 	        <Translate__Font>MS Sans Serif,10,B</Translate__Font>
-	        <Caption>Enter text here...</Caption>
+	        <Caption>???</Caption>
 	    </Control>
 	</Controls>
 	 */
@@ -721,6 +721,30 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+	<Control>
+	    <Type>{F4D19E36-BC93-4D89-B82B-1A8900710077}</Type>
+	    <Id>13</Id>
+	    <Align>2</Align>
+	    <Top>210</Top>
+	    <Width>240</Width>
+	    <Height>90</Height>
+        <Translate__Font>MS Sans Serif,10,B</Translate__Font>
+	    <Caption>???</Caption>
+	</Control>
+	 */
+	public Controls.Control createBottomMemoControl13(String text) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{F4D19E36-BC93-4D89-B82B-1A8900710077}"); //$NON-NLS-1$
+		control.setId(13);
+		control.setAlign(2);
+		control.setTop(210);
+		control.setWidth(240);
+		control.setHeight(90);
+		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
+		control.setCaption(text);
+		return control;
+	}
 
 	/**
 	<Control>
@@ -827,4 +851,7 @@ public class ScreensObjectFactory {
 		return node.getData().getControls().getControl().get(CONTROL_7_INDEX);
 	}
 
+	public static void addControlToNode(Node node, Controls.Control control) {
+		node.getData().getControls().getControl().add(control);
+	}	
 }
