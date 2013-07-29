@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -74,19 +75,28 @@ public class CyberTrackerImporter {
 		Process proc = Runtime.getRuntime().exec(downloadCommand);
 		proc.waitFor();
 
-		File cxtDataFolder = new File(PdaUtil.getFilestore(ca));
+		File cxtDataFolder = PdaUtil.getDowloadFolder(ca);
 		File xmlTempDir = PdaUtil.createTempDirectory();
 		//scan files in this directory and obtain raw xml for them
 		monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 		try {
 			for (final File file : cxtDataFolder.listFiles()) {
-				extractRawXml(appPath, file, xmlTempDir);
+				if (file.isFile())
+					extractRawXml(appPath, file, xmlTempDir);
 			}
 			
 			//now all raw xml data is in temporary directory, importing it
 			for (final File file : xmlTempDir.listFiles()) {
 				patrols.addAll(importXmlFileData(file, monitor));
 			}
+
+			//move processed files to storage
+			File storageFolder = PdaUtil.getStorageFolder(ca);
+			for (final File file : cxtDataFolder.listFiles()) {
+				if (file.isFile())
+					FileUtils.moveFileToDirectory(file, storageFolder, true);
+			}
+			
 			return patrols;
 			
 		} finally {

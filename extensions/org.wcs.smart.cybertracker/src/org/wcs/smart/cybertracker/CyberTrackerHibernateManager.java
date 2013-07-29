@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker;
 
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -38,6 +40,19 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerHibernateManager {
 
+	/**
+	 * Returns all {@link CyberTrackerProperties}
+	 * 
+	 * @param session
+	 * @return  {@link List} of {@link CyberTrackerProperties}
+	 */
+	public static List<CyberTrackerProperties> getAllProperties(Session session) {
+		Criteria query = session.createCriteria(CyberTrackerProperties.class);
+		@SuppressWarnings("unchecked")
+		List<CyberTrackerProperties> list = query.list();
+		return list;
+	}
+	
 	/**
 	 * Fetches {@link CyberTrackerProperties} for current conservation area
 	 * 
