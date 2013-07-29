@@ -60,20 +60,32 @@ public class PdaUtil {
 		return ICyberTrackerConstants.REG_KEY_SMART + SmartUtils.encodeHex(ca.getUuid());
 	}
 
-	public static String getFilestore(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
-				ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
+//	public static String getFilestoreFromRegistry(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+//		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+//				ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
+//	}
+
+	private static String getCyberTrackerFolder(ConservationArea ca) {
+		String dir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
+		return dir + File.separator + SmartUtils.getDirectoryPath(ca.getUuid()) + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
+	}
+	
+	public static File getDowloadFolder(ConservationArea ca) {
+		return new File(getCyberTrackerFolder(ca));
+	}
+
+	public static File getStorageFolder(ConservationArea ca) {
+		String dir = getCyberTrackerFolder(ca) + File.separator + ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER;
+		return new File(dir);
 	}
 	
 	public static void updateRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-		String filestoreStr = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		filestoreStr = filestoreStr + File.separator + SmartUtils.getDirectoryPath(ca.getUuid()) + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
-		File filestore = new File(filestoreStr);
-		if (!filestore.exists())
-			filestore.mkdirs();
+		File folder = getDowloadFolder(ca);
+		if (!folder.exists())
+			folder.mkdirs();
 
 		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
-				getRegistryKey(ca), filestore.getCanonicalPath());
+				getRegistryKey(ca), folder.getCanonicalPath());
 	}
 
 	public static void deleteTempDirectory(File tempDir) {
