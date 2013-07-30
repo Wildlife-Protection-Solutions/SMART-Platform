@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -137,7 +141,16 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 
 		createKeyColumn();
 		createColumn(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+		List<Language> sortedLangs = new ArrayList<Language>();
+		sortedLangs.addAll(SmartDB.getCurrentConservationArea().getLanguages());
+		Collections.sort(sortedLangs, new Comparator<Language>() {
+			@Override
+			public int compare(Language l0, Language l1) {
+				if (l0.isDefault()) return -1;
+				return Collator.getInstance().compare(l0.getDisplayName(), l1.getDisplayName());
+			}
+		});
+		for (Language l : sortedLangs) {
 			if (l.isDefault()) continue;
 			createColumn(l);
 		}
