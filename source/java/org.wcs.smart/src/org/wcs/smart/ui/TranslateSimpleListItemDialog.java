@@ -95,7 +95,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 			@Override
 			public int compare(org.wcs.smart.ca.Label l0, org.wcs.smart.ca.Label l1) {
 				if (l0.getLanguage().isDefault()){
-					return 1;
+					return -1;
 				}
 				return Collator.getInstance().compare(l0.getLanguage().getDisplayName(), l1.getLanguage().getDisplayName());
 			}
