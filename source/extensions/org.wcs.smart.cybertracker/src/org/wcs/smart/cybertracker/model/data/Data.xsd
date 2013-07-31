@@ -21,6 +21,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
         <xs:element name="Sightings">
           <xs:complexType>
             <xs:sequence>
@@ -44,6 +45,31 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
+		<xs:element name="TimerTracks">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="T" maxOccurs="unbounded" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="A" maxOccurs="unbounded" minOccurs="0">
+									<xs:complexType>
+										<xs:simpleContent>
+											<xs:extension base="xs:string">
+												<xs:attribute type="xs:string" name="I" use="optional" />
+												<xs:attribute type="xs:string" name="N" use="optional" />
+												<xs:attribute type="xs:string" name="V" use="optional" />
+											</xs:extension>
+										</xs:simpleContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+        
       </xs:sequence>
     </xs:complexType>
   </xs:element>
