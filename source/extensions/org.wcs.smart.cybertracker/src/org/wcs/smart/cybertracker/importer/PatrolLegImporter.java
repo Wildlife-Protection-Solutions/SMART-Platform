@@ -60,7 +60,6 @@ public class PatrolLegImporter extends SmartImporter {
 				if(!fixTransportError(leg, ctPatrol, session))
 					return false;
 			}
-			leg.createLegDays();
 
 			if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
 				if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))

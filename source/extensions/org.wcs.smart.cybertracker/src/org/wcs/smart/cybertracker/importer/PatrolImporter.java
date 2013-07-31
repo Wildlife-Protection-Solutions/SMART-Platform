@@ -95,8 +95,7 @@ public class PatrolImporter extends SmartImporter {
 		p.setEndDate(ctPatrol.getEndDate());
 		
 		initLegData(p.getFirstLeg(), ctPatrol);
-		
-		p.createLegDays();
+
 		return p;
 	}
 	
