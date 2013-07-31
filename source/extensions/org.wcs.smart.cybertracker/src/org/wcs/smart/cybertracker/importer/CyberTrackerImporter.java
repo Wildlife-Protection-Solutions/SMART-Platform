@@ -24,10 +24,14 @@ package org.wcs.smart.cybertracker.importer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.sql.Time;
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +42,29 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Station;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data;
+import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
+import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType.Type;
+import org.wcs.smart.patrol.model.Team;
 
 /**
  * Importer for CyberTracker application data. 
@@ -149,8 +166,17 @@ public class CyberTrackerImporter {
 		
 		data = null; //we don't need data object anymore
 		List<CyberTrackerPatrol> patrols = new ArrayList<CyberTrackerPatrol>();
-		for (String id : patrolsMap.keySet()) {
-			patrols.add(new CyberTrackerPatrol(elementsMap, patrolsMap.get(id)));
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			for (String id : patrolsMap.keySet()) {
+				CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(elementsMap, patrolsMap.get(id));
+				initMetaData(ctPatrol, session);
+				patrols.add(ctPatrol);
+			}
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
 		}
 		//sort patrols based on there CT id before returning
 		Collections.sort(patrols, new Comparator<CyberTrackerPatrol>() {
@@ -178,6 +204,139 @@ public class CyberTrackerImporter {
 		File xmlFile = new File(xmlFilePath);
 		return xmlFile.exists() ? xmlFile : null;
 	}
+
+	private void initMetaData(CyberTrackerPatrol ctPatrol, Session session) {
+		List<S> patrolData = ctPatrol.getPatrolData();
+		if (patrolData.isEmpty())
+			return;
+		
+		 Map<String, E> eMap = ctPatrol.getElementsMap();
+		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
+		Date date = null;
+		Time time = null;
+		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
+		
+		for (Data.Sightings.S.A a : s.getA()) {
+			String i = a.getI();
+			String n = a.getN();
+			String v = a.getV();
+			
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				try {
+					date = formatter.parse(v);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				time = Time.valueOf(v);
+			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
+				ctPatrol.setId(v);
+			} else if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
+				E e = eMap.get(v);
+				String tag0 = e != null ? e.getTag0() : null;
+				if (tag0 != null) {
+					ctPatrol.setPatrolType(Type.valueOf(e.getTag0()));
+				}
+			} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
+				E e = eMap.get(v);
+				PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
+				if (transportType == null)
+					ctPatrol.addProblem(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
+				ctPatrol.setCtTransport(e.getN());
+				ctPatrol.setPatrolTransportType(transportType);
+			} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
+				E e = eMap.get(v);
+				String tag0 = e != null ? e.getTag0() : null;
+				if (tag0 != null) {
+					ctPatrol.setArmed("true".equals(tag0.toLowerCase())); //$NON-NLS-1$
+				}				
+			} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
+				E e = eMap.get(v);
+				Team t = fetchFromTag0(Team.class, e, session);
+				if (t == null && e.getTag0() != null)
+					ctPatrol.addProblem(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
+				ctPatrol.setCtTeam(e.getN());
+				ctPatrol.setTeam(t);
+			} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
+				E e = eMap.get(v);
+				Station st = fetchFromTag0(Station.class, e, session);
+				if (st == null && e.getTag0() != null)
+					ctPatrol.addProblem(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
+				ctPatrol.setCtStation(e.getN());
+				ctPatrol.setStation(st);
+			} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
+				E e = eMap.get(v);
+				PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
+				if (m == null && e.getTag0() != null)
+					ctPatrol.addProblem(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
+				ctPatrol.setMandate(m);
+			} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
+				ctPatrol.setObjective(v);
+			} else if (PatrolScreensUtil.RESULT_COMMENTS.equals(n)) {
+				ctPatrol.setComment(v);
+			} else if (PatrolScreensUtil.RESULT_LEADER.equals(n)) {
+				E e = eMap.get(v);
+				Employee emp = fetchFromTag0(Employee.class, e, session);
+				if (emp == null && e.getTag0() != null)
+					ctPatrol.addProblem(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
+				ctPatrol.setCtLeader(e.getN());
+				ctPatrol.setLeader(emp);
+			} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
+				E e = eMap.get(v);
+				Employee emp = fetchFromTag0(Employee.class, e, session);
+				if (emp == null && e.getTag0() != null)
+					ctPatrol.addProblem(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
+				ctPatrol.setCtPilot(e.getN());
+				ctPatrol.setPilot(emp);
+			} else if (isMemberRecord(a)) {
+				E e = eMap.get(i);
+				Employee emp = fetchFromTag0(Employee.class, e, session);
+				if (emp == null && e.getTag0() != null)
+					ctPatrol.addProblem(PatrolMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, e.getN()));
+				ctPatrol.getCtMembers().add(e.getN());
+				if (emp != null) {
+					ctPatrol.getMembers().add(emp);
+				}
+			}
+		}
+		ctPatrol.setStartDate(SmartImporter.combine(date, time));
+		date = null;
+		time = null;
+		
+		s = patrolData.get(patrolData.size()-1); //need to find end date
+		for (Data.Sightings.S.A a : s.getA()) {
+			String i = a.getI();
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				try {
+					date = formatter.parse(a.getV());
+					if (time != null)
+						break;
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				time = Time.valueOf(a.getV());
+				if (date != null)
+					break;
+			}
+		}
+		ctPatrol.setEndDate(SmartImporter.combine(date, time));
+	}
+
+	private boolean isMemberRecord(A a) {
+		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
+			return false;
+		//TODO: check if this is really member (use tag1?)
+		return true;
+	}
+
+	private <T> T fetchFromTag0(Class<T> clazz, E e, Session session) {
+		String tag0 = e != null ? e.getTag0() : null;
+		if (tag0 != null) {
+			return CyberTrackerHibernateManager.fetchByUuid(clazz, tag0, session);
+		}
+		return null;
+	}
 	
 	private Map<String, Data.Elements.E> buildElementsMap(Data data) {
 		Map<String, Data.Elements.E> result = new HashMap<String, Data.Elements.E>();
@@ -187,7 +346,6 @@ public class CyberTrackerImporter {
 			result.put(e.getI(), e);
 		}
 		return result;
-		
 	}
 
 	/**
@@ -221,6 +379,7 @@ public class CyberTrackerImporter {
 		}
 		return result;
 	}
+
 	
 	/**
 	 * Reads data data from an xml file.
