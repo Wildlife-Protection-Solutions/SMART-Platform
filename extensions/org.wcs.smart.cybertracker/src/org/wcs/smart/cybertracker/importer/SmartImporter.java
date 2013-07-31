@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,13 +53,17 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Common smart importing logic.
@@ -91,6 +96,45 @@ public class SmartImporter {
 		dateCalendar.add(Calendar.SECOND, timeCalendar.get(Calendar.SECOND));
 		return dateCalendar.getTime();
 	}
+
+	/**
+	 * Returns list of coordinates recorded during specified period of time.
+	 * Assumes that source list is sorted by z coordinate (date+time).
+	 * @param list
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	public static List<Coordinate> listPart(final List<Coordinate> list, Date from, Date to) {
+		Coordinate fromC = new Coordinate(0, 0, from.getTime() - 0.5);
+		Coordinate toC = new Coordinate(0, 0, to.getTime() + 0.5);
+		Comparator<Coordinate> cmp = new CoordinateZComparator();
+		int low = binaryCut(list, fromC, cmp) + 1;
+		int high = binaryCut(list, toC, cmp) + 1;
+		return new ArrayList<Coordinate>(list.subList(low, high));
+	}
+
+	/**
+	 * Returns max index of an element smaller or equal to the key
+	 */
+    private static <T> int binaryCut(List<? extends T> l, T key, Comparator<? super T> c) {
+        int low = 0;
+        int high = l.size()-1;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            T midVal = l.get(mid);
+            int cmp = c.compare(midVal, key);
+
+            if (cmp < 0)
+                low = mid + 1;
+            else if (cmp > 0)
+                high = mid - 1;
+            else
+                return mid; // key found
+        }
+        return low-1;  // key not found
+    }
 	
 	protected boolean fixTransportError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session) {
 		Display.getDefault().syncExec(new Runnable() {
@@ -125,6 +169,23 @@ public class SmartImporter {
 			legMembers.add(plm);
 		}
 		leg.setMembers(legMembers);
+		
+		leg.createLegDays();
+		
+		List<Coordinate> timerTrackList = ctPatrol.getTimerTrackList();
+		if (timerTrackList == null || timerTrackList.isEmpty())
+			return;
+		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+			Date from = combine(pld.getDate(), pld.getStartTime());
+			Date to = combine(pld.getDate(), pld.getEndTime());
+			List<Coordinate> coordinates = listPart(timerTrackList, from, to);
+			Track track = GPSDataImport.convertToTrack(coordinates);
+			if (track != null) {
+				track.setPatrolLegDay(pld);
+				pld.setTrack(track);
+			}
+		}
+	
 	}
 	
 	protected void addObservations(PatrolLeg leg, S s, Map<String, E> eMap, Session session) {
@@ -399,6 +460,13 @@ public class SmartImporter {
 	
 	protected void clearWarning() {
 		warnings.clear();
+	}
+
+	public static class CoordinateZComparator implements Comparator<Coordinate> {
+		@Override
+		public int compare(Coordinate o1, Coordinate o2) {
+			return ((Double) o1.z).compareTo((Double) o2.z);
+		}
 	}
 
 }

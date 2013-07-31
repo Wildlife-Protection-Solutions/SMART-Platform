@@ -36,6 +36,8 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
 /**
  * Model representing single patrol imported from CyberTracker application
  * 
@@ -79,6 +81,7 @@ public class CyberTrackerPatrol {
 	private Employee leader;
 	private Employee pilot;
 	private List<Employee> members;
+	private List<Coordinate> timerTrackList;
 	
 	//used only for gui representation after initial load
 	private String ctTransport;
@@ -293,5 +296,16 @@ public class CyberTrackerPatrol {
 	public void setCtMembers(List<String> ctMembers) {
 		this.ctMembers = ctMembers;
 	}
+
+	public List<Coordinate> getTimerTrackList() {
+		if (timerTrackList == null)
+			timerTrackList = new ArrayList<Coordinate>();
+		return timerTrackList;
+	}
+
+	public void setTimerTrackList(List<Coordinate> timerTrackList) {
+		this.timerTrackList = timerTrackList;
+	}
+	
 	
 }

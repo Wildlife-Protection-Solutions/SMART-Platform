@@ -49,6 +49,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
+import org.wcs.smart.cybertracker.importer.SmartImporter.CoordinateZComparator;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
@@ -57,7 +58,6 @@ import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -65,6 +65,8 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.Team;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Importer for CyberTracker application data. 
@@ -74,9 +76,6 @@ import org.wcs.smart.patrol.model.Team;
  * @since 1.0.0
  */
 public class CyberTrackerImporter {
-	
-	private Map<String, Data.Elements.E> elementsMap;
-	private Map<String, List<Data.Sightings.S>> patrolsMap;
 	
 	public List<CyberTrackerPatrol> importPdaData(IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerImporter_Task_Download);
@@ -161,8 +160,9 @@ public class CyberTrackerImporter {
 			throw new Exception(MessageFormat.format(Messages.CyberTrackerImporter_Read_Error, file.getName()));
 		}
 		
-		elementsMap = buildElementsMap(data);
-		patrolsMap = buildPatrolsMap(data);
+		Map<String, Data.Elements.E> elementsMap = buildElementsMap(data);
+		Map<String, List<Data.Sightings.S>> patrolsMap = buildPatrolsMap(data);
+		List<Coordinate> timerTrackList = buildTimerTrackList(data);
 		
 		data = null; //we don't need data object anymore
 		List<CyberTrackerPatrol> patrols = new ArrayList<CyberTrackerPatrol>();
@@ -172,6 +172,7 @@ public class CyberTrackerImporter {
 			for (String id : patrolsMap.keySet()) {
 				CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(elementsMap, patrolsMap.get(id));
 				initMetaData(ctPatrol, session);
+				ctPatrol.setTimerTrackList(SmartImporter.listPart(timerTrackList, ctPatrol.getStartDate(), ctPatrol.getEndDate()));
 				patrols.add(ctPatrol);
 			}
 		} finally {
@@ -216,7 +217,7 @@ public class CyberTrackerImporter {
 		Time time = null;
 		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
 		
-		for (Data.Sightings.S.A a : s.getA()) {
+		for (S.A a : s.getA()) {
 			String i = a.getI();
 			String n = a.getN();
 			String v = a.getV();
@@ -304,7 +305,7 @@ public class CyberTrackerImporter {
 		time = null;
 		
 		s = patrolData.get(patrolData.size()-1); //need to find end date
-		for (Data.Sightings.S.A a : s.getA()) {
+		for (S.A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
@@ -323,7 +324,7 @@ public class CyberTrackerImporter {
 		ctPatrol.setEndDate(SmartImporter.combine(date, time));
 	}
 
-	private boolean isMemberRecord(A a) {
+	private boolean isMemberRecord(S.A a) {
 		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
 			return false;
 		//TODO: check if this is really member (use tag1?)
@@ -380,6 +381,42 @@ public class CyberTrackerImporter {
 		return result;
 	}
 
+	private List<Coordinate> buildTimerTrackList(Data data) {
+		List<Coordinate> result = new ArrayList<Coordinate>();
+		if (data == null || data.getTimerTracks() == null)
+			return result;
+		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
+		for (Data.TimerTracks.T t : data.getTimerTracks().getT()) {
+			Date date = null;
+			Time time = null;
+			double x = 0;
+			double y = 0;
+			for (Data.TimerTracks.T.A a : t.getA()) {
+				String i = a.getI();
+				if (ICyberTrackerConstants.DATE.equals(i)) {
+					try {
+						date = formatter.parse(a.getV());
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+				} else if (ICyberTrackerConstants.TIME.equals(i)) {
+					time = Time.valueOf(a.getV());
+				} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
+					y = Double.valueOf(a.getV());
+				} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
+					x = Double.valueOf(a.getV());
+				}
+			}
+			
+			if (date == null || time == null)
+				continue;
+			
+			result.add(new Coordinate(x, y, SmartImporter.combine(date, time).getTime()));
+		}
+		//sort by date+time
+		Collections.sort(result, new CoordinateZComparator());
+		return result;
+	}
 	
 	/**
 	 * Reads data data from an xml file.
