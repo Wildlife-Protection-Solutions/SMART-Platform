@@ -108,9 +108,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblAppName = new Label(container, SWT.NONE);
 		lblAppName.setText(Messages.CyberTrackerPropertiesDialog_AppName);
+		lblAppName.setToolTipText(Messages.CyberTrackerPropertiesDialog_AppName_Tooltip);
 
 		txtAppName = new Text(container, SWT.BORDER);
 		txtAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtAppName.setToolTipText(Messages.CyberTrackerPropertiesDialog_AppName_Tooltip);
 		if (ctProperties.getApplicationName() != null)
 			txtAppName.setText(ctProperties.getApplicationName());
 		txtAppName.addModifyListener(new ModifyListener() {
@@ -134,8 +136,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblAutoNext = new Label(container, SWT.NONE);
 		lblAutoNext.setText(Messages.CyberTrackerPropertiesDialog_AutoNext);
+		lblAutoNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_AutoNext_Tooltip);
 
 		btnAutoNext = new Button(container, SWT.CHECK);
+		btnAutoNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_AutoNext_Tooltip);
 		btnAutoNext.setSelection(ctProperties.isAutoNext());
 		btnAutoNext.addSelectionListener(new SelectionListener() {
 			@Override
@@ -150,8 +154,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblLargeScrollBars = new Label(container, SWT.NONE);
 		lblLargeScrollBars.setText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars);
+		lblLargeScrollBars.setToolTipText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip);
 
 		btnLargeScrollBars = new Button(container, SWT.CHECK);
+		btnLargeScrollBars.setToolTipText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip);
 		btnLargeScrollBars.setSelection(ctProperties.isLargeScrollBars());
 		btnLargeScrollBars.addSelectionListener(new SelectionListener() {
 			@Override
@@ -166,8 +172,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		Label lblKioskMode = new Label(container, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
+		lblKioskMode.setToolTipText(Messages.CyberTrackerPropertiesDialog_KioskMode_Tooltip);
 
 		btnKioskMode = new Button(container, SWT.CHECK);
+		btnKioskMode.setToolTipText(Messages.CyberTrackerPropertiesDialog_KioskMode_Tooltip);
 		btnKioskMode.setSelection(ctProperties.isKioskMode());
 		btnKioskMode.addSelectionListener(new SelectionListener() {
 			@Override
@@ -182,8 +190,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblExitPin = new Label(container, SWT.NONE);
 		lblExitPin.setText(Messages.CyberTrackerPropertiesDialog_ExitPin);
+		lblExitPin.setToolTipText(Messages.CyberTrackerPropertiesDialog_ExitPin_Tooltip);
 
 		txtExitPin = new Text(container, SWT.BORDER);
+		txtExitPin.setToolTipText(Messages.CyberTrackerPropertiesDialog_ExitPin_Tooltip);
 		txtExitPin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtExitPin.setText(String.valueOf(ctProperties.getExitPin()));
 		txtExitPin.addModifyListener(new ModifyListener() {
@@ -207,9 +217,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		Label lblSigtingAccuracy = new Label(container, SWT.NONE);
 		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
+		lblSigtingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
 
 		txtSightingAccuracy = new Text(container, SWT.BORDER);
 		txtSightingAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtSightingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
 		if (ctProperties.getSightingAccuracy() != null)
 			txtSightingAccuracy.setText(String.valueOf(ctProperties.getSightingAccuracy()));
 		txtSightingAccuracy.addModifyListener(new ModifyListener() {
@@ -234,9 +246,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblSightingFixCount = new Label(container, SWT.NONE);
 		lblSightingFixCount.setText(Messages.CyberTrackerPropertiesDialog_SightingFixCount);
+		lblSightingFixCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingFixCount_Tooltip);
 
 		txtSightingFixCount = new Text(container, SWT.BORDER);
 		txtSightingFixCount.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtSightingFixCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingFixCount_Tooltip);
 		if (ctProperties.getSightingFixCount() != null)
 			txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
 		txtSightingFixCount.addModifyListener(new ModifyListener() {
@@ -260,9 +274,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		Label lblTrackTimer = new Label(container, SWT.NONE);
 		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer);
+		lblTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
 
 		txtTrackTimer = new Text(container, SWT.BORDER);
 		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
 		if (ctProperties.getWaypointTimer() != null)
 			txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimer()));
 		txtTrackTimer.addModifyListener(new ModifyListener() {
@@ -286,8 +302,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblTimeOffset = new Label(container, SWT.NONE);
 		lblTimeOffset.setText(Messages.CyberTrackerPropertiesDialog_TimeOffset);
+		lblTimeOffset.setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
 
 		timeOffset = new ComboViewer(container, SWT.READ_ONLY);
+		timeOffset.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
 		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
 		timeOffset.setLabelProvider(new CyberTrackerGTMLabelProvider());
@@ -304,9 +322,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 		Label lblSkipButtonTimeout = new Label(container, SWT.NONE);
 		lblSkipButtonTimeout.setText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout);
+		lblSkipButtonTimeout.setToolTipText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip);
 
 		txtSkipButtonTimeout = new Text(container, SWT.BORDER);
 		txtSkipButtonTimeout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtSkipButtonTimeout.setToolTipText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip);
 		if (ctProperties.getSkipButtonTimeout() != null)
 			txtSkipButtonTimeout.setText(String.valueOf(ctProperties.getSkipButtonTimeout()));
 		txtSkipButtonTimeout.addModifyListener(new ModifyListener() {
@@ -331,8 +351,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		Label lblStorageTime = new Label(container, SWT.NONE);
 		lblStorageTime.setText(Messages.CyberTrackerPropertiesDialog_StorageTime);
+		lblStorageTime.setToolTipText(Messages.CyberTrackerPropertiesDialog_StorageTime_Tooltip);
 
 		txtStorageTime = new Text(container, SWT.BORDER);
+		txtStorageTime.setToolTipText(Messages.CyberTrackerPropertiesDialog_StorageTime_Tooltip);
 		txtStorageTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtStorageTime.setText(String.valueOf(ctProperties.getStorageTime()));
 		txtStorageTime.addModifyListener(new ModifyListener() {
