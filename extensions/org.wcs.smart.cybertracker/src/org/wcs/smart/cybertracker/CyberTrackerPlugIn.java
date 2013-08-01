@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -36,6 +37,9 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+
+		ConservationAreaManager.getInstance().addDeleteHandler(new CyberTrackerCaDeleteHandler(), CyberTrackerCaDeleteHandler.EXECUTE_ORDER);
+
 		Job j = new CyberTrackerStartupJob();
 		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		j.schedule();
