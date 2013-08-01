@@ -63,5 +63,15 @@
             class="org.wcs.smart.cybertracker.model.CyberTrackerProperties">
       </class>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.cybertracker.importer.CyberTrackerImportEditor"
+            default="false"
+            icon="images/etool16/cybertracker16.png"
+            id="org.wcs.smart.cybertracker.CyberTrackerImportEditor"
+            name="CyberTracker Import">
+      </editor>
+   </extension>
 
 </plugin>

@@ -102,6 +102,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerImportDialog_Task_RawImport;
 	public static String CyberTrackerImportDialog_Title;
 	public static String CyberTrackerImportDialog_XmlFiles;
+	public static String CyberTrackerImportEditor_ConfirmClose_Message;
+	public static String CyberTrackerImportEditor_ConfirmClose_Title;
 	public static String CyberTrackerImporter_Read_Error;
 	public static String CyberTrackerImporter_Read_Xml;
 	public static String CyberTrackerImporter_Task_Download;
