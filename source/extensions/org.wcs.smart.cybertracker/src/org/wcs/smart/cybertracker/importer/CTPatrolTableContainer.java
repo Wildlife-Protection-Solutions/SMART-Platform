@@ -36,6 +36,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -55,6 +56,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Container for table containing imported data from CyberTracker application
@@ -112,6 +114,7 @@ public class CTPatrolTableContainer extends Composite {
 	private TableViewer viewer;
 	private Button btnAsPatrol;
 	private Button btnAsLeg;
+	private Button btnRemove;
 	
 	private CyberTrackerImporter importer = new CyberTrackerImporter();
 	
@@ -148,11 +151,12 @@ public class CTPatrolTableContainer extends Composite {
 				boolean selected = !viewer.getSelection().isEmpty();
 				btnAsPatrol.setEnabled(selected);
 				btnAsLeg.setEnabled(selected);
+				btnRemove.setEnabled(selected);
 			}
 		});
 		
 		Composite buttons = new Composite(this, SWT.NONE);
-		buttons.setLayout(new GridLayout(4, false));
+		buttons.setLayout(new GridLayout(5, false));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Button btnImport = new Button(buttons, SWT.NONE);
@@ -196,6 +200,17 @@ public class CTPatrolTableContainer extends Composite {
 		});
 		btnAsLeg.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
 		btnAsLeg.setEnabled(false);
+
+		btnRemove = new Button(buttons, SWT.NONE);
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handleRemove();
+			}
+		});
+		btnRemove.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
+		btnRemove.setEnabled(false);
 	}
 
 	private void performImport(final boolean fromPda) {
@@ -326,6 +341,19 @@ public class CTPatrolTableContainer extends Composite {
 		}
 
 		refreshViewer();
+	}
+
+	private void handleRemove() {
+		boolean isOk = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.CTPatrolTableContainer_DeleteWarn_Title, Messages.CTPatrolTableContainer_DeleteWarn_Message);
+		if (isOk) {
+			IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+			if (!sel.isEmpty()) {
+				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+					tableInputData.remove(iterator.next());
+				}
+			}
+			viewer.refresh();
+		}
 	}
 	
 	private void addColumns(TableViewer viewer) {
