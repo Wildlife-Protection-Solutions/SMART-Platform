@@ -44,6 +44,8 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_Patrol_Success_Message;
 	public static String CTPatrolTableContainer_Patrol_Success_Title;
 	public static String CTPatrolTableContainer_SupportedFiles;
+	public static String CyberTrackerCaDeleteHandler_DeleteProperties;
+	public static String CyberTrackerCaDeleteHandler_DeleteRegistryKey;
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;

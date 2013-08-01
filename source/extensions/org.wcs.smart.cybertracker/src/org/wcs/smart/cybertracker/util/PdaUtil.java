@@ -88,6 +88,10 @@ public class PdaUtil {
 				getRegistryKey(ca), folder.getCanonicalPath());
 	}
 
+	public static void deleteRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
+	}
+	
 	public static void deleteTempDirectory(File tempDir) {
 		if (tempDir == null)
 			return;
