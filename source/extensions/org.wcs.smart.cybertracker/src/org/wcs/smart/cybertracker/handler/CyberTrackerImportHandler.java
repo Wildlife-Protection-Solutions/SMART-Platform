@@ -24,9 +24,17 @@ package org.wcs.smart.cybertracker.handler;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.cybertracker.importer.CyberTrackerImportDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.cybertracker.importer.CyberTrackerImportEditor;
+import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.ui.PatrolPerspective;
 
 /**
  * Handler for importing data from CyberTracker application.
@@ -38,10 +46,59 @@ public class CyberTrackerImportHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell shell = HandlerUtil.getActiveShell(event);
-		CyberTrackerImportDialog dialog = new CyberTrackerImportDialog(shell);
-		dialog.open();
+		try {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			wb.showPerspective(PatrolPerspective.ID, win);
+			IWorkbenchPage page = win.getActivePage();
+			page.openEditor(new CTImportEditorInput(), CyberTrackerImportEditor.ID);						
+		} catch (Throwable t) {
+			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
+		}
 		return null;
+	}
+
+	private class CTImportEditorInput implements IEditorInput {
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Object getAdapter(Class adapter) {
+			return null;
+		}
+
+		@Override
+		public boolean exists() {
+			return false;
+		}
+
+		@Override
+		public ImageDescriptor getImageDescriptor() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return Messages.CyberTrackerImportDialog_Title;
+		}
+
+		@Override
+		public IPersistableElement getPersistable() {
+			return null;
+		}
+
+		@Override
+		public String getToolTipText() {
+			return Messages.CyberTrackerImportDialog_Message;
+		}
+		
+		@Override
+		public int hashCode() {
+			return 0;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			return obj instanceof CTImportEditorInput;
+		}
 	}
 	
 }
