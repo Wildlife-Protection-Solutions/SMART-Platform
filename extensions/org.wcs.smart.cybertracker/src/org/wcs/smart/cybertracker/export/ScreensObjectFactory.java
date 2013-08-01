@@ -728,7 +728,7 @@ public class ScreensObjectFactory {
 	    <Align>2</Align>
 	    <Top>210</Top>
 	    <Width>240</Width>
-	    <Height>90</Height>
+	    <Height>100</Height>
         <Translate__Font>MS Sans Serif,10,B</Translate__Font>
 	    <Caption>???</Caption>
 	</Control>
@@ -740,7 +740,7 @@ public class ScreensObjectFactory {
 		control.setAlign(2);
 		control.setTop(210);
 		control.setWidth(240);
-		control.setHeight(90);
+		control.setHeight(100);
 		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
 		control.setCaption(text);
 		return control;
