@@ -29,6 +29,8 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_Button_AsLeg;
 	public static String CTPatrolTableContainer_Button_AsPatrol;
 	public static String CTPatrolTableContainer_CyberTrackerFiles;
+	public static String CTPatrolTableContainer_DeleteWarn_Message;
+	public static String CTPatrolTableContainer_DeleteWarn_Title;
 	public static String CTPatrolTableContainer_Error_ImportAborted;
 	public static String CTPatrolTableContainer_Error_Title;
 	public static String CTPatrolTableContainer_ImportCompleted;
