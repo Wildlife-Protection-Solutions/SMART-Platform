@@ -247,7 +247,6 @@ public class CyberTrackerExporter {
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		List<CyberTrackerId> boolNonRqAttrElementIDs = null;
-		CyberTrackerId listNullElement = null;
 		category.getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(category);
@@ -258,11 +257,25 @@ public class CyberTrackerExporter {
 			CyberTrackerId resultElementId = getAttributeResultElementId(attribute); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
-				result.add(screensFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
+			{
+				Node numberNode = screensFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId());
+				if (attribute.getIsRequired()) {
+					Control numControl = ScreensObjectFactory.getNumberMainControl(numberNode);
+					numControl.setRequireSetValue(ICyberTrackerConstants.STR_TRUE);
+				}
+				result.add(numberNode);
 				break;
+			}
 			case TEXT:
-				result.add(screensFactory.createNodeNote(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
+			{
+				Node textNode = screensFactory.createNodeNote(id.getNodeId(), attribute.getName(), resultElementId.getItemId());
+				if (attribute.getIsRequired()) {
+					Control textControl = ScreensObjectFactory.getNoteMainControl(textNode);
+					textControl.setRequired(ICyberTrackerConstants.STR_TRUE);
+				}
+				result.add(textNode);
 				break;
+			}
 			case LIST:
 			{
 				List<String> itemNames = new ArrayList<String>();
@@ -272,12 +285,6 @@ public class CyberTrackerExporter {
 					tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
 				}
 				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, itemNames, tag0Values);
-				if (!attribute.getIsRequired()) {
-					if (listNullElement == null) {
-						listNullElement = ElementsUtil.buildAttributeNullElement(elements, Messages.Elements_ListAttribute_NoValue);
-					}
-					ids.add(0, listNullElement);
-				}
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
@@ -325,6 +332,10 @@ public class CyberTrackerExporter {
 					Control control2 = ScreensObjectFactory.getNavigationControl(lastNode);
 					//reference to "Next" screen
 					control2.setTranslateNextScreenId(id.getNodeId());
+					if (!attribute.getIsRequired()) {
+						//skip button
+						control2.setTranslateSkipScreenId(id.getNodeId());
+					}
 				}
 			}
 		}

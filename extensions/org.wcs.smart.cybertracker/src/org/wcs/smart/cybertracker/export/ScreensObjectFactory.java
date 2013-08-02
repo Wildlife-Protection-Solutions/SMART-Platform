@@ -39,7 +39,9 @@ import org.wcs.smart.hibernate.SmartDB;
 public class ScreensObjectFactory {
 	
 	private static final int CONTROL_2_INDEX = 0;
-	private static final int CONTROL_7_INDEX = 2;
+	private static final int CONTROL_RADIO_MAIN_INDEX = 2;
+	private static final int CONTROL_NUMBER_MAIN_INDEX = 3;
+	private static final int CONTROL_NOTE_MAIN_INDEX = 3;
 
 	private CyberTrackerProperties ctProperties;
 	
@@ -848,9 +850,17 @@ public class ScreensObjectFactory {
 	}
 
 	public static Controls.Control getRadioMainControl(Node node) {
-		return node.getData().getControls().getControl().get(CONTROL_7_INDEX);
+		return node.getData().getControls().getControl().get(CONTROL_RADIO_MAIN_INDEX);
 	}
 
+	public static Controls.Control getNumberMainControl(Node node) {
+		return node.getData().getControls().getControl().get(CONTROL_NUMBER_MAIN_INDEX);
+	}
+
+	public static Controls.Control getNoteMainControl(Node node) {
+		return node.getData().getControls().getControl().get(CONTROL_NOTE_MAIN_INDEX);
+	}
+	
 	public static void addControlToNode(Node node, Controls.Control control) {
 		node.getData().getControls().getControl().add(control);
 	}	
