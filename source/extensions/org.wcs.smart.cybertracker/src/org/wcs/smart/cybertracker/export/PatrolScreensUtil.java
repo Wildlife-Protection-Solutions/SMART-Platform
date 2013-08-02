@@ -128,32 +128,22 @@ public class PatrolScreensUtil {
 		}
 		id = addTypeTransportNodes(id, result, elements, patrolTypes);
 		//patrol armed
-		List<String> labelValues = new ArrayList<String>();
-		labelValues.add(Messages.PatrolScreens_Yes);
-		labelValues.add(Messages.PatrolScreens_No);
-		List<String> tag0Values = new ArrayList<String>();
-		tag0Values.add("true"); //$NON-NLS-1$
-		tag0Values.add("false"); //$NON-NLS-1$
-		List<CyberTrackerId> armedIds = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, RESULT_ARMED, armedIds);
+		List<CyberTrackerId> armedIds = ElementsUtil.buildBooleanElements(elements);
+		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, RESULT_ARMED, armedIds, false);
 
-		List<CyberTrackerId> cyberTrackerIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_None);
-		CyberTrackerId noneElemId = cyberTrackerIds.get(0);
 		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
-		cyberTrackerIds.addAll(toCyberTrackerIds(elements, teams));
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, RESULT_TEAM, cyberTrackerIds);
+		List<CyberTrackerId> cyberTrackerIds = toCyberTrackerIds(elements, teams);
+		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, RESULT_TEAM, cyberTrackerIds, true);
 
 		cyberTrackerIds.clear();
-		cyberTrackerIds.add(noneElemId);
 		List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, stations));
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds);
+		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds, true);
 
 		cyberTrackerIds.clear();
-		cyberTrackerIds.add(noneElemId);
 		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, mandates));
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds);
+		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds, true);
 
 		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE);
 		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS);
@@ -197,9 +187,16 @@ public class PatrolScreensUtil {
 	}
 
 	private CyberTrackerId toNextScreen(Node node) {
+		return toNextScreen(node, false);
+	}
+	
+	private CyberTrackerId toNextScreen(Node node, boolean canSkip) {
 		CyberTrackerId nextId = new CyberTrackerId();
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		control2.setTranslateNextScreenId(nextId.getNodeId());
+		if (canSkip) {
+			control2.setTranslateSkipScreenId(nextId.getNodeId());
+		}
 		return nextId;
 	}
 
@@ -211,12 +208,12 @@ public class PatrolScreensUtil {
 		}
 	}
 	
-	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids) {
+	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, boolean canSkip) {
 		String resultId = createResultElement(resultElName, elements);
 		Node node = ctUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
-		return toNextScreen(node);
+		return toNextScreen(node, canSkip);
 	}
 
 	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, String filter) {
@@ -233,7 +230,7 @@ public class PatrolScreensUtil {
 		Node node = screensFactory.createNodeNote(id.getNodeId(), name,  resultId);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
-		return toNextScreen(node);
+		return toNextScreen(node, true);
 	}
 
 	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {

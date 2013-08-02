@@ -48,6 +48,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.importer.SmartImporter.CoordinateZComparator;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -249,7 +250,7 @@ public class CyberTrackerImporter {
 				E e = eMap.get(v);
 				String tag0 = e != null ? e.getTag0() : null;
 				if (tag0 != null) {
-					ctPatrol.setArmed("true".equals(tag0.toLowerCase())); //$NON-NLS-1$
+					ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equals(tag0.toLowerCase()));
 				}				
 			} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
 				E e = eMap.get(v);
