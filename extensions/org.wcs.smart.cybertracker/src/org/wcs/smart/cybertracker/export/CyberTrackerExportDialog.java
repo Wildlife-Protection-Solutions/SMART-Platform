@@ -158,7 +158,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				fd.setFilterNames(new String[]{Messages.CyberTrackerExportDialog_CtxFile, Messages.CyberTrackerExportDialog_AllFiles});
 				
 				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
-					fd.setFilterPath(txtFile.getText());
+					fd.setFileName(txtFile.getText());
 				}
 				String f = fd.open();
 				if (f != null) {
