@@ -155,7 +155,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_TrackTimer_Tooltip;
 	public static String CyberTrackerPropertiesDialog_TrackTimerInvalid;
 	public static String Elements_BooleanAttribute_No;
-	public static String Elements_BooleanAttribute_Undefined;
 	public static String Elements_BooleanAttribute_Yes;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;

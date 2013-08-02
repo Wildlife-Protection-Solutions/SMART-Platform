@@ -246,7 +246,6 @@ public class CyberTrackerExporter {
 	private List<Node> buildAttributeNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
-		List<CyberTrackerId> boolNonRqAttrElementIDs = null;
 		category.getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(category);
@@ -305,18 +304,7 @@ public class CyberTrackerExporter {
 				if (boolRqAttrElementIDs == null) {
 					boolRqAttrElementIDs = ElementsUtil.buildAttributeBooleanElements(elements);
 				}
-				List<CyberTrackerId> elemIds;
-				if (attribute.getIsRequired()) {
-					elemIds = boolRqAttrElementIDs;
-				} else {
-					if (boolNonRqAttrElementIDs == null) {
-						boolNonRqAttrElementIDs = new ArrayList<CyberTrackerId>(3);
-						boolNonRqAttrElementIDs.addAll(boolRqAttrElementIDs);
-						boolNonRqAttrElementIDs.add(ElementsUtil.buildAttributeNullElement(elements, Messages.Elements_BooleanAttribute_Undefined));
-					}
-					elemIds = boolNonRqAttrElementIDs;
-				}
-				result.add(ctUtil.createRadioNode(id.getNodeId(), attribute.getName(), elemIds, resultElementId.getItemId()));
+				result.add(ctUtil.createRadioNode(id.getNodeId(), attribute.getName(), boolRqAttrElementIDs, resultElementId.getItemId()));
 				break;
 			}
 			default:
