@@ -277,6 +277,10 @@ public class CyberTrackerExporter {
 			}
 			case LIST:
 			{
+				if (attribute.getActiveListItems() == null || attribute.getActiveListItems().isEmpty()) {
+					//skip invalid attribute (attribute without any possible value)
+					continue;
+				}
 				List<String> itemNames = new ArrayList<String>();
 				List<String> tag0Values = new ArrayList<String>();
 				for (AttributeListItem listItem : attribute.getActiveListItems()) {
@@ -293,7 +297,10 @@ public class CyberTrackerExporter {
 			}
 			case TREE:
 			{
-				//NOTE: This is a special case as we might have multiple ending screens!!!
+				if (attribute.getActiveTreeNodes() == null || attribute.getActiveTreeNodes().isEmpty()) {
+					//skip invalid attribute (attribute without any possible value)
+					continue;
+				}
 				String nodeId = id.getNodeId();
 				id = new CyberTrackerId(); //this id will be used for next screen
 				result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId()));
@@ -394,7 +401,7 @@ public class CyberTrackerExporter {
 		if (treeNode == null)
 			return result;
 		
-		if (treeNode.getChildren() == null || treeNode.getChildren().isEmpty()) {
+		if (treeNode.getActiveChildren() == null || treeNode.getActiveChildren().isEmpty()) {
 			//if we are here that means that it was a screen with leaf and non-leaf elements above and treeNode is a leaf element
 			//adding fake screen that contains only this element
 			CyberTrackerId id = map.get(treeNode);
@@ -410,7 +417,7 @@ public class CyberTrackerExporter {
 		boolean isEndScreen = true;
 		//NOTE: there might be issues if at the save depth level leaf and non-leaf elements are present
 		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
-			if (child.getChildren() != null && !child.getChildren().isEmpty()) {
+			if (child.getActiveChildren() != null && !child.getActiveChildren().isEmpty()) {
 				isEndScreen = false;
 				break;
 			}
