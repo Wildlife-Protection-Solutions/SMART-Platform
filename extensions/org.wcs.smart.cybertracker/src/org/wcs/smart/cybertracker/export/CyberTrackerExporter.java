@@ -384,17 +384,16 @@ public class CyberTrackerExporter {
 	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId) {
 		List<Node> result = new ArrayList<Node>();
 		List<AttributeTreeNode> activeTreeNodes = new ArrayList<AttributeTreeNode>();
-		if (!treeAttribute.getIsRequired()) {
-			//adding fake "None (no value)" option
-			AttributeTreeNode noneTreeNode = new AttributeTreeNode();
-			noneTreeNode.setName(Messages.Elements_TreeAttribute_NoValue);
-			activeTreeNodes.add(noneTreeNode);
-		}
 		activeTreeNodes.addAll(treeAttribute.getActiveTreeNodes());
 		
 		Map<AttributeTreeNode, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		result.add(ctUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null));
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null);
+		if (!treeAttribute.getIsRequired()) {
+			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
+			navControl.setTranslateSkipScreenId(navId.getNodeId());
+		}
+		result.add(treeRootNode);
 		for (AttributeTreeNode treeNode : activeTreeNodes) {
 			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId));
 		}
