@@ -363,9 +363,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				String ctPath = PdaUtil.getCTAppPath();
-				String[] uploadCommands = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath()};
-				Process proc = Runtime.getRuntime().exec(uploadCommands);
-				proc.waitFor();
+				String[] launchCommands = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath()};
+				Runtime.getRuntime().exec(launchCommands);
 			} catch (Exception e) {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_LaunchCT);
 				e.printStackTrace();
