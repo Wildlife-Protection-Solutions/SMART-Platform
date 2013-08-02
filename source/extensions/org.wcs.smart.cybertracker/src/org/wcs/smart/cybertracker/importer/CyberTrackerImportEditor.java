@@ -24,11 +24,16 @@ package org.wcs.smart.cybertracker.importer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISaveablePart2;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.widgets.Form;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.cybertracker.internal.Messages;
 
@@ -42,7 +47,7 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 
 	public static final String ID = "org.wcs.smart.cybertracker.CyberTrackerImportEditor"; //$NON-NLS-1$
 
-//	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	private CTPatrolTableContainer tableContainer;
 	
 	@Override
@@ -53,9 +58,23 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 
 	@Override
 	public void createPartControl(Composite parent) {
-		tableContainer = new CTPatrolTableContainer(parent, SWT.NONE);
+		Form form = toolkit.createForm(parent);
+		form.setText("Import Patrol Data from Cybertracker");
+		GridLayout layout = new GridLayout();
+		form.getBody().setLayout(layout);
+		
+		tableContainer = new CTPatrolTableContainer(form.getBody(), SWT.NONE, toolkit);
+		tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 	
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (toolkit != null){
+			toolkit.dispose();
+		}
+	}
+		
 	@Override
 	public int promptToSaveOnClose() {
 		boolean result = MessageDialog.openQuestion(getSite().getShell(), Messages.CyberTrackerImportEditor_ConfirmClose_Title, Messages.CyberTrackerImportEditor_ConfirmClose_Message);
