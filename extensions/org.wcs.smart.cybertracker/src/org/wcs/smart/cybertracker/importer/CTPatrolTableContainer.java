@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -51,6 +52,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Section;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -120,20 +127,75 @@ public class CTPatrolTableContainer extends Composite {
 	
 	private List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
 	
+	private Text lblStartDate;
+	private Text lblEndDate;
+	private Text lblPatrolType;
+	private Text lblTransportType;
+	private Text lblArmed;
+	private Text lblTeam;
+	private Text lblStation;
+	private Text lblMembers;
+	private Text lblMandate;
+	private Text lblObjective;
+	private Text lblComment;
+	private Text lblLeader;
+	private Text lblPilot;
+	
 	/**
 	 * @param parent
 	 * @param style
 	 */
-	public CTPatrolTableContainer(Composite parent, int style) {
+	public CTPatrolTableContainer(Composite parent, int style, FormToolkit toolkit) {
 		super(parent, style);
-		createControls();
+		createControls(toolkit);
 	}
 	
-	private void createControls() {
+	private void createControls(FormToolkit toolkit) {
+		toolkit.adapt(this);
+		
 		GridLayout layout = new GridLayout();
+		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		this.setLayout(layout);
 		
-		viewer = new TableViewer(this, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
+		Section data = toolkit.createSection(this, Section.TITLE_BAR | Section.EXPANDED);
+		layout = new GridLayout();
+		data.setLayout(layout);
+		data.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		data.setText("Patrol Data");
+		
+		Composite dataComp = toolkit.createComposite(data);
+		layout = new GridLayout();
+		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
+		dataComp.setLayout(layout);
+		dataComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		data.setClient(dataComp);
+		
+		/* Import Data */		
+		Composite buttons = toolkit.createComposite(dataComp);
+		buttons.setLayout(new GridLayout(2, true));
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		Button btnImport = toolkit.createButton(buttons, Messages.CyberTrackerImportDialog_Button_Import, SWT.PUSH);
+		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnImport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performImport(false);
+			}
+		});
+
+		Button btnImportPda = toolkit.createButton(buttons, Messages.CyberTrackerImportDialog_Button_ImportFromDevice, SWT.PUSH);
+		btnImportPda.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnImportPda.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performImport(true);
+			}
+		});
+		
+		viewer = new TableViewer(dataComp, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
+		toolkit.paintBordersFor(viewer.getTable());
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -152,65 +214,67 @@ public class CTPatrolTableContainer extends Composite {
 				btnAsPatrol.setEnabled(selected);
 				btnAsLeg.setEnabled(selected);
 				btnRemove.setEnabled(selected);
+				if (selected){
+					updatePatrolDetails(((IStructuredSelection)viewer.getSelection()).getFirstElement());
+				}else{
+					updatePatrolDetails(null);
+				}
 			}
 		});
 		
-		Composite buttons = new Composite(this, SWT.NONE);
-		buttons.setLayout(new GridLayout(5, false));
-		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		Button btnImport = new Button(buttons, SWT.NONE);
-		btnImport.setText(Messages.CyberTrackerImportDialog_Button_Import);
-		btnImport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performImport(false);
-			}
-		});
-		btnImport.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false));
-
-		Button btnImportPda = new Button(buttons, SWT.NONE);
-		btnImportPda.setText(Messages.CyberTrackerImportDialog_Button_ImportFromDevice);
-		btnImportPda.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performImport(true);
-			}
-		});
-		btnImportPda.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 		
-		btnAsPatrol = new Button(buttons, SWT.NONE);
-		btnAsPatrol.setText(Messages.CTPatrolTableContainer_Button_AsPatrol);
+		/* Import Button Panel */
+		buttons = new Composite(dataComp, SWT.NONE);
+		buttons.setLayout(new GridLayout(3, true));
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnAsPatrol = toolkit.createButton(buttons,Messages.CTPatrolTableContainer_Button_AsPatrol, SWT.PUSH);
 		btnAsPatrol.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleAddAsPatrol();
 			}
 		});
-		btnAsPatrol.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
+		btnAsPatrol.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAsPatrol.setEnabled(false);
 
-		btnAsLeg = new Button(buttons, SWT.NONE);
-		btnAsLeg.setText(Messages.CTPatrolTableContainer_Button_AsLeg);
+		btnAsLeg = toolkit.createButton(buttons,Messages.CTPatrolTableContainer_Button_AsLeg,SWT.PUSH);
 		btnAsLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleAddAsLeg();
 			}
 		});
-		btnAsLeg.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
+		btnAsLeg.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAsLeg.setEnabled(false);
 
-		btnRemove = new Button(buttons, SWT.NONE);
-		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove = toolkit.createButton(buttons,DialogConstants.DELETE_BUTTON_TEXT,SWT.PUSH);
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleRemove();
 			}
 		});
-		btnRemove.setLayoutData(new GridData(SWT.TRAIL, SWT.CENTER, false, false));
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnRemove.setEnabled(false);
+		
+		/* Patrol Details Section */
+		final Section details = toolkit.createSection(this, Section.TITLE_BAR | Section.COMPACT | Section.TWISTIE);
+		details.setLayout(new GridLayout());
+		details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		details.setText("Patrol Details");
+		details.addExpansionListener(new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				if (details.isExpanded()){
+					details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+				}else{
+					details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}
+				details.getParent().layout(true, true);
+			}
+		});
+		details.setClient(createPatrolDetailsComposite(details, toolkit));
 	}
 
 	private void performImport(final boolean fromPda) {
@@ -404,4 +468,130 @@ public class CTPatrolTableContainer extends Composite {
 		});
 	}
 	
+	private void updatePatrolDetails(Object selection){
+		Text[] lbls = new Text[]{lblStartDate, lblEndDate,lblPatrolType,lblTransportType, lblArmed,lblTeam,lblStation,lblMembers,lblComment, lblObjective, lblMandate, lblLeader, lblPilot};
+		CTPatrolTableColumn[] cols = new CTPatrolTableColumn[]{CTPatrolTableColumn.START_DATE,CTPatrolTableColumn.END_DATE,CTPatrolTableColumn.TYPE,CTPatrolTableColumn.TRANSPORT,CTPatrolTableColumn.ARMED,CTPatrolTableColumn.TEAM,CTPatrolTableColumn.STATION,CTPatrolTableColumn.MEMBERS,CTPatrolTableColumn.COMMENT};
+		if (selection instanceof CyberTrackerPatrol){
+			
+			for (int i = 0; i < cols.length; i ++){
+				String text = ((CTPatrolTableCellLabelProvider)viewer.getLabelProvider(cols[i].ordinal())).getText(selection);
+				if (text == null){
+					text ="";
+				}
+				((Text)lbls[i]).setText(text);
+			}
+			
+			CyberTrackerPatrol patrol = ((CyberTrackerPatrol) selection);
+			
+			lblObjective.setText(patrol.getObjective()==null?"":patrol.getObjective());			
+			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName());
+			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel());
+			lblPilot.setText(patrol.getPilot() == null ? "" : patrol.getPilot().getFullLabel());
+		}else{
+			for (int i = 0; i < lbls.length; i ++){
+				((Text)lbls[i]).setText("");
+			}
+			
+		}
+	}
+	
+	
+	private Composite createPatrolDetailsComposite(Composite parent, FormToolkit toolkit){
+		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL);
+		scrolled.setLayout(new GridLayout(1, false));
+		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(scrolled);
+		scrolled.setExpandHorizontal(true);
+		
+		Composite main = toolkit.createComposite(scrolled);
+		main.setLayout(new GridLayout(2, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		scrolled.setContent(main);
+		
+		Composite left = toolkit.createComposite(main);
+		left.setLayout(new GridLayout(2, false));
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite right = toolkit.createComposite(main);
+		right.setLayout(new GridLayout(2, false));
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		toolkit.createLabel(left, "Start Date:");
+		lblStartDate = toolkit.createText(left, "");
+		lblStartDate.setEditable(false);
+		lblStartDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(left, "End Date:");
+		lblEndDate = toolkit.createText(left, "");
+		lblEndDate.setEditable(false);
+		lblEndDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(left, "Patrol Type:");
+		lblPatrolType = toolkit.createText(left, "");
+		lblPatrolType.setEditable(false);
+		lblPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(left, "Transport Type:");
+		lblTransportType = toolkit.createText(left, "");
+		lblTransportType.setEditable(false);
+		lblTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(left, "Armed:");
+		lblArmed = toolkit.createText(left, "");
+		lblArmed.setEditable(false);
+		lblArmed.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(left, "Leader:");
+		lblLeader = toolkit.createText(left, "");
+		lblLeader.setEditable(false);
+		lblLeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(left, "Pilot:");
+		lblPilot = toolkit.createText(left, "");
+		lblPilot.setEditable(false);
+		lblPilot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label l = toolkit.createLabel(left, "Members:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		lblMembers = toolkit.createText(left, "", SWT.WRAP | SWT.V_SCROLL);
+		lblMembers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lblMembers.getLayoutData()).widthHint = 150;
+		((GridData)lblMembers.getLayoutData()).heightHint = 150;
+		lblMembers.setEditable(false);
+		
+		toolkit.createLabel(right, "Team:");
+		lblTeam = toolkit.createText(right, "");
+		lblTeam.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblTeam.setEditable(false);
+		
+		toolkit.createLabel(right, "Station:");
+		lblStation = toolkit.createText(right, "");
+		lblStation.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		lblStation.setEditable(false);
+		
+		toolkit.createLabel(right, "Mandate:");
+		lblMandate = toolkit.createText(right, "");
+		lblMandate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblMandate.setEditable(false);
+		
+		l = toolkit.createLabel(right, "Objective:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		lblObjective = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL);
+		lblObjective.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lblObjective.getLayoutData()).heightHint = 150;
+		((GridData)lblObjective.getLayoutData()).widthHint = 150;
+		lblObjective.setEditable(false);
+		
+		l = toolkit.createLabel(right, "Comment:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		lblComment = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL);
+		lblComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lblComment.getLayoutData()).widthHint = 150;
+		((GridData)lblComment.getLayoutData()).heightHint = 150;
+		lblComment.setEditable(false);
+		
+		main.setSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, 300);
+		return scrolled;
+	}
 }
