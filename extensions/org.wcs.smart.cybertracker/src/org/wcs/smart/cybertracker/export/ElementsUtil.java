@@ -127,7 +127,7 @@ public class ElementsUtil {
 		return id;
 	}
 	
-	public static List<CyberTrackerId> buildAttributeBooleanElements(Elements elements) {
+	public static List<CyberTrackerId> buildBooleanElements(Elements elements) {
 		List<String> labels = new ArrayList<String>();
 		labels.add(Messages.Elements_BooleanAttribute_Yes);
 		labels.add(Messages.Elements_BooleanAttribute_No);

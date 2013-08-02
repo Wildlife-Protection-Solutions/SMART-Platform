@@ -302,7 +302,7 @@ public class CyberTrackerExporter {
 			case BOOLEAN:
 			{
 				if (boolRqAttrElementIDs == null) {
-					boolRqAttrElementIDs = ElementsUtil.buildAttributeBooleanElements(elements);
+					boolRqAttrElementIDs = ElementsUtil.buildBooleanElements(elements);
 				}
 				result.add(ctUtil.createRadioNode(id.getNodeId(), attribute.getName(), boolRqAttrElementIDs, resultElementId.getItemId()));
 				break;

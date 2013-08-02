@@ -172,8 +172,6 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Members;
 	public static String PatrolScreens_NewObservation;
 	public static String PatrolScreens_NextTask;
-	public static String PatrolScreens_No;
-	public static String PatrolScreens_None;
 	public static String PatrolScreens_Objective;
 	public static String PatrolScreens_PatrolType;
 	public static String PatrolScreens_Paused;
@@ -184,7 +182,6 @@ public class Messages extends NLS {
 	public static String PatrolScreens_StartPatrol;
 	public static String PatrolScreens_Station;
 	public static String PatrolScreens_Team;
-	public static String PatrolScreens_Yes;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
 	public static String PatrolScreensUtil_Error_TypesNotSet;
 	public static String PatrolSelectorDialog_Message;
