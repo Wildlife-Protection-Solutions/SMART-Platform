@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -58,6 +59,10 @@ public class PatrolLegImporter extends SmartImporter {
 		try {
 			session.beginTransaction();
 			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
+			if (patrol.getPatrolType() != ctPatrol.getPatrolType()) {
+				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(), patrol.getPatrolType().getGuiName()));
+				return false;
+			}
 			PatrolLeg leg = patrol.addLeg();
 			initLegData(leg, ctPatrol);
 			if (leg.getType() == null) {
