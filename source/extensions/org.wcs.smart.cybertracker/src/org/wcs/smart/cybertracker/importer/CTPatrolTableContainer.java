@@ -440,7 +440,9 @@ public class CTPatrolTableContainer extends Composite {
 						counter++;
 					}
 					monitor.done();
-					CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_Leg_Success_Title, MessageFormat.format(Messages.CTPatrolTableContainer_Leg_Success_Message, successCount, patrol.getId()));
+					if (successCount > 0) {
+						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_Leg_Success_Title, MessageFormat.format(Messages.CTPatrolTableContainer_Leg_Success_Message, successCount, patrol.getId()));
+					}
 				}
 			});
 		} catch (Exception e) {
