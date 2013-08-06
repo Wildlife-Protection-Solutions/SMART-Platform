@@ -849,6 +849,14 @@ public class ScreensObjectFactory {
 		return node.getData().getControls().getControl().get(CONTROL_2_INDEX);
 	}
 
+	public static Controls.Control getHeaderControl(Node node) {
+		for (Controls.Control control : node.getData().getControls().getControl()) {
+			if (control.getId() == 11)
+				return control;
+		}
+		return null;
+	}
+	
 	public static Controls.Control getRadioMainControl(Node node) {
 		return node.getData().getControls().getControl().get(CONTROL_RADIO_MAIN_INDEX);
 	}

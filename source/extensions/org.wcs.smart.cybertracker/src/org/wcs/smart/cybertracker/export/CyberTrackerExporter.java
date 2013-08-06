@@ -71,6 +71,7 @@ import org.wcs.smart.util.SmartUtils;
 public class CyberTrackerExporter {
 	
 	private static final String CATEGORY_RESULT_PREFIX = Messages.CyberTrackerExporter_Report_Column_Category;
+	private static final String CATEGORY_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
 
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
@@ -223,7 +224,10 @@ public class CyberTrackerExporter {
 			}
 			return result;
 		}
-		result.add(ctUtil.createRadioNode(category, keyMap, getCategoryLevelResultElementId(level).getItemId()));
+		Node categoryNode = ctUtil.createRadioNode(category, keyMap, getCategoryLevelResultElementId(level).getItemId());
+		Control headerControl = ScreensObjectFactory.getHeaderControl(categoryNode);
+		headerControl.setColor(CATEGORY_HEADER_COLOR);
+		result.add(categoryNode);
 		
 		Integer nextLevel = level + 1;
 		for (Category child : category.getActiveChildren()) {
