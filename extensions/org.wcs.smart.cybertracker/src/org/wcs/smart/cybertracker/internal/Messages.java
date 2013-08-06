@@ -158,6 +158,10 @@ public class Messages extends NLS {
 	public static String Elements_BooleanAttribute_Yes;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;
+	public static String PatrolLegImporter_MetaWarning_IsArmed;
+	public static String PatrolLegImporter_MetaWarning_Mandate;
+	public static String PatrolLegImporter_MetaWarning_Station;
+	public static String PatrolLegImporter_MetaWarning_Team;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
 	public static String PatrolLegImporter_Warn_TimeGap_Start;
 	public static String PatrolScreens_Comments;

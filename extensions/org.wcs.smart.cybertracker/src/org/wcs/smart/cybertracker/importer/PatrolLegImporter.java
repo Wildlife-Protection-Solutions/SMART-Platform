@@ -23,11 +23,15 @@ package org.wcs.smart.cybertracker.importer;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -74,6 +78,10 @@ public class PatrolLegImporter extends SmartImporter {
 				patrol.setEndDate(leg.getEndDate());
 			}
 			
+			List<String> patrolMetaWarnings = reportPatrolMetaWarnings(patrol, ctPatrol);
+			for (String warnMsg : patrolMetaWarnings) {
+				addWarning(warnMsg);
+			}
 			
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
@@ -109,4 +117,37 @@ public class PatrolLegImporter extends SmartImporter {
 		long delta = to.getTime() - from.getTime();
 		return delta <= 1000 * 60 * 60 * 24; //more that a day
 	}
+	
+	private List<String> reportPatrolMetaWarnings(Patrol patrol, CyberTrackerPatrol ctPatrol) {
+		List<String> result = new ArrayList<String>();
+
+		if (patrol.isArmed() != ctPatrol.isArmed())
+			result.add(MessageFormat.format(Messages.PatrolLegImporter_MetaWarning_IsArmed, armedTextValue(patrol.isArmed()), armedTextValue(ctPatrol.isArmed())));
+
+		if (!equal(patrol.getTeam(), ctPatrol.getTeam()))
+			result.add(MessageFormat.format(Messages.PatrolLegImporter_MetaWarning_Team, labelFor(patrol.getTeam()), labelFor(ctPatrol.getTeam())));
+
+		if (!equal(patrol.getStation(), ctPatrol.getStation()))
+			result.add(MessageFormat.format(Messages.PatrolLegImporter_MetaWarning_Station, labelFor(patrol.getStation()), labelFor(ctPatrol.getStation())));
+
+		if (!equal(patrol.getMandate(), ctPatrol.getMandate()))
+			result.add(MessageFormat.format(Messages.PatrolLegImporter_MetaWarning_Mandate, labelFor(patrol.getMandate()), labelFor(ctPatrol.getMandate())));
+		
+		return result;
+	}
+	
+	private String armedTextValue(boolean isArmed) {
+		return isArmed ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
+	}
+	
+	private String labelFor(SimpleListItem item) {
+		return item != null ? item.getName() : ""; //$NON-NLS-1$
+	}
+
+	private boolean equal(SimpleListItem o1, SimpleListItem o2) {
+		if (o1 == null || o2 == null)
+			return o1 == o2;
+		return Arrays.equals(o1.getUuid(), o2.getUuid());
+	}
+	
 }
