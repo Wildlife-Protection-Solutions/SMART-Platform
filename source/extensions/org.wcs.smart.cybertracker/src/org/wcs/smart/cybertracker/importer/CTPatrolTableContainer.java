@@ -29,6 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -53,6 +57,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -221,6 +227,36 @@ public class CTPatrolTableContainer extends Composite {
 				}
 			}
 		});
+		final MenuManager mgr = new MenuManager();
+		Action asPatrolAction = new Action(Messages.CTPatrolTableContainer_Button_AsPatrol){
+			@Override
+			public void run() {
+				handleAddAsPatrol();
+			}
+		};
+		Action asLegAction = new Action(Messages.CTPatrolTableContainer_Button_AsLeg){
+			@Override
+			public void run() {
+				handleAddAsLeg();
+			}
+		};
+		Action deleteAction = new Action(DialogConstants.DELETE_BUTTON_TEXT){
+			@Override
+			public void run() {
+				handleRemove();
+			}
+		};
+		mgr.add(asPatrolAction);
+		mgr.add(asLegAction);
+		mgr.add(deleteAction);
+		mgr.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				updateContextMenu(viewer.getControl().getMenu(), !viewer.getSelection().isEmpty());
+			}
+		});
+		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
+		mgr.updateAll(true);
 		
 		
 		/* Import Button Panel */
@@ -277,6 +313,14 @@ public class CTPatrolTableContainer extends Composite {
 		details.setClient(createPatrolDetailsComposite(details, toolkit));
 	}
 
+	private void updateContextMenu(Menu menu, boolean enabled) {
+		if (menu != null) {
+			for (MenuItem item : menu.getItems()) {
+				item.setEnabled(enabled);
+			}
+		}
+	}
+	
 	private void performImport(final boolean fromPda) {
 		File dialogFile = null;
 		if (!fromPda) {
