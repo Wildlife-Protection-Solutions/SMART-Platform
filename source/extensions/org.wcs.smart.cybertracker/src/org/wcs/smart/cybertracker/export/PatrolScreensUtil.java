@@ -49,6 +49,7 @@ import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -145,8 +146,8 @@ public class PatrolScreensUtil {
 		cyberTrackerIds.addAll(toCyberTrackerIds(elements, mandates));
 		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds, true);
 
-		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE);
-		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS);
+		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE, Patrol.MAX_OBJECTIVE_LENGTH);
+		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS, Patrol.MAX_COMMENT_LENGTH);
 
 		//getting all members names
 		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
@@ -225,9 +226,13 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 	
-	private CyberTrackerId addNoteNextNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName) {
+	private CyberTrackerId addNoteNextNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName, int maxLength) {
 		String resultId = createResultElement(resultElName, elements);
 		Node node = screensFactory.createNodeNote(id.getNodeId(), name,  resultId);
+		
+		Control textControl = ScreensObjectFactory.getNoteMainControl(node);
+		textControl.setMaxLength(maxLength);
+		
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
 		return toNextScreen(node, true);

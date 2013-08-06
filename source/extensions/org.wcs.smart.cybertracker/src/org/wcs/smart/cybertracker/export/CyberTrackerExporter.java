@@ -272,10 +272,11 @@ public class CyberTrackerExporter {
 			case TEXT:
 			{
 				Node textNode = screensFactory.createNodeNote(id.getNodeId(), attribute.getName(), resultElementId.getItemId());
+				Control textControl = ScreensObjectFactory.getNoteMainControl(textNode);
 				if (attribute.getIsRequired()) {
-					Control textControl = ScreensObjectFactory.getNoteMainControl(textNode);
 					textControl.setRequired(ICyberTrackerConstants.STR_TRUE);
 				}
+				textControl.setMaxLength(ICyberTrackerConstants.MAX_TEXT_ATTRIBUTE_LENGTH);
 				result.add(textNode);
 				break;
 			}

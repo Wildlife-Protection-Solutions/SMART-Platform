@@ -63,6 +63,8 @@ public interface ICyberTrackerConstants {
 	public static final String STR_TRUE = "True"; //$NON-NLS-1$
 	public static final String STR_FALSE = "False"; //$NON-NLS-1$
 	
+	public static final int MAX_TEXT_ATTRIBUTE_LENGTH = 1024;
+	
 //    <E I="{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}" N="Date" Static="1"/>
 //    <E I="{EB86279A-E032-43D2-B4A8-8B8B2892B10E}" N="Time" Static="1"/>
 //    <E I="{F6636A2D-2E9A-474D-A77D-2E1BAE1EF857}" N="Latitude" Static="1"/>
