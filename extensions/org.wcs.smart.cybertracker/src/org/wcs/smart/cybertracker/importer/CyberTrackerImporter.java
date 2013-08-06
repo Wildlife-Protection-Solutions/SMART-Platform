@@ -173,7 +173,20 @@ public class CyberTrackerImporter {
 			for (String id : patrolsMap.keySet()) {
 				CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(elementsMap, patrolsMap.get(id));
 				initMetaData(ctPatrol, session);
-				ctPatrol.setTimerTrackList(SmartImporter.listPart(timerTrackList, ctPatrol.getStartDate(), ctPatrol.getEndDate()));
+				List<Coordinate> trackPoints = SmartImporter.listPart(timerTrackList, ctPatrol.getStartDate(), ctPatrol.getEndDate());
+				
+				S lastS = !ctPatrol.getPatrolData().isEmpty() ? ctPatrol.getPatrolData().get(ctPatrol.getPatrolData().size()-1) : null;
+				if (lastS != null && !hasWaypointData(lastS, elementsMap)) {
+					//lastS is last point recorded when "End Patrol" was selected
+					//do not record it as a separate waypoint but add to end of the track
+					ctPatrol.getPatrolData().remove(ctPatrol.getPatrolData().size()-1);
+					//adding last waypoint to the track
+					//TODO: should all waypoints be part of a track?
+					Coordinate coord = toCoordinate(lastS);
+					if (coord != null)
+						trackPoints.add(coord);
+				}
+				ctPatrol.setTimerTrackList(trackPoints);
 				patrols.add(ctPatrol);
 			}
 		} finally {
@@ -417,6 +430,45 @@ public class CyberTrackerImporter {
 		//sort by date+time
 		Collections.sort(result, new CoordinateZComparator());
 		return result;
+	}
+
+	private boolean hasWaypointData(S s, Map<String, E> eMap) {
+		//true if at least one category or attribute was selected
+		for (S.A a : s.getA()) {
+			E e = eMap.get(a.getI());
+			if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
+				return true;
+		}
+		return false;
+	}
+
+	private Coordinate toCoordinate(S s) {
+		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
+		Date date = null;
+		Time time = null;
+		double x = 0;
+		double y = 0;
+		for (S.A a : s.getA()) {
+			String i = a.getI();
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				try {
+					date = formatter.parse(a.getV());
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				time = Time.valueOf(a.getV());
+			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
+				y = Double.valueOf(a.getV());
+			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
+				x = Double.valueOf(a.getV());
+			}
+		}
+		
+		if (date == null || time == null || x == 0 || y == 0)
+			return null;
+		
+		return new Coordinate(x, y, SmartImporter.combine(date, time).getTime());
 	}
 	
 	/**
