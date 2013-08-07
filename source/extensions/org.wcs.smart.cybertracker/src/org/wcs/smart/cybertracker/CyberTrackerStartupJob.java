@@ -72,7 +72,6 @@ public class CyberTrackerStartupJob extends Job {
 			propList = CyberTrackerHibernateManager.getAllProperties(session);
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to select CA list and CyberTracker properties.", e)); //$NON-NLS-1$
-			e.printStackTrace();
 		} finally {
 			session.close();
 		}
@@ -96,7 +95,6 @@ public class CyberTrackerStartupJob extends Job {
 				return; //required table exists
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to obtain information about CyberTracker plugin tables.", e)); //$NON-NLS-1$
-			e.printStackTrace();
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
@@ -166,7 +164,6 @@ public class CyberTrackerStartupJob extends Job {
 				PdaUtil.updateRegistryKey(ca);
 			} catch (Exception e) {
 				CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to create folder or update registry for CA "+ca.getName(), e)); //$NON-NLS-1$
-				e.printStackTrace();
 			}
 		}
 	}

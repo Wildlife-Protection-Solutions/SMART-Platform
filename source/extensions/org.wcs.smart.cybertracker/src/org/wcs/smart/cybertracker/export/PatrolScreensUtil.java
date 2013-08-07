@@ -127,7 +127,7 @@ public class PatrolScreensUtil {
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
 		String errorMsg = validatePatrolTypes(patrolTypes);
 		if (errorMsg != null) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg, null);
 			return null;
 		}
 		id = addTypeTransportNodes(id, result, elements, patrolTypes);
@@ -423,7 +423,7 @@ public class PatrolScreensUtil {
 			int index = filterStr.indexOf("<Filter>"); //$NON-NLS-1$
 			return "<?xml version=\"1.0\"?>\r\n" + filterStr.substring(index); //$NON-NLS-1$ //this is REQUIRED as CyberTracker expects EXACTLY "<?xml version=\"1.0\"?>\r\n<Filter>" at the begining
 		} catch (JAXBException e) {
-			e.printStackTrace();
+			CyberTrackerPlugIn.log(e.getMessage(), e);
 		}
 		return null;
 	}

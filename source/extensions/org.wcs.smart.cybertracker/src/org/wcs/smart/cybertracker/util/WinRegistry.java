@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+
 @SuppressWarnings("nls")
 public class WinRegistry {
   public static final int HKEY_CURRENT_USER = 0x80000001;
@@ -74,7 +76,7 @@ public class WinRegistry {
       regDeleteKey.setAccessible(true); 
     }
     catch (Exception e) {
-      e.printStackTrace();
+    	CyberTrackerPlugIn.log(e.getMessage(), e);
     }
   }
 

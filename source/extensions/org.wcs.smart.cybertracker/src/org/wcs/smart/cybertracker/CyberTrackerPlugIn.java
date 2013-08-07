@@ -1,5 +1,7 @@
 package org.wcs.smart.cybertracker;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -64,6 +66,16 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	}
 
 	/**
+	 * Log an error message
+	 * 
+	 * @param message error message
+	 * @param t exception thrown or null
+	 */
+	public static void log(String message, Throwable t){
+        getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
+	}
+	
+	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeImageRegistry(org.eclipse.jface.resource.ImageRegistry)
 	 */
 	@Override
@@ -80,7 +92,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		});
 	}
 
-	public static void displayError(final String title, final String message) {
+	public static void displayError(final String title, final String message, Throwable ex) {
+		log(message, ex);
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
