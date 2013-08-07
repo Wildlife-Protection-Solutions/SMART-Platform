@@ -59,7 +59,7 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 	@Override
 	public void createPartControl(Composite parent) {
 		Form form = toolkit.createForm(parent);
-		form.setText("Import Patrol Data from Cybertracker");
+		form.setText(Messages.CyberTrackerImportEditor_ImportDataFormTitle);
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		
