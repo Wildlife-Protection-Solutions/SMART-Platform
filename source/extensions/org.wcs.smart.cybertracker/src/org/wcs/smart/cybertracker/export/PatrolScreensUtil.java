@@ -22,8 +22,11 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -151,6 +154,12 @@ public class PatrolScreensUtil {
 
 		//getting all members names
 		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
+		Collections.sort(employees, new Comparator<Employee>() {
+			@Override
+			public int compare(Employee e1, Employee e2) {
+				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+			}
+		});
 		List<String> members = new ArrayList<String>();
 		List<String> memberTag0s = new ArrayList<String>();
 		for (Employee i : employees) {
