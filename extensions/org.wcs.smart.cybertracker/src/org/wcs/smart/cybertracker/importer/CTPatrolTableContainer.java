@@ -64,7 +64,6 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -345,8 +344,7 @@ public class CTPatrolTableContainer extends Composite {
 						data = fromPda ? importer.importPdaData(monitor) : importer.importFileData(file, monitor);
 						addTableData(data);
 					} catch (Exception e) {
-						CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportError_Message, e.getMessage()));
-						e.printStackTrace();
+						CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportError_Message, e.getMessage()), e);
 						return;
 					}
 					int count = data != null ? data.size() : 0;
@@ -359,8 +357,7 @@ public class CTPatrolTableContainer extends Composite {
 
 			});
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, Messages.CTPatrolTableContainer_Error_ImportAborted);
-			e.printStackTrace();
+			CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, Messages.CTPatrolTableContainer_Error_ImportAborted, e);
 		}
 
 	}
@@ -393,8 +390,7 @@ public class CTPatrolTableContainer extends Composite {
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CTPatrolTableContainer_Patrol_Error, e);
-			e.printStackTrace();
+			CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title,Messages.CTPatrolTableContainer_Patrol_Error, e);
 		}
 		
 		if (!addedList.isEmpty()) {
@@ -446,8 +442,7 @@ public class CTPatrolTableContainer extends Composite {
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CTPatrolTableContainer_Leg_Error, e);
-			e.printStackTrace();
+			CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, Messages.CTPatrolTableContainer_Leg_Error, e);
 		}
 
 		refreshViewer();

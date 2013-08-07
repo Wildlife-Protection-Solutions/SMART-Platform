@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.io.FileUtils;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -99,7 +100,7 @@ public class PdaUtil {
 			FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
 			//ignore
-			e.printStackTrace();
+			CyberTrackerPlugIn.log(e.getMessage(), e);
 		}
 	}	
 	

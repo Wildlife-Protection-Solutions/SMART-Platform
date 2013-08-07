@@ -242,7 +242,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 	private void handleExport(final boolean toDevice) {
 		if (!isCyberTrackerInstalled()) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION), null);
 			return;
 		}
 		final boolean launch = !toDevice && btnLaunchCT.getSelection();
@@ -257,8 +257,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 					try {
 						tempDir = PdaUtil.createTempDirectory();
 					} catch (IOException e) {
-						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_FailCreateTempFolder);
-						e.printStackTrace();
+						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_FailCreateTempFolder, e);
 						return;
 					}
 	
@@ -273,12 +272,11 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 								final int code = exporter.uploadPda(generated);
 								if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
 									String codeMeaning = getCyberTrackerCodeMeaning(code);
-									CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code, codeMeaning));
+									CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code, codeMeaning), null);
 									return;
 								}
 							} catch (Exception e) {
-								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_UploadFailed);
-								e.printStackTrace();
+								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_UploadFailed, e);
 								return;
 							}
 
@@ -287,8 +285,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 							try {
 								FileUtils.copyFile(generated, selectedFile);
 							} catch (IOException e) {
-								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_CopyFailed);
-								e.printStackTrace();
+								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_CopyFailed, e);
 								return;
 							}
 						}
@@ -305,7 +302,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 			});
 		} catch (Exception e) {
-			e.printStackTrace();
+			CyberTrackerPlugIn.log(e.getMessage(), e);
 		}
 	}
 
@@ -366,8 +363,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				String[] launchCommands = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath()};
 				Runtime.getRuntime().exec(launchCommands);
 			} catch (Exception e) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_LaunchCT);
-				e.printStackTrace();
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_LaunchCT, e);
 			}
 			return Status.OK_STATUS;
 		}

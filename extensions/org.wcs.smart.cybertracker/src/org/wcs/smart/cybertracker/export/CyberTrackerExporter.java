@@ -189,8 +189,7 @@ public class CyberTrackerExporter {
 			}
 			
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_WriteXMmlFail);
-			e.printStackTrace();
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_WriteXMmlFail, e);
 			return null;
 		}
 		
@@ -201,8 +200,7 @@ public class CyberTrackerExporter {
 			Process proc = Runtime.getRuntime().exec(createCommands);
 			proc.waitFor();
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_GenerateCtxFail);
-			e.printStackTrace();
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_GenerateCtxFail, e);
 			return null;
 		}
 

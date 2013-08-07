@@ -64,7 +64,7 @@ public class PatrolLegImporter extends SmartImporter {
 			session.beginTransaction();
 			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
 			if (patrol.getPatrolType() != ctPatrol.getPatrolType()) {
-				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(), patrol.getPatrolType().getGuiName()));
+				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(), patrol.getPatrolType().getGuiName()), null);
 				return false;
 			}
 			
@@ -76,7 +76,7 @@ public class PatrolLegImporter extends SmartImporter {
 					if (i.hasNext())
 						msg += "\n"; //$NON-NLS-1$
 				}
-				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_MemberOverlapError_Title, msg);
+				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_MemberOverlapError_Title, msg, null);
 				return false;
 				
 			}

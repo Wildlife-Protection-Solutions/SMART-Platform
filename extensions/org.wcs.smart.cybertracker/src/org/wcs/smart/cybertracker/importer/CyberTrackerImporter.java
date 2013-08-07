@@ -83,7 +83,7 @@ public class CyberTrackerImporter {
 		List<CyberTrackerPatrol> patrols = new ArrayList<CyberTrackerPatrol>();
 		String appPath = PdaUtil.getCTAppPath();
 		if (appPath == null) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION), null);
 			return patrols;
 		}
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -134,7 +134,7 @@ public class CyberTrackerImporter {
 			monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 			String appPath = PdaUtil.getCTAppPath();
 			if (appPath == null) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION));
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION), null);
 				return new ArrayList<CyberTrackerPatrol>();
 			}
 			File xmlFile = extractRawXml(appPath, file, xmlTempDir);
@@ -152,7 +152,7 @@ public class CyberTrackerImporter {
 			data = readDataModel(in);
 			monitor.worked(1);
 		} catch (Exception e) {
-			e.printStackTrace();
+			CyberTrackerPlugIn.log(e.getMessage(), e);
 			data = null;
 		} finally {
 			in.close();
@@ -240,7 +240,7 @@ public class CyberTrackerImporter {
 				try {
 					date = formatter.parse(v);
 				} catch (ParseException e) {
-					e.printStackTrace();
+					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
 				time = Time.valueOf(v);
@@ -327,7 +327,7 @@ public class CyberTrackerImporter {
 					if (time != null)
 						break;
 				} catch (ParseException e) {
-					e.printStackTrace();
+					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
 				time = Time.valueOf(a.getV());
@@ -411,7 +411,7 @@ public class CyberTrackerImporter {
 					try {
 						date = formatter.parse(a.getV());
 					} catch (ParseException e) {
-						e.printStackTrace();
+						CyberTrackerPlugIn.log(e.getMessage(), e);
 					}
 				} else if (ICyberTrackerConstants.TIME.equals(i)) {
 					time = Time.valueOf(a.getV());
@@ -454,7 +454,7 @@ public class CyberTrackerImporter {
 				try {
 					date = formatter.parse(a.getV());
 				} catch (ParseException e) {
-					e.printStackTrace();
+					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
 				time = Time.valueOf(a.getV());

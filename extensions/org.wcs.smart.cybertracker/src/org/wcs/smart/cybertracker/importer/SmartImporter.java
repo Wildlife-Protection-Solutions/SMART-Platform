@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -427,7 +428,7 @@ public class SmartImporter {
 		try {
 			return formatter.parse(strDate);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			CyberTrackerPlugIn.log(e.getMessage(), e);
 			return null;
 		}
 	}

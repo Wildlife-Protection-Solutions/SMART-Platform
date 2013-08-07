@@ -96,7 +96,7 @@ public class CyberTrackerHibernateManager {
 		try {
 			return fetchByUuid(clazz, SmartUtils.decodeHex(uuid), session);
 		} catch (Exception e) {
-			e.printStackTrace();
+			CyberTrackerPlugIn.log(e.getMessage(), e);
 			return null;
 		}
 	}

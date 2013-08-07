@@ -107,5 +107,16 @@
             name="CyberTracker Import">
       </editor>
    </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.cybertracker.export"
+            icon="images/etool16/export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.import"
+            icon="images/etool16/import.png">
+      </image>
+   </extension>
 
 </plugin>
