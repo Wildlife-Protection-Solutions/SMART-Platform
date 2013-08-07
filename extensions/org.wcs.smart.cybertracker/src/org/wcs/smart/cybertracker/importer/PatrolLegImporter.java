@@ -26,11 +26,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -42,6 +44,8 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -63,6 +67,20 @@ public class PatrolLegImporter extends SmartImporter {
 				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(), patrol.getPatrolType().getGuiName()));
 				return false;
 			}
+			
+			List<String> memberOverlaps = validateMemberOverlaping(patrol, ctPatrol);
+			if (!memberOverlaps.isEmpty()) {
+				String msg = ""; //$NON-NLS-1$
+				for (Iterator<String> i = memberOverlaps.iterator(); i.hasNext();) {
+					msg += i.next();
+					if (i.hasNext())
+						msg += "\n"; //$NON-NLS-1$
+				}
+				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_MemberOverlapError_Title, msg);
+				return false;
+				
+			}
+			
 			PatrolLeg leg = patrol.addLeg();
 			initLegData(leg, ctPatrol);
 			if (leg.getType() == null) {
@@ -112,6 +130,39 @@ public class PatrolLegImporter extends SmartImporter {
 		finally {
 			session.close();
 		}
+	}
+
+	private List<String> validateMemberOverlaping(Patrol patrol, CyberTrackerPatrol ctPatrol) {
+		List<String> errors = new ArrayList<String>();
+		if (patrol.getLegs() == null)
+			return errors;
+		Date ctStart = ctPatrol.getStartDate();
+		Date ctEnd = ctPatrol.getEndDate();
+		for (PatrolLeg leg : patrol.getLegs()) {
+			//ensure that legs overlap in time
+			Date legStart = SmartUtils.getDatePart(leg.getStartDate(), false);
+			Date legEnd = SmartUtils.getDatePart(leg.getEndDate(), false);
+			if (leg.getPatrolLegDays() != null) {
+				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+					Date date = SmartUtils.getDatePart(pld.getDate(), false);
+					if (date.equals(legStart))
+						legStart = SmartImporter.combine(legStart, pld.getStartTime());
+					if (date.equals(legEnd))
+						legEnd = SmartImporter.combine(legEnd, pld.getEndTime());
+				}
+			}
+			
+			if (legStart.compareTo(ctEnd) <= 0 && legEnd.compareTo(ctStart) >= 0) {
+				for (Employee ctMember : ctPatrol.getMembers()) {
+					for (PatrolLegMember plm : leg.getMembers()) {
+						if (plm.getMember().equals(ctMember)) {
+							errors.add(MessageFormat.format(Messages.PatrolLegImporter_MemberOverlapError_Message, ctMember.getFullLabel(), leg.getId()));
+						}
+					}
+				}
+			}
+		}
+		return errors;
 	}
 
 	//ensures that gap between dates is less than a day

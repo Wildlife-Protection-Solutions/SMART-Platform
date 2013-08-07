@@ -174,6 +174,8 @@ public class Messages extends NLS {
 	public static String Elements_BooleanAttribute_Yes;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;
+	public static String PatrolLegImporter_MemberOverlapError_Message;
+	public static String PatrolLegImporter_MemberOverlapError_Title;
 	public static String PatrolLegImporter_MetaWarning_IsArmed;
 	public static String PatrolLegImporter_MetaWarning_Mandate;
 	public static String PatrolLegImporter_MetaWarning_Station;
