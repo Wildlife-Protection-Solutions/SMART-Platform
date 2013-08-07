@@ -19,6 +19,10 @@
                   label="Import ..."
                   style="push">
             </command>
+            <separator
+                  name="org.wcs.smart.cybertracker.separator1"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.cybertracker.properties"
                   label="Properties ..."
