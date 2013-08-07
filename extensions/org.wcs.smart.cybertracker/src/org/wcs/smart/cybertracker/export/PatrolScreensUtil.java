@@ -345,17 +345,17 @@ public class PatrolScreensUtil {
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(startId.getNodeId());
 		
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_PausePatrol, Messages.PatrolScreens_EndPatrol);
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_EndPatrol, Messages.PatrolScreens_PausePatrol);
 		List<String> values = ctUtil.listItemIds(ids);
 		String trElements = ctUtil.translateElements(ids);
 		//custom translate links logic
 		StringBuilder links = new StringBuilder();
 		// "Make observations" leads to datamodel root
 		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
-		// "Pause Patrol (Rest)" leads to "Paused" screen
-		links.append(ids.get(1).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
 		// "End Patrol" leads to confirmation screen
-		links.append(ids.get(2).getItemTranslatedId()).append(confId.getNodeTranslatedId());
+		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
+		// "Pause Patrol (Rest)" leads to "Paused" screen
+		links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
 		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
 		addGpsConfiguration(node, timer);
 		container.screenNodes.add(node);
