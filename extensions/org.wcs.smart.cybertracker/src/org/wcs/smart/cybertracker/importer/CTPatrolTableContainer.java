@@ -167,7 +167,7 @@ public class CTPatrolTableContainer extends Composite {
 		layout = new GridLayout();
 		data.setLayout(layout);
 		data.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		data.setText("Patrol Data");
+		data.setText(Messages.CTPatrolTableContainer_PatrolDataSectionHeader);
 		
 		Composite dataComp = toolkit.createComposite(data);
 		layout = new GridLayout();
@@ -298,7 +298,7 @@ public class CTPatrolTableContainer extends Composite {
 		details.setLayout(new GridLayout());
 		details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		details.setText("Patrol Details");
+		details.setText(Messages.CTPatrolTableContainer_PatrolDetailsSectionHeader);
 		details.addExpansionListener(new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
@@ -522,20 +522,20 @@ public class CTPatrolTableContainer extends Composite {
 			for (int i = 0; i < cols.length; i ++){
 				String text = ((CTPatrolTableCellLabelProvider)viewer.getLabelProvider(cols[i].ordinal())).getText(selection);
 				if (text == null){
-					text ="";
+					text =""; //$NON-NLS-1$
 				}
 				((Text)lbls[i]).setText(text);
 			}
 			
 			CyberTrackerPatrol patrol = ((CyberTrackerPatrol) selection);
 			
-			lblObjective.setText(patrol.getObjective()==null?"":patrol.getObjective());			
-			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName());
-			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel());
-			lblPilot.setText(patrol.getPilot() == null ? "" : patrol.getPilot().getFullLabel());
+			lblObjective.setText(patrol.getObjective()==null?"":patrol.getObjective());			 //$NON-NLS-1$
+			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName()); //$NON-NLS-1$
+			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel()); //$NON-NLS-1$
+			lblPilot.setText(patrol.getPilot() == null ? "" : patrol.getPilot().getFullLabel()); //$NON-NLS-1$
 		}else{
 			for (int i = 0; i < lbls.length; i ++){
-				((Text)lbls[i]).setText("");
+				((Text)lbls[i]).setText(""); //$NON-NLS-1$
 			}
 			
 		}
@@ -563,75 +563,75 @@ public class CTPatrolTableContainer extends Composite {
 		right.setLayout(new GridLayout(2, false));
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(left, "Start Date:");
-		lblStartDate = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_StartDateLabel);
+		lblStartDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblStartDate.setEditable(false);
 		lblStartDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(left, "End Date:");
-		lblEndDate = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_EndDateLabel);
+		lblEndDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblEndDate.setEditable(false);
 		lblEndDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(left, "Patrol Type:");
-		lblPatrolType = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_PatrolTypeLabel);
+		lblPatrolType = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblPatrolType.setEditable(false);
 		lblPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(left, "Transport Type:");
-		lblTransportType = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_TransportTypeLabel);
+		lblTransportType = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblTransportType.setEditable(false);
 		lblTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(left, "Armed:");
-		lblArmed = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_ArmedLabel);
+		lblArmed = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblArmed.setEditable(false);
 		lblArmed.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(left, "Leader:");
-		lblLeader = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_LeaderLabel);
+		lblLeader = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblLeader.setEditable(false);
 		lblLeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(left, "Pilot:");
-		lblPilot = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.CTPatrolTableContainer_PilotLabel);
+		lblPilot = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblPilot.setEditable(false);
 		lblPilot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(left, "Members:");
+		Label l = toolkit.createLabel(left, Messages.CTPatrolTableContainer_MembersLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		lblMembers = toolkit.createText(left, "", SWT.WRAP | SWT.V_SCROLL);
+		lblMembers = toolkit.createText(left, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		lblMembers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lblMembers.getLayoutData()).widthHint = 150;
 		((GridData)lblMembers.getLayoutData()).heightHint = 150;
 		lblMembers.setEditable(false);
 		
-		toolkit.createLabel(right, "Team:");
-		lblTeam = toolkit.createText(right, "");
+		toolkit.createLabel(right, Messages.CTPatrolTableContainer_TeamLabel);
+		lblTeam = toolkit.createText(right, ""); //$NON-NLS-1$
 		lblTeam.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lblTeam.setEditable(false);
 		
-		toolkit.createLabel(right, "Station:");
-		lblStation = toolkit.createText(right, "");
+		toolkit.createLabel(right, Messages.CTPatrolTableContainer_StationLabel);
+		lblStation = toolkit.createText(right, ""); //$NON-NLS-1$
 		lblStation.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		lblStation.setEditable(false);
 		
-		toolkit.createLabel(right, "Mandate:");
-		lblMandate = toolkit.createText(right, "");
+		toolkit.createLabel(right, Messages.CTPatrolTableContainer_MandateLabel);
+		lblMandate = toolkit.createText(right, ""); //$NON-NLS-1$
 		lblMandate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lblMandate.setEditable(false);
 		
-		l = toolkit.createLabel(right, "Objective:");
+		l = toolkit.createLabel(right, Messages.CTPatrolTableContainer_ObjectiveLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		lblObjective = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL);
+		lblObjective = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		lblObjective.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lblObjective.getLayoutData()).heightHint = 150;
 		((GridData)lblObjective.getLayoutData()).widthHint = 150;
 		lblObjective.setEditable(false);
 		
-		l = toolkit.createLabel(right, "Comment:");
+		l = toolkit.createLabel(right, Messages.CTPatrolTableContainer_CommentLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		lblComment = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL);
+		lblComment = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		lblComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lblComment.getLayoutData()).widthHint = 150;
 		((GridData)lblComment.getLayoutData()).heightHint = 150;
