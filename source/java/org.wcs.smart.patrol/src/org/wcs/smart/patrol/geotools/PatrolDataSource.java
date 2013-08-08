@@ -54,6 +54,14 @@ public class PatrolDataSource extends AbstractDataStore{
 	public void dispose(){
 		super.dispose();
 	}
+	
+	/**
+	 * updates the patrol object associated with the data source
+	 * @param patrol
+	 */
+	public void updatePatrol(Patrol patrol){
+		this.patrol = patrol;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()

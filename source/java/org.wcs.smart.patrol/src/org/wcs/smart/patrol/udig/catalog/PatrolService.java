@@ -87,13 +87,21 @@ public class PatrolService extends IService {
 		return patrol.getId();
 	}
 	
+	public void updatePatrol(Patrol newPatrol){
+		this.patrol = newPatrol;
+	}
+	
 	/**
 	 * Refreshes the bounds for each resource.
 	 * 
 	 * @param monitor
 	 * @throws IOException
 	 */
-	public void refresh(IProgressMonitor monitor) throws IOException{
+	
+	public void refresh(Patrol patrol, IProgressMonitor monitor) throws IOException{
+		this.patrol = patrol;
+		this.ds.updatePatrol(patrol);
+		
 		for (IGeoResource member : resources(monitor)){
 			((PatrolGeoResourceInfo)member.getInfo(monitor)).computeBounds((PatrolGeoResource)member, monitor);
 		}

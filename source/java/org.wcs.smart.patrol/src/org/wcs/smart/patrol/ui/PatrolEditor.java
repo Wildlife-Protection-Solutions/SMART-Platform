@@ -127,7 +127,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								@Override
 								public void run() {
 									createDayPages();
-								
+									mapPage.refresh();
 								}});
 							return Status.OK_STATUS;
 						}					
