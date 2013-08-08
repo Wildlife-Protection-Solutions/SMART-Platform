@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -321,27 +322,42 @@ public class CTPatrolTableContainer extends Composite {
 	}
 	
 	private void performImport(final boolean fromPda) {
-		File dialogFile = null;
+		File[] dialogFiles = null;
 		if (!fromPda) {
-			dialogFile = selectFile();
-			if (dialogFile == null)
-				return;
-			if (!dialogFile.exists()) {
-				MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title, Messages.CyberTrackerImportDialog_Error_Message);
-				return;
-			}
+			dialogFiles = selectFile();
+			if (dialogFiles == null) return;
 		}
 		
-		final File file = dialogFile;
+		final File[] files = dialogFiles;
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 100);
+					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 1);
 					List<CyberTrackerPatrol> data;
 					try {
-						data = fromPda ? importer.importPdaData(monitor) : importer.importFileData(file, monitor);
+						if (fromPda){
+							data = importer.importPdaData(monitor);
+						}else{
+							monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, files.length);
+							data = new ArrayList<CyberTrackerPatrol>();
+							for (int i = 0; i < files.length; i ++){
+								File currentFile = files[i];
+								if (!currentFile.exists()){
+									final File fcurrentFile = currentFile;
+									Display.getDefault().syncExec(new Runnable(){
+										@Override
+										public void run() {
+											MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title,MessageFormat.format( Messages.CyberTrackerImportDialog_Error_Message, new Object[]{fcurrentFile.toString()}));
+										}});
+														
+								}else{
+									data.addAll(importer.importFileData(files[i], new SubProgressMonitor(monitor,1)));
+								}
+								monitor.worked(1);
+							}
+						}
 						addTableData(data);
 					} catch (Exception e) {
 						CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportError_Message, e.getMessage()), e);
@@ -470,7 +486,7 @@ public class CTPatrolTableContainer extends Composite {
 		}
 	}
 
-	private File selectFile() {
+	private File[] selectFile() {
 		FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
 		fd.setFilterExtensions(new String[] {
 				"*.xml;*.ctx", //$NON-NLS-1$
@@ -485,8 +501,13 @@ public class CTPatrolTableContainer extends Composite {
 				Messages.CyberTrackerImportDialog_AllFiles
 		});
 		String f = fd.open();
+		
 		if (f != null) {
-			return new File(f);
+			File[] files = new File[fd.getFileNames().length];
+			for (int i = 0; i < fd.getFileNames().length; i ++){
+				files[i] = new File(fd.getFilterPath(), fd.getFileNames()[i]);
+			}
+			return files;
 		}
 		return null;
 	}
