@@ -144,7 +144,7 @@ public class PatrolSummaryEditor extends EditorPart {
 
 	private PatrolEditor editor;
 	private TableViewer tblPatrolData;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());;
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	private boolean isMulti = false;
 	
@@ -551,10 +551,6 @@ public class PatrolSummaryEditor extends EditorPart {
 				txtObjective.setText(""); //$NON-NLS-1$
 			}
 
-//			if (patrol.getObjectiveRating() != null) {
-//				sclObjRating.setSelection(patrol.getObjectiveRating());
-//			}
-
 			Set<Employee> allEmployee = new HashSet<Employee>();
 			Set<Employee> leaders = new HashSet<Employee>();
 			Set<Employee> pilots = new HashSet<Employee>();
@@ -587,11 +583,6 @@ public class PatrolSummaryEditor extends EditorPart {
 				}});
 			employeeList.setInput(employeeArray);
 
-			txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
-					.format(patrol.getStartDate()));
-			txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
-					.format(patrol.getEndDate()));
-
 			updateDateTable();
 			if (!isMulti){
 				txtTransport.setText(patrol.getFirstLeg().getType().getName());
@@ -603,7 +594,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 	
 	private void updateDateTable(){
-		Patrol patrol = editor.getPatrol();
+		final Patrol patrol = editor.getPatrol();
 		final List<PatrolLegDay> input = new ArrayList<PatrolLegDay>();
 		if (!isMulti){
 			//multi leg patrol
@@ -639,6 +630,13 @@ public class PatrolSummaryEditor extends EditorPart {
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
+				//update dates
+				txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
+						.format(patrol.getStartDate()));
+				txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
+						.format(patrol.getEndDate()));
+				
+				
 				tblPatrolData.setInput(input);
 				updateTableLayout();
 
@@ -657,14 +655,24 @@ public class PatrolSummaryEditor extends EditorPart {
 					collayout.setColumnData(info.getValue().getColumn(), new ColumnWeightData(0, 0, false));
 				}
 			}
+			if (editEmployee != null) editEmployee.setVisible(true);
 		}else{
+			TableColumnLayout collayout = (TableColumnLayout) tblPatrolData.getTable().getParent().getLayout();
+			for (Iterator<Entry<PatrolLegDayColumn, TableViewerColumn>> iterator = tableColumns.entrySet().iterator(); iterator.hasNext();) {
+				Entry<PatrolLegDayColumn, TableViewerColumn> info = (Entry<PatrolLegDayColumn, TableViewerColumn>) iterator.next();
+				if (info.getKey().multi) {
+					collayout.setColumnData(info.getValue().getColumn(), new ColumnWeightData(1, 50, true));
+				}
+			}
 			//multi patrol; show pilot if applicable
 			if (!editor.getPatrol().hasPilot()) {
 				TableViewerColumn tcolumn = tableColumns.get(PatrolLegDayColumn.PILOT);
-				TableColumnLayout collayout = (TableColumnLayout) tblPatrolData.getTable().getParent().getLayout();
 				collayout.setColumnData(tcolumn.getColumn(),new ColumnWeightData(0, 0, false));
 			}
+			if (editEmployee != null) editEmployee.setVisible(false);
 		}
+		
+		tblPatrolData.getTable().getParent().layout(true,true);
 	}
 	/**
 	 * Refresh the patrol summary table.
