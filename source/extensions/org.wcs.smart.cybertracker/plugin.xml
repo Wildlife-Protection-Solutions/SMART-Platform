@@ -8,15 +8,15 @@
             locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.menu.help">
          <menu
                id="org.wcs.smart.cybertracker.menu"
-               label="Cyber Tracker">
+               label="%cybertracker.menu.label">
             <command
                   commandId="org.wcs.smart.cybertracker.export"
-                  label="Export ..."
+                  label="%cybertracker.export.command.label"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.cybertracker.import"
-                  label="Import ..."
+                  label="%cybertracker.import.command.label"
                   style="push">
             </command>
             <separator
@@ -25,7 +25,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.cybertracker.properties"
-                  label="Properties ..."
+                  label="%cybertracker.properties.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -65,15 +65,15 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.cybertracker.export"
-            name="CyberTracker Export">
+            name="%cybertracker.export.command.name">
       </command>
       <command
             id="org.wcs.smart.cybertracker.import"
-            name="CyberTracker Import">
+            name="%cybertracker.import.command.name">
       </command>
       <command
             id="org.wcs.smart.cybertracker.properties"
-            name="Properties">
+            name="%cybertracker.properties.command.name">
       </command>
    </extension>
    <extension
@@ -104,7 +104,7 @@
             default="false"
             icon="images/etool16/cybertracker16.png"
             id="org.wcs.smart.cybertracker.CyberTrackerImportEditor"
-            name="CyberTracker Import">
+            name="%cybertracker.editor.name">
       </editor>
    </extension>
    <extension
