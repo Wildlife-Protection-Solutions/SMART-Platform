@@ -108,7 +108,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (patrolService != null){
 				try {
-					patrolService.refresh(null);
+					patrolService.refresh(parentEditor.getPatrol(), null);
 				} catch (IOException e) {
 					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
 				}
@@ -136,8 +136,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 					attributeChanged == PatrolEventManager.PATROL_DATES_LEG ||
 					attributeChanged == PatrolEventManager.PATROL_TRACKS ||
 					attributeChanged == PatrolEventManager.PATROL_WAYPOINTS)){
-				refreshJob.cancel();
-				refreshJob.schedule();
+				refresh();
 			}
 		}
 	};
@@ -146,11 +145,17 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		this.parentEditor = parent;
 	}
 	
-	   public MultiPageEditorPart getParentEditor(){
-		   return this.parentEditor;
-	   }
-		
+	public MultiPageEditorPart getParentEditor() {
+		return this.parentEditor;
+	}
 
+	/**
+	 * refresh the map and track layers
+	 */
+	public void refresh(){
+		refreshJob.cancel();
+		refreshJob.schedule();
+	}
 
 	private void addLayers(){
 		addLayerJob.schedule();
