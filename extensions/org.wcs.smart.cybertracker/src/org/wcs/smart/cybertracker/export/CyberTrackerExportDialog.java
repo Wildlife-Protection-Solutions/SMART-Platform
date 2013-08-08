@@ -169,10 +169,10 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		btnLaunchCT = new Button(toFileCmp, SWT.CHECK);
+		btnLaunchCT = new Button(fileCmp, SWT.CHECK);
 		btnLaunchCT.setText(Messages.CyberTrackerExportDialog_LaunchInCyberTracker);
 		btnLaunchCT.setSelection(getDefaultLaunchCT());
-		
+		btnLaunchCT.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3,1));
 		exportOptionChanged();
 		
 		setTitle(Messages.CyberTrackerExportDialog_Title);
