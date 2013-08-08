@@ -388,6 +388,14 @@
             commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
             icon="images/etool16/intelligence.png">
       </image>
+      <image
+            commandId="org.wcs.smart.intelligence.export"
+            icon="images/etool16/import_intel.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.import"
+            icon="images/etool16/export_intel.png">
+      </image>
    </extension>
    <extension
          point="org.wcs.smart.query.filter.patrol">
