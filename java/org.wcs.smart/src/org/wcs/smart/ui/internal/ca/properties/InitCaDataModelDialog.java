@@ -115,6 +115,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 
 	@Override
 	public Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
 		layout.marginLeft = 15;
