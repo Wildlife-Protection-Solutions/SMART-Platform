@@ -256,7 +256,7 @@ public class CyberTrackerImporter {
 				E e = eMap.get(v);
 				PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
 				if (transportType == null)
-					ctPatrol.addProblem(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
+					ctPatrol.addError(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
 				ctPatrol.setCtTransport(e.getN());
 				ctPatrol.setPatrolTransportType(transportType);
 			} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
@@ -269,21 +269,21 @@ public class CyberTrackerImporter {
 				E e = eMap.get(v);
 				Team t = fetchFromTag0(Team.class, e, session);
 				if (t == null && e.getTag0() != null)
-					ctPatrol.addProblem(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
+					ctPatrol.addWarning(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
 				ctPatrol.setCtTeam(e.getN());
 				ctPatrol.setTeam(t);
 			} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
 				E e = eMap.get(v);
 				Station st = fetchFromTag0(Station.class, e, session);
 				if (st == null && e.getTag0() != null)
-					ctPatrol.addProblem(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
+					ctPatrol.addWarning(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
 				ctPatrol.setCtStation(e.getN());
 				ctPatrol.setStation(st);
 			} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
 				E e = eMap.get(v);
 				PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
 				if (m == null && e.getTag0() != null)
-					ctPatrol.addProblem(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
+					ctPatrol.addWarning(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
 				ctPatrol.setMandate(m);
 			} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
 				ctPatrol.setObjective(v);
@@ -293,27 +293,28 @@ public class CyberTrackerImporter {
 				E e = eMap.get(v);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
-					ctPatrol.addProblem(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
+					ctPatrol.addError(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
 				ctPatrol.setCtLeader(e.getN());
 				ctPatrol.setLeader(emp);
 			} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
 				E e = eMap.get(v);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
-					ctPatrol.addProblem(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
+					ctPatrol.addError(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
 				ctPatrol.setCtPilot(e.getN());
 				ctPatrol.setPilot(emp);
 			} else if (isMemberRecord(a)) {
 				E e = eMap.get(i);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
-					ctPatrol.addProblem(PatrolMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, e.getN()));
+					ctPatrol.addWarning(PatrolMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, e.getN()));
 				ctPatrol.getCtMembers().add(e.getN());
 				if (emp != null) {
 					ctPatrol.getMembers().add(emp);
 				}
 			}
 		}
+		
 		ctPatrol.setStartDate(SmartImporter.combine(date, time));
 		date = null;
 		time = null;

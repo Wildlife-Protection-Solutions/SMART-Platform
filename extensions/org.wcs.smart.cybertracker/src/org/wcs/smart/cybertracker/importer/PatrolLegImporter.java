@@ -62,6 +62,7 @@ public class PatrolLegImporter extends SmartImporter {
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
+			
 			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
 			if (patrol.getPatrolType() != ctPatrol.getPatrolType()) {
 				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(), patrol.getPatrolType().getGuiName()), null);
@@ -101,6 +102,16 @@ public class PatrolLegImporter extends SmartImporter {
 				patrol.setEndDate(leg.getEndDate());
 			}
 			
+			if (leg.getLeader() == null){
+				if (!fixLeaderError(leg, ctPatrol, session)){
+					return false;
+				}
+			}
+			if (patrol.hasPilot() && leg.getPilot() == null){
+				if (!fixPilotError(leg, ctPatrol, session)){
+					return false;
+				}
+			}
 			List<String> patrolMetaWarnings = reportPatrolMetaWarnings(patrol, ctPatrol);
 			for (String warnMsg : patrolMetaWarnings) {
 				addWarning(warnMsg);
@@ -110,7 +121,7 @@ public class PatrolLegImporter extends SmartImporter {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}
 
-			if (!displayWarnings())
+			if (!displayWarnings(ctPatrol))
 				return false;
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);

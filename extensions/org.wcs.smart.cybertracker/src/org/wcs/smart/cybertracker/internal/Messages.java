@@ -172,6 +172,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_TrackTimerInvalid;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
+	public static String EmployeeSelectorDialog_DialogTitle;
+	public static String EmployeeSelectorDialog_LeaderType;
+	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolImporter_Save_Error;
 	public static String PatrolLegImporter_ErrorDialog_Message;
 	public static String PatrolLegImporter_MemberOverlapError_Message;
@@ -211,6 +214,12 @@ public class Messages extends NLS {
 	public static String PatrolSelectorDialog_Message;
 	public static String PatrolSelectorDialog_PatrolID;
 	public static String PatrolSelectorDialog_Title;
+	public static String SmartImporter_ImportErrorDialogTitle;
+	public static String SmartImporter_LeaderTitle;
+	public static String SmartImporter_NoEmployeesErrorMessage;
+	public static String SmartImporter_PilotTitle;
+	public static String SmartImporter_SelectLeaderMessage;
+	public static String SmartImporter_SelectPilotTitle;
 	public static String SmartImporter_Warn_AddToWaypointTimeframe;
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
 	public static String SmartImporter_Warn_CategoryTag0_Missing;
