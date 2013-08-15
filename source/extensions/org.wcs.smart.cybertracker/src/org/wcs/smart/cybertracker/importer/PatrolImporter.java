@@ -44,6 +44,7 @@ public class PatrolImporter extends SmartImporter {
 	
 	public Patrol importData(CyberTrackerPatrol ctPatrol) {
 		clearWarning();
+		
 		for (String warning : ctPatrol.getWarnings()) {
 			addWarning(warning);
 		}
@@ -55,11 +56,21 @@ public class PatrolImporter extends SmartImporter {
 				if(!fixTransportError(patrol.getFirstLeg(), ctPatrol, session))
 					return null;
 			}
+			if (patrol.getFirstLeg().getLeader() == null){
+				if (!fixLeaderError(patrol.getFirstLeg(), ctPatrol, session)){
+					return null;
+				}
+			}
+			if (patrol.hasPilot() && patrol.getFirstLeg().getPilot() == null){
+				if (!fixPilotError(patrol.getFirstLeg(), ctPatrol, session)){
+					return null;
+				}
+			}
 			for (S s : ctPatrol.getPatrolData()) {
 				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
 			}
 			
-			if (!displayWarnings())
+			if (!displayWarnings(ctPatrol))
 				return null;
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);

@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -37,6 +38,8 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -55,6 +58,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -65,9 +69,13 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -146,6 +154,20 @@ public class CTPatrolTableContainer extends Composite {
 	private Text lblComment;
 	private Text lblLeader;
 	private Text lblPilot;
+	
+	private ControlDecoration cdStartDate;
+	private ControlDecoration cdEndDate;
+	private ControlDecoration cdPatrolType;
+	private ControlDecoration cdTransportType;
+	private ControlDecoration cdArmed;
+	private ControlDecoration cdTeam;
+	private ControlDecoration cdStation;
+	private ControlDecoration cdMembers;
+	private ControlDecoration cdMandate;
+	private ControlDecoration cdObjective;
+	private ControlDecoration cdComment;
+	private ControlDecoration cdLeader;
+	private ControlDecoration cdPilot;	
 	
 	/**
 	 * @param parent
@@ -531,8 +553,8 @@ public class CTPatrolTableContainer extends Composite {
 	}
 	
 	private void updatePatrolDetails(Object selection){
-		Text[] lbls = new Text[]{lblStartDate, lblEndDate,lblPatrolType,lblTransportType, lblArmed,lblTeam,lblStation,lblMembers,lblComment, lblObjective, lblMandate, lblLeader, lblPilot};
-		CTPatrolTableColumn[] cols = new CTPatrolTableColumn[]{CTPatrolTableColumn.START_DATE,CTPatrolTableColumn.END_DATE,CTPatrolTableColumn.TYPE,CTPatrolTableColumn.TRANSPORT,CTPatrolTableColumn.ARMED,CTPatrolTableColumn.TEAM,CTPatrolTableColumn.STATION,CTPatrolTableColumn.MEMBERS,CTPatrolTableColumn.COMMENT};
+		Text[] lbls = new Text[]{lblStartDate, lblEndDate,lblPatrolType,lblTransportType, lblArmed,lblTeam,lblStation,lblComment, lblObjective, lblMandate, lblLeader, lblPilot, lblMembers};
+		CTPatrolTableColumn[] cols = new CTPatrolTableColumn[]{CTPatrolTableColumn.START_DATE,CTPatrolTableColumn.END_DATE,CTPatrolTableColumn.TYPE,CTPatrolTableColumn.TRANSPORT,CTPatrolTableColumn.ARMED,CTPatrolTableColumn.TEAM,CTPatrolTableColumn.STATION,CTPatrolTableColumn.COMMENT};
 		if (selection instanceof CyberTrackerPatrol){
 			
 			for (int i = 0; i < cols.length; i ++){
@@ -549,14 +571,76 @@ public class CTPatrolTableContainer extends Composite {
 			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName()); //$NON-NLS-1$
 			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel()); //$NON-NLS-1$
 			lblPilot.setText(patrol.getPilot() == null ? "" : patrol.getPilot().getFullLabel()); //$NON-NLS-1$
+			StringBuilder sbMembers = new StringBuilder();
+			for (Employee e : ((CyberTrackerPatrol) selection).getMembers()){
+				sbMembers.append(e.getFullLabel());
+				sbMembers.append("\n"); //$NON-NLS-1$
+			}
+			lblMembers.setText(sbMembers.toString());
+			
+			
+			Map<PatrolMeta, List<ImportError>> problems = ((CyberTrackerPatrol) selection).getProblems();
+			updateCd(cdStartDate, problems.get(PatrolMeta.START_DATE));
+			updateCd(cdEndDate, problems.get(PatrolMeta.END_DATE));
+			updateCd(cdPatrolType, problems.get(PatrolMeta.TYPE));
+			updateCd(cdTransportType, problems.get(PatrolMeta.TRANSPORT));
+			updateCd(cdArmed, problems.get(PatrolMeta.ARMED));
+			updateCd(cdMandate, problems.get(PatrolMeta.MANDATE));
+			updateCd(cdTeam, problems.get(PatrolMeta.TEAM));
+			updateCd(cdStation, problems.get(PatrolMeta.STATION));
+			updateCd(cdObjective, problems.get(PatrolMeta.OBJECTIVE));
+			updateCd(cdComment, problems.get(PatrolMeta.COMMENT));
+			updateCd(cdLeader, problems.get(PatrolMeta.LEADER));
+			updateCd(cdPilot, problems.get(PatrolMeta.PILOT));
+			updateCd(cdMembers, problems.get(PatrolMeta.MEMBERS));
+			
 		}else{
 			for (int i = 0; i < lbls.length; i ++){
 				((Text)lbls[i]).setText(""); //$NON-NLS-1$
+			}
+			ControlDecoration[] cds = {cdStartDate, cdEndDate, cdPatrolType, cdTransportType, cdArmed, cdMandate, cdTeam, cdStation, cdObjective, cdComment, cdLeader, cdPilot, cdMembers};
+			for (int i = 0; i < cds.length; i ++){
+				cds[i].hide();
 			}
 			
 		}
 	}
 	
+	private void updateCd(ControlDecoration cd, List<ImportError> errors){
+		if (errors == null || errors.size() == 0){
+			cd.hide();
+			return;
+		}
+		boolean error = false;
+		StringBuilder sb = new StringBuilder();
+		for (ImportError err: errors){
+			if (sb.length() > 0){
+				sb.append("\n"); //$NON-NLS-1$
+			}
+			sb.append(err.getMessage());	
+			if(err.getType() == ErrorType.ERROR){
+				error = true;
+			}
+		}
+		if (error){
+			cd.setImage(FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		}else{
+			cd.setImage(FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+		}
+		cd.setDescriptionText(sb.toString());
+		cd.show();
+	}
+	
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT | SWT.TOP);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		cd.hide();
+		return cd;
+	}
 	
 	private Composite createPatrolDetailsComposite(Composite parent, FormToolkit toolkit){
 		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL);
@@ -579,40 +663,55 @@ public class CTPatrolTableContainer extends Composite {
 		right.setLayout(new GridLayout(2, false));
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		int indent = 10;
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_StartDateLabel);
 		lblStartDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblStartDate.setEditable(false);
 		lblStartDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblStartDate.getLayoutData()).horizontalIndent = indent;
+		cdStartDate = createDecoration(lblStartDate);
 		
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_EndDateLabel);
 		lblEndDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblEndDate.setEditable(false);
 		lblEndDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblEndDate.getLayoutData()).horizontalIndent = indent;
+		cdEndDate = createDecoration(lblEndDate);
 		
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_PatrolTypeLabel);
 		lblPatrolType = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblPatrolType.setEditable(false);
 		lblPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblPatrolType.getLayoutData()).horizontalIndent = indent;
+		cdPatrolType = createDecoration(lblPatrolType);
 		
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_TransportTypeLabel);
 		lblTransportType = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblTransportType.setEditable(false);
 		lblTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblTransportType.getLayoutData()).horizontalIndent = indent;
+		cdTransportType = createDecoration(lblTransportType);
 		
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_ArmedLabel);
 		lblArmed = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblArmed.setEditable(false);
 		lblArmed.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblArmed.getLayoutData()).horizontalIndent = indent;
+		cdArmed = createDecoration(lblArmed);
 		
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_LeaderLabel);
 		lblLeader = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblLeader.setEditable(false);
 		lblLeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblLeader.getLayoutData()).horizontalIndent = indent;
+		cdLeader = createDecoration(lblLeader);
 		
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_PilotLabel);
 		lblPilot = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblPilot.setEditable(false);
 		lblPilot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblPilot.getLayoutData()).horizontalIndent = indent;
+		cdPilot = createDecoration(lblPilot);
 		
 		Label l = toolkit.createLabel(left, Messages.CTPatrolTableContainer_MembersLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -620,22 +719,30 @@ public class CTPatrolTableContainer extends Composite {
 		lblMembers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lblMembers.getLayoutData()).widthHint = 150;
 		((GridData)lblMembers.getLayoutData()).heightHint = 150;
+		((GridData)lblMembers.getLayoutData()).horizontalIndent = indent;
 		lblMembers.setEditable(false);
+		cdMembers = createDecoration(lblMembers);
 		
 		toolkit.createLabel(right, Messages.CTPatrolTableContainer_TeamLabel);
 		lblTeam = toolkit.createText(right, ""); //$NON-NLS-1$
 		lblTeam.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lblTeam.setEditable(false);
+		((GridData)lblTeam.getLayoutData()).horizontalIndent = indent;
+		cdTeam = createDecoration(lblTeam);
 		
 		toolkit.createLabel(right, Messages.CTPatrolTableContainer_StationLabel);
 		lblStation = toolkit.createText(right, ""); //$NON-NLS-1$
 		lblStation.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		lblStation.setEditable(false);
+		((GridData)lblStation.getLayoutData()).horizontalIndent = indent;
+		cdStation = createDecoration(lblStation);
 		
 		toolkit.createLabel(right, Messages.CTPatrolTableContainer_MandateLabel);
 		lblMandate = toolkit.createText(right, ""); //$NON-NLS-1$
 		lblMandate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lblMandate.setEditable(false);
+		((GridData)lblMandate.getLayoutData()).horizontalIndent = indent;
+		cdMandate = createDecoration(lblMandate);
 		
 		l = toolkit.createLabel(right, Messages.CTPatrolTableContainer_ObjectiveLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -643,7 +750,9 @@ public class CTPatrolTableContainer extends Composite {
 		lblObjective.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lblObjective.getLayoutData()).heightHint = 150;
 		((GridData)lblObjective.getLayoutData()).widthHint = 150;
+		((GridData)lblObjective.getLayoutData()).horizontalIndent = indent;
 		lblObjective.setEditable(false);
+		cdObjective = createDecoration(lblObjective);
 		
 		l = toolkit.createLabel(right, Messages.CTPatrolTableContainer_CommentLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -651,7 +760,9 @@ public class CTPatrolTableContainer extends Composite {
 		lblComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lblComment.getLayoutData()).widthHint = 150;
 		((GridData)lblComment.getLayoutData()).heightHint = 150;
+		((GridData)lblComment.getLayoutData()).horizontalIndent = indent;
 		lblComment.setEditable(false);
+		cdComment = createDecoration(lblComment);
 		
 		main.setSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, 300);
 		return scrolled;

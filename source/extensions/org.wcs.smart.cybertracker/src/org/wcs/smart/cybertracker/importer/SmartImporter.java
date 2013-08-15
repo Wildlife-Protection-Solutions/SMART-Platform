@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
@@ -47,6 +48,7 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
@@ -142,8 +144,8 @@ public class SmartImporter {
 			@Override
 			public void run() {
 				List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session, ctPatrol.getPatrolType());
-				List<String> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
-				String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0) : null;
+				List<ImportError> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
+				String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0).getMessage() : null;
 				TransportSelectorDialog selectorDialog = new TransportSelectorDialog(Display.getDefault().getActiveShell(), types, message);
 				if (selectorDialog.open() != IDialogConstants.OK_ID) {
 					return;
@@ -152,6 +154,62 @@ public class SmartImporter {
 			}
 		});
 		return leg.getType() != null;
+	}
+	
+	
+	private String getPatrolIdentifier(CyberTrackerPatrol ctPatrol){
+		return DateFormat.getDateTimeInstance().format(ctPatrol.getStartDate()) + "  [" + ctPatrol.getCtTransport() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private boolean checkEmployees(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol){
+		if (leg.getMembers().size() == 0){
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					MessageDialog.openError(Display.getDefault().getActiveShell(), 
+							Messages.SmartImporter_ImportErrorDialogTitle, 
+							MessageFormat.format(Messages.SmartImporter_NoEmployeesErrorMessage, 
+								new Object[]{getPatrolIdentifier(ctPatrol)}));
+				}				
+			});
+			return false;
+		}
+		return true;
+	}
+	
+	protected boolean fixLeaderError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session){
+		if (!checkEmployees(leg, ctPatrol)){
+			return false;
+		}
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
+						Display.getDefault().getActiveShell(), 
+						MessageFormat.format(Messages.SmartImporter_LeaderTitle, getPatrolIdentifier(ctPatrol)),
+						MessageFormat.format(Messages.SmartImporter_SelectLeaderMessage, new Object[]{ctPatrol.getCtLeader() }),
+						EmployeeSelectorDialog.Type.LEADER, leg);
+				dialog.open();
+			}});
+		return leg.getLeader() != null;
+	}
+
+
+	protected boolean fixPilotError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session){
+		if (!checkEmployees(leg, ctPatrol)){
+			return false;
+		}
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
+						Display.getDefault().getActiveShell(), 
+						MessageFormat.format(Messages.SmartImporter_PilotTitle, getPatrolIdentifier(ctPatrol)),
+						MessageFormat.format(Messages.SmartImporter_SelectPilotTitle, new Object[]{ctPatrol.getPilot()}), 
+						EmployeeSelectorDialog.Type.PILOT, leg);
+				dialog.open();
+			}});
+		return leg.getPilot() != null;
 	}
 	
 	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol) {
@@ -437,13 +495,16 @@ public class SmartImporter {
 	 * Displays warnings dialog if warnings present and returns if user choose to proceed with import
 	 * @return
 	 */
-	protected boolean displayWarnings() {
+	protected boolean displayWarnings(final CyberTrackerPatrol ctPatrol) {
 		final boolean[] isOk = {true};
 		if (getWarnings() != null && getWarnings().size() > 0) {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					ImportWarningDialog wdialog = new ImportWarningDialog(Display.getDefault().getActiveShell(), Messages.SmartImporter_WarnDialog_Title, Messages.SmartImporter_WarnDialog_Message, getWarnings());
+					ImportWarningDialog wdialog = new ImportWarningDialog(Display.getDefault().getActiveShell(), 
+							Messages.SmartImporter_WarnDialog_Title, 
+							MessageFormat.format(Messages.SmartImporter_WarnDialog_Message, getPatrolIdentifier(ctPatrol)), 
+							getWarnings());
 					isOk[0] = wdialog.open() == IDialogConstants.OK_ID;
 				}
 			});

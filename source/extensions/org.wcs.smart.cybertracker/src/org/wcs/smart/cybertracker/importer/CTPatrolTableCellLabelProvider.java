@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 
 /**
@@ -84,12 +85,16 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			return null;
 		if (element instanceof CyberTrackerPatrol) {
 			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
-			if (!ctPatrol.getProblems().containsKey(meta))
+			List<CyberTrackerPatrol.ImportError> in = ctPatrol.getProblems().get(meta);
+			if (in == null || in.size() == 0){
 				return null;
-			switch (column) {
-			case TRANSPORT:	return ERROR_IMAGE;
-			default: return WARN_IMAGE;
 			}
+			for (CyberTrackerPatrol.ImportError err : in){
+				if (err.getType() == ErrorType.ERROR){
+					return ERROR_IMAGE;
+				}
+			}
+			return WARN_IMAGE;
 		}
 		return null;
 	}
@@ -110,10 +115,16 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			if (!ctPatrol.getProblems().containsKey(meta))
 				return result;
 			result += "\n"; //$NON-NLS-1$
-			result += column == CTPatrolTableColumn.TRANSPORT ? Messages.CTPatrolTableCellLabelProvider_Tooltip_Error : Messages.CTPatrolTableCellLabelProvider_Tooltip_Warning;
-			for (String problem : ctPatrol.getProblems().get(meta)) {
-				result += "\n" + problem; //$NON-NLS-1$
+			String prefix = Messages.CTPatrolTableCellLabelProvider_Tooltip_Warning;
+
+			String msg = ""; //$NON-NLS-1$
+			for (CyberTrackerPatrol.ImportError problem : ctPatrol.getProblems().get(meta)) {
+				msg += "\n" + problem.getMessage(); //$NON-NLS-1$
+				if (problem.getType() == ErrorType.ERROR){
+					prefix = Messages.CTPatrolTableCellLabelProvider_Tooltip_Error;
+				}
 			}
+			result += prefix + msg;
 			return result;
 		}		
 		return super.getToolTipText(element);

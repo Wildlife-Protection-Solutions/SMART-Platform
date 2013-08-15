@@ -46,6 +46,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class CyberTrackerPatrol {
 	
+	public enum ErrorType{ERROR, WARNING};
+	
 	public enum PatrolMeta {
 		START_DATE,
 		END_DATE,
@@ -62,7 +64,7 @@ public class CyberTrackerPatrol {
 		MEMBERS
 	}
 
-	private Map<PatrolMeta, List<String>> problems = new HashMap<PatrolMeta, List<String>>();
+	private Map<PatrolMeta, List<ImportError>> problems = new HashMap<PatrolMeta, List<ImportError>>();
 	
 	private Map<String, E> elementsMap;
 	private List<S> patrolData;
@@ -96,30 +98,43 @@ public class CyberTrackerPatrol {
 		this.patrolData = patrolData;
 	}
 
-	public void addProblem(PatrolMeta area, String problem) {
+	public void addWarning(PatrolMeta area, String problem) {
 		if (!problems.containsKey(area))
-			problems.put(area, new ArrayList<String>());
-		problems.get(area).add(problem);
+			problems.put(area, new ArrayList<ImportError>());
+		problems.get(area).add(new ImportError(problem, ErrorType.WARNING));
+	}
+	
+	public void addError(PatrolMeta area, String problem) {
+		if (!problems.containsKey(area))
+			problems.put(area, new ArrayList<ImportError>());
+		problems.get(area).add(new ImportError(problem, ErrorType.ERROR));
 	}
 	
 	public List<String> getErrors() {
-		if (problems.containsKey(PatrolMeta.TRANSPORT))
-			return problems.get(PatrolMeta.TRANSPORT);
-		return new ArrayList<String>();
+		List<String> errors = new ArrayList<String>();
+		for (List<ImportError> lerrors : problems.values()){
+			for(ImportError err : lerrors){
+				if (err.errorType == ErrorType.ERROR){
+					errors.add(err.problem);
+				}
+			}
+		}
+		return errors;
 	}
 	
 	public List<String> getWarnings() {
 		List<String> warnings = new ArrayList<String>();
-		for (PatrolMeta area : PatrolMeta.values()) {
-			if (area == PatrolMeta.TRANSPORT)
-				continue;
-			if (problems.containsKey(area))
-				warnings.addAll(problems.get(area));
+		for (List<ImportError> lerrors : problems.values()){
+			for(ImportError err : lerrors){
+				if (err.errorType == ErrorType.WARNING){
+					warnings.add(err.problem);
+				}
+			}
 		}
 		return warnings;
 	}
 	
-	public Map<PatrolMeta, List<String>> getProblems() {
+	public Map<PatrolMeta, List<ImportError>> getProblems() {
 		return problems;
 	}
 	
@@ -307,5 +322,28 @@ public class CyberTrackerPatrol {
 		this.timerTrackList = timerTrackList;
 	}
 	
+	/**
+	 * Import error class to track import error messages
+	 * and error type.
+	 * @author Emily
+	 *
+	 */
+	public class ImportError {
+		private ErrorType errorType;
+		private String problem;
+		
+		public ImportError(String problem, ErrorType type){
+			this.errorType = type;
+			this.problem = problem;
+		}
+		
+		public ErrorType getType(){
+			return this.errorType;
+		}
+		
+		public String getMessage(){
+			return this.problem;
+		}
+	}
 	
 }
