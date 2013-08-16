@@ -175,7 +175,11 @@ public class Messages extends NLS {
 	public static String EmployeeSelectorDialog_DialogTitle;
 	public static String EmployeeSelectorDialog_LeaderType;
 	public static String EmployeeSelectorDialog_PilotType;
+	public static String PatrolImporter_DuplicateMessage;
+	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;
+	public static String PatrolLegImporter_DuplicateDialogTitle;
+	public static String PatrolLegImporter_DuplicateMessage;
 	public static String PatrolLegImporter_ErrorDialog_Message;
 	public static String PatrolLegImporter_MemberOverlapError_Message;
 	public static String PatrolLegImporter_MemberOverlapError_Title;
