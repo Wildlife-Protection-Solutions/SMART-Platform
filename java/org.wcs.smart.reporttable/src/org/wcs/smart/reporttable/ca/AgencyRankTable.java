@@ -43,19 +43,24 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class AgencyRankTable  extends SmartBirtTable {
 
 	private enum Column{
-		CA(Messages.AgencyRankTable_Ca_FieldName, java.sql.Types.VARCHAR),
-		AGENCY(Messages.AgencyRankTable_AgencyName_FieldName, java.sql.Types.VARCHAR),
-		RANK(Messages.AgencyRankTable_RankName_FieldName, java.sql.Types.VARCHAR);
+		CA(Messages.AgencyRankTable_Ca_FieldName, "Conservation Area", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		AGENCY(Messages.AgencyRankTable_AgencyName_FieldName, "Agency Name", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		RANK(Messages.AgencyRankTable_RankName_FieldName, "Rank", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		private String name;
 		private int type;
+		private String label;
 		
-		private Column(String name, int type){
+		private Column(String label, String name, int type){
 			this.name = name;
 			this.type = type;
+			this.label = label;
 		}
 		public String getName(){
 			return this.name;
+		}
+		public String getLabel(){
+			return this.label;
 		}
 		public int getType(){
 			return this.type;
@@ -81,7 +86,7 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 * Creates a new agency/rank birt table source
 	 */
 	public AgencyRankTable() {
-		super(Messages.AgencyRankTable_TableName);
+		super(Messages.AgencyRankTable_TableName,"Agencies and Rank"); //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			this.activeColumns = Column.values();
 		}else{
@@ -101,6 +106,18 @@ public class AgencyRankTable  extends SmartBirtTable {
 		return name;
 	}
 
+	/**
+	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getColumnLabels()
+	 */
+	@Override
+	public String[] getColumnLabels() {
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getLabel();
+		}
+		return name;
+	}
+	
 	/**
 	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getColumnTypes()
 	 */

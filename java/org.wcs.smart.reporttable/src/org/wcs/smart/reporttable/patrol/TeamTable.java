@@ -43,21 +43,26 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class TeamTable  extends SmartBirtTable {
 
 	private enum Column{
-		CA(Messages.TeamTable_Ca_FieldName,java.sql.Types.VARCHAR),
-		NAME(Messages.TeamTable_TeamName_FieldName,java.sql.Types.VARCHAR),
-		DESCRIPTION(Messages.TeamTable_Description_FieldName, java.sql.Types.VARCHAR),
-		MANDATE(Messages.TeamTable_Mandate_FieldName, java.sql.Types.VARCHAR),
-		ACTIVE(Messages.TeamTable_IsActive_FieldName, java.sql.Types.BOOLEAN);
+		CA(Messages.TeamTable_Ca_FieldName,"Conservation Area",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		NAME(Messages.TeamTable_TeamName_FieldName,"Team Name",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DESCRIPTION(Messages.TeamTable_Description_FieldName, "Description",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		MANDATE(Messages.TeamTable_Mandate_FieldName, "Mandate", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ACTIVE(Messages.TeamTable_IsActive_FieldName, "Active", java.sql.Types.BOOLEAN); //$NON-NLS-1$
 		
 		private String name;
 		private int type;
+		private String label;
 		
-		private Column(String name, int type){
+		private Column(String label, String name, int type){
 			this.name = name;
 			this.type = type;
+			this.label = label;
 		}
 		public String getName(){
 			return this.name;
+		}
+		public String getLabel(){
+			return this.label;
 		}
 		public int getType(){
 			return this.type;
@@ -90,7 +95,7 @@ public class TeamTable  extends SmartBirtTable {
 	 * Creates a new patrol team table
 	 */
 	public TeamTable() {
-		super(Messages.TeamTable_TableName);
+		super(Messages.TeamTable_TableName, "Patrol Team"); //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			this.activeColumns = Column.values();
 		}else{
@@ -106,6 +111,18 @@ public class TeamTable  extends SmartBirtTable {
 		String[] name = new String[activeColumns.length];
 		for (int i = 0; i < activeColumns.length; i ++){
 			name[i] = activeColumns[i].getName();
+		}
+		return name;
+	}
+	
+	/**
+	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getColumnLabels()
+	 */
+	@Override
+	public String[] getColumnLabels() {
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getLabel();
 		}
 		return name;
 	}

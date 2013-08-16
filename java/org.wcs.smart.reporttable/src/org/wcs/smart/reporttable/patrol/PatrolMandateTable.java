@@ -43,19 +43,24 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class PatrolMandateTable extends SmartBirtTable {
 
 	private enum Column{
-		CA(Messages.PatrolMandateTable_Ca_FieldName,java.sql.Types.VARCHAR),
-		NAME(Messages.PatrolMandateTable_MandateName_FieldName,java.sql.Types.VARCHAR),
-		ACTIVE(Messages.PatrolMandateTable_IsActive_FieldName, java.sql.Types.BOOLEAN);
+		CA(Messages.PatrolMandateTable_Ca_FieldName,"Conservation Area",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		NAME(Messages.PatrolMandateTable_MandateName_FieldName,"Patrol Mandate",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ACTIVE(Messages.PatrolMandateTable_IsActive_FieldName, "Active",java.sql.Types.BOOLEAN); //$NON-NLS-1$
 		
 		private String name;
 		private int type;
+		private String label;
 		
-		private Column(String name, int type){
+		private Column(String label, String name, int type){
 			this.name = name;
 			this.type = type;
+			this.label = label;
 		}
 		public String getName(){
 			return this.name;
+		}
+		public String getLabel(){
+			return this.label;
 		}
 		public int getType(){
 			return this.type;
@@ -82,7 +87,7 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 * Creates a new patrol mandate table.
 	 */
 	public PatrolMandateTable() {
-		super(Messages.PatrolMandateTable_TableName);
+		super(Messages.PatrolMandateTable_TableName, "Patrol Mandate"); //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			this.activeColumns = Column.values();
 		}else{
@@ -98,6 +103,18 @@ public class PatrolMandateTable extends SmartBirtTable {
 		String[] name = new String[activeColumns.length];
 		for (int i = 0; i < activeColumns.length; i ++){
 			name[i] = activeColumns[i].getName();
+		}
+		return name;
+	}
+	
+	/**
+	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getColumnLabels()
+	 */
+	@Override
+	public String[] getColumnLabels() {
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getLabel();
 		}
 		return name;
 	}

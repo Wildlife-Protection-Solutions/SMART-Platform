@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.wcs.smart.data.ods.smart.table">
+         point="org.wcs.smart.data.oda.smart.table">
       <class
             SmartBirtTable="org.wcs.smart.reporttable.ca.EmployeeTable">
       </class>
