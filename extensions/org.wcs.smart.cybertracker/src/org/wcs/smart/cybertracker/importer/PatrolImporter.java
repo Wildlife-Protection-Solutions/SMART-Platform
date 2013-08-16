@@ -21,8 +21,14 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.text.MessageFormat;
+import java.util.List;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -56,6 +62,12 @@ public class PatrolImporter extends SmartImporter {
 				if(!fixTransportError(patrol.getFirstLeg(), ctPatrol, session))
 					return null;
 			}
+			
+			//check if duplicate of existing patrol
+			if (!checkDuplicate(ctPatrol, patrol, session)){
+				return null;
+			}
+			
 			if (patrol.getFirstLeg().getLeader() == null){
 				if (!fixLeaderError(patrol.getFirstLeg(), ctPatrol, session)){
 					return null;
@@ -110,4 +122,49 @@ public class PatrolImporter extends SmartImporter {
 		return p;
 	}
 	
+	
+	protected boolean checkDuplicate(final CyberTrackerPatrol ctPatrol, Patrol patrol, final Session session){
+		
+		Criteria c = session.createCriteria(Patrol.class);
+		c.add(Restrictions.eq("startDate", patrol.getStartDate())); //$NON-NLS-1$
+		c.add(Restrictions.eq("endDate", patrol.getEndDate())); //$NON-NLS-1$
+		c.add(Restrictions.eq("patrolType", patrol.getPatrolType())); //$NON-NLS-1$
+		if (patrol.getStation() == null){
+			c.add(Restrictions.isNull("station")); //$NON-NLS-1$
+		}else{
+			c.add(Restrictions.eq("station", patrol.getStation())); //$NON-NLS-1$
+		}
+		if (patrol.getTeam() == null){
+			c.add(Restrictions.isNull("team")); //$NON-NLS-1$
+		}else{
+			c.add(Restrictions.eq("team", patrol.getTeam())); //$NON-NLS-1$
+		}
+		@SuppressWarnings("unchecked")
+		List<Patrol> patrols = c.list(); 
+		
+		if (patrols.size() > 0){
+			final StringBuilder smartPatrols = new StringBuilder();
+			for (Patrol p : patrols){
+				smartPatrols.append(p.getId());
+				smartPatrols.append(", "); //$NON-NLS-1$
+			}
+			smartPatrols.deleteCharAt(smartPatrols.length() - 1);
+			smartPatrols.deleteCharAt(smartPatrols.length() - 1);
+			if (smartPatrols.length() > 100){
+				smartPatrols.delete(100, smartPatrols.length());
+			}
+			final boolean[] ret = new boolean[]{false};
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					ret[0] = MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
+						Messages.PatrolImporter_ImportDialogTitle, 
+						MessageFormat.format(Messages.PatrolImporter_DuplicateMessage, new Object[]{getPatrolIdentifier(ctPatrol), smartPatrols.toString()})
+						);
+				}});
+			return ret[0];
+		}
+		
+		return true;
+	}
 }

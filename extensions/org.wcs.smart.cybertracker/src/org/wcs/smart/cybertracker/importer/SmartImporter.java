@@ -157,7 +157,7 @@ public class SmartImporter {
 	}
 	
 	
-	private String getPatrolIdentifier(CyberTrackerPatrol ctPatrol){
+	protected String getPatrolIdentifier(CyberTrackerPatrol ctPatrol){
 		return DateFormat.getDateTimeInstance().format(ctPatrol.getStartDate()) + "  [" + ctPatrol.getCtTransport() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	

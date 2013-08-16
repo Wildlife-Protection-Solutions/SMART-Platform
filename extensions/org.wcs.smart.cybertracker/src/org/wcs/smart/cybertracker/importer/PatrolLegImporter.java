@@ -29,8 +29,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
@@ -69,6 +72,13 @@ public class PatrolLegImporter extends SmartImporter {
 				return false;
 			}
 			
+
+			PatrolLeg tmpLeg = new PatrolLeg();
+			initLegData(tmpLeg, ctPatrol);
+			if (!checkDuplicate(ctPatrol, tmpLeg, patrol, session)){
+				return false;
+			}
+
 			List<String> memberOverlaps = validateMemberOverlaping(patrol, ctPatrol);
 			if (!memberOverlaps.isEmpty()) {
 				String msg = ""; //$NON-NLS-1$
@@ -78,8 +88,7 @@ public class PatrolLegImporter extends SmartImporter {
 						msg += "\n"; //$NON-NLS-1$
 				}
 				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_MemberOverlapError_Title, msg, null);
-				return false;
-				
+				return false;	
 			}
 			
 			PatrolLeg leg = patrol.addLeg();
@@ -88,7 +97,7 @@ public class PatrolLegImporter extends SmartImporter {
 				if(!fixTransportError(leg, ctPatrol, session))
 					return false;
 			}
-
+		
 			if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
 				if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))
 					addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_Start, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getEndDate())));
@@ -139,6 +148,9 @@ public class PatrolLegImporter extends SmartImporter {
 			return false;
 		}
 		finally {
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
 			session.close();
 		}
 	}
@@ -217,4 +229,45 @@ public class PatrolLegImporter extends SmartImporter {
 		return Arrays.equals(o1.getUuid(), o2.getUuid());
 	}
 	
+	
+	protected boolean checkDuplicate(final CyberTrackerPatrol ctPatrol, 
+			PatrolLeg patrolLeg,
+			Patrol importTo,
+			final Session session){
+		
+		Criteria c = session.createCriteria(PatrolLeg.class);
+		//search for a leg with the samte start date, end date and transport type
+		c.add(Restrictions.eq("patrol", importTo)); //$NON-NLS-1$
+		c.add(Restrictions.eq("startDate", patrolLeg.getStartDate())); //$NON-NLS-1$
+		c.add(Restrictions.eq("endDate", patrolLeg.getEndDate())); //$NON-NLS-1$
+		c.add(Restrictions.eq("type", patrolLeg.getType())); //$NON-NLS-1$
+		
+		@SuppressWarnings("unchecked")
+		List<PatrolLeg> patrols = c.list(); 
+		
+		if (patrols.size() > 0){
+			final StringBuilder smartPatrols = new StringBuilder();
+			for (PatrolLeg p : patrols){
+				smartPatrols.append(p.getId());
+				smartPatrols.append(", "); //$NON-NLS-1$
+			}
+			smartPatrols.deleteCharAt(smartPatrols.length() - 1);
+			smartPatrols.deleteCharAt(smartPatrols.length() - 1);
+			if (smartPatrols.length() > 100){
+				smartPatrols.delete(100, smartPatrols.length());
+			}
+			final boolean[] ret = new boolean[]{false};
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					ret[0] = MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
+						Messages.PatrolLegImporter_DuplicateDialogTitle, 
+						MessageFormat.format(Messages.PatrolLegImporter_DuplicateMessage, new Object[]{getPatrolIdentifier(ctPatrol), smartPatrols.toString()})
+						);
+				}});
+			return ret[0];
+		}
+		
+		return true;
+	}
 }
