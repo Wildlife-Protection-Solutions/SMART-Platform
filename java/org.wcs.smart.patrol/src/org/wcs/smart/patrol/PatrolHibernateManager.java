@@ -345,8 +345,9 @@ public class PatrolHibernateManager extends HibernateManager{
 		sb.append(p.getConservationArea().getId());
 
 		Query q = s
-				.createQuery("SELECT id FROM Patrol WHERE id like :id ORDER BY id desc"); //$NON-NLS-1$
+				.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
 		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("ca", p.getConservationArea()); //$NON-NLS-1$
 
 		long idNumber = 0;
 		List<?> results = q.list();
