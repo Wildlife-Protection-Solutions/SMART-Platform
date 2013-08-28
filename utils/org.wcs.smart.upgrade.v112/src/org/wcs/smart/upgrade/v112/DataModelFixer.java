@@ -56,21 +56,26 @@ public class DataModelFixer {
 			pm.setNote("Processing attribute list items");
 			AttributeListItemProcessor alp = new AttributeListItemProcessor();
 			alp.fixAttributesListItems(c);
-			pm.setProgress(25);
+			pm.setProgress(20);
 		
 			pm.setNote("Processing attribute tree nodes");
 			AttributeTreeItemProcessor atp = new AttributeTreeItemProcessor();
 			atp.fixAttributeTreeItems(c);
-			pm.setProgress(50);
+			pm.setProgress(40);
 			
 			pm.setNote("Processing attributes");
 			AttributeProcessor ap = new AttributeProcessor();
 			ap.fixAttributes(c);
-			pm.setProgress(75);
+			pm.setProgress(60);
 		
 			pm.setNote("Processing categories");
 			CategoryProcessor cp = new CategoryProcessor();
 			cp.fixCategories(c);
+			pm.setProgress(80);
+			
+			pm.setNote("Processing names");
+			NameFixer nf = new NameFixer();
+			nf.fixNames(c);
 			pm.setProgress(90);
 			
 			pm.setNote("Saving results");

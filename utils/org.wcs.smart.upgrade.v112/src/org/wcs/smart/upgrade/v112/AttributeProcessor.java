@@ -28,15 +28,13 @@ public class AttributeProcessor implements IDataProcessor {
 
 		//groups attributes by ca so keys are not duplicated across attributes
 		//in a given ca but can be duplicated across cas
-		String sql = "SELECT a.ca_uuid, a.uuid, a.keyid, b.language_uuid, b.value " +
-					" FROM smart.dm_attribute a, smart.i18n_label b where b.element_uuid = a.uuid";
+		String sql = "SELECT a.ca_uuid, a.uuid, a.keyid " +
+					" FROM smart.dm_attribute a ";
 		ResultSet rs = c.createStatement().executeQuery(sql);
 		while(rs.next()){
 			byte[] cauuid = rs.getBytes(1);
 			byte[] uuid = rs.getBytes(2);
 			String key = rs.getString(3);
-			byte[] lang = rs.getBytes(4);
-			String name = rs.getString(5);
 			
 			ByteWrapper ca = new ByteWrapper(cauuid);
 			List<KeyItem> its = items.get(ca);
@@ -54,7 +52,6 @@ public class AttributeProcessor implements IDataProcessor {
 				keyItem = new KeyItem(uuid, key, cauuid);
 				its.add(keyItem);
 			}
-			keyItem.addName(lang, name);
 		}
 		rs.close();
 		
@@ -76,14 +73,6 @@ public class AttributeProcessor implements IDataProcessor {
 					ps.setBytes(2, k.getUuid());
 					ps.execute();
 					updatedItems.add(k);
-				}
-				for (KeyItem.KeyName lname : k.getNames()){
-					if (lname.isChanged()){
-						psname.setString(1, lname.getNewName());
-						psname.setBytes(2, lname.getLanguage());
-						psname.setBytes(3, k.getUuid());
-						psname.execute();
-					}
 				}
 			}
 		}

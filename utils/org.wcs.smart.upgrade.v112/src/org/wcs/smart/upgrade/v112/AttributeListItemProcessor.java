@@ -34,17 +34,14 @@ public class AttributeListItemProcessor implements IDataProcessor {
 		//group list items by attribute so that all list items
 		//associated with the same category are fixed together; ensure
 		//correct keys
-		String sql = "SELECT a.attribute_uuid, a.uuid, a.keyid, b.language_uuid, b.value, c.ca_uuid " +
-					" FROM smart.dm_attribute_list a, smart.i18n_label b, smart.dm_attribute c " +
-					" WHERE b.element_uuid = a.uuid and c.uuid = a.attribute_uuid ";
+		String sql = "SELECT a.attribute_uuid, a.uuid, a.keyid, c.ca_uuid " +
+					" FROM smart.dm_attribute_list a join smart.dm_attribute c on c.uuid = a.attribute_uuid ";
 		ResultSet rs = c.createStatement().executeQuery(sql);
 		while(rs.next()){
 			byte[] attributeuuid = rs.getBytes(1);
 			byte[] uuid = rs.getBytes(2);
 			String key = rs.getString(3);
-			byte[] lang = rs.getBytes(4);
-			String name = rs.getString(5);
-			byte[] cauuid = rs.getBytes(6);
+			byte[] cauuid = rs.getBytes(4);
 			
 			ByteWrapper ca = new ByteWrapper(attributeuuid);
 			List<KeyItem> its = items.get(ca);
@@ -62,7 +59,6 @@ public class AttributeListItemProcessor implements IDataProcessor {
 				keyItem = new KeyItem(uuid, key, cauuid);
 				its.add(keyItem);
 			}
-			keyItem.addName(lang, name);
 		}
 		rs.close();
 		
@@ -81,14 +77,6 @@ public class AttributeListItemProcessor implements IDataProcessor {
 					ps.setBytes(2, k.getUuid());
 					ps.execute();
 					updated.add(k);
-				}
-				for (KeyItem.KeyName lname : k.getNames()){
-					if (lname.isChanged()){
-						psname.setString(1, lname.getNewName());
-						psname.setBytes(2, lname.getLanguage());
-						psname.setBytes(3, k.getUuid());
-						psname.execute();
-					}
 				}
 			}
 		}

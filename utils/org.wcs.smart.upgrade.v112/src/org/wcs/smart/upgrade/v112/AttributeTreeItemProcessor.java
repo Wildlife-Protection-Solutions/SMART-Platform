@@ -37,20 +37,17 @@ public class AttributeTreeItemProcessor implements IDataProcessor{
 		//group by attribute tree level so keys are unique across tree level
 		String sql = "SELECT a.attribute_uuid, " +
 				"case when a.parent_uuid is null then a.attribute_uuid else a.parent_uuid end, " +
-				"a.uuid, a.keyid, b.language_uuid, b.value, a.parent_uuid, a.hkey, c.ca_uuid " +
-				"FROM smart.dm_attribute_tree a, smart.i18n_label b, smart.dm_attribute c " +
-				" where b.element_uuid = a.uuid and c.uuid = a.attribute_uuid ";
+				"a.uuid, a.keyid, a.parent_uuid, a.hkey, c.ca_uuid " +
+				"FROM smart.dm_attribute_tree a JOIN smart.dm_attribute c on c.uuid = a.attribute_uuid ";
 		ResultSet rs = c.createStatement().executeQuery(sql);
 		while(rs.next()){
 			byte[] attributeUuid = rs.getBytes(1);
 			byte[] groupByUuuid = rs.getBytes(2);
 			byte[] uuid = rs.getBytes(3);
 			String key = rs.getString(4);
-			byte[] lang = rs.getBytes(5);
-			String name = rs.getString(6);
-			byte[] parentUuid = rs.getBytes(7);
-			String hkey = rs.getString(8);
-			byte[] cauuid = rs.getBytes(9);
+			byte[] parentUuid = rs.getBytes(5);
+			String hkey = rs.getString(6);
+			byte[] cauuid = rs.getBytes(7);
 
 			
 			ByteWrapper ca = new ByteWrapper(groupByUuuid);
@@ -69,7 +66,6 @@ public class AttributeTreeItemProcessor implements IDataProcessor{
 				keyItem = new KeyItem(uuid, key, cauuid, parentUuid, hkey);
 				its.add(keyItem);
 			}
-			keyItem.addName(lang, name);
 			
 			ByteWrapper caBw = new ByteWrapper(attributeUuid);
 			List<KeyItem> caits = attributeItems.get(caBw);
@@ -117,14 +113,6 @@ public class AttributeTreeItemProcessor implements IDataProcessor{
 					ps.setBytes(2, k.getUuid());
 					ps.execute();
 					updateHkey(k,kids,uuidToItem,c);
-				}
-				for (KeyItem.KeyName lname : k.getNames()){
-					if (lname.isChanged()){
-						psname.setString(1, lname.getNewName());
-						psname.setBytes(2, lname.getLanguage());
-						psname.setBytes(3, k.getUuid());
-						psname.execute();
-					}
 				}
 			}
 		}

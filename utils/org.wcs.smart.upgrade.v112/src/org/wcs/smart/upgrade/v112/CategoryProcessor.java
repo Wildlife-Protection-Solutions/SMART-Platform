@@ -34,17 +34,17 @@ public class CategoryProcessor implements IDataProcessor{
 		HashMap<ByteWrapper, List<KeyItem>> items = new HashMap<ByteWrapper, List<KeyItem>>();
 		HashMap<ByteWrapper, List<KeyItem>> caitems = new HashMap<ByteWrapper, List<KeyItem>>();
 		
-		String sql = "SELECT a.ca_uuid, case when a.parent_category_uuid is null then a.ca_uuid else a.parent_category_uuid end, a.uuid, a.keyid, b.language_uuid, b.value, a.parent_category_uuid, a.hkey FROM smart.dm_category a, smart.i18n_label b where b.element_uuid = a.uuid";
+		String sql = "SELECT a.ca_uuid, case when a.parent_category_uuid is null then a.ca_uuid else a.parent_category_uuid end, " +
+				"a.uuid, a.keyid, a.parent_category_uuid, a.hkey " +
+				"FROM smart.dm_category a";
 		ResultSet rs = c.createStatement().executeQuery(sql);
 		while(rs.next()){
 			byte[] cauuid = rs.getBytes(1);
 			byte[] groupbyUuid = rs.getBytes(2);
 			byte[] uuid = rs.getBytes(3);
 			String key = rs.getString(4);
-			byte[] lang = rs.getBytes(5);
-			String name = rs.getString(6);
-			byte[] parentuuid = rs.getBytes(7);
-			String hkey = rs.getString(8);
+			byte[] parentuuid = rs.getBytes(5);
+			String hkey = rs.getString(6);
 			
 			ByteWrapper groupBw = new ByteWrapper(groupbyUuid);
 			List<KeyItem> its = items.get(groupBw);
@@ -62,8 +62,6 @@ public class CategoryProcessor implements IDataProcessor{
 				keyItem = new KeyItem(uuid, key, cauuid, parentuuid, hkey);
 				its.add(keyItem);
 			}
-			keyItem.addName(lang, name);
-			
 			ByteWrapper caBw = new ByteWrapper(cauuid);
 			List<KeyItem> caits = caitems.get(caBw);
 			if (caits == null){
@@ -110,14 +108,6 @@ public class CategoryProcessor implements IDataProcessor{
 					ps.setBytes(2, k.getUuid());
 					ps.execute();
 					updateHkey(k,kids,uuidToItem,c);
-				}
-				for (KeyItem.KeyName lname : k.getNames()){
-					if (lname.isChanged()){
-						psname.setString(1, lname.getNewName());
-						psname.setBytes(2, lname.getLanguage());
-						psname.setBytes(3, k.getUuid());
-						psname.execute();
-					}
 				}
 			}
 		}

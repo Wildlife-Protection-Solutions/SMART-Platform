@@ -1,7 +1,5 @@
 package org.wcs.smart.upgrade.v112;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class KeyItem {
 
@@ -9,8 +7,7 @@ public class KeyItem {
 	private String oldKeyId;
 	private String newKeyId;
 	private byte[] cauuid;
-	
-	private List<KeyName> names;
+
 	
 	private byte[] parentItem;
 	private String originalHkey;
@@ -19,7 +16,6 @@ public class KeyItem {
 		this.uuid = uuid;
 		this.oldKeyId = keyId;
 		newKeyId = null;
-		names = new ArrayList<KeyName>();
 		this.cauuid = cauuid;
 	}
 	
@@ -62,41 +58,5 @@ public class KeyItem {
 	}
 	public boolean isChanged(){
 		return this.newKeyId != null && !this.newKeyId.equals(oldKeyId);
-	}
-	
-	public void addName(byte[] language, String name){
-		names.add(new KeyName(language, name));
-	}
-	
-	public List<KeyName> getNames(){
-		return names;
-	}
-	
-	class KeyName{
-		private byte[] language;
-		private String name;
-		private String newName;
-		
-		public KeyName(byte[] language, String name){
-			this.language = language;
-			this.name = name;
-			this.newName = null;
-		}
-		
-		public void updateName(String newName){
-			this.newName = newName;
-		}
-		public boolean isChanged(){
-			return this.newName != null;
-		}
-		public String getOldName(){
-			return this.name;
-		}
-		public String getNewName(){
-			return this.newName;
-		}
-		public byte[] getLanguage(){
-			return this.language;
-		}
 	}
 }
