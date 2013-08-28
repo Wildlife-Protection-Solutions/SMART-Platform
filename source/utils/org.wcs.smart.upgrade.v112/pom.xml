@@ -4,16 +4,16 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart</groupId>
-	<artifactId>SmartUpgrade</artifactId>
+	<artifactId>SmartUpgrade112</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<name>SMARTUpgradeScript</name>
 
 	<properties>
 		<package.dir>${project.build.directory}/../Target/${project.name}.${version}</package.dir>
 		<package.dir.lib>${project.build.directory}/../Target/${project.name}.${version}/lib</package.dir.lib>
-		<source.db.version>1.0.5</source.db.version>
-		<target.db.version>1.1.0</target.db.version>
+		<source.db.version>1.1.0</source.db.version>
+		<target.db.version>1.2.0</target.db.version>
 	</properties>
 	
 	<build>
@@ -92,14 +92,6 @@
                        							<token>%CP2%</token>
                        							<value>;lib/${project.build.finalName}.jar</value>
                    						</replacement>      
-                   						<replacement>
-                       							<token>%TARGETVERSION%</token>
-                       							<value>${target.db.version}</value>
-                   						</replacement>             
-                   						<replacement>
-                       							<token>%SOURCEVERSION%</token>
-                       							<value>${source.db.version}</value>
-                   						</replacement>
                						</replacements>
            					</configuration>
                				</execution>
@@ -118,15 +110,7 @@
                    						<replacement>
                        							<token>%CP2%</token>
                        							<value>:lib/${project.build.finalName}.jar</value>
-                   						</replacement>
-                   						<replacement>
-                       							<token>%TARGETVERSION%</token>
-                       							<value>${target.db.version}</value>
-                   						</replacement>             
-                   						<replacement>
-                       							<token>%SOURCEVERSION%</token>
-                       							<value>${source.db.version}</value>
-                   						</replacement>    
+                   						</replacement>   
                						</replacements>
            					</configuration>
                				</execution>
@@ -171,6 +155,10 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.5</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.wcs.smart</groupId>
+			<artifactId>SmartUpgrade</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 	</dependencies>
 </project>
