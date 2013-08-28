@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.zh"
       label="SMART Chinese Language Pack"
-      version="1.1.1">
+      version="1.1.2">
 
    <description url="http://www.example.com/description">
       Complete Chinese language pack includes required BIRT language fragements and eclipse fragments.
