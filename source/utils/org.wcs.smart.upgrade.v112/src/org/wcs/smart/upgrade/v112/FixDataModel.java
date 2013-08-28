@@ -209,17 +209,6 @@ public class FixDataModel {
 					}
 					k.updateKey(newKey);
 				}
-				
-				
-				for (KeyItem.KeyName name : k.getNames()){
-					if (!FixDataModel.validateName(name.getOldName())){
-						String newName = FixDataModel.fixName(name.getOldName());
-						if (!FixDataModel.validateName(newName)){
-							throw new Exception("Name " + name.getOldName() + " is invalid and cannot be fixed.");
-						}
-						name.updateName(newName);
-					}
-				}
 			}
 		}
 	}

@@ -100,7 +100,7 @@
                    				<phase>package</phase>
                    				<goals><goal>replace</goal></goals>                   
                    				<configuration>
-                   					<file>upgradeSmart.sh</file>
+                   					<file>upgradeSmart.command</file>
                						<outputFile>${package.dir}/upgradeSmart.sh</outputFile>
                						<replacements>
                    						<replacement>
