@@ -123,7 +123,7 @@ public class UpgradeSmartEngine {
 	 * Creates a temp directory
 	 * @return
 	 */
-	private File createTempDir() {
+	private static File createTempDir() {
 		File baseDir = new File(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
 		String basename = "smart_" + Long.toString(System.nanoTime()); //$NON-NLS-1$
 
@@ -142,7 +142,7 @@ public class UpgradeSmartEngine {
 	 * @return temp dir file unzipped to
 	 * @throws Exception
 	 */
-	private File unzipBackup(File backupFile) throws Exception {
+	public static File unzipBackup(File backupFile) throws Exception {
 		File tempDir = createTempDir();
 		if (tempDir == null) {
 			throw new Exception("Unable to create temp directory.");
@@ -161,23 +161,8 @@ public class UpgradeSmartEngine {
 	 */
 	private boolean checkVersion(String version, File dbFile) throws Exception {
 		Connection c = getConnection(dbFile.getAbsoluteFile());
-		try {
-			ResultSet rs = c.createStatement().executeQuery(
-					"SELECT * FROM smart.db_version");
-			try {
-				rs.next();
-				String dbVersion = rs.getString(1);
-
-				if (dbVersion.trim().equals(version)) {
-					return true;
-				} else {
-					throw new Exception("Invalid database version.  Got "
-							+ dbVersion + " excepected " + version);
-				}
-			} finally {
-				rs.close();
-			}
-
+		try{
+			return checkVersion(version, c);
 		} catch (Exception ex) {
 			throw new Exception("Could not determine database version: "
 					+ ex.getMessage());
@@ -185,6 +170,23 @@ public class UpgradeSmartEngine {
 			c.close();
 		}
 
+	}
+	
+	public static boolean checkVersion(String version, Connection c) throws Exception{
+		ResultSet rs = c.createStatement().executeQuery("SELECT * FROM smart.db_version");
+		try {
+			rs.next();
+			String dbVersion = rs.getString(1);
+
+			if (dbVersion.trim().equals(version)) {
+				return true;
+			} else {
+				throw new Exception("Invalid database version.  Got "
+						+ dbVersion + " excepected " + version);
+			}
+		} finally {
+			rs.close();
+		}
 	}
 
 	/**
