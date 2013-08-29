@@ -4,9 +4,9 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import javax.swing.ProgressMonitor;
 import javax.swing.UIManager;
 
+import org.wcs.smart.upgrade.CustomProgressMonitor;
 import org.wcs.smart.upgrade.UpgradeDialog;
 import org.wcs.smart.upgrade.UpgradeSmartEngine;
 import org.wcs.smart.upgrade.ZipUtil;
@@ -23,13 +23,13 @@ public class DataModelFixer {
 		
 		new UpgradeDialog("1.1.0 or 1.1.1", "1.1.2", new UpgradeDialog.IUpgradeAction() {
 			@Override
-			public File performUpgrade(File file, ProgressMonitor pm) throws Exception{
+			public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 				return performDbUpgrade(file, pm);
 			}
 		});
 	}
 	
-	private static File performDbUpgrade(File file, ProgressMonitor pm) throws Exception{
+	private static File performDbUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 		
 		pm.setNote("Un-compressing backup");
 		File backupLocation = UpgradeSmartEngine.unzipBackup(file);
