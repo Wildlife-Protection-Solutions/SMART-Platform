@@ -172,10 +172,10 @@ public class UpgradeDialog extends JFrame {
 				}
 				if (updateAction != null){
 					
-						
-					final ProgressMonitor pm = new ProgressMonitor(UpgradeDialog.this, "Performing Upgrade", "", 0, 100);
-					pm.setMillisToPopup(0);
-					pm.setMillisToDecideToPopup(0);
+					final CustomProgressMonitor pm = new  CustomProgressMonitor(UpgradeDialog.this, "Performing Upgrade","");	
+//					final ProgressMonitor pm = new ProgressMonitor(UpgradeDialog.this, "Performing Upgrade", "", 0, 100);
+//					pm.setMillisToPopup(0);
+//					pm.setMillisToDecideToPopup(0);
 					pm.setProgress(0);
 					SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>(){
 						private Exception ex = null;
@@ -269,14 +269,14 @@ public class UpgradeDialog extends JFrame {
 		UpgradeDialog bd = new UpgradeDialog("test", "test", new IUpgradeAction() {
 			
 			@Override
-			public File performUpgrade(File file, ProgressMonitor pm) throws Exception{
+			public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 				throw new Exception("This is not a valid 1.1.2 database export file.");
 			}
 		});
 	}
 	
 	public interface IUpgradeAction{
-		public File performUpgrade(File file, ProgressMonitor pm) throws Exception;
+		public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception;
 		
 	}
 }
