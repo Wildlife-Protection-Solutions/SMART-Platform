@@ -17,22 +17,6 @@
    </license>
 
    <plugin
-         id="org.wcs.smart.data.oda.smart.nl_th"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.data.oda.smart.ui.nl_th"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.intelligence.nl_th"
          download-size="0"
          install-size="0"
@@ -362,6 +346,14 @@
 
    <plugin
          id="org.eclipse.update.ui.nl_th"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.report.birt.query.nl_th"
          download-size="0"
          install-size="0"
          version="0.0.0"

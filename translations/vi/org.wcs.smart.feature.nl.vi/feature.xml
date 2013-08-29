@@ -17,22 +17,6 @@
    </license>
 
    <plugin
-         id="org.wcs.smart.data.oda.smart.nl_vi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.data.oda.smart.ui.nl_vi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.intelligence.nl_vi"
          download-size="0"
          install-size="0"
@@ -97,10 +81,11 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.help.nl_vi"
+         id="org.wcs.smart.report.birt.query.nl_vi"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"/>
+         fragment="true"
+         unpack="false"/>
 
 </feature>

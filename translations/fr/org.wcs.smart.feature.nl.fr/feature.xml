@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.fr"
       label="SMART French Language Pack"
-      version="1.1.1">
+      version="1.1.2">
 
    <description url="http://www.example.com/description">
       Complete french language pack includes required BIRT language fragements and eclipse fragments.
@@ -15,22 +15,6 @@
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
-
-   <plugin
-         id="org.wcs.smart.data.oda.smart.nl_fr"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.data.oda.smart.ui.nl_fr"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
 
    <plugin
          id="org.wcs.smart.intelligence.nl_fr"
@@ -825,10 +809,11 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.help.nl_fr"
+         id="org.wcs.smart.report.birt.query.nl_fr"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"/>
+         fragment="true"
+         unpack="false"/>
 
 </feature>
