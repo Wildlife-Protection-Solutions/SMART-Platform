@@ -24,7 +24,9 @@ package org.wcs.smart.query.parser;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -38,7 +40,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -54,6 +56,7 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.hibernate.MultiCaQueryHibernateManagerImpl;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
@@ -210,7 +213,10 @@ public class PatrolQueryOptions {
 	 * be shared across conservation areas
 	 */
 	public final static PatrolQueryOption[] SHARED_PATROL_GROUBY_OPTIONS = {
+			PatrolQueryOption.TEAM_KEY,
+			PatrolQueryOption.MANDATE_KEY,
 			PatrolQueryOption.PATROL_TYPE,
+			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY,
 			PatrolQueryOption.CONSERVATION_AREA
 	};
 	
@@ -236,7 +242,10 @@ public class PatrolQueryOptions {
 	 */
 	public final static PatrolQueryOption[] SHARED_PATROL_FILTER_OPTIONS = {
 			PatrolQueryOption.ARMED, 
-			PatrolQueryOption.PATROL_TYPE
+			PatrolQueryOption.TEAM_KEY,
+			PatrolQueryOption.MANDATE_KEY,
+			PatrolQueryOption.PATROL_TYPE,
+			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY
 	};
 	
 	/**
@@ -374,7 +383,7 @@ public class PatrolQueryOptions {
 	 * @since 1.0.0
 	 */
 	public enum PatrolQueryOptionType{
-		BOOLEAN, UUID, STRING
+		BOOLEAN, UUID, STRING,KEY
 	}
 	
 	/**
@@ -389,6 +398,7 @@ public class PatrolQueryOptions {
 		STATION(Messages.PatrolQueryOptions_QueryOpStation, "station", "station_uuid", Patrol.class, Station.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
 		TEAM(Messages.PatrolQueryOptions_QueryOpTeam, "team", "team_uuid", Patrol.class, Team.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
+		TEAM_KEY(Messages.PatrolQueryOptions_QueryOpTeam, "teamkey", "team_uuid", Patrol.class, Team.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 		
 		EMPLOYEE(Messages.PatrolQueryOptions_QueryOpMember, "member", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
@@ -397,10 +407,12 @@ public class PatrolQueryOptions {
 		PILOT(Messages.PatrolQueryOptions_QueryOpPilot, "pilot", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
 		MANDATE(Messages.PatrolQueryOptions_QueryOpMandate, "mandate", "mandate_uuid", Patrol.class, PatrolMandate.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
+		MANDATE_KEY(Messages.PatrolQueryOptions_QueryOpMandate, "mandatekey", "mandate_uuid", Patrol.class, PatrolMandate.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 		
 		PATROL_TYPE(Messages.PatrolQueryOptions_QueryOpType, "patroltype", "patrol_type", Patrol.class, null, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
 		
 		PATROL_TRANSPORT_TYPE(Messages.PatrolQueryOptions_QueryOpTransportType, "transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
+		PATROL_TRANSPORT_TYPE_KEY(Messages.PatrolQueryOptions_QueryOpTransportType, "transportkey", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 		
 		CONSERVATION_AREA(Messages.PatrolQueryOptions_CaGroupByOptionName, "ca", "ca_uuid", Patrol.class, ConservationArea.class, PatrolQueryOptionType.UUID);  //$NON-NLS-1$//$NON-NLS-2$
 		
@@ -479,11 +491,11 @@ public class PatrolQueryOptions {
 		public Image getImage() {
 			if (this == PatrolQueryOption.ARMED){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON);
-			}else if (this == PatrolQueryOption.TEAM){
+			}else if (this == PatrolQueryOption.TEAM || this == PatrolQueryOption.TEAM_KEY){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
 			}else if (this == PatrolQueryOption.STATION){
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
-			}else if (this == PatrolQueryOption.MANDATE){
+			}else if (this == PatrolQueryOption.MANDATE || this == MANDATE_KEY){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
 			}else if (this == PatrolQueryOption.LEADER){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON);
@@ -493,7 +505,7 @@ public class PatrolQueryOptions {
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON);
 			}else if (this == PatrolQueryOption.PATROL_TYPE){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
-			}else if (this == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
+			}else if (this == PatrolQueryOption.PATROL_TRANSPORT_TYPE || this == PATROL_TRANSPORT_TYPE_KEY){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
 			}else {
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
@@ -511,8 +523,8 @@ public class PatrolQueryOptions {
 		public String getName(Session session, byte[] uuid){
 			Object x = getObject(session, uuid);
 			if (x != null){
-				if (x instanceof SimpleListItem){
-					return ((SimpleListItem) x).getName();
+				if (x instanceof NamedItem){
+					return ((NamedItem) x).getName();
 				}else if (x instanceof Employee){
 					return ((Employee) x).getFullLabel();
 				}
@@ -535,8 +547,8 @@ public class PatrolQueryOptions {
 		public String[] getNames(Session session, byte[] uuid){
 			Object x = getObject(session, uuid);
 			if (x != null){
-				if (x instanceof SimpleListItem){
-					return new String[]{((SimpleListItem)x).findName(SmartDB.getCurrentConservationArea().getDefaultLanguage())};
+				if (x instanceof NamedItem){
+					return new String[]{((NamedItem)x).findName(SmartDB.getCurrentConservationArea().getDefaultLanguage())};
 				}else if (x instanceof Employee){
 					Employee e = (Employee)x;
 					return new String[]{e.getId(), e.getGivenName(), e.getFamilyName()};
@@ -585,21 +597,41 @@ public class PatrolQueryOptions {
 									+ ex.getLocalizedMessage(), ex);
 					return results;
 				}
-				List<?> data = session.createCriteria(sourceClazz).add(Restrictions.in("uuid", uuidkeys)).list(); //$NON-NLS-1$
+				Collection<?> data = session.createCriteria(sourceClazz).add(Restrictions.in("uuid", uuidkeys)).list(); //$NON-NLS-1$
 				
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					Object object = (Object) iterator.next();
-					if (object instanceof SimpleListItem){
-						results.add(new ListItem(((SimpleListItem) object).getUuid(), ((SimpleListItem) object).getName()));
+					if (object instanceof NamedItem){
+						results.add(new ListItem(((NamedItem) object).getUuid(), ((NamedItem) object).getName()));
 					}else if (object instanceof Employee){
 						Employee e = (Employee)object;
 						results.add(new ListItem(e.getUuid(), e.getFullLabel()));
 					}else if (object instanceof ConservationArea){
 						ConservationArea ca = (ConservationArea)object;
 						results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+					}else if (object instanceof ListItem){
+						results.add((ListItem)object);
 					}
 				}
-				
+			}else if (type == PatrolQueryOptionType.KEY){
+				Collection<?> data = null;
+				if (SmartDB.isMultipleAnalysis()){
+					if (this == TEAM_KEY){
+						data = ((MultiCaQueryHibernateManagerImpl)QueryHibernateManager.getInstance()).getTeams(session);
+					}else if (this == PATROL_TRANSPORT_TYPE_KEY){
+						data = ((MultiCaQueryHibernateManagerImpl)QueryHibernateManager.getInstance()).getTransportTypes(session);
+					}else if (this == MANDATE_KEY){
+						data = ((MultiCaQueryHibernateManagerImpl)QueryHibernateManager.getInstance()).getMandates(session);
+					}
+				}
+				if (data != null){
+					for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
+						ListItem it = (ListItem) iterator.next();
+						if (Arrays.asList(keys).contains(it.getKey())){
+							results.add(it);
+						}
+					}
+				}
 			}else if (type == PatrolQueryOptionType.STRING){
 				if (this == ID){
 					List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.in(columnName, keys)).list(); //$NON-NLS-1$
@@ -640,16 +672,11 @@ public class PatrolQueryOptions {
 				for (Station s : stations){
 					items.add(new ListItem(s.getUuid(), s.getName()));
 				}
-			}else if (this == TEAM){
-				List<Team> teams = PatrolHibernateManager.getActiveTeams(SmartDB.getCurrentConservationArea(), session);
-				for (Team t : teams){
-					items.add(new ListItem(t.getUuid(), t.getName()));
-				}
-			}else if (this == MANDATE){
-				List<PatrolMandate> mandates= PatrolHibernateManager.getActiveMandates(SmartDB.getCurrentConservationArea(), session);
-				for (PatrolMandate t : mandates){
-					items.add(new ListItem(t.getUuid(), t.getName()));
-				}
+			}else if (this == TEAM || this == TEAM_KEY){
+				items.addAll(QueryHibernateManager.getInstance().getActiveTeams(session));
+			}else if (this == MANDATE || this == MANDATE_KEY){
+				items.addAll(QueryHibernateManager.getInstance().getActiveMandates(session));
+				
 			}else if (this == PATROL_TYPE){
 				if (SmartDB.isMultipleAnalysis()){
 					for (PatrolType.Type t : PatrolType.Type.values()){
@@ -661,11 +688,8 @@ public class PatrolQueryOptions {
 						items.add(new ListItem(null, t.getType().getGuiName(), t.getType().name() ));
 					}
 				}
-			}else if (this == PATROL_TRANSPORT_TYPE){
-				List<PatrolTransportType> types= PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session);
-				for (PatrolTransportType t : types){
-					items.add(new ListItem(t.getUuid(), t.getName()));
-				}
+			}else if (this == PATROL_TRANSPORT_TYPE || this == PATROL_TRANSPORT_TYPE_KEY){
+				items.addAll(QueryHibernateManager.getInstance().getActiveTransportTypes(session));
 			}else if (this == LEADER ||
 					this == PILOT || 
 					this == EMPLOYEE){

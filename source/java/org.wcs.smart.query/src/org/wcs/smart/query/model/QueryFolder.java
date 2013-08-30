@@ -36,7 +36,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 
 /**
  * An object representing a folder for 
@@ -47,7 +47,7 @@ import org.wcs.smart.ca.SimpleListItem;
  */
 @Entity
 @Table(name="smart.query_folder")
-public class QueryFolder extends SimpleListItem {
+public class QueryFolder extends NamedItem {
 
 	private QueryFolder parentFolder;
 	private Employee employee;

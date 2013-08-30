@@ -32,7 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceAttachment;
@@ -113,7 +113,7 @@ public class XmlToIntelligenceConverter {
 		}
 	}
 
-	private Label labelForElement(LabelType labelType, SimpleListItem element) {
+	private Label labelForElement(LabelType labelType, NamedItem element) {
 		Criteria criteria = session.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.ilike("code", labelType.getLanguageCode())); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		@SuppressWarnings("unchecked")

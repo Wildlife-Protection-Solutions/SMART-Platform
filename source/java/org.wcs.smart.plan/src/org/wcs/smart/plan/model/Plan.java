@@ -38,7 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.SmartPlanPlugIn;
@@ -52,7 +52,7 @@ import org.wcs.smart.plan.internal.Messages;
  */
 @Entity
 @Table(name="smart.plan")
-public class Plan extends SimpleListItem {
+public class Plan extends NamedItem {
 
 	public static final int MAX_ID_LENGTH = 32;
 	public static final int MAX_DESC_LENGTH = 256;

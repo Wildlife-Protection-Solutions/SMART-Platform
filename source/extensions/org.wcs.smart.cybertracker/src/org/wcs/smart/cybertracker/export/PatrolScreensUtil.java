@@ -36,7 +36,7 @@ import javax.xml.bind.Marshaller;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -372,10 +372,10 @@ public class PatrolScreensUtil {
 		container.screenNodes.add(confirmNode);
 	}
 
-	public static List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends SimpleListItem> items) {
+	public static List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends NamedItem> items) {
 		List<String> labelValues = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
-		for (SimpleListItem i : items) {
+		for (NamedItem i : items) {
 			labelValues.add(i.getName());
 			tag0Values.add(SmartUtils.encodeHex(i.getUuid()));
 		}

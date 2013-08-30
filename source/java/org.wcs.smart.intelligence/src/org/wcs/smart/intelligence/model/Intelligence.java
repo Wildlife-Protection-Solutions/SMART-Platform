@@ -40,7 +40,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
@@ -50,7 +50,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Table(name = "smart.intelligence")
-public class Intelligence extends SimpleListItem {
+public class Intelligence extends NamedItem {
 
 	/**
 	 * Maximum length of description field

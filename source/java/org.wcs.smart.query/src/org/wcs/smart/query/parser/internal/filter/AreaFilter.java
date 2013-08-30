@@ -145,7 +145,10 @@ public class AreaFilter implements IFilter {
 		}
 		return sb.toString();
 	}
-
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		return asSql(tableMapping);
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()
 	 */

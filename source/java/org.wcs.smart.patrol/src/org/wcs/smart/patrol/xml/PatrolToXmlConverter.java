@@ -8,7 +8,7 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -85,7 +85,7 @@ public class PatrolToXmlConverter {
 		
 	}
 	
-	private static LabelType createLabel(Patrol p, SimpleListItem object){
+	private static LabelType createLabel(Patrol p, NamedItem object){
 		if (object == null){
 			return null;
 		}

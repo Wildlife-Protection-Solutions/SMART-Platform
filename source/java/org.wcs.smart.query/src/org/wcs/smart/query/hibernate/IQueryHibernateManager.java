@@ -190,4 +190,21 @@ public interface IQueryHibernateManager {
 	 * @return a list of supported query types 
 	 */
 	public QueryType[] getSupportedQueryTypes();
+
+	
+	/**
+	 * 
+	 * @return  list of all active teams as list items
+	 */
+	public List<ListItem> getActiveTeams(Session session);
+	/**
+	 * 
+	 * @return  list of all active patrol mandates
+	 */
+	public List<ListItem> getActiveMandates(Session session);
+	/**
+	 * 
+	 * @return  list of all active transport types
+	 */
+	public List<ListItem> getActiveTransportTypes(Session session);
 }

@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
@@ -135,14 +134,9 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 		if (filterTreeViewer == null){
 			return;
 		}
-		if (SmartDB.isMultipleAnalysis()){
-			filterTreeViewer.setInput(Messages.GriddedFilterPanel_GriddedAnalysisError);
-			filterTreeViewer.refresh();
-		}else{
-			filterTreeViewer.setInput(LOADING_TEXT);
-			filterTreeViewer.refresh();
-			refreshJob.schedule();
-		}
+		filterTreeViewer.setInput(LOADING_TEXT);
+		filterTreeViewer.refresh();
+		refreshJob.schedule();
 	}
 	
 	// job for refreshing the tree
@@ -151,7 +145,7 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Object, Object> griddedInput = new HashMap<Object, Object> ();
-			
+
 			griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
 			griddedInput.put(GriddedQueryContentProvider.NodeType.DATAMODEL_VALUES, QueryDataModelManager.getInstance().getDataModel());
 			Display.getDefault().asyncExec(new Runnable(){

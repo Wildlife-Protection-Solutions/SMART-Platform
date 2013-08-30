@@ -99,61 +99,67 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROL_TEAM_KEY = 48;
   /** RegularExpression Id. */
-  int PATROL_MANDATE_KEY = 49;
+  int PATROL_TEAM_KEY_KEY = 49;
   /** RegularExpression Id. */
-  int PATROL_TYPE_KEY = 50;
+  int PATROL_MANDATE_KEY = 50;
   /** RegularExpression Id. */
-  int PATROL_CA_KEY = 51;
+  int PATROL_MANDATE_KEY_KEY = 51;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY = 52;
+  int PATROL_TYPE_KEY = 52;
   /** RegularExpression Id. */
-  int PATROLLEG_LEADER_KEY = 53;
+  int PATROL_CA_KEY = 53;
   /** RegularExpression Id. */
-  int PATROLLEG_PILOT_KEY = 54;
+  int PATROLLEG_TRANSPORT_KEY = 54;
   /** RegularExpression Id. */
-  int PATROLLEG_MEMBER_KEY = 55;
+  int PATROLLEG_TRANSPORT_KEY_KEY = 55;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_BOOL_KEY = 56;
+  int PATROLLEG_LEADER_KEY = 56;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_STRING_KEY = 57;
+  int PATROLLEG_PILOT_KEY = 57;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 58;
+  int PATROLLEG_MEMBER_KEY = 58;
   /** RegularExpression Id. */
-  int AREA_KEY = 59;
+  int PATROL_CONTRIBUTION_BOOL_KEY = 59;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 60;
+  int PATROL_CONTRIBUTION_STRING_KEY = 60;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 61;
+  int AREA_TYPE_KEY = 61;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 62;
+  int AREA_KEY = 62;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 63;
+  int PATROL_VALUE_ITEM = 63;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 64;
+  int PATROL_VALUE_KEY = 64;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 65;
+  int SUM_CAT_VALUE_KEY = 65;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 66;
+  int SUM_ATTRIBUTE_VALUE_KEY = 66;
   /** RegularExpression Id. */
-  int AGG = 67;
+  int SUM_CAT_ATT_VALUE_KEY = 67;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 68;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 68;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 69;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 69;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 70;
+  int AGG = 70;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 71;
+  int DATE_GROUPBY_ITEM = 71;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 72;
+  int QUERY_SPLITTER = 72;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 73;
+  int PATROL_UUID_GROUPBY_OPTION = 73;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 74;
+  int PATROL_STRING_GROUPBY_OPTION = 74;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 75;
+  int CATEGORY_GROUPBY_ITEM = 75;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 76;
+  int AREA_GROUPBY_ITEM = 76;
+  /** RegularExpression Id. */
+  int ATTRIBUTE_GROUPBY_ITEM = 77;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 78;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 79;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -209,10 +215,13 @@ public interface ParserConstants {
     "\"patrol:id\"",
     "\"patrol:station\"",
     "\"patrol:team\"",
+    "\"patrol:teamkey\"",
     "\"patrol:mandate\"",
+    "\"patrol:mandatekey\"",
     "\"patrol:patroltype\"",
     "\"patrol:ca\"",
     "\"patrol:transport\"",
+    "\"patrol:transportkey\"",
     "\"patrol:leader\"",
     "\"patrol:pilot\"",
     "\"patrol:member\"",

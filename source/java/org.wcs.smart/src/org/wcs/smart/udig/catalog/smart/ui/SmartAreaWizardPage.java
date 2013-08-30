@@ -21,7 +21,9 @@ import net.refractions.udig.catalog.ui.workflow.State;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -44,26 +46,34 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 
 	@Override
 	public void createControl(Composite parent) {
-		setControl(new Composite(parent, SWT.NONE));
-        IRunnableWithProgress runnable = new IRunnableWithProgress(){
-
-            public void run( IProgressMonitor monitor ) throws InvocationTargetException,
-                    InterruptedException {
-                getWizard().getWorkflow().next();
-            }
-            
-        };
-        try {
-            getContainer().run(true, false, runnable);
-        } catch (InvocationTargetException e) {
-            throw (RuntimeException) new RuntimeException( ).initCause( e );
-        } catch (InterruptedException e) {
-            throw (RuntimeException) new RuntimeException( ).initCause( e );
-        }
+		Composite main = new Composite(parent, SWT.NONE);
+		setControl(main);
+		
+		if (SmartDB.isMultipleAnalysis()){
+			main.setLayout(new GridLayout());
+			Label lbl = new Label(main, SWT.NONE);
+			lbl.setText("SMART datasets are not available for cross conservation area analysis.");
+			
+		}else{
+			IRunnableWithProgress runnable = new IRunnableWithProgress(){
+            	public void run( IProgressMonitor monitor ) throws InvocationTargetException,
+                    	InterruptedException {
+                	getWizard().getWorkflow().next();
+            	}
+        	};
+        	try {
+            	getContainer().run(true, false, runnable);
+        	} catch (Exception e) {
+            	throw (RuntimeException) new RuntimeException( ).initCause( e );
+        	}
+		}
 	}
 	
 	@Override
 	public boolean isPageComplete() {
+		if (SmartDB.isMultipleAnalysis()){
+			return false;
+		}
 		return true;
 	}
 	

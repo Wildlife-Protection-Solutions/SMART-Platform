@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -76,6 +77,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	
 	private BasemapDefinition baseMap;
 	private BasemapDefinition newBasemap;
+	private Language defaultLanguage;
 	
 	/**
 	 * @param parent
@@ -133,7 +135,11 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		Composite compNew = new Composite(main, SWT.NONE);
 		compNew.setLayout(new GridLayout(3, false));
 		lblCreateNew = new Label(compNew, SWT.NONE);
-		lblCreateNew.setText(Messages.SaveBasemapDialog_NameLabel + " [" + SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		defaultLanguage = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+		if(defaultLanguage == null){
+			defaultLanguage = SmartDB.getCurrentLanguage();
+		}
+		lblCreateNew.setText(Messages.SaveBasemapDialog_NameLabel + " [" + defaultLanguage.getCode() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(compNew, SWT.BORDER);
@@ -150,11 +156,11 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				BasemapDefinition tmp = getNewBasemap();
-				tmp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), txtName.getText());
+				tmp.updateName(defaultLanguage, txtName.getText());
 				
 				TranslateSimpleListItemDialog d = new TranslateSimpleListItemDialog(getShell(), tmp);
 				if (d.open() == TranslateSimpleListItemDialog.OK){
-					txtName.setText(baseMap.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+					txtName.setText(baseMap.findName(defaultLanguage));
 				}
 						
 			}
@@ -278,11 +284,6 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 			getNewBasemap().updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
 			baseMap = getNewBasemap();
 			
-		}
-		if (baseMap != null){
-			baseMap.setEmployee(SmartDB.getCurrentEmployee());
-		}else{
-			ok = false;
 		}
 		
 		Button btn = getButton(IDialogConstants.OK_ID);

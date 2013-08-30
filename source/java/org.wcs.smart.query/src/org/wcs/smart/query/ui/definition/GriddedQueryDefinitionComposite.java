@@ -35,8 +35,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
@@ -58,8 +60,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	private SourceProvider provider;
 	private QueryDefView parentView;
 	private GriddedValuePanel panel;
-	//private FilterDropTargetPanel filterPanel;
+
 	private ValueRateFilterPanel filterPanel;
+	private ConservationAreaFilterPanel caFilterPanel;
 	private TabFolder tabs;
 	private boolean isInitializing = false;
 
@@ -116,6 +119,20 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		item2.setControl( filterPanel.createComposite(tabs) );
 		item2.setText(Messages.GriddedQueryDefinitionComposite_FilterSectionHeader);
 	
+		if (SmartDB.isMultipleAnalysis()){
+			TabItem item3 = new TabItem(tabs, SWT.NONE);
+			caFilterPanel = new ConservationAreaFilterPanel(tabs);
+			item3.setControl(caFilterPanel);
+			item3.setText(ConservationAreaFilterPanel.PANEL_TITLE);	
+			caFilterPanel.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, false));
+			caFilterPanel.setSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					validate();
+				}
+			});
+		}
+		
 		tabs.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -169,7 +186,12 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 				error = ex.getLocalizedMessage();
 			}
 		}
-		
+		if (error == null & caFilterPanel != null){
+			error = caFilterPanel.isValid();
+			if (error != null){
+				isvalid = false;
+			}
+		}
 		
 		if (isvalid && query.length() == 0) {
 			isvalid = false;
@@ -209,6 +231,12 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			parentView.getQuery().setIsValid(isvalid);
 			if (isvalid){
 				((GriddedQuery)parentView.getQuery()).setQuery(query, def);
+				if (caFilterPanel != null){
+					ConservationAreaFilter filter = caFilterPanel.getCaFilter();
+					if (filter != null){
+						parentView.getQuery().setConservationAreaFilter(filter);
+					}
+				}
 			}
 		}
 		return error;
@@ -225,6 +253,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		filterPanel.addValueFilterElements(query.getValueFilterDropItems());
 		filterPanel.addRateFilterElements(query.getRateFilterDropItems());
 		panel.init(query);
+		if (caFilterPanel != null){
+			caFilterPanel.initQuery(query);
+		}
 		isInitializing = false;
 		validate();
 	}

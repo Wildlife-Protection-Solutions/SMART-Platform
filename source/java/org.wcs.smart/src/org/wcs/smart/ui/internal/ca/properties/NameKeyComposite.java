@@ -50,11 +50,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.HkeyObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 
 /**
@@ -158,7 +160,7 @@ public abstract class NameKeyComposite extends Composite {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (currentSelection.isDefault()){
-					String newKey = DataModel.generateKey(txtName.getText(), getSiblings());
+					String newKey = NamedKeyItem.generateKey(txtName.getText(), getSiblings());
 					txtKey.setText(newKey);
 				}
 				if (canEdit){
@@ -261,23 +263,7 @@ public abstract class NameKeyComposite extends Composite {
 									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Message)) {
 						return;
 					}
-					final String thisKey = txtKey.getText();
-					InputDialog id = new InputDialog(getShell(), Messages.NameKeyComposite_ChangeKey_Dialog_Title,
-							Messages.NameKeyComposite_ChangeKey_Dialog_Message,
-							txtKey.getText(), new IInputValidator() {
-
-								@Override
-								public String isValid(String newText) {
-									//if (originalKey != null && originalKey.equals(newText)){
-									if (thisKey != null && thisKey.equals(newText)){
-										//same key
-										return ""; //$NON-NLS-1$
-									}
-									String error = DataModel.validateKey(newText, getSiblings());
-									return error;
-
-								}
-							});
+					InputDialog id = new KeyInputDialog(getShell(), txtKey.getText(),getSiblings());
 					int ret = id.open();
 					if (ret != Window.CANCEL) {
 						txtKey.setText(id.getValue());
@@ -312,7 +298,7 @@ public abstract class NameKeyComposite extends Composite {
 			values.put(currentSelection, txtName.getText());
 		}
 						
-		String errormsg = DataModel.validateKey(txtKey.getText(), new ArrayList<DmObject>());
+		String errormsg = NamedKeyItem.validateKey(txtKey.getText(), new ArrayList<DmObject>());
 		if (errormsg != null){
 			cdKey.setDescriptionText(errormsg);
 			cdKey.show();

@@ -39,9 +39,12 @@ public class Parser implements ParserConstants {
     case PATROL_ID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
+    case PATROL_TEAM_KEY_KEY:
     case PATROL_MANDATE_KEY:
+    case PATROL_MANDATE_KEY_KEY:
     case PATROL_TYPE_KEY:
     case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_TRANSPORT_KEY_KEY:
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
@@ -75,9 +78,12 @@ public class Parser implements ParserConstants {
       case PATROL_ID_KEY:
       case PATROL_STATION_KEY:
       case PATROL_TEAM_KEY:
+      case PATROL_TEAM_KEY_KEY:
       case PATROL_MANDATE_KEY:
+      case PATROL_MANDATE_KEY_KEY:
       case PATROL_TYPE_KEY:
       case PATROLLEG_TRANSPORT_KEY:
+      case PATROLLEG_TRANSPORT_KEY_KEY:
       case PATROLLEG_LEADER_KEY:
       case PATROLLEG_PILOT_KEY:
       case PATROLLEG_MEMBER_KEY:
@@ -128,9 +134,12 @@ public class Parser implements ParserConstants {
     case PATROL_ID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
+    case PATROL_TEAM_KEY_KEY:
     case PATROL_MANDATE_KEY:
+    case PATROL_MANDATE_KEY_KEY:
     case PATROL_TYPE_KEY:
     case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_TRANSPORT_KEY_KEY:
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
@@ -162,9 +171,12 @@ public class Parser implements ParserConstants {
     case PATROL_ID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
+    case PATROL_TEAM_KEY_KEY:
     case PATROL_MANDATE_KEY:
+    case PATROL_MANDATE_KEY_KEY:
     case PATROL_TYPE_KEY:
     case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_TRANSPORT_KEY_KEY:
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
@@ -421,9 +433,12 @@ public class Parser implements ParserConstants {
     case PATROL_ID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
+    case PATROL_TEAM_KEY_KEY:
     case PATROL_MANDATE_KEY:
+    case PATROL_MANDATE_KEY_KEY:
     case PATROL_TYPE_KEY:
     case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_TRANSPORT_KEY_KEY:
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
@@ -522,9 +537,12 @@ public class Parser implements ParserConstants {
     case PATROL_ID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
+    case PATROL_TEAM_KEY_KEY:
     case PATROL_MANDATE_KEY:
+    case PATROL_MANDATE_KEY_KEY:
     case PATROL_TYPE_KEY:
     case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_TRANSPORT_KEY_KEY:
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
@@ -614,9 +632,12 @@ public class Parser implements ParserConstants {
     case PATROL_ID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
+    case PATROL_TEAM_KEY_KEY:
     case PATROL_MANDATE_KEY:
+    case PATROL_MANDATE_KEY_KEY:
     case PATROL_TYPE_KEY:
     case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_TRANSPORT_KEY_KEY:
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
@@ -630,14 +651,23 @@ public class Parser implements ParserConstants {
       case PATROL_TEAM_KEY:
         jj_consume_token(PATROL_TEAM_KEY);
         break;
+      case PATROL_TEAM_KEY_KEY:
+        jj_consume_token(PATROL_TEAM_KEY_KEY);
+        break;
       case PATROL_MANDATE_KEY:
         jj_consume_token(PATROL_MANDATE_KEY);
+        break;
+      case PATROL_MANDATE_KEY_KEY:
+        jj_consume_token(PATROL_MANDATE_KEY_KEY);
         break;
       case PATROL_TYPE_KEY:
         jj_consume_token(PATROL_TYPE_KEY);
         break;
       case PATROLLEG_TRANSPORT_KEY:
         jj_consume_token(PATROLLEG_TRANSPORT_KEY);
+        break;
+      case PATROLLEG_TRANSPORT_KEY_KEY:
+        jj_consume_token(PATROLLEG_TRANSPORT_KEY_KEY);
         break;
       case PATROLLEG_LEADER_KEY:
         jj_consume_token(PATROLLEG_LEADER_KEY);
@@ -779,10 +809,10 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x80040100,0x80040100,0x0,0x80040100,0x80040100,0x0,0x400,0x100000,0x0,0x0,0x400,0x0,0x0,0x280,0x100,0x80040000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xbf7c7ff,0xbf7c7ff,0x0,0xbf7c7ff,0xbf7c7ff,0xd0000000,0x0,0x0,0xd0000000,0x0,0x0,0x0,0x0,0x0,0x0,0xbf7c7ff,0x1000484,0x42,0x3f7c7ff,0xf7c000,0x2f7c021,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x5fdfc7ff,0x5fdfc7ff,0x0,0x5fdfc7ff,0x5fdfc7ff,0x80000000,0x0,0x0,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x5fdfc7ff,0x8000484,0x42,0x1fdfc7ff,0x7dfc000,0x17dfc021,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x20,0x0,0x0,0x7,0x0,0x0,0x7,0xfd0,0x0,0xc0,0xfd0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x100,0x0,0x0,0x3e,0x0,0x0,0x3e,0x7e80,0x0,0x600,0x7e80,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -899,7 +929,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[77];
+    boolean[] la1tokens = new boolean[80];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -919,7 +949,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 77; i++) {
+    for (int i = 0; i < 80; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

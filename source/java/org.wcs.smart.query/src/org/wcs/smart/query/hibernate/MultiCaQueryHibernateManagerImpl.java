@@ -23,16 +23,24 @@ package org.wcs.smart.query.hibernate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -177,9 +185,74 @@ public class MultiCaQueryHibernateManagerImpl extends
 		return new QueryType[]{
 				QueryType.OBSERVATION,
 				QueryType.PATROL,
-				QueryType.SUMMARY
+				QueryType.SUMMARY,
+				QueryType.GRIDDED
 		};
 	}
 
+	private Collection<ListItem> getNamedKeyItem(Session session, Class<? extends NamedKeyItem> clazz, boolean onlyActive) {
+		
+		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
+		
+			Criteria c = session
+					.createCriteria(clazz)
+					.add(Restrictions.in("conservationArea", SmartDB
+							.getConservationAreaConfiguration()
+							.getConservationAreas()));
+			if (onlyActive){
+				c.add(Restrictions.eq("isActive", true));
+			}
+			List<?> teams = c.list();
+
+			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
+				NamedKeyItem namedItem = (NamedKeyItem) iterator.next();
+				ListItem item = keyToItem.get(namedItem.getKeyId());
+				if (item == null) {
+					item = new ListItem(null, namedItem.getName(), namedItem.getKeyId());
+					keyToItem.put(namedItem.getKeyId(), item);
+				} else if (namedItem.getNames().iterator().next().getLanguage().getCa().equals(
+						SmartDB.getConservationAreaConfiguration()
+								.getMainConservationArea())) {
+					item.updateName(namedItem.getName());
+				}
+
+			}
+		
+
+		return keyToItem.values();
+
+	}
+
+	public Collection<ListItem> getTeams(Session session) {
+		return getNamedKeyItem(session, Team.class, false);
+	}
 	
+	@Override
+	public List<ListItem> getActiveTeams(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.addAll(getNamedKeyItem(session, Team.class, true));
+		return items;
+	}
+	
+	public Collection<ListItem> getMandates(Session session) {
+		return getNamedKeyItem(session, PatrolMandate.class, false);
+	}
+	
+	@Override
+	public List<ListItem> getActiveMandates(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.addAll(getNamedKeyItem(session, PatrolMandate.class, true));
+		return items;
+	}
+	
+	public Collection<ListItem> getTransportTypes(Session session) {
+		return getNamedKeyItem(session, PatrolTransportType.class, false);
+	}
+	
+	@Override
+	public List<ListItem> getActiveTransportTypes(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.addAll(getNamedKeyItem(session, PatrolTransportType.class, true));
+		return items;
+	}
 }

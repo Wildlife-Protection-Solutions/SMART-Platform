@@ -55,7 +55,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.AbstractQueryPropertyProvider;
@@ -213,7 +213,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		lnkTranslate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SimpleListItem toUpdate = new SimpleListItem();
+				NamedItem toUpdate = new NamedItem();
 				for(Entry<Language, String> l : QueryPropertiesDialog.this.names.entrySet()){
 					toUpdate.updateName(l.getKey(), l.getValue());
 					

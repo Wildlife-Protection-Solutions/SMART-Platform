@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.comparators.NullComparator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -55,19 +56,24 @@ import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -76,6 +82,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
@@ -93,6 +100,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private MandateSorter sorter ; 
 	private Button btnDisable;
 	private Button btnDelete;
+	private Button btnEditKey;
+	
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
@@ -104,12 +113,15 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		NAME(PatrolMandate.NAME);
+		KEY(PatrolMandate.KEY,1),
+		NAME(PatrolMandate.NAME,2);
 		
 		String name;
+		int size;
 
-		Column(String name) {
+		Column(String name, int size) {
 			this.name = name;
+			this.size = size;
 		}
 		
 		
@@ -196,6 +208,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				if (md == null){
 					btnDisable.setEnabled(false);
 					btnDelete.setEnabled(false);
+					btnEditKey.setEnabled(false);
 					return;
 				}
 				if (md.getIsActive()){
@@ -205,6 +218,15 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				btnDelete.setEnabled(true);
 				btnDisable.setEnabled(true);
+				btnEditKey.setEnabled(true);
+			}
+		});
+		tableViewer.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (tableViewer.getCell(new Point(event.x, event.y)).getColumnIndex() == Column.KEY.ordinal()){
+					editKey();
+				}
 			}
 		});
 		Composite composite = new Composite(container, SWT.NONE);
@@ -223,7 +245,16 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 
 		});
-
+		btnEditKey = new Button(composite, SWT.NONE);
+		btnEditKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
+		btnEditKey.setText("Edit Key");
+		btnEditKey.setEnabled(false);
+		btnEditKey.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				editKey();
+			}
+		});
+		
 		btnDisable = new Button(composite, SWT.NONE);
 		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
 				false, 1, 1));
@@ -251,6 +282,18 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		return container;
 	}
 
+	private void editKey(){
+		PatrolMandate x = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		String currentKey = findLangValue(Column.KEY,x);
+		InputDialog id = new KeyInputDialog(getShell(), currentKey, mandates);
+		int ret = id.open();
+		if (ret != Window.CANCEL) {
+			updateLangValue(Column.KEY,x,id.getValue());
+			tableViewer.refresh(x);
+		}
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
@@ -262,9 +305,15 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			for (PatrolMandate m : toDelete){
 				s.delete(m);
 			}
-			
+			ArrayList<PatrolMandate> siblings = new ArrayList<PatrolMandate>();
 			for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 				PatrolMandate pm = (PatrolMandate) iterator.next();
+				siblings.remove(pm);
+				String error = NamedKeyItem.validateKey(pm.getKeyId(), siblings);
+				siblings.add(pm);
+				if (error != null){
+					throw new Exception(error);
+				}
 				s.saveOrUpdate(pm);
 			}
 			s.getTransaction().commit();
@@ -294,6 +343,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		mandates.add(mandate);
 		setChangesMade(true);
 		tableViewer.refresh();
+		
+		tableViewer.editElement(mandate, Column.NAME.ordinal());
 	}
 	
 	private void deleteMandate(){
@@ -354,6 +405,11 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				name = mnd.getName();
 			}
 			return name;
+		}else if (type == Column.KEY){
+			if (mnd.getKeyId() == null){
+				return "";
+			}
+			return mnd.getKeyId();
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -396,9 +452,18 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				if (error != null){
 					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, error);
 				}else{
+					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
+					if (mnd.getKeyId() == null){
+						mnd.setKeyId(NamedKeyItem.generateKey(newValue, mandates));
+					}
 					setChangesMade(true);
 				}
+			}
+		}else if (type == Column.KEY){
+			if (!findLangValue(type, mnd).equals(newValue)){
+				mnd.setKeyId((String)newValue);
+				setChangesMade(true);
 			}
 		}
 	}
@@ -410,32 +475,29 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		for (int i = 0; i < Column.values().length; i++) {
 			final Column colum = Column.values()[i];
-			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name,
-					1, i);
-			
+			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name, colum.size, i);
 			col.setLabelProvider(new MandateLabelProvider(colum));
 			final TextTableEditor editor = new TextTableEditor(viewer, colum);
-			editor.editor.addListener(new ICellEditorListener() {
+			if (colum == Column.NAME){
+				editor.editor.addListener(new ICellEditorListener() {
 				
-				@Override
-				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
-					setErrorMessage(editor.editor.getErrorMessage());
-				}
+					@Override
+					public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+						setErrorMessage(editor.editor.getErrorMessage());
+					}
 				
-				@Override
-				public void cancelEditor() {
-					setErrorMessage(null);
-					
-				}
+					@Override
+					public void cancelEditor() {
+						setErrorMessage(null);	
+					}
 				
-				@Override
-				public void applyEditorValue() {
-					setErrorMessage(null);
-					
-				}
-			});
-			col.setEditingSupport(editor);
-			
+					@Override
+					public void applyEditorValue() {
+						setErrorMessage(null);
+					}
+				});
+				col.setEditingSupport(editor);
+			}
 			
 			
 			col.getColumn().addSelectionListener(new SelectionAdapter() {

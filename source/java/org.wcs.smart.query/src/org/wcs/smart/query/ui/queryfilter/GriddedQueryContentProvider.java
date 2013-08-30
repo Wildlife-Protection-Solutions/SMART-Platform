@@ -206,13 +206,11 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					List<AttributeTreeNode> nodes = null;
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
-						attribute = (Attribute) s.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
+						attribute = QueryDataModelManager.getInstance().getAttribute(s, attribute);
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						attribute = (Attribute) s.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
+						attribute = QueryDataModelManager.getInstance().getAttribute(s, attribute);
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
@@ -270,19 +268,20 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 				Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try{
-					
 					List<AttributeListItem> nodes = null;
-					
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
-						attribute = (Attribute)session.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+						for(AttributeListItem it : nodes){
+							it.getAttribute().getName();
+						}
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						attribute = (Attribute)session.load(Attribute.class, attribute.getUuid());
-						attribute.getName();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+						for(AttributeListItem it : nodes){
+							it.getAttribute().getName();
+						}
+						
 					}
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();

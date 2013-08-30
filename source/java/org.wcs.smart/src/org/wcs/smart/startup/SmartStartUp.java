@@ -46,7 +46,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * This class contains some of the basic functions required
@@ -193,12 +192,13 @@ public class SmartStartUp {
 					Session session = HibernateManager.openSession();
 					session.beginTransaction();
 					try{
-						List<?> results = session.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", SmartUtils.localeToString(Locale.getDefault()))).list(); //$NON-NLS-1$ //$NON-NLS-2$
+						List<?> results = session.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", Locale.getDefault().getLanguage())).list(); //$NON-NLS-1$ //$NON-NLS-2$
 						if (results.size() == 0){
 							Language lang = new Language();
 							lang.setCa(ca);
 							lang.setDefault(false);
-							lang.setCode(SmartUtils.localeToString(Locale.getDefault()));
+							lang.setCode(Locale.getDefault().getLanguage());
+							
 							ca.getLanguages().add(lang);
 							session.saveOrUpdate(lang);
 						}

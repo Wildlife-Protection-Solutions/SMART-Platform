@@ -55,7 +55,7 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 @Entity
 @Table(name ="smart.area_geometries")
-public class Area extends SimpleListItem{
+public class Area extends NamedItem{
 	
 	public static final int KEY_MAX_LENGTH = 256;
 	public static final int NAME_MAX_LENGTH = 256;

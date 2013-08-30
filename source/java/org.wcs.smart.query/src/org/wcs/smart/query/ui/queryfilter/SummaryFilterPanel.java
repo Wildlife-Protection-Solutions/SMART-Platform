@@ -153,7 +153,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			}
 			input.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
 			input.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS, PatrolQueryOptions.DateGroupByOption.values());
-			input.put(SummaryQueryContentProvider.NodeType.GROUP_BY_NODE, QueryDataModelManager.getInstance().getDataModel());
+			input.put(SummaryQueryContentProvider.NodeType.DATAMODEL_VALUES, QueryDataModelManager.getInstance().getDataModel());
 			
 			Display.getDefault().asyncExec(new Runnable(){
 

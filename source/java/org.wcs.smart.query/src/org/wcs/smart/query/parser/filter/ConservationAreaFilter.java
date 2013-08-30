@@ -260,7 +260,10 @@ public class ConservationAreaFilter implements IFilter {
 		return asSql(tableMapping.get(Patrol.class));
 	}
 
-	
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		return asSql(tableMapping);
+	}
+
 	/**
 	 * Creates the sql given the provided conservation
 	 * area class prefix.  Assumes the column name

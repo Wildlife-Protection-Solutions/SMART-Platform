@@ -39,9 +39,8 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "smart.saved_maps")
-public class BasemapDefinition extends SimpleListItem{
+public class BasemapDefinition extends NamedItem{
 		
-	private Employee employee;
 	private ConservationArea conservationArea;
 	
 	private String mapDef;
@@ -49,22 +48,6 @@ public class BasemapDefinition extends SimpleListItem{
 	
 	public BasemapDefinition(){
 		super();
-	}
-
-	/**
-	 * @return the employee
-	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name="employee_uuid", referencedColumnName="uuid")
-	public Employee getEmployee() {
-		return employee;
-	}
-
-	/**
-	 * @param employee the employee to set
-	 */
-	public void setEmployee(Employee employee) {
-		this.employee = employee;
 	}
 
 	/**

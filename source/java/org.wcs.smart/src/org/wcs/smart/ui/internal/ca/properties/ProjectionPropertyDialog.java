@@ -191,6 +191,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	}
 	
 	private void listModified(){
+		super.setChangesMade(true);
 		boolean enabled = true;
 		if (projections.size() == 0){
 			setErrorMessage(Messages.ProjectionPropertyDialog_Error_AtLeastOneProjectionRequired);
@@ -200,7 +201,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(enabled);		
 		lstViewer.refresh();
-		super.setChangesMade(true);
+		
 	}
 	
 	

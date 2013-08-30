@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.engine.DerbyQueryEngine2;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
@@ -207,11 +208,17 @@ public class PatrolFilter implements IFilter {
 				throw new IllegalStateException(ex);
 			}
 			
+		}else if (option.getType() == PatrolQueryOptionType.KEY){
+			String key = SmartUtils.stripQuotes((String)value);
+			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + tableMapping.get(option.getSourceClass()) + " where keyid = '" + key + "') ";
+			
 		}
 		return ""; //$NON-NLS-1$
 	}
 	
-	
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		return asSql(tableMapping);
+	}
 	/**
 	 * Add employee filter 
 	 * @param tableMapping
@@ -270,12 +277,33 @@ public class PatrolFilter implements IFilter {
 				throw new Exception(MessageFormat.format(Messages.PatrolFilter_StationNotFound, new Object[]{value1}));
 			}
 			it.initializeData(m);
-		}else if (option == PatrolQueryOption.TEAM){
+		}else if (option == PatrolQueryOption.TEAM ){
 			ListItem m = QueryHibernateManager.getInstance().getTeam(session, value1);
 			if (m == null){
 				throw new Exception(MessageFormat.format(Messages.PatrolFilter_TeamNotFound, new Object[]{value1}));
 			}
 			it.initializeData(m);
+		}else if (option == PatrolQueryOption.TEAM_KEY || option== PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY || option == PatrolQueryOption.MANDATE_KEY){
+			List<ListItem> items = null;
+			//TODO: should get all not just active
+			if (option == PatrolQueryOption.TEAM_KEY){
+				items = QueryHibernateManager.getInstance().getActiveTeams(session);
+			}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
+				items = QueryHibernateManager.getInstance().getActiveTransportTypes(session);
+			}else if (option == PatrolQueryOption.MANDATE_KEY){
+				items = QueryHibernateManager.getInstance().getActiveMandates(session);
+			}
+			boolean found = false;
+			if (items != null){
+				for (ListItem item : items){
+					if (item.getKey().equals(value1)){
+						it.initializeData(item);
+						found = true;
+						break;
+					}
+				}
+			}
+			if (!found) throw new Exception(MessageFormat.format(Messages.PatrolFilter_TeamNotFound, new Object[]{value1}));
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
 			ListItem m = QueryHibernateManager.getInstance().getTransportType(session, value1);
 			if (m == null){

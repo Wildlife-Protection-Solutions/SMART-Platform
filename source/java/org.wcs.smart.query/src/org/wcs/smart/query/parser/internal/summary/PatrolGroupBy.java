@@ -27,8 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
@@ -139,6 +142,8 @@ public class PatrolGroupBy implements IGroupBy {
 			return GroupByType.BYTE;
 		}else if (option.getType() == PatrolQueryOptionType.STRING){
 			return GroupByType.STRING;
+		}else if (option.getType() == PatrolQueryOptionType.KEY){
+			return GroupByType.KEY;
 		}
 		return GroupByType.STRING;
 	}
@@ -207,53 +212,60 @@ public class PatrolGroupBy implements IGroupBy {
 		ArrayList<String> warnings = new ArrayList<String>();
 		if (items != null) {
 			for (int i = 0; i < items.length; i++) {
-				byte[] uuid = SmartUtils.decodeHex(items[i]);
-				if (option.getObject(session, uuid) == null) {
-					// this item does not exist in the database
-					if (SimpleListItem.class.isAssignableFrom(option.getSourceClass())) {
-						UuidItemType item = uuidLookup.get(items[i]);
-						if (item == null) {
-							throw new Exception(MessageFormat.format(
+				if (option.getType() == PatrolQueryOptionType.UUID){
+					byte[] uuid = SmartUtils.decodeHex(items[i]);
+					if (option.getObject(session, uuid) == null) {
+						// this item does not exist in the database
+						if (NamedItem.class.isAssignableFrom(option.getSourceClass())) {
+							UuidItemType item = uuidLookup.get(items[i]);
+							if (item == null) {
+								throw new Exception(MessageFormat.format(
 									COULDNOTRESOLVE_ERRMSG, new Object[]{asString()}));
-						}
-						SimpleListItem it = FilterValidator.findValue(langCode, item.getValue().get(0), option.getSourceClass().getSimpleName(), session, warnings);
-						if (it == null) {
-							throw new Exception(
+							}
+							NamedItem it = FilterValidator.findValue(langCode, item.getValue().get(0), option.getSourceClass().getSimpleName(), session, warnings);
+							if (it == null) {
+								throw new Exception(
 									MessageFormat.format(
 											Messages.PatrolGroupBy_Error_NoMatchingValue,
 											new Object[]{asString(), option.getSourceClass().getSimpleName(),item.getValue().get(0) }));
-						} else {
-							warnings.add(
+							} else {
+								warnings.add(
 									MessageFormat.format(
 											Messages.PatrolGroupBy_Error_NotUniqueId,
-											new Object[]{option.getGuiName(), item.getValue().get(0) }));
-									
-									
-							// update uuid
-							items[i] = SmartUtils.encodeHex(it.getUuid());
-						}
-					} else if (Employee.class.isAssignableFrom(option
-							.getSourceClass())) {
-						UuidItemType item = uuidLookup.get(items[i]);
-						if (item == null) {
-							throw new Exception(MessageFormat.format(
+											new Object[]{option.getGuiName(), item.getValue().get(0) }));	
+								// update uuid
+								items[i] = SmartUtils.encodeHex(it.getUuid());
+							}
+						} else if (Employee.class.isAssignableFrom(option.getSourceClass())) {
+							UuidItemType item = uuidLookup.get(items[i]);
+							if (item == null) {
+								throw new Exception(MessageFormat.format(
 									COULDNOTRESOLVE_ERRMSG, new Object[]{asString()}));
-						}
-						// lookup employee
-						Employee e = FilterValidator.findEmployee(item.getId(),
+							}
+							// lookup employee
+							Employee e = FilterValidator.findEmployee(item.getId(),
 								item.getValue().get(0), item.getValue().get(1),
 								session, warnings);
-						if (e != null) {
-							items[i] = SmartUtils.encodeHex(e.getUuid());
-						} else {
-							throw new Exception(
+							if (e != null) {
+								items[i] = SmartUtils.encodeHex(e.getUuid());
+							} else {
+								throw new Exception(
 									MessageFormat.format(
 									Messages.PatrolGroupBy_Error_NoEmployee,
 									new Object[]{asString(),item.getValue().get(0) + " " + item.getValue().get(1) + " [" + item.getId() + "] "})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
-					} else {
-						throw new Exception(MessageFormat.format(
+							}
+						} else {
+							throw new Exception(MessageFormat.format(
 								COULDNOTRESOLVE_ERRMSG, new Object[]{asString()}));
+						}
+					}
+				
+				}else if (option.getType() == PatrolQueryOptionType.KEY){
+					String key = items[i];
+					//look for key in database
+					Long cnt = (Long) session.createCriteria(option.getSourceClass()).add(Restrictions.eq("keyId", key)).add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())).setProjection(Projections.rowCount()).list().get(0);
+					if (cnt == 0){
+						throw new Exception(MessageFormat.format("No {0} found with key ''{1}''", new Object[]{option.getGuiName(), key}));
 					}
 				}
 			}

@@ -48,6 +48,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -167,6 +168,8 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 			sb.append("\""); //$NON-NLS-1$
 			if (option == PatrolQueryOption.PATROL_TYPE){
 				sb.append(it.getKey().toUpperCase());
+			}else if (option.getType() == PatrolQueryOptionType.KEY){
+				sb.append(it.getKey());
 			}else{
 				if (it.getUuid() != null){
 					sb.append( SmartUtils.encodeHex(it.getUuid()));

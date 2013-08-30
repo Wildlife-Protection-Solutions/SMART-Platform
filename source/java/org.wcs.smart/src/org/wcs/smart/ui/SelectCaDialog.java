@@ -135,7 +135,7 @@ public class SelectCaDialog extends TitleAreaDialog {
 		});
 		caList.setContentProvider(ArrayContentProvider.getInstance());
 		caList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)caList.getControl().getLayoutData()).heightHint = 100;
+		((GridData)caList.getControl().getLayoutData()).heightHint = 250;
 		caList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

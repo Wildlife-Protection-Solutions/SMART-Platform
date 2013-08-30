@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.collections.comparators.NullComparator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -56,16 +57,20 @@ import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.engine.SessionImplementor;
@@ -75,6 +80,7 @@ import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -84,6 +90,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
@@ -100,6 +107,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private TeamSorter sorter ; 
 	private Button btnDisable;
 	private Button btnDelete;
+	private Button btnEditKey;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
@@ -114,6 +122,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
+		KEY(Team.KEY, 1),
 		NAME(Team.NAME, 1),
 		MANDATE(Team.MANDATE,1),
 		DESCRIPTION(Team.DESCRIPTION,2);
@@ -249,6 +258,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				if (team == null){
 					btnDisable.setEnabled(false);
 					btnDelete.setEnabled(false);
+					btnEditKey.setEnabled(false);
 					return;
 				}
 				if (team.getIsActive()){
@@ -258,8 +268,20 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				btnDisable.setEnabled(true);
 				btnDelete.setEnabled(true);
+				btnEditKey.setEnabled(true);
 			}
 		});
+
+		tableViewer.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (tableViewer.getCell(new Point(event.x, event.y)).getColumnIndex() == Column.KEY.ordinal()){
+					editKey();
+				}
+			}
+		});
+		
+		
 		Composite composite = new Composite(container, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
@@ -277,6 +299,16 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 
 		});
 
+		btnEditKey = new Button(composite, SWT.NONE);
+		btnEditKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
+		btnEditKey.setText("Edit Key");
+		btnEditKey.setEnabled(false);
+		btnEditKey.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				editKey();
+			}
+		});
+		
 		btnDisable = new Button(composite, SWT.NONE);
 		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
 				false, 1, 1));
@@ -304,6 +336,18 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		setTitle(Messages.TeamPropertyPage_PageName);
 		setMessage(Messages.TeamPropertyPage_Dialog_Message);
 		return container;
+	}
+	
+	
+	private void editKey(){
+		Team x = (Team)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		String currentKey = findValue(Column.KEY,x);
+		InputDialog id = new KeyInputDialog(getShell(), currentKey, teams);
+		int ret = id.open();
+		if (ret != Window.CANCEL) {
+			updateValue(Column.KEY,x,id.getValue());
+			tableViewer.refresh(x);
+		}
 	}
 	
 	private void deleteTeam(){
@@ -344,9 +388,17 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Team t : toDelete){
 				s.delete(t);
 			}
+			List<Team> siblings = new ArrayList<Team>(teams.size());
+			siblings.addAll(teams);
 			
 			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
 				Team team = (Team) iterator.next();
+				siblings.remove(team);
+				String error = NamedKeyItem.validateKey(team.getKeyId(), siblings);
+				siblings.add(team);
+				if (error != null){
+					throw new Exception(error);
+				}
 				s.saveOrUpdate(team);
 				
 				for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions()) {
@@ -368,7 +420,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return true;
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.TeamPropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
+					Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(),
 					ex);
 		}
 		return false;
@@ -388,6 +440,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		teams.add(team);
 		setChangesMade(true);
 		tableViewer.refresh();
+		
+		tableViewer.editElement(team, Column.NAME.ordinal());
 		
 	}
 	private void disableTeam(boolean enable){
@@ -421,6 +475,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			String x = mnd.findDescriptionNull(languageViewer.getCurrentSelection());
 			if (x == null){
 				x = mnd.getDescription();
+				if (x == null){
+					return "";
+				}
+				return x;
 			}
 			return x;
 		}else if (type == Column.MANDATE){
@@ -428,6 +486,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				return ""; //$NON-NLS-1$
 			}
 			return mnd.getMandate().findName(languageViewer.getCurrentSelection());
+		}else if (type == Column.KEY){
+			if (mnd.getKeyId() == null){
+				return "";
+			}
+			return mnd.getKeyId();
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -457,8 +520,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return null;
 		}else if (type == Column.DESCRIPTION){
 			String newDesc = (String) newValue;
-			if (newDesc.length() > org.wcs.smart.ca.Label.MAX_LENGTH){
+			if (newDesc != null && newDesc.length() > org.wcs.smart.ca.Label.MAX_LENGTH){
 				return MessageFormat.format(Messages.TeamPropertyPage_DescriptionError, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH});
+			}
+		}else if (type == Column.KEY){
+			String keyId = (String)newValue;
+			if (!SmartUtils.isSimpleString(keyId, SmartUtils.RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Team.MAX_KEY_LENGTH, 1)){
+				return MessageFormat.format("Key Id must only contain {0} and be between {1} and {2} characters in length.",new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc, 1, Team.MAX_NAME_LENGTH});
 			}
 		}
 		return null;
@@ -474,6 +542,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			if (!findValue(type, mnd).equals((String)newValue)){
 				mnd.updateName(languageViewer.getCurrentSelection(), (String)newValue);
 				setChangesMade(true);
+				
+				if (mnd.getKeyId() == null){
+					mnd.setKeyId(NamedKeyItem.generateKey((String)newValue, teams));
+				}
 			}
 		}else if (type == Column.DESCRIPTION){
 			if (!findValue(type, mnd).equals((String)newValue)){
@@ -483,6 +555,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}else if (type == Column.MANDATE){
 			mnd.setMandate((PatrolMandate)newValue);
 			setChangesMade(true);
+		}else if (type == Column.KEY){
+			if (!findValue(type,mnd).equals((String)newValue)){
+				mnd.setKeyId((String)newValue);
+				setChangesMade(true);
+			}
 		}
 	}
 	
@@ -495,10 +572,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			final Column colum = Column.values()[i];
 			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name,
 					colum.weight, i);
-			
-			
 			col.setLabelProvider(new TeamLabelProvider(colum));
-			
 			if (colum == Column.NAME || colum == Column.DESCRIPTION){
 				final TextTableEditor ed = new TextTableEditor(viewer, colum);
 				ed.editor.addListener(new ICellEditorListener() {
@@ -522,7 +596,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				col.setEditingSupport(ed);
 			}else if (colum == Column.MANDATE){
 				col.setEditingSupport(new ComboTableEditor(viewer, colum));
-			}	
+			}
 			
 			col.getColumn().addSelectionListener(new SelectionAdapter() {
 				@Override

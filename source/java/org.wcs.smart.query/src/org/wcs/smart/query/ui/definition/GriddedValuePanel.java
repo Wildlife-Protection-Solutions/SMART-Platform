@@ -187,7 +187,7 @@ public class GriddedValuePanel {
 					}
 				}
 			}
-			if (defaultP==null){
+			if (defaultP==null && ps.size() > 0){
 				defaultP=ps.get(0);
 			}
 			if (query != null && query.getCoordinateReferenceSystem() != null) {
@@ -213,7 +213,9 @@ public class GriddedValuePanel {
 
 			}
 			lstProjections.setInput(ps.toArray(new Projection[ps.size()]));
-			lstProjections.setSelection(new StructuredSelection(defaultP));
+			if (defaultP != null){
+				lstProjections.setSelection(new StructuredSelection(defaultP));
+			}
 			lstProjections.refresh();
 		} catch (Exception ex) {
 			QueryPlugIn.displayLog(Messages.GriddedValuePanel_ProjectionParseError

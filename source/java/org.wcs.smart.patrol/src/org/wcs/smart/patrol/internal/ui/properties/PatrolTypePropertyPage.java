@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -46,19 +47,24 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -68,6 +74,7 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
@@ -90,6 +97,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private Button btnDisableType;
 	private Button btnDisableTransport;
 	private Button btnDeleteTransport;
+	private Button btnEditKeyTransport;
 	
 	private List<PatrolType> patrolTypes = null;
 	private ConservationArea currentCa = null;
@@ -239,6 +247,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				if (pt == null){
 					btnDisableTransport.setEnabled(false);
 					btnDeleteTransport.setEnabled(false);
+					btnEditKeyTransport.setEnabled(false);
 					return;
 				}
 				if (pt.getIsActive()){
@@ -248,7 +257,16 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				btnDisableTransport.setEnabled(true);
 				btnDeleteTransport.setEnabled(true);
+				btnEditKeyTransport.setEnabled(true);
 				
+			}
+		});
+		transportTblViewer.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (transportTblViewer.getCell(new Point(event.x, event.y)).getColumnIndex() == 1){
+					editKey();
+				}
 			}
 		});
 		
@@ -287,6 +305,17 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				setChangesMade(true);
 			}
 		});
+		btnEditKeyTransport = new Button(composite, SWT.NONE);
+		btnEditKeyTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnEditKeyTransport.setText("Edit Key");
+		btnEditKeyTransport.setEnabled(false);
+		btnEditKeyTransport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				editKey();
+			}
+		});;
+		
 		btnDisableTransport = new Button(composite, SWT.NONE);
 		btnDisableTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
 				false, 1, 1));
@@ -324,6 +353,22 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		return container;
 	}
 
+	private void editKey(){
+		ArrayList<PatrolTransportType> siblings = new ArrayList<PatrolTransportType>();
+		for (Iterator<?> iterator = patrolTypes.iterator(); iterator.hasNext();) {
+			PatrolType type = (PatrolType) iterator.next();
+			siblings.addAll(type.getTransportTypes());
+		}
+		PatrolTransportType x = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
+		String currentKey = x.getKeyId();
+		InputDialog id = new KeyInputDialog(getShell(), currentKey,  siblings);
+		int ret = id.open();
+		if (ret != Window.CANCEL) {
+			x.setKeyId(id.getValue());
+			setChangesMade(true);
+			transportTblViewer.refresh(x);
+		}
+	}
 	/*
 	 * Creates station table columns
 	 */
@@ -383,111 +428,131 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private void createTransportColumns(final TableViewer viewer) {
 		
 		/* Active Column */
-			TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
-			TableColumn column = viewerColumn.getColumn();
-			column.setText(ACTIVE_LABEL);
-			column.setResizable(true);
-			column.setMoveable(true);
+		TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		TableColumn column = viewerColumn.getColumn();
+		column.setText(ACTIVE_LABEL);
+		column.setResizable(true);
+		column.setMoveable(true);
 
-			TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
-			layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+		TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
 			
-			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof PatrolTransportType){
-						if (((PatrolTransportType)element).getIsActive()){
-							return ACTIVE_LABEL;
-						}else{
-							return DISABLED_LABEL;
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType){
+					if (((PatrolTransportType)element).getIsActive()){
+						return ACTIVE_LABEL;
+					}else{
+						return DISABLED_LABEL;
+					}
+				}
+				return super.getText(element);
+			}
+		});
+
+		/* Key Column */
+		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText("Key");
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType){
+					return ((PatrolTransportType) element).getKeyId();
+				}
+				return super.getText(element);
+			}
+		});
+		
+		
+		/* Transport Type Name Column */
+		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText(Messages.PatrolTypePropertyPage_TransportType_ColumnHeader);
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+		final ColumnLabelProvider lblProvider = new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType){
+					String x = (((PatrolTransportType)element).findNameNull(languageViewer.getCurrentSelection()));
+					if (x == null){
+						x = (((PatrolTransportType)element).getName());
+					}
+					return x;
+				}
+				return super.getText(element);
+			}
+		};
+			
+		viewerColumn.setLabelProvider(lblProvider);
+		viewerColumn.setEditingSupport(new EditingSupport(viewer){
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				return new TextCellEditor(viewer.getTable());
+			}
+
+			@Override
+			protected boolean canEdit(Object element) {
+				return true;
+			}
+			@Override
+			protected Object getValue(Object element) {
+				return lblProvider.getText(element);
+			}
+
+			@Override
+			protected void setValue(Object element, Object value) {
+				if (element instanceof PatrolTransportType){
+					PatrolTransportType ttype = (PatrolTransportType)element;
+					PatrolType pt = null;
+					for (PatrolType t : patrolTypes){
+						if (t.getType().equals(ttype.getPatrolType())){
+							pt = t;
+							break;
 						}
 					}
-					return super.getText(element);
-				}
-			});
-			
-			/* Type Column */
-			viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
-			column = viewerColumn.getColumn();
-			column.setText(Messages.PatrolTypePropertyPage_TransportType_ColumnHeader);
-			column.setResizable(true);
-			column.setMoveable(true);
-
-			layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
-			layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
-			
-			final ColumnLabelProvider lblProvider = new ColumnLabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof PatrolTransportType){
-						String x = (((PatrolTransportType)element).findNameNull(languageViewer.getCurrentSelection()));
-						if (x == null){
-							x = (((PatrolTransportType)element).getName());
-						}
-						return x;
-					}
-					return super.getText(element);
-				}
-			};
-			
-			viewerColumn.setLabelProvider(lblProvider);
-			viewerColumn.setEditingSupport(new EditingSupport(viewer){
-
-				@Override
-				protected CellEditor getCellEditor(Object element) {
-					return new TextCellEditor(viewer.getTable());
-				}
-
-				@Override
-				protected boolean canEdit(Object element) {
-					return true;
-				}
-
-				@Override
-				protected Object getValue(Object element) {
-					return lblProvider.getText(element);
-				}
-
-				@Override
-				protected void setValue(Object element, Object value) {
-					if (element instanceof PatrolTransportType){
-						PatrolTransportType ttype = (PatrolTransportType)element;
-						PatrolType pt = null;
-						for (PatrolType t : patrolTypes){
-							if (t.getType().equals(ttype.getPatrolType())){
-								pt = t;
-								break;
-							}
-						}
-						if (!ttype.findName(languageViewer.getCurrentSelection()).equals((String)value)){
-							if(SmartUtils.isSimpleString(((String)value).trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolType.MAX_TRANSPORT_NAME_LENGTH)){
-								Integer matches = 0;
-								for (Iterator<PatrolTransportType> itr = pt.getTransportTypes().iterator(); itr.hasNext();) {
-									PatrolTransportType a = itr.next();
-									if( a != element && a.findName(languageViewer.getCurrentSelection()).equals(((String)value).trim())){
-										matches++;
-									}
-								} 
-								if(matches > 0){
-									//invalid agency name, don't update it.
-									MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_TYPE_DIALOG_TITLE, Messages.PatrolTypePropertyPage_Error_DuplicateTransportOption);
-									setChangesMade(false);
-								}else{
-									ttype.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
-									setChangesMade(true);
+					if (!ttype.findName(languageViewer.getCurrentSelection()).equals((String)value)){
+						if(SmartUtils.isSimpleString(((String)value).trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolType.MAX_TRANSPORT_NAME_LENGTH)){
+							Integer matches = 0;
+							for (Iterator<PatrolTransportType> itr = pt.getTransportTypes().iterator(); itr.hasNext();) {
+								PatrolTransportType a = itr.next();
+								if( a != element && a.findName(languageViewer.getCurrentSelection()).equals(((String)value).trim())){
+									matches++;
 								}
-							}else{
+							} 
+							if(matches > 0){
 								//invalid agency name, don't update it.
-								MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_TYPE_DIALOG_TITLE, 
-										MessageFormat.format(Messages.PatrolTypePropertyPage_Error_InvalidTransportType, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolType.MAX_TRANSPORT_NAME_LENGTH}));
+								MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_TYPE_DIALOG_TITLE, Messages.PatrolTypePropertyPage_Error_DuplicateTransportOption);
 								setChangesMade(false);
+							}else{
+								ttype.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
+								if (ttype.getKeyId() == null){
+									ttype.setKeyId(NamedKeyItem.generateKey((String)value, pt.getTransportTypes()));
+								}
+								setChangesMade(true);
 							}
-							
-								
-						}
-						viewer.refresh();
-					}					
-				}});
+						}else{
+							//invalid agency name, don't update it.
+							MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_TYPE_DIALOG_TITLE, 
+									MessageFormat.format(Messages.PatrolTypePropertyPage_Error_InvalidTransportType, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolType.MAX_TRANSPORT_NAME_LENGTH}));
+							setChangesMade(false);
+						}				
+					}
+					viewer.refresh();
+				}					
+			}});
 
 		
 	}
@@ -533,6 +598,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
+		ArrayList<PatrolTransportType> siblings = new ArrayList<PatrolTransportType>();
+		for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
+			PatrolType type = (PatrolType) iterator.next();
+			siblings.addAll(type.getTransportTypes());
+		}
 		Session s = getSession();
 		s.beginTransaction();
 		try{
@@ -545,6 +615,12 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				s.saveOrUpdate(type);
 				if (type.getTransportTypes() != null){
 					for (PatrolTransportType tt : type.getTransportTypes()){
+						siblings.remove(tt);
+						String error = NamedKeyItem.validateKey(tt.getKeyId(), siblings);
+						siblings.add(tt);
+						if (error != null){
+							throw new Exception(error);
+						}
 						s.saveOrUpdate(tt);
 					}
 				}
@@ -556,7 +632,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + "\n" + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}

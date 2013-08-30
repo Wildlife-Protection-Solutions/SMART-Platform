@@ -176,6 +176,17 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.showBasemaps"
+                  label="%basemaps.command.label"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.ca.showProjection"
+                  label="%manageprojections.command.label"
+                  style="push"
+                  tooltip="%manageprojections.command.tooltip">
+            </command>
+            <command
                   commandId="org.eclipse.ui.file.export"
                   id="x"
                   label="%exportmap.command.label"
@@ -671,12 +682,6 @@
       <handler
             class="org.wcs.smart.ui.internal.ShowDefaultMapPerspective"
             commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.DeleteConservationArea"
@@ -715,102 +720,42 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowBasemapHandler"
             commandId="org.wcs.smart.showBasemaps">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.SaveMapHandler"
             commandId="org.wcs.smart.map.saveMap">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.PanMapHandler"
             commandId="org.wcs.smart.map.pan">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomHandler"
             commandId="org.wcs.smart.map.zoom">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.AddLayerHandler"
             commandId="org.wcs.smart.map.addLayer">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomExtentsHandler"
             commandId="org.wcs.smart.map.zoomExtents">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.LoadBasemapHandler"
             commandId="org.wcs.smart.map.loadBasemap">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomInHandler"
             commandId="org.wcs.smart.map.zoomIn">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomOutHandler"
             commandId="org.wcs.smart.map.zoomOut">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler"
             commandId="org.wcs.smart.ca.showProjection">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ShowSystemPreferencesHandler"
@@ -914,10 +859,10 @@
             class="org.wcs.smart.ca.datamodel.DmObject">
       </class>
       <class
-            class="org.wcs.smart.ca.HasLabel">
+            class="org.wcs.smart.ca.UuidItem">
       </class>
       <class
-            class="org.wcs.smart.ca.SimpleListItemWithDescription">
+            class="org.wcs.smart.ca.NamedDesciptionItem">
       </class>
       <class
             class="org.wcs.smart.ca.DescriptionLabel">
@@ -1100,10 +1045,33 @@
                id="org.wcs.smart.crossCaView"
                minimized="false"
                moveable="true"
-               ratio=".5"
-               relationship="left"
-               relative="org.eclipse.ui.editorss"
-               showTitle="false"
+               ratio=".2"
+               relationship="right"
+               relative="org.wcs.smart.query.conservationAreaList"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+         <view
+               closeable="false"
+               id="org.wcs.smart.ui.map.MapView"
+               minimized="false"
+               moveable="true"
+               relationship="stack"
+               relative="org.wcs.smart.crossCaView"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+         <view
+               closeable="false"
+               id="net.refractions.udig.project.ui.layerManager"
+               minimized="false"
+               moveable="true"
+               ratio=".7"
+               relationship="bottom"
+               relative="org.wcs.smart.query.conservationAreaList"
+               showTitle="true"
                standalone="true"
                visible="true">
          </view>

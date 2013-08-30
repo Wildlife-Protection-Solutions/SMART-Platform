@@ -27,7 +27,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
@@ -57,7 +57,7 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
 		final Object o = obj;
 		
-		SimpleListItem toUpdate = null;
+		NamedItem toUpdate = null;
 		if (o instanceof QueryInput){
 			QueryInput input = (QueryInput)o;
 			Session s = HibernateManager.openSession();
@@ -70,8 +70,8 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 			}finally{
 				s.close();
 			}
-		}else if  (o instanceof SimpleListItem){
-			toUpdate = (SimpleListItem)o;
+		}else if  (o instanceof NamedItem){
+			toUpdate = (NamedItem)o;
 			
 		}
 		

@@ -196,9 +196,14 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			
 			if (SmartDB.isMultipleAnalysis()){
 				input.put(QueryFilterContentProvider.ROOT_NODES,new QueryFilterContentProvider.RootNodeType[]{RootNodeType.PATROL_FILTERS, RootNodeType.DATA_MODEL_FILTERS, RootNodeType.OTHER_ITEMS}); 
-				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, PatrolQueryOptions.SHARED_PATROL_FILTER_OPTIONS);
+				
+				List<IPatrolQueryOption> options = new ArrayList<IPatrolQueryOption>();
+				options.addAll(Arrays.asList(PatrolQueryOptions.SHARED_PATROL_FILTER_OPTIONS));
+				options.addAll(findContributedPatrolQueryOptions());
+				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, options.toArray());
 			}else{
 				input.put(QueryFilterContentProvider.ROOT_NODES,QueryFilterContentProvider.RootNodeType.values());
+				
 				List<IPatrolQueryOption> options = new ArrayList<IPatrolQueryOption>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_FILTER_OPTIONS));
 				options.addAll(findContributedPatrolQueryOptions());

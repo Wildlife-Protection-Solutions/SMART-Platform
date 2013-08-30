@@ -384,13 +384,6 @@
                      mnemonic="%menu.query.menu.newquery.newgridquery.command.mnemonic"
                      style="push"
                      tooltip="%menu.query.menu.newquery.newgridquery.command.tooltip">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <test
-                           forcePluginActivation="false"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                  </visibleWhen>
                </command>
             </menu>
             <separator
@@ -599,13 +592,6 @@
                label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                style="push"
                tooltip="%querytoolbar.createquery.menu.newgridsummary.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     forcePluginActivation="false"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -899,11 +885,6 @@
       <handler
             class="org.wcs.smart.query.internal.ui.CreateGriddedSummaryHandler"
             commandId="org.wcs.smart.query.createGriddedSummary">
-         <activeWhen>
-            <test
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.query.internal.ui.CreateUnknownQueryHandler"

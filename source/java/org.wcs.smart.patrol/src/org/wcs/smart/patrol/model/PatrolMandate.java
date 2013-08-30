@@ -29,7 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**
@@ -40,10 +40,11 @@ import org.wcs.smart.patrol.internal.Messages;
  */
 @Entity
 @Table(name = "smart.patrol_mandate")
-public class PatrolMandate extends SimpleListItem{
+public class PatrolMandate extends NamedKeyItem{
 
 	public static final String NAME = Messages.PatrolMandate_MandateName;
-
+	public static final String KEY = "Key";
+	
 	public static final Integer MAX_NAME_LENGTH = 64;
 	
 	private boolean isActive = true;

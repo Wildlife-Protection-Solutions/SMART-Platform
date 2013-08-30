@@ -22,12 +22,10 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -55,15 +53,6 @@ import com.ibm.icu.text.MessageFormat;
 public class DataModel {
 
 	public static final String HKEY_SEPERATOR = "."; //$NON-NLS-1$
-
-	private static final String INVALID_START_CHARS_KEY_PATTERN = "[^a-z]+"; //$NON-NLS-1$
-
-	private static final String VALID_DM_KEY_PATTERN = "[a-z]{1}[a-z0-9_]*"; //$NON-NLS-1$
-	
-	/*
-	 * These are keywords that cannot be used as keys; for querying purposes.
-	 */
-	private static final String[] KEYWORDS = new String[]{"and", "or", "not", "contains", "notcontains", "equals"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
 	private ConservationArea ca;	//the conservation area of the data model
 	private List<Category> categories;	//the root categories for the data model
@@ -409,95 +398,6 @@ public class DataModel {
 	 */
 	public List<Attribute> getAttributes(){
 		return this.attributes;
-	}
-	
-	/**
-	 * Generates a key for a dm object from a name.
-	 * 
-	 * @param value the name provided
-	 * @param otherValues list of other dm objects that the key must be different from
-	 * 
-	 * @return valid key
-	 */
-	public static String generateKey (String value, Collection<? extends DmObject> otherValues){
-		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		//DM keys should not start with number or '_' character or queries will be invalid see ticket #354
-		if (!raw.isEmpty() && Pattern.matches(INVALID_START_CHARS_KEY_PATTERN, raw.subSequence(0, 1))) {
-			raw = raw.replaceFirst(INVALID_START_CHARS_KEY_PATTERN, ""); //$NON-NLS-1$
-		}
-		if (raw.isEmpty()){
-			raw = "object"; //$NON-NLS-1$
-		}
-	
-		int count = 0;
-		String key = raw;
-		if (raw.length() > DmObject.MAX_KEY_LENGTH){
-			key = raw.substring(0, DmObject.MAX_KEY_LENGTH);
-		}
-
-		for (String keyword: KEYWORDS){
-			if (keyword.equals(key)){
-				key = key + "_"; //$NON-NLS-1$
-				break;
-			}
-		}
-		while(checkKeyExists(key, otherValues)){
-			count ++;
-			String cnt = String.valueOf(count);
-			if (raw.length() + cnt.length() > DmObject.MAX_KEY_LENGTH){
-				key = raw.substring(0, DmObject.MAX_KEY_LENGTH - cnt.length() ) + cnt;
-			}else{
-				key = raw + String.valueOf(count);
-			}
-			
-		}
-		
-		return key;
-	}
-	/*
-	 * determines if a key exists in 
-	 * a set of objects
-	 */
-	private static boolean checkKeyExists(String key, Collection<? extends DmObject> otherValues){
-		if (otherValues == null){
-			return false;
-		}
-		for (DmObject other : otherValues){
-			if (key.equals(other.getKeyId())){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * Validates a data model object key.
-	 * <p>Keys must not be empty, less than DmObject.MAX_KEY_LENGTH characters,
-	 * and different from their siblings.</p>
-	 * 
-	 * @param key the key to validate.
-	 * @param otherValues set of {@link DmObject} the key value must be different from
-	 * @return <code>null</code> if the key is valid otherwise a string description of the error
-	 */
-	public static String validateKey(String key, Collection<? extends DmObject> otherValues){
-		if (key == null || key.isEmpty()){
-			return Messages.DataModel_Error_Key_NotEmpty;
-		}
-		if (key.length() > DmObject.MAX_KEY_LENGTH ){
-			return MessageFormat.format(Messages.DataModel_Error_Key_ToLong, new Object[]{DmObject.MAX_KEY_LENGTH});
-		}
-		if (!key.matches(VALID_DM_KEY_PATTERN)){
-			return Messages.DataModel_Error_Key_InvalidCharacters;
-		}
-		if (checkKeyExists(key, otherValues)){
-			return Messages.DataModel_Error_Key_NotUnique;
-		}
-		for (String keyword: KEYWORDS){
-			if (keyword.equals(key)){
-				return MessageFormat.format(Messages.DataModel_KeywordKeyError, new Object[]{keyword});
-			}
-		}
-		return null;
 	}
 	
 	/**

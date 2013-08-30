@@ -36,7 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -219,11 +219,11 @@ public class PatrolLegImporter extends SmartImporter {
 		return isArmed ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
 	}
 	
-	private String labelFor(SimpleListItem item) {
+	private String labelFor(NamedItem item) {
 		return item != null ? item.getName() : ""; //$NON-NLS-1$
 	}
 
-	private boolean equal(SimpleListItem o1, SimpleListItem o2) {
+	private boolean equal(NamedItem o1, NamedItem o2) {
 		if (o1 == null || o2 == null)
 			return o1 == o2;
 		return Arrays.equals(o1.getUuid(), o2.getUuid());

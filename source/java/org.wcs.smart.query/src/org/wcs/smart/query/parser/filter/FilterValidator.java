@@ -30,7 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
@@ -108,9 +108,9 @@ public class FilterValidator {
 								MessageFormat.format(
 								Messages.FilterValidator_PatrolFilterError, new Object[]{ filter.asString()}));
 					}
-					if (SimpleListItem.class.isAssignableFrom(op.getSourceClass())){
+					if (NamedItem.class.isAssignableFrom(op.getSourceClass())){
 						
-						SimpleListItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), session, warnings);
+						NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), session, warnings);
 						
 						if (it == null){
 							throw new Exception(MessageFormat.format(
@@ -214,7 +214,7 @@ public class FilterValidator {
 	 * 
 	 * @return
 	 */
-	public static SimpleListItem findValue(String langCode, String value, String objectType, Session session, List<String> warnings){
+	public static NamedItem findValue(String langCode, String value, String objectType, Session session, List<String> warnings){
 		
 		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -228,9 +228,9 @@ public class FilterValidator {
 			return null;
 		}else if (results.size() > 1){
 			warnings.add(MessageFormat.format(Messages.FilterValidator_MultipleImportOptions, new Object[]{objectType, value}));
-			return (SimpleListItem)results.get(0);
+			return (NamedItem)results.get(0);
 		}else{
-			return (SimpleListItem)results.get(0);
+			return (NamedItem)results.get(0);
 		}
 	}
 	
