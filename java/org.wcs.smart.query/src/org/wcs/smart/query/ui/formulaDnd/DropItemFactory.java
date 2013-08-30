@@ -130,13 +130,16 @@ public class DropItemFactory {
 			item = new BooleanPatrolDropItem(option);
 		}else if (option == PatrolQueryOption.ID){
 			item = new PatrolIdDropItem(option);
-		}else if (option == PatrolQueryOption.MANDATE || 
+		}else if (option == PatrolQueryOption.MANDATE ||
+				option == PatrolQueryOption.MANDATE_KEY || 
 				option == PatrolQueryOption.PATROL_TYPE ||
 				option == PatrolQueryOption.PATROL_TRANSPORT_TYPE ||
+				option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY ||
 				option == PatrolQueryOption.STATION ||
 				option == PatrolQueryOption.EMPLOYEE ||
 				option == PatrolQueryOption.LEADER ||
-				option == PatrolQueryOption.TEAM||
+				option == PatrolQueryOption.TEAM ||
+				option == PatrolQueryOption.TEAM_KEY ||
 				option == PatrolQueryOption.PILOT){
 			item = new PatrolListDropItem(option);
 		} else {

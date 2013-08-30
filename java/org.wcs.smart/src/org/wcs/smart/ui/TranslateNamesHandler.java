@@ -29,7 +29,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
@@ -51,15 +51,15 @@ public class TranslateNamesHandler extends AbstractHandler {
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
 		final Object o = obj;
-		if (o instanceof SimpleListItem ){
-			translateItem((SimpleListItem) o, event);
+		if (o instanceof NamedItem ){
+			translateItem((NamedItem) o, event);
 		}
 		
 		
 		return null;
 	}
 	
-	protected void translateItem(SimpleListItem toUpdate, ExecutionEvent event){
+	protected void translateItem(NamedItem toUpdate, ExecutionEvent event){
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();

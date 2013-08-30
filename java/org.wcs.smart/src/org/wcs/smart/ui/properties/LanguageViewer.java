@@ -65,8 +65,11 @@ public class LanguageViewer extends ComboViewer {
 			}});
 		
 		setInput(langs);
-		setSelection(new StructuredSelection(ca.getDefaultLanguage()));
-
+		if (ca.getDefaultLanguage() != null){
+			setSelection(new StructuredSelection(ca.getDefaultLanguage()));
+		}else if (langs.size() > 0){
+			setSelection(new StructuredSelection(langs.get(0)));
+		}
 	}
 
 	public Language getCurrentSelection(){

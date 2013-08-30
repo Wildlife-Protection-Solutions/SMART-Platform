@@ -182,7 +182,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				throw new IllegalArgumentException("new input must be map"); //$NON-NLS-1$
 			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
-			this.dataModel = (DataModel)in.get(NodeType.GROUP_BY_NODE);
+			this.dataModel = (DataModel)in.get(NodeType.DATAMODEL_VALUES);
 			patrolValueOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
 			patrolGroupByOption = (PatrolQueryOption[])in.get(NodeType.PATROL_GROUPBYS);
 			dateGroupByOptions = (DateGroupByOption[]) in.get(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS);

@@ -84,8 +84,17 @@ public class CategoryFilter implements IFilter {
 		}
 		return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$
 	}
-	
-	
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		String col = colMapping.get(this);
+		if (col == null){
+			return asSql(tableMapping);
+		}else{
+			return " waypointTable." + col + " ";
+		}
+	}
+	public String getCategoryKey(){
+		return categoryIdentifier.split(":")[1]; //$NON-NLS-1$
+	}
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()
 	 */

@@ -120,6 +120,9 @@ public class DateFilter implements IFilter {
 		String field = tablePrefix + "." + dateField.columnName; //$NON-NLS-1$
 		return asSql(field);
 	}
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		return asSql(tableMapping);
+	}
 	
 	/**
 	 * @return the date filter option represented by this date filter

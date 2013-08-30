@@ -29,7 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleListItemWithDescription;
+import org.wcs.smart.ca.NamedDescriptionKeyItem;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**
@@ -40,11 +40,12 @@ import org.wcs.smart.patrol.internal.Messages;
  */
 @Entity
 @Table(name="smart.team")
-public class Team extends SimpleListItemWithDescription{
+public class Team extends NamedDescriptionKeyItem{
 
 	public static final String NAME = Messages.Team_Name;
 	public static final String DESCRIPTION = Messages.Team_DescriptionFieldName;
 	public static final String MANDATE = Messages.Team_MandateFieldName;
+	public static final String KEY = "Key";
 	
 	public static final int MAX_NAME_LENGTH = 64;
 	

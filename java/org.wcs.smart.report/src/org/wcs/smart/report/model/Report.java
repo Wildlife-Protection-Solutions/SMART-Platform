@@ -33,7 +33,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.report.ReportPlugIn;
 
 /**
@@ -44,7 +44,7 @@ import org.wcs.smart.report.ReportPlugIn;
  */
 @Entity
 @Table(name="smart.report")
-public class Report extends SimpleListItem {
+public class Report extends NamedItem {
 
 	public static final int MAX_NAME_LENGTH = org.wcs.smart.ca.Label.MAX_LENGTH;
 	

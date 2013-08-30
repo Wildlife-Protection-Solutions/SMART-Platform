@@ -31,7 +31,7 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -49,7 +49,7 @@ import org.wcs.smart.query.ui.summary.SummaryEditor;
  */
 
 @Entity
-public abstract class Query extends SimpleListItem {
+public abstract class Query extends NamedItem {
 	
 	//if you add another query type you must update
 	//the queryInput constructor

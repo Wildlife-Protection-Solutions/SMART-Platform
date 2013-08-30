@@ -30,13 +30,13 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-    public static final String IN_DIR = "D:\\SMART\\Source\\trunk\\source\\java\\";//"C:\\data\\SMART\\Source\\Version1.1.0\\source\\java";
+    public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java";
 
-    public static final String TRANS_DIR = "D:\\SMART\\Source\\trunk\\source\\translations\\"; //"C:\\data\\SMART\\Source\\Version1.1.0\\source\\translations\\";
+    public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\translations\\";
 
     public static final String LINE_SEP = "\n";
 
-    public static final String NATIVE2ASCII = "C:\\Program Files (x86)\\Java\\jdk1.6.0_34\\bin\\native2ascii.exe"; //"C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
+    public static final String NATIVE2ASCII = "C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
 
     /**
      * find all plugin.properties, messages.properties or bundle.properties
@@ -108,7 +108,7 @@ public class Mergei18n {
 
         List<File> filesList = new ArrayList<File>();
 
-        final String matchDir = pluginName + ".nl_zh";  /*ADD _XX if you want to search for a specific language */
+        final String matchDir = pluginName + ".nl_ms";  /*ADD _XX if you want to search for a specific language */
         for (File flangDir : transDir.listFiles()){
 
 

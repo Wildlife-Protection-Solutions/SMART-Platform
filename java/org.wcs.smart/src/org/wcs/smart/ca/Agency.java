@@ -42,7 +42,7 @@ import org.wcs.smart.internal.Messages;
  */
 @Entity
 @Table(name ="smart.agency")
-public class Agency extends SimpleListItem{
+public class Agency extends NamedItem{
 
 	public static final String NAME = Messages.Agency_AgencyName;
 	public static final Integer MAX_AGENCY_LENGTH = 128;

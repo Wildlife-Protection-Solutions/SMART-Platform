@@ -26,8 +26,10 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.DefaultCrossCaPerspective;
 import org.wcs.smart.DefaultPerspective;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 public class ShowDefaultMapPerspective extends AbstractHandler {
@@ -36,11 +38,15 @@ public class ShowDefaultMapPerspective extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		//Open Patrol Perspective
 		try {
+			String prespectiveId = DefaultPerspective.ID;
+			
+			if (SmartDB.isMultipleAnalysis()){
+				prespectiveId = DefaultCrossCaPerspective.ID;
+			}
 			HandlerUtil
 					.getActiveWorkbenchWindow(event)
 					.getWorkbench()
-					.showPerspective(DefaultPerspective.ID,
-							HandlerUtil.getActiveWorkbenchWindow(event));
+					.showPerspective(prespectiveId,HandlerUtil.getActiveWorkbenchWindow(event));
 		} catch (WorkbenchException e) {
 			SmartPlugIn.displayLog(HandlerUtil.getActiveWorkbenchWindow(event).getShell(),  Messages.ShowDefaultMapPerspective_Error_LoadingPerspective, e);
 		}

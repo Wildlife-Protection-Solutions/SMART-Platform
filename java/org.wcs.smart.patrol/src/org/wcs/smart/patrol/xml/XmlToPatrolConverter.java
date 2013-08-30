@@ -35,7 +35,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -568,7 +568,7 @@ public class XmlToPatrolConverter {
 		return HibernateManager.findEmployeeByName(type.getGivenName(), type.getFamilyName(), ca, session);
 	}
 	
-	private SimpleListItem findValue(String langCode, String value, String objectType){
+	private NamedItem findValue(String langCode, String value, String objectType){
 		
 		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -582,13 +582,13 @@ public class XmlToPatrolConverter {
 			return null;
 		}else if (results.size() > 1){
 			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_MultipleOptionsFound, new Object[]{objectType}));
-			return (SimpleListItem)results.get(0);
+			return (NamedItem)results.get(0);
 		}else{
-			return (SimpleListItem)results.get(0);
+			return (NamedItem)results.get(0);
 		}
 	}
 	
-	private SimpleListItem findTransportationValue(String langCode, String value, org.wcs.smart.patrol.model.PatrolType.Type type){
+	private NamedItem findTransportationValue(String langCode, String value, org.wcs.smart.patrol.model.PatrolType.Type type){
 		
 		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language = a.uuid " + //$NON-NLS-1$
 				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " + //$NON-NLS-1$
@@ -605,9 +605,9 @@ public class XmlToPatrolConverter {
 			return null;
 		}else if (results.size() > 1){
 			warnings.add(Messages.XmlToPatrolConverter_Warning_MultipleTransportTypeOptionsFound);
-			return (SimpleListItem)results.get(0);
+			return (NamedItem)results.get(0);
 		}else{
-			return (SimpleListItem)results.get(0);
+			return (NamedItem)results.get(0);
 		}
 	}
 

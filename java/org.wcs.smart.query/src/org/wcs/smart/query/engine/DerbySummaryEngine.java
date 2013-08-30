@@ -43,6 +43,9 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
@@ -56,6 +59,7 @@ import org.wcs.smart.query.model.SummaryQueryResult;
 import org.wcs.smart.query.model.SummaryResultKey;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.summary.AreaGroupBy;
@@ -1012,8 +1016,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				if (prefix != null){
 					groupByInnerSql.append(prefix + "."); //$NON-NLS-1$
 				}
-				groupByInnerSql.append(name + " as " + name + "_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
-				groupBySql.append(name + "_" + itemcnt); //$NON-NLS-1$
+				groupByInnerSql.append(name + " as " + "gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
 				if (((PatrolGroupBy)gb).option == PatrolQueryOption.EMPLOYEE){
 					fromSql.append(" left join "); //$NON-NLS-1$
@@ -1021,6 +1025,15 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(prefix(PatrolLegMember.class));
 					fromSql.append(" on temp.pl_uuid = " + prefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				}else if (((PatrolGroupBy)gb).option.getType() == PatrolQueryOptionType.KEY){
+					PatrolQueryOption op = ((PatrolGroupBy)gb).option;
+					fromSql.append(" left join ");
+					fromSql.append(tableNames.get(op.getSourceClass()));
+					fromSql.append(" on temp.");
+					fromSql.append(getUuidFieldName(op));
+					fromSql.append(" = "  );
+					fromSql.append(prefix(op.getSourceClass()));
+					fromSql.append(".uuid");
 				}
 			}else if (gb instanceof DateGroupBy){
 				DateGroupByOption op = ((DateGroupBy)gb).getOption();
@@ -1270,6 +1283,17 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		return null;
 	}
 	
+	private String getUuidFieldName(PatrolQueryOption gb){
+		switch(gb){
+		case TEAM_KEY:
+			return "p_team_uuid";
+		case MANDATE_KEY:
+			return "p_mandate_uuid";
+		case PATROL_TRANSPORT_TYPE_KEY:
+			return "pl_transport_uuid";
+		}
+		return null;
+	}
 	
 	/**
 	 * Returns the patrol group by field from 
@@ -1299,6 +1323,12 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			return "employee_uuid"; //$NON-NLS-1$
 		case CONSERVATION_AREA:
 			return "p_ca_uuid"; //$NON-NLS-1$
+		case TEAM_KEY:
+			return tablePrefix.get(Team.class) + ".keyid";
+		case MANDATE_KEY:
+			return tablePrefix.get(PatrolMandate.class) + ".keyid";
+		case PATROL_TRANSPORT_TYPE_KEY:
+			return tablePrefix.get(PatrolTransportType.class) + ".keyid";
 		}
 		assert false;
 		return ""; //$NON-NLS-1$

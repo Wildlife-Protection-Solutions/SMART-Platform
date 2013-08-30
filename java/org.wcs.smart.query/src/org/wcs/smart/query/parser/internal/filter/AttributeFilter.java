@@ -152,6 +152,9 @@ public class AttributeFilter implements IFilter {
 		this.value2 = value2;
 	}
 	
+	public Operator getOperator(){
+		return this.op;
+	}
 	/**
 	 * @return the unique attribute key
 	 */
@@ -188,6 +191,14 @@ public class AttributeFilter implements IFilter {
 		return ""; //$NON-NLS-1$
 	}
 	
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		String col = colMapping.get(this);
+		if (col == null){
+			return asSql(tableMapping);
+		}else{
+			return " waypointTable." + col + " ";
+		}
+	}
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		

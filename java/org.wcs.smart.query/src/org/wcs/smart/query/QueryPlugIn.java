@@ -52,7 +52,7 @@ import org.wcs.smart.query.internal.ui.QueryPerspective;
  */
 public class QueryPlugIn extends AbstractUIPlugin {
 	
-	private static final boolean LOG_QUERY = false;
+	private static final boolean LOG_QUERY = true;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.query"; //$NON-NLS-1$

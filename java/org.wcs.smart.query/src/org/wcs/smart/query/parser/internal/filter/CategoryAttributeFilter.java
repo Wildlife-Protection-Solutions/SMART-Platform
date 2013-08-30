@@ -163,7 +163,14 @@ public class CategoryAttributeFilter implements IFilter{
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		return "( " + categoryFilter.asSql( tableMapping ) + Operator.AND.asSql() + attributeFilter.asSql(tableMapping) + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		String col = colMapping.get(this);
+		if (col == null){
+			return asSql(tableMapping);
+		}else{
+			return " waypointTable." + col + " ";
+		}
+	}
 
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()

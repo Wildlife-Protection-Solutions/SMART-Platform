@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.internal.Messages;
@@ -151,7 +152,7 @@ public class XmlDataModelValidator {
 				break;
 			}
 		}
-		String error = org.wcs.smart.ca.datamodel.DataModel.validateKey(key, kids);
+		String error = NamedKeyItem.validateKey(key, kids);
 		if (error != null) {
 			throw new ParseException(MessageFormat.format(
 					Messages.XmlDataModelValidator_InvalidKey, new Object[] {

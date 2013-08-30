@@ -88,7 +88,7 @@ public class Label  {
 		}
 		
 		Label.LabelItemPK id = new Label.LabelItemPK();
-		HasLabel h = new HasLabel();
+		UuidItem h = new UuidItem();
 		h.setUuid(elementuuid);
 		id.setElement(h);
 		id.setLanguage(SmartDB.getCurrentLanguage());
@@ -117,13 +117,13 @@ public class Label  {
 				Query q = s.createQuery("SELECT l.value from Label l where l.id.element.uuid = :uuid and l.id.language.code = :code"); //$NON-NLS-1$
 				q.setCacheable(true);
 				q.setParameter("uuid", elementuuid); //$NON-NLS-1$
-				q.setParameter("code", SmartDB.getCurrentLanguage().getCode()); //$NON-NLS-1$
+				q.setParameter("code", SmartDB.getConservationAreaConfiguration().getLanguage().getCode()); //$NON-NLS-1$
 				List<String> x = q.list();
 				if (x.size() > 0){
 					description = x.get(0);
 				}else{
 					//same language code
-					q.setParameter("code", SmartDB.getCurrentLanguage().getCode().split("_")[0]); //$NON-NLS-1$ //$NON-NLS-2$
+					q.setParameter("code", SmartDB.getConservationAreaConfiguration().getLanguage().getCode().split("_")[0]); //$NON-NLS-1$ //$NON-NLS-2$
 					x = q.list();
 					if (x.size() > 0){
 						description = x.get(0);
@@ -163,7 +163,7 @@ public class Label  {
 		}
 		
 		Label.LabelItemPK id = new Label.LabelItemPK();
-		HasLabel h = new HasLabel();
+		UuidItem h = new UuidItem();
 		h.setUuid(elementuuid);
 		id.setElement(h);
 		
@@ -222,12 +222,12 @@ public class Label  {
 	}
 	
 	@Transient
-	public HasLabel getElementuuid() {
+	public UuidItem getElementuuid() {
 		return id.element;
 	}
 
 	
-	public void setElement(HasLabel elementuuid) {
+	public void setElement(UuidItem elementuuid) {
 		id.setElement(elementuuid);
 	}
 
@@ -240,7 +240,7 @@ public class Label  {
 		private static final long serialVersionUID = 1L;
 		
 		private Language language;
-		private HasLabel element;
+		private UuidItem element;
 
 		
 		@ManyToOne(fetch = FetchType.LAZY)
@@ -255,11 +255,11 @@ public class Label  {
 		
 		@ManyToOne(fetch = FetchType.LAZY)
 		@JoinColumn(name="element_uuid", referencedColumnName="uuid")
-		public HasLabel getElement() {
+		public UuidItem getElement() {
 			return element;
 		}
 
-		public void setElement(HasLabel element) {
+		public void setElement(UuidItem element) {
 			this.element = element;
 		}
 		

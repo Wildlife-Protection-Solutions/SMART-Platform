@@ -41,6 +41,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.geotools.data.smart.SmartDataSource;
 import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -111,8 +112,11 @@ public class SmartService extends IService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<SmartGeoResource>();
-					for (int i = 0; i < Area.AreaType.values().length; i ++){
-						members.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
+					//these are only valid for single-cas
+					if (!SmartDB.isMultipleAnalysis()){
+						for (int i = 0; i < Area.AreaType.values().length; i ++){
+							members.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
+						}
 					}
 				}
 			}

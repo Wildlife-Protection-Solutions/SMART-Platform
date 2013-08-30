@@ -32,6 +32,11 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -175,4 +180,32 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 		};
 	}
 
+	@Override
+	public List<ListItem> getActiveTeams(Session session) {
+		List<Team> teams = PatrolHibernateManager.getActiveTeams(SmartDB.getCurrentConservationArea(), session);
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (Team t : teams){
+			items.add(new ListItem(t.getUuid(), t.getName(), t.getKeyId()));
+		}
+		return items;
+	}
+
+	@Override
+	public List<ListItem> getActiveMandates(Session session) {
+		List<PatrolMandate> teams = PatrolHibernateManager.getActiveMandates(SmartDB.getCurrentConservationArea(), session);
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (PatrolMandate t : teams){
+			items.add(new ListItem(t.getUuid(), t.getName(), t.getKeyId()));
+		}
+		return items;
+	}
+	@Override
+	public List<ListItem> getActiveTransportTypes(Session session) {
+		List<PatrolTransportType> teams = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session);
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (PatrolTransportType t : teams){
+			items.add(new ListItem(t.getUuid(), t.getName(), t.getKeyId()));
+		}
+		return items;
+	}
 }

@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -69,7 +69,7 @@ import org.wcs.smart.util.SmartUtils;
 public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 
 	private TableViewer tblViewer;
-	private SimpleListItem item;
+	private NamedItem item;
 	private List<org.wcs.smart.ca.Label> input;
 	
 	private boolean isDirty = false;
@@ -78,7 +78,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 	 * @param parentShell parent shell
 	 * @param item item to update
 	 */
-	public TranslateSimpleListItemDialog(Shell parentShell, SimpleListItem item) {
+	public TranslateSimpleListItemDialog(Shell parentShell, NamedItem item) {
 		super(parentShell);
 
 		this.item = item;

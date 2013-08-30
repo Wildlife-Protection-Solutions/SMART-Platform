@@ -1,33 +1,9 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.ca;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.hibernate.Criteria;
@@ -36,31 +12,15 @@ import org.hibernate.annotations.Type;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 
-/**
- * Extensions of a simple list item that also tracks a description 
- * field.  The description field is a uuid that references
- * a label in the label table.
- * 
- * <p>
- * WARNING: Currently users are required to save the labels entities
- * manually, they are not automatically saved
- * when the entity is saved.
- * </p>
- * 
- * @author Emily
- * @since 1.0.0
- */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class SimpleListItemWithDescription extends SimpleListItem {
-	
+public class NamedDescriptionKeyItem extends NamedKeyItem {
+
 	private byte[] descuuid;
-	
+
 	private String description;
 
 	private Set<DescriptionLabel> descriptions;
 
-	public SimpleListItemWithDescription() {
+	public NamedDescriptionKeyItem() {
 		super();
 		this.descriptions = null;
 	}
@@ -84,10 +44,10 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 		this.description = description;
 	}
 
-//	// TODO: There must be a better way to do this
-//	// This fails;
-//	 @OneToMany(fetch = FetchType.LAZY)
-//	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
+	// // TODO: There must be a better way to do this
+	// // This fails;
+	// @OneToMany(fetch = FetchType.LAZY)
+	// @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
 	@SuppressWarnings("unchecked")
 	@Transient
 	public Set<DescriptionLabel> getDescriptions() {
@@ -95,7 +55,8 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 			this.descriptions = new HashSet<DescriptionLabel>();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
-			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid)); //$NON-NLS-1$
+			Criteria c = session.createCriteria(DescriptionLabel.class).add(
+					Restrictions.eq("id.element", this.descuuid)); //$NON-NLS-1$
 			this.descriptions.addAll(c.list());
 			session.getTransaction().commit();
 		}
@@ -111,11 +72,12 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 	}
 
 	/**
-	 * Finds the description with the associated language.  Returns null if
-	 * no description found.
+	 * Finds the description with the associated language. Returns null if no
+	 * description found.
 	 * 
 	 * @param lang
-	 * @return the description associated with the language; null if string not found
+	 * @return the description associated with the language; null if string not
+	 *         found
 	 */
 	public String findDescriptionNull(Language lang) {
 		DescriptionLabel x = findValue(getDescriptions(), lang);
@@ -149,7 +111,7 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 	}
 
 	private DescriptionLabel findValue(Set<DescriptionLabel> list, Language lang) {
-		if(list == null){
+		if (list == null) {
 			return null;
 		}
 		for (DescriptionLabel lbl : list) {

@@ -41,6 +41,9 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
@@ -77,6 +80,9 @@ public abstract class DerbyQueryEngine2 implements QueryEngine {
 		tablePrefix.put(PatrolLegMember.class, "plm"); //$NON-NLS-1$
 		tablePrefix.put(Track.class, "t"); //$NON-NLS-1$
 		tablePrefix.put(Area.class, "ar"); //$NON-NLS-1$
+		tablePrefix.put(Team.class, "smart.team"); //$NON-NLS-1$
+		tablePrefix.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
+		tablePrefix.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
 	}
 
 	
@@ -100,6 +106,9 @@ public abstract class DerbyQueryEngine2 implements QueryEngine {
 		tableNames.put(PatrolLegMember.class, "smart.patrol_leg_members"); //$NON-NLS-1$
 		tableNames.put(Track.class, "smart.track"); //$NON-NLS-1$
 		tableNames.put(Area.class, "smart.area_geometries"); //$NON-NLS-1$
+		tableNames.put(Team.class, "smart.team"); //$NON-NLS-1$
+		tableNames.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
+		tableNames.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
 	}
 		
 	/**

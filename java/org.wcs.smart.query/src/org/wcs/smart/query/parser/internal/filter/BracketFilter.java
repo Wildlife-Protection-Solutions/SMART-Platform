@@ -78,7 +78,9 @@ public class BracketFilter implements IFilter{
 	public String asSql(HashMap<Class<?>, String> tableMapping){
 		return "(" + filter.asSql(tableMapping) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		return asSql(tableMapping);
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()

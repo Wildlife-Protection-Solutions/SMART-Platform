@@ -37,7 +37,7 @@ import org.wcs.smart.internal.Messages;
  */
 @Entity
 @Table(name ="smart.rank")
-public class Rank extends SimpleListItem{
+public class Rank extends NamedItem{
 
 	public static final String NAME = Messages.Rank_Label;
 	

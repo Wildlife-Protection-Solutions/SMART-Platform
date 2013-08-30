@@ -55,7 +55,14 @@ public interface IFilter {
 	 */
 	public String asSql(HashMap<Class<?>, String> tableMapping);
 
-	
+	/**
+	 * Converts the filter to an sql where clause expression
+	 * 
+	 * @param tableMapping a mapping of tables to table prefixes
+	 * @return sql where clause expression
+	 */
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping);
+
 	/**
 	 * @return <code>true</code> if the filter includes a data 
 	 * model category filter, <code>false</code> otherwise

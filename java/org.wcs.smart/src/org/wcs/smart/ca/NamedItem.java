@@ -37,17 +37,18 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Type;
 
 /**
- * Super class for items with names.  A simple list items
- * contains a uuid and a link to a list of 
- * names that represent the list name in various
- * languages.
+ * Super class for items with names.  
+ * Items with names must have a uuid field.  That uuid
+ * field is used to store names in the i18n_label field.  Multiple
+ * names can exist for the different languages (although only
+ * a single name per language).
  * 
  * @author Emily
  *
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class SimpleListItem extends HasLabel {
+public class NamedItem extends UuidItem {
 
 	
 	private Set<Label> names;
@@ -56,7 +57,7 @@ public class SimpleListItem extends HasLabel {
 	/**
 	 * Creates a new simple list
 	 */
-	public SimpleListItem(){}
+	public NamedItem(){}
 
 	
 	/**
@@ -149,6 +150,9 @@ public class SimpleListItem extends HasLabel {
 	 */
 	public void updateName(Language lang, String newName){
 		if (lang == null) return;
+		if (getNames() == null){
+			names = new HashSet<Label>();
+		}
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if (type.getLanguage().equals(lang)){
@@ -157,12 +161,17 @@ public class SimpleListItem extends HasLabel {
 			}
 		}
 		//create a new label
+		getNames().add(createLabel(lang, newName));		
+	}
+	
+	
+	private Label createLabel(Language lang, String newName){
+		//create a new label
 		Label lbl = new Label();
 		lbl.setElement(this);
 		lbl.setLanguage(lang);
 		lbl.setValue(newName);
-		getNames().add(lbl);
-		
+		return lbl;
 	}
 	
 }

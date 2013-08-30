@@ -46,10 +46,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -79,8 +79,8 @@ import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
-import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem.ValueType;
+import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
@@ -512,6 +512,8 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	private Collection<GridResultItem> computePatrolTrack(Connection c, 
 			GridAnalysisEngine<?> engine, 
 			String[] dataField) throws Exception{
+		
+		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom "); //$NON-NLS-1$ //$NON-NLS-2$
 		if (dataField != null){
@@ -539,7 +541,6 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		WKBReader reader = new WKBReader();
 		
 		while(rs.next()){
 			byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
@@ -551,6 +552,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				}
 			}
 			if (bytes != null){
+				WKBReader reader = new WKBReader();
 				LineString ls = (LineString) reader.read(bytes);
 				if (data != null){
 					if (data.length == 1){
@@ -618,11 +620,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		WKBReader reader = new WKBReader();
+		
 		
 		while(rs.next()){
 			byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
 			if (bytes != null){
+				WKBReader reader = new WKBReader();
 				LineString ls = (LineString) reader.read(bytes);
 				try{
 					engine.rasterizeLinestring(ls);

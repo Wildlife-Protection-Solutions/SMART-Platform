@@ -32,22 +32,26 @@ import javax.persistence.InheritanceType;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
+ * This represents entities with simple uuid field.
+ * 
+ * <p>
  * Entities which have associated name labels should
- * extend this class.  This entity has a simple uuid.
+ * extend this class or the NamedItem class.
+ * </p>
  * 
  * @author Emily
  * @since 1.0.0
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class HasLabel {
+public class UuidItem {
 	
 	private byte[] uuid;
 	
 	/**
 	 * Creates a new label class
 	 */
-	public  HasLabel(){}
+	public  UuidItem(){}
 
 	/**
 	 * 
@@ -67,8 +71,8 @@ public class HasLabel {
 	
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof HasLabel){
-			HasLabel s = (HasLabel)other;
+		if (other != null && other instanceof UuidItem){
+			UuidItem s = (UuidItem)other;
 			if (s.getUuid() == null && this.getUuid() == null){
 				return this == s;
 			}else if (s.getUuid() != null && this.getUuid() != null){

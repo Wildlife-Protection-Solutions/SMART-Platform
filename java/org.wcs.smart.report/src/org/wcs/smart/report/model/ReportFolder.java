@@ -38,7 +38,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedItem;
 
 /**
  * A report folder object
@@ -47,7 +47,7 @@ import org.wcs.smart.ca.SimpleListItem;
  */
 @Entity
 @Table(name="smart.report_folder")
-public class ReportFolder extends SimpleListItem implements IAdaptable {
+public class ReportFolder extends NamedItem implements IAdaptable {
 
 	private ReportFolder parentFolder;
 	private Employee employee;

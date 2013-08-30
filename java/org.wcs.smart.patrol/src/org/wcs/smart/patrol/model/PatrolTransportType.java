@@ -31,7 +31,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**
@@ -43,9 +43,10 @@ import org.wcs.smart.patrol.internal.Messages;
  */
 @Entity
 @Table(name = "smart.patrol_transport")
-public class PatrolTransportType extends SimpleListItem{
+public class PatrolTransportType extends NamedKeyItem{
 
 	public static final String NAME = Messages.PatrolTransportType_Name;
+	public static final String KEY = "Key";
 	
 	private boolean isActive = true;
 	private ConservationArea ca;

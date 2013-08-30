@@ -46,7 +46,9 @@ public class EmptyFilter implements IFilter {
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		return ""; //$NON-NLS-1$
 	}
-
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
+		return asSql(tableMapping);
+	}
 	@Override
 	public boolean hasCategoryFilter() {
 		return false;
