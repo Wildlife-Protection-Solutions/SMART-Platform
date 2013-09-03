@@ -1,7 +1,7 @@
 alter table smart.saved_maps drop column employee_uuid;
 
 insert into smart.ca_projection(uuid, ca_uuid, name, definition, is_default)
-values (x'00000000000000000000000000000001',x'00000000000000000000000000000000','WGS 84 [EPSG: 4326]', 'GEOGCS["WGS 84", DATUM["World Geodetic System 1984", SPHEROID["WGS 84", 6378137.0, 298.257223563, AUTHORITY["EPSG","7030"]], AUTHORITY["EPSG","6326"]], PRIMEM["Greenwich", 0.0, AUTHORITY["EPSG","8901"]], UNIT["degree", 0.017453292519943295], AXIS["Geodetic longitude", EAST], AXIS["Geodetic latitude", NORTH], AUTHORITY["EPSG","4326"]]', true)
+values (x'00000000000000000000000000000001',x'00000000000000000000000000000000','WGS 84 [EPSG: 4326]', 'GEOGCS["WGS 84", DATUM["World Geodetic System 1984", SPHEROID["WGS 84", 6378137.0, 298.257223563, AUTHORITY["EPSG","7030"]], AUTHORITY["EPSG","6326"]], PRIMEM["Greenwich", 0.0, AUTHORITY["EPSG","8901"]], UNIT["degree", 0.017453292519943295], AXIS["Geodetic longitude", EAST], AXIS["Geodetic latitude", NORTH], AUTHORITY["EPSG","4326"]]', true);
 
 
 -- ADD keys for team, mandate, and transport for cross-ca analysis
