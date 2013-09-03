@@ -11,5 +11,31 @@
             class="org.wcs.smart.dataentry.model.CmNode">
       </class>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.ca">
+         <command
+               commandId="org.wcs.smart.dataentry.showConfigurableModel"
+               label="Configurable Model ..."
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.dataentry.showConfigurableModel"
+            name="ShowConfigurableModel">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.dataentry.handlers.ShowConfigurableModelHandler"
+            commandId="org.wcs.smart.dataentry.showConfigurableModel">
+      </handler>
+   </extension>
 
 </plugin>
