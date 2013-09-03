@@ -65,7 +65,7 @@ public class PatrolType {
 	 * @since 1.0.0
 	 */
 	public enum Type {
-		GROUND(Messages.PatrolType_GroundName), MARINE(Messages.PatrolType_MarineName), AIR(Messages.PatrolType_AirName);
+		GROUND(Messages.PatrolType_GroundName), MARINE(Messages.PatrolType_WaterName), AIR(Messages.PatrolType_AirName);
 		
 		private String guiName;
 		Type(String guiName){

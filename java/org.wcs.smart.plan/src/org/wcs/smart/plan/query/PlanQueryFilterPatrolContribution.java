@@ -54,7 +54,8 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 
 	@Override
 	public IFilter createStringFilter(String key, Operator op, Object value) {
-		if (planOption.getKey().equals(key)) {
+		String fullKey = "patrol:" + planOption.getKey(); //$NON-NLS-1$
+		if (fullKey.equals(key)) {
 			return new PatrolPlanQueryFilter(planOption, op, value);
 		}
 		return null;

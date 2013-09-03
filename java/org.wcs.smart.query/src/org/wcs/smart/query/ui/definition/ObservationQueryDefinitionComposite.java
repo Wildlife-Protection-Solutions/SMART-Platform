@@ -149,7 +149,6 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		if (isInitializing) return null; //still initializing ; do not validate
 		
 		String error =null;
-		
 		String query = dropTarget.getQueryString().trim();
 		if (query.length() != 0) {
 			try {

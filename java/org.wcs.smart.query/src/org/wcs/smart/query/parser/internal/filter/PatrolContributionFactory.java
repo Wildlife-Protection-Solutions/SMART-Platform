@@ -45,10 +45,6 @@ public class PatrolContributionFactory {
 	
 	private PatrolContributionFactory() {}
 
-	private static String outerKey(String key) {
-		return key.substring(key.indexOf(':')+1);
-	}
-	
 	public static List<IQueryFilterPatrolContribution> getContributions() {
 		if (contributions == null) {
 			if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
@@ -77,9 +73,8 @@ public class PatrolContributionFactory {
 	 * @return
 	 */
 	public static IFilter createStringFilter(String key, Operator op, Object value) {
-		String outerKey = outerKey(key);
 		for (IQueryFilterPatrolContribution contribution : getContributions()) {
-			IFilter filter = contribution.createStringFilter(outerKey, op, value);
+			IFilter filter = contribution.createStringFilter(key, op, value);
 			if (filter != null) {
 				return filter;
 			}
@@ -94,9 +89,8 @@ public class PatrolContributionFactory {
 	 * @return
 	 */
 	public static IFilter createBooleanFilter(String key){
-		String outerKey = outerKey(key);
 		for (IQueryFilterPatrolContribution contribution : getContributions()) {
-			IFilter filter = contribution.createBooleanFilter(outerKey);
+			IFilter filter = contribution.createBooleanFilter(key);
 			if (filter != null) {
 				return filter;
 			}
