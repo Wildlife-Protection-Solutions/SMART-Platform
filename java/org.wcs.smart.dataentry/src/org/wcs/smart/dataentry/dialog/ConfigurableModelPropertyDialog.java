@@ -19,30 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.dataentry.handlers;
+package org.wcs.smart.dataentry.dialog;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelPropertyDialog;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
- * Handler for "Show Configurable Model" command.
+ * Dialog for editing Configurable Models.
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public class ShowConfigurableModelHandler extends AbstractHandler {
+public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDialog {
+
+	public ConfigurableModelPropertyDialog(Shell parent) {
+		super(parent, Messages.ConfigurableModelPropertyDialog_Title);
+	}
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final Shell shell = HandlerUtil.getActiveShell(event);
-		Dialog dialog = new ConfigurableModelPropertyDialog(shell);
-		dialog.open();
-		return null;
+	protected Composite createContent(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(2, false));
+		
+		setTitle(Messages.ConfigurableModelPropertyDialog_Title);
+		setMessage(Messages.ConfigurableModelPropertyDialog_Message);
+		
+		return container;
+	}
+
+	@Override
+	protected boolean performSave() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
