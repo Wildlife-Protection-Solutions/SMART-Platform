@@ -53,7 +53,7 @@ public class PatrolIntelligenceQueryFilter extends EmptyFilter {
 
 	@Override
 	public String asString() {
-		return option.getKey() + " " + op.asSmartValue() + " " + value; //$NON-NLS-1$ //$NON-NLS-2$
+		return "patrol:" + option.getKey() + " " + op.asSmartValue() + " " + value; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override

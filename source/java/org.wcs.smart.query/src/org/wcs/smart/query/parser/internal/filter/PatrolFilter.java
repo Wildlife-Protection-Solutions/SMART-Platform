@@ -30,7 +30,6 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.engine.DerbyQueryEngine2;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
@@ -210,7 +209,7 @@ public class PatrolFilter implements IFilter {
 			
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
 			String key = SmartUtils.stripQuotes((String)value);
-			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + tableMapping.get(option.getSourceClass()) + " where keyid = '" + key + "') ";
+			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + tableMapping.get(option.getSourceClass()) + " where keyid = '" + key + "') "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			
 		}
 		return ""; //$NON-NLS-1$

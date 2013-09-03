@@ -564,7 +564,7 @@ public class Messages extends NLS {
 	public static String PatrolTransportType_Name;
 	public static String PatrolType_AirName;
 	public static String PatrolType_GroundName;
-	public static String PatrolType_MarineName;
+	public static String PatrolType_WaterName;
 	public static String PatrolTypePropertyPage_ActiveLabel;
 	public static String PatrolTypePropertyPage_DefaultTransportionTypeName;
 	public static String PatrolTypePropertyPage_DeleteDialogTitle;

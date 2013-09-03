@@ -53,7 +53,8 @@ public class IntelligenceQueryFilterPatrolContribution implements IQueryFilterPa
 
 	@Override
 	public IFilter createStringFilter(String key, Operator op, Object value) {
-		if (intelligenceOption.getKey().equals(key)) {
+		String opKey = "patrol:" + intelligenceOption.getKey(); //$NON-NLS-1$
+		if (opKey.equals(key)) {
 			return new PatrolIntelligenceQueryFilter(intelligenceOption, op, value);
 		}
 		return null;
