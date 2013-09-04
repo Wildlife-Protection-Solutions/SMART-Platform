@@ -680,14 +680,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor"
-            default="true"
-            icon="platform:/plugin/org.eclipse.birt.report.designer.ui/icons/eview16/report.gif"
-            id="org.eclipse.birt.report.designer.ui.editors.ReportEditor"
-            name="%report.editor.name">
-      </editor>
-      <editor
-            class="org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor"
+            class="org.wcs.smart.birt.ui.RCPMultiPageReportEditor"
             default="true"
             icon="platform:/plugin/org.eclipse.birt.report.designer.ui/icons/eview16/library.gif"
             id="org.eclipse.birt.report.designer.ui.editors.LibraryEditor"
