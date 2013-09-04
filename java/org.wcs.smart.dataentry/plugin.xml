@@ -15,7 +15,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.ca">
+            locationURI="menu:org.wcs.smart.menu.ca?after=org.wcs.smart.ca.showDataModel">
          <command
                commandId="org.wcs.smart.dataentry.showConfigurableModel"
                label="Configurable Model ..."
