@@ -1,9 +1,11 @@
 package org.wcs.smart.upgrade.v112;
 
+import java.awt.Component;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import org.wcs.smart.upgrade.CustomProgressMonitor;
@@ -26,9 +28,28 @@ public class DataModelFixer {
 			public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 				return performDbUpgrade(file, pm);
 			}
+
+			@Override
+			public boolean checkInputFile(File file, Component dialog) {
+				File newBackupFile = getBackupFileName(file);
+				
+				if (newBackupFile.exists()){
+					int x = JOptionPane.showOptionDialog(dialog, 
+							"<html><p style='width:400px'>The output file to be created " + newBackupFile.toString() + " already exists.  Do you want to overwrite it?</p></html>", "Overwrite", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+					if (x != 0){
+						return false;
+					}
+					
+				}
+				return true;
+			}
+			
 		});
 	}
 	
+	private static File getBackupFileName(File file){
+		return new File(file.getParentFile(), file.getName().substring(0,file.getName().lastIndexOf(".")) + ".1.1.2.zip");
+	}
 	private static File performDbUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 		
 		pm.setNote("Un-compressing backup");
@@ -41,7 +62,7 @@ public class DataModelFixer {
 					"ERROR: Invalid backup file.  Does not contain smart database.");
 		}
 		
-		File newBackupFile = new File(file.getParentFile(), file.getName().substring(0,file.getName().lastIndexOf(".")) + ".1.1.2.zip");
+		File newBackupFile = getBackupFileName(file);
 		if (newBackupFile.exists()){
 			throw new Exception("The output file " +newBackupFile + " already exists.  Please move or delete this file before upgrading the database.");
 		}

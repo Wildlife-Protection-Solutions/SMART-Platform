@@ -2,10 +2,8 @@ package org.wcs.smart.upgrade;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -15,7 +13,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -27,7 +24,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ProgressMonitor;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
@@ -171,12 +167,13 @@ public class UpgradeDialog extends JFrame {
 					return;
 				}
 				if (updateAction != null){
+					if (!updateAction.checkInputFile(f, UpgradeDialog.this)){
+						return;
+					}
 					
 					final CustomProgressMonitor pm = new  CustomProgressMonitor(UpgradeDialog.this, "Performing Upgrade","");	
-//					final ProgressMonitor pm = new ProgressMonitor(UpgradeDialog.this, "Performing Upgrade", "", 0, 100);
-//					pm.setMillisToPopup(0);
-//					pm.setMillisToDecideToPopup(0);
 					pm.setProgress(0);
+
 					SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>(){
 						private Exception ex = null;
 						private File outputFile = null;
@@ -186,11 +183,11 @@ public class UpgradeDialog extends JFrame {
 								outputFile = updateAction.performUpgrade(f, pm);
 							} catch (Exception e1) {
 								ex = e1;
-								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 							return null;
 						}
+						
 						protected void done() {
 							
 							if (ex != null){
@@ -202,9 +199,10 @@ public class UpgradeDialog extends JFrame {
 							btnClose.setEnabled(true);
 							btnUpgrade.setEnabled(true);
 							pm.setProgress(100);
-					    }};
+					    }
+					};
 					
-					    btnClose.setEnabled(false);
+					btnClose.setEnabled(false);
 					btnUpgrade.setEnabled(false);	
 					worker.execute();
 					
@@ -272,11 +270,25 @@ public class UpgradeDialog extends JFrame {
 			public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 				throw new Exception("This is not a valid 1.1.2 database export file.");
 			}
+			
+			public boolean checkInputFile(File file, Component dialog){
+				return true;
+			}
 		});
 	}
 	
 	public interface IUpgradeAction{
+		
 		public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception;
+		
+		/**
+		 * Called from the GUI thread before the upgrade is performed.  Input files
+		 * and output files should be checked
+		 * 
+		 * @param file input file
+		 * @return <code>true</code> if upgrade to continue, <code>false</code> otherwsie
+		 */
+		public boolean checkInputFile(File file, Component dialog);
 		
 	}
 }
