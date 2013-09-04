@@ -1,0 +1,87 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.dataentry.dialog;
+
+import java.util.List;
+
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+
+/**
+ * Content provided for configurable data model tree.
+ * 
+ * @author elitvin
+ * @since 2.0.0
+ */
+public class ConfigurableModelTreeContentProvider implements ITreeContentProvider {
+
+	private ConfigurableModel model;
+	
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		model = (ConfigurableModel) newInput;
+	}
+
+	@Override
+	public Object[] getElements(Object inputElement) {
+		if (inputElement instanceof ConfigurableModel) {
+			ConfigurableModel cm = (ConfigurableModel) inputElement;
+			List<CmNode> nodes = cm.getNodes();
+			return nodes == null ? new Object[]{} : nodes.toArray();
+		}
+		return new Object[]{};
+	}
+
+	@Override
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof CmNode) {
+			CmNode n = (CmNode) parentElement;
+			List<CmNode> nodes = n.getChildren();
+			return nodes == null ? new Object[]{} : nodes.toArray();
+		}
+		return new Object[]{};
+	}
+
+	@Override
+	public Object getParent(Object element) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasChildren(Object element) {
+		if (element instanceof CmNode) {
+			CmNode n = (CmNode) element;
+			List<CmNode> nodes = n.getChildren();
+			return nodes != null && !nodes.isEmpty();
+		}
+		return false;
+	}
+
+	@Override
+	public void dispose() {
+		//nothing
+	}
+	
+}

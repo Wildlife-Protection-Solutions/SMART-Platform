@@ -21,10 +21,18 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
+import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 
@@ -33,9 +41,12 @@ import org.wcs.smart.ca.NamedItem;
  * @author elitvin
  * @since 2.0.0
  */
+@Entity
+@Table(name = "smart.configurable_model")
 public class ConfigurableModel extends NamedItem {
 
     private ConservationArea conservationArea;
+    private List<CmNode> nodes; //the root nodes for the data model
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -46,5 +57,15 @@ public class ConfigurableModel extends NamedItem {
     public void setConservationArea(ConservationArea conservationArea) {
         this.conservationArea = conservationArea;
     }
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="model", orphanRemoval=true, cascade={CascadeType.ALL})
+	@Where(clause = "parent_node_uuid is null")
+	@OrderBy(clause = "node_order")
+	public List<CmNode> getNodes() {
+		return nodes;
+	}
+	public void setNodes(List<CmNode> nodes) {
+		this.nodes = nodes;
+	}
     
 }
