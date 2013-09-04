@@ -48,13 +48,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
+import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
-import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
 
@@ -83,7 +83,7 @@ public class ReportView extends ViewPart implements IReportListener{
 		
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
-				IReportEngine engine = ReportManager.getReportEngine();
+				IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
 				
 				IRunAndRenderTask task = engine.createRunAndRenderTask(design);

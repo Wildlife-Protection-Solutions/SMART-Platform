@@ -19,35 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.plan.ui.handlers;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
-
+import org.wcs.smart.plan.report.ReportPlan;
 /**
- * Edit birt report library handler.
+ * Handler to revert changes to plan template.
  * 
- * @author egouge
+ * @author Emily
+ * @since 2.0.0
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class RevertPlanTemplate extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
+		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm", "All changes to the plan template will be lost.  Are you sure you want to revert to the default template?");
+		if (revert){
+			if (ReportPlan.getCustomPlanTemplateLocation() != null){
+				ReportPlan.getCustomPlanTemplateLocation().delete();
+			}
+		}
 		return null;
 	}
 

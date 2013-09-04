@@ -19,36 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.birt.ui;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * Edit birt report library handler.
+ * Basic manager that calls the default editor doSave function.
  * 
- * @author egouge
+ * @author Emily
+ * @since 2.0.0
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class BasicReportEditorManager implements IReportEditorManager {
+
+	private RCPMultiPageReportEditor editor;
+	
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		editor.doSaveParent(monitor);
+	}
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
-		return null;
+	public void doSaveAs() {
+	}
+
+	@Override
+	public void dispose() {
+	}
+
+	@Override
+	public void addPages() {
+	}
+
+	@Override
+	public void init(RCPMultiPageReportEditor editor) {
+		this.editor = editor;
 	}
 
 }

@@ -19,36 +19,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.birt.ui;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * Edit birt report library handler.
+ * Interface for report edit manager.  The report edit manager
+ * is responsible for managin the report edit session.  It 
+ * deals with the save, saveAs events.  Additional functionality can be added to the init, 
+ * addPages, and dispose events as well.
  * 
- * @author egouge
+ * @author Emily
+ * @since 2.0.0
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public interface IReportEditorManager {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
-		return null;
-	}
-
+	public static final String EXTENSION_ID="org.wcs.smart.birt.reportEditorManager"; //$NON-NLS-1$
+	
+	/**
+	 * Called when the editor save function is called.
+	 * 
+	 * @param monitor
+	 */
+	void doSave(IProgressMonitor monitor);
+	
+	/**
+	 * Called when the editor saveAs function is called.
+	 */
+	void doSaveAs();
+	
+	/**
+	 * Called before the editor dispose function is called.
+	 */
+	void dispose();
+	
+	/**
+	 * Called after the editor addPages() function is called
+	 */
+	void addPages();
+	
+	/**
+	 * Called when the editor init function called 
+	 * @param editor
+	 */
+	void init(RCPMultiPageReportEditor editor);
 }

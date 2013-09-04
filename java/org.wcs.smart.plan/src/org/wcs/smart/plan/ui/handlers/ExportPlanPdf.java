@@ -19,35 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.plan.ui.handlers;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
-
+import org.wcs.smart.plan.report.ReportPlan;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 /**
- * Edit birt report library handler.
+ * Handler for exporting plans to pdf files.
  * 
- * @author egouge
+ * @author Emily
+ * @since 2.0.0
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class ExportPlanPdf extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
+		PlanEditorInput in = null;
+		if (event.getCommand().getId().equals("org.wcs.smart.plan.exportPdfEditor")){
+			IEditorInput ein = HandlerUtil.getActiveEditor(event).getEditorInput();
+			if (ein instanceof PlanEditorInput){
+				in = (PlanEditorInput) ein;
+			}
+		}else{
+			final IStructuredSelection lastSelection = (IStructuredSelection) HandlerUtil.getCurrentSelection(event);
+			if (lastSelection != null && lastSelection.getFirstElement() instanceof PlanEditorInput){
+				in = (PlanEditorInput) lastSelection.getFirstElement();	
+			}			
+		}
+		
+		
+		if (in != null){
+			ReportPlan.exportPlan(in.getUuid());
+		}
 		return null;
 	}
 

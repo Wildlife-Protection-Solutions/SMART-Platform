@@ -14,7 +14,8 @@ Require-Bundle: org.wcs.smart,
  org.eclipse.birt.report.designer.ui.editors;bundle-version="3.7.2",
  org.eclipse.ui.forms;bundle-version="3.5.100",
  com.lowagie.itext;bundle-version="2.1.7",
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.wcs.smart.birt;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.report.ReportPlugIn
 Bundle-Vendor: org.wcs.smart

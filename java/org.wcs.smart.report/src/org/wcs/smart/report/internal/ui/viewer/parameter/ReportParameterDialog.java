@@ -92,7 +92,9 @@ public class ReportParameterDialog extends TitleAreaDialog {
 		
 		for(IBirtParameterComponent param: params){
 			Composite c = param.createComposite(comp, dialogSettings);
-			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.widthHint = 200;
+			c.setLayoutData(gd);
 		}
 		
 		super.getShell().setText(Messages.ReportParameterDialog_DialogTitle);

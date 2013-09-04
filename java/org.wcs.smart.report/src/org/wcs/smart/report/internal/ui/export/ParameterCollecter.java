@@ -36,6 +36,7 @@ import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.viewer.parameter.BooleanParameterComponent;
@@ -46,7 +47,6 @@ import org.wcs.smart.report.internal.ui.viewer.parameter.NumberParameterComponen
 import org.wcs.smart.report.internal.ui.viewer.parameter.ReportParameterDialog;
 import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.StringParameterComponent;
-import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -88,12 +88,9 @@ public class ParameterCollecter {
 	 */
 	private void getParameters(Report r) throws Exception{
 		
-		IReportEngine engine = ReportManager.getReportEngine();
+		IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
 		final IReportRunnable design = engine.openReportDesign(r.getFullReportFilename().getAbsolutePath());
-		
-	
-		
 		final IGetParameterDefinitionTask paramDefnTask = engine.createGetParameterDefinitionTask( design );
 		Collection<?> parameters = paramDefnTask.getParameterDefns(true);
 		

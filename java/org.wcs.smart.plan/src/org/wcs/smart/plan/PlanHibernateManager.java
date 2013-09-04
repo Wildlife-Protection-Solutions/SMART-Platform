@@ -396,7 +396,7 @@ public class PlanHibernateManager{
 	}
 
 	/**
-	 * Returns all patrols directory associated with a given plan.
+	 * Returns all patrols directly associated with a given plan.
 	 *  
 	 * @param plan
 	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.

@@ -19,36 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.plan.report.oda.ui;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
+import java.util.Properties;
 
+import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSourceWizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 /**
- * Edit birt report library handler.
+ * SMART Plan datasource wizard page.
  * 
- * @author egouge
+ * @author Emily
+ * @since 2.0.0
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class SmartPlanDataSourceWizardPage extends DataSourceWizardPage {
+
+	Properties p = new Properties();
+	public SmartPlanDataSourceWizardPage(String pageName) {
+		super(pageName);
+	}
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
-		return null;
+	public Properties collectCustomProperties() {
+		return p;
+	}
+
+	@Override
+	public void createPageCustomControl(Composite arg0) {
+		Label lbl = new Label(arg0, SWT.NONE);
+		lbl.setText("This data source is not configurable.");
+	}
+
+	@Override
+	public void setInitialProperties(Properties prop) {
+		this.p = prop;
+
 	}
 
 }

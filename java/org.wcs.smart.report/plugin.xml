@@ -837,4 +837,15 @@
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
    </extension>
+   <extension
+         point="org.wcs.smart.birt.reportEditorManager">
+      <EditorManager
+            EditorInput="org.wcs.smart.report.ui.SmartReportEditorInput"
+            EditorManager="org.wcs.smart.report.internal.ui.designer.ReportEditorManager">
+      </EditorManager>
+      <EditorManager
+            EditorInput="org.wcs.smart.report.ui.SmartLibraryEditorInput"
+            EditorManager="org.wcs.smart.birt.ui.BasicReportEditorManager">
+      </EditorManager>
+   </extension>
 </plugin>
