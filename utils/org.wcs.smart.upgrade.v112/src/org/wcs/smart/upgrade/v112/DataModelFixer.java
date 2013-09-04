@@ -38,6 +38,12 @@ public class DataModelFixer {
 							"<html><p style='width:400px'>The output file to be created " + newBackupFile.toString() + " already exists.  Do you want to overwrite it?</p></html>", "Overwrite", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
 					if (x != 0){
 						return false;
+					}else{
+						if (!newBackupFile.delete()){
+							JOptionPane.showMessageDialog(dialog, "Could not delete file.","Upgrade", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}
+						return true;
 					}
 					
 				}
