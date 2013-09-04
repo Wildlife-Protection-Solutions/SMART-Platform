@@ -21,12 +21,18 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
+import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
 
@@ -34,12 +40,15 @@ import org.wcs.smart.ca.datamodel.Category;
  * @author elitvin
  * @since 2.0.0
  */
+@Entity
+@Table(name = "smart.cm_node")
 public class CmNode extends NamedItem {
 
 	private ConfigurableModel model; 
 	private Category category; 
 	private CmNode parent;
 	private int nodeOrder;
+	private List<CmNode> children;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -79,5 +88,18 @@ public class CmNode extends NamedItem {
 	public void setNodeOrder(int nodeOrder) {
 		this.nodeOrder = nodeOrder;
 	}
-    
+
+	
+	/**
+	 * @return all children nodes; <code>null</code> if leaf node
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OrderBy(clause = "node_order")
+	public List<CmNode> getChildren() {
+		return this.children;
+	}
+	public void setChildren(List<CmNode> children) {
+		this.children = children;
+	}
+	
 }

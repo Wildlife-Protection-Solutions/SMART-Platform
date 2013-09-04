@@ -1,0 +1,125 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.dataentry;
+
+import java.util.List;
+
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
+
+/**
+ * Dataentry related database functions.
+ * 
+ * @author elitvin
+ * @since 2.0.0
+ */
+public class DataentryHibernateManager extends HibernateManager {
+
+	/**
+	 * Returns all ConfigurableModels
+	 * 
+	 * @param session
+	 * @return all ConfigurableModels
+	 */
+	public static List<ConfigurableModel> getConfigurableModels(Session session) {
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<ConfigurableModel> list = query.list();
+		return list;
+	}
+
+	/**
+	 * Returns all ConfigurableModels
+	 * 
+	 * @param session
+	 * @return all ConfigurableModels
+	 */
+	public static ConfigurableModel getFullConfigurableModel(ConfigurableModel model) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			session.refresh(model);
+			fetchNodesData(model.getNodes());
+			return model;
+		} finally {
+			session.close();
+		}
+	}
+
+	private static void fetchNodesData(List<CmNode> nodes) {
+		if (nodes == null)
+			return;
+		for (CmNode cmNode : nodes) {
+			fetchNodesData(cmNode.getChildren());
+		}
+	}
+	
+	/**
+	 * Saves a given ConfigurableModel to the database.
+	 * 
+	 * @param model the ConfigurableModel to save
+	 * @return <code>true</code> if saved successfully, <code>false</code> if error
+	 */
+	public static boolean saveConfigurableModel(ConfigurableModel model) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			return saveConfigurableModel(model, session);
+		} finally {
+			session.close();
+		}
+	}
+
+	/**
+	 * Saves a given ConfigurableModel to the database.
+	 * 
+	 * @param model the ConfigurableModel to save
+	 * @param session session
+	 * @return <code>true</code> if saved successfully, <code>false</code> if error
+	 */
+	public static boolean saveConfigurableModel(ConfigurableModel model, Session session) {
+		session.beginTransaction();
+		try {
+			//save a name
+			if (model.getName() != null) {
+				model.updateName(SmartDB.getCurrentLanguage(), model.getName());
+			}
+			session.saveOrUpdate(model);
+			session.getTransaction().commit();
+			return true;
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.DataentryHibernateManager_ConfigurableModel_Save_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			return false;
+		}
+	}
+	
+}
