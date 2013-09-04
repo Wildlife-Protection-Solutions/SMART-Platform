@@ -1,0 +1,1317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408></property>
+    <text-property name="title">New Report</text-property>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">queryText</property>
+            <property name="id">236</property>
+        </structure>
+    </list-property>
+    <parameters>
+        <scalar-parameter name="PlanID" id="13">
+            <property name="valueType">static</property>
+            <property name="isRequired">true</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="PlanName" id="15">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="PlanDescription" id="16">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="PlanType" id="17">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="UnavaliableEmployees" id="18">
+            <property name="valueType">static</property>
+            <property name="dataType">integer</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="AvaliableEmployees" id="111">
+            <property name="valueType">static</property>
+            <property name="dataType">integer</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="ParentPlan" id="19">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="StartDate" id="20">
+            <property name="valueType">static</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="EndDate" id="21">
+            <property name="valueType">static</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Station" id="22">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Team" id="23">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Patrols" id="24">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.wcs.smart.plan.report.oda.SmartPlanDriver" name="SMART Plans" id="234"/>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.wcs.smart.plan.report.oda.SmartPlanTargets" name="Smart Plan Targets" id="235">
+            <text-property name="displayName">Smart Plan Targets</text-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">TargetName</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Target Name</text-property>
+                    <text-property name="heading">Target Name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">TargetDescription</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Target Description</text-property>
+                    <text-property name="heading">Target Description</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">StatusDescription</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Status Description</text-property>
+                    <text-property name="heading">Status Description</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Status</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Status</text-property>
+                    <text-property name="heading">Status</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">PlanId</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Plan Id</text-property>
+                    <text-property name="heading">Plan Id</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Plan ID</property>
+                    <property name="paramName">PlanID</property>
+                    <property name="nativeName">Plan ID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">TargetName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">TargetDescription</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">StatusDescription</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">PlanId</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">SMART Plans</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">TargetName</property>
+                    <property name="nativeName">TargetName</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">TargetDescription</property>
+                    <property name="nativeName">TargetDescription</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">StatusDescription</property>
+                    <property name="nativeName">StatusDescription</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">Status</property>
+                    <property name="nativeName">Status</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">PlanId</property>
+                    <property name="nativeName">PlanId</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[plan]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>Plan ID</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Unknown</design:nullability>
+        </design:attributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>TargetName</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Target Name</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Target Name</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>TargetDescription</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Target Description</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Target Description</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>StatusDescription</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Status Description</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Status Description</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>Status</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Status</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Status</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>PlanId</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Plan Id</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Plan Id</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+        <oda-data-set extensionID="org.wcs.smart.plan.report.oda.SmartPlanTargets" name="SubPlan Targets" id="236">
+            <text-property name="displayName">Smart Plan Targets</text-property>
+            <property name="nullsOrdering">nulls lowest</property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">TargetName</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Target Name</text-property>
+                    <text-property name="heading">Target Name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">TargetDescription</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Target Description</text-property>
+                    <text-property name="heading">Target Description</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">StatusDescription</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Status Description</text-property>
+                    <text-property name="heading">Status Description</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Status</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Status</text-property>
+                    <text-property name="heading">Status</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">PlanId</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Plan Id</text-property>
+                    <text-property name="heading">Plan Id</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Plan ID</property>
+                    <property name="paramName">PlanID</property>
+                    <property name="nativeName">Plan ID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">TargetName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">TargetDescription</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">StatusDescription</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Status</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">PlanId</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">SMART Plans</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">TargetName</property>
+                    <property name="nativeName">TargetName</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">TargetDescription</property>
+                    <property name="nativeName">TargetDescription</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">StatusDescription</property>
+                    <property name="nativeName">StatusDescription</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">Status</property>
+                    <property name="nativeName">Status</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">PlanId</property>
+                    <property name="nativeName">PlanId</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[subplan]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>Plan ID</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Unknown</design:nullability>
+        </design:attributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>TargetName</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Target Name</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Target Name</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>TargetDescription</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Target Description</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Target Description</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>StatusDescription</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Status Description</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Status Description</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>Status</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Status</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Status</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>PlanId</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Plan Id</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Plan Id</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+    </data-sets>
+    <page-setup>
+        <simple-master-page name="NewSimpleMasterPage" id="12">
+            <property name="headerHeight">0in</property>
+            <property name="footerHeight">0.3in</property>
+            <page-footer>
+                <text-data id="321">
+                    <property name="fontFamily">sans-serif</property>
+                    <property name="borderTopColor">#000000</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">1px</property>
+                    <property name="textAlign">right</property>
+                    <expression name="valueExpr">new Date()</expression>
+                    <property name="contentType">html</property>
+                </text-data>
+            </page-footer>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <text-data id="42">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">14pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="marginBottom">0pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">params["PlanName"].value</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <text-data id="310">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="marginBottom">5pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">params["PlanID"].value</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <label id="43">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingLeft">1pt</property>
+            <property name="paddingBottom">5pt</property>
+            <text-property name="text">Plan Summary</text-property>
+        </label>
+        <grid id="44">
+            <property name="fontFamily">sans-serif</property>
+            <property name="marginTop">5pt</property>
+            <property name="width">7.947916666666667in</property>
+            <column id="45">
+                <property name="width">0.8958333333333334in</property>
+            </column>
+            <column id="46">
+                <property name="width">3.0208333333333335in</property>
+            </column>
+            <column id="47">
+                <property name="width">1.5833333333333333in</property>
+            </column>
+            <column id="48">
+                <property name="width">2.4479166666666665in</property>
+            </column>
+            <row id="49">
+                <cell id="50">
+                    <label id="74">
+                        <text-property name="text">Plan ID:</text-property>
+                    </label>
+                </cell>
+                <cell id="51">
+                    <data id="84">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">PlanID</property>
+                                <expression name="expression" type="javascript">params["PlanID"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">PlanID</property>
+                    </data>
+                </cell>
+                <cell id="52">
+                    <label id="79">
+                        <text-property name="text">Plan Type:</text-property>
+                    </label>
+                </cell>
+                <cell id="53">
+                    <data id="93">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">PlanType</property>
+                                <expression name="expression" type="javascript">params["PlanType"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">PlanType</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="54">
+                <cell id="55">
+                    <label id="75">
+                        <text-property name="text">Plan Name:</text-property>
+                    </label>
+                </cell>
+                <cell id="56">
+                    <data id="85">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">PlanName</property>
+                                <expression name="expression" type="javascript">params["PlanName"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">PlanName</property>
+                    </data>
+                </cell>
+                <cell id="57">
+                    <label id="80">
+                        <text-property name="text">Unavaliable Employees:</text-property>
+                    </label>
+                </cell>
+                <cell id="58">
+                    <data id="92">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">UnavaliableEmployees</property>
+                                <expression name="expression" type="javascript">params["UnavaliableEmployees"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">UnavaliableEmployees</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="59">
+                <cell id="60">
+                    <label id="76">
+                        <text-property name="text">Description:</text-property>
+                    </label>
+                </cell>
+                <cell id="61">
+                    <data id="86">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">PlanDescription</property>
+                                <expression name="expression" type="javascript">params["PlanDescription"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">PlanDescription</property>
+                    </data>
+                </cell>
+                <cell id="62">
+                    <label id="109">
+                        <text-property name="text">Active Employees:</text-property>
+                    </label>
+                </cell>
+                <cell id="63">
+                    <data id="110">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">UnavaliableEmployees</property>
+                                <expression name="expression" type="javascript">params["AvaliableEmployees"]</expression>
+                                <property name="dataType">string</property>
+                                <property name="allowExport">true</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">UnavaliableEmployees</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="64">
+                <cell id="65"/>
+                <cell id="66"/>
+                <cell id="67">
+                    <label id="81">
+                        <text-property name="text">Parent Plan:</text-property>
+                    </label>
+                </cell>
+                <cell id="68">
+                    <data id="91">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">ParentPlan</property>
+                                <expression name="expression" type="javascript">params["ParentPlan"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">ParentPlan</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="69">
+                <cell id="70">
+                    <label id="77">
+                        <text-property name="text">Start Date:</text-property>
+                    </label>
+                </cell>
+                <cell id="71">
+                    <data id="87">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">StartDate</property>
+                                <expression name="expression" type="javascript">params["StartDate"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">StartDate</property>
+                    </data>
+                </cell>
+                <cell id="72">
+                    <label id="82">
+                        <text-property name="text">Station:</text-property>
+                    </label>
+                </cell>
+                <cell id="73">
+                    <data id="90">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">Team</property>
+                                <expression name="expression" type="javascript">params["Station"]</expression>
+                                <property name="dataType">string</property>
+                                <property name="allowExport">true</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">Team</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="103">
+                <cell id="104">
+                    <label id="78">
+                        <text-property name="text">End Date:</text-property>
+                    </label>
+                </cell>
+                <cell id="105">
+                    <data id="88">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">EndDate</property>
+                                <expression name="expression" type="javascript">params["EndDate"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">EndDate</property>
+                    </data>
+                </cell>
+                <cell id="106">
+                    <label id="83">
+                        <text-property name="text">Team:</text-property>
+                    </label>
+                </cell>
+                <cell id="107">
+                    <data id="108">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">Team</property>
+                                <expression name="expression" type="javascript">params["Team"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">Team</property>
+                    </data>
+                </cell>
+            </row>
+        </grid>
+        <label id="94">
+            <property name="fontFamily">sans-serif</property>
+        </label>
+        <grid id="95">
+            <property name="fontFamily">sans-serif</property>
+            <property name="width">7.947916666666667in</property>
+            <column id="96">
+                <property name="width">0.6354166666666666in</property>
+            </column>
+            <column id="97">
+                <property name="width">7.3125in</property>
+            </column>
+            <row id="98">
+                <cell id="99">
+                    <label id="101">
+                        <text-property name="text">Patrols:</text-property>
+                    </label>
+                </cell>
+                <cell id="100">
+                    <data id="102">
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">Patrols</property>
+                                <expression name="expression" type="javascript">params["Patrols"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">Patrols</property>
+                    </data>
+                </cell>
+            </row>
+        </grid>
+        <label id="272"/>
+        <label id="237">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingBottom">5pt</property>
+            <text-property name="text">Plan Targets</text-property>
+        </label>
+        <table id="238">
+            <property name="fontFamily">sans-serif</property>
+            <property name="marginTop">5pt</property>
+            <property name="width">7.947916666666667in</property>
+            <property name="dataSet">Smart Plan Targets</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">TargetName</property>
+                    <text-property name="displayName">Target Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["TargetName"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">TargetDescription</property>
+                    <text-property name="displayName">Target Description</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["TargetDescription"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">StatusDescription</property>
+                    <text-property name="displayName">Status Description</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["StatusDescription"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Status</property>
+                    <text-property name="displayName">Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Status"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">PlanId</property>
+                    <text-property name="displayName">Plan Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["PlanId"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <column id="267">
+                <property name="width">1.9895833333333333in</property>
+            </column>
+            <column id="268">
+                <property name="width">3.71875in</property>
+            </column>
+            <column id="269">
+                <property name="width">1.6145833333333333in</property>
+            </column>
+            <column id="270">
+                <property name="width">0.625in</property>
+            </column>
+            <header>
+                <row id="239">
+                    <property name="fontWeight">bold</property>
+                    <property name="borderBottomColor">#000000</property>
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">1px</property>
+                    <cell id="240">
+                        <property name="textAlign">left</property>
+                        <label id="241">
+                            <property name="marginTop">0pt</property>
+                            <text-property name="text">Target Name</text-property>
+                        </label>
+                    </cell>
+                    <cell id="242">
+                        <property name="textAlign">left</property>
+                        <label id="243">
+                            <text-property name="text">Target Description</text-property>
+                        </label>
+                    </cell>
+                    <cell id="244">
+                        <property name="textAlign">left</property>
+                        <label id="245">
+                            <text-property name="text">Status Description</text-property>
+                        </label>
+                    </cell>
+                    <cell id="246">
+                        <property name="textAlign">left</property>
+                        <label id="247">
+                            <property name="textAlign">center</property>
+                            <text-property name="text">Status</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="250">
+                    <property name="textAlign">center</property>
+                    <cell id="251">
+                        <property name="textAlign">left</property>
+                        <data id="252">
+                            <property name="resultSetColumn">TargetName</property>
+                        </data>
+                    </cell>
+                    <cell id="253">
+                        <property name="textAlign">left</property>
+                        <data id="254">
+                            <property name="resultSetColumn">TargetDescription</property>
+                        </data>
+                    </cell>
+                    <cell id="255">
+                        <property name="textAlign">left</property>
+                        <data id="256">
+                            <property name="resultSetColumn">StatusDescription</property>
+                        </data>
+                    </cell>
+                    <cell id="257">
+                        <property name="textAlign">center</property>
+                        <image id="320">
+                            <property name="height">0.16666666666666666in</property>
+                            <property name="width">0.16666666666666666in</property>
+                            <method name="onCreate"><![CDATA[if (this.getRowData().getColumnValue("Status") == "C"){
+	this.imageName = "tick.png"
+}else{
+	this.imageName = "cross.png"
+}]]></method>
+                            <property name="source">embed</property>
+                            <property name="imageName">cross.png</property>
+                        </image>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="261">
+                    <cell id="262">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="263">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="264">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="265">
+                        <property name="textAlign">left</property>
+                    </cell>
+                </row>
+            </footer>
+        </table>
+        <label id="273"/>
+        <label id="274">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingLeft">1pt</property>
+            <property name="paddingBottom">5pt</property>
+            <text-property name="text">SubPlan Targets</text-property>
+        </label>
+        <table id="275">
+            <property name="fontFamily">sans-serif</property>
+            <property name="marginTop">5pt</property>
+            <property name="textAlign">center</property>
+            <property name="width">7.979166666666667in</property>
+            <property name="dataSet">SubPlan Targets</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">TargetName</property>
+                    <text-property name="displayName">Target Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["TargetName"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Status</property>
+                    <text-property name="displayName">Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Status"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">PlanId</property>
+                    <text-property name="displayName">Plan Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["PlanId"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">StatusDescription</property>
+                    <text-property name="displayName">Status Description</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["StatusDescription"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">TargetDescription</property>
+                    <text-property name="displayName">Target Description</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["TargetDescription"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <list-property name="sort">
+                <structure>
+                    <expression name="key" type="javascript">row["PlanId"]</expression>
+                    <property name="direction">asc</property>
+                    <property name="strength">-1</property>
+                </structure>
+            </list-property>
+            <column id="304">
+                <property name="width">1.2083333333333333in</property>
+            </column>
+            <column id="305">
+                <property name="width">1.9791666666666667in</property>
+            </column>
+            <column id="306">
+                <property name="width">2.34375in</property>
+            </column>
+            <column id="307">
+                <property name="width">1.7083333333333333in</property>
+            </column>
+            <column id="308">
+                <property name="width">0.6145833333333334in</property>
+            </column>
+            <header>
+                <row id="276">
+                    <property name="borderBottomColor">#000000</property>
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">1px</property>
+                    <cell id="277">
+                        <property name="textAlign">left</property>
+                        <label id="278">
+                            <property name="fontWeight">bold</property>
+                            <property name="marginTop">0pt</property>
+                            <text-property name="text">Plan Id</text-property>
+                        </label>
+                    </cell>
+                    <cell id="279">
+                        <property name="textAlign">left</property>
+                        <label id="280">
+                            <property name="fontWeight">bold</property>
+                            <text-property name="text">Target Name</text-property>
+                        </label>
+                    </cell>
+                    <cell id="281">
+                        <property name="textAlign">left</property>
+                        <label id="282">
+                            <property name="fontWeight">bold</property>
+                            <text-property name="text">Target Description</text-property>
+                        </label>
+                    </cell>
+                    <cell id="283">
+                        <property name="textAlign">left</property>
+                        <label id="284">
+                            <property name="fontWeight">bold</property>
+                            <text-property name="text">Status Description</text-property>
+                        </label>
+                    </cell>
+                    <cell id="285">
+                        <property name="textAlign">left</property>
+                        <label id="286">
+                            <property name="fontWeight">bold</property>
+                            <property name="textAlign">center</property>
+                            <text-property name="text">Status</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="287">
+                    <cell id="288">
+                        <property name="textAlign">left</property>
+                        <data id="297">
+                            <property name="resultSetColumn">PlanId</property>
+                        </data>
+                    </cell>
+                    <cell id="290">
+                        <property name="textAlign">left</property>
+                        <data id="319">
+                            <property name="resultSetColumn">TargetName</property>
+                        </data>
+                    </cell>
+                    <cell id="292">
+                        <property name="textAlign">left</property>
+                        <data id="293">
+                            <property name="resultSetColumn">TargetDescription</property>
+                        </data>
+                    </cell>
+                    <cell id="294">
+                        <property name="textAlign">left</property>
+                        <data id="295">
+                            <property name="resultSetColumn">StatusDescription</property>
+                        </data>
+                    </cell>
+                    <cell id="296">
+                        <property name="textAlign">center</property>
+                        <image id="311">
+                            <property name="height">0.16666666666666666in</property>
+                            <property name="width">0.16666666666666666in</property>
+                            <method name="onCreate"><![CDATA[if (this.getRowData().getColumnValue("Status") == "C"){
+	this.imageName = "tick.png"
+}else{
+	this.imageName = "cross.png"
+}]]></method>
+                            <property name="source">embed</property>
+                            <property name="imageName">cross.png</property>
+                        </image>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="298">
+                    <property name="textAlign">left</property>
+                    <cell id="299">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="300">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="301">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="302">
+                        <property name="textAlign">left</property>
+                    </cell>
+                    <cell id="303">
+                        <property name="textAlign">left</property>
+                    </cell>
+                </row>
+            </footer>
+        </table>
+    </body>
+    <list-property name="images">
+        <structure>
+            <property name="name">cross.png</property>
+            <property name="type">image/png</property>
+            <property name="data">
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29m
+                dHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0Jb
+                BiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC
+                184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FF
+                pSVENDe3OxDZu8apO5rROJDLo30+Nlvj5RnTlVNAKs1aCVFr7b4BPn6Cls21AWgEQlz2+Dl1h7IdA+i9
+                7A/geP65WhbmrnZZ0GIJpr6OqZqYAd5/gJpKox4Mg7pD2YoC2b0/54rJQuJZdm6Izcgma4TW1WZ0h+y8
+                BfbyJMwBmSxkjw+VObNanp5h/adwGhaTXF4NWbLj9gEONyCmUZmd10pGgf1/vwcgOT3tUQE0DdicwIod
+                2EmSbwsKE1P8QoDkcHPJ5YESjgBJkYQpIEZ2KEB51Y6y3ojvY+P8XEDN7uKS0w0ltA7QGCWHCxSWWpwy
+                aCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGt
+                Qd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf
+                3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==
+            </property>
+        </structure>
+        <structure>
+            <property name="name">tick.png</property>
+            <property name="type">image/png</property>
+            <property name="data">
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29m
+                dHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAGrSURBVDjLvZPZLkNhFIV75zjvYm7VGFNCqoZUJ+ro
+                KUUpjRuqp61Wq0NKDMelGGqOxBSUIBKXWtWGZxAvobr8lWjChRgSF//dv9be+9trCwAI/vIE/26gXmvi
+                W5bqnb8yUK028qZjPfoPWEj4Ku5HBspgAz941IXZeze8N1bottSo8BTZviVWrEh546EO03EXpuJOdG63
+                otJbjBKHkEp/Ml6yNYYzpuezWL4s5VMtT8acCMQcb5XL3eJE8VgBlR7BeMGW9Z4yT9y1CeyucuhdTGDx
+                fftaBO7G4L+zg91UocxVmCiy51NpiP3n2treUPujL8xhOjYOzZYsQWANyRYlU4Y9Br6oHd5bDh0bCpSO
+                ixJiWx71YY09J5pM/WEbzFcDmHvwwBu2wnikg+lEj4mwBe5bC5h1OUqcwpdC60dxegRmR06TyjCF9G9z
+                +qM2uCJmuMJmaNZaUrCSIi6X+jJIBBYtW5Cge7cd7sgoHDfDaAvKQGAlRZYc6ltJlMxX03UzlaRlBdQr
+                zSCwksLRbOpHUSb7pcsnxCCwngvM2Rm/ugUCi84fycr4l2t8Bb6iqTxSCgNIAAAAAElFTkSuQmCC
+            </property>
+        </structure>
+    </list-property>
+</report>

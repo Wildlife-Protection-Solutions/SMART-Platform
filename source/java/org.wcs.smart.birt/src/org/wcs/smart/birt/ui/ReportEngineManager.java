@@ -19,36 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.birt.ui;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
+import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.report.engine.api.EngineConfig;
+import org.eclipse.birt.report.engine.api.IReportEngine;
+import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 
 /**
- * Edit birt report library handler.
- * 
- * @author egouge
+ * Report engine manger for SMART
+ * @author Emily
+ * @since 2.0.0
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class ReportEngineManager {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
-		return null;
+
+	private static IReportEngine reportEngine;
+	private static final Object lock = new Object(); 
+	
+	public static IReportEngine getBirtReportEngine(){
+		if (reportEngine != null){
+			return reportEngine;
+		}
+		synchronized (lock) {
+			if (reportEngine != null){
+				return reportEngine;
+			}
+			IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
+			reportEngine = factory.createReportEngine(new EngineConfig());
+			return reportEngine;
+		}
 	}
-
+	
+	/**
+	 * Shuts down the BIRT report engine
+	 */
+	public static void endReportEngine(){
+		synchronized (lock) {
+			if (reportEngine != null){
+				reportEngine.destroy();
+				reportEngine = null;
+			}
+		}
+	}
 }

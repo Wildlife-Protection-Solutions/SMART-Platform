@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
@@ -83,7 +84,7 @@ public class RunReportJob extends Job {
 			if (reportFile == null || outputFile == null || info == null) {
 				throw new Exception(Messages.RunReportJob_Error_NoReportFile);
 			}
-			IReportEngine engine = ReportManager.getReportEngine();
+			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 
 			final IReportRunnable design = engine.openReportDesign(reportFile
 					.getAbsolutePath());

@@ -35,6 +35,26 @@
                   </or>
                </visibleWhen>
             </command>
+            <menu
+                  label="Plan Template">
+               <command
+                     commandId="org.wcs.smart.plan.editTemplate"
+                     style="push"
+                     tooltip="Edit the plan print template">
+               </command>
+               <command
+                     commandId="org.wcs.smart.plan.revertTemplate"
+                     style="push"
+                     tooltip="Reverts the plan template to the default">
+               </command>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
+            </menu>
             <separator
                   name="org.wcs.smart.plan.separator1"
                   visible="true">
@@ -162,6 +182,15 @@
                visible="true">
          </separator>
          <command
+               commandId="org.wcs.smart.plan.exportPdf"
+               style="push"
+               tooltip="Exports the selected plan to a pdf file for printing">
+         </command>
+         <separator
+               name="org.wcs.smart.plan.separator3"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.plan.DeletePlan"
                icon="images/icons/etool16/delete.png"
                label="%planlistview.popup.command.label.deleteplan2"
@@ -183,6 +212,69 @@
                         value="dataentry">
                   </test>
                </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.plan.toolbar">
+            <command
+                  commandId="org.wcs.smart.plan.exportPdfEditor"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.plan.planPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.plan.PlanReportPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.changeuserpassword">
+         <command
+               commandId="org.wcs.smart.plan.exportPdfEditor"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.plan.planPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.ui.file.save"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.plan.PlanReportPerspective">
+                  </equals>
+               </with>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -232,6 +324,70 @@
       <handler
             class="org.wcs.smart.plan.ui.handlers.TranslatePlanHandler"
             commandId="org.wcs.smart.plan.translate">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.RevertPlanTemplate"
+            commandId="org.wcs.smart.plan.revertTemplate">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.EditPlanTemplate"
+            commandId="org.wcs.smart.plan.editTemplate">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ExportPlanPdf"
+            commandId="org.wcs.smart.plan.exportPdf">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.plan.ui.editor.PlanEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ExportPlanPdf"
+            commandId="org.wcs.smart.plan.exportPdfEditor">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.plan.ui.editor.PlanEditor">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -255,6 +411,22 @@
       <command
             id="org.wcs.smart.plan.translate"
             name="%translate.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.plan.exportPdf"
+            name="Export To PDF">
+      </command>
+      <command
+            id="org.wcs.smart.plan.exportPdfEditor"
+            name="Export To PDF">
+      </command>
+      <command
+            id="org.wcs.smart.plan.revertTemplate"
+            name="Revert to Default Template">
+      </command>
+      <command
+            id="org.wcs.smart.plan.editTemplate"
+            name="Edit Plan Template">
       </command>
    </extension>
 
@@ -337,6 +509,14 @@
             commandId="org.wcs.smart.plan.DeletePlan"
             icon="images/icons/etool16/delete.png">
       </image>
+      <image
+            commandId="org.wcs.smart.plan.exportPdf"
+            icon="images/icons/etool16/printpdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.exportPdfEditor"
+            icon="images/icons/etool16/printpdf.png">
+      </image>
    </extension>
    <extension
          point="org.wcs.smart.query.filter.patrol">
@@ -368,6 +548,94 @@
             advisor="org.wcs.smart.plan.advisors.TeamDeleteAdvisor"
             class="org.wcs.smart.patrol.model.Team">
       </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.wcs.smart.birt.reportEditorManager">
+      <EditorManager
+            EditorInput="org.wcs.smart.plan.report.ReportPlanEditorInput"
+            EditorManager="org.wcs.smart.plan.report.ReportPlanManager">
+      </EditorManager>
+   </extension>
+   <extension
+         point="org.eclipse.datatools.connectivity.oda.dataSource">
+      <dataSource
+            defaultDisplayName="SMART Plan Data Source"
+            driverClass="org.wcs.smart.plan.report.oda.SmartPlanDriver"
+            id="org.wcs.smart.plan.report.oda.SmartPlanDriver"
+            odaVersion="3.0"
+            overrideExplorerFiltering="false"
+            setThreadContextClassLoader="false">
+      </dataSource>
+      <dataSet
+            defaultDisplayName="SMART Plan Targets"
+            id="org.wcs.smart.plan.report.oda.SmartPlanTargets">
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+        <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+      </dataSet>
+   </extension>
+   <extension
+         point="org.eclipse.datatools.connectivity.oda.design.ui.dataSource">
+      <dataSourceUI
+            id="org.wcs.smart.plan.report.oda.SmartPlanDriver">
+         <newDataSourceWizard
+               includesProgressMonitor="true"
+               pageClass="org.wcs.smart.plan.report.oda.ui.SmartPlanDataSourceWizardPage"
+               windowTitle="SMART Plan Data Source">
+         </newDataSourceWizard>
+      </dataSourceUI>
+      <dataSetUI
+            id="org.wcs.smart.plan.report.oda.SmartPlanTargets"
+            initialPageId="org.wcs.smart.plan.report.smartPlanTargets.page1"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Smart Plan Targets"></dataSetWizard>
+         <dataSetPage
+               displayName="SMART Plan Targets"
+               id="org.wcs.smart.plan.report.smartPlanTargets.page1"
+               path="/"
+               wizardPageClass="org.wcs.smart.plan.report.oda.ui.SmartPlanTargetDatasetWizardPage">
+         </dataSetPage>
+      </dataSetUI>
    </extension>
 
 </plugin>

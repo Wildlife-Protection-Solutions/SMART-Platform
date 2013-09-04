@@ -37,7 +37,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.manger.ReportManager;
 
 /**
  * SMART BIRT Reporting plugin
@@ -117,7 +116,6 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		ReportManager.endReportEngine();
 		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
 		QueryEventManager.getInstance().removeQuerySaveListener(queryListener);
 		plugin = null;

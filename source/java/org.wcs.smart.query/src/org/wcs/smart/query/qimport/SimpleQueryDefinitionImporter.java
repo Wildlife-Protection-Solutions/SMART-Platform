@@ -96,8 +96,8 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
-					InputStream is = new ByteArrayInputStream(part.getValue()
-							.getBytes());
+					InputStream is = new ByteArrayInputStream(part.getValue().getBytes());
+				
 					Parser parser = new Parser(is);
 					IFilter queryFilter = parser.QueryFilter();
 					is.close();

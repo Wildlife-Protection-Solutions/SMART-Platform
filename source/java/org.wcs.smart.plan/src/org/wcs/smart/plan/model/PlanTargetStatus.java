@@ -40,15 +40,17 @@ public class PlanTargetStatus{
 	 *
 	 */
 	public enum Status{
-		COMPLETE (Messages.PlanTargetStatus_Complete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_COMPLETE)),
-		INCOMPLETE(Messages.PlanTargetStatus_Incomplete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE));
+		COMPLETE (Messages.PlanTargetStatus_Complete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_COMPLETE), "C"), //$NON-NLS-1$
+		INCOMPLETE(Messages.PlanTargetStatus_Incomplete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE), "I"); //$NON-NLS-1$
 		
 		public String guiName;
 		public Image guiImage;
+		public String key;
 		
-		private Status (String defaultGuiValue, Image guiImage){
+		private Status (String defaultGuiValue, Image guiImage, String key){
 			this.guiName = defaultGuiValue;
 			this.guiImage = guiImage;
+			this.key = key;
 		}
 		
 		

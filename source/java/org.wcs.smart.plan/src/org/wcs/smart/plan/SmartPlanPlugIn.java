@@ -1,6 +1,8 @@
 package org.wcs.smart.plan;
 
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -13,6 +15,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.IPatrolDeleteHandler;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -28,6 +31,11 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 
 	// The shared instance
 	private static SmartPlanPlugIn plugin;
+	
+	/**
+	 * Directory for storing plan data in filestore
+	 */
+	public static final String PLAN_DIR = "plans"; //$NON-NLS-1$
 	
 	/**
 	 * General Image descriptor key for plan 
@@ -191,5 +199,21 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	 */
 	public int getDefaultPreferenceInt(String key){
 		return DefaultScope.INSTANCE.getNode(getBundle().getSymbolicName()).getInt(SYSPROP_PLAN_DISTANCE_TO_COMPLETE, 0);
+	}
+	
+	/**
+	 * Gets the location of plan files within the smart file store.
+	 * If the directory does not exist it will create it.
+	 * @return
+	 */
+	public File getPlanDirectory() {
+		File f =  new File(SmartDB.getCurrentConservationArea()
+				.getFileDataStoreLocation()
+				+ File.separator
+				+ SmartPlanPlugIn.PLAN_DIR + File.separator);
+		if (!f.exists()){
+			f.mkdir();
+		}
+		return f;
 	}
 }

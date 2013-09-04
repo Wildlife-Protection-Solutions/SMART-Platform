@@ -41,7 +41,7 @@ public class AttachmentUtil {
 		}
 	}
 	
-	private static final void launch(File file) {
+	public static final void launch(File file) {
 		try {
 			Program.launch(file.getCanonicalPath());
 		} catch (Exception ex) {

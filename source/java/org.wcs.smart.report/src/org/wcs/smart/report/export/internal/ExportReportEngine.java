@@ -56,12 +56,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
-import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
 
@@ -251,7 +251,7 @@ public class ExportReportEngine {
 		if (reportFile == null ){
 			throw new Exception("Cannot run report."); //$NON-NLS-1$
 		}
-		IReportEngine engine = ReportManager.getReportEngine();
+		IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
 		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
 
@@ -310,7 +310,7 @@ public class ExportReportEngine {
 	 * @return an array of support export formats
 	 */
 	public static IExportFormat[] getSupportedExportFormats(){
-		EmitterInfo[] info = ReportManager.getReportEngine().getEmitterInfo();
+		EmitterInfo[] info = ReportEngineManager.getBirtReportEngine().getEmitterInfo();
 		List<IExportFormat> formats = new ArrayList<IExportFormat>();
 		for (int i = 0; i < info.length; i ++){
 			formats.add(new BirtEmitterExportFormat(info[i]));

@@ -30,14 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.data.ui.dataset.DataSetUIUtil;
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.birt.report.engine.api.EngineConfig;
-import org.eclipse.birt.report.engine.api.IReportEngine;
-import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
@@ -52,11 +48,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.model.Report;
@@ -72,45 +68,11 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class ReportManager {
-
-	private static IReportEngine reportEngine = null;
-	private static final Object lock = new Object(); 
 	
 	public static final String SMART_DATASOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
 	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
 	public static final String SMART_DATASET_TABLE_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset"; //$NON-NLS-1$
 
-	
-	/**
-	 * 
-	 * @return the BIRT report engine
-	 */
-	public static IReportEngine getReportEngine(){
-		if (reportEngine != null){
-			return reportEngine;
-		}
-		synchronized (lock) {
-			if (reportEngine != null){
-				return reportEngine;
-			}
-			IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
-			reportEngine = factory.createReportEngine(new EngineConfig());
-			return reportEngine;
-		}
-		
-	}
-	
-	/**
-	 * Shuts down the BIRT report engine
-	 */
-	public static void endReportEngine(){
-		synchronized (lock) {
-			if (reportEngine != null){
-				reportEngine.destroy();
-				reportEngine = null;
-			}
-		}
-	}
 	
 	/**
 	 * Deletes a report folder from the database.

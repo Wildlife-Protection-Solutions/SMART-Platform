@@ -19,36 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.plan.report;
 
-import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.library.SmartBirtLibrary;
-import org.wcs.smart.report.ui.SmartLibraryEditorInput;
+import org.wcs.smart.birt.ui.BasicReportPerspective;
 
 /**
- * Edit birt report library handler.
+ * 
+ * Smart Report Designer Perspective
  * 
  * @author egouge
- *
+ * @since 1.0.0
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class PlanReportPerspective extends BasicReportPerspective {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
-		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
-		return null;
+	public static final String ID = "org.wcs.smart.plan.PlanReportPerspective"; //$NON-NLS-1$
+	
+	public PlanReportPerspective() {
+		super();
 	}
-
 }
