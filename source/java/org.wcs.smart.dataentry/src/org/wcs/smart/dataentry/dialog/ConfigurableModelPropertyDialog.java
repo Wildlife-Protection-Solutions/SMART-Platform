@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,8 +32,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -47,7 +51,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
- * Dialog for editing Configurable Models.
+ * Dialog for viewing Configurable Models.
  * 
  * @author elitvin
  * @since 1.0.0
@@ -56,6 +60,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 	private TableViewer modelListViewer;
 	private TreeViewer modelTreeViewer;
+	
+	private Button btnNew;
+	private Button btnEdit;
 
 	public ConfigurableModelPropertyDialog(Shell parent) {
 		super(parent, Messages.ConfigurableModelPropertyDialog_Title);
@@ -99,7 +106,25 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelTreeViewer.setLabelProvider(new NamedItemLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider());
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		btnNew = new Button(container, SWT.PUSH);
+		btnNew.setText("Create New Configured Data Model...");
+		btnNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO: implement
+			}
+		});
 		
+		btnEdit = new Button(container, SWT.PUSH);
+		btnEdit.setText("Edit");
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Dialog dialog = new ConfigurableModelEditDialog(Display.getDefault().getActiveShell(), (ConfigurableModel)modelTreeViewer.getInput());
+				dialog.open();
+			}
+		});
 		
 		setTitle(Messages.ConfigurableModelPropertyDialog_Title);
 		setMessage(Messages.ConfigurableModelPropertyDialog_Message);
