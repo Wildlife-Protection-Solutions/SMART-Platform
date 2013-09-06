@@ -52,7 +52,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 		if (SmartDB.isMultipleAnalysis()){
 			main.setLayout(new GridLayout());
 			Label lbl = new Label(main, SWT.NONE);
-			lbl.setText("SMART datasets are not available for cross conservation area analysis.");
+			lbl.setText(Messages.SmartAreaWizardPage_CrossCaErrorMessage); 
 			
 		}else{
 			IRunnableWithProgress runnable = new IRunnableWithProgress(){
