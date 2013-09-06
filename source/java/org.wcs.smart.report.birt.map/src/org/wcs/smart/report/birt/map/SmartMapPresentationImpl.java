@@ -25,9 +25,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -52,7 +50,10 @@ import net.refractions.udig.style.sld.SLDContent;
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.extension.IRowSet;
 import org.eclipse.birt.report.engine.extension.ReportItemPresentationBase;
+import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -60,17 +61,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.internal.settings.MapSettings;
-import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.query.model.GridResultItem;
-import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.PatrolQuery;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
-import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -141,73 +131,52 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				if (uuid != null){
 					def = HibernateManager.getBasemapDefinition(session,uuid);
 				}
-
-				List<String> mapqueries = mapItem.getLayers();
-				List<String> mapnames = mapItem.getLayerNames();
-				List<String> mapstyles = mapItem.getLayerStyles();
-
-				if (mapqueries != null){
-					for (int i = 0; i < mapqueries.size(); i++) {
-						byte[] quuid = SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]); //$NON-NLS-1$
-						QueryType qtype = QueryType.valueOf(mapqueries.get(i).split(":")[0]); //$NON-NLS-1$
-						
-						Query q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
-						GeoSmart layer = new GeoSmart();
-						layer.name = mapnames.get(i);
-						layer.dbQuery = q;
-						layer.style = mapstyles.get(i);
-						layers.add(layer);
-					}
-				}
 			} finally {
 				session.getTransaction().commit();
 				session.close();
 			}
+			List<String> mapqueries = mapItem.getLayers();
+			List<String> mapnames = mapItem.getLayerNames();
+			List<String> mapstyles = mapItem.getLayerStyles();
+			List<String> datasets = mapItem.getDatasets();
+
+			if (mapqueries != null){
+				for (int i = 0; i < mapqueries.size(); i++) {
+					String dataSet = i < datasets.size() ? datasets.get(i) : null;
+					DataSetHandle handle = null;
+					if (dataSet != null){
+						handle = ((ReportDesignHandle)super.modelHandle.getRoot()).findDataSet(dataSet);
+						if (handle == null){
+							//search for query string
+							OdaDataSetHandle[] handles = BirtMapUtils.getDataSets(super.modelHandle);
+							for (OdaDataSetHandle h : handles){
+								if (h.getQueryText().equals(mapqueries.get(i))){
+									handle = h;
+								}
+							}
+						}
+					}
+					GeoSmart layer = new GeoSmart();
+					layer.name = mapnames.get(i);
+					layer.style = mapstyles.get(i);
+					layers.add(layer);
+					layer.handle = handle;
+					IBirtMapLayerManager manager = mapItem.findMapLayerManager(handle);
+					if (manager != null){
+						layer.mapLayerManager = manager;
+						layer.georesource = layer.mapLayerManager.createLayer(layer.handle, context);
+					}
+				}
+			}
 
 			renderedMap = ProjectFactory.eINSTANCE.createMap();
-
 			if (def != null) {
 				MapSettings.getInstance(def).applyTo((Map) renderedMap);
 			}
-			
-			// create date filter
-			DateFilter dateFilter = new DateFilter(
-					DateFilter.DATE_FIELD_OP.WAYPOINT, DATE_FILTER_OP.CUSTOM,
-					(Date) context.getParameterValue(SmartReportParameters.PARAM_START_DATE_KEY),
-					(Date) context.getParameterValue(SmartReportParameters.PARAM_END_DATE_KEY));
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 			for (GeoSmart layer : layers) {
-				IService qs = QueryServiceFactory.generateQueryService(layer.dbQuery);
-				if (qs != null) {
-					boolean add = true;
-					layer.service = qs;
-					if (Query.class.isAssignableFrom( layer.dbQuery.getClass() )){
-						((Query)layer.dbQuery).setDateFilter(dateFilter);
-					}
-					if (layer.dbQuery instanceof ObservationQuery) {
-						((ObservationQuery) layer.dbQuery).setDateFilter(dateFilter);
-						((ObservationQuery) layer.dbQuery)
-								.getPagedQueryResults(new NullProgressMonitor());
-					} else if (layer.dbQuery instanceof PatrolQuery) {
-						((PatrolQuery) layer.dbQuery).setDateFilter(dateFilter);
-						((PatrolQuery) layer.dbQuery)
-								.getQueryResults(new NullProgressMonitor());
-					} else if (layer.dbQuery instanceof GriddedQuery ){
-						((GriddedQuery)layer.dbQuery).setDateFilter(dateFilter);
-						Collection<GridResultItem> data = ((GriddedQuery) layer.dbQuery).getQueryResults(new NullProgressMonitor());
-						if (data.size() <= 0){
-							add = false;
-						}
-					}
-					if (add){
-						List<? extends IGeoResource> resources = qs.resources(null);
-						if (resources.size() > 0){
-							layer.georesource = resources.get(0);
-							toAdd.add(layer.georesource);
-						}
-					}
-					
-					
+				if (layer.georesource != null){
+					toAdd.addAll(layer.georesource);
 				}
 			}
 			
@@ -216,13 +185,17 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			for (Layer l : cmd.getLayers()) {
 				//setup name and style
 				for (GeoSmart smrt : layers){
-					if (smrt.georesource != null && smrt.georesource.equals(l.getGeoResource())){
-						l.setName(smrt.name);
-						if (smrt.style != null){
-							Object st = BirtMapUtils.mementoToStyle(smrt.style);
-							if (st != null) {
-								l.getStyleBlackboard().put(SLDContent.ID, st);
-							}
+					if (smrt.georesource != null){	
+						for (IGeoResource r : smrt.georesource){
+						  if (r.equals(l.getGeoResource())){
+							  l.setName(smrt.name);
+							  if (smrt.style != null){
+								  Object st = BirtMapUtils.mementoToStyle(smrt.style);
+								  if (st != null) {
+									  l.getStyleBlackboard().put(SLDContent.ID, st);
+								  }
+							  }
+						  }
 						}
 					}
 				}
@@ -267,10 +240,16 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			NullProgressMonitor monitor = new NullProgressMonitor();
 			for (GeoSmart layer: layers) {
 				if (layer.georesource != null){
-					layer.georesource.dispose(monitor);
+					for (IGeoResource resource : layer.georesource){
+						IService service = resource.service(monitor);
+						if (service != null ){
+							service.dispose(monitor);
+							CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+						}
+						resource.dispose(monitor);
+					}
 				}
-				layer.service.dispose(monitor);
-				CatalogPlugin.getDefault().getLocalCatalog().remove(layer.service);
+				
 			}
 
 			ImageIO.setUseCache(false);
@@ -292,10 +271,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	//structure for aggregating smart
 	class GeoSmart{
 		String name;
-		Query dbQuery;
-		IGeoResource georesource;
+		IBirtMapLayerManager mapLayerManager;
+		DataSetHandle handle;
+		List<IGeoResource> georesource;
 		Layer layer;
-		IService service;
 		String style;
 		
 	}

@@ -47,16 +47,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.styling.Style;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Style cell editor for styles
@@ -87,9 +80,8 @@ public class StyleCellEditor extends DialogCellEditor {
 
 		try {
 			map = ProjectFactory.eINSTANCE.createMap();
-			LayerDefinition mapLayer = (LayerDefinition) super.getValue();
+			final LayerDefinition mapLayer = (LayerDefinition) super.getValue();
 			final OdaDataSetHandle ds = mapLayer.handle;
-			
 			final Object style = mapLayer.style != null ? BirtMapUtils.mementoToStyle(mapLayer.style) : null;
 
 			Job j = new Job(Messages.StyleCellEditor_CreateMapLayerJobName) {
@@ -99,35 +91,24 @@ public class StyleCellEditor extends DialogCellEditor {
 					// add a layer to the map
 
 					try {
-						Session session = HibernateManager.openSession();
-						session.beginTransaction();
-						Query q = null;
-						try {
-							q = QueryHibernateManager.getInstance().findQuery(session,
-									SmartUtils.decodeHex(ds.getQueryText().split(":")[1]), //$NON-NLS-1$
-									QueryType.valueOf(ds.getQueryText().split(":")[0])); //$NON-NLS-1$
-						} finally {
-							session.getTransaction().commit();
-							session.close();
-						}
-						qs = QueryServiceFactory.generateQueryService(q);
+						if (mapLayer.mapLayer != null){
+							List<? extends IGeoResource> resources = mapLayer.mapLayer.createLayer(ds, null);
+							IGeoResource iGeoResource = (IGeoResource) resources.get(0);
+							ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
+							thisresources.add(iGeoResource);
+							
+							AddLayersCommand cmd = new AddLayersCommand(resources);
+							map.executeSyncWithoutUndo(cmd);
+							layer = cmd.getLayers().get(0);
 						
-						List<? extends IGeoResource> resources = qs.resources(null);
-						IGeoResource iGeoResource = (IGeoResource) resources.get(0);
-						ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
-						thisresources.add(iGeoResource);
-						AddLayersCommand cmd = new AddLayersCommand(resources);
-						map.executeSyncWithoutUndo(cmd);
-						layer = cmd.getLayers().get(0);
-						
-						Object lstyle = style;
-						if (lstyle == null){
-							//lets see if we can get a style from the georesource
-							lstyle = (Style)iGeoResource.resolve(Style.class, new NullProgressMonitor());
-						}
-						if (style != null) {
-							layer.getStyleBlackboard()
-									.put(SLDContent.ID, lstyle);
+							Object lstyle = style;
+							if (lstyle == null){
+								//lets see if we can get a style from the georesource
+								lstyle = (Style)iGeoResource.resolve(Style.class, new NullProgressMonitor());
+							}
+							if (style != null) {
+								layer.getStyleBlackboard().put(SLDContent.ID, lstyle);
+							}
 						}
 					} catch (Exception ex) {
 						SmartMapItemPlugIn.displayLog(Messages.StyleCellEditor_Error_CouldNotCreateStyleEditor + ex.getMessage(), ex);
