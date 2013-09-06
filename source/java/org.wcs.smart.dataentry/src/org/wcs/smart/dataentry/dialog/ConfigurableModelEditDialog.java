@@ -29,8 +29,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -48,8 +56,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private Button btnAddCategory;
 	private Button btnDelete;
 	
-	public ConfigurableModelEditDialog(Shell parent, ConfigurableModel model) {
-		super(parent, "Configured Data Model");
+	public ConfigurableModelEditDialog(ConfigurableModel model) {
+		super(Display.getDefault().getActiveShell(), "Configured Data Model");
 		this.model = model;
 	}
 
@@ -81,6 +89,18 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		btnAddCategory.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try {
+					DataModel dm = getDataModel(s);
+					DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
+					dialog.open();
+				} catch (Exception ex) {
+					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
+				} finally {
+					s.getTransaction().rollback();
+					s.close();
+				}
 				//TODO: implement
 			}
 		});
@@ -107,4 +127,26 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		return false;
 	}
 
+	private DataModel getDataModel(Session session) {
+		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+		//load into memory; no-lazy loading here.
+		for (Category cat: dataModel.getCategories()){
+			visitCategory(cat);
+		}
+		for (Attribute att: dataModel.getAttributes()){
+			att.getAggregations().size();
+		}
+		return dataModel;
+	}
+	
+	private void visitCategory(Category cat){
+		for (Category child : cat.getActiveChildren()){
+			visitCategory(child);
+			child.getName();
+		}
+//		for (CategoryAttribute ca: cat.getAttributes()){
+//			ca.getAttribute().getName();
+//		}	
+	}
+	
 }

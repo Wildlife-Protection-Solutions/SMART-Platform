@@ -121,7 +121,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Dialog dialog = new ConfigurableModelEditDialog(Display.getDefault().getActiveShell(), (ConfigurableModel)modelTreeViewer.getInput());
+				Dialog dialog = new ConfigurableModelEditDialog((ConfigurableModel)modelTreeViewer.getInput());
 				dialog.open();
 			}
 		});
