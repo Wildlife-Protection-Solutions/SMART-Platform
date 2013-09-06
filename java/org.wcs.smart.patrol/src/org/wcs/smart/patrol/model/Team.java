@@ -45,7 +45,7 @@ public class Team extends NamedDescriptionKeyItem{
 	public static final String NAME = Messages.Team_Name;
 	public static final String DESCRIPTION = Messages.Team_DescriptionFieldName;
 	public static final String MANDATE = Messages.Team_MandateFieldName;
-	public static final String KEY = "Key";
+	public static final String KEY = Messages.Team_KeyFieldName;
 	
 	public static final int MAX_NAME_LENGTH = 64;
 	

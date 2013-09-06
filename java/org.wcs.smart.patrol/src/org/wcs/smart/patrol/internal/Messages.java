@@ -473,6 +473,7 @@ public class Messages extends NLS {
 	public static String PatrolManager_Progress_DeletingPatrol1;
 	public static String PatrolManager_Progress_RemovingFileStore;
 	public static String PatrolManager_Progress_SubDeletingPatrol;
+	public static String PatrolMandate_MandateKey;
 	public static String PatrolMandate_MandateName;
 	public static String PatrolMandateComposite_Error_LoadingMandates;
 	public static String PatrolMandateComposite_Mandate_Label;
@@ -561,6 +562,7 @@ public class Messages extends NLS {
 	public static String PatrolTransportComposite_Error_NoTransportType;
 	public static String PatrolTransportComposite_Title;
 	public static String PatrolTransportComposite_TransportType_Lable;
+	public static String PatrolTransportType_Key;
 	public static String PatrolTransportType_Name;
 	public static String PatrolType_AirName;
 	public static String PatrolType_GroundName;
@@ -612,6 +614,7 @@ public class Messages extends NLS {
 	public static String StationTeamWizardPage_PageMessage;
 	public static String StationTeamWizardPage_Title;
 	public static String Team_DescriptionFieldName;
+	public static String Team_KeyFieldName;
 	public static String Team_MandateFieldName;
 	public static String Team_Name;
 	public static String TeamComposite_Error_CouldNotLoadTeams;
@@ -632,6 +635,7 @@ public class Messages extends NLS {
 	public static String TeamPropertyPage_Error_LoadingMandates;
 	public static String TeamPropertyPage_Error_LoadingTeams;
 	public static String TeamPropertyPage_Error_SavingUpdates;
+	public static String TeamPropertyPage_KeyErrorMessage;
 	public static String TeamPropertyPage_Language_Label;
 	public static String TeamPropertyPage_PageName;
 	public static String TeamPropertyPage_TeamNameError;
