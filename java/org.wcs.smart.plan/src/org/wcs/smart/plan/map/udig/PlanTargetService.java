@@ -68,7 +68,9 @@ public class PlanTargetService extends IService {
 	public PlanTargetService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = PlanTargetServiceExtension.createURL(this.params);
+		
 		this.plan = null;
+		this.subPlans = (Boolean) params.get(PlanTargetDataSourceFactory.SUB_PLANS.key);
 	}
 	
 	/**
@@ -215,6 +217,7 @@ public class PlanTargetService extends IService {
                 		try {
                 			if (dsf.canProcess(params)) {
                 				this.ds = (PlanTargetDataSource) dsf.createDataStore(params);
+                				this.plan = ((PlanTargetDataSource)ds).getPlan();
                 			}
                 		} catch (IOException e) {
                 			throw e;

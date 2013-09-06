@@ -41,6 +41,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * SMRAT Plan target result set
@@ -65,7 +66,7 @@ public class PlanTargetResultSet  implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public PlanTargetResultSet(String[] planIds, boolean onlyChildren,
+	public PlanTargetResultSet(String[] planUuids, boolean onlyChildren,
 			PlanTargetResultSetMetadata metadata) {
 
 		this.metadata = metadata;
@@ -74,8 +75,12 @@ public class PlanTargetResultSet  implements IResultSet {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		Set<Plan> addedPlans = new HashSet<Plan>();
-		for (int i = 0; i < planIds.length; i ++){
-			Plan p = (Plan)session.createCriteria(Plan.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("id", planIds[i].trim())).list().get(0); //$NON-NLS-1$ //$NON-NLS-2$
+		for (int i = 0; i < planUuids.length; i ++){
+			try{
+			Plan p = (Plan)session.createCriteria(Plan.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				//.add(Restrictions.eq("id", planIds[i].trim())).list().get(0); //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("uuid", SmartUtils.decodeHex(planUuids[i]))).list().get(0);
 			if (p != null){
 				if (!onlyChildren){
 					plans.addAll(p.getTargets());
@@ -94,6 +99,10 @@ public class PlanTargetResultSet  implements IResultSet {
 						}
 					}
 				}
+			}
+			}catch (Exception ex){
+				ex.printStackTrace();
+				//TODO: FIX ME
 			}
 		}
 	}

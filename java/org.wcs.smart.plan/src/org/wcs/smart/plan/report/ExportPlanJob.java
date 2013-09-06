@@ -45,6 +45,7 @@ import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.util.SmartUtils;
 /**
  * Job for exporting a plan to a pdf file for printing
  * 
@@ -76,6 +77,7 @@ public class ExportPlanJob extends Job {
 			this.outputFile = File.createTempFile(plan.getId() + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile.deleteOnExit();
 			
+			reportParameters.put(ReportPlan.PLAN_UUID, SmartUtils.encodeHex(plan.getUuid()));
 			reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
 			reportParameters.put(ReportPlan.PLAN_NAME, plan.getName());
 			reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
@@ -96,6 +98,11 @@ public class ExportPlanJob extends Job {
 				reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
 			}
 			StringBuilder sb = new StringBuilder();
+			List<PatrolEditorInput> ins = PlanHibernateManager.getPatrols(plan, session);
+			for (PatrolEditorInput in : ins){
+				sb.append(in.getPatrolId());
+				sb.append(", "); //$NON-NLS-1$
+			}
 			getChildPlanPatrols(plan, sb, session);
 			if (sb.length() > 0){
 				sb.delete(sb.length()-2, sb.length());

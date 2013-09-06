@@ -52,6 +52,7 @@ public class ReportPlan {
 	/**
 	 * Plan template parameters
 	 */
+	public final static String PLAN_UUID = "PlanUUID"; //$NON-NLS-1$
 	public final static String PLAN_ID = "PlanID"; //$NON-NLS-1$
 	public final static String PLAN_NAME = "PlanName"; //$NON-NLS-1$
 	public final static String PLAN_DESCRIPTION = "PlanDescription"; //$NON-NLS-1$
