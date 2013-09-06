@@ -25,7 +25,7 @@ import org.wcs.smart.birt.ui.BasicReportPerspective;
 
 /**
  * 
- * Smart Report Designer Perspective
+ * Smart Report Designer Perspective for editing plan template
  * 
  * @author egouge
  * @since 1.0.0

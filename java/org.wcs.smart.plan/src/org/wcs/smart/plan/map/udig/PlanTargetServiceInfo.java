@@ -19,31 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.plan.ui.perspective;
+package org.wcs.smart.plan.map.udig;
 
-import org.eclipse.ui.IFolderLayout;
-import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IPerspectiveFactory;
+import net.refractions.udig.catalog.IServiceInfo;
+
+import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
- * The planning perspective.
- * 
- * @author jeff
- *
+ * Smart service information.
+ * @author Emily
+ * @since 1.0.0
  */
-public class PlanPerspective implements IPerspectiveFactory {
+public class PlanTargetServiceInfo extends IServiceInfo{
 
-	public static final String ID = "org.wcs.smart.plan.planPerspective"; //$NON-NLS-1$
-	
-	@Override
-	public void createInitialLayout(IPageLayout layout) {
-		layout.setEditorAreaVisible(true);
-		layout.addView(PlanListView.ID, IPageLayout.LEFT, 0.25f, IPageLayout.ID_EDITOR_AREA);
-		layout.getViewLayout(PlanListView.ID).setCloseable(false);
-
-		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.plan.planFolder", IPageLayout.BOTTOM, 0.6f, PlanListView.ID); //$NON-NLS-1$
-		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
-		folder1.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
+	public PlanTargetServiceInfo(PlanTargetService service){
+		this.description = Messages.PlanTargetServiceInfo_Description;
+		this.icon = SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlanPlugIn.PLAN_ICON);
+		this.keywords = new String[]{Messages.PlanTargetServiceInfo_Keyword1, Messages.PlanTargetServiceInfo_Keyword2, Messages.PlanTargetServiceInfo_Keyword3, Messages.PlanTargetServiceInfo_Keyword4};
+		this.title = service.getName();
+		
 	}
-
+	
 }

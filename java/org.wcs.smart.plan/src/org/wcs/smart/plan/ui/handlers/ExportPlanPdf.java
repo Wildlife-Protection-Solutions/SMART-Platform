@@ -41,7 +41,7 @@ public class ExportPlanPdf extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		PlanEditorInput in = null;
-		if (event.getCommand().getId().equals("org.wcs.smart.plan.exportPdfEditor")){
+		if (event.getCommand().getId().equals("org.wcs.smart.plan.exportPdfEditor")){ //$NON-NLS-1$
 			IEditorInput ein = HandlerUtil.getActiveEditor(event).getEditorInput();
 			if (ein instanceof PlanEditorInput){
 				in = (PlanEditorInput) ein;
@@ -52,8 +52,6 @@ public class ExportPlanPdf extends AbstractHandler {
 				in = (PlanEditorInput) lastSelection.getFirstElement();	
 			}			
 		}
-		
-		
 		if (in != null){
 			ReportPlan.exportPlan(in.getUuid());
 		}

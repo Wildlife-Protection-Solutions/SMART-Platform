@@ -43,6 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 /**
  * Job for exporting a plan to a pdf file for printing
@@ -53,13 +54,13 @@ import org.wcs.smart.plan.model.Plan;
  */
 public class ExportPlanJob extends Job {
 
-			
+	private static final String NONE = Messages.ExportPlanJob_NoneLabel;
+	
 	private byte[] planUuid;
 	private File outputFile;
 	
 	public ExportPlanJob(byte[] planUuid) {
-		super("Export Plan");
-		
+		super(Messages.ExportPlanJob_JobName);
 		this.planUuid = planUuid;
 	}
 
@@ -84,13 +85,13 @@ public class ExportPlanJob extends Job {
 			reportParameters.put(ReportPlan.UNAVALIABLE_EMPLOYEES, plan.getUnavailableEmployees());
 			reportParameters.put(ReportPlan.AVALIABLE_EMPLOYEES, plan.getActiveEmployees());
 			if (plan.getTeam() == null){
-				reportParameters.put(ReportPlan.PLAN_TEAM,"(None)");
+				reportParameters.put(ReportPlan.PLAN_TEAM,NONE);
 			}else{
 				reportParameters.put(ReportPlan.PLAN_TEAM,plan.getTeam().getName());
 			}
 			
 			if (plan.getStation() == null){
-				reportParameters.put(ReportPlan.PLAN_STATION,"(None)");
+				reportParameters.put(ReportPlan.PLAN_STATION,NONE);
 			}else{
 				reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
 			}
@@ -99,17 +100,17 @@ public class ExportPlanJob extends Job {
 			if (sb.length() > 0){
 				sb.delete(sb.length()-2, sb.length());
 			}else{
-				sb.append("(None)");
+				sb.append(NONE);
 			}
 			reportParameters.put(ReportPlan.PLAN_PATROLS, sb.toString());
 			
 			if (plan.getParent() == null){
-				reportParameters.put(ReportPlan.PLAN_PARENT, "(None)");
+				reportParameters.put(ReportPlan.PLAN_PARENT, NONE);
 			}else{
 				reportParameters.put(ReportPlan.PLAN_PARENT, plan.getParent().getLabel());
 			}
 		}catch (Exception ex){
-			SmartPlanPlugIn.displayLog("Error exporting plan." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-2$
+			SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return Status.CANCEL_STATUS;
 		}finally{
 			session.getTransaction().rollback();
@@ -136,7 +137,7 @@ public class ExportPlanJob extends Job {
 			fout.close();
 			
 		}catch (Exception ex){
-			SmartPlanPlugIn.displayLog("Error exporting plan." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-2$
+			SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return Status.CANCEL_STATUS;
 		}
 		

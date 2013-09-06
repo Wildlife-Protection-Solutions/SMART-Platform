@@ -27,6 +27,7 @@ import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSourceWizard
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.plan.internal.Messages;
 /**
  * SMART Plan datasource wizard page.
  * 
@@ -49,7 +50,7 @@ public class SmartPlanDataSourceWizardPage extends DataSourceWizardPage {
 	@Override
 	public void createPageCustomControl(Composite arg0) {
 		Label lbl = new Label(arg0, SWT.NONE);
-		lbl.setText("This data source is not configurable.");
+		lbl.setText(Messages.SmartPlanDataSourceWizardPage_DataSourceNotConfigurable);
 	}
 
 	@Override

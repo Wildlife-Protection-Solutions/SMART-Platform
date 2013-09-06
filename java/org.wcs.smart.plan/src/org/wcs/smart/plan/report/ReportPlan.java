@@ -33,6 +33,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * Main class for managing the exporting of plans to 
@@ -126,7 +127,7 @@ public class ReportPlan {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 			
 		}catch (Exception ex){
-			SmartPlanPlugIn.displayLog("Error opening template for editing." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-2$
+			SmartPlanPlugIn.displayLog(Messages.ReportPlan_ErrorEditingPlanTemplate + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;
 		}
 		

@@ -26,6 +26,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.ReportPlan;
 /**
  * Handler to revert changes to plan template.
@@ -38,7 +39,7 @@ public class RevertPlanTemplate extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm", "All changes to the plan template will be lost.  Are you sure you want to revert to the default template?");
+		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.RevertPlanTemplate_ConfirmDialogTitle, Messages.RevertPlanTemplate_OverwriteTemplateWarningMessage);
 		if (revert){
 			if (ReportPlan.getCustomPlanTemplateLocation() != null){
 				ReportPlan.getCustomPlanTemplateLocation().delete();

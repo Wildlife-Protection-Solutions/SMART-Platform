@@ -41,6 +41,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
 import org.wcs.smart.plan.report.oda.SmartPlanDriver;
 
@@ -72,8 +73,8 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 		all.setLayout(new GridLayout());
 		
 		btnIncludeKids = new Button(all, SWT.CHECK);
-		btnIncludeKids.setText("Include only subplan targets.");
-		btnIncludeKids.setToolTipText("If checked only subplans targets will be included.");
+		btnIncludeKids.setText(Messages.SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonName);
+		btnIncludeKids.setToolTipText(Messages.SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonTooltip);
 		btnIncludeKids.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		
 		super.setControl(all);
@@ -159,8 +160,8 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 			SmartPlanPlugIn.displayLog(ex.getMessage(), ex);
 		}
 
-		dataSetDesign.setDisplayName("Smart Plan Targets"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataSetDesign.setName("Smart Plan Targets");
+		dataSetDesign.setDisplayName("Smart Plan Targets"); //$NON-NLS-1$ 
+		dataSetDesign.setName("Smart Plan Targets"); //$NON-NLS-1$
 	}
 	
 	/**

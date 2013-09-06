@@ -32,7 +32,6 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.internal.Messages;
-import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
 
 /**

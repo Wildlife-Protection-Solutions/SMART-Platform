@@ -41,7 +41,8 @@ public class PlanTargetStatus{
 	 */
 	public enum Status{
 		COMPLETE (Messages.PlanTargetStatus_Complete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_COMPLETE), "C"), //$NON-NLS-1$
-		INCOMPLETE(Messages.PlanTargetStatus_Incomplete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE), "I"); //$NON-NLS-1$
+		INCOMPLETE(Messages.PlanTargetStatus_Incomplete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE), "I"), //$NON-NLS-1$
+		UNKNOWN(Messages.PlanTargetStatus_Unknown, null, "U" ); //$NON-NLS-1$
 		
 		public String guiName;
 		public Image guiImage;

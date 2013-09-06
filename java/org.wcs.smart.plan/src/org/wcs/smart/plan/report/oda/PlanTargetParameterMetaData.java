@@ -45,7 +45,7 @@ public class PlanTargetParameterMetaData implements IParameterMetaData {
 	@Override
 	public String getParameterName(int param) throws OdaException {
 		if (param == 1){
-			return "Plan ID";
+			return "PlanID"; //$NON-NLS-1$
 		}
 		return null;
 	}

@@ -23,6 +23,7 @@ package org.wcs.smart.plan.report.oda;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * SMART plan target result set metadata.
@@ -60,11 +61,11 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
 		switch(index){
-		case 1: return "Target Name";
-		case 2: return "Target Description";
-		case 3: return "Status Description";
-		case 4: return "Status";
-		case 5: return "Plan Id";
+		case 1: return Messages.PlanTargetResultSetMetadata_TargetNameColumnLabel;
+		case 2: return Messages.PlanTargetResultSetMetadata_TargetDescriptionColumnLabel;
+		case 3: return Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel;
+		case 4: return Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel;
+		case 5: return Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel;
 		}
 		return null;
 	}
