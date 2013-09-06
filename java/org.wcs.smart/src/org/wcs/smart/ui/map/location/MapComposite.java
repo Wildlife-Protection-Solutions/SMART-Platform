@@ -154,6 +154,7 @@ public class MapComposite extends Composite implements MapPart {
 
 		tools.selectTool(PanTool.ID);
 
+		addPointsLayer();
 		LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(map, true, null);
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
@@ -163,8 +164,6 @@ public class MapComposite extends Composite implements MapPart {
 				map.getRenderManager().refresh(null);
 			}
 		});
-		
-		addPointsLayer();
 		defaultLayer.schedule();
 	
 		mapViewer.getViewport().addPaneListener(new IMapDisplayListener() {
