@@ -147,7 +147,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	
 	  
     /*
-     * Job to refresh the plantarget service and map layer 
+     * Job to refresh the plan target service and map layer 
      */
     private Job refreshJob = new Job(Messages.MapPlanEditorPage_RefreshMapJobName){
 		@Override
@@ -157,13 +157,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 					planTargetService.refresh(parentEditor.getPlan(), null);
 				} catch (IOException e) {
 					SmartPlanPlugIn.log(Messages.MapPlanEditorPage_RefreshError, e);
-				}
-			}
-			if (subPlanTargetService != null){
-				try {
-					subPlanTargetService.refresh(parentEditor.getPlan(), null);
-				} catch (IOException e) {
-					SmartPlanPlugIn.log(Messages.MapPlanEditorPage_SubPlanRefreshError, e);
 				}
 			}
 			//clear selection

@@ -57,8 +57,8 @@ public class ReportPlan {
 	public final static String PLAN_NAME = "PlanName"; //$NON-NLS-1$
 	public final static String PLAN_DESCRIPTION = "PlanDescription"; //$NON-NLS-1$
 	public final static String PLAN_TYPE = "PlanType"; //$NON-NLS-1$
-	public final static String UNAVALIABLE_EMPLOYEES = "UnavaliableEmployees"; //$NON-NLS-1$
-	public final static String AVALIABLE_EMPLOYEES = "AvaliableEmployees"; //$NON-NLS-1$
+	public final static String UNAVAILABLE_EMPLOYEES = "UnavailableEmployees"; //$NON-NLS-1$
+	public final static String AVAILABLE_EMPLOYEES = "AvailableEmployees"; //$NON-NLS-1$
 	public final static String PLAN_START_DATE = "StartDate"; //$NON-NLS-1$
 	public final static String PLAN_END_DATE = "EndDate"; //$NON-NLS-1$
 	public final static String PLAN_STATION = "Station"; //$NON-NLS-1$

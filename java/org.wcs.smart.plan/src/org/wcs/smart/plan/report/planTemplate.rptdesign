@@ -68,7 +68,7 @@
                 <property name="category">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="UnavaliableEmployees" id="18">
+        <scalar-parameter name="UnavailableEmployees" id="18">
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
             <property name="distinct">true</property>
@@ -79,7 +79,7 @@
                 <property name="category">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="AvaliableEmployees" id="111">
+        <scalar-parameter name="AvailableEmployees" id="111">
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
             <property name="distinct">true</property>
@@ -728,6 +728,14 @@
             <property name="fontFamily">sans-serif</property>
             <property name="marginTop">5pt</property>
             <property name="width">7.947916666666667in</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">UnavailableEmployees</property>
+                    <expression name="expression" type="javascript">params["UnavailableEmployees"].value</expression>
+                    <property name="dataType">integer</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
             <column id="45">
                 <property name="width">0.8958333333333334in</property>
             </column>
@@ -796,19 +804,20 @@
                 </cell>
                 <cell id="57">
                     <label id="80">
-                        <text-property name="text">Unavaliable Employees:</text-property>
+                        <text-property name="text">Unavailable Employees:</text-property>
                     </label>
                 </cell>
                 <cell id="58">
-                    <data id="92">
+                    <data id="335">
                         <list-property name="boundDataColumns">
                             <structure>
-                                <property name="name">UnavaliableEmployees</property>
-                                <expression name="expression" type="javascript">params["UnavaliableEmployees"]</expression>
-                                <property name="dataType">string</property>
+                                <property name="name">UnavailableEmployees</property>
+                                <expression name="expression" type="javascript">params["UnavailableEmployees"]</expression>
+                                <property name="dataType">integer</property>
+                                <property name="allowExport">true</property>
                             </structure>
                         </list-property>
-                        <property name="resultSetColumn">UnavaliableEmployees</property>
+                        <property name="resultSetColumn">UnavailableEmployees</property>
                     </data>
                 </cell>
             </row>
@@ -839,13 +848,13 @@
                     <data id="110">
                         <list-property name="boundDataColumns">
                             <structure>
-                                <property name="name">UnavaliableEmployees</property>
-                                <expression name="expression" type="javascript">params["AvaliableEmployees"]</expression>
-                                <property name="dataType">string</property>
+                                <property name="name">AvailableEmployees</property>
+                                <expression name="expression" type="javascript">params["AvailableEmployees"]</expression>
+                                <property name="dataType">integer</property>
                                 <property name="allowExport">true</property>
                             </structure>
                         </list-property>
-                        <property name="resultSetColumn">UnavaliableEmployees</property>
+                        <property name="resultSetColumn">AvailableEmployees</property>
                     </data>
                 </cell>
             </row>
@@ -897,13 +906,12 @@
                     <data id="90">
                         <list-property name="boundDataColumns">
                             <structure>
-                                <property name="name">Team</property>
+                                <property name="name">Station</property>
                                 <expression name="expression" type="javascript">params["Station"]</expression>
                                 <property name="dataType">string</property>
-                                <property name="allowExport">true</property>
                             </structure>
                         </list-property>
-                        <property name="resultSetColumn">Team</property>
+                        <property name="resultSetColumn">Station</property>
                     </data>
                 </cell>
             </row>
