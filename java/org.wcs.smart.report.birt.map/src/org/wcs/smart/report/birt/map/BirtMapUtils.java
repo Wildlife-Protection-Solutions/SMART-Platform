@@ -23,6 +23,7 @@ package org.wcs.smart.report.birt.map;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,6 +36,8 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.XMLMemento;
 import org.wcs.smart.report.birt.map.internal.Messages;
 
@@ -70,8 +73,7 @@ public class BirtMapUtils {
 	 * @param element
 	 * @return array of smart query dataset handles added to the report
 	 */
-	public static OdaDataSetHandle[] getSmartDataSetHandles(
-			ExtendedItemHandle element) {
+	public static OdaDataSetHandle[] getDataSets(ExtendedItemHandle element) {
 		ReportDesignHandle handle = (ReportDesignHandle) ((ExtendedItemHandle) element)
 				.getRoot();
 		List<?> datasets = handle.getDataSets().getContents();
@@ -80,9 +82,7 @@ public class BirtMapUtils {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle) {
 				OdaDataSetHandle h = (OdaDataSetHandle) dataset;
-				if (h.getExtensionID().equals(SmartMapItem.SMART_QUERY_ID)) {
-					sets.add(h);
-				}
+				sets.add(h);
 			}
 		}
 		return sets.toArray(new OdaDataSetHandle[sets.size()]);
@@ -97,18 +97,29 @@ public class BirtMapUtils {
 	 * @return
 	 */
 	public static OdaDataSetHandle findHandle(ReportDesignHandle handle,
-			String queryText) {
+			String dataSetName, String queryText) {
 		List<?> datasets = handle.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle) {
 				OdaDataSetHandle h = (OdaDataSetHandle) dataset;
-				if (h.getExtensionID().equals(SmartMapItem.SMART_QUERY_ID)
-						&& h.getQueryText().equals(queryText)) {
+				if (h.getName().equals(dataSetName)){
 					return h;
 				}
+				
 			}
 		}
+		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+			DataSetHandle dataset = (DataSetHandle) iterator.next();
+			if (dataset instanceof OdaDataSetHandle) {
+				OdaDataSetHandle h = (OdaDataSetHandle) dataset;
+				if (h.getQueryText().equals(queryText)){
+					return h;
+				}
+				
+			}
+		}
+		
 		return null;
 
 	}
@@ -149,5 +160,33 @@ public class BirtMapUtils {
 		}
 		return value;
 		
+	}
+	
+	private static List<IBirtMapLayerManager> layerExtensions = null;
+	private static Object lock = new Object();
+	public static List<IBirtMapLayerManager> getMapLayerExtensions(){
+		if (layerExtensions != null){
+			return layerExtensions;
+		}
+		synchronized (lock) {
+			if (layerExtensions == null){
+				String maplayer = "org.wcs.smart.report.birt.maplayer"; //$NON-NLS-1$
+				List<IBirtMapLayerManager> items = new ArrayList<IBirtMapLayerManager>();
+				if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+				IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(maplayer);
+				try {
+					for (IConfigurationElement e : config) {
+						IBirtMapLayerManager mapLayer = (IBirtMapLayerManager) e.createExecutableExtension("maplayer"); //$NON-NLS-1$
+						items.add(mapLayer);
+					}
+				}catch (Exception ex){
+					//TODO: do something here
+					ex.printStackTrace();
+				}
+				layerExtensions = items;
+			}
+		}
+		
+		return layerExtensions;
 	}
 }

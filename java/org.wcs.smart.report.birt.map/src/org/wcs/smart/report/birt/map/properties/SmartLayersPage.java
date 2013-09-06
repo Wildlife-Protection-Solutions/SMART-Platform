@@ -78,8 +78,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
+import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.SmartMapItem;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
@@ -303,7 +303,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				OdaDataSetHandle[] handles = getHandles(true);
+				OdaDataSetHandle[] handles = getHandles();
 				if (handles.length == 0){
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), ERROR_DIALOG_TITLE, Messages.SmartLayersPage_Error_NoDatasets);
 					return;
@@ -476,12 +476,10 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().commit();
 			}
-		
 			session.close();
 		}
 		
 		basemapCombo.setInput(maps.toArray());
-		
 		basemapCombo.getControl().addListener(SWT.Modify, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -504,29 +502,32 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 
 	private void updateModel(String prop) {
-		
-		
 		// update the model
 		try {
 			if (prop.equals(SmartMapItem.SMART_LAYER_PROP)) {
 				ArrayList<String> names = new ArrayList<String>();
 				ArrayList<String> defs = new ArrayList<String>();
 				ArrayList<String> styles = new ArrayList<String>();
-
+				ArrayList<String> datasets = new ArrayList<String>();
+				
 				for (Iterator<?> iterator = layerItems.iterator(); iterator.hasNext();) {
 					LayerDefinition type = (LayerDefinition) iterator.next();
+					
 					names.add(type.name);
 					if (type.handle != null){
 						defs.add(type.handle.getQueryText());
+						datasets.add(type.handle.getName());	
 					}else{
 						defs.add(null);
+						datasets.add(""); //$NON-NLS-1$
 					}
 					styles.add(type.style);
 				}
 				mapItem.setLayers(defs);
 				mapItem.setLayerNames(names);
 				mapItem.setLayerStyles(styles);
-
+				mapItem.setDatasets(datasets);
+				
 			} else if (prop.equals(SmartMapItem.SMART_BASEMAP_PROP)) {
 				byte[] uuid = getSelectedBasemapUuid();
 				if (uuid == null){
@@ -591,8 +592,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				LayerDefinition def = new LayerDefinition();
 				def.handle = BirtMapUtils.findHandle(
 						(ReportDesignHandle) this.itemHandle.getRoot(),
+						i < mapItem.getDatasets().size() ? mapItem.getDatasets().get(i) : null,
 						mapItem.getLayers().get(i));
-				
+				def.mapLayer = mapItem.findMapLayerManager(def.handle);
 				if (mapItem.getLayerNames() != null  && i < mapItem.getLayerNames().size()){
 					def.name = mapItem.getLayerNames().get(i);
 				}else if (def.handle != null){
@@ -633,21 +635,20 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	}
 
 	
-	private OdaDataSetHandle[] getHandles(boolean onlyGeom){
+	private OdaDataSetHandle[] getHandles(){
 		if (itemHandle != null){
-			OdaDataSetHandle[] handles = BirtMapUtils.getSmartDataSetHandles(itemHandle);
-			if (!onlyGeom){
-				return handles;
-			}else{
-				List<OdaDataSetHandle> thisHandles = new ArrayList<OdaDataSetHandle>();
-				for (int i = 0; i < handles.length; i ++){
-					QueryType qt = QueryType.valueOf(handles[i].getQueryText().split(":")[0]); //$NON-NLS-1$
-					if (qt != QueryType.SUMMARY){
+			OdaDataSetHandle[] handles = BirtMapUtils.getDataSets(itemHandle);
+			List<IBirtMapLayerManager> mapLayers = BirtMapUtils.getMapLayerExtensions();
+			
+			List<OdaDataSetHandle> thisHandles = new ArrayList<OdaDataSetHandle>();
+			for (int i = 0; i < handles.length; i ++){
+				for (IBirtMapLayerManager l : mapLayers){
+					if (l.canAddToMap(handles[i])){
 						thisHandles.add(handles[i]);
 					}
 				}
-				return thisHandles.toArray(new OdaDataSetHandle[thisHandles.size()]);	
 			}
+			return thisHandles.toArray(new OdaDataSetHandle[thisHandles.size()]);	
 		}
 		return new OdaDataSetHandle[0];
 	}
@@ -743,6 +744,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 class LayerDefinition{
 	
+	IBirtMapLayerManager mapLayer;
 	OdaDataSetHandle handle;
 	String name;
 	String style;

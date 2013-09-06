@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
@@ -40,11 +42,6 @@ import org.wcs.smart.report.birt.map.internal.Messages;
 public class SmartMapItem extends ReportItem {
 
 	/**
-	 * Smart query dataset ids
-	 */
-	public static final String SMART_QUERY_ID = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
-	
-	/**
 	 * Smart map item extension name
 	 */
 	public static final String EXTENSION_NAME = "org.wcs.smart.report.birt.SmartMap";  //$NON-NLS-1$
@@ -56,7 +53,7 @@ public class SmartMapItem extends ReportItem {
 	
 	/**
 	 * List of layers; layers are represented by
-	 * the hex encoded uuid of the query they represent
+	 * query string of the layer they represent
 	 */
 	public static final String SMART_LAYER_PROP = "org.wcs.smart.birt.map.layers"; //$NON-NLS-1$
 	/**
@@ -68,6 +65,10 @@ public class SmartMapItem extends ReportItem {
 	 */
 	public static final String SMART_LAYERSTYLE_PROP = "org.wcs.smart.birt.map.layerStyles"; //$NON-NLS-1$
 	
+	/**
+	 * List of layer dataset names;
+	 */
+	public static final String SMART_DATASET_PROP = "org.wcs.smart.birt.map.layerDataSet"; //$NON-NLS-1$
 	/**
 	 * xmin map bounds property
 	 */
@@ -145,16 +146,43 @@ public class SmartMapItem extends ReportItem {
 	 * Set map layers
 	 * @param layers
 	 * @throws SemanticException
+	 * 
+	 * @Deprecated 2.0 we are going to use dataset names now instead of
+	 * queries 
 	 */
 	public void setLayers(List<String> layers) throws SemanticException{
 		handle.setProperty(SMART_LAYER_PROP, layers);
 	}
 	
 	/**
-	 * @return map layer names 
+	 * 
+	 * @return map layer names
+	 * 
+	 *  @Deprecated 2.0 we are going to use dataset names now instead of
+	 * queries
 	 */
 	public List<String> getLayerNames(){
 		return handle.getListProperty(SMART_LAYERNAME_PROP);
+	}
+	
+	/**
+	 * Set map datasets
+	 * @param layers
+	 * @throws SemanticException
+	 */
+	public void setDatasets(List<String> layers) throws SemanticException{
+		handle.setProperty(SMART_DATASET_PROP, layers);
+	}
+	
+	/**
+	 * @return map dataset layers
+	 */
+	public List<String> getDatasets(){
+		List<String> ds = handle.getListProperty(SMART_DATASET_PROP);
+		if (ds == null){
+			ds = new ArrayList<String>();
+		}
+		return ds;
 	}
 	
 	/**
@@ -226,6 +254,16 @@ public class SmartMapItem extends ReportItem {
 			handle.setFloatProperty(SMART_BOUNDS_YMAX_PROP, e.getMaxY());
 			handle.setProperty(SMART_BOUNDS_SRID_PROP, e.getCoordinateReferenceSystem().toWKT());
 		}
+	}
+	
+	public IBirtMapLayerManager findMapLayerManager(DataSetHandle handle){
+		List<IBirtMapLayerManager> birtlayers = BirtMapUtils.getMapLayerExtensions();
+		for (IBirtMapLayerManager l : birtlayers){
+			if (l.canAddToMap(handle)){
+				return l;
+			}
+		}	
+		return null;
 	}
 	
 }
