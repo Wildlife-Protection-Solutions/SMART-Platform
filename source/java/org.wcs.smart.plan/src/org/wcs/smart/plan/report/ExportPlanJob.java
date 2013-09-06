@@ -84,8 +84,8 @@ public class ExportPlanJob extends Job {
 			reportParameters.put(ReportPlan.PLAN_END_DATE,  new java.sql.Date(plan.getEndDate().getTime()));
 			reportParameters.put(ReportPlan.PLAN_START_DATE, new java.sql.Date(plan.getStartDate().getTime()));
 			reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getName());
-			reportParameters.put(ReportPlan.UNAVALIABLE_EMPLOYEES, plan.getUnavailableEmployees());
-			reportParameters.put(ReportPlan.AVALIABLE_EMPLOYEES, plan.getActiveEmployees());
+			reportParameters.put(ReportPlan.UNAVAILABLE_EMPLOYEES, plan.getUnavailableEmployees());
+			reportParameters.put(ReportPlan.AVAILABLE_EMPLOYEES, plan.getActiveEmployees());
 			if (plan.getTeam() == null){
 				reportParameters.put(ReportPlan.PLAN_TEAM,NONE);
 			}else{
