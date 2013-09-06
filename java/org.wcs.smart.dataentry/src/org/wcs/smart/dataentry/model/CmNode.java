@@ -49,6 +49,7 @@ public class CmNode extends NamedItem {
 	private CmNode parent;
 	private int nodeOrder;
 	private List<CmNode> children;
+	private List<CmAttribute> cmAttributes;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -89,7 +90,6 @@ public class CmNode extends NamedItem {
 		this.nodeOrder = nodeOrder;
 	}
 
-	
 	/**
 	 * @return all children nodes; <code>null</code> if leaf node
 	 */
@@ -100,6 +100,14 @@ public class CmNode extends NamedItem {
 	}
 	public void setChildren(List<CmNode> children) {
 		this.children = children;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="node", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<CmAttribute> getCmAttributes() {
+		return cmAttributes;
+	}
+	public void setCmAttributes(List<CmAttribute> cmAttributes) {
+		this.cmAttributes = cmAttributes;
 	}
 	
 }
