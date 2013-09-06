@@ -46,7 +46,7 @@ import org.wcs.smart.patrol.internal.Messages;
 public class PatrolTransportType extends NamedKeyItem{
 
 	public static final String NAME = Messages.PatrolTransportType_Name;
-	public static final String KEY = "Key";
+	public static final String KEY = Messages.PatrolTransportType_Key;
 	
 	private boolean isActive = true;
 	private ConservationArea ca;

@@ -43,7 +43,7 @@ import org.wcs.smart.patrol.internal.Messages;
 public class PatrolMandate extends NamedKeyItem{
 
 	public static final String NAME = Messages.PatrolMandate_MandateName;
-	public static final String KEY = "Key";
+	public static final String KEY = Messages.PatrolMandate_MandateKey;
 	
 	public static final Integer MAX_NAME_LENGTH = 64;
 	

@@ -247,7 +247,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		btnEditKey = new Button(composite, SWT.NONE);
 		btnEditKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
-		btnEditKey.setText("Edit Key");
+		btnEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		btnEditKey.setEnabled(false);
 		btnEditKey.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
@@ -407,7 +407,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			return name;
 		}else if (type == Column.KEY){
 			if (mnd.getKeyId() == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return mnd.getKeyId();
 		}

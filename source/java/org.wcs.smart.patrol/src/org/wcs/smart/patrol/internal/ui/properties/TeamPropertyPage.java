@@ -301,7 +301,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 
 		btnEditKey = new Button(composite, SWT.NONE);
 		btnEditKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
-		btnEditKey.setText("Edit Key");
+		btnEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		btnEditKey.setEnabled(false);
 		btnEditKey.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
@@ -420,7 +420,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return true;
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(),
+					Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(), //$NON-NLS-1$
 					ex);
 		}
 		return false;
@@ -476,7 +476,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			if (x == null){
 				x = mnd.getDescription();
 				if (x == null){
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return x;
 			}
@@ -488,7 +488,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return mnd.getMandate().findName(languageViewer.getCurrentSelection());
 		}else if (type == Column.KEY){
 			if (mnd.getKeyId() == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return mnd.getKeyId();
 		}
@@ -526,7 +526,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}else if (type == Column.KEY){
 			String keyId = (String)newValue;
 			if (!SmartUtils.isSimpleString(keyId, SmartUtils.RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Team.MAX_KEY_LENGTH, 1)){
-				return MessageFormat.format("Key Id must only contain {0} and be between {1} and {2} characters in length.",new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc, 1, Team.MAX_NAME_LENGTH});
+				return MessageFormat.format(Messages.TeamPropertyPage_KeyErrorMessage,new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc, 1, Team.MAX_NAME_LENGTH});
 			}
 		}
 		return null;

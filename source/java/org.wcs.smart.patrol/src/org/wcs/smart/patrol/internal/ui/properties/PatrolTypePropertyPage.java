@@ -307,7 +307,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		btnEditKeyTransport = new Button(composite, SWT.NONE);
 		btnEditKeyTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		btnEditKeyTransport.setText("Edit Key");
+		btnEditKeyTransport.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		btnEditKeyTransport.setEnabled(false);
 		btnEditKeyTransport.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -454,7 +454,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		/* Key Column */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Key");
+		column.setText(PatrolTransportType.KEY);
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -632,7 +632,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + "\n" + ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 		}
 		return false;
 	}
