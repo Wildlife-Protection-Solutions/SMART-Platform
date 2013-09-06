@@ -28,6 +28,7 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.plan.internal.Messages;
 
 import com.ibm.icu.util.ULocale;
 /**
@@ -83,7 +84,7 @@ public class SmartPlanConnection implements IConnection {
 			if (dataSetType.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)) {
 				return new PlanTargetQuery();
 			}
-			throw new OdaException(MessageFormat.format("Dataset {0} type not supported.",new Object[]{dataSetType}));
+			throw new OdaException(MessageFormat.format(Messages.SmartPlanConnection_UnsupportedDataset,new Object[]{dataSetType}));
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}

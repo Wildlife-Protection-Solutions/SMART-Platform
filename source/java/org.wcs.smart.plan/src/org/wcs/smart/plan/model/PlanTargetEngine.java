@@ -27,7 +27,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.plan.PlanHibernateManager;
-import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;

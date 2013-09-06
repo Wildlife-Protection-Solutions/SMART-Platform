@@ -25,6 +25,7 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * SMART plan dataset metadata.
@@ -79,7 +80,7 @@ public class SmartPlanDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceProductName()
 	 */
 	public String getDataSourceProductName() throws OdaException {
-		return "Smart Plan Targets";
+		return Messages.SmartPlanDatasetMetadata_DatasetName;
 	}
 
 	/*

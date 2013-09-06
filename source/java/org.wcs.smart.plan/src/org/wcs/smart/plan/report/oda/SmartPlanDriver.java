@@ -72,6 +72,6 @@ public class SmartPlanDriver implements IDriver {
 				.getDataTypeMapping(nativeDataTypeCode);
 		if (typeMapping != null)
 			return typeMapping.getNativeType();
-		return "undefined";
+		return "undefined"; //$NON-NLS-1$
 	}
 }

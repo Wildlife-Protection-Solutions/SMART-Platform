@@ -478,6 +478,11 @@
             id="org.wcs.smart.plan.planPerspective"
             name="%plan.perspective.name">
       </perspective>
+      <perspective
+            class="org.wcs.smart.plan.report.PlanReportPerspective"
+            id="org.wcs.smart.plan.PlanReportPerspective"
+            name="Plan Template Editing Perspective">
+      </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -636,6 +641,12 @@
                wizardPageClass="org.wcs.smart.plan.report.oda.ui.SmartPlanTargetDatasetWizardPage">
          </dataSetPage>
       </dataSetUI>
+   </extension>
+   <extension
+         point="org.wcs.smart.report.birt.maplayer">
+      <MapLayer
+            maplayer="org.wcs.smart.plan.report.PlanTargetMapLayer">
+      </MapLayer>
    </extension>
 
 </plugin>
