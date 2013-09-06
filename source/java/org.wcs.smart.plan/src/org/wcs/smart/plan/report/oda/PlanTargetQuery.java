@@ -110,9 +110,9 @@ public class PlanTargetQuery implements IQuery {
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#executeQuery()
 	 */
 	public IResultSet executeQuery() throws OdaException {
-		String[] planIds = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
+		String[] planUuids = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
 		
-		return new PlanTargetResultSet(planIds, onlySubplans, (PlanTargetResultSetMetadata)getMetaData());
+		return new PlanTargetResultSet(planUuids, onlySubplans, (PlanTargetResultSetMetadata)getMetaData());
 	}
 
 	/**

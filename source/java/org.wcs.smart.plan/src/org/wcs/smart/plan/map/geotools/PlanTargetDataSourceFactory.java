@@ -24,7 +24,9 @@ package org.wcs.smart.plan.map.geotools;
 import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.geotools.data.DataStore;
@@ -107,6 +109,8 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
 		
+		List<PlanTarget> pts = new ArrayList<PlanTarget>();
+		
 		Session session = HibernateManager.openSession();
 		Plan plan = null;
 		Boolean subPlans = null;
@@ -115,18 +119,21 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 			if (plan == null ){
 				throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
 			}
-			subPlans = (Boolean)params.get(SUB_PLANS);
+			subPlans = (Boolean)params.get(SUB_PLANS.key);
 			if (!subPlans){
 				//load plan targets
 				for(PlanTarget pt : plan.getTargets()){
-					pt.getName();
+					pts.add(pt);
 				}
 			}else{
-				//load subplan targets
-				for(Plan kid : plan.getChildren()){
+				List<Plan> toProcess = new ArrayList<Plan>();
+				toProcess.addAll(plan.getChildren());
+				while(toProcess.size() > 0){
+					Plan kid = toProcess.remove(0);
 					for(PlanTarget pt : kid.getTargets()){
-						pt.getName();
-					}	
+						pts.add(pt);
+					}
+					toProcess.addAll(kid.getChildren());
 				}
 			}
 			
@@ -134,6 +141,9 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 			throw new IOException(ex);
 		}finally{
 			session.close();
+		}
+		for(PlanTarget pt : pts){
+			pt.refreshStatus();
 		}
 		
 		return new PlanTargetDataSource(plan, subPlans);

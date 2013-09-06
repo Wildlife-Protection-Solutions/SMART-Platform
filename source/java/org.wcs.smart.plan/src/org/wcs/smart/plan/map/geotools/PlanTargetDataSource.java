@@ -96,6 +96,10 @@ public class PlanTargetDataSource extends AbstractDataStore{
 		return type;
 	}
 
+	public Plan getPlan(){
+		return this.plan;
+	}
+	
 	public void updatePlan(Plan plan){
 		this.plan = plan;
 	}
