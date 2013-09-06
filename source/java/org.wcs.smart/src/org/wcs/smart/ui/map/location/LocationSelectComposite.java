@@ -244,7 +244,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 			@Override
 			public void changed(ViewportModelEvent event) {
 				if (EventType.CRS.equals(event.getType())) {
-					Display.getDefault().syncExec(new Runnable() {
+					//TODO: this piece of code is causing deadlock in geotools and on the ui
+					Display.getDefault().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							if (pointsListViewer != null && !LocationSelectComposite.this.isDisposed()) {

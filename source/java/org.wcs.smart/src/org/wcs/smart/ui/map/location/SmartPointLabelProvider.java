@@ -24,7 +24,9 @@ package org.wcs.smart.ui.map.location;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -41,6 +43,8 @@ import com.vividsolutions.jts.geom.Point;
 public class SmartPointLabelProvider extends LabelProvider {
 	
 	private ICrsProvider crsProvider;
+	private MathTransform transform;
+	private CoordinateReferenceSystem transformCrs;
 	
 	public SmartPointLabelProvider(ICrsProvider provider) {
 		super();
@@ -75,7 +79,11 @@ public class SmartPointLabelProvider extends LabelProvider {
 			if (destCrs == null) {
 				return point;
 			}
-			Point p = (Point) JTS.transform(point, CRS.findMathTransform(SmartDB.DATABASE_CRS, destCrs));
+			if (transform == null || transformCrs != destCrs){
+				transformCrs = destCrs;
+				transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, transformCrs);
+			}
+			Point p = (Point) JTS.transform(point, transform);
 			return p;
 		} catch (Exception e) {
 			return null;
