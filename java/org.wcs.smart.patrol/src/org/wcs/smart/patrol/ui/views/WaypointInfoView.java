@@ -87,7 +87,6 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	private Font boldFont = null;
 	private ScrolledForm infoSection = null;
 
-	private Waypoint currentWp;
 	private byte[] selectedWaypointUuid;
 		
 	//listener for modifications to waypoints
@@ -117,6 +116,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			final List<Label> categoryLabels = new ArrayList<Label>();
 			final List<Label> attributeLabels = new ArrayList<Label>();
 			final List<Label> attributeValuesLabels = new ArrayList<Label>();
+			Waypoint currentWp = null;
 			
 			Date wpDate = null;
 			
@@ -185,7 +185,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			final Date wpDate2 = wpDate;
-
+			final Waypoint lcurrentWp = currentWp;
 			// update ui with observation information 
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -196,14 +196,14 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 					for (Control c : infoSection.getBody().getChildren()) {
 						c.dispose();
 					}
-					if (currentWp == null){
+					if (lcurrentWp == null){
 						clearContents();
 					}else{
-						lblWaypointId.setText(String.valueOf(currentWp.getId()));
+						lblWaypointId.setText(String.valueOf(lcurrentWp.getId()));
 						lblDateTime
 								.setText(DateFormat.getDateInstance(
 										DateFormat.SHORT).format(wpDate2)
-										+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(currentWp.getTime())); //$NON-NLS-1$
+										+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(lcurrentWp.getTime())); //$NON-NLS-1$
 
 						int widthHint = infoSection.getBody().getBounds().width - 20;						
 						for (Entry<String, List<List<String[]>>> cat : displayData.entrySet()) {
@@ -244,7 +244,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 					}
 					
 			
-					if (currentWp != null && currentWp.getAttachments() != null && currentWp.getAttachments().size() > 1){
+					if (lcurrentWp != null && lcurrentWp.getAttachments() != null && lcurrentWp.getAttachments().size() > 1){
 						compThumbnails = toolkit.createComposite(infoSection.getBody());
 						compThumbnails.setLayout(new GridLayout());
 						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
@@ -442,7 +442,6 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	 */
 	private void clearContents(){
 		selectedWaypointUuid = null;
-		currentWp = null;
 		for (Control c : infoSection.getBody().getChildren()) {
 			c.dispose();
 		}
