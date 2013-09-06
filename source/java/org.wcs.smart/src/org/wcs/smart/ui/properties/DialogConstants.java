@@ -45,4 +45,6 @@ public class DialogConstants {
 	
 	public static final String SAVE_TEXT = Messages.DialogConstants_SaveButton_Label;
 	
+	public static final String EDIT_KEY_BUTTON_TEXT = Messages.DialogConstants_EditKeyButtonText;
+	
 }

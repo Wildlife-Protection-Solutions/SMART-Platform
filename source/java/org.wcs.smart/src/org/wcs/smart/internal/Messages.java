@@ -474,6 +474,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_DisableAllButton_Label;
 	public static String DialogConstants_DisableButton_Label;
 	public static String DialogConstants_EditButton_Label;
+	public static String DialogConstants_EditKeyButtonText;
 	public static String DialogConstants_EnableAllButton_Label;
 	public static String DialogConstants_EnableButton_Label;
 	public static String DialogConstants_SaveButton_Label;
@@ -695,6 +696,8 @@ public class Messages extends NLS {
 	public static String InteractiveSplashHandler_Progress_LoadingCa;
 	public static String InteractiveSplashHandler_Progress_ValidatingUser;
 	public static String InteractiveSplashHandler_Username_Label;
+	public static String KeyInputDialog_DialogTitle;
+	public static String KeyInputDialog_EditKeyWarning;
 	public static String LanguageSelectionDialog_Dialog_Title;
 	public static String LanguageSelectionDialog_MissingLanguageMessage;
 	public static String LoadBasemapDialog_Error_BasemapNoSelected;
@@ -803,6 +806,7 @@ public class Messages extends NLS {
 	public static String ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel;
 	public static String ShowDataModelPropertyPageHandler_Progress_LoadingDataModel;
 	public static String ShowDefaultMapPerspective_Error_LoadingPerspective;
+	public static String SmartAreaWizardPage_CrossCaErrorMessage;
 	public static String SmartAreaWizardPage_Error_LoadingSmartResources;
 	public static String SmartAreaWizardPage_SmartLayerConnectionPage_Title;
 	public static String SmartDataSourceFactory_CA_ParameterName;

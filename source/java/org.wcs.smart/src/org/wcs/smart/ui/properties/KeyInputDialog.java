@@ -35,7 +35,7 @@ public class KeyInputDialog extends InputDialog{
 	
 	@Override
 	public int open(){
-		MessageDialog.openInformation(getShell(), "Edit Key", "Modifying keys will affect queries and reports used in cross conservation area analysis.  Some of your queries/reports may become invalid.");
+		MessageDialog.openInformation(getShell(), Messages.KeyInputDialog_DialogTitle, Messages.KeyInputDialog_EditKeyWarning);
 		return super.open();
 	}
 
