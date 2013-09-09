@@ -30,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -64,10 +65,14 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @param session
 	 * @return all ConfigurableModels
 	 */
-	public static ConfigurableModel getFullConfigurableModel(ConfigurableModel model) {
+	public static ConfigurableModel getFullConfigurableModel(byte[] uuid) {
+		if (uuid == null)
+			return null;
 		Session session = SmartHibernateManager.openSession();
 		try {
-			session.refresh(model);
+			Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
+			ConfigurableModel model = (ConfigurableModel) query.uniqueResult();
+			model.getNames().size();
 			fetchNodesData(model.getNodes());
 			return model;
 		} finally {
@@ -81,6 +86,9 @@ public class DataentryHibernateManager extends HibernateManager {
 		for (CmNode cmNode : nodes) {
 			//load all lazy data
 			cmNode.getCategory();
+//			for (CmAttribute cma : cmNode.getCmAttributes()) {
+//				cma.getNames().size();
+//			}
 			cmNode.getCmAttributes().size();
 			fetchNodesData(cmNode.getChildren());
 		}
