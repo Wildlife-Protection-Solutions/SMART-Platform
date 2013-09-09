@@ -21,58 +21,24 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
-import java.text.DateFormat;
 import java.util.Arrays;
 
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Form;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.part.EditorPart;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.common.attachment.AttachmentUtil;
-import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.ui.PatrolEditor;
-import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.patrol.ui.PatrolPerspective;
-import org.wcs.smart.ui.TranslateSimpleListItemDialog;
-import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * The Intelligence Editor
@@ -80,25 +46,15 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceEditor extends EditorPart {
+public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 
 	public static final String ID = "org.wcs.smart.intelligence.IntelligenceEditor"; //$NON-NLS-1$
 
 	private Intelligence intelligence;
 	
-	private boolean isDirty;
-	private Form form;
+	private IntelligenceEditorMapPage mapPage;
+	private IntelligenceSummaryEditorPage summaryPage;
 
-	private Text txtDateReceived;
-	private Text txtSource;
-	private Hyperlink lnkPatrolID;
-	private Text txtShortName;
-	private Text txtDescription;
-	private Text txtFromDate;
-	private Text txtToDate;
-	private TableViewer pointsList;
-	private TableViewer attachmentsList;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	/**
 	 * listener for intelligence change events.
@@ -109,7 +65,8 @@ public class IntelligenceEditor extends EditorPart {
 			byte[] uuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
 			if (Arrays.equals(source.getUuid(), uuid)) {
 				intelligence = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
-				initValues();
+				summaryPage.initValues();
+				mapPage.refresh();
 			}
 		}
 	};
@@ -143,177 +100,19 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void dispose() {
-		if (toolkit != null){
-			toolkit.dispose();
-			toolkit = null;
-		}
+		
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_DELETED, deleteListener);
 		super.dispose();
 	}
 	
-	@Override
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-		if (!(input instanceof IntelligenceEditorInput)) {
-			throw new IllegalArgumentException("Invalid editor input."); //$NON-NLS-1$
-		}
-		setSite(site);
-		setInput(input);
-	}
 
-	public void setDirty(boolean isDirty){
-		this.isDirty = isDirty;
-	}
-	
 	@Override
 	public boolean isDirty() {
-		return isDirty;
+		return false;
 	}
 
-	@Override
-	public void createPartControl(Composite parent) {
-		toolkit.setBorderStyle(SWT.BORDER);
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
-
-		toolkit.paintBordersFor(container);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		form = toolkit.createForm(container);
-		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-
-		form.getBody().setLayout(new GridLayout(1, true));
-
-		if (canEdit()){
-			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.IntelligenceEditor_Translate_Link, SWT.WRAP);
-			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
-						getEditorSite().getShell(), getIntelligence());
-					if (dialog.open() == IDialogConstants.OK_ID) {
-						IntelligenceHibernateManager.saveIntelligence(getIntelligence());
-						IntelligenceEventManager.getInstance().intelligenceChanged(0, getIntelligence());
-					}
-				}
-			});
-		}
-
-		
-		Composite content = toolkit.createComposite(form.getBody(), SWT.NONE);
-		GridLayout leftLayout = new GridLayout(3, false);
-		leftLayout.verticalSpacing = 10;
-		content.setLayout(leftLayout);
-		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)content.getLayout()).marginRight = 10;
 	
-		toolkit.createLabel(content, Messages.IntelligenceReceived_ReceivedDate_Label);
-		txtDateReceived = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtDateReceived.setEditable(false);
-		txtDateReceived.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.RECIEVED); 
-
-		toolkit.createLabel(content, Messages.IntelligenceSource_IntelligenceSource_Label);
-		txtSource = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtSource.setEditable(false);
-		txtSource.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.SOURCE); 
-
-		toolkit.createLabel(content, Messages.IntelligenceSource_PatrolId_Label);
-		lnkPatrolID = toolkit.createHyperlink(content, "", SWT.WRAP); //$NON-NLS-1$
-		lnkPatrolID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lnkPatrolID.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				openPatrol(getIntelligence().getPatrol());
-			}
-		});
-		toolkit.createLabel(content, ""); //$NON-NLS-1$
-
-		toolkit.createLabel(content, Messages.IntelligenceDesc_Name_Label);
-		txtShortName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtShortName.setEditable(false);
-		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.DESCRIPTION); 
-		
-		Label descLbl = toolkit.createLabel(content, Messages.IntelligenceDesc_Description_Label);
-		descLbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtDescription = toolkit.createText(content, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
-		txtDescription.setEditable(false);
-		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		((GridData)txtDescription.getLayoutData()).heightHint=80;
-//		((GridData)txtDescription.getLayoutData()).widthHint=100;
-		Hyperlink descLink = createEditLink(toolkit, content, PanelType.DESCRIPTION); 
-		descLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		
-		toolkit.createLabel(content, Messages.IntelligenceDates_From_Label);
-		txtFromDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtFromDate.setEditable(false);
-		txtFromDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.DATES); 
-
-		toolkit.createLabel(content, Messages.IntelligenceDates_To_Label);
-		txtToDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtToDate.setEditable(false);
-		txtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, ""); //$NON-NLS-1$
-
-		Label locLbl = toolkit.createLabel(content, Messages.IntelligenceLocation_Location_Label);
-		locLbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		Table pointsTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
-		pointsList = new TableViewer(pointsTable);
-		pointsList.setContentProvider(ArrayContentProvider.getInstance());
-		pointsList.setLabelProvider(new SmartPointLabelProvider());
-		pointsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		((GridData)pointsTable.getLayoutData()).minimumHeight = 60;
-		Hyperlink locLink = createEditLink(toolkit, content, PanelType.LOCATION);
-		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-
-		Label attachLbl = toolkit.createLabel(content, Messages.IntelligenceAttachments_Attachments_Label);
-		attachLbl .setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		Table attachTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
-		attachmentsList = new TableViewer(attachTable);
-		attachmentsList.setContentProvider(ArrayContentProvider.getInstance());
-		attachmentsList.setLabelProvider(new SmartAttachmentLabelProvider());
-		attachmentsList.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection sel = (IStructuredSelection)attachmentsList.getSelection();
-				AttachmentUtil.openAttachment((ISmartAttachment) sel.getFirstElement());
-			}
-		});
-		attachTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		((GridData)attachTable.getLayoutData()).minimumHeight = 60;
-		Hyperlink attachLink = createEditLink(toolkit, content, PanelType.ATTACHMENTS);
-		attachLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		
-		initValues();
-	}
-
-	/**
-	 * Updates the widgets with the value from the intelligence.
-	 */
-	private void initValues() {
-		Intelligence intel = getIntelligence();
-		setPartName(intel.getName());		
-		form.setText(intel.getName());
-		String none = Messages.IntelligenceEditor_NoValue;
-		String value = null;
-		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
-		txtSource.setText(intel.getSource().getName());
-		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
-		lnkPatrolID.setText(value);
-		lnkPatrolID.setEnabled(intel.getPatrol() != null);
-		txtShortName.setText(intel.getName());
-		txtDescription.setText(intel.getDescription());
-		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));
-		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : txtFromDate.getText();
-		txtToDate.setText(value);
-		pointsList.setInput(intel.getPoints().toArray());
-		attachmentsList.setInput(intel.getAttachments().toArray());
-	}
-
 	public Intelligence getIntelligence(){
 		if (intelligence == null){
 			byte[] puuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
@@ -333,73 +132,9 @@ public class IntelligenceEditor extends EditorPart {
 		return intelligence;
 	}
 
-	/**
-	 * Creates an edit hyperlink button
-	 * @param toolkit toolkit
-	 * @param parent parent composite
-	 * @param partEditor editor to use
-	 * @return hyperlink created
-	 */
-	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent, final PanelType panelType) {
-		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
-		
-		boolean canEdit = canEdit();
-		editLink.setEnabled(canEdit);
-		editLink.setVisible(canEdit);
-		
-		if (panelType != null){
-			editLink.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					showEditDialog(panelType);
-				}
-			});
-		}
-		return editLink;
-	}
 	
-	private boolean canEdit() {
-		//analyst users can never edit
-		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
-	}
 
-	/**
-	 * Displays and edit dialog for editing a particular item in
-	 * intelligence object.
-	 * 
-	 * @param panelType type of inner panel to be created
-	 * @return  true if changes made, false otherwise
-	 */
-	private boolean showEditDialog(PanelType panelType){
-		
-		int ret = -1;
-		try {
-			final EditItelligenceItemDialog editDialog = new EditItelligenceItemDialog(getEditorSite().getShell(), panelType, getIntelligence());
-			ret = editDialog.open();
-		} finally {
-			
-		}
-		
-		if (ret == IDialogConstants.OK_ID){
-			return true;
-		}
-		return false;
-	}
-
-	private void openPatrol(Patrol p){
-		try {
-			if (p == null) {
-				return;
-			}
-			PatrolEditorInput input = new PatrolEditorInput(p.getUuid(), p.getId(), null, null, null);
-			IWorkbench workbench = PlatformUI.getWorkbench();
-			IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-			workbench.showPerspective(PatrolPerspective.ID, window);
-			window.getActivePage().openEditor(input, PatrolEditor.ID);
-		} catch (Exception e1) {
-			IntelligencePlugIn.displayLog(Messages.IntelligenceEditor_FailOpenPatrol_Error +SmartUtils.LINE_SEPARATOR + e1.getLocalizedMessage(), e1);
-		}
-	}
+	
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -408,7 +143,7 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void setFocus() {
-		txtDateReceived.setFocus();
+		summaryPage.setFocus();
 	}
 
 	@Override
@@ -419,6 +154,49 @@ public class IntelligenceEditor extends EditorPart {
 	@Override
 	public boolean isSaveAsAllowed() {
 		return false;
+	}
+
+	@Override
+	protected void createPages() {
+		try{
+			summaryPage = new IntelligenceSummaryEditorPage(this);
+			int i = addPage(summaryPage, getEditorInput());
+			setPageText(i, Messages.IntelligenceEditor_SummaryPageName);
+		
+			mapPage = new IntelligenceEditorMapPage(this);
+			i = addPage(mapPage, getEditorInput());
+			setPageText(i, Messages.IntelligenceEditor_MapPageName);
+			
+		}catch (Exception ex){
+			IntelligencePlugIn.log(Messages.IntelligenceEditor_ErrorCreatingPages, ex);
+		}
+	}
+
+	@Override
+	public Map getMap() {
+		return mapPage.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		mapPage.openContextMenu();
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		mapPage.setFont(textArea);
+		
+	}
+
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapPage.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return mapPage.getStatusLineManager();
 	}
 
 }

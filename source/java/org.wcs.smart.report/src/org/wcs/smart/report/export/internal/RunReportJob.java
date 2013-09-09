@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
 /**

@@ -180,8 +180,7 @@ public class BirtMapUtils {
 						items.add(mapLayer);
 					}
 				}catch (Exception ex){
-					//TODO: do something here
-					ex.printStackTrace();
+					SmartMapItemPlugIn.log(ex.getMessage(), ex);
 				}
 				layerExtensions = items;
 			}

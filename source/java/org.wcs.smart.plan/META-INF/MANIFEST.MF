@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.datatools.connectivity.oda.design.ui;bundle-version="3.2.6",
  org.eclipse.datatools.connectivity.oda.profile;bundle-version="3.2.7",
  org.eclipse.birt.report.designer.ui.editors;bundle-version="3.7.2",
- org.eclipse.core.resources;bundle-version="3.7.101",
+ org.eclipse.core.resources,
  org.eclipse.birt.report.engine;bundle-version="3.7.2",
  org.wcs.smart.report.birt.map;bundle-version="1.1.2",
  net.refractions.udig.style.sld;bundle-version="1.2.0"

@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
@@ -78,9 +79,8 @@ public class PlanTargetResultSet  implements IResultSet {
 		for (int i = 0; i < planUuids.length; i ++){
 			try{
 			Plan p = (Plan)session.createCriteria(Plan.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				//.add(Restrictions.eq("id", planIds[i].trim())).list().get(0); //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("uuid", SmartUtils.decodeHex(planUuids[i]))).list().get(0);
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("uuid", SmartUtils.decodeHex(planUuids[i]))).list().get(0); //$NON-NLS-1$
 			if (p != null){
 				if (!onlyChildren){
 					plans.addAll(p.getTargets());
@@ -101,8 +101,7 @@ public class PlanTargetResultSet  implements IResultSet {
 				}
 			}
 			}catch (Exception ex){
-				ex.printStackTrace();
-				//TODO: FIX ME
+				SmartPlanPlugIn.log("Error creating plan target result set", ex); //$NON-NLS-1$
 			}
 		}
 	}

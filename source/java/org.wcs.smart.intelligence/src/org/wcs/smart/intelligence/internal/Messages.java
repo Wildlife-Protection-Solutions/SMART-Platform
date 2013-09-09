@@ -102,6 +102,18 @@ public class Messages extends NLS {
 
 	public static String IntelligenceAttachments_PageTitle;
 
+	public static String IntelligenceDataSource_SchemaNotSupported;
+
+	public static String IntelligenceDataSourceFactory_DataSourceDescription;
+
+	public static String IntelligenceDataSourceFactory_DataSourceName;
+
+	public static String IntelligenceDataSourceFactory_IntelNotFound;
+
+	public static String IntelligenceDataSourceFactory_ReadOnlySource;
+
+	public static String IntelligenceDataSourceFactory_UuidParameterName;
+
 	public static String IntelligenceDates_Date_Label;
 
 	public static String IntelligenceDates_From_Label;
@@ -132,11 +144,25 @@ public class Messages extends NLS {
 
 	public static String IntelligenceEditor_Edit_LinkLabel;
 
+	public static String IntelligenceEditor_ErrorCreatingPages;
+
 	public static String IntelligenceEditor_FailOpenPatrol_Error;
+
+	public static String IntelligenceEditor_MapPageName;
 
 	public static String IntelligenceEditor_NoValue;
 
+	public static String IntelligenceEditor_SummaryPageName;
+
 	public static String IntelligenceEditor_Translate_Link;
+
+	public static String IntelligenceEditorMapPage_AddLayerJobName;
+
+	public static String IntelligenceEditorMapPage_ErrorLoadingMaps;
+
+	public static String IntelligenceEditorMapPage_ErrorRefreshingMapPage;
+
+	public static String IntelligenceEditorMapPage_RefreshJobName;
 
 	public static String IntelligenceExporter_Converting;
 
@@ -240,7 +266,13 @@ public class Messages extends NLS {
 
 	public static String IntelligenceReceivedComposite_FutureDate;
 
-    public static String IntelligenceSourceType_CET;
+    public static String IntelligenceServiceInfo_Description;
+
+	public static String IntelligenceServiceInfo_Keyword1;
+
+	public static String IntelligenceServiceInfo_Keyword2;
+
+	public static String IntelligenceSourceType_CET;
 
 	public static String IntelligenceSourceType_Informant;
 
