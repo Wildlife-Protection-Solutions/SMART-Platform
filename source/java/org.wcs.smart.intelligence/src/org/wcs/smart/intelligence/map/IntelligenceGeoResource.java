@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.map;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -29,15 +30,19 @@ import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IGeoResourceInfo;
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.core.internal.CorePlugin;
+import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ui.XMLMemento;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.styling.Style;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 /**
  * Intelligence point geo resource
  * 
@@ -111,6 +116,7 @@ public class IntelligenceGeoResource extends IGeoResource {
 	                || adaptee.isAssignableFrom(FeatureStore.class)
 	                || adaptee.isAssignableFrom(SimpleFeatureStore.class)
 	                || adaptee.isAssignableFrom(SimpleFeatureSource.class)
+	                || adaptee.isAssignableFrom(Style.class)
 	                || super.canResolve(adaptee);
 	    }
 	  
@@ -129,8 +135,6 @@ public class IntelligenceGeoResource extends IGeoResource {
         	 DataStore ds = ((IntelligenceService)service).getDataStore(monitor);
              if (ds != null) {
                  FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(dataType);
-                 
-//                 CachingFeatureSource cfs = new CachingFeatureSource(fs);
                  if (fs != null)
                      return adaptee.cast(fs);
              }else{
@@ -145,7 +149,61 @@ public class IntelligenceGeoResource extends IGeoResource {
                  return adaptee.cast(fs);
              }
         }
+        
+        if (adaptee.isAssignableFrom(Style.class)){
+        	Style s = createStyle();
+        	if (s != null){
+        		return adaptee.cast(s);
+        	}
+        }
         return super.resolve(adaptee, monitor);
+    }
+    
+    private Style createStyle(){
+    	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " //$NON-NLS-1$
+    			+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
+    			+ "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:UserLayer&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:FeatureTypeConstraint/&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:UserStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Name&gt;IntelPoint&lt;/sld:Name&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Title/&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Name&gt;group 0&lt;/sld:Name&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Rule&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Name&gt;default rule&lt;/sld:Name&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:PointSymbolizer&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Graphic&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Mark&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:WellKnownName&gt;star&lt;/sld:WellKnownName&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Fill&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:CssParameter name=\"fill\"&gt;#FF0000&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:Fill&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:Mark&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Size&gt;12&lt;/sld:Size&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:Graphic&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:PointSymbolizer&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:Rule&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:UserStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:UserLayer&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:StyledLayerDescriptor&gt;" //$NON-NLS-1$
+    			+ "</styleEntry>"; //$NON-NLS-1$
+
+		try {
+			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
+			SLDContent c = new SLDContent();
+			Style style = (Style) c.load(memento);
+			return style;
+		} catch (Exception ex) {
+			IntelligencePlugIn.log("Error generating smart style", ex); //$NON-NLS-1$
+			return null;
+		}
     }
 
 }
