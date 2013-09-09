@@ -84,7 +84,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	public NumberParameterComponent(String name, String displayText, INumberValidator validator, Object defaultValue) {
 		super(name, displayText);
 		this.validator = validator;
-		this.defaultValue = defaultValue == null ? "" : defaultValue.toString();
+		this.defaultValue = defaultValue == null ? "" : defaultValue.toString(); //$NON-NLS-1$
 	}
 
 	@Override

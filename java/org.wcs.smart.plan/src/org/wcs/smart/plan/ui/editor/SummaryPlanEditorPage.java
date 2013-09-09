@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -623,7 +625,8 @@ public class SummaryPlanEditorPage extends EditorPart {
 			
 			ret = editDialog.open();
 		} finally {
-			
+			//this ensure the map tools work correctly
+			ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 		}
 		
 		if (ret == IDialogConstants.OK_ID){
