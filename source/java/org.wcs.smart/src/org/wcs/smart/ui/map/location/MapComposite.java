@@ -102,6 +102,7 @@ public class MapComposite extends Composite implements MapPart {
 	private Map map;
 
 	private ISmartPointDataProvider dataProvider;
+	private String styleSld = null;
 	
 	private Job refreshJob = new Job(Messages.MapComposite_MapResizeJob_Title){
 		@Override
@@ -118,6 +119,10 @@ public class MapComposite extends Composite implements MapPart {
 	public MapComposite(Composite parent, int style) {
 		super(parent, style);
 		createControls();
+	}
+	
+	public void setStyleSld(String sld){
+		this.styleSld = sld;
 	}
 	
 	private void createControls() {
@@ -155,7 +160,7 @@ public class MapComposite extends Composite implements MapPart {
 		tools.selectTool(PanTool.ID);
 
 		addPointsLayer();
-		LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(map, true, null);
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(map, true, null);
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {
@@ -165,6 +170,14 @@ public class MapComposite extends Composite implements MapPart {
 			}
 		});
 		defaultLayer.schedule();
+		
+		//if I am disposed before finished cancel job
+		addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				defaultLayer.cancel();
+			}
+		});
 	
 		mapViewer.getViewport().addPaneListener(new IMapDisplayListener() {
 			@Override
@@ -312,6 +325,9 @@ public class MapComposite extends Composite implements MapPart {
 	}
 
 	private String getStylingConfig() {
+		if (styleSld != null){
+			return styleSld;
+		}
 		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
 		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
 		"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$

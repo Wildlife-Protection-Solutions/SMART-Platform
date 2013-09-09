@@ -518,6 +518,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 	        PlanTarget selected = (PlanTarget)selection.getFirstElement(); 
 			TargetPropertyDialog dialog = new TargetPropertyDialog(getEditorSite().getShell(), parentEditor.getPlan().getTargets(), selected);
 			dialog.open();
+			ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 			if (dialog.isSavePerformed()) {
 				if (PlanHibernateManager.savePlan(parentEditor.getPlan(), HibernateManager.openSession())) {
 					PlanEventManager.getInstance().planChanged(0, parentEditor.getPlan());
