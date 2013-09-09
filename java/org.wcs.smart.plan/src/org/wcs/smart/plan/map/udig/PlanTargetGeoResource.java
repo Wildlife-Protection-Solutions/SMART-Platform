@@ -168,7 +168,7 @@ public class PlanTargetGeoResource extends IGeoResource {
     		pointStyle = "triangle"; //$NON-NLS-1$
     	}
     	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" //$NON-NLS-1$
-    			 + "<styleEntry type=\"SLDStyle\" version=\"1.0\">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" //$NON-NLS-1$
+    			 + "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
     			 + "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$
     			 + "&lt;sld:UserLayer&gt;" //$NON-NLS-1$
     			 + "&lt;sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$

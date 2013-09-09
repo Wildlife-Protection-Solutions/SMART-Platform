@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
@@ -39,6 +40,10 @@ public class IntelligencePerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(true);
 		layout.addView(IntelligenceListView.ID, IPageLayout.LEFT, 0.25f, IPageLayout.ID_EDITOR_AREA);
 		layout.getViewLayout(IntelligenceListView.ID).setCloseable(false);
+		
+		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.intelligence.intelligenceFolder", IPageLayout.BOTTOM, 0.6f, IntelligenceListView.ID); //$NON-NLS-1$
+		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
+		folder1.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
 	}
 
 }
