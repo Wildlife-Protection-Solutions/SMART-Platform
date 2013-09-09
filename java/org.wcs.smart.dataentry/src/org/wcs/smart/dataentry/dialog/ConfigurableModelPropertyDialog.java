@@ -93,12 +93,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
-				if (!selection.isEmpty()) {
-					ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();
-					cm = DataentryHibernateManager.getFullConfigurableModel(cm);
-					modelTreeViewer.setInput(cm);
-				}
+				updateTreeViewer();
 			}
 		});
 		
@@ -123,6 +118,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			public void widgetSelected(SelectionEvent e) {
 				Dialog dialog = new ConfigurableModelEditDialog((ConfigurableModel)modelTreeViewer.getInput());
 				dialog.open();
+				updateTreeViewer();
 			}
 		});
 		
@@ -140,6 +136,15 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		return true;
 	}
 
+	void updateTreeViewer() {
+		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
+		if (!selection.isEmpty()) {
+			ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();
+			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid());
+			modelTreeViewer.setInput(cm);
+		}
+	}
+	
 	//TODO: remove this method after it is not required
 	void addFakeModel() {
 		ConfigurableModel model = new ConfigurableModel();

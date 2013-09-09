@@ -72,7 +72,14 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 
 	@Override
 	public Object getParent(Object element) {
-		throw new IllegalAccessError("Not implemented"); //$NON-NLS-1$
+		if (element instanceof CmNode) {
+			CmNode n = (CmNode) element;
+			return n.getParent();
+		} else if (element instanceof CmAttribute) {
+			CmAttribute cma = (CmAttribute) element;
+			return cma.getNode();
+		}
+		return null;
 	}
 
 	@Override
