@@ -1324,7 +1324,6 @@
             <text-property name="text">Spatial Targets Map</text-property>
         </label>
         <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="324">
-            <property name="org.wcs.smart.birt.map.basemap">12b98578d5874fcf8f1d07d39101ffd5</property>
             <simple-property-list name="org.wcs.smart.birt.map.layers">
                 <value>subplan</value>
                 <value>plan</value>
@@ -1341,32 +1340,6 @@
                 <value isNull="true"/>
                 <value isNull="true"/>
             </simple-property-list>
-            <property name="org.wcs.smart.report.birt.map.bounds.xmin">1147196.6778305457</property>
-            <property name="org.wcs.smart.report.birt.map.bounds.xmax">1224424.48053178</property>
-            <property name="org.wcs.smart.report.birt.map.bounds.ymin">365978.4222113266</property>
-            <property name="org.wcs.smart.report.birt.map.bounds.ymax">427370.18671820656</property>
-            <property name="org.wcs.smart.report.birt.map.bounds.srid">PROJCS["NAD83 / BC Albers", &#13;
-  GEOGCS["NAD83", &#13;
-    DATUM["North American Datum 1983", &#13;
-      SPHEROID["GRS 1980", 6378137.0, 298.257222101, AUTHORITY["EPSG","7019"]], &#13;
-      TOWGS84[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &#13;
-      AUTHORITY["EPSG","6269"]], &#13;
-    PRIMEM["Greenwich", 0.0, AUTHORITY["EPSG","8901"]], &#13;
-    UNIT["degree", 0.017453292519943295], &#13;
-    AXIS["Geodetic longitude", EAST], &#13;
-    AXIS["Geodetic latitude", NORTH], &#13;
-    AUTHORITY["EPSG","4269"]], &#13;
-  PROJECTION["Albers_Conic_Equal_Area"], &#13;
-  PARAMETER["central_meridian", -126.0], &#13;
-  PARAMETER["latitude_of_origin", 45.0], &#13;
-  PARAMETER["standard_parallel_1", 50.0], &#13;
-  PARAMETER["false_easting", 1000000.0], &#13;
-  PARAMETER["false_northing", 0.0], &#13;
-  PARAMETER["standard_parallel_2", 58.5], &#13;
-  UNIT["m", 1.0], &#13;
-  AXIS["Easting", EAST], &#13;
-  AXIS["Northing", NORTH], &#13;
-  AUTHORITY["EPSG","3005"]]</property>
             <property name="height">5.125in</property>
             <property name="width">7.9375in</property>
         </extended-item>
