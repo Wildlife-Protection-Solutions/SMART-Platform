@@ -81,7 +81,7 @@ public class DataentryHibernateManager extends HibernateManager {
 		for (CmNode cmNode : nodes) {
 			//load all lazy data
 			cmNode.getCategory();
-			cmNode.getCmAttributes();
+			cmNode.getCmAttributes().size();
 			fetchNodesData(cmNode.getChildren());
 		}
 	}

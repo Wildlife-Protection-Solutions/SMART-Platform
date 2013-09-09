@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,10 +38,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -89,19 +98,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		btnAddCategory.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try {
-					DataModel dm = getDataModel(s);
-					DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
-					dialog.open();
-				} catch (Exception ex) {
-					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
-				} finally {
-					s.getTransaction().rollback();
-					s.close();
-				}
-				//TODO: implement
+				addDatamodelCategory();
 			}
 		});
 		
@@ -127,6 +124,55 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		return false;
 	}
 
+	private void addDatamodelCategory() {
+		Session s = getSession();
+		s.beginTransaction();
+		try {
+			DataModel dm = getDataModel(s);
+			DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
+			if (dialog.open() == IDialogConstants.OK_ID) {
+				CmNode parentNode = getCurrentNode();
+				if (parentNode != null) {
+					Category category = dialog.getCategory();
+					CmNode node = new CmNode();
+					node.setParent(parentNode);
+					node.setCategory(category);
+					node.setName(category.getName());
+					node.setNames(new HashSet<Label>(category.getNames())); //we need a copy, not the same instance of set
+					node.setNodeOrder(parentNode.getChildren().size());
+					parentNode.getChildren().add(node);
+					parentNode.setCategory(category);
+					List<Attribute> attrList = new ArrayList<Attribute>();
+					category.getAllAttribute(attrList, true);
+					for (Attribute a : attrList) {
+						CmAttribute cma = new CmAttribute();
+						cma.setNode(node);
+						cma.setAttribute(a);
+						cma.setName(a.getName());
+						cma.setNames(new HashSet<Label>(a.getNames())); //we need a copy, not the same instance of set
+						//TODO: add CmAttribute default options
+						node.getCmAttributes().add(cma);
+					}
+				}
+				modelTreeViewer.refresh();
+			}
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
+		} finally {
+			s.getTransaction().rollback();
+			s.close();
+		}
+	}
+
+	private CmNode getCurrentNode() {
+		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
+		Object obj = selection.getFirstElement();
+		if (obj instanceof CmNode) {
+			return (CmNode) obj;
+		}
+		return null;
+	}
+	
 	private DataModel getDataModel(Session session) {
 		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 		//load into memory; no-lazy loading here.

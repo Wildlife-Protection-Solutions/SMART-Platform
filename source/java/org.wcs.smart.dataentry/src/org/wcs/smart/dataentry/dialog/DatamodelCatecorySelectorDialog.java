@@ -22,12 +22,16 @@
 package org.wcs.smart.dataentry.dialog;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
@@ -42,6 +46,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
 public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDialog {
 
 	private DataModel datamodel;
+	private Category category;
 
 	private TreeViewer dmTreeViewer;
 	
@@ -62,13 +67,25 @@ public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDia
 		dmTreeViewer.setContentProvider(new DataModelContentProvider(true, true));
 		dmTreeViewer.setLabelProvider(new DataModelLabelProvider());
 		dmTreeViewer.setAutoExpandLevel(3);
-		dmTreeViewer.setInput(datamodel); 
+		dmTreeViewer.setInput(datamodel);
+		dmTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				category = null;
+				IStructuredSelection selection = (IStructuredSelection) dmTreeViewer.getSelection();
+				Object obj = selection.getFirstElement();
+				if (obj instanceof Category) {
+					category = (Category) obj;
+				}
+				getButton(IDialogConstants.OK_ID).setEnabled(category != null);
+
+			}
+		});
 		
 		setTitle("Datamodel Category Selector");
 		setMessage("Select Datamodel Category to add to Configurable Model");
 		
 		return container;
-		
 	}
 
 	@Override
@@ -84,9 +101,17 @@ public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDia
 	}
 	
 	@Override
-	protected boolean performSave() {
-		// TODO Auto-generated method stub
-		return false;
+	protected void buttonPressed(int buttonId) {
+		setReturnCode(buttonId);
+		close();
 	}
 
+	@Override
+	protected boolean performSave() {
+		return true;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
 }
