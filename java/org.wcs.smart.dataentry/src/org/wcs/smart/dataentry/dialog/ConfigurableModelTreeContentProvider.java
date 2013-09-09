@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -58,15 +59,20 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		if (parentElement instanceof CmNode) {
 			CmNode n = (CmNode) parentElement;
 			List<CmNode> nodes = n.getChildren();
-			return nodes == null ? new Object[]{} : nodes.toArray();
+			if (nodes != null && !nodes.isEmpty()) {
+				return nodes.toArray();
+			}
+			List<CmAttribute> attributes = n.getCmAttributes();
+			if (attributes != null && !attributes.isEmpty()) {
+				return attributes.toArray();
+			}
 		}
 		return new Object[]{};
 	}
 
 	@Override
 	public Object getParent(Object element) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new IllegalAccessError("Not implemented"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -74,7 +80,8 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		if (element instanceof CmNode) {
 			CmNode n = (CmNode) element;
 			List<CmNode> nodes = n.getChildren();
-			return nodes != null && !nodes.isEmpty();
+			List<CmAttribute> attributes = n.getCmAttributes();
+			return (nodes != null && !nodes.isEmpty()) || (attributes != null && !attributes.isEmpty());
 		}
 		return false;
 	}

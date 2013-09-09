@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -31,6 +32,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.NamedItem;
@@ -96,6 +98,8 @@ public class CmNode extends NamedItem {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "node_order")
 	public List<CmNode> getChildren() {
+		if (this.children == null)
+			this.children = new ArrayList<CmNode>();
 		return this.children;
 	}
 	public void setChildren(List<CmNode> children) {
@@ -104,10 +108,16 @@ public class CmNode extends NamedItem {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="node", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<CmAttribute> getCmAttributes() {
+		if (cmAttributes == null)
+			cmAttributes = new ArrayList<CmAttribute>();
 		return cmAttributes;
 	}
 	public void setCmAttributes(List<CmAttribute> cmAttributes) {
 		this.cmAttributes = cmAttributes;
 	}
 	
+	@Transient
+	public boolean isGroup() {
+		return category == null;
+	}
 }
