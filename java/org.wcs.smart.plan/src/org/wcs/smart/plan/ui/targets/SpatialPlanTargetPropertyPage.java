@@ -168,13 +168,12 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		targetDesc.addListener(SWT.Modify, changeListener);
 		
         //location selection
-        locationSelect = new LocationSelectComposite<SpatialPlanTargetPoint>(main, SWT.NONE) {
+        locationSelect = new LocationSelectComposite<SpatialPlanTargetPoint>(main, SWT.NONE, getStyleSld()) {
 			@Override
 			protected ISmartPoint createNewPoint() {
 				return new SpatialPlanTargetPoint();
 			}
         };
-//        locationSelect.setForceBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
         locationSelect.addLocationPointsChangeListener(this);
         locationSelect.getDecoration().setDescriptionText(Messages.SpatialPlanTargetPropertyPage_Description_Required_Error);
         locationSelect.getDecoration().show();
@@ -190,7 +189,9 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
         PaintListener firstPaint = new PaintListener() {
 			@Override
 			public void paintControl(PaintEvent e) {
-				locationSelect.getMap().sendCommandASync(new ZoomExtentCommand());
+				if (!main.isDisposed()){
+					locationSelect.getMap().sendCommandASync(new ZoomExtentCommand());
+				}
 				main.removePaintListener(this);
 			}
 		};
@@ -316,4 +317,65 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		}
 	}
 
+	private String getStyleSld(){
+		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
+				"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
+				"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
+				"	&lt;sld:UserStyle xmlns=\"http://www.opengis.net/sld\""+ //$NON-NLS-1$
+				"		xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\""+ //$NON-NLS-1$
+				"		xmlns:gml=\"http://www.opengis.net/gml\"&gt;"+ //$NON-NLS-1$
+				"		&lt;sld:Name&gt;Default Styler&lt;/sld:Name&gt;"+ //$NON-NLS-1$
+				"		&lt;sld:Title /&gt;"+ //$NON-NLS-1$
+				"		&lt;sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
+				"			&lt;sld:Name&gt;simple&lt;/sld:Name&gt;"+ //$NON-NLS-1$
+				"			&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;"+ //$NON-NLS-1$
+				"			&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
+				"			&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
+
+				//rule for not selected points (same as default)
+				"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
+				"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
+				"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+				"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
+				"                            &lt;ogc:Literal&gt;false&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
+				"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+				"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
+				"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+				"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
+				"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
+				"							&lt;sld:WellKnownName&gt;circle&lt;/sld:WellKnownName&gt;" + //$NON-NLS-1$
+				"							&lt;sld:Fill&gt;" + //$NON-NLS-1$
+		    	"							&lt;sld:CssParameter name=\"fill\"&gt;#004080&lt;/sld:CssParameter&gt;" + //$NON-NLS-1$
+		    	"							&lt;/sld:Fill&gt;" + //$NON-NLS-1$
+				"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
+				"						&lt;sld:Size&gt;10.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
+				"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
+				"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+				"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
+					
+				//rule for selected points
+				"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
+				"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
+				"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+				"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
+				"                            &lt;ogc:Literal&gt;true&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
+				"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+				"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
+				"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+				"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
+				"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
+				"							&lt;sld:WellKnownName&gt;circle&lt;/sld:WellKnownName&gt;" + //$NON-NLS-1$
+				"							&lt;sld:Fill&gt;" + //$NON-NLS-1$
+		    	"							&lt;sld:CssParameter name=\"fill\"&gt;#FFFF00&lt;/sld:CssParameter&gt;" + //$NON-NLS-1$
+		    	"							&lt;/sld:Fill&gt;" + //$NON-NLS-1$
+				"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
+				"						&lt;sld:Size&gt;10.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
+				"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
+				"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+				"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$	
+				"		&lt;/sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
+				"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
+				"</styleEntry>"; //$NON-NLS-1$
+		
+	}
 }

@@ -53,8 +53,8 @@ import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 
 /**
- * Job and intitializes a map with the
- * default conservation area basemap 
+ * Job that initializes a map with the default basemap
+ * for the current Conservation Area.
  * 
  * @author egouge
  * @since 1.0.0
@@ -68,10 +68,10 @@ public class LoadDefaultLayersJob extends Job{
 	
 	/**
 	 * Creates a new job that loads the the session
-	 * basemap (if defined), the default basemap (if defined)
-	 * or the smart default basemap.
+	 * basemap (if defined), or the default basemap (if defined)
+	 * or the default SMART basemap.
 	 * 
-	 * @param map
+	 * @param map the map to apply the default basemap too
 	 * @param zoom if should zoom to extents after loading basemap
 	 */
 	public LoadDefaultLayersJob(IMap map, boolean zoom){
@@ -114,7 +114,6 @@ public class LoadDefaultLayersJob extends Job{
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     	if (map != null){
     		try {
-    			
     			if (mapDef != null){
     				MapSettings settings = MapSettings.getInstance(mapDef);
     				settings.applyTo((Map) map);
@@ -136,6 +135,7 @@ public class LoadDefaultLayersJob extends Job{
     				if (prj != null){
     					try{
     						CoordinateReferenceSystem crs = prj.getCrs();
+    						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     						ChangeCRSCommand cmd = new ChangeCRSCommand(crs);
     						map.sendCommandSync(cmd);
     					}catch(Exception ex){

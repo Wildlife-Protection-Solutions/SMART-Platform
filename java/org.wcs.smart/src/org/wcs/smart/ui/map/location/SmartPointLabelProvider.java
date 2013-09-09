@@ -24,7 +24,6 @@ package org.wcs.smart.ui.map.location;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.hibernate.SmartDB;

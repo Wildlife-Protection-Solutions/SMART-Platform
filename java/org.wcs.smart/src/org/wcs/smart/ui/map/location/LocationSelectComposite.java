@@ -99,7 +99,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	private Button removeButton;
 	
 	private MapComposite mapComposite;
-
+	private String layerStyle = null;
+	
 	private List<ILocationPointsChangeListener> pointsChangeListeners = new ArrayList<ILocationPointsChangeListener>();
 	
 	/**
@@ -113,6 +114,17 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	}
 	
 	/**
+	 * @param parent
+	 * @param style
+	 */
+	public LocationSelectComposite(Composite parent, int style, String layerStyle) {
+		super(parent, SWT.HORIZONTAL | style);
+		this.layerStyle = layerStyle;
+		createControls();
+		setWeights(new int[] {1, 2});
+	}
+	
+	/**
 	 * 
 	 * @return map associated with composite
 	 */
@@ -121,7 +133,6 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	}
 
 	private void createControls(){
-//		setLayout(new GridLayout(2, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setBackground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
 
@@ -133,8 +144,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		Label pointsLabel = new Label(pointsComposite, SWT.NONE);
 		pointsLabel.setText(Messages.LocationSelectComposite_Points_Label);
 		decoration = new ControlDecoration(pointsLabel, SWT.RIGHT);
-		decoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		decoration.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		decoration.setShowHover(true);
 		decoration.hide();
 
@@ -142,7 +152,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		pointsListViewer.setContentProvider(new ObservableListContentProvider());
 		pointsListViewer.setLabelProvider(createLabelProvider());
 		pointsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)pointsListViewer.getControl().getLayoutData()).widthHint = 120;
+		((GridData)pointsListViewer.getControl().getLayoutData()).widthHint = 180;
+		((GridData)pointsListViewer.getControl().getLayoutData()).heightHint = 300;
 		pointsListViewer.setInput(this.points);
 		pointsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -235,29 +246,14 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		ScrolledComposite mapScrollCmp = new ScrolledComposite(this, SWT.H_SCROLL);
 		mapComposite = new MapComposite(mapScrollCmp, SWT.NONE);
 		mapComposite.setDataProvider(this);
+		if (layerStyle != null){
+			mapComposite.setStyleSld(this.layerStyle);
+		}
+		
 		mapScrollCmp.setContent(mapComposite);
 		mapScrollCmp.setExpandVertical(true);
 		mapScrollCmp.setExpandHorizontal(true);
 		mapScrollCmp.setMinWidth(MAP_MIN_WIDTH);
-		
-		mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
-			@Override
-			public void changed(ViewportModelEvent event) {
-				if (EventType.CRS.equals(event.getType())) {
-					//TODO: this piece of code is causing deadlock in geotools and on the ui
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							if (pointsListViewer != null && !LocationSelectComposite.this.isDisposed()) {
-								pointsListViewer.refresh(true);
-								updateAddButtonDecoration();
-							}
-						}
-					});
-				}
-					
-			}
-		});
 
 		//========register required listeners========
 		Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
@@ -276,6 +272,26 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 				}
 			}
 		});
+		
+		mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
+			@Override
+			public void changed(ViewportModelEvent event) {
+				if (EventType.CRS.equals(event.getType())) {
+					//TODO: this piece of code is causing deadlock in geotools and on the ui
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (pointsListViewer != null && !LocationSelectComposite.this.isDisposed()) {
+								pointsListViewer.refresh(true);
+								updateAddButtonDecoration();
+							}
+						}
+					});
+				}					
+			}
+		});
+		
+		
 	}	
 
 	@Override
