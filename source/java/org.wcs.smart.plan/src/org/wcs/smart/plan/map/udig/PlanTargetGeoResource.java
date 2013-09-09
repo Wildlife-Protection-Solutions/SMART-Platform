@@ -195,7 +195,7 @@ public class PlanTargetGeoResource extends IGeoResource {
     			 + "&lt;sld:Mark&gt;" //$NON-NLS-1$
     			 + "&lt;sld:WellKnownName&gt;" + pointStyle + "&lt;/sld:WellKnownName&gt;" //$NON-NLS-1$ //$NON-NLS-2$
     			 + "&lt;sld:Fill&gt;" //$NON-NLS-1$
-    			 + "&lt;sld:CssParameter name=\"fill\"&gt;#EA2F31&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
+    			 + "&lt;sld:CssParameter name=\"fill\"&gt;#FF0000&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
     			 + "&lt;/sld:Fill&gt;" //$NON-NLS-1$
     			 + "&lt;/sld:Mark&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Size&gt;9.0&lt;/sld:Size&gt;" //$NON-NLS-1$
@@ -216,7 +216,7 @@ public class PlanTargetGeoResource extends IGeoResource {
     			 + "&lt;sld:Mark&gt;" //$NON-NLS-1$
     			 + "&lt;sld:WellKnownName&gt;" + pointStyle + "&lt;/sld:WellKnownName&gt;" //$NON-NLS-1$ //$NON-NLS-2$
     			 + "&lt;sld:Fill&gt;" //$NON-NLS-1$
-    			 + "&lt;sld:CssParameter name=\"fill\"&gt;#5AA252&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
+    			 + "&lt;sld:CssParameter name=\"fill\"&gt;#008000&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
     			 + "&lt;/sld:Fill&gt;" //$NON-NLS-1$
     			 + "&lt;/sld:Mark&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Size&gt;9.0&lt;/sld:Size&gt;" //$NON-NLS-1$
