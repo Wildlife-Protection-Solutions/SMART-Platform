@@ -93,9 +93,11 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 					//force reload plan to get latest changes
 					plan = loadPlan();
 					summaryPage.initValues();
+					computeStatus.schedule();
 					mapPage.refreshPlanTargets();
-				}
+				}	
 			}
+			
 			if (type == PlanEventManager.PATROL_PLAN_ATTRIBUTE){
 				summaryPage.refreshPatrolLinks();
 			}
@@ -121,7 +123,6 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	};
 	
 	private IPatrolEventListener patrolListener = new IPatrolEventListener() {
-		
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
 			summaryPage.refreshPatrolLinks();
@@ -147,12 +148,15 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 				session.getTransaction().rollback();
 				session.close();
 			}
+			for(PlanTarget pt : childTargets){
+				pt.refreshStatus();
+			}
 			mapPage.updateSubplanTargetLayer(thisPlan);
+			
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
-					summaryPage.refreshChildTargets(childTargets);
-					
+					summaryPage.refreshChildTargets(childTargets);		
 				}});
 			
 			
@@ -160,6 +164,28 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		}
 		
 	};
+	
+	/*
+	 * recomputes target status
+	 */
+	private Job computeStatus = new Job(Messages.TargetProgressViewer_ComputeTargetStatus_JobTitle){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
+			for (PlanTarget pt : targets){
+				pt.refreshStatus();
+			}
+			Display.getDefault().asyncExec(new Runnable(){
+				public void run(){
+					summaryPage.refreshPlanTargetList();
+				}
+			});
+			mapPage.refreshPlanTargets();
+			
+			return org.eclipse.core.runtime.Status.OK_STATUS;
+		}};
+	
 	
 	/**
 	 * Default constructor
@@ -201,12 +227,29 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		return false;
 	}
 
-	
+	/**
+	 * Runs a job and reloads the sub plan targets
+	 * from the database, recomputes the 
+	 * status, updates the ui and map
+	 */
 	public void refreshSubPlanTargets(){
 		refreshSubPlanTargets.schedule();
 	}
-	public void refreshPlanTargets(){
+	
+	/**
+	 * Refreshes the plan targets map layer
+	 */
+	public void refreshPlanTargetsMapLayer(){
 		mapPage.refreshPlanTargets();
+	}
+	
+	/**
+	 * Runs a job and computes the status
+	 * of each target in the current plan, updates
+	 * the ui and the map
+	 */
+	public void computePlanTargetStatus(){
+		computeStatus.schedule();
 	}
 	
 	public void openPatrol(PatrolEditorInput p){
@@ -316,6 +359,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		summaryPage.initValues();
 		setPartName(plan.getLabel());
 		setTitleImage(((PlanEditorInput)getEditorInput()).getImageDescriptor().createImage());
+		computePlanTargetStatus();
 	}
 	
 	private void getChildTargets(Plan parent, List<PlanTarget> targets){

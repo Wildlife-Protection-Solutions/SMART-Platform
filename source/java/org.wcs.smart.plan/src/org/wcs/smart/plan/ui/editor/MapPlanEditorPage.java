@@ -86,6 +86,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			try {
 				if (subPlanTargetService != null){
 					subPlanTargetService.refresh(lPlan, monitor);
+					mapViewer.getRenderManager().refresh(null);
 				}else{
 					//wait until plan target layer is added first
 					loadDefaultLayers.join();
