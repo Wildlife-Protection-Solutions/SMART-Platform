@@ -24,8 +24,10 @@ package org.wcs.smart.ui.map.location;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -67,6 +69,30 @@ public class SmartPointLabelProvider extends LabelProvider {
 		return super.getText(element);
 	}
 	
+	/**
+	 * Update the transform used to transform
+	 * coordinates to map crs.  Should be called
+	 * when map CRS is called.
+	 * <p>Note: it is done this way to avoid deadlock issues
+	 * I found in geotools if the transform was computed
+	 * in the display thread.
+	 * </p>
+	 */
+	public void updateTransform() {
+		CoordinateReferenceSystem destCrs = crsProvider.getCurrentCrs();
+		if (destCrs == null) {
+			transform = null;
+			transformCrs = null;
+		}
+		if (transform == null || transformCrs != destCrs){
+			try {
+				transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, transformCrs);
+				transformCrs = destCrs;
+			} catch (FactoryException e) {
+				SmartPlugIn.log(e.getMessage(),e);
+			}
+		}
+	}
 	private Point convert(double x, double y) {
 		Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
 		if (crsProvider == null) {
