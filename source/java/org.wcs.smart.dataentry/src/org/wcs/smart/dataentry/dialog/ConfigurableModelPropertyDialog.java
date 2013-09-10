@@ -86,7 +86,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		container.setLayout(new GridLayout(2, false));
 
 		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
-		modelListViewer.setLabelProvider(new NamedItemLabelProvider());
+		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(modelList.toArray());
 		modelListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -98,8 +98,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		});
 		
 		modelTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
-		modelTreeViewer.setLabelProvider(new NamedItemLabelProvider());
-		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider());
+		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(false));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		btnNew = new Button(container, SWT.PUSH);

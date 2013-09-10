@@ -22,7 +22,6 @@
 package org.wcs.smart.dataentry.dialog;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -45,6 +44,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -79,8 +79,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		container.setLayout(new GridLayout(2, false));
 
 		modelTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
-		modelTreeViewer.setLabelProvider(new NamedItemLabelProvider());
-		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider());
+		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(true));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		modelTreeViewer.setInput(model);
 		modelTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -134,17 +134,30 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		return true;
 	}
 
-	private void addSubGroup() {
-		CmNode parentNode = getCurrentNode();
-		CmNode node = new CmNode();
-		node.setModel(model);
-		node.setParent(parentNode);
-		node.setName("New SubGroup");
-		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
-		node.setNodeOrder(parentNode.getChildren().size());
-		parentNode.getChildren().add(node);
+	private void addToParent(CmNode node) {
+		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
+		Object obj = selection.getFirstElement();
+		if (obj instanceof CmNode) {
+			CmNode parentNode = (CmNode) obj;
+			node.setParent(parentNode);
+			node.setNodeOrder(parentNode.getChildren().size());
+			parentNode.getChildren().add(node);
+		} else if (obj instanceof CmRootNode) {
+			node.setParent(null);
+			node.setNodeOrder(model.getNodes().size());
+			model.getNodes().add(node);
+		}
+		
 		setChangesMade(true);
 		modelTreeViewer.refresh();
+	}
+	
+	private void addSubGroup() {
+		CmNode node = new CmNode();
+		node.setModel(model);
+		node.setName("New SubGroup");
+		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
+		addToParent(node);
 	}
 	
 	private void addDatamodelCategory() {
@@ -154,35 +167,28 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			DataModel dm = getDataModel(s);
 			DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
 			if (dialog.open() == IDialogConstants.OK_ID) {
-				CmNode parentNode = getCurrentNode();
-				if (parentNode != null) {
-					Category category = dialog.getCategory();
-					CmNode node = new CmNode();
-					node.setModel(model);
-					node.setParent(parentNode);
-					node.setCategory(category);
-					node.setName(category.getName());
-					for (Label label : category.getNames()) { //we need a copy, not the same instance of set
-						node.updateName(label.getLanguage(), label.getValue());
-					}
-					node.setNodeOrder(parentNode.getChildren().size());
-					parentNode.getChildren().add(node);
-					List<Attribute> attrList = new ArrayList<Attribute>();
-					category.getAllAttribute(attrList, true);
-					for (Attribute a : attrList) {
-						CmAttribute cma = new CmAttribute();
-						cma.setNode(node);
-						cma.setAttribute(a);
-						cma.setName(a.getName());
-						for (Label label : a.getNames()) { //we need a copy, not the same instance of set
-							cma.updateName(label.getLanguage(), label.getValue());
-						}
-						//TODO: add CmAttribute default options
-						node.getCmAttributes().add(cma);
-					}
+				Category category = dialog.getCategory();
+				CmNode node = new CmNode();
+				node.setModel(model);
+				node.setCategory(category);
+				node.setName(category.getName());
+				for (Label label : category.getNames()) { //we need a copy, not the same instance of set
+					node.updateName(label.getLanguage(), label.getValue());
 				}
-				setChangesMade(true);
-				modelTreeViewer.refresh();
+				List<Attribute> attrList = new ArrayList<Attribute>();
+				category.getAllAttribute(attrList, true);
+				for (Attribute a : attrList) {
+					CmAttribute cma = new CmAttribute();
+					cma.setNode(node);
+					cma.setAttribute(a);
+					cma.setName(a.getName());
+					for (Label label : a.getNames()) { //we need a copy, not the same instance of set
+						cma.updateName(label.getLanguage(), label.getValue());
+					}
+					//TODO: add CmAttribute default options
+					node.getCmAttributes().add(cma);
+				}
+				addToParent(node);
 			}
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
@@ -231,6 +237,10 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			btnAddGroup.setEnabled(isGroup);
 			btnAddCategory.setEnabled(isGroup);
 			btnDelete.setEnabled(true);
+		} else if (obj instanceof CmRootNode) {
+			btnAddGroup.setEnabled(true);
+			btnAddCategory.setEnabled(true);
+			btnDelete.setEnabled(false);
 		}
 	}
 	
