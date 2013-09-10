@@ -113,6 +113,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		setWeights(new int[] {1, 2});
 	}
 	
+	
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -124,6 +126,11 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		setWeights(new int[] {1, 2});
 	}
 	
+	@Override
+	public void dispose(){
+		super.dispose();
+		mapComposite.dispose();
+	}
 	/**
 	 * 
 	 * @return map associated with composite
@@ -133,6 +140,13 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	}
 
 	private void createControls(){
+		getParent().addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				dispose();
+			}
+		});
+		
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setBackground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
 
@@ -276,8 +290,14 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
 			@Override
 			public void changed(ViewportModelEvent event) {
-				if (EventType.CRS.equals(event.getType())) {
-					//TODO: this piece of code is causing deadlock in geotools and on the ui
+				if (EventType.CRS.equals(event.getType())) {					
+					//update the transform outside of the display thread
+					//if this is done inside the display thread it seems
+					//to cause deadlocking issues in geotools
+					IBaseLabelProvider provider = pointsListViewer.getLabelProvider();
+					if (provider instanceof SmartPointLabelProvider){
+						((SmartPointLabelProvider) provider).updateTransform();
+					}
 					Display.getDefault().asyncExec(new Runnable() {
 						@Override
 						public void run() {
@@ -290,8 +310,6 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 				}					
 			}
 		});
-		
-		
 	}	
 
 	@Override

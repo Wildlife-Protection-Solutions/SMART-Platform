@@ -99,7 +99,6 @@ public class MapComposite extends Composite implements MapPart {
 	private IGeoResource pointResource;
 	
 	private MapViewer mapViewer;
-	private Map map;
 
 	private ISmartPointDataProvider dataProvider;
 	private String styleSld = null;
@@ -107,7 +106,9 @@ public class MapComposite extends Composite implements MapPart {
 	private Job refreshJob = new Job(Messages.MapComposite_MapResizeJob_Title){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			map.getRenderManager().refresh(null);
+			if (!isDisposed() && mapViewer != null){
+				mapViewer.getMap().getRenderManager().refresh(null);
+			}
 			return Status.OK_STATUS;
 		}
 	};
@@ -119,6 +120,14 @@ public class MapComposite extends Composite implements MapPart {
 	public MapComposite(Composite parent, int style) {
 		super(parent, style);
 		createControls();
+	}
+	
+	@Override
+	public void dispose(){
+		super.dispose();
+		mapViewer.getRenderManager().stopRendering();
+		mapViewer.dispose();
+		mapViewer = null;
 	}
 	
 	public void setStyleSld(String sld){
@@ -139,7 +148,7 @@ public class MapComposite extends Composite implements MapPart {
 
 		mapViewer = new MapViewer(this,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		map = (Map) ProjectFactory.eINSTANCE.createMap();
+		Map map = (Map) ProjectFactory.eINSTANCE.createMap();
 		map.setName(Messages.MapComposite_Map_Name);
 		mapViewer.setMap(map);
 		//set default crs
@@ -160,13 +169,14 @@ public class MapComposite extends Composite implements MapPart {
 		tools.selectTool(PanTool.ID);
 
 		addPointsLayer();
-		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(map, true, null);
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(), true, null);
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				map.getRenderManager().refresh(null);
+				if (isDisposed() || mapViewer == null) return;
+				mapViewer.getMap().getRenderManager().refresh(null);
 			}
 		});
 		defaultLayer.schedule();
@@ -251,6 +261,8 @@ public class MapComposite extends Composite implements MapPart {
 			featureCollection.addAll(getSmartPointAsFeatures(featureType));
 			store.removeFeatures(Filter.INCLUDE);
 			store.addFeatures(featureCollection);
+			
+			
 		} catch (IOException e) {
 			SmartPlugIn.displayLog(null, Messages.MapComposite_PointLayer_Update_Error, e);
 		}
@@ -298,7 +310,10 @@ public class MapComposite extends Composite implements MapPart {
 	
 	@Override
 	public Map getMap() {
-		return map;
+		if (mapViewer == null){
+			return null;
+		}
+		return mapViewer.getMap();
 	}
 
 	@Override
