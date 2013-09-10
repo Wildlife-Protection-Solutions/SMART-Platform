@@ -23,9 +23,6 @@ package org.wcs.smart.plan.ui.targets;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -38,14 +35,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.PlanTargetStatus;
-import org.wcs.smart.plan.model.PlanTargetStatus.Status;
 
 
 
@@ -140,6 +135,7 @@ public class TargetProgressViewer{
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lbl = toolkit.createLabel(container, Messages.TargetProgressViewer_TargetsComplete_Label); 
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Composite table = new Composite(container, SWT.NONE);
 		TableColumnLayout layout = new TableColumnLayout();
@@ -217,28 +213,7 @@ public class TargetProgressViewer{
 	}
 
 
-	/**
-	 * initialize the viewer
-	 * @param targets
-	 */
-	public void initValues(List<PlanTarget> targets) {
-		if(targets != null){
-			for (PlanTarget pt : targets){
-				pt.clearCurrentStatus();
-			}
-		
-			v.setInput(targets);
-			v.refresh();
-			
-			computeStatus.schedule();
-		}
-		
-	}
-	
-	/**
-	 * Refresh the status of the targets
-	 */
-	public void refreshStatus(){
+	public void clearStatus(){
 		Object x = v.getInput();
 		if (x != null && x instanceof List){
 			@SuppressWarnings("unchecked")
@@ -246,40 +221,42 @@ public class TargetProgressViewer{
 			for (PlanTarget pt : targets){
 				pt.clearCurrentStatus();
 			}
-			v.refresh();
 		}
-		computeStatus.schedule();
+		refresh();
+	}
+	/**
+	 * initialize the viewer
+	 * @param targets
+	 */
+	public void initValues(List<PlanTarget> targets) {
+		if(targets != null){
+			v.setInput(targets);
+			refresh();
+		}
+		
 	}
 	
-	
-	/*
-	 * recomputes target status
+	/**
+	 * Refresh the status of the targets
 	 */
-	Job computeStatus = new Job(Messages.TargetProgressViewer_ComputeTargetStatus_JobTitle){
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Object x = v.getInput();
-			int totalCompleteTargets = 0;
-			if (x != null && x instanceof List){
-				@SuppressWarnings("unchecked")
-				final List<PlanTarget> targets = (List<PlanTarget>)x;
-
-				for (PlanTarget pt : targets){
-					pt.refreshStatus();
-					if (pt.getCurrentStatus().getStatus() == Status.COMPLETE){
-						totalCompleteTargets ++;
-					}
+	public void refresh(){
+		v.refresh();
+		Object x = v.getInput();
+		if (x != null && x instanceof List){
+			@SuppressWarnings("unchecked")
+			List<PlanTarget> targets = (List<PlanTarget>)x;
+			int complete = 0;
+			for (PlanTarget pt : targets){
+				if (pt.getCurrentStatus() != null && (pt.getCurrentStatus().getStatus() == PlanTargetStatus.Status.COMPLETE)){
+					complete++;
 				}
-				final int total = totalCompleteTargets;
-				Display.getDefault().asyncExec(new Runnable(){
-					public void run(){
-						v.refresh();
-						lbl.setText(Messages.TargetProgressViewer_TargetsComplete_Label + " " + total + "/" + targets.size()); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				});
 			}
-			return org.eclipse.core.runtime.Status.OK_STATUS;
-		}};
+			
+			lbl.setText(Messages.TargetProgressViewer_TargetsComplete_Label + " " + complete + "/" + targets.size()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+	}
+	
+
 	
 }

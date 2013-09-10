@@ -482,7 +482,8 @@ public class SummaryPlanEditorPage extends EditorPart {
 		lnkRefresh.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				targetList.refreshStatus();
+				targetList.clearStatus();
+				parentEditor.computePlanTargetStatus();
 			}
 		});
 
@@ -503,6 +504,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		lnkRefreshChild.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
+				targetList2.clearStatus();
 				parentEditor.refreshSubPlanTargets();
 			}
 		});
@@ -575,7 +577,10 @@ public class SummaryPlanEditorPage extends EditorPart {
 		
 		refreshPatrolLinks();
 		parentEditor.refreshSubPlanTargets();
-		
+	}
+	
+	public void refreshPlanTargetList(){
+		targetList.refresh();		
 	}
 	
 	public void refreshPatrolLinks(){
