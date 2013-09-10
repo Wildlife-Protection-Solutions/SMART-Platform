@@ -37,19 +37,24 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class ConfigurableModelTreeContentProvider implements ITreeContentProvider {
 
-	private ConfigurableModel model;
+	private CmRootNode rootNode = new CmRootNode();
+	private boolean showRoot = false;
 	
+	
+	public ConfigurableModelTreeContentProvider(boolean showRoot) {
+		super();
+		this.showRoot = showRoot;
+	}
+
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		model = (ConfigurableModel) newInput;
+		rootNode.model = (ConfigurableModel) newInput;
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof ConfigurableModel) {
-			ConfigurableModel cm = (ConfigurableModel) inputElement;
-			List<CmNode> nodes = cm.getNodes();
-			return nodes == null ? new Object[]{} : nodes.toArray();
+			return showRoot ? new Object[]{rootNode} : getChildren(inputElement);
 		}
 		return new Object[]{};
 	}
@@ -66,6 +71,14 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 			if (attributes != null && !attributes.isEmpty()) {
 				return attributes.toArray();
 			}
+		}
+		if (parentElement instanceof ConfigurableModel) {
+			ConfigurableModel cm = (ConfigurableModel) parentElement;
+			List<CmNode> nodes = cm.getNodes();
+			return nodes == null ? new Object[]{} : nodes.toArray();
+		}
+		if (parentElement instanceof CmRootNode) {
+			return getChildren(((CmRootNode) parentElement).model);
 		}
 		return new Object[]{};
 	}
@@ -90,6 +103,14 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 			List<CmAttribute> attributes = n.getCmAttributes();
 			return (nodes != null && !nodes.isEmpty()) || (attributes != null && !attributes.isEmpty());
 		}
+		if (element instanceof ConfigurableModel) {
+			ConfigurableModel cm = (ConfigurableModel) element;
+			List<CmNode> nodes = cm.getNodes();
+			return (nodes != null && !nodes.isEmpty());
+		}
+		if (element instanceof CmRootNode) {
+			return hasChildren(((CmRootNode) element).model);
+		}
 		return false;
 	}
 
@@ -98,4 +119,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		//nothing
 	}
 	
+	public class CmRootNode {
+		public ConfigurableModel model;
+	}
 }
