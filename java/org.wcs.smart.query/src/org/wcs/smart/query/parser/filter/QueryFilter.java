@@ -21,59 +21,43 @@
  */
 package org.wcs.smart.query.parser.filter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import org.hibernate.Session;
-import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
-import org.wcs.smart.query.ui.formulaDnd.DropItem;
-
 /**
- * A class to represent and empty filter.
+ * Query filter that wraps the filter with the filter type.
  * 
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class EmptyFilter implements IFilter {
+public class QueryFilter {
 
-	@Override
-	public String asString() {
-		return ""; //$NON-NLS-1$
+	public static QueryFilter createFilter(IFilter filter){
+		return new QueryFilter(filter);
 	}
-
-	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
-		return ""; //$NON-NLS-1$
+	public static QueryFilter createFilter(IFilter filter, IFilter.FilterType filterType){
+		return new QueryFilter(filter, filterType);
 	}
 	
-	@Override
-	public boolean hasCategoryFilter() {
-		return false;
-	}
-
-	@Override
-	public boolean hasAttributeFilter() {
-		return false;
-	}
-
-	@Override
-	public boolean hasEmployeeFilter() {
-		return false;
-	}
-
-	@Override
-	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+	private IFilter filter;
+	private IFilter.FilterType filterType;
+	
+	public QueryFilter(IFilter filter){
+		this.filter = filter;
+		this.filterType = IFilter.FilterType.OBSERVATION;
 	}
 	
-	@Override
-	public DropItem[] getDropItems(Session session) throws Exception {
-		return new DropItem[]{};
+	public QueryFilter(IFilter filter, IFilter.FilterType filterType){
+		this.filter = filter;
+		this.filterType = filterType;
 	}
-
-	@Override
-	public List<IFilter> getChildren() {
-		return null;
+	
+	public String asString(){
+		return filterType.getKey() + "|" + filter.asString(); //$NON-NLS-1$
 	}
-
+	
+	public IFilter getFilter(){
+		return this.filter;
+	}
+	
+	public IFilter.FilterType getFilterType(){
+		return this.filterType;
+	}
 }

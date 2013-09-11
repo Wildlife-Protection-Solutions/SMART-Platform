@@ -89,11 +89,8 @@ public class BooleanExpression implements IFilter{
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping){
-		return e1.asSql(tableMapping) + " " + op.asSql() + " " + e2.asSql(tableMapping); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		return asSql(tableMapping);
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
+		return e1.asSql(tableMapping, filterTables) + " " + op.asSql() + " " + e2.asSql(tableMapping, filterTables); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	/**	
 	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()

@@ -62,6 +62,8 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	
 	private QueryDefView view;
 	private boolean isInitializing = false;
+
+	
 	/**
 	 * 
 	 */
@@ -82,6 +84,8 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		setLayout(layout);
 		setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
+
+		
 		dropTarget = new FilterDropTargetPanel(view);
 		
 		if (SmartDB.isMultipleAnalysis()){
@@ -196,11 +200,14 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	 */
 	@Override
 	public void init() {
+		SimpleQuery query = (SimpleQuery)view.getQuery();
 		isInitializing = true;
-		dropTarget.addElements(((SimpleQuery)view.getQuery()).getDropItems());
+		dropTarget.addElements(query.getDropItems());
+		dropTarget.setFilterType(query.getFilterType());
 		if (caFilter != null){
 			caFilter.initQuery(view.getQuery());
 		}
+		
 		isInitializing = false;
 	}
 

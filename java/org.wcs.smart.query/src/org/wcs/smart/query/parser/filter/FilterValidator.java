@@ -146,7 +146,7 @@ public class FilterValidator {
 		}
 		
 		//validate children
-		if (filter.getChildren() != null){
+		if (filter != null && filter.getChildren() != null){
 			for (IFilter kid : filter.getChildren()){	
 				validateFilterPart(kid, langCode, uuidLookup, session);
 			}

@@ -129,7 +129,7 @@ public class AreaFilter implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
 		StringBuilder sb = new StringBuilder();
 		if (geomType == AreaFilterGeometryType.WAYPOINT){
 			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
@@ -144,9 +144,6 @@ public class AreaFilter implements IFilter {
 			sb.append(")");  //$NON-NLS-1$
 		}
 		return sb.toString();
-	}
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		return asSql(tableMapping);
 	}
 	
 	/**

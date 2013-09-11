@@ -75,23 +75,20 @@ public class CategoryFilter implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		String keyPart = categoryIdentifier.split(":")[1]; //$NON-NLS-1$
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
+		String col = filterTables.get(this);
+		if (col != null){
+			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
+		}
 		
+		String keyPart = categoryIdentifier.split(":")[1]; //$NON-NLS-1$
 		String prefix = tableMapping.get(Category.class);
 		if (prefix == null){
 			throw new IllegalStateException(Messages.CategoryFilter_InvalidPrefix);
 		}
 		return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$
 	}
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		String col = colMapping.get(this);
-		if (col == null){
-			return asSql(tableMapping);
-		}else{
-			return " waypointTable." + col + " ";
-		}
-	}
+	
 	public String getCategoryKey(){
 		return categoryIdentifier.split(":")[1]; //$NON-NLS-1$
 	}

@@ -271,7 +271,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		
 		createColumnTable(main);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-		gd.heightHint = 40;
+		gd.heightHint = 150;
 		columnViewer.getTable().setLayoutData(gd);
 		
 		Composite hyperlinkComposite = new Composite(main, SWT.NONE);

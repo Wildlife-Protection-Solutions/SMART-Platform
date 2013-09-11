@@ -36,6 +36,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.filter.EmptyFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
@@ -65,7 +66,7 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 	}
 
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
 		String prefix = tableMapping.get(option.getPatrolAttributeClass());
 		String v = SmartUtils.stripQuotes((String)value);
 		//if v is empty this means that this is "Any Plan" case

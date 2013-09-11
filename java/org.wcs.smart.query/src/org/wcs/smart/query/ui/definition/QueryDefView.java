@@ -217,11 +217,11 @@ public class QueryDefView extends ViewPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		stackComp = new Composite(parent, SWT.BORDER);
+		stackComp = new Composite(parent, SWT.NONE);
 		
 		StackLayout layout = new StackLayout();
 		layout.marginHeight = 0;
-		layout.marginWidth=0;
+		layout.marginWidth = 0;
 		stackComp.setLayout(layout);
 		stackComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
 		emptyComp = new Composite(stackComp, SWT.NONE);

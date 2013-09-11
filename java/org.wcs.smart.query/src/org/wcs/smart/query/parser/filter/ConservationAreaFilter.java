@@ -256,13 +256,10 @@ public class ConservationAreaFilter implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
 		return asSql(tableMapping.get(Patrol.class));
 	}
 
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		return asSql(tableMapping);
-	}
 
 	/**
 	 * Creates the sql given the provided conservation

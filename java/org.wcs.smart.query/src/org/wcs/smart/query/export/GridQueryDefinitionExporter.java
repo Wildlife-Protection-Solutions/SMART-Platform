@@ -75,8 +75,12 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			processFilter(gQuery.getQueryDefinition().getValueFilter(), xmlQuery, s);
-			processFilter(gQuery.getQueryDefinition().getRateFilter(), xmlQuery, s);
+			if (gQuery.getQueryDefinition().getValueFilter() != null){
+				processFilter(gQuery.getQueryDefinition().getValueFilter().getFilter(), xmlQuery, s);
+			}
+			if (gQuery.getQueryDefinition().getRateFilter() != null){
+				processFilter(gQuery.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
+			}
 		}finally{
 			s.getTransaction().rollback();
 			s.close();

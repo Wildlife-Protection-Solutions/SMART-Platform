@@ -107,7 +107,7 @@ public class DateFilter implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
 		String tablePrefix = ""; //$NON-NLS-1$
 		if (this.dateField == DATE_FIELD_OP.PATROL_END || this.dateField == DATE_FIELD_OP.PATROL_START){
 			tablePrefix = tableMapping.get(Patrol.class);
@@ -119,9 +119,6 @@ public class DateFilter implements IFilter {
 		}
 		String field = tablePrefix + "." + dateField.columnName; //$NON-NLS-1$
 		return asSql(field);
-	}
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		return asSql(tableMapping);
 	}
 	
 	/**

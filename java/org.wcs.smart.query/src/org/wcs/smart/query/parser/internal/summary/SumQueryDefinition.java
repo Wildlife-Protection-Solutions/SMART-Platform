@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
-import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 
 /**
  * A representation of a summary query parsed into the various
@@ -43,7 +43,7 @@ public class SumQueryDefinition {
 	 */
 	public static final SumQueryDefinition createQuery(ValuePart valuePart, 
 			GroupByPart rowGroupBy, GroupByPart colGroupBy, 
-			IFilter valueFilter, IFilter rateFilter){
+			QueryFilter valueFilter, QueryFilter rateFilter){
 		return new SumQueryDefinition(valuePart, rowGroupBy, colGroupBy, valueFilter, rateFilter);
 	}
 	
@@ -51,8 +51,8 @@ public class SumQueryDefinition {
 	private ValuePart valuePart;
 	private GroupByPart rowGroupBy;
 	private GroupByPart colGroupBy;
-	private IFilter valueFilter;
-	private IFilter rateFilter;
+	private QueryFilter valueFilter;
+	private QueryFilter rateFilter;
 	
 	/**
 	 * Creates a new summary query definition
@@ -63,8 +63,8 @@ public class SumQueryDefinition {
 	 */
 	protected SumQueryDefinition (ValuePart valuePart, GroupByPart rowGroupBy, 
 			GroupByPart colGroupBy, 
-			IFilter valueFilter,
-			IFilter rateFilter){
+			QueryFilter valueFilter,
+			QueryFilter rateFilter){
 		this.valuePart = valuePart;
 		this.rowGroupBy = rowGroupBy;
 		this.colGroupBy = colGroupBy;
@@ -93,14 +93,14 @@ public class SumQueryDefinition {
 	/**
 	 * @return the query value filter (numerator filter)
 	 */
-	public IFilter getValueFilter(){
+	public QueryFilter getValueFilter(){
 		return this.valueFilter;
 	}
 	
 	/**
 	 * @return the rate filter (denominator filter)
 	 */
-	public IFilter getRateFilter(){
+	public QueryFilter getRateFilter(){
 		return this.rateFilter;
 	}
 	

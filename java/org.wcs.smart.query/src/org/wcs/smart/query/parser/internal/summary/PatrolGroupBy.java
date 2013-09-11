@@ -263,9 +263,9 @@ public class PatrolGroupBy implements IGroupBy {
 				}else if (option.getType() == PatrolQueryOptionType.KEY){
 					String key = items[i];
 					//look for key in database
-					Long cnt = (Long) session.createCriteria(option.getSourceClass()).add(Restrictions.eq("keyId", key)).add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())).setProjection(Projections.rowCount()).list().get(0);
+					Long cnt = (Long) session.createCriteria(option.getSourceClass()).add(Restrictions.eq("keyId", key)).add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$ //$NON-NLS-2$
 					if (cnt == 0){
-						throw new Exception(MessageFormat.format("No {0} found with key ''{1}''", new Object[]{option.getGuiName(), key}));
+						throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_KeyNotFoundError, new Object[]{option.getGuiName(), key}));
 					}
 				}
 			}

@@ -127,39 +127,43 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int AREA_KEY = 62;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 63;
+  int OBSERVATION_FILTER_TYPE_KEY = 63;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 64;
+  int WAYPOINT_FILTER_TYPE_KEY = 64;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 65;
+  int PATROL_VALUE_ITEM = 65;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 66;
+  int PATROL_VALUE_KEY = 66;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 67;
+  int SUM_CAT_VALUE_KEY = 67;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 68;
+  int SUM_ATTRIBUTE_VALUE_KEY = 68;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 69;
+  int SUM_CAT_ATT_VALUE_KEY = 69;
   /** RegularExpression Id. */
-  int AGG = 70;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 70;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 71;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 71;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 72;
+  int AGG = 72;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 73;
+  int DATE_GROUPBY_ITEM = 73;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 74;
+  int QUERY_SPLITTER = 74;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 75;
+  int PATROL_UUID_GROUPBY_OPTION = 75;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 76;
+  int PATROL_STRING_GROUPBY_OPTION = 76;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 77;
+  int CATEGORY_GROUPBY_ITEM = 77;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 78;
+  int AREA_GROUPBY_ITEM = 78;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 79;
+  int ATTRIBUTE_GROUPBY_ITEM = 79;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 80;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 81;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -229,6 +233,8 @@ public interface ParserConstants {
     "<PATROL_CONTRIBUTION_STRING_KEY>",
     "<AREA_TYPE_KEY>",
     "<AREA_KEY>",
+    "\"observation\"",
+    "\"waypoint\"",
     "<PATROL_VALUE_ITEM>",
     "<PATROL_VALUE_KEY>",
     "<SUM_CAT_VALUE_KEY>",

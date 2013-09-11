@@ -70,10 +70,10 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
-				FilterProcessor data = new FilterProcessor(queryDataTable, DerbyObservationEngine.this);
+				IFilterProcessor filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilterType(), queryDataTable);
 				
 				try {			
-					data.processFilter(c, query.getFilter(), query.getDateFilter(), 
+					filterer.processFilter(c, query.getFilter().getFilter(), query.getDateFilter(), 
 							query.getConservationAreaFilterAsFilter(), 
 							true, true, monitor);
 					
@@ -101,7 +101,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 					}
 					
 				} finally {
-					data.dropTemporaryTables(c);
+					filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}

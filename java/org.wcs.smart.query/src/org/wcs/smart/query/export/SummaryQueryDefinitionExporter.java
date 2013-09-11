@@ -78,8 +78,12 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			processFilter(summary.getQueryDefinition().getValueFilter(), xmlQuery, s);
-			processFilter(summary.getQueryDefinition().getRateFilter(), xmlQuery, s);
+			if (summary.getQueryDefinition().getValueFilter() != null){
+				processFilter(summary.getQueryDefinition().getValueFilter().getFilter(), xmlQuery, s);
+			}
+			if (summary.getQueryDefinition().getRateFilter() != null){
+				processFilter(summary.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
+			}
 			
 			processGroupBy(summary.getQueryDefinition().getRowGroupByPart(), xmlQuery,s);
 			processGroupBy(summary.getQueryDefinition().getColumnGroupByPart(), xmlQuery,s);

@@ -39,6 +39,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
@@ -208,8 +209,10 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	public void init() {
 		isInitializing = true;
 		SummaryQuery query = ((SummaryQuery)parentView.getQuery());
-		filterPanel.addValueFilterElements(query.getValueFilterDropItems());
-		filterPanel.addRateFilterElements(query.getRateFilterDropItems());
+		
+		filterPanel.setValueFilterElements(query.getQueryDefinition() == null || query.getQueryDefinition().getValueFilter() == null ? IFilter.FilterType.OBSERVATION : query.getQueryDefinition().getValueFilter().getFilterType(), query.getValueFilterDropItems());
+		filterPanel.setRateFilterElements(query.getQueryDefinition() == null || query.getQueryDefinition().getRateFilter() == null ? IFilter.FilterType.OBSERVATION : query.getQueryDefinition().getRateFilter().getFilterType(), query.getRateFilterDropItems());
+		
 		panel.init(query);
 		if (caFilterPanel != null){
 			caFilterPanel.initQuery(query);

@@ -170,7 +170,7 @@ public class PatrolFilter implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {	
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
 		if (option.isEmployeeItem()){
 			return employeeOptionAsSql(tableMapping, option);
 			
@@ -215,9 +215,7 @@ public class PatrolFilter implements IFilter {
 		return ""; //$NON-NLS-1$
 	}
 	
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		return asSql(tableMapping);
-	}
+	
 	/**
 	 * Add employee filter 
 	 * @param tableMapping

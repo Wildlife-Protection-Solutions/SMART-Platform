@@ -357,11 +357,13 @@ public class GriddedQuery extends Query {
 		Exception lastException = null;
 		try{
 			//---- generate drop items for value filter
-			IFilter valueFilter = getQueryDefinition().getValueFilter();
-			if (valueFilter != null){
-				DropItem[] filterItems = valueFilter.getDropItems(session);
-				for (int i = 0; i < filterItems.length; i ++){
-					valueFilterDropItems.add(filterItems[i]);
+			if (getQueryDefinition().getValueFilter() != null){
+				IFilter valueFilter = getQueryDefinition().getValueFilter().getFilter();
+				if (valueFilter != null){
+					DropItem[] filterItems = valueFilter.getDropItems(session);
+					for (int i = 0; i < filterItems.length; i ++){
+						valueFilterDropItems.add(filterItems[i]);
+					}
 				}
 			}
 		}catch (Exception ex){
@@ -371,11 +373,13 @@ public class GriddedQuery extends Query {
 		}
 		//---- generate drop items for rate filter 		
 		try{
-			IFilter rateFilter = getQueryDefinition().getRateFilter();
-			if (rateFilter != null){
-				DropItem[] filterItems = rateFilter.getDropItems(session);
-				for (int i = 0; i < filterItems.length; i ++){
-					rateFilterDropItems.add(filterItems[i]);
+			if (getQueryDefinition().getRateFilter() != null){
+				IFilter rateFilter = getQueryDefinition().getRateFilter().getFilter();
+				if (rateFilter != null){
+					DropItem[] filterItems = rateFilter.getDropItems(session);
+					for (int i = 0; i < filterItems.length; i ++){
+						rateFilterDropItems.add(filterItems[i]);
+					}
 				}
 			}
 		}catch (Exception ex){

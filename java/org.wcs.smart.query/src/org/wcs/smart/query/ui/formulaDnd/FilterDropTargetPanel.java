@@ -38,11 +38,16 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter.FilterType;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 
 /**
@@ -68,7 +73,9 @@ public class FilterDropTargetPanel implements IDropPanel {
 	private Set<FilterDropTargetPanel> targetPanels;
 	
 	private DropItem dragItem;
-
+	
+	private Button btnWaypoint;
+	private Button btnObservation;
 	/**
 	 * Creates a new drop target panel.
 	 * 
@@ -94,6 +101,15 @@ public class FilterDropTargetPanel implements IDropPanel {
 		return types;
 	}
 
+	public void setFilterType(IFilter.FilterType filterType){
+		if (filterType.equals(FilterType.WAYPOINT)){
+			btnWaypoint.setSelection(true);
+			btnObservation.setSelection(false);
+		}else{
+			btnObservation.setSelection(true);
+			btnWaypoint.setSelection(false);
+		}
+	}
 
 	public void dispose(){		
 	}
@@ -138,6 +154,16 @@ public class FilterDropTargetPanel implements IDropPanel {
 	public String getQueryString(){
 		StringBuilder query = new StringBuilder();
 		
+		if (items.size() > 0){
+			//if non-empty filter then include filter type
+			if (btnWaypoint.getSelection()){
+				query.append(IFilter.FilterType.WAYPOINT.getKey());
+			}else{
+				query.append(IFilter.FilterType.OBSERVATION.getKey());
+			}
+			query.append("|"); //$NON-NLS-1$
+		}
+		
 		for (Object item : items){
 			if (item instanceof DropItem){
 				DropItem it = (DropItem)item;
@@ -145,6 +171,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 				query.append(" "); //$NON-NLS-1$
 			}
 		}
+		System.out.println(query.toString());
 		return query.toString();
 	}
 	
@@ -288,6 +315,26 @@ public class FilterDropTargetPanel implements IDropPanel {
 	 */
 	public Composite createComposite(Composite parent) {
 
+		Composite filterTypeComp = new Composite(parent, SWT.NONE);
+		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		GridLayout layout = new GridLayout(4, false);
+		layout.horizontalSpacing = 5;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 5;
+		layout.marginHeight = 3;
+		
+		filterTypeComp.setLayout(layout);
+		Label l = new Label(filterTypeComp, SWT.NONE);
+		l.setText(Messages.FilterDropTargetPanel_FilterTypeLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnWaypoint = new Button(filterTypeComp, SWT.RADIO);
+		btnWaypoint.setText(IFilter.FilterType.WAYPOINT.getGuiName());
+		btnWaypoint.setSelection(true);
+		btnObservation = new Button(filterTypeComp, SWT.RADIO);
+		btnObservation.setText(IFilter.FilterType.OBSERVATION.getGuiName());
+		Label lspacer = new Label(filterTypeComp, SWT.NONE);
+		lspacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		dropTarget = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NONE);
 		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dropTarget.addListener(SWT.Resize, new Listener() {

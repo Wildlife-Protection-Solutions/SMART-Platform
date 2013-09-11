@@ -191,17 +191,13 @@ public class AttributeFilter implements IFilter {
 		return ""; //$NON-NLS-1$
 	}
 	
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		String col = colMapping.get(this);
-		if (col == null){
-			return asSql(tableMapping);
-		}else{
-			return " waypointTable." + col + " ";
-		}
-	}
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
+		String col = filterTables.get(this);
+		if (col != null){
+			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		}
+	
 		String attprefix = tableMapping.get(Attribute.class);
 		if (attprefix == null){
 			throw new IllegalStateException(Messages.AttributeFilter_InvalidAttributePrefix);
@@ -231,7 +227,6 @@ public class AttributeFilter implements IFilter {
 		}else if (attributeType == AttributeType.LIST ){
 			return "( qa."+ attributeKey  + " " + op.asSql() + " '" + (String)value1 + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}else if (attributeType == AttributeType.TREE){
-//			return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') ";
 			return "( qa." + attributeKey + " >= '" + (String)value1 + "' and qa." + attributeKey + "<'" + ((String)value1).substring(0,  ((String)value1).length() -1) + "/')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		
 		}

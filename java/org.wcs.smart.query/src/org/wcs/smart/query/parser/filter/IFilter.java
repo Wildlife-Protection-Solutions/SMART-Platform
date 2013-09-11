@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
@@ -36,6 +37,33 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
  */
 public interface IFilter {
 
+	public enum FilterType{
+		OBSERVATION("observation",Messages.IFilter_ObservationFilterName),  //$NON-NLS-1$
+		WAYPOINT("waypoint", Messages.IFilter_IncidentFilterName); //$NON-NLS-1$
+	
+		private String key;
+		private String gui;
+		
+		FilterType(String key, String gui){
+			this.key = key;
+			this.gui = gui;
+		}
+		public String getKey(){
+			return this.key;
+		}
+		public String getGuiName(){
+			return this.gui;
+		}
+		
+		
+		public static FilterType parse(String type){
+			if (type.equals(WAYPOINT.key)){
+				return WAYPOINT;
+			}
+			return OBSERVATION;
+		}
+	};
+	
 	/**
 	 * A class to represent and empty filter.
 	 */
@@ -46,22 +74,20 @@ public interface IFilter {
 	 */
 	public String asString();
 	
-
 	/**
-	 * Converts the filter to an sql where clause expression
+	 * Converts the filter to an sql where clause expression.
+	 * 
+	 * If the filter exists in the filterTables map then the filter
+	 * can assume that a table exists with the given names that contains
+	 * all waypoints that match the filter.  Otherwise the filter needs
+	 * to use the tableMapping to filter the data 
 	 * 
 	 * @param tableMapping a mapping of tables to table prefixes
-	 * @return sql where clause expression
-	 */
-	public String asSql(HashMap<Class<?>, String> tableMapping);
-
-	/**
-	 * Converts the filter to an sql where clause expression
+	 * @param filterTables 
 	 * 
-	 * @param tableMapping a mapping of tables to table prefixes
 	 * @return sql where clause expression
 	 */
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping);
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables);
 
 	/**
 	 * @return <code>true</code> if the filter includes a data 
