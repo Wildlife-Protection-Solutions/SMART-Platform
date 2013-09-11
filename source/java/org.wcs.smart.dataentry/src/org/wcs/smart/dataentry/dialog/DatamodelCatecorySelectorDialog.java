@@ -50,7 +50,7 @@ public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDia
 
 	private TreeViewer dmTreeViewer;
 	
-	protected DatamodelCatecorySelectorDialog(DataModel datamodel) {
+	public DatamodelCatecorySelectorDialog(DataModel datamodel) {
 		super(Display.getDefault().getActiveShell(), "Datamodel Category Selector");
 		this.datamodel = datamodel;
 	}

@@ -132,7 +132,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 	@Override
 	protected boolean performSave() {
-		//addFakeModel();
 		return true;
 	}
 
@@ -143,40 +142,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid());
 			modelTreeViewer.setInput(cm);
 		}
-	}
-	
-	//TODO: remove this method after it is not required
-	void addFakeModel() {
-		ConfigurableModel model = new ConfigurableModel();
-		model.setName("Model-B"); //$NON-NLS-1$
-		model.updateName(SmartDB.getCurrentLanguage(), model.getName());
-		model.setConservationArea(SmartDB.getCurrentConservationArea());
-		List<CmNode> nodes = new ArrayList<CmNode>();
-		CmNode node1 = new CmNode();
-		node1.setName("Group B1"); //$NON-NLS-1$
-		node1.updateName(SmartDB.getCurrentLanguage(), node1.getName());
-		node1.setModel(model);
-		node1.setNodeOrder(0);
-		nodes.add(node1);
-
-		CmNode node2 = new CmNode();
-		node2.setName("Group B2"); //$NON-NLS-1$
-		node2.updateName(SmartDB.getCurrentLanguage(), node2.getName());
-		node2.setModel(model);
-		node2.setNodeOrder(1);
-		nodes.add(node2);
-		
-		CmNode node11 = new CmNode();
-		node11.setName("Group B1-1"); //$NON-NLS-1$
-		node11.updateName(SmartDB.getCurrentLanguage(), node11.getName());
-		node11.setParent(node1);
-		node11.setModel(model);
-		node11.setNodeOrder(0);
-		node1.setChildren(new ArrayList<CmNode>());
-		node1.getChildren().add(node11);
-		
-		model.setNodes(nodes);
-		DataentryHibernateManager.saveConfigurableModel(model);
 	}
 	
 }
