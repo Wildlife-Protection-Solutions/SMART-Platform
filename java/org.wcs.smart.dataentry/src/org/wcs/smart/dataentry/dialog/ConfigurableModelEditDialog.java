@@ -21,35 +21,25 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
+import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
-import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
+import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -57,16 +47,20 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * Dialog for editing Configurable Models.
  * 
  * @author elitvin
- * @since 1.0.0
+ * @since 2.0.0
  */
 public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 	private ConfigurableModel model;
 	
 	private TreeViewer modelTreeViewer;
-	private Button btnAddGroup;
-	private Button btnAddCategory;
-	private Button btnDelete;
+	private Text txtName;
+
+	private Composite infoInnerPanel;
+	private Composite emptyComposite;
+	private CmRootNodeInfoComposite rootNodeComposite;
+	private CmNodeInfoComposite groupNodeComposite;
+	private CmNodeInfoComposite categoryNodeComposite;
 	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
 		super(Display.getDefault().getActiveShell(), "Configured Data Model");
@@ -92,39 +86,36 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
+		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		btnAddGroup = new Button(rightPanel, SWT.PUSH);
-		btnAddGroup.setText("Add SubGroup");
-		btnAddGroup.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addSubGroup();
-			}
-		});
+		infoInnerPanel = new Composite(rightPanel, SWT.NONE);
+		infoInnerPanel.setLayout(new StackLayout());
+		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		btnAddCategory = new Button(rightPanel, SWT.PUSH);
-		btnAddCategory.setText("Add Datamodel Category");
-		btnAddCategory.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addDatamodelCategory();
-			}
-		});
+		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
+		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		btnDelete = new Button(rightPanel, SWT.PUSH);
-		btnDelete.setText("Delete");
-		btnDelete.addSelectionListener(new SelectionAdapter() {
+		IModelChangedListener modelChangeListener = new IModelChangedListener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				handleDeleteNode();
+			public void modelChanged() {
+				setChangesMade(true);
+				modelTreeViewer.refresh();
 			}
-		});
+		};
 
+		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model);
+		rootNodeComposite.addModelChangedListener(modelChangeListener);
+
+		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, true);
+		groupNodeComposite.addModelChangedListener(modelChangeListener);
+		
+		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, false);
+		categoryNodeComposite.addModelChangedListener(modelChangeListener);
+		
 		setTitle("Configured Data Model");
 		setMessage("Editing data model configuration");
 		
 		return container;
-		
 	}
 
 	@Override
@@ -133,137 +124,38 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		setChangesMade(false);
 		return true;
 	}
-
-	private void addToParent(CmNode node) {
+	
+	private void handleNameChanged() {
 		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
 		Object obj = selection.getFirstElement();
-		if (obj instanceof CmNode) {
-			CmNode parentNode = (CmNode) obj;
-			node.setParent(parentNode);
-			node.setNodeOrder(parentNode.getChildren().size());
-			parentNode.getChildren().add(node);
-		} else if (obj instanceof CmRootNode) {
-			node.setParent(null);
-			node.setNodeOrder(model.getNodes().size());
-			model.getNodes().add(node);
+		if (obj instanceof NamedItem) {
+			NamedItem item = (NamedItem) obj;
+			item.setName(txtName.getText());
+			item.updateName(SmartDB.getCurrentLanguage(), item.getName());
 		}
-		
 		setChangesMade(true);
 		modelTreeViewer.refresh();
 	}
 	
-	private void addSubGroup() {
-		CmNode node = new CmNode();
-		node.setModel(model);
-		node.setName("New SubGroup");
-		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
-		addToParent(node);
-	}
-	
-	private void addDatamodelCategory() {
-		Session s = getSession();
-		s.beginTransaction();
-		try {
-			DataModel dm = getDataModel(s);
-			DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
-			if (dialog.open() == IDialogConstants.OK_ID) {
-				Category category = dialog.getCategory();
-				CmNode node = new CmNode();
-				node.setModel(model);
-				node.setCategory(category);
-				node.setName(category.getName());
-				for (Label label : category.getNames()) { //we need a copy, not the same instance of set
-					node.updateName(label.getLanguage(), label.getValue());
-				}
-				List<Attribute> attrList = new ArrayList<Attribute>();
-				category.getAllAttribute(attrList, true);
-				for (Attribute a : attrList) {
-					CmAttribute cma = new CmAttribute();
-					cma.setNode(node);
-					cma.setAttribute(a);
-					cma.setName(a.getName());
-					for (Label label : a.getNames()) { //we need a copy, not the same instance of set
-						cma.updateName(label.getLanguage(), label.getValue());
-					}
-					//TODO: add CmAttribute default options
-					node.getCmAttributes().add(cma);
-				}
-				addToParent(node);
-			}
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
-		}
-	}
-
-	private void handleDeleteNode() {
-		CmNode node = getCurrentNode();
-		CmNode parentNode = node.getParent();
-		if (parentNode == null) {
-			//this is the root node
-			model.getNodes().remove(node);
-		} else {
-			//not a root node
-			parentNode.getChildren().remove(node);
-		}
-		node.setParent(null);
-		node.setModel(null);
-
-		setChangesMade(true);
-		modelTreeViewer.refresh();
-	}
-	
-	private CmNode getCurrentNode() {
-		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
-		Object obj = selection.getFirstElement();
-		if (obj instanceof CmNode) {
-			return (CmNode) obj;
-		}
-		return null;
-	}
-
 	private void updateRightPanelState() {
-		btnAddGroup.setEnabled(false);
-		btnAddCategory.setEnabled(false);
-		btnDelete.setEnabled(false);
-		
 		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
 		Object obj = selection.getFirstElement();
+
 		if (obj instanceof CmNode) {
 			CmNode node = (CmNode) obj;
-			boolean isGroup = node.isGroup();
-			btnAddGroup.setEnabled(isGroup);
-			btnAddCategory.setEnabled(isGroup);
-			btnDelete.setEnabled(true);
+			CmNodeInfoComposite cmp = node.isGroup() ? groupNodeComposite : categoryNodeComposite;
+			cmp.setSourceObject(node);
+			((StackLayout)infoInnerPanel.getLayout()).topControl = cmp;
+			
 		} else if (obj instanceof CmRootNode) {
-			btnAddGroup.setEnabled(true);
-			btnAddCategory.setEnabled(true);
-			btnDelete.setEnabled(false);
+			rootNodeComposite.setSourceObject((CmRootNode)obj);
+			((StackLayout)infoInnerPanel.getLayout()).topControl = rootNodeComposite;
+			
+		} else {
+			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			
 		}
-	}
-	
-	private DataModel getDataModel(Session session) {
-		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-		//load into memory; no-lazy loading here.
-		for (Category cat: dataModel.getCategories()){
-			visitCategory(cat);
-		}
-		for (Attribute att: dataModel.getAttributes()){
-			att.getAggregations().size();
-		}
-		return dataModel;
-	}
-	
-	private void visitCategory(Category cat){
-		for (Category child : cat.getActiveChildren()){
-			visitCategory(child);
-			child.getName();
-		}
-//		for (CategoryAttribute ca: cat.getAttributes()){
-//			ca.getAttribute().getName();
-//		}	
+		infoInnerPanel.layout();
 	}
 	
 }
