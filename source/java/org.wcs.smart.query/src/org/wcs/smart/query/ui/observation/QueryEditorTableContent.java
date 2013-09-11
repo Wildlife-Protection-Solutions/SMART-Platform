@@ -284,7 +284,7 @@ public class QueryEditorTableContent {
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		comp.setLayout(layout);
-		toolkit.createLabel(comp,  Messages.QueryEditorTableContent_NumberOfRecordsLabel);
+		toolkit.createLabel(comp,  Messages.QueryEditorTableContent_NumberOfRecordsLabel1);
 		lblNumResults = toolkit.createLabel(comp, Messages.QueryEditorTableContent_NaLabel);
 		
 		toolkit.createLabel(comp,  "  "); //$NON-NLS-1$

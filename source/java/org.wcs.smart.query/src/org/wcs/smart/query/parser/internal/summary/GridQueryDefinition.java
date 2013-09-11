@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
-import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 
 /**
  * A representation of a grid query parsed into the various
@@ -40,15 +40,15 @@ public class GridQueryDefinition {
 	 */
 	public static final GridQueryDefinition createQuery(IValueItem valueItem, 
 			Double gridSize, 
-			IFilter queryFilter,
-			IFilter rateFilter){
+			QueryFilter queryFilter,
+			QueryFilter rateFilter){
 		return new GridQueryDefinition(valueItem, gridSize, queryFilter, rateFilter);
 	}
 	
 	
 	private IValueItem valueItem;
-	private IFilter queryFilter;
-	private IFilter rateFilter;
+	private QueryFilter queryFilter;
+	private QueryFilter rateFilter;
 	private Double gridSize;
 	
 	/**
@@ -59,8 +59,8 @@ public class GridQueryDefinition {
 	 */
 	protected GridQueryDefinition (IValueItem valueItem, 
 			Double gridSize, 
-			IFilter queryFilter,
-			IFilter rateFilter){
+			QueryFilter queryFilter,
+			QueryFilter rateFilter){
 		this.valueItem = valueItem;
 		this.queryFilter = queryFilter;
 		this.rateFilter = rateFilter;
@@ -76,14 +76,14 @@ public class GridQueryDefinition {
 	/**
 	 * @return the value query filter
 	 */
-	public IFilter getValueFilter(){
+	public QueryFilter getValueFilter(){
 		return this.queryFilter;
 	}
 	
 	/**
 	 * @return the rate query filter
 	 */
-	public IFilter getRateFilter(){
+	public QueryFilter getRateFilter(){
 		return this.rateFilter;
 	}
 	

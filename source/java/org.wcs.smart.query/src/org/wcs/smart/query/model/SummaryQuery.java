@@ -347,11 +347,13 @@ public class SummaryQuery extends Query {
 		//---- generate drop items for filter items ----
 		Exception lastException = null;
 		try{
-			IFilter query = getQueryDefinition().getValueFilter();
-			if (query != null){
-				DropItem[] filterItems = query.getDropItems(session);
-				for (int i = 0; i < filterItems.length; i ++){
-					valueFilterDropItems.add(filterItems[i]);
+			if (getQueryDefinition().getValueFilter() != null){
+				IFilter query = getQueryDefinition().getValueFilter().getFilter();
+				if (query != null){
+					DropItem[] filterItems = query.getDropItems(session);
+					for (int i = 0; i < filterItems.length; i ++){
+						valueFilterDropItems.add(filterItems[i]);
+					}
 				}
 			}
 		}catch (Exception ex){
@@ -360,11 +362,13 @@ public class SummaryQuery extends Query {
 			lastException = ex;
 		}
 		try{
-			IFilter query = getQueryDefinition().getRateFilter();
-			if (query != null){
-				DropItem[] filterItems = query.getDropItems(session);
-				for (int i = 0; i < filterItems.length; i ++){
-					rateFilterDropItems.add(filterItems[i]);
+			if (getQueryDefinition().getRateFilter() != null){
+				IFilter query = getQueryDefinition().getRateFilter().getFilter();
+				if (query != null){
+					DropItem[] filterItems = query.getDropItems(session);
+					for (int i = 0; i < filterItems.length; i ++){
+						rateFilterDropItems.add(filterItems[i]);
+					}
 				}
 			}
 		}catch (Exception ex){

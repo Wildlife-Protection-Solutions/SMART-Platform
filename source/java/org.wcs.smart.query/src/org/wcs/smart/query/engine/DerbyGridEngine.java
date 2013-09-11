@@ -75,6 +75,7 @@ import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
@@ -199,7 +200,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * 
 	 */
 	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
-			IFilter filter, Connection c, Session session, 
+			QueryFilter filter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
 		
@@ -210,20 +211,22 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				// eatme
 			}
 			if (filter == null){
-				filter = IFilter.EMPTY_FILTER;
+				filter = new QueryFilter(IFilter.EMPTY_FILTER);
 			}
 			boolean needsObservation = false;
 			if (value.hasCategory() || value.hasAttribute()
-					|| filter.hasCategoryFilter()
-					|| filter.hasAttributeFilter()) {
+					|| filter.getFilter().hasCategoryFilter()
+					|| filter.getFilter().hasAttributeFilter()) {
 				needsObservation = true;
 			}
 			
-			FilterProcessor data = new FilterProcessor(dataTable, DerbyGridEngine.this);
-			data.processFilter(c, filter, query.getDateFilter(), query.getConservationAreaFilterAsFilter(), 
+			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+			try{
+				filterer.processFilter(c, filter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), 
 					needsObservation, false, monitor);
-			
-			data.dropTemporaryTables(c);
+			}finally{
+				filterer.dropTemporaryTables(c);
+			}
 
 			if (monitor.isCanceled()) {
 				return null;
@@ -609,14 +612,14 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		DateFilter dateFilter = query.getDateFilter();
 		if (dateFilter != null ){
-			String dfilter = dateFilter.asSql(tablePrefix);
+			String dfilter = dateFilter.asSql(tablePrefix, new HashMap<IFilter, String>());
 			if (dfilter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
 				sql.append(dfilter);
 			}
 		}
 		sql.append( " and "); //$NON-NLS-1$
-		sql.append(query.getConservationAreaFilterAsFilter().asSql(tablePrefix));
+		sql.append(query.getConservationAreaFilterAsFilter().asSql(tablePrefix, new HashMap<IFilter, String>()));
 		
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());

@@ -39,6 +39,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
@@ -63,7 +64,7 @@ public abstract class SimpleQuery extends Query {
 	private List<DropItem> items;
 	
 	public String strQueryFilter;
-	public IFilter queryFilter;	//cached copy of the parsed query
+	public QueryFilter queryFilter;	//cached copy of the parsed query
 	
 	private DateFilter dateFilter;
 		
@@ -86,7 +87,7 @@ public abstract class SimpleQuery extends Query {
 	 * 
 	 * @param pFilter query filter
 	 */
-	public SimpleQuery(IFilter pFilter){
+	public SimpleQuery(QueryFilter pFilter){
 		this();
 		
 		this.queryFilter = pFilter;
@@ -136,7 +137,7 @@ public abstract class SimpleQuery extends Query {
 	 * attempt to parse the query if it has not been parsed
 	 */
 	@Transient
-	public IFilter getFilter(){
+	public QueryFilter getFilter(){
 		if (queryFilter == null){
 			try{
 				queryFilter = parseQueryFilter();
@@ -173,7 +174,7 @@ public abstract class SimpleQuery extends Query {
 	@Override
 	public void generateDropItems(Session session) throws Exception{
 		//parses the query into a collection of drop items
-		IFilter query = parseQueryFilter();
+		IFilter query = parseQueryFilter().getFilter();
 		if (items != null){
 			for (DropItem it : items){
 				it.dispose();
@@ -220,16 +221,16 @@ public abstract class SimpleQuery extends Query {
 	 * @return 
 	 */
 	@Transient
-	private  IFilter parseQueryFilter() throws Exception {
+	private  QueryFilter parseQueryFilter() throws Exception {
 		if (strQueryFilter == null || strQueryFilter.length() == 0){
-			return IFilter.EMPTY_FILTER;
+			return new QueryFilter(IFilter.EMPTY_FILTER);
 		}
 		if(queryFilter != null){
 			return queryFilter;
 		}
 		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
 		Parser parser = new Parser(is);
-		IFilter myQuery = parser.QueryFilter();
+		QueryFilter myQuery = parser.QueryFilter();
 		is.close();
 		queryFilter = myQuery;
 		return myQuery;
@@ -281,6 +282,11 @@ public abstract class SimpleQuery extends Query {
 		setQueryFilter(q.getQueryFilter());
 		setVisibleColumns(q.getVisibleColumns());
 		setConservationAreaFilter(q.getConservationAreaFilter());
+	}
+	
+	@Transient
+	public IFilter.FilterType getFilterType(){
+		return getFilter().getFilterType();
 	}
 	
 }

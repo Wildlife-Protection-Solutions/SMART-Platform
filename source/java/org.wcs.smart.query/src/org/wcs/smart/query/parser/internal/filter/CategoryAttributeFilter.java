@@ -160,16 +160,12 @@ public class CategoryAttributeFilter implements IFilter{
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		return "( " + categoryFilter.asSql( tableMapping ) + Operator.AND.asSql() + attributeFilter.asSql(tableMapping) + " )"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		String col = colMapping.get(this);
-		if (col == null){
-			return asSql(tableMapping);
-		}else{
-			return " waypointTable." + col + " ";
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
+		String col = filterTables.get(this);
+		if (col != null){
+			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
+		return "( " + categoryFilter.asSql( tableMapping, filterTables ) + Operator.AND.asSql() + attributeFilter.asSql(tableMapping,filterTables) + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**

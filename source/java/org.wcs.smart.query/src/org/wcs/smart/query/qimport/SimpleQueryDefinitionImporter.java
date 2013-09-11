@@ -36,7 +36,7 @@ import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.FilterValidator;
-import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -99,14 +99,14 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 					InputStream is = new ByteArrayInputStream(part.getValue().getBytes());
 				
 					Parser parser = new Parser(is);
-					IFilter queryFilter = parser.QueryFilter();
+					QueryFilter queryFilter = parser.QueryFilter();
 					is.close();
 
 					Session session = HibernateManager.openSession();
 					session.beginTransaction();
 					try {
 						FilterValidator validator = new FilterValidator();
-						validator.validateFilterPart(queryFilter, langCode, uuidLookup, session);
+						validator.validateFilterPart(queryFilter.getFilter(), langCode, uuidLookup, session);
 						warnings.addAll(validator.getWarnings());
 					} finally {
 						session.getTransaction().rollback();

@@ -92,14 +92,14 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 					session.beginTransaction();
 					try {
 						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
-						if (sumDef.getValueFilter() != null){
+						if (sumDef.getValueFilter() != null ){
 							FilterValidator filter = new FilterValidator();
-							filter.validateFilterPart(sumDef.getValueFilter(), langCode, uuidLookup, session);
+							filter.validateFilterPart(sumDef.getValueFilter().getFilter(), langCode, uuidLookup, session);
 							warnings.addAll(filter.getWarnings());
 						}
 						if (sumDef.getRateFilter() != null){
 							FilterValidator filter = new FilterValidator();
-							filter.validateFilterPart(sumDef.getRateFilter(), langCode, uuidLookup, session);
+							filter.validateFilterPart(sumDef.getRateFilter().getFilter(), langCode, uuidLookup, session);
 							warnings.addAll(filter.getWarnings());
 						}
 						//process value items

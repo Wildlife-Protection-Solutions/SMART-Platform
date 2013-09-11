@@ -62,6 +62,8 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 import org.wcs.smart.query.parser.internal.summary.AreaGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
@@ -168,44 +170,55 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 						}
 					}
 					needsObservationRate = needsObservationValue;
+					QueryFilter valueFilter = new QueryFilter(IFilter.EMPTY_FILTER);
+					if (query.getQueryDefinition().getValueFilter() != null){
+						valueFilter = query.getQueryDefinition().getValueFilter();
+					}
+					QueryFilter rateFilter = new QueryFilter(IFilter.EMPTY_FILTER);
+					if (query.getQueryDefinition().getRateFilter() != null){
+						rateFilter = query.getQueryDefinition().getRateFilter();
+					}
+					
 					if (!needsObservationValue){
-						if (query.getQueryDefinition().getValueFilter() != null && (
-								query.getQueryDefinition().getValueFilter().hasAttributeFilter() || 
-								query.getQueryDefinition().getValueFilter().hasCategoryFilter())){
+						if (valueFilter.getFilter().hasAttributeFilter() || 
+							valueFilter.getFilter().hasCategoryFilter()){
 							needsObservationValue = true;
 						}
 						if (query.getQueryDefinition().getRateFilter() != null && (
-								query.getQueryDefinition().getRateFilter().hasAttributeFilter() || 
-								query.getQueryDefinition().getRateFilter().hasCategoryFilter())){
+								query.getQueryDefinition().getRateFilter().getFilter().hasAttributeFilter() || 
+								query.getQueryDefinition().getRateFilter().getFilter().hasCategoryFilter())){
 							needsObservationRate = true;
 						}
 					}
 					
-					FilterProcessor dt = new FilterProcessor(valueTable, DerbySummaryEngine.this);
-					dt.processFilter(c, query.getQueryDefinition().getValueFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
-					dt.dropTemporaryTables(c);
+					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable);
+					try{
+						filterer.processFilter(c, valueFilter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
+					}finally{
+						filterer.dropTemporaryTables(c);
+					}
+					
 					if (monitor.isCanceled()){
 						return;
 					}
 					monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
 					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					
-					String vFilter = ""; //$NON-NLS-1$
-					String rFilter = ""; //$NON-NLS-1$
-					if (query.getQueryDefinition().getValueFilter() != null){
-						vFilter = query.getQueryDefinition().getValueFilter().asString();
-					}
-					if (query.getQueryDefinition().getRateFilter() != null){
-						rFilter = query.getQueryDefinition().getRateFilter().asString();
-					}
+					String vFilter = valueFilter.asString();
+					String rFilter = rateFilter.asString();
+					
 					if (vFilter.equals(rFilter)){
 						rateTable = valueTable;
 					}else{
 						rateTable = createTempTableName();
 						
-						dt = new FilterProcessor(rateTable, DerbySummaryEngine.this);
-						dt.processFilter(c, query.getQueryDefinition().getRateFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
-						dt.dropTemporaryTables(c);
+						
+						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
+						try{
+							rfilterer.processFilter(c, rateFilter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
+						}finally{
+							rfilterer.dropTemporaryTables(c);
+						}
 						if (monitor.isCanceled()){
 							return;
 						}
@@ -1027,13 +1040,13 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(" on temp.pl_uuid = " + prefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (((PatrolGroupBy)gb).option.getType() == PatrolQueryOptionType.KEY){
 					PatrolQueryOption op = ((PatrolGroupBy)gb).option;
-					fromSql.append(" left join ");
+					fromSql.append(" left join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(op.getSourceClass()));
-					fromSql.append(" on temp.");
+					fromSql.append(" on temp."); //$NON-NLS-1$
 					fromSql.append(getUuidFieldName(op));
-					fromSql.append(" = "  );
+					fromSql.append(" = "  ); //$NON-NLS-1$
 					fromSql.append(prefix(op.getSourceClass()));
-					fromSql.append(".uuid");
+					fromSql.append(".uuid"); //$NON-NLS-1$
 				}
 			}else if (gb instanceof DateGroupBy){
 				DateGroupByOption op = ((DateGroupBy)gb).getOption();
@@ -1286,11 +1299,11 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	private String getUuidFieldName(PatrolQueryOption gb){
 		switch(gb){
 		case TEAM_KEY:
-			return "p_team_uuid";
+			return "p_team_uuid"; //$NON-NLS-1$
 		case MANDATE_KEY:
-			return "p_mandate_uuid";
+			return "p_mandate_uuid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE_KEY:
-			return "pl_transport_uuid";
+			return "pl_transport_uuid"; //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -1324,11 +1337,11 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		case CONSERVATION_AREA:
 			return "p_ca_uuid"; //$NON-NLS-1$
 		case TEAM_KEY:
-			return tablePrefix.get(Team.class) + ".keyid";
+			return tablePrefix.get(Team.class) + ".keyid"; //$NON-NLS-1$
 		case MANDATE_KEY:
-			return tablePrefix.get(PatrolMandate.class) + ".keyid";
+			return tablePrefix.get(PatrolMandate.class) + ".keyid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE_KEY:
-			return tablePrefix.get(PatrolTransportType.class) + ".keyid";
+			return tablePrefix.get(PatrolTransportType.class) + ".keyid"; //$NON-NLS-1$
 		}
 		assert false;
 		return ""; //$NON-NLS-1$

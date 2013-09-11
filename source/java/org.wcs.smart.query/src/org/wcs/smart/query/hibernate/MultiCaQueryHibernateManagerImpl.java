@@ -33,10 +33,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -176,8 +175,6 @@ public class MultiCaQueryHibernateManagerImpl extends
 	}
 
 	/**
-	 * Gridded queries not supported for multi ca analysis
-	 * 
 	 * @see org.wcs.smart.query.hibernate.IQueryHibernateManager#getSupportedQueryTypes()
 	 */
 	@Override
@@ -190,17 +187,18 @@ public class MultiCaQueryHibernateManagerImpl extends
 		};
 	}
 
+	
 	private Collection<ListItem> getNamedKeyItem(Session session, Class<? extends NamedKeyItem> clazz, boolean onlyActive) {
 		
 		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
 		
 			Criteria c = session
 					.createCriteria(clazz)
-					.add(Restrictions.in("conservationArea", SmartDB
+					.add(Restrictions.in("conservationArea", SmartDB //$NON-NLS-1$
 							.getConservationAreaConfiguration()
 							.getConservationAreas()));
 			if (onlyActive){
-				c.add(Restrictions.eq("isActive", true));
+				c.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 			}
 			List<?> teams = c.list();
 

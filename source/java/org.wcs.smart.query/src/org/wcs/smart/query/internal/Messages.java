@@ -136,6 +136,7 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_OverwriteDialogMessage;
 	public static String ExportQueryWizard_OverwriteDialogTitle;
 	public static String ExportQueryWizard_WindowTitle;
+	public static String FilterDropTargetPanel_FilterTypeLabel;
 	public static String FilterDropTargetPanel_QueryFilterPanelTitle1;
 	public static String FilterValidator_AttributeListItemNotFound;
 	public static String FilterValidator_AttributeNotFound;
@@ -265,6 +266,8 @@ public class Messages extends NLS {
 	public static String GroupByFilterDialog_LoadingJobName;
 	public static String GroupByFilterDialog_LoadingLabel;
 	public static String GroupByFilterDialog_SelectAllLabel;
+	public static String IFilter_IncidentFilterName;
+	public static String IFilter_ObservationFilterName;
 	public static String ImportQueryFilePage_AllFilesFilterName;
 	public static String ImportQueryFilePage_BrowseButton;
 	public static String ImportQueryFilePage_FileLabel;
@@ -314,6 +317,7 @@ public class Messages extends NLS {
 	public static String PatrolGroupBy_Error_NoEmployee;
 	public static String PatrolGroupBy_Error_NoMatchingValue;
 	public static String PatrolGroupBy_Error_NotUniqueId;
+	public static String PatrolGroupBy_KeyNotFoundError;
 	public static String PatrolGroupBy_PatrolOptionParseError;
 	public static String PatrolGroupByDropItem_AllLabel;
 	public static String PatrolGroupByDropItem_Error_LoadingListItems;
@@ -407,7 +411,7 @@ public class Messages extends NLS {
 	public static String QueryDefView_Warning_Title;
 	public static String QueryEditorTableContent_NaLabel;
 	public static String QueryEditorTableContent_NumberOfIncidentLabel;
-	public static String QueryEditorTableContent_NumberOfRecordsLabel;
+	public static String QueryEditorTableContent_NumberOfRecordsLabel1;
 	public static String QueryEditorTableContent_QueryLabel;
 	public static String QueryEditorTableContent_QueryPropertiesLable;
 	public static String QueryEditorTableContent_RunQueryLink;
@@ -584,6 +588,9 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_ValuesSectionHeader;
 	public static String SummaryValueGroupByPanel_ValuesSectionTooltip;
 	public static String TranslateNamesHandler_LoadQueryError;
+
+	public static String WaypointFilterProcessor_filterProgress;
+	public static String WaypointFilterProcessor_progress1;
 
 	static {
 		// initialize resource bundle

@@ -50,6 +50,8 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter.FilterType;
 
 /**
  * Query engine for executing 
@@ -267,5 +269,20 @@ public abstract class DerbyQueryEngine2 implements QueryEngine {
 		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
+	}
+	
+	/**
+	 * Creates the filter processor based on the query filter type
+	 * 
+	 * @param filterType
+	 * @param queryDataTable
+	 * @return
+	 */
+	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable){
+		if (filterType == FilterType.OBSERVATION){
+			return new FilterProcessor(queryDataTable, this);
+		}else{
+			return new WaypointFilterProcessor(queryDataTable, this);
+		}
 	}
 }

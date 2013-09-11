@@ -46,6 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
@@ -250,7 +251,7 @@ public class ValueRateFilterPanel {
 		try{
 			InputStream is = new ByteArrayInputStream(queryString.getBytes());
 			Parser parser = new Parser(is);
-			IFilter filterPart = parser.ExpressionPart();
+			QueryFilter filterPart = parser.QueryFilter();
 			is.close();
 		
 			//---- generate drop items for value filter
@@ -258,13 +259,14 @@ public class ValueRateFilterPanel {
 			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
 			if (filterPart != null){
-				DropItem[] filterItems = filterPart.getDropItems(session);
+				DropItem[] filterItems = filterPart.getFilter().getDropItems(session);
 				for (int i = 0; i < filterItems.length; i ++){
 					copies.add(filterItems[i]);
 				}
 			}
 			session.getTransaction().rollback();
 			rateFilter.addElements(copies);
+			rateFilter.setFilterType(filterPart.getFilterType());
 		}catch (Exception ex){
 			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
 			if (session != null && session.getTransaction().isActive()){
@@ -298,10 +300,12 @@ public class ValueRateFilterPanel {
 		return queryText.toString();
 	}
 	
-	public void addValueFilterElements(List<DropItem> items){
+	public void setValueFilterElements(IFilter.FilterType filterType, List<DropItem> items){
+		valueFilter.setFilterType(filterType);
 		valueFilter.addElements(items);
 	}
-	public void addRateFilterElements(List<DropItem> items){
+	public void setRateFilterElements(IFilter.FilterType filterType, List<DropItem> items){
+		rateFilter.setFilterType(filterType);
 		rateFilter.addElements(items);
 	}
 	public void addElement(DropItem item){

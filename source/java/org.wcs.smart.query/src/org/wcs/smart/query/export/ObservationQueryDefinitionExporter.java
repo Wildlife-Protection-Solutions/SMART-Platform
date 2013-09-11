@@ -69,15 +69,17 @@ public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter 
 		defPart.setKey("columns"); //$NON-NLS-1$
 		defPart.setValue( ((SimpleQuery)query).getVisibleColumns() );
 		xmlQuery.getQueryPart().add(defPart);
-				
-		IFilter queryFilter = ((SimpleQuery)query).getFilter();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			processFilter(queryFilter, xmlQuery, s);
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
+		
+		if (((SimpleQuery)query).getFilter() != null){
+			IFilter queryFilter = ((SimpleQuery)query).getFilter().getFilter();
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				processFilter(queryFilter, xmlQuery, s);
+			}finally{
+				s.getTransaction().rollback();
+				s.close();
+			}
 		}
 	}
 

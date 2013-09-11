@@ -27,6 +27,7 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.QueryFilter;
 import org.wcs.smart.query.parser.internal.parser.ParseException;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
@@ -106,25 +107,25 @@ public class ParserTest {
 		
 		try{
 			query = "area:p:BA:key";
-			test = parseQuery(query);
+			parseAllQuery(query);
 			Assert.assertTrue(false);
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			Assert.assertTrue(true);
 		}
 		
 		try{
 			query = "area:BA:key";
-			test = parseQuery(query);
+			parseAllQuery(query);
 			Assert.assertTrue(false);
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			Assert.assertTrue(true);
 		}
 		
 		try{
 			query = "area:t:ABC:key";
-			test = parseQuery(query);
+			parseAllQuery(query);
 			Assert.assertTrue(false);
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			Assert.assertTrue(true);
 		}
 	}
@@ -389,11 +390,48 @@ public class ParserTest {
 		Assert.assertTrue(ex);
 	}
 	
+	@Test
+	public void testFilterType() throws Exception{
+		String query="waypoint|";
+		QueryFilter test = parseAllQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "waypoint|patrol:team equals \"b83514b938ae40e9a9118d17c5706234\"";
+		test = parseAllQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query="observation|";
+		test = parseAllQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "observation|patrol:team equals \"b83514b938ae40e9a9118d17c5706234\"";
+		test = parseAllQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "observation|category:a:attribute:s:color contains \"white\"";
+		test = parseAllQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "waypoint|category:a:attribute:s:color contains \"white\" or attribute:t:weapontype = gun.hand.jamesbond";
+		test = parseAllQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	
+	
 	private IFilter parseQuery(String query) throws Exception{
 		InputStream is = new ByteArrayInputStream(query.getBytes());
 		Parser parser = new Parser(is);		
-		IFilter myQuery = parser.QueryFilter();
+		QueryFilter myQuery = parser.QueryFilter();
+		is.close();
+		return myQuery.getFilter();
+	}
+	
+	private QueryFilter parseAllQuery(String query) throws Exception{
+		InputStream is = new ByteArrayInputStream(query.getBytes());
+		Parser parser = new Parser(is);		
+		QueryFilter myQuery = parser.QueryFilter();
 		is.close();
 		return myQuery;
 	}
+	
 }

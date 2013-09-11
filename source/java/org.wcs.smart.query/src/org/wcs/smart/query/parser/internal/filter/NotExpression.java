@@ -75,11 +75,8 @@ public class NotExpression implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping){
-		return "NOT ( " + filter.asSql(tableMapping) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> colMapping){
-		return asSql(tableMapping);
+	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
+		return "NOT ( " + filter.asSql(tableMapping, filterTables) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()

@@ -70,12 +70,12 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 						GridQueryDefinition def = griddedQuery.getQueryDefinition();
 						FilterValidator filter = new FilterValidator();
 						if (def.getValueFilter() != null){
-							filter.validateFilterPart(def.getValueFilter(), langCode, uuidLookup, session);
+							filter.validateFilterPart(def.getValueFilter().getFilter(), langCode, uuidLookup, session);
 							this.warnings.addAll(filter.getWarnings());
 						}
 						
 						if (def.getRateFilter() != null){
-							filter.validateFilterPart(def.getRateFilter(), langCode, uuidLookup, session);
+							filter.validateFilterPart(def.getRateFilter().getFilter(), langCode, uuidLookup, session);
 							this.warnings.addAll(filter.getWarnings());
 						}
 						
