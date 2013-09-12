@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
+import java.io.File;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.report.PlanReportPerspective;
 import org.wcs.smart.plan.report.ReportPlan;
 /**
  * Handler to revert changes to plan template.
@@ -41,8 +44,20 @@ public class RevertPlanTemplate extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.RevertPlanTemplate_ConfirmDialogTitle, Messages.RevertPlanTemplate_OverwriteTemplateWarningMessage);
 		if (revert){
-			if (ReportPlan.getCustomPlanTemplateLocation() != null){
-				ReportPlan.getCustomPlanTemplateLocation().delete();
+			File customTemplate = ReportPlan.getCustomPlanTemplateLocation();
+			if (customTemplate != null){
+				
+				boolean open = ReportPlan.closeTemplateEditor();
+
+				//delete
+				if (!ReportPlan.getCustomPlanTemplateLocation().delete()){
+					MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.RevertPlanTemplate_Error, Messages.RevertPlanTemplate_ErrorRevertingTemplate);
+				}
+				
+				//re-open
+				if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(PlanReportPerspective.ID) ){
+					ReportPlan.editTemplate(event);
+				}
 			}
 		}
 		return null;

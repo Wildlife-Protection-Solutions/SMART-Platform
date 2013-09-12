@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.plan.SmartPlanPlugIn;
@@ -66,7 +67,8 @@ public class ReportPlan {
 	public final static String PLAN_PATROLS = "Patrols"; //$NON-NLS-1$
 	public final static String PLAN_PARENT = "ParentPlan"; //$NON-NLS-1$
 	
-
+	private static IEditorPart templateEditor = null;
+	
 	/**
 	 * 
 	 * @return the custom plan template file or null
@@ -125,13 +127,24 @@ public class ReportPlan {
 			
 			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench().showPerspective(PlanReportPerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
 			ReportPlanEditorInput input = new ReportPlanEditorInput(getCustomPlanTemplateLocation());
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
-			
+			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ReportPlan_ErrorEditingPlanTemplate + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;
 		}
-		
-		
+	}
+	
+	/**
+	 * Closes the current template editor.
+	 * 
+	 * @return true if editor is open and closed, false if not open
+	 */
+	public static boolean closeTemplateEditor(){
+		if (templateEditor != null){
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(templateEditor, false);
+			templateEditor = null;
+			return true;
+		}
+		return false;
 	}
 }
