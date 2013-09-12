@@ -222,6 +222,8 @@ public class Messages extends NLS {
 	public static String PlanTypeEmployeesComposite_VacationSickness_Label;
 	public static String ReportPlan_ErrorEditingPlanTemplate;
 	public static String RevertPlanTemplate_ConfirmDialogTitle;
+	public static String RevertPlanTemplate_Error;
+	public static String RevertPlanTemplate_ErrorRevertingTemplate;
 	public static String RevertPlanTemplate_OverwriteTemplateWarningMessage;
 	public static String ShowPlanPersepctiveHandler_Load_Error;
 	public static String SmartPlanConnection_UnsupportedDataset;

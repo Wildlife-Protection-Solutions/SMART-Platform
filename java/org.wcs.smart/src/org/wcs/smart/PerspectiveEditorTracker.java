@@ -84,14 +84,30 @@ public class PerspectiveEditorTracker implements IPartListener {
 	public void partClosed(IWorkbenchPart part) {
 		if (part instanceof EditorPart) {
 			IWorkbenchPage page = part.getSite().getPage();
+			boolean found = false;
 			IPerspectiveDescriptor activePerspective = page.getPerspective();
 			ArrayList<IEditorReference> editors = perspectiveEditors.get(activePerspective.getId());
 			if (editors != null) {
 				for (IEditorReference ref : editors){
 					if (ref.getPart(false) == part){
 						editors.remove(ref);
+						found = true;
 						break;
 					}
+				}
+			}
+			if (!found){
+				//check other perspective; this cause occurs when an editor is closed
+				//programmatically from another perspective (closing plan template editor from the
+				//plan perspective).
+				for (ArrayList<IEditorReference> allEditors : perspectiveEditors.values()){
+					for (IEditorReference ref : allEditors){
+						if (ref.getPart(false) == part){
+							allEditors.remove(ref);
+							break;
+						}
+					}
+					
 				}
 			}
 		}
