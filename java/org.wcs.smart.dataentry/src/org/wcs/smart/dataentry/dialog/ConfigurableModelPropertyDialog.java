@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,6 +57,9 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDialog {
 
+	private static final int DIALOG_WIDTH = 500;
+	private static final int DIALOG_HEIGHT = 550;
+	
 	private TableViewer modelListViewer;
 	private TreeViewer modelTreeViewer;
 	
@@ -66,6 +70,11 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		super(parent, Messages.ConfigurableModelPropertyDialog_Title);
 	}
 
+	@Override
+	protected Point getInitialSize() {
+		return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
+	}
+	
 	@Override
 	protected Composite createContent(Composite parent) {
 		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
@@ -81,7 +90,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		}
 
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, false));
+		container.setLayout(new GridLayout(2, true));
 
 		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
 		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
@@ -92,6 +101,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateTreeViewer();
+				btnEdit.setEnabled(!modelListViewer.getSelection().isEmpty());
 			}
 		});
 		
@@ -110,6 +120,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		});
 		
 		btnEdit = new Button(container, SWT.PUSH);
+		btnEdit.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		btnEdit.setEnabled(false);
 		btnEdit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override

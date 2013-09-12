@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -49,6 +50,9 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @since 2.0.0
  */
 public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
+	
+	private static final int DIALOG_WIDTH = 680;
+	private static final int DIALOG_HEIGHT = 680;
 
 	private ConfigurableModel model;
 	
@@ -66,9 +70,14 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	@Override
+	protected Point getInitialSize() {
+		return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
+	}
+	
+	@Override
 	protected Composite createContent(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, false));
+		container.setLayout(new GridLayout(2, true));
 
 		modelTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
