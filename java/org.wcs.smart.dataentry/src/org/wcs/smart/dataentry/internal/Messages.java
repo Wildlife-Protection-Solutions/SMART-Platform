@@ -12,6 +12,8 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_Key;
 	public static String ConfigurableModelEditDialog_Message;
 	public static String ConfigurableModelEditDialog_Title;
+	public static String ConfigurableModelPropertyDialog_Button_Create;
+	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_LoadModelsListError;
 	public static String ConfigurableModelPropertyDialog_Message;
 	public static String ConfigurableModelPropertyDialog_Title;

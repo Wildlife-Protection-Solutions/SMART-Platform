@@ -101,7 +101,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		btnNew = new Button(container, SWT.PUSH);
-		btnNew.setText("Create New Configured Data Model...");
+		btnNew.setText(Messages.ConfigurableModelPropertyDialog_Button_Create);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -110,7 +110,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		});
 		
 		btnEdit = new Button(container, SWT.PUSH);
-		btnEdit.setText("Edit");
+		btnEdit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
