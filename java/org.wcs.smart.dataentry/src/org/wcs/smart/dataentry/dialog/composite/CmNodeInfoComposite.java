@@ -82,6 +82,20 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		label.setText(Messages.CmNodeInfoComposite_Key);
 		lblKey = new Label(container, SWT.NONE);
 		lblKey.setText(""); //$NON-NLS-1$
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				CmNode n = getSourceObject();
+				if (!n.isGroup()) {
+					if (lblCategory != null)
+						lblCategory.setText(n.getCategory().getFullCategoryName());
+					if (lblKey != null)
+						lblKey.setText(n.getCategory().getKeyId());
+					CmNodeInfoComposite.this.layout(true, true);
+				}
+			}
+		});
 	}
 
 	private void createDeleteButton() {
@@ -118,12 +132,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	public void setSourceObject(CmNode node) {
 		this.node = node;
-		if (!node.isGroup()) {
-			if (lblCategory != null)
-				lblCategory.setText(node.getCategory().getFullCategoryName());
-			if (lblKey != null)
-				lblKey.setText(node.getCategory().getKeyId());
-			layout(true, true);
-		}
+		fireSourceObjectChanged(node);
 	}
 }

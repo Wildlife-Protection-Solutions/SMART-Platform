@@ -31,9 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
@@ -42,7 +40,6 @@ import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -56,7 +53,6 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private ConfigurableModel model;
 	
 	private TreeViewer modelTreeViewer;
-	private Text txtName;
 
 	private Composite infoInnerPanel;
 	private Composite emptyComposite;
@@ -127,18 +123,6 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		DataentryHibernateManager.saveConfigurableModel(model);
 		setChangesMade(false);
 		return true;
-	}
-	
-	private void handleNameChanged() {
-		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
-		Object obj = selection.getFirstElement();
-		if (obj instanceof NamedItem) {
-			NamedItem item = (NamedItem) obj;
-			item.setName(txtName.getText());
-			item.updateName(SmartDB.getCurrentLanguage(), item.getName());
-		}
-		setChangesMade(true);
-		modelTreeViewer.refresh();
 	}
 	
 	private void updateRightPanelState() {

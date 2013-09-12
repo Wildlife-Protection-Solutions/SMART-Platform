@@ -25,7 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -61,7 +64,8 @@ public abstract class AbstractInfoComposite extends Composite {
 	private ConfigurableModel model;
 	private Session session;
 	
-	private List<IModelChangedListener> listeners = new ArrayList<IModelChangedListener>();
+	private List<IModelChangedListener> modelListeners = new ArrayList<IModelChangedListener>();
+	private List<ISourceObjectChangedListener> sourceListeners = new ArrayList<ISourceObjectChangedListener>();
 
 	public AbstractInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, SWT.NONE);
@@ -70,7 +74,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 
 	public abstract Object getSourceObject();
-
+	
 	protected void createAddButtons(Composite parent) {
 		Button btnAddGroup = new Button(parent, SWT.PUSH);
 		btnAddGroup.setText(Messages.AbstractInfoComposite_Button_AddGroup);
@@ -108,7 +112,9 @@ public abstract class AbstractInfoComposite extends Composite {
 	protected TranslatableNameComposite createDisplayNameControls(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
 		label.setText(Messages.AbstractInfoComposite_DisplayName);
-		return new TranslatableNameComposite(parent);
+		TranslatableNameComposite tnc = new TranslatableNameComposite(parent);
+		addSourceObjectChangedListener(tnc);
+		return tnc;
 	}
 	
 	private void addToParent(CmNode node) {
@@ -198,27 +204,53 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 	
 	protected void fireModelChanged() {
-		for (IModelChangedListener listener : listeners) {
+		for (IModelChangedListener listener : modelListeners) {
 			listener.modelChanged();
 		}
 	}
 	
 	public void addModelChangedListener(IModelChangedListener listener) {
-		listeners.add(listener);
+		modelListeners.add(listener);
 	}
 
 	public void removeModelChangedListener(IModelChangedListener listener) {
-		listeners.remove(listener);
+		modelListeners.remove(listener);
 	}
 
+	protected void fireSourceObjectChanged(Object newObject) {
+		for (ISourceObjectChangedListener listener : sourceListeners) {
+			listener.sourceObjectChanged(newObject);
+		}
+	}
+	
+	protected void addSourceObjectChangedListener(ISourceObjectChangedListener listener) {
+		sourceListeners.add(listener);
+	}
+
+	protected void removeSourceObjectChangedListener(ISourceObjectChangedListener listener) {
+		sourceListeners.remove(listener);
+	}
+	
 	/**
 	 * Represents listener for configurable model changes.
+	 * Fired when some of controls changes some data in {@link ConfigurableModel}
 	 * 
 	 * @author elitvin
 	 * @since 2.0.0
 	 */
 	public static interface IModelChangedListener {
 		public void modelChanged();
+	}
+
+	/**
+	 * Represents listener for source object changes.
+	 * Fired when new source object is set for composite.
+	 * 
+	 * @author elitvin
+	 * @since 2.0.0
+	 */
+	protected interface ISourceObjectChangedListener {
+		public void sourceObjectChanged(Object newObject);
 	}
 	
 	/**
@@ -228,11 +260,13 @@ public abstract class AbstractInfoComposite extends Composite {
 	 * @author elitvin
 	 * @since 2.0.0
 	 */
-	protected class TranslatableNameComposite extends Composite {
+	protected class TranslatableNameComposite extends Composite implements ISourceObjectChangedListener {
 
 		private Text text;
 		private Button button;
 		
+		private NamedItem item;
+		private boolean internalChange = false; //indicate if text was changed by user or by calling setter
 		
 		public TranslatableNameComposite(Composite parent) {
 			super(parent, SWT.NONE);
@@ -252,6 +286,16 @@ public abstract class AbstractInfoComposite extends Composite {
 
 			text = new Text(this, SWT.BORDER);
 			text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			text.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					if (internalChange && item != null) {
+						item.setName(text.getText());
+						item.updateName(SmartDB.getCurrentLanguage(), item.getName());
+						fireModelChanged();
+					}
+				}
+			});
 			
 			button = new Button(this, SWT.PUSH);
 			button.setText(Messages.TranslatableNameComposite_Button_Translate);
@@ -263,6 +307,16 @@ public abstract class AbstractInfoComposite extends Composite {
 		
 		public Button getButton() {
 			return button;
+		}
+
+		@Override
+		public void sourceObjectChanged(Object newObject) {
+			if (newObject instanceof NamedItem) {
+				item = (NamedItem) newObject;
+				internalChange = false;
+				text.setText(item.getName());
+				internalChange = true;
+			}
 		}
 	}
 }

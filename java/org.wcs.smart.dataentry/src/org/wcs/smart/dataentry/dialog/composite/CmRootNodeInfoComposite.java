@@ -58,6 +58,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 	
 	public void setSourceObject(CmRootNode rootNode) {
 		this.rootNode = rootNode;
+		fireSourceObjectChanged(rootNode);
 	}
 	
 }
