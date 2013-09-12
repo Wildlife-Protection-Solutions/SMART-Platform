@@ -28,12 +28,16 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -45,7 +49,6 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
  * Info composite containing some common logic and building blocks for {@link CmRootNode},  {@link CmNode},  {@link CmAttribute}
@@ -56,18 +59,20 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 public abstract class AbstractInfoComposite extends Composite {
 
 	private ConfigurableModel model;
+	private Session session;
 	
 	private List<IModelChangedListener> listeners = new ArrayList<IModelChangedListener>();
 
-	public AbstractInfoComposite(Composite parent, ConfigurableModel model) {
+	public AbstractInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, SWT.NONE);
 		this.model = model;
+		this.session = session;
 	}
 
 	public abstract Object getSourceObject();
 
-	protected void createAddButtons() {
-		Button btnAddGroup = new Button(this, SWT.PUSH);
+	protected void createAddButtons(Composite parent) {
+		Button btnAddGroup = new Button(parent, SWT.PUSH);
 		btnAddGroup.setText("Add SubGroup");
 		btnAddGroup.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -76,7 +81,7 @@ public abstract class AbstractInfoComposite extends Composite {
 			}
 		});
 
-		Button btnAddCategory = new Button(this, SWT.PUSH);
+		Button btnAddCategory = new Button(parent, SWT.PUSH);
 		btnAddCategory.setText("Add Datamodel Category");
 		btnAddCategory.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -84,6 +89,26 @@ public abstract class AbstractInfoComposite extends Composite {
 				addDatamodelCategory();
 			}
 		});
+	}
+
+	protected Composite createContentContainer(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout gd = new GridLayout(2, false);
+		gd.marginBottom=0;
+		gd.marginHeight = 0;
+		gd.marginLeft = 0;
+		gd.marginRight = 0;
+		gd.marginTop = 0;
+		gd.marginWidth = 0;
+		container.setLayout(gd);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		return container;
+	}
+
+	protected TranslatableNameComposite createDisplayNameControls(Composite parent) {
+		Label label = new Label(parent, SWT.NONE);
+		label.setText("Display Name:");
+		return new TranslatableNameComposite(parent);
 	}
 	
 	private void addToParent(CmNode node) {
@@ -95,8 +120,8 @@ public abstract class AbstractInfoComposite extends Composite {
 			parentNode.getChildren().add(node);
 		} else if (obj instanceof CmRootNode) {
 			node.setParent(null);
-			node.setNodeOrder(model.getNodes().size());
-			model.getNodes().add(node);
+			node.setNodeOrder(getModel().getNodes().size());
+			getModel().getNodes().add(node);
 		}
 		fireModelChanged();
 	}
@@ -110,18 +135,16 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 	
 	protected void addDatamodelCategory() {
-		Session s = SmartHibernateManager.openSession();
-		s.beginTransaction();
 		try {
-			DataModel dm = getDataModel(s);
+			DataModel dm = getDataModel();
 			DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
 			if (dialog.open() == IDialogConstants.OK_ID) {
 				Category category = dialog.getCategory();
 				CmNode node = new CmNode();
-				node.setModel(model);
+				node.setModel(getModel());
 				node.setCategory(category);
 				node.setName(category.getName());
-				for (Label label : category.getNames()) { //we need a copy, not the same instance of set
+				for (org.wcs.smart.ca.Label label : category.getNames()) { //we need a copy, not the same instance of set
 					node.updateName(label.getLanguage(), label.getValue());
 				}
 				List<Attribute> attrList = new ArrayList<Attribute>();
@@ -131,7 +154,7 @@ public abstract class AbstractInfoComposite extends Composite {
 					cma.setNode(node);
 					cma.setAttribute(a);
 					cma.setName(a.getName());
-					for (Label label : a.getNames()) { //we need a copy, not the same instance of set
+					for (org.wcs.smart.ca.Label label : a.getNames()) { //we need a copy, not the same instance of set
 						cma.updateName(label.getLanguage(), label.getValue());
 					}
 					//TODO: add CmAttribute default options
@@ -141,14 +164,11 @@ public abstract class AbstractInfoComposite extends Composite {
 			}
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
 		}
 	}
 
-	private DataModel getDataModel(Session session) {
-		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+	private DataModel getDataModel() {
+		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), getSession());
 		//load into memory; no-lazy loading here.
 		for (Category cat: dataModel.getCategories()){
 			visitCategory(cat);
@@ -173,6 +193,10 @@ public abstract class AbstractInfoComposite extends Composite {
 		return model;
 	}
 	
+	protected Session getSession() {
+		return session;
+	}
+	
 	protected void fireModelChanged() {
 		for (IModelChangedListener listener : listeners) {
 			listener.modelChanged();
@@ -186,8 +210,59 @@ public abstract class AbstractInfoComposite extends Composite {
 	public void removeModelChangedListener(IModelChangedListener listener) {
 		listeners.remove(listener);
 	}
-	
+
+	/**
+	 * Represents listener for configurable model changes.
+	 * 
+	 * @author elitvin
+	 * @since 2.0.0
+	 */
 	public static interface IModelChangedListener {
 		public void modelChanged();
+	}
+	
+	/**
+	 * Composite with text field and "Translate" button.
+	 * Contains all related functionality for translating {@link NamedItem}
+	 * 
+	 * @author elitvin
+	 * @since 2.0.0
+	 */
+	protected class TranslatableNameComposite extends Composite {
+
+		private Text text;
+		private Button button;
+		
+		
+		public TranslatableNameComposite(Composite parent) {
+			super(parent, SWT.NONE);
+			createControls();
+		}
+		
+		private void createControls() {
+			GridLayout gd = new GridLayout(2, false);
+			gd.marginBottom=0;
+			gd.marginHeight = 0;
+			gd.marginLeft = 0;
+			gd.marginRight = 0;
+			gd.marginTop = 0;
+			gd.marginWidth = 0;
+			this.setLayout(gd);
+			this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+			text = new Text(this, SWT.BORDER);
+			text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			
+			button = new Button(this, SWT.PUSH);
+			button.setText("Translate...");
+		}
+		
+		public Text getText() {
+			return text;
+		}
+		
+		public Button getButton() {
+			return button;
+		}
 	}
 }

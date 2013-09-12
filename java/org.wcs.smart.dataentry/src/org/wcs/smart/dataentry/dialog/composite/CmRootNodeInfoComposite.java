@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -38,8 +39,8 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 	private CmRootNode rootNode;
 	
-	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+		super(parent, model, session);
 		createControls();
 	}
 	
@@ -47,7 +48,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		createAddButtons();
+		createAddButtons(this);
 	}
 
 	@Override

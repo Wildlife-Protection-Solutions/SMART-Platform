@@ -44,10 +44,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -116,8 +114,18 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Dialog dialog = new ConfigurableModelEditDialog((ConfigurableModel)modelTreeViewer.getInput());
-				dialog.open();
+				Session session = getSession();
+				try {
+					ConfigurableModel cm = (ConfigurableModel) modelTreeViewer.getInput();
+					cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
+					Dialog dialog = new ConfigurableModelEditDialog(cm);
+					dialog.open();
+				} finally {
+					//most likely session will be closed here as AbstractPropertyJHeaderDialog closes session when dialog is closed
+					if (session.isOpen()){
+						session.close();
+					}
+				}
 				updateTreeViewer();
 			}
 		});
