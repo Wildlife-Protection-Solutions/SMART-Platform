@@ -39,6 +39,7 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRoo
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
 import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -64,7 +65,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private CmNodeInfoComposite categoryNodeComposite;
 	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
-		super(Display.getDefault().getActiveShell(), "Configured Data Model");
+		super(Display.getDefault().getActiveShell(), Messages.ConfigurableModelEditDialog_Title);
 		this.model = model;
 	}
 
@@ -115,8 +116,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 		
-		setTitle("Configured Data Model");
-		setMessage("Editing data model configuration");
+		setTitle(Messages.ConfigurableModelEditDialog_Title);
+		setMessage(Messages.ConfigurableModelEditDialog_Message);
 		
 		return container;
 	}

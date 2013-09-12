@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -73,19 +74,19 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		createDisplayNameControls(container);
 		
 		Label label = new Label(container, SWT.NONE);
-		label.setText("Category:");
+		label.setText(Messages.CmNodeInfoComposite_Category);
 		lblCategory = new Label(container, SWT.NONE);
 		lblCategory.setText(""); //$NON-NLS-1$
 
 		label = new Label(container, SWT.NONE);
-		label.setText("Key:");
+		label.setText(Messages.CmNodeInfoComposite_Key);
 		lblKey = new Label(container, SWT.NONE);
 		lblKey.setText(""); //$NON-NLS-1$
 	}
 
 	private void createDeleteButton() {
 		Button btnDelete = new Button(this, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(Messages.CmNodeInfoComposite_Button_Delete);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
