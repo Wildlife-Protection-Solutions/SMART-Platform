@@ -30,7 +30,6 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;

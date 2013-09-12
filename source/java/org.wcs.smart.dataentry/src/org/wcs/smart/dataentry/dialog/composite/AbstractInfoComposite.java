@@ -73,7 +73,7 @@ public abstract class AbstractInfoComposite extends Composite {
 
 	protected void createAddButtons(Composite parent) {
 		Button btnAddGroup = new Button(parent, SWT.PUSH);
-		btnAddGroup.setText("Add SubGroup");
+		btnAddGroup.setText(Messages.AbstractInfoComposite_Button_AddGroup);
 		btnAddGroup.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -82,7 +82,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		});
 
 		Button btnAddCategory = new Button(parent, SWT.PUSH);
-		btnAddCategory.setText("Add Datamodel Category");
+		btnAddCategory.setText(Messages.AbstractInfoComposite_Button_AddCategory);
 		btnAddCategory.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -107,7 +107,7 @@ public abstract class AbstractInfoComposite extends Composite {
 
 	protected TranslatableNameComposite createDisplayNameControls(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
-		label.setText("Display Name:");
+		label.setText(Messages.AbstractInfoComposite_DisplayName);
 		return new TranslatableNameComposite(parent);
 	}
 	
@@ -128,7 +128,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	
 	protected void addSubGroup() {
 		CmNode node = new CmNode();
-		node.setModel(model);
+		node.setModel(getModel());
 		node.setName("New SubGroup");
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
 		addToParent(node);
@@ -254,7 +254,7 @@ public abstract class AbstractInfoComposite extends Composite {
 			text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
 			button = new Button(this, SWT.PUSH);
-			button.setText("Translate...");
+			button.setText(Messages.TranslatableNameComposite_Button_Translate);
 		}
 		
 		public Text getText() {
