@@ -79,17 +79,33 @@ public class DataentryHibernateManager extends HibernateManager {
 			session.close();
 		}
 	}
+	
+	/**
+	 * Returns all ConfigurableModels
+	 * 
+	 * @param session
+	 * @return all ConfigurableModels
+	 */
+	public static ConfigurableModel getFullConfigurableModel(byte[] uuid, Session session) {
+		if (uuid == null)
+			return null;
+		Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
+		ConfigurableModel model = (ConfigurableModel) query.uniqueResult();
+		model.getNames().size();
+		fetchNodesData(model.getNodes());
+		return model;
+	}
 
 	private static void fetchNodesData(List<CmNode> nodes) {
 		if (nodes == null)
 			return;
 		for (CmNode cmNode : nodes) {
 			//load all lazy data
-			cmNode.getCategory();
-			cmNode.getNames().size();
-			for (CmAttribute cma : cmNode.getCmAttributes()) {
-				cma.getNames().size();
-			}
+//			cmNode.getCategory();
+//			cmNode.getNames().size();
+//			for (CmAttribute cma : cmNode.getCmAttributes()) {
+//				cma.getNames().size();
+//			}
 			cmNode.getCmAttributes().size();
 			fetchNodesData(cmNode.getChildren());
 		}

@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
@@ -103,13 +104,15 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			}
 		};
 
-		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model);
+		 //NOTE: session is already opened and should not be closed until dialog is closed
+		Session session = getSession();
+		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, session);
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
-		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, true);
+		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, true);
 		groupNodeComposite.addModelChangedListener(modelChangeListener);
 		
-		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, false);
+		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 		
 		setTitle("Configured Data Model");

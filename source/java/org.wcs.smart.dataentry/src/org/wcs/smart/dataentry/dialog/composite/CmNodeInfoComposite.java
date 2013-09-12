@@ -28,6 +28,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -41,9 +43,11 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	private CmNode node;
 
+	private Label lblCategory;
+	private Label lblKey;
 	
-	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, boolean isGroup) {
-		super(parent, model);
+	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
+		super(parent, model, session);
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (isGroup)
@@ -53,14 +57,31 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	}
 	
 	private void createGroupControls() {
-		createAddButtons();
+		createAddButtons(this);
 		createDeleteButton();
+		
+		Composite container = createContentContainer(this);
+		createDisplayNameControls(container);
+		
 	}
 
 	private void createCategoryControls() {
 		createDeleteButton();
-	}
+		
+		Composite container = createContentContainer(this);
 
+		createDisplayNameControls(container);
+		
+		Label label = new Label(container, SWT.NONE);
+		label.setText("Category:");
+		lblCategory = new Label(container, SWT.NONE);
+		lblCategory.setText(""); //$NON-NLS-1$
+
+		label = new Label(container, SWT.NONE);
+		label.setText("Key:");
+		lblKey = new Label(container, SWT.NONE);
+		lblKey.setText(""); //$NON-NLS-1$
+	}
 
 	private void createDeleteButton() {
 		Button btnDelete = new Button(this, SWT.PUSH);
@@ -96,5 +117,12 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	public void setSourceObject(CmNode node) {
 		this.node = node;
+		if (!node.isGroup()) {
+			if (lblCategory != null)
+				lblCategory.setText(node.getCategory().getFullCategoryName());
+			if (lblKey != null)
+				lblKey.setText(node.getCategory().getKeyId());
+			layout(true, true);
+		}
 	}
 }
