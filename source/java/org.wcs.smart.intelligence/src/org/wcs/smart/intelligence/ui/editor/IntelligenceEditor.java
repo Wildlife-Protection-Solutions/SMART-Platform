@@ -167,6 +167,7 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 			i = addPage(mapPage, getEditorInput());
 			setPageText(i, Messages.IntelligenceEditor_MapPageName);
 			
+			super.setPartName(getIntelligence().getName());
 		}catch (Exception ex){
 			IntelligencePlugIn.log(Messages.IntelligenceEditor_ErrorCreatingPages, ex);
 		}
