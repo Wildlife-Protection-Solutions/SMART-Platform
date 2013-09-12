@@ -111,15 +111,21 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 		
 		List<PlanTarget> pts = new ArrayList<PlanTarget>();
 		
+		String planUuid = (String)params.get(PLAN_UUID.key);
+		Boolean subPlans = (Boolean)params.get(SUB_PLANS.key);;
+		
+		if (planUuid == null){
+			return new PlanTargetDataSource(null, subPlans);
+		}
 		Session session = HibernateManager.openSession();
 		Plan plan = null;
-		Boolean subPlans = null;
+		
 		try{
 			plan = (Plan)session.load(Plan.class, SmartUtils.decodeHex((String)params.get(PLAN_UUID.key)));
 			if (plan == null ){
 				throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
 			}
-			subPlans = (Boolean)params.get(SUB_PLANS.key);
+			
 			if (!subPlans){
 				//load plan targets
 				for(PlanTarget pt : plan.getTargets()){
