@@ -36,16 +36,57 @@
                </visibleWhen>
             </command>
             <menu
-                  label="Plan Template">
+                  label="%plantemplate.menu.label">
                <command
                      commandId="org.wcs.smart.plan.editTemplate"
                      style="push"
-                     tooltip="Edit the plan print template">
+                     tooltip="%plantemplate.command.tooltip">
                </command>
+               <separator
+                     name="org.wcs.smart.plan.template.separator"
+                     visible="true">
+               </separator>
                <command
                      commandId="org.wcs.smart.plan.revertTemplate"
                      style="push"
-                     tooltip="Reverts the plan template to the default">
+                     tooltip="%reverttemplate.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.PlanReportPerspective">
+                        </equals>
+                     </with>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.plan.exportTemplate"
+                     style="push"
+                     tooltip="%exporttemplate.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.PlanReportPerspective">
+                        </equals>
+                     </with>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.plan.importTemplate"
+                     style="push"
+                     tooltip="%importtemplate.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.PlanReportPerspective">
+                        </equals>
+                     </with>
+                  </visibleWhen>
                </command>
                <visibleWhen
                      checkEnabled="false">
@@ -184,7 +225,7 @@
          <command
                commandId="org.wcs.smart.plan.exportPdf"
                style="push"
-               tooltip="Exports the selected plan to a pdf file for printing">
+               tooltip="%exportplanpdf.command.tooltip">
          </command>
          <separator
                name="org.wcs.smart.plan.separator3"
@@ -389,6 +430,26 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ExportTemplateHandler"
+            commandId="org.wcs.smart.plan.exportTemplate">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ImportTemplateHandler"
+            commandId="org.wcs.smart.plan.importTemplate">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -414,19 +475,27 @@
       </command>
       <command
             id="org.wcs.smart.plan.exportPdf"
-            name="Export To PDF">
+            name="%exportpdf1command.name">
       </command>
       <command
             id="org.wcs.smart.plan.exportPdfEditor"
-            name="Export To PDF">
+            name="%exportpdf2.command.name">
       </command>
       <command
             id="org.wcs.smart.plan.revertTemplate"
-            name="Revert to Default Template">
+            name="%reverttemplate.command.name">
       </command>
       <command
             id="org.wcs.smart.plan.editTemplate"
-            name="Edit Plan Template">
+            name="%edittemplate.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.plan.exportTemplate"
+            name="%exporttemplate.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.plan.importTemplate"
+            name="%importtemplate.command.name">
       </command>
    </extension>
 
@@ -481,7 +550,7 @@
       <perspective
             class="org.wcs.smart.plan.report.PlanReportPerspective"
             id="org.wcs.smart.plan.PlanReportPerspective"
-            name="Plan Template Editing Perspective">
+            name="%plantemplate.perspective.name">
       </perspective>
    </extension>
    <extension

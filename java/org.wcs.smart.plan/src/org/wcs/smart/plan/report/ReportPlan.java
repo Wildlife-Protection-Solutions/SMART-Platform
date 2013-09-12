@@ -24,9 +24,11 @@ package org.wcs.smart.plan.report;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -95,6 +97,16 @@ public class ReportPlan {
 		return SmartPlanPlugIn.getDefault().getBundle().getResource("/org/wcs/smart/plan/report/planTemplate.rptdesign").openStream(); //$NON-NLS-1$
 	}
 
+	/**
+	 * Imports the given file as the new plan template.
+	 * 
+	 * @param newTemplate
+	 * @throws IOException
+	 */
+	public static void importPlanTemplate(File newTemplate) throws IOException{
+		File f = new File(SmartPlanPlugIn.getDefault().getPlanDirectory(), PLAN_TEMPLATE);
+		FileUtils.copyFile(newTemplate, f);
+	}
 	
 	/**
 	 * Export the plan to pdf
