@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Plan
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.wcs.smart.plan;singleton:=true
 Bundle-Version: 1.1.2
 Bundle-Activator: org.wcs.smart.plan.SmartPlanPlugIn
@@ -25,4 +25,4 @@ Import-Package: org.eclipse.core.databinding.observable.list,
  org.eclipse.jface.databinding.viewers
 Export-Package: org.wcs.smart.plan,
  org.wcs.smart.plan.model
-Bundle-Vendor: org.wcs.smart
+Bundle-Vendor: %Bundle-Vendor

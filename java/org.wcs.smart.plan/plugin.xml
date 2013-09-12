@@ -35,6 +35,10 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.plan.exportPdfEditor"
+                  style="push">
+            </command>
             <menu
                   label="%plantemplate.menu.label">
                <command
@@ -292,9 +296,30 @@
       <menuContribution
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.changeuserpassword">
+         <separator
+               name="org.wcs.smart.plan.separator3"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.file.export"
+               label="%command.label.exportMap"
+               style="push"
+               tooltip="%exportmap.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.plan.planPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
          <command
                commandId="org.wcs.smart.plan.exportPdfEditor"
-               style="push">
+               label="%command.label.exportPlanToPDF"
+               style="push"
+               tooltip="%exportpdf.command.tooltip.0">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -318,6 +343,10 @@
                </with>
             </visibleWhen>
          </command>
+         <separator
+               name="org.wcs.smart.plan.separator2"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension
