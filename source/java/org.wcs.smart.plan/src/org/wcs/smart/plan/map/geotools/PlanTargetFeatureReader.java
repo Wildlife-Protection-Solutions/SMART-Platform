@@ -63,6 +63,10 @@ public class PlanTargetFeatureReader implements FeatureReader<SimpleFeatureType,
 			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;
+		if (plan == null){
+			fIterator = null;
+			return;
+		}
 		List<SpatialPlanTargetPoint> pnt = new ArrayList<SpatialPlanTargetPoint>();
 		if (!subPlans){
 			for (PlanTarget pt : plan.getTargets()){

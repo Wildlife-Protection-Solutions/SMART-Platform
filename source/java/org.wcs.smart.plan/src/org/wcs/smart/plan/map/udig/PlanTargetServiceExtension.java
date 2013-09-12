@@ -80,7 +80,11 @@ public class PlanTargetServiceExtension implements ServiceExtension {
 		uuid = uuid.substring(pos);
 		String[] bits = uuid.split("\\."); //$NON-NLS-1$
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, bits[0]);
+		if (bits[0].length() == 0){
+			params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, null);	
+		}else{
+			params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, bits[0]);
+		}
 		params.put(PlanTargetDataSourceFactory.SUB_PLANS.key, Boolean.valueOf(bits[1]));
 		return params;
 	}
@@ -92,8 +96,8 @@ public class PlanTargetServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(PlanTargetDataSourceFactory.PLAN_UUID.key) == null 
-			|| !(params.get(PlanTargetDataSourceFactory.PLAN_UUID.key) instanceof String)
+		if ((params.get(PlanTargetDataSourceFactory.PLAN_UUID.key) != null 
+			&& !(params.get(PlanTargetDataSourceFactory.PLAN_UUID.key) instanceof String))
 			|| params.get(PlanTargetDataSourceFactory.SUB_PLANS.key) == null 
 			|| !(params.get(PlanTargetDataSourceFactory.SUB_PLANS.key) instanceof Boolean)
 			){
@@ -102,7 +106,7 @@ public class PlanTargetServiceExtension implements ServiceExtension {
 		String planuuid = (String) params.get(PlanTargetDataSourceFactory.PLAN_UUID.key);
 		Boolean subPlans = (Boolean) params.get(PlanTargetDataSourceFactory.SUB_PLANS.key);
 		
-		String url = "smart://smartdb/plan/" + planuuid + "." + subPlans.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		String url = "smart://smartdb/plan/" + (planuuid == null ? "" : planuuid) + "." + subPlans.toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

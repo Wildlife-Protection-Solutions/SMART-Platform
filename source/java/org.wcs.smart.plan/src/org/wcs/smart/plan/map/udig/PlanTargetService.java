@@ -115,9 +115,17 @@ public class PlanTargetService extends IService {
 
 	public String getName(){
 		if (!subPlans){
-			return Messages.PlanTargetService_PlanTargetsLayerName + " (" + plan.getLabel() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+			if (plan != null){
+				return Messages.PlanTargetService_PlanTargetsLayerName + " (" + plan.getLabel() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+			}else{
+				return Messages.PlanTargetService_PlanTargetsLayerName;
+			}
 		}else{
-			return Messages.PlanTargetService_SubPlanTargetsLayerName + " (" + plan.getLabel() + ")";  //$NON-NLS-1$//$NON-NLS-2$ 
+			if (plan != null){
+				return Messages.PlanTargetService_SubPlanTargetsLayerName + " (" + plan.getLabel() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+			}else{
+				return Messages.PlanTargetService_SubPlanTargetsLayerName;
+			}
 		}
 	}
 	

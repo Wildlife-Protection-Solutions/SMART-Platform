@@ -76,11 +76,14 @@ public class PlanTargetMapLayer implements IBirtMapLayerManager {
 			onlySubplans= false;
 		}
 		
-		//The oda layer supports multiple plans
-		//here we only support a single plan so get only the first plan
-		String planUuids = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
-		String[] uuids = planUuids.split(","); //$NON-NLS-1$
-		String uuid = uuids[0];
+		String uuid = null;
+		if (context != null){
+			//The oda layer supports multiple plans
+			//here we only support a single plan so get only the first plan
+			String planUuids = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
+			String[] uuids = planUuids.split(","); //$NON-NLS-1$
+			uuid = uuids[0];
+		}
 		
 		Map<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, uuid);
