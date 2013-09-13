@@ -47,6 +47,7 @@ import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -77,25 +78,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	
 	@Override
 	protected Composite createContent(Composite parent) {
-		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try {
-			modelList = DataentryHibernateManager.getConfigurableModels(s);
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
-		}
-
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, true));
 
 		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
 		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		modelListViewer.setInput(modelList.toArray());
+		modelListViewer.setInput(getModelsList().toArray());
 		modelListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -115,7 +104,22 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: implement
+				Session session = getSession();
+				try {
+					ConfigurableModel cm = new ConfigurableModel();
+					cm.setConservationArea(SmartDB.getCurrentConservationArea());
+					cm.setName("New Configurable Model");
+					cm.updateName(SmartDB.getCurrentLanguage(), cm.getName());
+					Dialog dialog = new ConfigurableModelEditDialog(cm);
+					dialog.open();
+				} finally {
+					//most likely session will be closed here as AbstractPropertyJHeaderDialog closes session when dialog is closed
+					if (session.isOpen()){
+						session.close();
+					}
+				}
+				modelListViewer.setInput(getModelsList().toArray());
+				updateTreeViewer();
 			}
 		});
 		
@@ -138,14 +142,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						session.close();
 					}
 				}
+				modelListViewer.setInput(getModelsList().toArray());
 				updateTreeViewer();
 			}
 		});
 		
 		setTitle(Messages.ConfigurableModelPropertyDialog_Title);
 		setMessage(Messages.ConfigurableModelPropertyDialog_Message);
-		
-		//setChangesMade(true); //TODO: remove this line
 		
 		return container;
 	}
@@ -155,7 +158,22 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		return true;
 	}
 
-	void updateTreeViewer() {
+	private List<ConfigurableModel> getModelsList() {
+		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try {
+			modelList = DataentryHibernateManager.getConfigurableModels(s);
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
+		} finally {
+			s.getTransaction().rollback();
+			s.close();
+		}
+		return modelList;
+	}
+	
+	private void updateTreeViewer() {
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		if (!selection.isEmpty()) {
 			ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();

@@ -25,21 +25,26 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
- * Info composite for {@link CmRootNode}
- * 
+ * Info composite for {@link CmAttribute}
+ *
  * @author elitvin
  * @since 2.0.0
  */
-public class CmRootNodeInfoComposite extends AbstractInfoComposite {
+public class CmAttributeInfoComposite extends AbstractInfoComposite {
 
-	private CmRootNode rootNode;
+	private CmAttribute attribute;
+
+	private Label lblAttribute;
+	private Label lblKey;
 	
-	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, model, session);
 		createControls();
 	}
@@ -48,20 +53,47 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		createAddButtons(this);
-		
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
+
+		Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmAttributeInfoComposite_Attribute);
+		lblAttribute = new Label(container, SWT.NONE);
+		lblAttribute.setText(""); //$NON-NLS-1$
+
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmAttributeInfoComposite_Key);
+		lblKey = new Label(container, SWT.NONE);
+		lblKey.setText(""); //$NON-NLS-1$
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				CmAttribute attr = getSourceObject();
+				if (attr != null) {
+					if (lblAttribute != null) {
+						String text = attr.getAttribute().getName();
+						text += " (" + attr.getNode().getCategory().getFullCategoryName() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+						lblAttribute.setText(text);
+					}
+					if (lblKey != null)
+						lblKey.setText(attr.getAttribute().getKeyId());
+					CmAttributeInfoComposite.this.layout(true, true);
+				}
+			}
+		});
+		
+		
 	}
 
 	@Override
-	public CmRootNode getSourceObject() {
-		return rootNode;
+	public CmAttribute getSourceObject() {
+		return attribute;
 	}
 	
-	public void setSourceObject(CmRootNode rootNode) {
-		this.rootNode = rootNode;
-		fireSourceObjectChanged(rootNode);
+	public void setSourceObject(CmAttribute attribute) {
+		this.attribute = attribute;
+		fireSourceObjectChanged(attribute);
 	}
-	
+
 }

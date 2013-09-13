@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -62,6 +63,8 @@ public class ConfigurableModel extends NamedItem {
 	@Where(clause = "parent_node_uuid is null")
 	@OrderBy(clause = "node_order")
 	public List<CmNode> getNodes() {
+		if (nodes == null)
+			nodes = new ArrayList<CmNode>();
 		return nodes;
 	}
 	public void setNodes(List<CmNode> nodes) {

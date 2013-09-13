@@ -36,9 +36,11 @@ import org.hibernate.Session;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
+import org.wcs.smart.dataentry.dialog.composite.CmAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -63,6 +65,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private CmRootNodeInfoComposite rootNodeComposite;
 	private CmNodeInfoComposite groupNodeComposite;
 	private CmNodeInfoComposite categoryNodeComposite;
+	private CmAttributeInfoComposite attributeComposite;
 	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
 		super(Display.getDefault().getActiveShell(), Messages.ConfigurableModelEditDialog_Title);
@@ -121,6 +124,9 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 		
+		attributeComposite = new CmAttributeInfoComposite(infoInnerPanel, model, session);
+		attributeComposite.addModelChangedListener(modelChangeListener);
+				
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
 		
@@ -144,13 +150,16 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			cmp.setSourceObject(node);
 			((StackLayout)infoInnerPanel.getLayout()).topControl = cmp;
 			
+		} else if (obj instanceof CmAttribute) {
+			attributeComposite.setSourceObject((CmAttribute)obj);
+			((StackLayout)infoInnerPanel.getLayout()).topControl = attributeComposite;
+
 		} else if (obj instanceof CmRootNode) {
 			rootNodeComposite.setSourceObject((CmRootNode)obj);
 			((StackLayout)infoInnerPanel.getLayout()).topControl = rootNodeComposite;
 			
 		} else {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
-			
 		}
 		infoInnerPanel.layout();
 	}
