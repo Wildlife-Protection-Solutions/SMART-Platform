@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
@@ -51,7 +52,7 @@ public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDia
 	private TreeViewer dmTreeViewer;
 	
 	public DatamodelCatecorySelectorDialog(DataModel datamodel) {
-		super(Display.getDefault().getActiveShell(), "Datamodel Category Selector");
+		super(Display.getDefault().getActiveShell(), Messages.DatamodelCatecorySelectorDialog_Title);
 		this.datamodel = datamodel;
 	}
 
@@ -82,8 +83,8 @@ public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDia
 			}
 		});
 		
-		setTitle("Datamodel Category Selector");
-		setMessage("Select Datamodel Category to add to Configurable Model");
+		setTitle(Messages.DatamodelCatecorySelectorDialog_Title);
+		setMessage(Messages.DatamodelCatecorySelectorDialog_Message);
 		
 		return container;
 	}
@@ -91,7 +92,7 @@ public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDia
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Add", true);
+		createButton(parent, IDialogConstants.OK_ID, Messages.DatamodelCatecorySelectorDialog_Button_Add, true);
 		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CANCEL_LABEL, false);
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);

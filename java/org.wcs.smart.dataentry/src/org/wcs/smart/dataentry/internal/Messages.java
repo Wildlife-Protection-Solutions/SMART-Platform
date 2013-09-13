@@ -20,6 +20,9 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_Message;
 	public static String ConfigurableModelPropertyDialog_Title;
 	public static String DataentryHibernateManager_ConfigurableModel_Save_Error;
+	public static String DatamodelCatecorySelectorDialog_Button_Add;
+	public static String DatamodelCatecorySelectorDialog_Message;
+	public static String DatamodelCatecorySelectorDialog_Title;
 	public static String TranslatableNameComposite_Button_Translate;
 	static {
 		// initialize resource bundle
