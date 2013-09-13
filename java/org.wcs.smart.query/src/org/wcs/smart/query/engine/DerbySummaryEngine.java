@@ -53,6 +53,7 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SummaryHeader;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.model.SummaryQueryResult;
@@ -783,11 +784,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				String key = gb.getKeyPart() + ":"; //$NON-NLS-1$
 				switch (gb.getType()) {
 					case STRING:
-//						if (gb instanceof PatrolGroupBy ){
-//							key += "\"" + rs.getString(rsindex++) + "\"";
-//						}else{
-							key += rs.getString(rsindex++);
-//						}
+						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
 						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
@@ -1490,6 +1487,12 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
+	}
+
+	@Override
+	protected QueryResultItem asQueryResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		return null;
 	}
 
 }

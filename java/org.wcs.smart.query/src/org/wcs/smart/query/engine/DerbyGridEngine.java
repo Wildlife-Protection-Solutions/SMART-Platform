@@ -72,6 +72,7 @@ import org.wcs.smart.query.engine.grids.Tile;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.filter.IFilter;
@@ -738,6 +739,13 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
+	}
+
+	@Override
+	protected QueryResultItem asQueryResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

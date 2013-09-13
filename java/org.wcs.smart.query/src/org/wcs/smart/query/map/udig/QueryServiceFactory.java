@@ -24,10 +24,9 @@ package org.wcs.smart.query.map.udig;
 import net.refractions.udig.catalog.IService;
 
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.SimpleQuery;
 
 /**
  * Query service factory.
@@ -47,10 +46,8 @@ public class QueryServiceFactory {
 	 */
 	public static IService generateQueryService(Query query){
 		
-		if (query instanceof ObservationQuery){
-			return new QueryService((ObservationQuery)query);
-		}else if (query instanceof PatrolQuery){
-			return new QueryService((PatrolQuery)query);
+		if (query instanceof SimpleQuery){
+			return new QueryService((SimpleQuery)query);
 		}else if (query.getType() == QueryType.GRIDDED){
 			return new RasterService((GriddedQuery)query);
 		}

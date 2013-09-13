@@ -28,10 +28,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -54,21 +56,26 @@ public abstract class Query extends NamedItem {
 	//if you add another query type you must update
 	//the queryInput constructor
 	public enum QueryType{
-		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, Messages.Query_ObservationQueryName, ObservationQuery.class), //$NON-NLS-1$
-		SUMMARY("SummaryQuery", SummaryEditor.ID, Messages.Query_SummaryQueryName, SummaryQuery.class), //$NON-NLS-1$
-		GRIDDED("GriddedQuery", GriddedEditor.ID,  Messages.Query_GriddedQueryName, GriddedQuery.class), //$NON-NLS-1$
-		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, Messages.Query_PatrolQueryName, PatrolQuery.class); //$NON-NLS-1$
+		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, Messages.Query_ObservationQueryName, ObservationQuery.class, QueryPlugIn.OBSERVATION_QUERY_ICON), //$NON-NLS-1$
+		WAYPOINT("WaypointQuery", QueryResultsEditor.ID, Messages.Query_IncidentQueryName, WaypointQuery.class, QueryPlugIn.WAYPOINT_QUERY_ICON), //$NON-NLS-1$
+		SUMMARY("SummaryQuery", SummaryEditor.ID, Messages.Query_SummaryQueryName, SummaryQuery.class, QueryPlugIn.SUMMARY_QUERY_ICON), //$NON-NLS-1$
+		GRIDDED("GriddedQuery", GriddedEditor.ID,  Messages.Query_GriddedQueryName, GriddedQuery.class, QueryPlugIn.GRID_ICON), //$NON-NLS-1$
+		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, Messages.Query_PatrolQueryName, PatrolQuery.class, QueryPlugIn.PATROL_QUERY_ICON); //$NON-NLS-1$
 		
 		private String objectName;
 		private String editorId;
 		private String uiName;
+		private String iconKey;
 		private Class<? extends Query> hibrnateClazz;
 		
-		private QueryType(String objectName, String editorId, String uiName, Class<? extends Query> hibrnateClazz){
+		private QueryType(String objectName, String editorId, 
+				String uiName, Class<? extends Query> hibrnateClazz,
+				String iconKey){
 			this.objectName = objectName;
 			this.editorId = editorId;
 			this.uiName = uiName;
 			this.hibrnateClazz = hibrnateClazz;
+			this.iconKey = iconKey;
 		}
 		
 		/**
@@ -103,6 +110,14 @@ public abstract class Query extends NamedItem {
 		 */
 		public String getEditorId(){
 			return this.editorId;
+		}
+		
+		/**
+		 * 
+		 * @return the icon associated with the image type
+		 */
+		public Image getImage(){
+			return QueryPlugIn.getDefault().getImageRegistry().get(iconKey);
 		}
 	}
 	

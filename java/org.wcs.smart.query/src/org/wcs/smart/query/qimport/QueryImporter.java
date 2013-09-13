@@ -97,9 +97,9 @@ public class QueryImporter {
 	private IQueryImporter getQueryImporter(QueryType qt) {
 		if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.SUMMARY.name())){
 			return new SummaryQueryDefinitionImporter();
-		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
-			return new SimpleQueryDefinitionImporter();
-		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
+		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name()) ||
+				qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.WAYPOINT.name()) ||
+				qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
 			return new SimpleQueryDefinitionImporter();
 		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.GRIDDED.name())){
 			return new GriddedQueryDefinitionImporter();

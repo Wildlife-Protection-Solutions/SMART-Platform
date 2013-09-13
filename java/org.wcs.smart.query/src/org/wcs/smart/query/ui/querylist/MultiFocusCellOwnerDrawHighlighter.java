@@ -111,11 +111,8 @@ public class MultiFocusCellOwnerDrawHighlighter extends FocusCellHighlighter {
 		Listener listener = new Listener() {
 
 			public void handleEvent(Event event) {
-//				System.out.println("FIRED EVENT");
 				if ((event.detail & SWT.SELECTED) > 0 &&						
 						((StructuredSelection)viewer.getSelection()).size() == 1) {
-//					ViewerCell focusCell = getFocusCell();
-					//ViewerRow row = viewer.getViewerRowFromItem(event.item);
 					ViewerCell focusCell = viewer.getCell(new Point(event.x, event.y));
 					if (focusCell == null){
 						return;

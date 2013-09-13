@@ -40,7 +40,6 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -87,16 +86,19 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	//current direction
 	private int direction = SWT.UP;
 	private boolean hasSortColumns = false;
+	private DerbyQueryEngine2 engine;
 
 	
-	public DerbyPagedObservationResult(String queryTempTable) {
+	public DerbyPagedObservationResult(String queryTempTable, DerbyQueryEngine2 engine) {
 		this.queryTempTable = queryTempTable;
+		this.engine = engine;
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyQueryEngine2 engine) {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;
+		this.engine = engine;
 	}
 	
 	@Override
@@ -419,94 +421,14 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	
 	protected List<QueryResultItem> getResults(ResultSet rs, int from, int pageSize) throws SQLException {
 		List<QueryResultItem> items = new ArrayList<QueryResultItem>();
-		/*
-		1	P_CA_UUID
-		2	P_UUID
-		3	P_ID
-		4	P_STATION_UUID
-		5	P_TEAM_UUID
-		6	P_OBJECTIVE
-		7	P_MANDATE_UUID
-		8	P_TYPE
-		9	P_IS_ARMED
-		10	P_START_DATE
-		11	P_END_DATE
-		12	PL_UUID
-		13	PL_ID (same as P_LEGID)
-		14	PL_TRANSPORT_UUID
-		15	PLD_UUID
-		16	PLD_PATROL_DAY (same as WP_DATE)
-		17	WP_UUID
-		18	WP_ID
-		19	WP_X
-		20	WP_Y
-		21	WP_DIRECTION
-		22	WP_DISTANCE
-		23	WP_TIME
-		24	WP_WP_COMMENT
-		25	OB_UUID
-		26	OB_CATEGORY_UUID
-		27	PLM_LEADER
-		28	PLM_PILOT
-		29	P_STATION
-		30	P_TEAM
-		31	P_MANDATE
-		32	P_TRANSPORT
-		33	P_LEADER
-		34	P_PILOT
-		35  CA_ID
-		36  CA_NAME
-		37+	CATEGORY_0 -> CATEGORY_N (N last category number)
-		 */
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
 			to = itemCount;
 		}
-		int columnCount = rs.getMetaData().getColumnCount();
 		for(int x = from; x < to; x++) {
 			rs.next();
-//		while (rs.next()) {
-			QueryResultItem it = new QueryResultItem();
-			
-			it.setConservationAreaId(rs.getString(35));
-			it.setConservationAreaName(rs.getString(36));
-			it.setPatrolUuid(rs.getBytes(2));
-			it.setPatrolId(rs.getString(3));
-			it.setPatrolStartDate(rs.getDate(10));
-			it.setPatrolEndDate(rs.getDate(11));
-			it.setStation(rs.getString(29));				
-			it.setTeam(rs.getString(30));	
-			it.setObjective(rs.getString(6));
-			it.setMandate(rs.getString(31));
-			it.setPatrolType(PatrolType.Type.valueOf(rs.getString(8)));
-			it.setArmed(rs.getBoolean(9));
-			it.setTransportType(rs.getString(32));
-			it.setPatrolLegId(rs.getString(13));
-			it.setWpDateTime(rs.getDate(16));
-			
-			it.setLeader(rs.getString(33));
-			it.setPilot(rs.getString(34));
-			it.setWaypointUuid(rs.getBytes(17));
-			it.setWaypointId(rs.getInt(18));
-			it.setWaypointX(rs.getDouble(19));
-			it.setWaypointY(rs.getDouble(20));
-			it.setWaypointTime(rs.getTime(23));
-			it.setWaypointDirection(rs.getFloat(21));
-			it.setWaypointDistance(rs.getFloat(22));
-			it.setWaypointComment(rs.getString(24));
-			it.setObservationUuid(rs.getBytes(25));
-			//build categories
-			List<String> categories = new ArrayList<String>();
-			for (int j = 37; j <= columnCount; j++) {
-				String category = rs.getString(j);
-				if (category == null) {
-					break;
-				}
-				categories.add(category);
-			}
-			it.setCategory(categories.toArray(new String[categories.size()]));
-			
+			QueryResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
 		}
 		return items;

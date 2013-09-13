@@ -39,7 +39,20 @@ public class CreateQueryHandler extends CreateHandler {
 	 */
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		super.execute(event);
-		super.createQuery(QueryType.OBSERVATION);
+		
+		QueryType qType = QueryType.OBSERVATION;
+		if (event.getCommand().getId().equals("org.wcs.smart.query.createPatrolQuery")){ //$NON-NLS-1$
+			qType = QueryType.PATROL;
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createSummary")){ //$NON-NLS-1$
+			qType = QueryType.SUMMARY;
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createGriddedSummary")){ //$NON-NLS-1$
+			qType = QueryType.GRIDDED;
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createWaypointQuery")){ //$NON-NLS-1$
+			qType = QueryType.WAYPOINT;
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createQuery")){ //$NON-NLS-1$
+			qType = QueryType.OBSERVATION;
+		}
+		super.createQuery(qType);
 		return null;
 	}
 

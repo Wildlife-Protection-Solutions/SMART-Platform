@@ -19,24 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.internal.ui;
+package org.wcs.smart.query.ui.observation;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.wcs.smart.query.model.Query.QueryType;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
+
 /**
- * Handler for creating new patrol query
+ * Info section for waypoint query which displays
+ * incident count
  * 
  * @author Emily
  *
  */
-public class CreatePatrolQueryHandler extends CreateHandler {
-
+public class WaypointQuerySummaryInfo implements ISummaryInfo {
+	
+	private Label lblNumResults;
+	
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		super.execute(event);
-		super.createQuery(QueryType.PATROL);
-		return null;
+	public void createControls(Composite parent, FormToolkit toolkit) {
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		parent.setLayout(layout);
+		
+		toolkit.createLabel(parent,  Messages.WaypointQuerySummaryInfo_NumberOfIncidentLabel);
+		lblNumResults = toolkit.createLabel(parent, Messages.QueryEditorTableContent_NaLabel);
 	}
 
+	@Override
+	public void updateControls(IPagedQueryResultSet resultSet) {
+		if (resultSet == null ){
+			lblNumResults.setText(Messages.WaypointQuerySummaryInfo_UnknownNumberOfIncidents);
+		}else{
+			lblNumResults.setText(String.valueOf(resultSet.getItemCount()));
+		}
+		lblNumResults.getParent().getParent().layout();
+	}
 }

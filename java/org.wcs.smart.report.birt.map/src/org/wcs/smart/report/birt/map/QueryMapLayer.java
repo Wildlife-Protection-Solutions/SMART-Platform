@@ -39,10 +39,11 @@ import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.PatrolQuery;
+import org.wcs.smart.query.model.IMemoryQuery;
+import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.report.SmartReportParameters;
@@ -114,12 +115,13 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 			if (Query.class.isAssignableFrom( q.getClass() )){
 				q.setDateFilter(dateFilter);
 			}
-			if (q instanceof ObservationQuery) {
-				((ObservationQuery) q).setDateFilter(dateFilter);
-				((ObservationQuery) q).getPagedQueryResults(new NullProgressMonitor());
-			} else if (q instanceof PatrolQuery) {
-				((PatrolQuery) q).setDateFilter(dateFilter);
-				((PatrolQuery) q).getQueryResults(new NullProgressMonitor());
+			if (q instanceof SimpleQuery) {
+				((SimpleQuery) q).setDateFilter(dateFilter);
+				if (q instanceof IPagedQuery){
+					((IPagedQuery) q).getPagedQueryResults(new NullProgressMonitor());
+				}else if (q instanceof IMemoryQuery){
+					((IMemoryQuery) q).getQueryResults(new NullProgressMonitor());
+				}
 			} else if (q instanceof GriddedQuery ){
 				((GriddedQuery)q).setDateFilter(dateFilter);
 				Collection<GridResultItem> data = ((GriddedQuery) q).getQueryResults(new NullProgressMonitor());

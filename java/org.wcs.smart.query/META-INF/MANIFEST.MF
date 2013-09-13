@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Query
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
 Bundle-Version: 1.1.2
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
@@ -28,7 +28,7 @@ Export-Package: .,
  org.wcs.smart.query.parser.filter,
  org.wcs.smart.query.parser.internal.filter;x-friends:="org.wcs.smart.test",
  org.wcs.smart.query.parser.internal.parser;x-friends:="org.wcs.smart.test",
- org.wcs.smart.query.parser.internal.summary;x-friends:="org.wcs.smart.test,org.wcs.smart.data.oda.smart",
+ org.wcs.smart.query.parser.internal.summary;x-friends:="org.wcs.smart.test,org.wcs.smart.report.birt.query",
  org.wcs.smart.query.qimport,
  org.wcs.smart.query.querylist,
  org.wcs.smart.query.ui,
@@ -43,4 +43,4 @@ Export-Package: .,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
 Bundle-ClassPath: .
-Bundle-Vendor: org.wcs.smart
+Bundle-Vendor: %Bundle-Vendor

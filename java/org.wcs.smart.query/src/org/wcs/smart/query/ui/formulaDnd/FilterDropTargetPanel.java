@@ -171,7 +171,6 @@ public class FilterDropTargetPanel implements IDropPanel {
 				query.append(" "); //$NON-NLS-1$
 			}
 		}
-		System.out.println(query.toString());
 		return query.toString();
 	}
 	
@@ -314,10 +313,18 @@ public class FilterDropTargetPanel implements IDropPanel {
 	 * @return
 	 */
 	public Composite createComposite(Composite parent) {
-
+		parent = new Composite(parent, SWT.NONE);
+		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout();
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		parent.setLayout(layout);
+		
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(4, false);
+		layout = new GridLayout(4, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -327,11 +334,23 @@ public class FilterDropTargetPanel implements IDropPanel {
 		Label l = new Label(filterTypeComp, SWT.NONE);
 		l.setText(Messages.FilterDropTargetPanel_FilterTypeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Listener selectListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				fireQueryChangedListeners();
+			}
+		};
 		btnWaypoint = new Button(filterTypeComp, SWT.RADIO);
 		btnWaypoint.setText(IFilter.FilterType.WAYPOINT.getGuiName());
+		btnWaypoint.setToolTipText(Messages.FilterDropTargetPanel_waypointtooltip);
 		btnWaypoint.setSelection(true);
+		btnWaypoint.addListener(SWT.Selection, selectListener);
+		
 		btnObservation = new Button(filterTypeComp, SWT.RADIO);
 		btnObservation.setText(IFilter.FilterType.OBSERVATION.getGuiName());
+		btnObservation.addListener(SWT.Selection, selectListener);
+		btnObservation.setToolTipText(Messages.FilterDropTargetPanel_observationtooltip);
 		Label lspacer = new Label(filterTypeComp, SWT.NONE);
 		lspacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -483,7 +502,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		proxy.createWidget(this);
 		proxy.getWidget().setVisible(false);
 		
-		return dropTarget;
+		return parent;
 	}
 
 

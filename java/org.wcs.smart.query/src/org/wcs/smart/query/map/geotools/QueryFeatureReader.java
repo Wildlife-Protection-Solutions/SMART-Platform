@@ -28,9 +28,10 @@ import java.util.NoSuchElementException;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.SimpleQuery;
 
 /**
  * Feature reader for waypoint/observation query.
@@ -42,7 +43,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 
 	private SimpleFeatureType ftype;
 	private Iterator<QueryResultItem> fIterator;
-	private ObservationQuery query;
+	private SimpleQuery query;
 		
 	/**
 	 * Creates a new feature reader.
@@ -50,14 +51,14 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public QueryFeatureReader(ObservationQuery query,
+	public QueryFeatureReader(SimpleQuery query,
 			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
 		this.query = query;
-		if (query.getLastPagedResults() != null){
-			fIterator = query.getLastPagedResults().iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
+		if (query instanceof IPagedQuery && ((IPagedQuery)query).getLastPagedResults() != null){
+			fIterator = ((IPagedQuery)query).getLastPagedResults().iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 		}
 	}
 	

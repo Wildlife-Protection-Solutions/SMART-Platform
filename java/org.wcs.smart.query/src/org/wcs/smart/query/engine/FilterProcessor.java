@@ -263,19 +263,22 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(prefix(PatrolLegMember.class) + "_pilot.patrol_leg_uuid and  "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegMember.class) + "_pilot.is_pilot "); //$NON-NLS-1$
 		
+		
+		if (onlyObservations){
+			sql.append(" inner join "); //$NON-NLS-1$
+		}else{
+			sql.append(" left join "); //$NON-NLS-1$
+		}
+		usedTables.add(Waypoint.class);
+		sql.append(namePrefix(Waypoint.class));
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegDay.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class));
+		sql.append(".leg_day_uuid "); //$NON-NLS-1$
+		
 		if (populateObservation || queryFilter.hasAttributeFilter() || queryFilter.hasCategoryFilter()){
-			if (onlyObservations){
-				sql.append(" inner join "); //$NON-NLS-1$
-			}else{
-				sql.append(" left join "); //$NON-NLS-1$
-			}
-			usedTables.add(Waypoint.class);
-			sql.append(namePrefix(Waypoint.class));
-			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(PatrolLegDay.class));
-			sql.append(".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(Waypoint.class));
-			sql.append(".leg_day_uuid "); //$NON-NLS-1$
+		
 		
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));

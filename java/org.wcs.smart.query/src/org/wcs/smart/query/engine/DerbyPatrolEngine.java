@@ -127,38 +127,15 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 			byte[] lastPlUuid = null;
 			QueryResultItem lastItem = null;
 			while (rs.next()) {
-				
-				byte[] pluuid = rs.getBytes(21);
+				byte[] pluuid = rs.getBytes("r_pl_uuid"); //$NON-NLS-1$
 				if (Arrays.equals(pluuid, lastPlUuid)){
 					lastItem.addTrack(rs.getBytes(20));
 				}else{
-					QueryResultItem it = new QueryResultItem();
-					byte[] cauuid = rs.getBytes(3);
-					it.setConservationAreaId(rs.getString(1));
-					it.setConservationAreaName(rs.getString(2));
-					it.setPatrolUuid(rs.getBytes(4));
-					it.setPatrolId(rs.getString(5));
-					it.setPatrolStartDate(rs.getDate(6));
-					it.setPatrolEndDate(rs.getDate(7));
-					it.setStation(getName(rs.getBytes(8), cauuid, session));				
-					it.setTeam(getName(rs.getBytes(9), cauuid, session));				
-					it.setObjective(rs.getString(10));
-					it.setMandate(getName(rs.getBytes(11), cauuid, session));
-					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(12)));
-					it.setArmed(rs.getBoolean(13));
-					it.setTransportType(getName(rs.getBytes(14), cauuid, session));
-					it.setPatrolLegId(rs.getString(15));
-					it.setPatrolLegStartDate(rs.getDate(16));
-					it.setPatrolLegEndDate(rs.getDate(17));
-					it.setLeader(getEmployeeName(rs.getBytes(18), session));
-					it.setPilot(getEmployeeName(rs.getBytes(19), session));
-					it.addTrack(rs.getBytes(20));
+					QueryResultItem it = asQueryResultItem(rs, session);
 					items.add(it);
 					lastItem = it;
 				}
 				lastPlUuid = pluuid;
-			
-				
 			}
 		} finally {
 			rs.close();
@@ -170,7 +147,6 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 	/**
 	 * Build select clause 
 	 * 
-	 * @param includeObservations if observations should be included
 	 * @return select clause
 	 */
 	private String buildSelectClause() {
@@ -324,6 +300,36 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
+	}
+
+	@Override
+	protected QueryResultItem asQueryResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		
+		QueryResultItem it = new QueryResultItem();
+		byte[] cauuid = rs.getBytes("r_p_ca_uuid"); //$NON-NLS-1$
+		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
+		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setPatrolUuid(rs.getBytes("r_p_uuid")); //$NON-NLS-1$
+		it.setPatrolId(rs.getString("r_p_id")); //$NON-NLS-1$
+		it.setPatrolStartDate(rs.getDate("r_p_start_date")); //$NON-NLS-1$
+		it.setPatrolEndDate(rs.getDate("r_p_end_date")); //$NON-NLS-1$
+		it.setStation(getName(rs.getBytes("r_p_station_uuid"), cauuid, session));				 //$NON-NLS-1$
+		it.setTeam(getName(rs.getBytes("r_p_team_uuid"), cauuid, session));				 //$NON-NLS-1$
+		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
+		it.setMandate(getName(rs.getBytes("r_p_mandate_uuid"), cauuid, session)); //$NON-NLS-1$
+		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("r_p_type"))); //$NON-NLS-1$
+		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
+		it.setTransportType(getName(rs.getBytes("r_pl_transport_uuid"), cauuid, session)); //$NON-NLS-1$
+		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
+		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date")); //$NON-NLS-1$
+		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date")); //$NON-NLS-1$
+		it.setLeader(getEmployeeName(rs.getBytes("r_plm_leader"), session)); //$NON-NLS-1$
+		it.setPilot(getEmployeeName(rs.getBytes("r_plm_pilot"), session)); //$NON-NLS-1$
+		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
+	
+
+		return it;
 	}
 	
 }

@@ -19,25 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.internal.ui;
+package org.wcs.smart.query.ui.observation;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.wcs.smart.query.model.Query.QueryType;
-
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 /**
- * Handler for creating a new summary query.
+ * Info section to appear at the top of the results
+ * table to display count or other summary information.
  * 
- * @author egouge
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class CreateSummaryHandler extends CreateHandler implements IHandler {
+public interface ISummaryInfo {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		super.execute(event);
-		super.createQuery(QueryType.SUMMARY);
-		return null;
-	}
+	/**
+	 * Creates the controls
+	 * @param parent parent component; requires user to set the layout
+	 * @param toolkit
+	 */
+	public void createControls(Composite parent, FormToolkit toolkit);
+	
+	/**
+	 * Updates the control values based on the result set
+	 * @param resultSet
+	 */
+	public void updateControls(IPagedQueryResultSet resultSet);
 }

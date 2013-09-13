@@ -83,6 +83,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static final String WAYPOINT_QUERY_ICON = "org.wcs.smart.query.waypointquery"; //$NON-NLS-1$
 	
 	/**
+	 * The observation query
+	 */
+	public static final String OBSERVATION_QUERY_ICON = "org.wcs.smart.query.observationquery"; //$NON-NLS-1$
+	
+	/**
 	 * The patrol query
 	 */
 	public static final String PATROL_QUERY_ICON = "org.wcs.smart.query.patrolquery"; //$NON-NLS-1$
@@ -232,6 +237,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(SUMMARY_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/summary_query.png"));//$NON-NLS-1$
 		reg.put(FOLDER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/folder.png"));//$NON-NLS-1$
 		reg.put(WAYPOINT_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/waypoint_query.png"));//$NON-NLS-1$
+		reg.put(OBSERVATION_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/observation_query.png"));//$NON-NLS-1$
 		reg.put(PATROL_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/patrol_query.png"));//$NON-NLS-1$
 		reg.put(GRIDDED_SUMMARY_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/gridded_query.png"));//$NON-NLS-1$
 		reg.put(GRID_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/grid.png"));//$NON-NLS-1$

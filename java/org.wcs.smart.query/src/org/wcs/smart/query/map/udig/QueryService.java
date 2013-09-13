@@ -43,11 +43,11 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
-import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.WaypointQuery;
 
 /**
  * A udig service for a smart waypoint or patrol queries.
@@ -82,37 +82,11 @@ public class QueryService extends IService {
 	}
 	
 	/**
-	 * Creates a new query service using the given waypoint query.
+	 * Creates a new query service .
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(ObservationQuery query){
-		this.query = query;
-		this.params = new HashMap<String, Serializable>();
-		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
-		this.url = QueryServiceExtension.createURL(this.params);
-		
-	}
-	
-	/**
-	 * Creates a new query service using the given patrol query.
-	 * 
-	 * @param query patrol query
-	 */
-	public QueryService(PatrolQuery query){
-		this.query = query;
-		this.params = new HashMap<String, Serializable>();
-		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
-		this.url = QueryServiceExtension.createURL(this.params);
-		
-	}
-
-	/**
-	 * Creates a new query service using the given waypoint query.
-	 * 
-	 * @param query gridded query
-	 */
-	public QueryService(GriddedQuery query){
+	public QueryService(Query query){
 		this.query = query;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
@@ -177,11 +151,11 @@ public class QueryService extends IService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query instanceof ObservationQuery){
+					if (query.getType() == QueryType.OBSERVATION || query.getType() == QueryType.WAYPOINT){
 						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query instanceof PatrolQuery){
+					}else if (query.getType() == QueryType.PATROL){
 						members.add(new QueryGeoResource(this, PatrolQueryDataSource.PATROL_TYPE));
-					}else if (query instanceof GriddedQuery){
+					}else if (query.getType() == QueryType.GRIDDED){
 						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
 				}
@@ -248,6 +222,8 @@ public class QueryService extends IService {
                 	if (query != null){
                 		if (query.getType() == QueryType.OBSERVATION){
                 			ds = new QueryDataSource((ObservationQuery)query);
+                		}else if (query.getType() == QueryType.WAYPOINT){
+                    		ds = new QueryDataSource((WaypointQuery)query);
                 		}else if (query.getType() == QueryType.PATROL){
                 			ds = new PatrolQueryDataSource((PatrolQuery)query);
                 		}

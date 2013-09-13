@@ -25,8 +25,6 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.parser.filter.IFilter;
@@ -41,14 +39,14 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  * @author egouge
  * @since 1.0.0
  */
-public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter {
+public class SimpleQueryDefinitionExporter extends DefinitionQueryExporter {
 
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof ObservationQuery || query instanceof PatrolQuery ){
+		if (query instanceof SimpleQuery){
 			return true;
 		}
 		return false;
@@ -59,19 +57,20 @@ public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter 
 	 */
 	@Override
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery) throws Exception {
+		SimpleQuery sQuery = (SimpleQuery) query;
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition"); //$NON-NLS-1$
-		defPart.setValue( ((SimpleQuery)query).getQueryFilter() );
+		defPart.setValue( sQuery.getQueryFilter() );
 		xmlQuery.getQueryPart().add(defPart);
 		
 		
 		defPart = new QueryPart();
 		defPart.setKey("columns"); //$NON-NLS-1$
-		defPart.setValue( ((SimpleQuery)query).getVisibleColumns() );
+		defPart.setValue( sQuery.getVisibleColumns() );
 		xmlQuery.getQueryPart().add(defPart);
 		
 		if (((SimpleQuery)query).getFilter() != null){
-			IFilter queryFilter = ((SimpleQuery)query).getFilter().getFilter();
+			IFilter queryFilter = sQuery.getFilter().getFilter();
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{

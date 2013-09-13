@@ -470,7 +470,8 @@ public class DropItemFactory {
 		}else if (object instanceof Area){
 			if (dropType == QueryPartPanelType.SUMMARY_ITEM){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)object)};
-			}else if (queryType == QueryType.OBSERVATION){
+			}else if (queryType == QueryType.OBSERVATION ||
+					queryType == QueryType.WAYPOINT){
 				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 			}else if (queryType == QueryType.PATROL ||
 					queryType == QueryType.SUMMARY ||
