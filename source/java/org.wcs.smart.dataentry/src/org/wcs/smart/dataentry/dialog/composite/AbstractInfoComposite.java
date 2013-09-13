@@ -315,6 +315,9 @@ public abstract class AbstractInfoComposite extends Composite {
 				internalChange = false;
 				text.setText(item.getName());
 				internalChange = true;
+			} else if (newObject instanceof CmRootNode) {
+				CmRootNode root = (CmRootNode) newObject;
+				sourceObjectChanged(root.model);
 			}
 		}
 	}

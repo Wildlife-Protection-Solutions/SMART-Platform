@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_Button_AddCategory;
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_DisplayName;
+	public static String CmAttributeInfoComposite_Attribute;
+	public static String CmAttributeInfoComposite_Key;
 	public static String CmNodeInfoComposite_Button_Delete;
 	public static String CmNodeInfoComposite_Category;
 	public static String CmNodeInfoComposite_Key;
