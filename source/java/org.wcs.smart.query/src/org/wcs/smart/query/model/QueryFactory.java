@@ -23,6 +23,7 @@ package org.wcs.smart.query.model;
 
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 
 /**
@@ -47,8 +48,30 @@ public class QueryFactory {
 		
 	}
 	
+	public static Query createQuery(QueryType querytype){
+		if (querytype == QueryType.OBSERVATION){
+			return createObservationQuery();
+		}else if (querytype == QueryType.GRIDDED){
+			return createGriddedQuery();
+		}else if (querytype == QueryType.PATROL){
+			return createPatrolQuery();
+		}else if (querytype == QueryType.WAYPOINT){
+			return createWaypointQuery();
+		}else if (querytype == QueryType.SUMMARY){
+			return createSummaryQuery();
+		}
+		return null;
+	}
+	
 	public static ObservationQuery createObservationQuery(){
 		ObservationQuery query = new ObservationQuery();
+		initQuery(query, null);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		return query;
+	}
+	
+	public static WaypointQuery createWaypointQuery(){
+		WaypointQuery query = new WaypointQuery();
 		initQuery(query, null);
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;

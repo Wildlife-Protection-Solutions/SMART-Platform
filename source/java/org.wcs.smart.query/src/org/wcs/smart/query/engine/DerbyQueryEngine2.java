@@ -22,6 +22,7 @@
 package org.wcs.smart.query.engine;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,6 +51,7 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.filter.IFilter.FilterType;
 
@@ -233,6 +235,16 @@ public abstract class DerbyQueryEngine2 implements QueryEngine {
 	 * @return
 	 */
 	protected abstract String getTemporaryTableSelectClause(boolean includeObservations);
+	
+	/**
+	 * Converts the a row in the temporary table select clause to
+	 * a result item
+	 * @param rs result set item to convert to the queryresultitem
+	 * @param session current database connection
+	 * @return
+	 * @throws SQLException
+	 */
+	protected abstract QueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
 	
 	/**
 	 * Create the temporary table for hold observation data

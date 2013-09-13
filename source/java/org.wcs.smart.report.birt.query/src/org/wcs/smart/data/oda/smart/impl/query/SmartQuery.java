@@ -183,7 +183,8 @@ public class SmartQuery implements IQuery {
 	 */
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (smartQuery.getType() == QueryType.OBSERVATION
-				|| smartQuery.getType() == QueryType.PATROL) {
+				|| smartQuery.getType() == QueryType.PATROL
+				|| smartQuery.getType() == QueryType.WAYPOINT) {
 			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery);
 		} else if (smartQuery.getType() == QueryType.SUMMARY) {
 			return new SummaryQueryResultSetMetadata((SummaryQuery) smartQuery);
@@ -222,7 +223,7 @@ public class SmartQuery implements IQuery {
 				startDate, endDate);
 
 		//the result set
-		if (smartQuery.getType() == QueryType.OBSERVATION) {
+		if (smartQuery.getType() == QueryType.OBSERVATION || smartQuery.getType() == QueryType.WAYPOINT) {
 			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
 			resultSet = new PagedQueryResultSet((IPagedQuery) smartQuery, (SimpleQueryResultSetMetadata)getMetaData());
 		}else if (smartQuery.getType() == QueryType.PATROL) {

@@ -49,6 +49,8 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 			throws Exception {
 		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingObservationQueries);
 		deleteObservationQueries(ca, session);
+		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingWaypointQueries);
+		deleteWaypointQueries(ca, session);
 		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingSummaryQueries);
 		deleteSummaryQueries(ca, session);
 		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingPatrolQueries);
@@ -59,6 +61,11 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 		deleteQueryFolders(ca, session);		
 	}
 
+	private void deleteWaypointQueries(ConservationArea ca, Session session) throws Exception{
+		moveCrossCaUserQueries(ca, session, QueryType.WAYPOINT);
+		deleteQueries(QueryType.WAYPOINT, ca, session);
+	}
+	
 	private void deleteObservationQueries(ConservationArea ca, Session session) throws Exception{
 		moveCrossCaUserQueries(ca, session, QueryType.OBSERVATION);
 		deleteQueries(QueryType.OBSERVATION, ca, session);

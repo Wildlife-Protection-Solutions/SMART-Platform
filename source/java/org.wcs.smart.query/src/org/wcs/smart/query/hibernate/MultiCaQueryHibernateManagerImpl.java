@@ -181,6 +181,7 @@ public class MultiCaQueryHibernateManagerImpl extends
 	public QueryType[] getSupportedQueryTypes() {
 		return new QueryType[]{
 				QueryType.OBSERVATION,
+				QueryType.WAYPOINT,
 				QueryType.PATROL,
 				QueryType.SUMMARY,
 				QueryType.GRIDDED

@@ -109,7 +109,9 @@ public class QueryLayoutManager {
 	 * @return
 	 */
 	public QueryDefinitionComposite createComposite(QueryType queryType, Composite parent, QueryDefView view){
-		if (queryType == QueryType.OBSERVATION || queryType == QueryType.PATROL){
+		if (queryType == QueryType.OBSERVATION || 
+			queryType == QueryType.PATROL || 
+			queryType == QueryType.WAYPOINT){
 			return new ObservationQueryDefinitionComposite(parent, view);
 		}else if (queryType == QueryType.GRIDDED){
 			return new GriddedQueryDefinitionComposite(parent, view);

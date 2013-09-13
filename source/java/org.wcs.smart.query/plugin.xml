@@ -35,14 +35,14 @@
       <editor
             class="org.wcs.smart.query.ui.observation.QueryResultsEditor"
             default="false"
-            icon="images/icons/view16/waypoint_query.png"
+            icon="images/icons/obj16/observation_query.png"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
             name="%observationqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.query.ui.summary.SummaryEditor"
             default="false"
-            icon="images/icons/view16/summary_query.png"
+            icon="images/icons/obj16/summary_query.png"
             id="org.wcs.smart.query.ui.SummaryEditor"
             name="%summaryqueryeditor.editor.name">
       </editor>
@@ -365,6 +365,13 @@
                      tooltip="%menu.query.menu.newquery.newobservationquery.command.tooltip">
                </command>
                <command
+                     commandId="org.wcs.smart.query.createWaypointQuery"
+                     label="%newincident.command.label"
+                     mnemonic="%newincident.command.mnemonic"
+                     style="push"
+                     tooltip="%newincident.command.tooltip">
+               </command>
+               <command
                      commandId="org.wcs.smart.query.createPatrolQuery"
                      label="%menu.query.menu.newquery.newpatrolquery.command.label"
                      mnemonic="%menu.query.menu.newquery.newpatrolquery.command.mnemonic"
@@ -576,6 +583,12 @@
                tooltip="%querytoolbar.createquery.menu.newobservationquery.command.tooltip">
          </command>
          <command
+               commandId="org.wcs.smart.query.createWaypointQuery"
+               label="%querytoolbar.newincident.command.label"
+               style="push"
+               tooltip="%querytoolbar.newincident.command.tooltip.">
+         </command>
+         <command
                commandId="org.wcs.smart.query.createPatrolQuery"
                label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                style="push"
@@ -603,7 +616,7 @@
       </image>
       <image
             commandId="org.wcs.smart.query.createQuery"
-            icon="images/icons/obj16/waypoint_query.png">
+            icon="images/icons/obj16/observation_query.png">
       </image>
       <image
             commandId="org.wcs.smart.query.createSummary"
@@ -624,6 +637,10 @@
       <image
             commandId="org.wcs.smart.query.DeleteItem"
             icon="images/icons/etool16/delete.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.createWaypointQuery"
+            icon="images/icons/obj16/waypoint_query.png">
       </image>
    </extension>
    <extension
@@ -687,6 +704,10 @@
       <command
             id="org.wcs.smart.query.translate"
             name="%translate.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.query.createWaypointQuery"
+            name="%newincident.command.name">
       </command>
    </extension>
    <extension
@@ -875,18 +896,6 @@
             commandId="org.wcs.smart.query.importQuery">
       </handler>
       <handler
-            class="org.wcs.smart.query.internal.ui.CreateSummaryHandler"
-            commandId="org.wcs.smart.query.createSummary">
-      </handler>
-      <handler
-            class="org.wcs.smart.query.internal.ui.CreatePatrolQueryHandler"
-            commandId="org.wcs.smart.query.createPatrolQuery">
-      </handler>
-      <handler
-            class="org.wcs.smart.query.internal.ui.CreateGriddedSummaryHandler"
-            commandId="org.wcs.smart.query.createGriddedSummary">
-      </handler>
-      <handler
             class="org.wcs.smart.query.internal.ui.CreateUnknownQueryHandler"
             commandId="org.wcs.smart.query.createUnknownQuery">
       </handler>
@@ -897,6 +906,22 @@
       <handler
             class="org.wcs.smart.query.ui.querylist.TranslateNamesHandler"
             commandId="org.wcs.smart.query.translate">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateQueryHandler"
+            commandId="org.wcs.smart.query.createSummary">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateQueryHandler"
+            commandId="org.wcs.smart.query.createGriddedSummary">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateQueryHandler"
+            commandId="org.wcs.smart.query.createWaypointQuery">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateQueryHandler"
+            commandId="org.wcs.smart.query.createPatrolQuery">
       </handler>
    </extension>
    <extension
@@ -944,6 +969,9 @@
       <class
             class="org.wcs.smart.query.model.GriddedQuery">
       </class>
+      <class
+            class="org.wcs.smart.query.model.WaypointQuery">
+      </class>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
@@ -974,7 +1002,7 @@
             class="org.wcs.smart.query.export.CsvSummaryExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.query.export.ObservationQueryDefinitionExporter">
+            class="org.wcs.smart.query.export.SimpleQueryDefinitionExporter">
       </Exporter>
       <Exporter
             class="org.wcs.smart.query.export.SummaryQueryDefinitionExporter">

@@ -31,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -39,8 +38,9 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IObservationPagedQueryResultSet;
-import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
@@ -70,23 +70,22 @@ public class QueryEditorTableContent {
 	
 	private Hyperlink runQueryLink;
 	private QueryHeaderComposite compQueryName;
-	private Label lblNumResults;
-	private Label lblIncidentCnt;
+	private ISummaryInfo infoSection;
 	/**
 	 * Creates a new editor area
 	 * @param parent parent composite
 	 * @param editor parent editor 
 	 */
 	public QueryEditorTableContent(Composite parent, QueryResultsEditor editor, FormToolkit toolkit) {
-		createContent(parent, toolkit);
 		this.editor = editor;
+		createContent(parent, toolkit);
 	}
 
 	/**
 	 * Initializes the form values with the query information
 	 * @param query the observation query to initialize data with
 	 */
-	public void initValues(ObservationQuery query) {
+	public void initValues(SimpleQuery query) {
 		if (stackComposite.isDisposed()) return;
 		setQueryName(query);
 		resultsTable.initQuery(query);
@@ -100,7 +99,7 @@ public class QueryEditorTableContent {
 		this.dateComposite.validate();
 	}
 	
-	public void setQueryName(ObservationQuery query){
+	public void setQueryName(SimpleQuery query){
 		compQueryName.setText(query.getName(), query.getId());
 	}
 	/**
@@ -116,7 +115,7 @@ public class QueryEditorTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final IObservationPagedQueryResultSet items, final IProgressMonitor monitor) {
+	public void setTableData(final IPagedQueryResultSet items, final IProgressMonitor monitor) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -128,14 +127,9 @@ public class QueryEditorTableContent {
 				if (monitor.isCanceled()) {
 					showCancelled();
 				} else {
-					if (items != null) {
-						lblNumResults.setText(String.valueOf(items.getItemCount()));
-						lblIncidentCnt.setText(String.valueOf(items.getWpCount()));
-					} else {
-						lblNumResults.setText(""); //$NON-NLS-1$
-						lblIncidentCnt.setText(""); //$NON-NLS-1$
+					if (infoSection != null){
+						infoSection.updateControls(items);
 					}
-					lblNumResults.getParent().getParent().layout();
 					resultsTable.setInput(items);
 					showTable();
 				}
@@ -280,21 +274,10 @@ public class QueryEditorTableContent {
 		main.setLayout(new GridLayout(1, false));
 		
 		Composite comp = toolkit.createComposite(main);
-		GridLayout layout = new GridLayout(7,false);
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		comp.setLayout(layout);
-		toolkit.createLabel(comp,  Messages.QueryEditorTableContent_NumberOfRecordsLabel1);
-		lblNumResults = toolkit.createLabel(comp, Messages.QueryEditorTableContent_NaLabel);
-		
-		toolkit.createLabel(comp,  "  "); //$NON-NLS-1$
-		Label l = toolkit.createLabel(comp, "", SWT.SEPARATOR | SWT.VERTICAL); //$NON-NLS-1$
-		l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		((GridData)l.getLayoutData()).heightHint = 20;
-		toolkit.createLabel(comp,  "  "); //$NON-NLS-1$
-		
-		toolkit.createLabel(comp,  Messages.QueryEditorTableContent_NumberOfIncidentLabel);
-		lblIncidentCnt = toolkit.createLabel(comp, Messages.QueryEditorTableContent_NaLabel);
+		infoSection = createInfoSection();
+		if (infoSection != null){
+			infoSection.createControls(comp, toolkit);
+		}
 		
 		resultsTable = new QueryLazyResultsTable();
 
@@ -305,6 +288,14 @@ public class QueryEditorTableContent {
 		return main;
 	}
 	
+	private ISummaryInfo createInfoSection(){
+		if (editor.getQuery().getType() == QueryType.OBSERVATION){
+			return new ObservationQuerySummaryInfo();
+		}else if (editor.getQuery().getType() == QueryType.WAYPOINT){
+			return new WaypointQuerySummaryInfo();
+		}
+		return null;
+	}
 	/**
 	 * Creates the initial composite that prompts users
 	 * to run query.

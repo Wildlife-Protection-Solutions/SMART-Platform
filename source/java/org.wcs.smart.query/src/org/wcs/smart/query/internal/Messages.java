@@ -137,7 +137,9 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_OverwriteDialogTitle;
 	public static String ExportQueryWizard_WindowTitle;
 	public static String FilterDropTargetPanel_FilterTypeLabel;
+	public static String FilterDropTargetPanel_observationtooltip;
 	public static String FilterDropTargetPanel_QueryFilterPanelTitle1;
+	public static String FilterDropTargetPanel_waypointtooltip;
 	public static String FilterValidator_AttributeListItemNotFound;
 	public static String FilterValidator_AttributeNotFound;
 	public static String FilterValidator_AttributeTreeNodeNotFound;
@@ -293,6 +295,7 @@ public class Messages extends NLS {
 	public static String NameCellEditor_UpdateQueryNameJob;
 	public static String ObservationQueryDefinitionComposite_CaTooltip;
 	public static String ObservationQueryDefinitionComposite_FilterWarningTooltip;
+	public static String ObservationQuerySummaryInfo_NAValueLabel;
 	public static String Operator_AND;
 	public static String Operator_Equals;
 	public static String Operator_GreaterThan;
@@ -385,6 +388,7 @@ public class Messages extends NLS {
 	public static String ProgressAreaComposite_QueryCancelledStatus;
 	public static String Query_DefaultQueryName;
 	public static String Query_GriddedQueryName;
+	public static String Query_IncidentQueryName;
 	public static String Query_ObservationQueryName;
 	public static String Query_PatrolQueryName;
 	public static String Query_SummaryQueryName;
@@ -393,9 +397,11 @@ public class Messages extends NLS {
 	public static String QueryCaDeleteHandler_Progress_DeletingPatrolQueries;
 	public static String QueryCaDeleteHandler_Progress_DeletingQueryFolders;
 	public static String QueryCaDeleteHandler_Progress_DeletingSummaryQueries;
+	public static String QueryCaDeleteHandler_Progress_DeletingWaypointQueries;
 	public static String QueryColumn_LoadingObservationColumnJobName;
 	public static String QueryColumn_LoadingPatrolColumnJobName;
 	public static String QueryColumn_ObservationCategoryTableHeader;
+	public static String QueryColumnCache_LoadingWPQueryColumnJobName;
 	public static String QueryDataSource_SchemaError;
 	public static String QueryDataSourceFactory_Description;
 	public static String QueryDataSourceFactory_DisplayName;
@@ -591,6 +597,8 @@ public class Messages extends NLS {
 
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
+	public static String WaypointQuerySummaryInfo_NumberOfIncidentLabel;
+	public static String WaypointQuerySummaryInfo_UnknownNumberOfIncidents;
 
 	static {
 		// initialize resource bundle

@@ -50,8 +50,10 @@ public class QueryListLabelProvider extends LabelProvider {
 		if (element instanceof QueryFolder){
 			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.FOLDER_ICON);
 		}else if (element instanceof QueryInput){
-			if (((QueryInput) element).getType() == QueryType.OBSERVATION){
+			if (((QueryInput) element).getType() == QueryType.WAYPOINT){
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.WAYPOINT_QUERY_ICON);
+			}else if (((QueryInput) element).getType() == QueryType.OBSERVATION){
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.OBSERVATION_QUERY_ICON);
 			}else if (((QueryInput) element).getType() == QueryType.SUMMARY){
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.SUMMARY_QUERY_ICON);
 			}else if (((QueryInput) element).getType() == QueryType.PATROL){

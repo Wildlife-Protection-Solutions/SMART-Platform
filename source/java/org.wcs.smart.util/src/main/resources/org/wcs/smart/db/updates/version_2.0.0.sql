@@ -24,6 +24,72 @@ alter table smart.patrol_transport add column keyid varchar(128);
 
 
 
+--run smart-tables-dataentry.sql
 
+--create waypoint queries table to observation query table
+rename table smart.waypoint_query to observation_query;
+
+--name table constraints; dropping and recreating
+ALTER TABLE smart.observation_query drop constraint waypoint_query_creator_uuid_fk;
+ALTER TABLE smart.observation_query
+	ADD constraint observation_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+ALTER TABLE smart.observation_query drop constraint waypoint_query_ca_uuid_fk;
+ALTER TABLE smart.observation_query
+	ADD constraint observation_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+ALTER TABLE smart.observation_query drop constraint waypoint_query_folder_uuid_fk;
+ALTER TABLE smart.observation_query
+	ADD constraint observation_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+--create new table for waypoint queries
+CREATE TABLE smart.waypoint_query
+(
+	UUID CHAR(16) FOR BIT DATA NOT NULL,
+	CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL,
+	QUERY_FILTER VARCHAR(32672),
+	CA_FILTER VARCHAR(32672),
+	CA_UUID CHAR(16) FOR BIT DATA NOT NULL,
+	FOLDER_UUID CHAR(16) FOR BIT DATA,
+	COLUMN_FILTER VARCHAR(32672),
+	SHARED BOOLEAN DEFAULT false NOT NULL,
+	ID VARCHAR(6) NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.waypoint_query
+	ADD constraint waypoint_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+
+ALTER TABLE smart.waypoint_query
+	ADD constraint waypoint_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+
+ALTER TABLE smart.waypoint_query
+	ADD constraint waypoint_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
 
 update smart.db_version set version = '2.0.0';

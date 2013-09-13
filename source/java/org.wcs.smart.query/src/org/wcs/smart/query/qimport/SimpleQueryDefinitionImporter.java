@@ -78,6 +78,8 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 		String langCode = qt.getLanguage();
 		if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
 			wq = QueryFactory.createObservationQuery();	
+		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.WAYPOINT.name())){
+				wq = QueryFactory.createWaypointQuery();
 		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
 			wq = QueryFactory.createPatrolQuery();
 		}else{

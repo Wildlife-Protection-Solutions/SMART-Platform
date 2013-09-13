@@ -30,7 +30,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.query.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.querytable.QueryLazyResultsTable;
 
@@ -164,7 +164,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(IObservationPagedQueryResultSet results, IProgressMonitor monitor){
+	public void updateAndShowTable(IPagedQueryResultSet results, IProgressMonitor monitor){
 		content.setTableData(results, monitor);
 	}
 	

@@ -22,6 +22,8 @@
 package org.wcs.smart.query.model;
 
 import java.util.ArrayList;
+
+
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,33 +35,32 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.engine.DerbyObservationEngine;
+import org.wcs.smart.query.engine.DerbyWaypointEngine;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.model.observation.QueryColumnCache;
 
 /**
- * A class to represent an observation query.
- * <p>Observation queries query each observation
- * which consists of a category and a 
- * set of attributes.</p>
+ * A class to represent an waypoint query.
+ * <p>Waypoint queries query all observations at a
+ * given waypoint.</p>  Also known as incident queries.
  * 
  * @author Emily
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.observation_query")
-public class ObservationQuery extends SimpleQuery implements IPagedQuery{
+@Table(name="smart.waypoint_query")
+public class WaypointQuery extends SimpleQuery  implements IPagedQuery{
 
 	private List<QueryColumn> queryColumns = null;
 	
-	private IObservationPagedQueryResultSet lastResult;
+	private IPagedQueryResultSet lastResult;
 	
 	
 	/**
 	 * Creates a new observation query with the default
 	 * conservation area filter and no date filter
 	 */
-	protected ObservationQuery(){
+	protected WaypointQuery(){
 		super();
 	}
 	
@@ -107,7 +108,7 @@ public class ObservationQuery extends SimpleQuery implements IPagedQuery{
 	 * Loads the query columns
 	 */
 	private void initQueryColumns(){
-		QueryColumn[] cols = QueryColumnCache.getInstance().getObservationQueryColumns();
+		QueryColumn[] cols = QueryColumnCache.getInstance().getWaypointQueryColumns();
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;
@@ -136,7 +137,7 @@ public class ObservationQuery extends SimpleQuery implements IPagedQuery{
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			DerbyObservationEngine engine = new DerbyObservationEngine();
+			DerbyWaypointEngine engine = new DerbyWaypointEngine();
 			lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
 			return lastResult;
 		} finally {
@@ -158,8 +159,8 @@ public class ObservationQuery extends SimpleQuery implements IPagedQuery{
 	 */
 	@Transient
 	@Override
-	public ObservationQuery clone(){
-		ObservationQuery q = new ObservationQuery();
+	public WaypointQuery clone(){
+		WaypointQuery q = new WaypointQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());
@@ -177,6 +178,6 @@ public class ObservationQuery extends SimpleQuery implements IPagedQuery{
 	@Override
 	@Transient
 	public QueryType getType() {
-		return QueryType.OBSERVATION;
+		return QueryType.WAYPOINT;
 	}
 }

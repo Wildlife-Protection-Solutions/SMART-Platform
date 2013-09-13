@@ -43,10 +43,12 @@ public class QueryColumnCache {
 	
 	private QueryColumn[] queryColumns = null;
 	private QueryColumn[] patrolQueryColumns = null;
+	private QueryColumn[] waypointQueryColumns = null;
 	private QueryColumn[] gridQueryColumns = null;
 	
 	private final Object GRIDLOCK = new Object();
 	private final Object PATROLLOCK = new Object();
+	private final Object OBSERVATIONLOCK = new Object();
 	private final Object WAYPOINTLOCK = new Object();
 	
 	private QueryColumnCache(){
@@ -72,12 +74,12 @@ public class QueryColumnCache {
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public  QueryColumn[] getWaypointQueryColumns() {
+	public  QueryColumn[] getObservationQueryColumns() {
 		
 		if (queryColumns != null){
 			return cloneColumns(queryColumns);
 		}
-		synchronized (WAYPOINTLOCK) {
+		synchronized (OBSERVATIONLOCK) {
 			if (queryColumns != null){
 				return cloneColumns(queryColumns);
 			}	
@@ -157,6 +159,74 @@ public class QueryColumnCache {
 		}
 		
 		return  cloneColumns(queryColumns);
+	}
+
+	
+	/**
+	 * 
+	 * @return query columns available to a waypoint query based
+	 * on the patrol options and the data model of the conservation
+	 * area.
+	 * This function will access the database the first
+	 * time it is called, subsequent calls return cached values. 
+	 */
+	public  QueryColumn[] getWaypointQueryColumns() {
+		
+		if (waypointQueryColumns != null){
+			return cloneColumns(waypointQueryColumns);
+		}
+		synchronized (WAYPOINTLOCK) {
+			if (waypointQueryColumns != null){
+				return cloneColumns(waypointQueryColumns);
+			}	
+		
+		
+			Job j = new Job(Messages.QueryColumnCache_LoadingWPQueryColumnJobName){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				//load from the database 
+				PatrolOptions patrolOps = null;
+				Session session = HibernateManager.openSession();
+				
+				try {
+					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				} finally {
+					session.close();
+				}	
+				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+				
+				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+					boolean add = true;
+					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						add = patrolOps.getTrackDistanceDirection();
+						
+					}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
+								item == FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE){
+							//do nothing, don't want these columns in a waypoint query
+						add = false;
+					}else if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
+						add = SmartDB.isMultipleAnalysis();
+					}
+					if (add){
+						cols.add(new FixedQueryColumn(item));
+					}
+				}
+				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				return Status.OK_STATUS;
+			}
+			};
+			j.schedule();
+			try{
+				j.join();
+			}catch (Exception ex){
+				throw new IllegalStateException(ex);
+			}
+		}
+		
+		return  cloneColumns(waypointQueryColumns);
 	}
 
 	

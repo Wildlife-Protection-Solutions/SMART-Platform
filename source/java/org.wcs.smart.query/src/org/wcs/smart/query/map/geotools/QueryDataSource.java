@@ -34,6 +34,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.model.WaypointQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
@@ -49,7 +51,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 */
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	
-	private ObservationQuery query;
+	private SimpleQuery query;
 	
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
@@ -61,6 +63,17 @@ public class QueryDataSource extends AbstractDataStore{
 	public QueryDataSource(ObservationQuery query){
 		this.query = query;
 	}
+
+	
+	/**
+	 * Creates a new data source from the give query.
+	 * 
+	 * @param query
+	 */
+	public QueryDataSource(WaypointQuery query){
+		this.query = query;
+	}
+	
 
 	/**
 	 * @see org.geotools.data.AbstractDataStore#dispose()
