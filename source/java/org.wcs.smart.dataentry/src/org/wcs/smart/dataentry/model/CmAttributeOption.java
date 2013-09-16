@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 
@@ -37,6 +38,11 @@ import org.wcs.smart.ca.UuidItem;
 @Entity
 @Table(name = "smart.cm_attribute_option")
 public class CmAttributeOption extends UuidItem {
+
+	public static final String ID_IS_VISIBLE = "IS_VISIBLE"; //$NON-NLS-1$
+	public static final String ID_DEFAULT_VALUE = "DEFAULT_VALUE"; //$NON-NLS-1$
+	public static final String ID_MULTISELECT = "MULTISELECT"; //$NON-NLS-1$
+	public static final String ID_FLATTEN_TREE = "FLATTEN_TREE"; //$NON-NLS-1$
 	
 	private CmAttribute cmAttribute;
 	private String optionId;
@@ -73,9 +79,17 @@ public class CmAttributeOption extends UuidItem {
 	public Double getDoubleValue() {
 		return doubleValue;
 	}
-	
 	public void setDoubleValue(Double doubleValue) {
 		this.doubleValue = doubleValue;
+	}
+
+	@Transient
+	public boolean getBooleanValue() {
+		return doubleValue != null && doubleValue > 0.5;
+	}
+	@Transient
+	public void setBooleanValue(boolean value) {
+		this.doubleValue = value ? 1.0 : 0.0;
 	}
 	
 	@Column(name="uuid_value")
