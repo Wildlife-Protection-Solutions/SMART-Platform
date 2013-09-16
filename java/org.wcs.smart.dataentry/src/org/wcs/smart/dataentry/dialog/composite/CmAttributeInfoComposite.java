@@ -144,9 +144,12 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(labelText);
 		final Text text = new Text(parent, SWT.BORDER);
+		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
 		text.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				if (internalChange[0])
+					return;
 				getSourceObject().getCmAttributeOptions().get(optionId).setStringValue(text.getText());
 				fireModelChanged();
 			}
@@ -158,7 +161,9 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 				text.setVisible(option != null);
 				label.setVisible(option != null);
 				if (option != null) {
+					internalChange[0] = true;
 					text.setText(option.getStringValue() != null ? option.getStringValue() : ""); //$NON-NLS-1$
+					internalChange[0] = false;
 				}
 			}
 		});
@@ -169,9 +174,12 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(labelText);
 		final Text text = new Text(parent, SWT.BORDER);
+		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
 		text.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				if (internalChange[0])
+					return;
 				Double value = text.getText() == null || text.getText().isEmpty() ? null : Double.valueOf(text.getText());
 				getSourceObject().getCmAttributeOptions().get(optionId).setDoubleValue(value);
 				fireModelChanged();
@@ -185,7 +193,9 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 				label.setVisible(option != null);
 				if (option != null) {
 					Double value = option.getDoubleValue();
+					internalChange[0] = true;
 					text.setText(value != null ? value.toString() : ""); //$NON-NLS-1$
+					internalChange[0] = false;
 				}
 			}
 		});
