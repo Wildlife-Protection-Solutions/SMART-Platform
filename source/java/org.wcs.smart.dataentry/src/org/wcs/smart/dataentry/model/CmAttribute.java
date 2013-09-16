@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,6 +29,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -45,7 +46,8 @@ public class CmAttribute extends NamedItem {
 
 	private CmNode node;
 	private Attribute attribute;
-	private List<CmAttributeOption> cmAttributeOptions;
+//	private List<CmAttributeOption> cmAttributeOptions;
+	private Map<String, CmAttributeOption> cmAttributeOptions;
 	private int order;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -66,11 +68,20 @@ public class CmAttribute extends NamedItem {
 		this.attribute = attribute;
 	}
 	
+//	@OneToMany(fetch = FetchType.EAGER, mappedBy="cmAttribute", cascade={CascadeType.ALL}, orphanRemoval = true)
+//	public List<CmAttributeOption> getCmAttributeOptions() {
+//		return cmAttributeOptions;
+//	}
+//	public void setCmAttributeOptions(List<CmAttributeOption> cmAttributeOptions) {
+//		this.cmAttributeOptions = cmAttributeOptions;
+//	}
+
 	@OneToMany(fetch = FetchType.EAGER, mappedBy="cmAttribute", cascade={CascadeType.ALL}, orphanRemoval = true)
-	public List<CmAttributeOption> getCmAttributeOptions() {
+	@MapKey(name="optionId")
+	public Map<String, CmAttributeOption> getCmAttributeOptions() {
 		return cmAttributeOptions;
 	}
-	public void setCmAttributeOptions(List<CmAttributeOption> cmAttributeOptions) {
+	public void setCmAttributeOptions(Map<String, CmAttributeOption> cmAttributeOptions) {
 		this.cmAttributeOptions = cmAttributeOptions;
 	}
 	
