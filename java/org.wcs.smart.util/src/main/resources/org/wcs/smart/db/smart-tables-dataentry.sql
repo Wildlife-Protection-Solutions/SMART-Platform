@@ -20,6 +20,7 @@ CREATE TABLE smart.cm_attribute
 	UUID CHAR(16) for bit data NOT NULL,
 	NODE_UUID CHAR(16) for bit data  NOT NULL,
 	ATTRIBUTE_UUID CHAR(16) for bit data  NOT NULL,
+	ATTRIBUTE_ORDER SMALLINT,
 	PRIMARY KEY (UUID)
 );
 
