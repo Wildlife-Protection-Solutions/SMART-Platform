@@ -159,7 +159,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected boolean performSave() {
-		DataentryHibernateManager.saveConfigurableModel(model);
+		DataentryHibernateManager.saveConfigurableModel(model, session);
 		setChangesMade(false);
 		return true;
 	}
