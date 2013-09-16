@@ -22,13 +22,22 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -44,16 +53,18 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 	private Label lblAttribute;
 	private Label lblKey;
 	
-	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, AttributeType attrType, Session session) {
 		super(parent, model, session);
-		createControls();
+		createControls(attrType);
 	}
 	
-	private void createControls() {
+	private void createControls(AttributeType attrType) {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite container = createContentContainer(this);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 		createDisplayNameControls(container);
 
 		Label label = new Label(container, SWT.NONE);
@@ -84,8 +95,104 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		});
 		
 		
+		createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, "Is Visible:", "Visible");
+		switch (attrType) {
+		case BOOLEAN:
+			//TODO: boolean default value might vary depending on required flag -> true/false or true/false/null 
+			break;
+		case NUMERIC:
+			createTextNumberControl(container, CmAttributeOption.ID_DEFAULT_VALUE, "Default Value");
+			break;
+		case TEXT:
+			createTextStringControl(container, CmAttributeOption.ID_DEFAULT_VALUE, "Default Value");
+			break;
+		case LIST:
+			createBooleanControl(container, CmAttributeOption.ID_MULTISELECT, "Multi-select:", "Multi");
+			break;
+		case TREE:
+			createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, "Flatten Tree:", "Flatten");
+			break;
+		}
 	}
 
+	private Button createBooleanControl(Composite parent, final String optionId, String text, String cbText) {
+		final Label label = new Label(parent, SWT.NONE);
+		label.setText(text);
+		final Button btnBool = new Button(parent, SWT.CHECK);
+		btnBool.setText(cbText);
+		btnBool.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().getCmAttributeOptions().get(optionId).setBooleanValue(btnBool.getSelection());
+				fireModelChanged();
+			}
+		});
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
+				btnBool.setVisible(option != null);
+				label.setVisible(option != null);
+				if (option != null) {
+					btnBool.setSelection(option.getBooleanValue());
+				}
+			}
+		});
+		return btnBool;
+	}
+
+	private Text createTextStringControl(Composite parent, final String optionId, String labelText) {
+		final Label label = new Label(parent, SWT.NONE);
+		label.setText(labelText);
+		final Text text = new Text(parent, SWT.BORDER);
+		text.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				getSourceObject().getCmAttributeOptions().get(optionId).setStringValue(text.getText());
+				fireModelChanged();
+			}
+		});
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
+				text.setVisible(option != null);
+				label.setVisible(option != null);
+				if (option != null) {
+					text.setText(option.getStringValue() != null ? option.getStringValue() : ""); //$NON-NLS-1$
+				}
+			}
+		});
+		return text;
+	}
+
+	private Text createTextNumberControl(Composite parent, final String optionId, String labelText) {
+		final Label label = new Label(parent, SWT.NONE);
+		label.setText(labelText);
+		final Text text = new Text(parent, SWT.BORDER);
+		text.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				Double value = text.getText() == null || text.getText().isEmpty() ? null : Double.valueOf(text.getText());
+				getSourceObject().getCmAttributeOptions().get(optionId).setDoubleValue(value);
+				fireModelChanged();
+			}
+		});
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
+				text.setVisible(option != null);
+				label.setVisible(option != null);
+				if (option != null) {
+					Double value = option.getDoubleValue();
+					text.setText(value != null ? value.toString() : ""); //$NON-NLS-1$
+				}
+			}
+		});
+		return text;
+	}
+	
 	@Override
 	public CmAttribute getSourceObject() {
 		return attribute;

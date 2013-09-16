@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,6 +39,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
@@ -68,7 +72,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private CmRootNodeInfoComposite rootNodeComposite;
 	private CmNodeInfoComposite groupNodeComposite;
 	private CmNodeInfoComposite categoryNodeComposite;
-	private CmAttributeInfoComposite attributeComposite;
+	private Map<AttributeType, CmAttributeInfoComposite> attributeComposites;
 	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
 		super(Display.getDefault().getActiveShell(), Messages.ConfigurableModelEditDialog_Title);
@@ -139,9 +143,13 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		
 		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
-		
-		attributeComposite = new CmAttributeInfoComposite(infoInnerPanel, model, session);
-		attributeComposite.addModelChangedListener(modelChangeListener);
+
+		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
+		for (AttributeType type : AttributeType.values()) {
+			CmAttributeInfoComposite attrComposite = new CmAttributeInfoComposite(infoInnerPanel, model, type, session);
+			attrComposite.addModelChangedListener(modelChangeListener);
+			attributeComposites.put(type, attrComposite);
+		}
 				
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
@@ -167,8 +175,14 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = cmp;
 			
 		} else if (obj instanceof CmAttribute) {
-			attributeComposite.setSourceObject((CmAttribute)obj);
-			((StackLayout)infoInnerPanel.getLayout()).topControl = attributeComposite;
+			CmAttribute attr = (CmAttribute)obj;
+			CmAttributeInfoComposite attrComposite = attributeComposites.get(attr.getAttribute().getType());
+			if (attrComposite != null) {
+				attrComposite.setSourceObject((CmAttribute)obj);
+				((StackLayout)infoInnerPanel.getLayout()).topControl = attrComposite;
+			} else {
+				((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			}
 
 		} else if (obj instanceof CmRootNode) {
 			rootNodeComposite.setSourceObject((CmRootNode)obj);

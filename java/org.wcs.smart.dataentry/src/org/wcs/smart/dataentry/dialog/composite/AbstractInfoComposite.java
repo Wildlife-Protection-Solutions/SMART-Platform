@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.DatamodelCatecorySelectorDialog;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -163,7 +164,7 @@ public abstract class AbstractInfoComposite extends Composite {
 						cma.updateName(label.getLanguage(), label.getValue());
 					}
 					cma.setOrder(node.getCmAttributes().size());
-					//TODO: add CmAttribute default options
+					cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 					node.getCmAttributes().add(cma);
 				}
 				addToParent(node);
