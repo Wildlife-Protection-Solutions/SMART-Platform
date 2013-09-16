@@ -9,6 +9,13 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_DisplayName;
 	public static String CmAttributeInfoComposite_Attribute;
 	public static String CmAttributeInfoComposite_Key;
+	public static String CmAttributeInfoComposite_Option_DefaultValue;
+	public static String CmAttributeInfoComposite_Option_Flatten_Checkbox;
+	public static String CmAttributeInfoComposite_Option_FlattenTree;
+	public static String CmAttributeInfoComposite_Option_IsVisible;
+	public static String CmAttributeInfoComposite_Option_Multi_Checkbox;
+	public static String CmAttributeInfoComposite_Option_Multiselect;
+	public static String CmAttributeInfoComposite_Option_Visible_Checkbox;
 	public static String CmNodeInfoComposite_Button_Delete;
 	public static String CmNodeInfoComposite_Category;
 	public static String CmNodeInfoComposite_Key;

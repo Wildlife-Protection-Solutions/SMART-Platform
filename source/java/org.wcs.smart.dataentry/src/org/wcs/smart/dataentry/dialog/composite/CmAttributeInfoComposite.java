@@ -30,7 +30,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -95,22 +94,22 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		});
 		
 		
-		createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, "Is Visible:", "Visible");
+		createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, Messages.CmAttributeInfoComposite_Option_IsVisible, Messages.CmAttributeInfoComposite_Option_Visible_Checkbox);
 		switch (attrType) {
 		case BOOLEAN:
 			//TODO: boolean default value might vary depending on required flag -> true/false or true/false/null 
 			break;
 		case NUMERIC:
-			createTextNumberControl(container, CmAttributeOption.ID_DEFAULT_VALUE, "Default Value");
+			createTextNumberControl(container, CmAttributeOption.ID_DEFAULT_VALUE, Messages.CmAttributeInfoComposite_Option_DefaultValue);
 			break;
 		case TEXT:
-			createTextStringControl(container, CmAttributeOption.ID_DEFAULT_VALUE, "Default Value");
+			createTextStringControl(container, CmAttributeOption.ID_DEFAULT_VALUE, Messages.CmAttributeInfoComposite_Option_DefaultValue);
 			break;
 		case LIST:
-			createBooleanControl(container, CmAttributeOption.ID_MULTISELECT, "Multi-select:", "Multi");
+			createBooleanControl(container, CmAttributeOption.ID_MULTISELECT, Messages.CmAttributeInfoComposite_Option_Multiselect, Messages.CmAttributeInfoComposite_Option_Multi_Checkbox);
 			break;
 		case TREE:
-			createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, "Flatten Tree:", "Flatten");
+			createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, Messages.CmAttributeInfoComposite_Option_Flatten_Checkbox);
 			break;
 		}
 	}
