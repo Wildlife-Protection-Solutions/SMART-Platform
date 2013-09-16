@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -93,6 +96,19 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 				updateRightPanelState();
 			}
 		});
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		modelTreeViewer.addDragSupport(DND.DROP_MOVE, transferTypes , new ConfigurableModelTreeDragListener(modelTreeViewer));
+		modelTreeViewer.addDropSupport(DND.DROP_MOVE, transferTypes, new ConfigurableModelTreeDropListener(modelTreeViewer) {
+			@Override
+			public boolean performDrop(Object data) {
+				boolean ok = super.performDrop(data);
+				if (ok) {
+					setChangesMade(true);
+				}
+				return ok;
+			}
+		});
+		
 
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
