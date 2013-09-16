@@ -31,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
@@ -70,5 +71,64 @@ public class ConfigurableModel extends NamedItem {
 	public void setNodes(List<CmNode> nodes) {
 		this.nodes = nodes;
 	}
-    
+
+	
+	/**
+	 * Moves an {@link CmNode} to a new position in the sibling list.
+	 * 
+	 * @param source the node to move
+	 * @param target the node to move it to
+	 * @param moveBefore if it should be moved before or after the <b>source</b> parameter
+	 */
+	@Transient
+	public void moveNodePosition(CmNode source, CmNode target, boolean moveBefore) {
+		if (source == target || source.equals(target)) {
+			return;
+		}
+		List<CmNode> list = null;
+		if (source.getParent() != null) {
+			list = source.getParent().getChildren();
+		} else {
+			list = getNodes();
+		}
+		
+		list.remove(source);
+		if (moveBefore) {
+			list.add(list.indexOf(target), source);
+		} else {
+			list.add(list.indexOf(target)+1, source);
+		}
+			
+		for (int i = 0; i < list.size(); i ++){
+			list.get(i).setNodeOrder(i);
+		}
+	}
+
+	/**
+	 * Moves {@link CmAttribute} to a new position in the sibling list.
+	 * 
+	 * @param source the attribute to move
+	 * @param target the attribute to move it to
+	 * @param moveBefore if it should be moved before or after the <b>source</b> parameter
+	 */
+	@Transient
+	public void moveAttributePosition(CmAttribute source, CmAttribute target, boolean moveBefore) {
+		if (source == target || source.equals(target)) {
+			return;
+		}
+		if (source.getNode() != null) {
+			List<CmAttribute> attrList = source.getNode().getCmAttributes();
+			attrList.remove(source);
+			if (moveBefore) {
+				attrList.add(source.getNode().getCmAttributes().indexOf(target), source);
+			} else {
+				attrList.add(source.getNode().getCmAttributes().indexOf(target) + 1, source);
+			}
+			
+			for (int i = 0; i < attrList.size(); i ++){
+				attrList.get(i).setOrder(i);
+			}
+		}
+	}
+	
 }

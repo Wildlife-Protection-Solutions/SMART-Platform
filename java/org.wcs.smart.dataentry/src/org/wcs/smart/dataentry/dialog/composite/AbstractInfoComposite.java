@@ -162,6 +162,7 @@ public abstract class AbstractInfoComposite extends Composite {
 					for (org.wcs.smart.ca.Label label : a.getNames()) { //we need a copy, not the same instance of set
 						cma.updateName(label.getLanguage(), label.getValue());
 					}
+					cma.setOrder(node.getCmAttributes().size());
 					//TODO: add CmAttribute default options
 					node.getCmAttributes().add(cma);
 				}
