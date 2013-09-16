@@ -107,6 +107,7 @@ public class CmNode extends NamedItem {
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="node", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OrderBy(clause = "attribute_order")
 	public List<CmAttribute> getCmAttributes() {
 		if (cmAttributes == null)
 			cmAttributes = new ArrayList<CmAttribute>();

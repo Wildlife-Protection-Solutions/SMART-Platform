@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.model;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -45,6 +46,7 @@ public class CmAttribute extends NamedItem {
 	private CmNode node;
 	private Attribute attribute;
 	private List<CmAttributeOption> cmAttributeOptions;
+	private int order;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
@@ -72,4 +74,11 @@ public class CmAttribute extends NamedItem {
 		this.cmAttributeOptions = cmAttributeOptions;
 	}
 	
+	@Column(name = "attribute_order")
+	public int getOrder() {
+		return order;
+	}
+	public void setOrder(int order) {
+		this.order = order;
+	}
 }
