@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -62,9 +62,9 @@ public class ElementsUtil {
 	 * @param elements
 	 * @param map
 	 */
-	public static void addElements(Elements elements, Map<? extends DmObject, CyberTrackerId> map) {
-		Set<? extends DmObject> keys = map.keySet();
-		for (DmObject dmObject : keys) {
+	public static void addElements(Elements elements, Map<? extends NamedItem, CyberTrackerId> map) {
+		Set<? extends NamedItem> keys = map.keySet();
+		for (NamedItem dmObject : keys) {
 			addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), SmartUtils.encodeHex(dmObject.getUuid()));
 		}
 	}
