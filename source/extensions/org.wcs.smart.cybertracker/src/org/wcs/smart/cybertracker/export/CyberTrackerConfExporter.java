@@ -40,7 +40,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
@@ -52,9 +51,9 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.reports.Items;
 import org.wcs.smart.cybertracker.model.reports.Reports;
+import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
-import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -63,14 +62,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Exporter from {@link ConfigurableModel} to CyberTracker application
+ * 
  * @author elitvin
- * @since 1.0.0
+ * @since 2.0.0
  */
 public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 
@@ -229,15 +224,14 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		return result;
 	}
 	
-	private List<Node> buildAttributeNodes(CmNode category, Map<CmNode, CyberTrackerId> keyMap) {
+	private List<Node> buildAttributeNodes(CmNode cmNode, Map<CmNode, CyberTrackerId> keyMap) {
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
-		category.getCategory().getAllAttribute(attrList, true);
+		cmNode.getCategory().getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
-		CyberTrackerId startId = keyMap.get(category);
+		CyberTrackerId startId = keyMap.get(cmNode);
 		CyberTrackerId id = startId;
-		int attrListLastIndex = attrList.size() - 1;
-		for (int i = 0; i <= attrListLastIndex; i++) {
+		for (int i = 0; i <= attrList.size(); i++) {
 			Attribute attribute = attrList.get(i);
 			CyberTrackerId resultElementId = getAttributeResultElementId(attribute); //id for result element in attribute screen node
 			switch (attribute.getType()) {
