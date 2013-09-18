@@ -33,6 +33,8 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
  * Util for CyberTracker xml data creation
@@ -209,6 +211,41 @@ public class CyberTrackerUtil {
 			}
 		}
 		return links.toString();
+	}
+
+//-------------------------------------------------------------	
+	public CmNode buildRoot(ConfigurableModel model) {
+		CmNode fakeRoot = new CmNode();
+		fakeRoot.setName(model.getName());
+		fakeRoot.setNames(model.getNames());
+		fakeRoot.setChildren(model.getNodes());
+		return fakeRoot;
+	}
+
+	public Map<CmNode, CyberTrackerId> buildMap(CmNode node) {
+		Map<CmNode, CyberTrackerId> map = new HashMap<CmNode, CyberTrackerId>();
+		map.put(node, new CyberTrackerId());
+		mapNodes(node.getChildren(), map);
+		return map;
+	}
+
+	private void mapNodes(List<CmNode> nodes, Map<CmNode, CyberTrackerId> map) {
+		for (CmNode node : nodes) {
+			map.put(node, new CyberTrackerId());
+			if (node.getChildren() != null) {
+				mapNodes(node.getChildren(), map);
+			}
+		}
+	}
+	
+	public Node createRadioNode(CmNode node, Map<CmNode, CyberTrackerId> keyMap, String resultElementId) {
+		String id = keyMap.get(node).getNodeId();
+		String name = node.getName();
+		List<CyberTrackerId> childIds = getChildrenIds(node.getChildren(), keyMap);
+		List<String> values = listItemIds(childIds);
+		String trElements = translateElements(childIds);
+		String trLinks = translateLinks(childIds, true);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
 	}
 	
 }
