@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +40,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -48,14 +55,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -73,7 +87,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.cybertracker.export"); //$NON-NLS-1$
 	
-	private CyberTrackerExporter exporter = new CyberTrackerExporter();
+	private CyberTrackerConfExporter exporter = new CyberTrackerConfExporter();
 
 	private Button btnToDevice;
 	private Button btnToFile;
@@ -84,7 +98,10 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	private Button btnLaunchCT;
 	
 	private File selectedFile;
+	private ConfigurableModel selectedModel;
 
+    private ComboViewer modelViewer;
+	
 	public CyberTrackerExportDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -99,6 +116,25 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		Composite modelSelector = new Composite(main, SWT.NONE);
+		modelSelector.setLayout(new GridLayout(2, false));
+		modelSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Label modelLabel = new Label(modelSelector, SWT.NONE);
+		modelLabel.setText(Messages.CyberTrackerExportDialog_ConfigurableModel);
+		modelViewer = new ComboViewer(modelSelector, SWT.READ_ONLY);
+		modelViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		modelViewer.setContentProvider(ArrayContentProvider.getInstance());
+		modelViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		modelViewer.setInput(getModelsList().toArray());
+		modelViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				selectedModel = (ConfigurableModel) ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
+				getButton(IDialogConstants.OK_ID).setEnabled(true);
+			}
+		});
+		
+		
 		btnToDevice = new Button(main, SWT.RADIO);
 		btnToDevice.setSelection(true);
 		btnToDevice.setText(Messages.CyberTrackerExportDialog_ExportToDevice);
@@ -196,7 +232,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.OK_ID, Messages.CyberTrackerExportDialog_Button_Export, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
-		getButton(IDialogConstants.CANCEL_ID).setFocus();
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		getButton(IDialogConstants.CANCEL_ID).setFocus();		
 		super.setReturnCode(IDialogConstants.CANCEL_ID);
 	}
 	
@@ -262,7 +299,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 					}
 	
 					try {
-						File generated = exporter.export(tempDir, monitor);
+						File generated = exporter.export(tempDir, selectedModel, monitor);
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}
@@ -345,6 +382,21 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	protected boolean getDefaultLaunchCT() {
 		String name = dialogSettings.get(LAUNCH_CT);
 		return "true".equals(name); //$NON-NLS-1$
+	}
+
+	private List<ConfigurableModel> getModelsList() {
+		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try {
+			modelList = DataentryHibernateManager.getConfigurableModels(s);
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CyberTrackerExportDialog_LoadConfModels_Error, ex);
+		} finally {
+			s.getTransaction().rollback();
+			s.close();
+		}
+		return modelList;
 	}
 	
 	private class LaunchCTJob extends Job {
