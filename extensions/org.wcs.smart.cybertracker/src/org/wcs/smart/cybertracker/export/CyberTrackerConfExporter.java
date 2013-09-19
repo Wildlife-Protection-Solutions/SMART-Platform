@@ -56,6 +56,8 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -225,14 +227,21 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 	}
 	
 	private List<Node> buildAttributeNodes(CmNode cmNode, Map<CmNode, CyberTrackerId> keyMap) {
-		List<Attribute> attrList = new ArrayList<Attribute>();
+		List<CmAttribute> attrList = cmNode.getCmAttributes();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
-		cmNode.getCategory().getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(cmNode);
 		CyberTrackerId id = startId;
 		for (int i = 0; i < attrList.size(); i++) {
-			Attribute attribute = attrList.get(i);
+			CmAttribute cmAttr = attrList.get(i);
+			Map<String, CmAttributeOption> options = cmAttr.getCmAttributeOptions();
+			CmAttributeOption isVisibleOption = options.get(CmAttributeOption.ID_IS_VISIBLE);
+			if (isVisibleOption != null && Boolean.FALSE.equals(isVisibleOption.getBooleanValue())) {
+				//this attribute is configured as invisible
+				//TODO: track other options like "default value"
+				continue;
+			}
+			Attribute attribute = cmAttr.getAttribute();
 			CyberTrackerId resultElementId = getAttributeResultElementId(attribute); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
