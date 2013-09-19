@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -79,6 +80,8 @@ public class CmAttribute extends NamedItem {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy="cmAttribute", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@MapKey(name="optionId")
 	public Map<String, CmAttributeOption> getCmAttributeOptions() {
+		if (cmAttributeOptions == null)
+			cmAttributeOptions = new HashMap<String, CmAttributeOption>();
 		return cmAttributeOptions;
 	}
 	public void setCmAttributeOptions(Map<String, CmAttributeOption> cmAttributeOptions) {
