@@ -231,7 +231,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(cmNode);
 		CyberTrackerId id = startId;
-		for (int i = 0; i <= attrList.size(); i++) {
+		for (int i = 0; i < attrList.size(); i++) {
 			Attribute attribute = attrList.get(i);
 			CyberTrackerId resultElementId = getAttributeResultElementId(attribute); //id for result element in attribute screen node
 			switch (attribute.getType()) {
