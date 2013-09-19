@@ -87,8 +87,9 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.cybertracker.export"); //$NON-NLS-1$
 	
+//	private CyberTrackerExporter exporter = new CyberTrackerExporter();
 	private CyberTrackerConfExporter exporter = new CyberTrackerConfExporter();
-
+	
 	private Button btnToDevice;
 	private Button btnToFile;
 
@@ -300,6 +301,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 					try {
 						File generated = exporter.export(tempDir, selectedModel, monitor);
+//						File generated = exporter.export(tempDir, monitor);
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}
