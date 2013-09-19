@@ -84,12 +84,20 @@ public class CmAttributeOption extends UuidItem {
 	}
 
 	@Transient
-	public boolean getBooleanValue() {
-		return doubleValue != null && doubleValue > 0.5;
+	public Boolean getBooleanValue() {
+		if (doubleValue == null) {
+			return null;
+		} else {
+			return doubleValue > 0.5;
+		}
 	}
 	@Transient
-	public void setBooleanValue(boolean value) {
-		this.doubleValue = value ? 1.0 : 0.0;
+	public void setBooleanValue(Boolean value) {
+		if (value == null) {
+			this.doubleValue = null;
+		} else {
+			this.doubleValue = value ? 1.0 : 0.0;
+		}
 	}
 	
 	@Column(name="uuid_value")
