@@ -149,7 +149,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			
 			//----------------creating Elements.xml----------------
 			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
-			ElementsUtil.addElements(elements, keyMap);
+			ElementsUtil.addNodeElements(elements, keyMap);
 			BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_ELEMENTS)); //$NON-NLS-1$
 			try {
 				writeDataModel(elements, outE, Elements.class);
@@ -199,37 +199,40 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		return new File(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME); //$NON-NLS-1$
 	}
 
-	private List<Node> buildCategoryNodes(CmNode category, Map<CmNode, CyberTrackerId> keyMap, Integer level) {
+	private List<Node> buildCategoryNodes(CmNode node, Map<CmNode, CyberTrackerId> keyMap, Integer level) {
 		List<Node> result = new ArrayList<Node>();
-		if (category == null)
+		if (node == null)
 			return result;
 		
-		if (category.getChildren() == null || category.getChildren().isEmpty()) {
-			List<Node> attributeNodes = buildAttributeNodes(category, keyMap);
+		if (node.getChildren() == null || node.getChildren().isEmpty()) {
+			List<Node> attributeNodes = buildAttributeNodes(node, keyMap);
 			if (!attributeNodes.isEmpty()) {
 				result.addAll(attributeNodes);
 			} else {
 				//it appeared that category has not attributes to display -> show warning screen for that case
-				result.add(createNoAttributeWarnNode(category, keyMap));
+				result.add(createNoAttributeWarnNode(node, keyMap));
 			}
 			return result;
 		}
-		Node categoryNode = ctUtil.createRadioNode(category, keyMap, getNodeLevelResultElementId(level).getItemId());
+		Node categoryNode = ctUtil.createRadioNode(node, keyMap, getNodeLevelResultElementId(level).getItemId());
 		Control headerControl = ScreensObjectFactory.getHeaderControl(categoryNode);
 		headerControl.setColor(NODE_HEADER_COLOR);
 		result.add(categoryNode);
 		
 		Integer nextLevel = level + 1;
-		for (CmNode child : category.getChildren()) {
+		for (CmNode child : node.getChildren()) {
 			result.addAll(buildCategoryNodes(child, keyMap, nextLevel));
 		}		
 		return result;
 	}
 	
 	private List<Node> buildAttributeNodes(CmNode cmNode, Map<CmNode, CyberTrackerId> keyMap) {
+		List<Node> result = new ArrayList<Node>();
+		if (cmNode.isGroup())
+			return result;
+		
 		List<CmAttribute> attrList = cmNode.getCmAttributes();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
-		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(cmNode);
 		CyberTrackerId id = startId;
 		for (int i = 0; i < attrList.size(); i++) {
@@ -348,8 +351,8 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		return id;
 	}
 
-	private Node createNoAttributeWarnNode(CmNode category, Map<CmNode, CyberTrackerId> keyMap) {
-		CyberTrackerId warnId = keyMap.get(category);
+	private Node createNoAttributeWarnNode(CmNode node, Map<CmNode, CyberTrackerId> keyMap) {
+		CyberTrackerId warnId = keyMap.get(node);
 		Node warnNode = screensFactory.createNodeMsgText(warnId.getNodeId(), Messages.CyberTrackerExporter_NoAttributesNode_Title, Messages.CyberTrackerExporter_NoAttributesNode_Message);
 		//disable next button, enable save button, navigate on save to root point
 		Control control2 = ScreensObjectFactory.getNavigationControl(warnNode);
