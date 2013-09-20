@@ -30,6 +30,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -136,4 +137,15 @@ public class ElementsUtil {
 		tag0Values.add(BOOL_FALSE);
 		return ElementsUtil.addCustomElements(elements, labels, tag0Values);
 	}
+	
+	//-------------------------------------------------------
+	public static void addNodeElements(Elements elements, Map<CmNode, CyberTrackerId> map) {
+		Set<CmNode> keys = map.keySet();
+		for (CmNode node : keys) {
+			//no need for tag0 in case of group cause we should not relay on any uuids from configurable model
+			String tag0 = node.isGroup() ? null : SmartUtils.encodeHex(node.getCategory().getUuid());
+			addElementsItem(elements, node.getName(), map.get(node).getItemId(), tag0);
+		}
+	}
+	
 }
