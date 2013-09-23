@@ -144,6 +144,7 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(labelText);
 		final Text text = new Text(parent, SWT.BORDER);
+		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
 		text.addModifyListener(new ModifyListener() {
 			@Override
@@ -174,6 +175,7 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(labelText);
 		final Text text = new Text(parent, SWT.BORDER);
+		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
 		text.addModifyListener(new ModifyListener() {
 			@Override
