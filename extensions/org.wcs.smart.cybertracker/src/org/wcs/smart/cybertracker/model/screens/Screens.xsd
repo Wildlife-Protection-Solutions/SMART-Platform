@@ -120,6 +120,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="RequireSetValue" />
 						<xs:element type="xs:string" name="Translate__SkipScreenId" />
 						<xs:element type="xs:int" name="MaxLength" minOccurs="0"/>
+						<xs:element type="xs:string" name="Value" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
