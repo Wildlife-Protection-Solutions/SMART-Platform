@@ -348,13 +348,6 @@
                   label="%showmapperspective.command.label"
                   style="push"
                   tooltip="%showmapperspective.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.resetSeparator"
