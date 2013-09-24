@@ -230,6 +230,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
+		
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			QueryPlugIn.logSql(sql);
