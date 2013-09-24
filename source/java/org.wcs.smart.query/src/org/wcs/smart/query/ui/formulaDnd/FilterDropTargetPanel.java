@@ -338,6 +338,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		Listener selectListener = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
+				validate();
 				fireQueryChangedListeners();
 			}
 		};
