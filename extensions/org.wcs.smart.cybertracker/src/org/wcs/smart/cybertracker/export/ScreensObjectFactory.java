@@ -127,7 +127,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>14</NextId>
+            <NextId>15</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -147,7 +147,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(14);
+		data.setNextId(15);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -829,17 +829,19 @@ public class ScreensObjectFactory {
 	 * see "Actions" -> "Add Attribute" in CyberTracker
     <Control>
     	<Type>{B76D0BF3-F4AC-44FF-A1E6-02707127C949}</Type>
-    	<Id>12</Id>
+    	<Id>14</Id>
     	<Translate__ElementId>...</Translate__ElementId>
-    	<Unique>True</Unique>
+    	<Unique>...</Unique>
+    	<Value>...</Value>
     </Control>
 	 */
-	public Controls.Control createUniqueAttrubuteControl12(String resultElement) {
+	public Controls.Control createAttrubuteControl14(String resultElement, boolean unique, String value) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{B76D0BF3-F4AC-44FF-A1E6-02707127C949}"); //$NON-NLS-1$
-		control.setId(12);
+		control.setId(14);
 		control.setTranslateElementId(resultElement);
-		control.setUnique("True"); //$NON-NLS-1$
+		control.setUnique(unique ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+		control.setValue(value);
 		return control;
 	}
 

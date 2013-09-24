@@ -82,6 +82,7 @@ public class PatrolScreensUtil {
 	public static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
 	
 	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
+	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
 
 	/**
 	 * Contains data filled by {@link PatrolScreensUtil}
@@ -457,8 +458,8 @@ public class PatrolScreensUtil {
 	}
 
 	private void addUniqueAttrubute(Node node, String resultElementId) {
-		Control uniqueAttr = screensFactory.createUniqueAttrubuteControl12(resultElementId);
-		node.getData().getControls().getControl().add(uniqueAttr);
+		Control uniqueAttr = screensFactory.createAttrubuteControl14(resultElementId, true, null);
+		ScreensObjectFactory.addControlToNode(node, uniqueAttr);
 	}
 	
 }

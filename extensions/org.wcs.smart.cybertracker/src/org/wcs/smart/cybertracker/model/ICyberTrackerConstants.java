@@ -64,6 +64,8 @@ public interface ICyberTrackerConstants {
 	public static final String STR_FALSE = "False"; //$NON-NLS-1$
 	
 	public static final int MAX_TEXT_ATTRIBUTE_LENGTH = 1024;
+
+	public static final String ATTRIBUTE_DEFAULT_VALUES_SEPATATOR = ";"; //$NON-NLS-1$
 	
 //    <E I="{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}" N="Date" Static="1"/>
 //    <E I="{EB86279A-E032-43D2-B4A8-8B8B2892B10E}" N="Time" Static="1"/>
