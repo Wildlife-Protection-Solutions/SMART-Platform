@@ -77,6 +77,9 @@ public class SmartService extends IService {
 	 */
 	@Override
 	public Status getStatus() {
+		if (SmartDB.isMultipleAnalysis()){
+			return Status.RESTRICTED_ACCESS;
+		}
 		return Status.CONNECTED;
 	}
 
