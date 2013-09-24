@@ -111,6 +111,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 				@Override
 				public void run() {
 					queryTree.setInput(data);
+					
 				}
 			});
 
@@ -176,7 +177,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		queryTree = new TreeViewer(composite, SWT.BORDER);
 		queryTree.setLabelProvider(new QueryListLabelProvider());
 		queryTree.setContentProvider(new QueryListViewContentProvider(true));
-
+		queryTree.setAutoExpandLevel(2);
 		queryTree.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryTree.getTree().addListener(SWT.Selection, new Listener() {
