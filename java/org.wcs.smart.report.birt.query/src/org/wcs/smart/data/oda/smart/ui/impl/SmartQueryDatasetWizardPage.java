@@ -103,13 +103,9 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 						//remove user folder
 						iterator.remove();
 					}
-					
 				}
 				data.put(QueryListViewContentProvider.FOLDER_KEY, folders2);
 			}
-			
-			
-			
 			
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
@@ -384,8 +380,12 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(smartQuery.getName() + " [" + smartQuery.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataSetDesign.setName(smartQuery.getName());
+		// names can not contain: / \ . ! ; , 
+		//See NamePropertyType.isValidName
+		String lname = smartQuery.getName();
+		lname = lname.replaceAll("[/\\\\.!;,]", "_");  //$NON-NLS-1$//$NON-NLS-2$
+		dataSetDesign.setDisplayName(lname + " [" + smartQuery.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataSetDesign.setName(lname);
 	}
 
 	/**
