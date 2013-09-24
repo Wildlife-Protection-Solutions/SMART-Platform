@@ -47,6 +47,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -264,7 +265,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		transportTblViewer.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				if (transportTblViewer.getCell(new Point(event.x, event.y)).getColumnIndex() == 1){
+				ViewerCell cell = transportTblViewer.getCell(new Point(event.x, event.y));
+				if (cell != null && cell.getColumnIndex() == 1){
 					editKey();
 				}
 			}
