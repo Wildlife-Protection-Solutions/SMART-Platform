@@ -281,9 +281,9 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, org.wcs.smart.ca.Label.MAX_LENGTH }));
 				ok = false;
 			}
-			getNewBasemap().updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
 			baseMap = getNewBasemap();
-			
+			getNewBasemap().updateName(defaultLanguage, name);
+			baseMap.setName(name);
 		}
 		
 		Button btn = getButton(IDialogConstants.OK_ID);
