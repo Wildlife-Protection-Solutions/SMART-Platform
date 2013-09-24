@@ -92,4 +92,8 @@ ALTER TABLE smart.waypoint_query
 	ON DELETE RESTRICT
 ;
 
+--update premissions on new table
+GRANT ALL PRIVILEGES  ON smart.WAYPOINT_QUERY to manager;
+GRANT ALL PRIVILEGES  ON smart.WAYPOINT_QUERY to analyst;
+
 update smart.db_version set version = '2.0.0';
