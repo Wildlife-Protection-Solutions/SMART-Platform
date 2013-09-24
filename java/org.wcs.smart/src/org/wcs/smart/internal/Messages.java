@@ -798,8 +798,10 @@ public class Messages extends NLS {
 	public static String SaveMapHandler_SaveOkMessage;
 	public static String SelectCaDialog_CaError;
 	public static String SelectCaDialog_CaLabel;
+	public static String SelectCaDialog_DeselectAllOption;
 	public static String SelectCaDialog_DialogTitle;
 	public static String SelectCaDialog_ErrorDialogtitle;
+	public static String SelectCaDialog_SelectAllOption;
 	public static String SelectCaDialog_SelectLabel;
 	public static String SelectCaDialog_ShellTitle;
 	public static String SetBasemapTool_RestoreBasemap_JobName;

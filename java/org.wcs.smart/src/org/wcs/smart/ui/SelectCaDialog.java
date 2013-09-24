@@ -41,7 +41,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -143,7 +146,30 @@ public class SelectCaDialog extends TitleAreaDialog {
 			}
 		});
 		
+		Composite links = new Composite(comp, SWT.NONE);
+		links.setLayout(new GridLayout(3, false));
 		
+		Link selectAll = new Link(links, SWT.NONE);
+		selectAll.setText("<a>" + Messages.SelectCaDialog_SelectAllOption + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		selectAll.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				select(true);
+			}
+		});
+		l = new Label(links, SWT.SEPARATOR | SWT.VERTICAL);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false);
+		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		l.setLayoutData(gd);
+		
+		Link deselectAll = new Link(links,  SWT.NONE);
+		deselectAll.setText("<a>" + Messages.SelectCaDialog_DeselectAllOption + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		deselectAll.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				select(false);
+			}
+		});
 		setMessage(Messages.SelectCaDialog_SelectLabel);
 		setTitle(Messages.SelectCaDialog_DialogTitle);
 		getShell().setText(Messages.SelectCaDialog_ShellTitle);
@@ -164,6 +190,12 @@ public class SelectCaDialog extends TitleAreaDialog {
 		
 		return comp;
 	}
+	
+	private void select(boolean all){
+		caList.setAllChecked(all);
+		validate();
+	}
+	
 	private void validate(){
 		String error = null;
 		if (caList.getCheckedElements().length < 2){
@@ -172,6 +204,8 @@ public class SelectCaDialog extends TitleAreaDialog {
 		setErrorMessage(error);
 		getButton(IDialogConstants.OK_ID).setEnabled(error == null);
 	}
+	
+	
 	@Override
 	public boolean isResizable(){
 		return true;
