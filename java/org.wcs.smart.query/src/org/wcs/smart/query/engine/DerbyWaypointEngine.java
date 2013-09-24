@@ -107,10 +107,8 @@ public class DerbyWaypointEngine extends DerbyQueryEngine2 {
 	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
 		if (!fullDrop)
 			return;
-		//original table
+
 		dropTable(c, queryDataTable);
-//		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-//		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
@@ -436,7 +434,7 @@ public class DerbyWaypointEngine extends DerbyQueryEngine2 {
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(prefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(prefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(prefix(Patrol.class) + ".id, "); //$NON-NLS-1$
