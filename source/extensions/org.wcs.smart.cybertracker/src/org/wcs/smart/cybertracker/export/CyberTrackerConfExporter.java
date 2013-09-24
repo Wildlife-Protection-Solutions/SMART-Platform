@@ -85,6 +85,8 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 	private CyberTrackerId newWpResultId;
 	private List<CyberTrackerId> newWpElementsIds;
 	
+	private CyberTrackerId defaultAttrValuesResultId;
+
 	public File export(File destFolder, ConfigurableModel model, IProgressMonitor monitor) {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -93,8 +95,11 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			newWpResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
 			newWpElementsIds = createNewWpElementsIds(elements);
+			defaultAttrValuesResultId = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId());
 			return performExport(destFolder, model, monitor, session);
 		} finally {
+			defaultAttrValuesResultId = null;
 			newWpResultId = null;
 			newWpElementsIds = null;
 			elements = null;
@@ -168,6 +173,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			for (Attribute attribute : attr2resultId.keySet()) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
 			}
+			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
 			for (Integer level : nodeLevel2resultId.keySet()) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(nodeLevel2resultId.get(level).getItemId(), NODE_DEPTH_RESULT_PREFIX+String.valueOf(level)));
 			}
@@ -231,6 +237,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		if (cmNode.isGroup())
 			return result;
 		
+		String defaultValues = ""; //$NON-NLS-1$
 		List<CmAttribute> attrList = cmNode.getCmAttributes();
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		CyberTrackerId startId = keyMap.get(cmNode);
@@ -241,7 +248,13 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			CmAttributeOption isVisibleOption = options.get(CmAttributeOption.ID_IS_VISIBLE);
 			if (isVisibleOption != null && Boolean.FALSE.equals(isVisibleOption.getBooleanValue())) {
 				//this attribute is configured as invisible
-				//TODO: track other options like "default value"
+				//record "default value" data
+				String newData = recordDefaultValue(cmAttr);
+				if (newData != null && !newData.isEmpty()) {
+					if (!defaultValues.isEmpty())
+						defaultValues += ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR;
+					defaultValues += newData;
+				}
 				continue;
 			}
 			Attribute attribute = cmAttr.getAttribute();
@@ -327,8 +340,48 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 				}
 			}
 		}
-		result.add(createLastNode(id, startId));
+		result.add(createLastNode(id, startId, defaultValues));
 		return result;
+	}
+	
+	private String recordDefaultValue(CmAttribute cmAttr) {
+		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
+		Map<String, CmAttributeOption> options = cmAttr.getCmAttributeOptions();
+		CmAttributeOption defaultValueOption = options.get(CmAttributeOption.ID_DEFAULT_VALUE);
+		if (defaultValueOption == null)
+			return null;
+
+		Attribute attribute = cmAttr.getAttribute();
+		switch (attribute.getType()) {
+		case NUMERIC:
+			if (defaultValueOption.getDoubleValue() != null) 
+				return recordDefaultValue(attribute, defaultValueOption.getDoubleValue().toString());
+			break;
+		case TEXT:
+		{
+			String strValue = defaultValueOption.getStringValue();
+			if (strValue != null && !strValue.isEmpty())
+				return recordDefaultValue(attribute, strValue);
+			break;
+		}
+		case LIST:
+		case TREE:
+			if (defaultValueOption.getUuidValue() != null)
+				return recordDefaultValue(attribute, SmartUtils.encodeHex(defaultValueOption.getUuidValue()));
+			break;
+		case BOOLEAN:
+			if (defaultValueOption.getBooleanValue() != null)
+				return recordDefaultValue(attribute, defaultValueOption.getBooleanValue().toString());
+			break;
+		}
+		return null;
+	}
+
+	private String recordDefaultValue(Attribute attribute, String defaultValue) {
+		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
+		String ctid = (new CyberTrackerId()).getItemId();
+		ElementsUtil.addElementsItem(elements, attribute.getName(), ctid, SmartUtils.encodeHex(attribute.getUuid()), defaultValue);
+		return ctid;
 	}
 	
 	private List<CyberTrackerId> createNewWpElementsIds(Elements elements2) {
@@ -459,10 +512,15 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private Node createLastNode(CyberTrackerId id, CyberTrackerId startId) {
+	private Node createLastNode(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
 		ScreensObjectFactory.addControlToNode(node, menoControl);
+
+		if (defaultAttrValues != null && !defaultAttrValues.isEmpty()) {
+			Control defaultAttr = screensFactory.createAttrubuteControl14(defaultAttrValuesResultId.getItemId(), false, defaultAttrValues);
+			ScreensObjectFactory.addControlToNode(node, defaultAttr);
+		}
 		
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		//this is the last screen and we need to show "Save" button
@@ -474,7 +532,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		control2.setTranslateMinorScreenId(startId.getNodeId());
 		return node;
 	}
-
+	
 	public int uploadPda(File file) throws Exception {
 		String appPath = PdaUtil.getCTAppPath();
 		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
