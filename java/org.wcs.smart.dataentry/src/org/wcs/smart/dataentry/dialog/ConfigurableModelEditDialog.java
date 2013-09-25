@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.dialog;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -153,10 +154,22 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 				
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
-		
+
+		setChangesMade(isNewModel());
+
 		return container;
 	}
 
+	private boolean isNewModel() {
+		return model.getUuid() == null;
+	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(isNewModel()); //this will enable "Save" button when new model is just created
+	}
+	
 	@Override
 	protected boolean performSave() {
 		DataentryHibernateManager.saveConfigurableModel(model, session);
