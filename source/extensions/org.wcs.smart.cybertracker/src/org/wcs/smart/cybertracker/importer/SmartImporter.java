@@ -276,7 +276,7 @@ public class SmartImporter {
 		//must have at least one attribute
 		for (A a : s.getA()) {
 			E e = eMap.get(a.getI());
-			if (ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()))
+			if (ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()) || PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(e.getN()))
 				result.add(a);
 		}
 		return result;
@@ -288,74 +288,93 @@ public class SmartImporter {
 			if (a.getV() == null)
 				continue;
 			
+			if (PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(a.getN())) {
+				//handling default values
+				String[] ctIdArray = a.getV().split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+				for (String ctid : ctIdArray) {
+					E e = eMap.get(ctid);
+					WaypointObservationAttribute wpoa = createWaypointObservationAttribute(e, e.getTag1(), eMap, session);
+					if (wpoa == null)
+						continue;
+					wpoa.setObservation(obs);
+					result.add(wpoa);
+				}
+				continue;
+			}
+				
 			E e = eMap.get(a.getI());
 			if (!ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
 				continue;
-			
-			String tag0 = e.getTag0();
-			if (tag0 == null || tag0.isEmpty()) {
-				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AttributeTag0_Missing, e.getN()));
-				continue;
-			}
 
-			Attribute attr = CyberTrackerHibernateManager.fetchByUuid(Attribute.class, e.getTag0(), session);
-			if (attr == null) {
-				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoAttributeInDatamodel, e.getN(), e.getTag0()));
+			WaypointObservationAttribute wpoa = createWaypointObservationAttribute(e, a.getV(), eMap, session);
+			if (wpoa == null)
 				continue;
-			}
-
-			WaypointObservationAttribute wpoa = new WaypointObservationAttribute();
 			wpoa.setObservation(obs);
-			wpoa.setAttribute(attr);
-			switch (attr.getType()) {
-			case NUMERIC:
-				wpoa.setNumberValue(Double.valueOf(a.getV()));
-				break;
-			case TEXT:
-				wpoa.setStringValue(a.getV());
-				break;
-			case LIST:
-			{
-				E eLst = eMap.get(a.getV());
-				AttributeListItem item = CyberTrackerHibernateManager.fetchByUuid(AttributeListItem.class, eLst.getTag0(), session);
-				if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eLst.getTag0())) {
-					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoListAttrItemInDatamodel, e.getN(), eLst.getN(), eLst.getTag0()));
-					continue;
-				}
-				wpoa.setAttributeListItem(item);
-				break;
-			}
-			case TREE:
-			{
-				E eTr = eMap.get(a.getV());
-				AttributeTreeNode item = CyberTrackerHibernateManager.fetchByUuid(AttributeTreeNode.class, eTr.getTag0(), session);
-				if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eTr.getTag0())) {
-					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoTreeAttrItemInDatamodel, e.getN(), eTr.getN(), eTr.getTag0()));
-					continue;
-				}
-				wpoa.setAttributeTreeNode(item);
-				break;
-			}
-			case BOOLEAN:
-			{
-				E eBool = eMap.get(a.getV());
-				Double value = null;
-				if (ElementsUtil.BOOL_TRUE.equals(eBool.getTag0())) {
-					value = 1.0;
-				} else if (ElementsUtil.BOOL_FALSE.equals(eBool.getTag0())) {
-					value = 0.0;
-				}
-				wpoa.setNumberValue(value);
-				break;
-			}
-			default:
-				break;
-			}
 			result.add(wpoa);
 		}	
 		return result;
 	}
 
+	private WaypointObservationAttribute createWaypointObservationAttribute(E e, String av, Map<String, E> eMap, Session session) {
+		String tag0 = e.getTag0();
+		if (tag0 == null || tag0.isEmpty()) {
+			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AttributeTag0_Missing, e.getN()));
+			return null;
+		}
+
+		Attribute attr = CyberTrackerHibernateManager.fetchByUuid(Attribute.class, tag0, session);
+		if (attr == null) {
+			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoAttributeInDatamodel, e.getN(), tag0));
+			return null;
+		}
+
+		WaypointObservationAttribute wpoa = new WaypointObservationAttribute();
+		wpoa.setAttribute(attr);
+		switch (attr.getType()) {
+		case NUMERIC:
+			wpoa.setNumberValue(Double.valueOf(av));
+			break;
+		case TEXT:
+			wpoa.setStringValue(av);
+			break;
+		case LIST:
+		{
+			E eLst = eMap.get(av);
+			AttributeListItem item = CyberTrackerHibernateManager.fetchByUuid(AttributeListItem.class, eLst.getTag0(), session);
+			if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eLst.getTag0())) {
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoListAttrItemInDatamodel, e.getN(), eLst.getN(), eLst.getTag0()));
+				return null;
+			}
+			wpoa.setAttributeListItem(item);
+			break;
+		}
+		case TREE:
+		{
+			E eTr = eMap.get(av);
+			AttributeTreeNode item = CyberTrackerHibernateManager.fetchByUuid(AttributeTreeNode.class, eTr.getTag0(), session);
+			if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eTr.getTag0())) {
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoTreeAttrItemInDatamodel, e.getN(), eTr.getN(), eTr.getTag0()));
+				return null;
+			}
+			wpoa.setAttributeTreeNode(item);
+			break;
+		}
+		case BOOLEAN:
+		{
+			E eBool = eMap.get(av);
+			Double value = null;
+			if (ElementsUtil.BOOL_TRUE.equals(eBool.getTag0())) {
+				value = 1.0;
+			} else if (ElementsUtil.BOOL_FALSE.equals(eBool.getTag0())) {
+				value = 0.0;
+			}
+			wpoa.setNumberValue(value);
+			break;
+		}
+		}
+		return wpoa;
+	}
+	
 	private Category fetchCategory(List<A> aList, Map<String, E> eMap, Session session) {
 		String v = null;
 		int vIndex = -1;
