@@ -48,6 +48,7 @@ public class ElementsUtil {
 
 	public static final String ATTRIBUTE_ELEMENT_TAG = "a"; //$NON-NLS-1$
 	public static final String CATEGORY_ELEMENT_TAG = "c"; //$NON-NLS-1$
+	public static final String MEMBER_ELEMENT_TAG = "m"; //$NON-NLS-1$
 	
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();

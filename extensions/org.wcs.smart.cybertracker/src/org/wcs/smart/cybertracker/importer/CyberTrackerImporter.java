@@ -303,7 +303,7 @@ public class CyberTrackerImporter {
 					ctPatrol.addError(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
 				ctPatrol.setCtPilot(e.getN());
 				ctPatrol.setPilot(emp);
-			} else if (isMemberRecord(a)) {
+			} else if (isMemberRecord(a, eMap)) {
 				E e = eMap.get(i);
 				Employee emp = fetchFromTag0(Employee.class, e, session);
 				if (emp == null && e.getTag0() != null)
@@ -339,11 +339,11 @@ public class CyberTrackerImporter {
 		ctPatrol.setEndDate(SmartImporter.combine(date, time));
 	}
 
-	private boolean isMemberRecord(S.A a) {
+	private boolean isMemberRecord(S.A a, Map<String, E> eMap) {
 		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
 			return false;
-		//TODO: check if this is really member (use tag1?)
-		return true;
+		E e = eMap.get(a.getI());
+		return ElementsUtil.MEMBER_ELEMENT_TAG.equals(e.getTag1());
 	}
 
 	private <T> T fetchFromTag0(Class<T> clazz, E e, Session session) {
