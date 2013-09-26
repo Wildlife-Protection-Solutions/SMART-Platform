@@ -106,6 +106,8 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
 		getShell().setText(Messages.SaveQueryDialog_DialogTitle);
 		setTitle(Messages.SaveQueryDialog_PageTitle);
 		if (this.includeName){
