@@ -161,13 +161,15 @@ public class PatrolScreensUtil {
 				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
 			}
 		});
+		List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 		List<String> members = new ArrayList<String>();
-		List<String> memberTag0s = new ArrayList<String>();
 		for (Employee i : employees) {
 			members.add(i.getFullLabel());
-			memberTag0s.add(SmartUtils.encodeHex(i.getUuid()));
+			CyberTrackerId mctid = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, i.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+			memberIds.add(mctid);
+			
 		}
-		List<CyberTrackerId> memberIds = ElementsUtil.addCustomElements(elements, members, memberTag0s);
 		String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
 		if (filter != null) {
 			filter = SmartUtils.encodeHex(filter.getBytes());
