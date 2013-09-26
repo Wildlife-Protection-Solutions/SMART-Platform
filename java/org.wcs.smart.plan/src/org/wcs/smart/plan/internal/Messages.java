@@ -95,6 +95,10 @@ public class Messages extends NLS {
 	public static String PlanCaDeleteHandler_DeletePatrolPlan_SubTasl;
 	public static String PlanCaDeleteHandler_DeletePlans_SubTask;
 	public static String PlanCaDeleteHandler_DeleteTargets_SubTask;
+	public static String PlanCommentComposite_CommentLabel;
+	public static String PlanCommentComposite_DialogMessage;
+	public static String PlanCommentComposite_DialogTitle;
+	public static String PlanCompositeFactory_Title_Comment;
 	public static String PlanCompositeFactory_Title_EndDate;
 	public static String PlanCompositeFactory_Title_IdNameDesc;
 	public static String PlanCompositeFactory_Title_ParentId;
@@ -257,6 +261,8 @@ public class Messages extends NLS {
 	public static String StationDeleteAdvisor_StationPlanLinkError;
 	public static String StationTeamPlanWizardPage_Message;
 	public static String StationTeamPlanWizardPage_PageName;
+	public static String SummaryPlanEditorPage_CommentLabel;
+	public static String SummaryPlanEditorPage_CreatorLabel;
 	public static String TargetListViewer_Summary_Label;
 	public static String TargetListViewer_TargetName_Label;
 	public static String TargetProgressViewer_Column_Name;

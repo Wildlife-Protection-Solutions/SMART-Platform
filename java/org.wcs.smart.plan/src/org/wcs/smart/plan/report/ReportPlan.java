@@ -68,6 +68,8 @@ public class ReportPlan {
 	public final static String PLAN_TEAM = "Team"; //$NON-NLS-1$
 	public final static String PLAN_PATROLS = "Patrols"; //$NON-NLS-1$
 	public final static String PLAN_PARENT = "ParentPlan"; //$NON-NLS-1$
+	public final static String PLAN_CREATOR = "Creator"; //$NON-NLS-1$
+	public final static String PLAN_COMMENT = "Comment"; //$NON-NLS-1$
 	
 	private static IEditorPart templateEditor = null;
 	

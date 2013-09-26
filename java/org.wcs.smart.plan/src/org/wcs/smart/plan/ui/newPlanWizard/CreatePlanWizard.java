@@ -76,10 +76,9 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	public CreatePlanWizard() {
 		setWindowTitle(Messages.CreatePlanWizard_Title);
 
-		plan = new Plan();
-		
+		plan = new Plan();		
+		plan.setCreator(SmartDB.getCurrentEmployee());
 		plan.setConservationArea(SmartDB.getCurrentConservationArea());
-
 		plan.setId(PlanHibernateManager.generatePlanId(plan, getSession()));
 }
 

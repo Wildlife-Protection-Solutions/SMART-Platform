@@ -160,6 +160,30 @@
                 <property name="category">Unformatted</property>
             </structure>
         </scalar-parameter>
+        <scalar-parameter name="Comment" id="336">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Creator" id="337">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.wcs.smart.plan.report.oda.SmartPlanDriver" name="SMART Plans" id="234"/>
@@ -730,9 +754,94 @@
             <property name="width">7.947916666666667in</property>
             <list-property name="boundDataColumns">
                 <structure>
+                    <property name="name">Plan ID</property>
+                    <text-property name="displayName">Plan ID</text-property>
+                    <expression name="expression" type="javascript">params["PlanID"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">PlanName</property>
+                    <text-property name="displayName">PlanName</text-property>
+                    <expression name="expression" type="javascript">params["PlanName"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Creator</property>
+                    <text-property name="displayName">Creator</text-property>
+                    <expression name="expression" type="javascript">params["Creator"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">PlanType</property>
+                    <text-property name="displayName">PlanType</text-property>
+                    <expression name="expression" type="javascript">params["PlanType"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
                     <property name="name">UnavailableEmployees</property>
+                    <text-property name="displayName">UnavailableEmployees</text-property>
                     <expression name="expression" type="javascript">params["UnavailableEmployees"].value</expression>
-                    <property name="dataType">integer</property>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">AvailableEmployees</property>
+                    <text-property name="displayName">AvailableEmployees</text-property>
+                    <expression name="expression" type="javascript">params["AvailableEmployees"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ParentPlan</property>
+                    <text-property name="displayName">ParentPlan</text-property>
+                    <expression name="expression" type="javascript">params["ParentPlan"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Station</property>
+                    <text-property name="displayName">Station</text-property>
+                    <expression name="expression" type="javascript">params["Station"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Team</property>
+                    <text-property name="displayName">Team</text-property>
+                    <expression name="expression" type="javascript">params["Team"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">StartDate</property>
+                    <text-property name="displayName">StartDate</text-property>
+                    <expression name="expression" type="javascript">params["StartDate"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">EndDate</property>
+                    <text-property name="displayName">EndDate</text-property>
+                    <expression name="expression" type="javascript">params["EndDate"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">PlanDescription</property>
+                    <text-property name="displayName">PlanDescription</text-property>
+                    <expression name="expression" type="javascript">params["PlanDescription"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Comment</property>
+                    <text-property name="displayName">Comment</text-property>
+                    <expression name="expression" type="javascript">params["Comment"].value</expression>
+                    <property name="dataType">string</property>
                     <property name="allowExport">true</property>
                 </structure>
             </list-property>
@@ -756,14 +865,7 @@
                 </cell>
                 <cell id="51">
                     <data id="84">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">PlanID</property>
-                                <expression name="expression" type="javascript">params["PlanID"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
-                        <property name="resultSetColumn">PlanID</property>
+                        <property name="resultSetColumn">Plan ID</property>
                     </data>
                 </cell>
                 <cell id="52">
@@ -773,13 +875,6 @@
                 </cell>
                 <cell id="53">
                     <data id="93">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">PlanType</property>
-                                <expression name="expression" type="javascript">params["PlanType"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">PlanType</property>
                     </data>
                 </cell>
@@ -792,13 +887,6 @@
                 </cell>
                 <cell id="56">
                     <data id="85">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">PlanName</property>
-                                <expression name="expression" type="javascript">params["PlanName"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">PlanName</property>
                     </data>
                 </cell>
@@ -809,14 +897,6 @@
                 </cell>
                 <cell id="58">
                     <data id="335">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">UnavailableEmployees</property>
-                                <expression name="expression" type="javascript">params["UnavailableEmployees"]</expression>
-                                <property name="dataType">integer</property>
-                                <property name="allowExport">true</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">UnavailableEmployees</property>
                     </data>
                 </cell>
@@ -824,19 +904,12 @@
             <row id="59">
                 <cell id="60">
                     <label id="76">
-                        <text-property name="text">Description:</text-property>
+                        <text-property name="text">Creator:</text-property>
                     </label>
                 </cell>
                 <cell id="61">
-                    <data id="86">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">PlanDescription</property>
-                                <expression name="expression" type="javascript">params["PlanDescription"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
-                        <property name="resultSetColumn">PlanDescription</property>
+                    <data id="369">
+                        <property name="resultSetColumn">Creator</property>
                     </data>
                 </cell>
                 <cell id="62">
@@ -846,14 +919,6 @@
                 </cell>
                 <cell id="63">
                     <data id="110">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">AvailableEmployees</property>
-                                <expression name="expression" type="javascript">params["AvailableEmployees"]</expression>
-                                <property name="dataType">integer</property>
-                                <property name="allowExport">true</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">AvailableEmployees</property>
                     </data>
                 </cell>
@@ -868,16 +933,16 @@
                 </cell>
                 <cell id="68">
                     <data id="91">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">ParentPlan</property>
-                                <expression name="expression" type="javascript">params["ParentPlan"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">ParentPlan</property>
                     </data>
                 </cell>
+            </row>
+            <row id="345">
+                <property name="height">20px</property>
+                <cell id="346"/>
+                <cell id="347"/>
+                <cell id="348"/>
+                <cell id="349"/>
             </row>
             <row id="69">
                 <cell id="70">
@@ -887,13 +952,6 @@
                 </cell>
                 <cell id="71">
                     <data id="87">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">StartDate</property>
-                                <expression name="expression" type="javascript">params["StartDate"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">StartDate</property>
                     </data>
                 </cell>
@@ -904,13 +962,6 @@
                 </cell>
                 <cell id="73">
                     <data id="90">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">Station</property>
-                                <expression name="expression" type="javascript">params["Station"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">Station</property>
                     </data>
                 </cell>
@@ -923,13 +974,6 @@
                 </cell>
                 <cell id="105">
                     <data id="88">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">EndDate</property>
-                                <expression name="expression" type="javascript">params["EndDate"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">EndDate</property>
                     </data>
                 </cell>
@@ -940,14 +984,36 @@
                 </cell>
                 <cell id="107">
                     <data id="108">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">Team</property>
-                                <expression name="expression" type="javascript">params["Team"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">Team</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="364">
+                <property name="height">20px</property>
+                <cell id="365"/>
+                <cell id="366"/>
+                <cell id="367"/>
+                <cell id="368"/>
+            </row>
+            <row id="340">
+                <cell id="341">
+                    <label id="355">
+                        <text-property name="text">Description:</text-property>
+                    </label>
+                </cell>
+                <cell id="342">
+                    <data id="356">
+                        <property name="resultSetColumn">PlanDescription</property>
+                    </data>
+                </cell>
+                <cell id="343">
+                    <label id="362">
+                        <text-property name="text">Comments:</text-property>
+                    </label>
+                </cell>
+                <cell id="344">
+                    <data id="363">
+                        <property name="resultSetColumn">Comment</property>
                     </data>
                 </cell>
             </row>
@@ -958,6 +1024,15 @@
         <grid id="95">
             <property name="fontFamily">sans-serif</property>
             <property name="width">7.947916666666667in</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Patrols</property>
+                    <text-property name="displayName">Patrols</text-property>
+                    <expression name="expression" type="javascript">params["Patrols"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
             <column id="96">
                 <property name="width">0.6354166666666666in</property>
             </column>
@@ -972,13 +1047,6 @@
                 </cell>
                 <cell id="100">
                     <data id="102">
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">Patrols</property>
-                                <expression name="expression" type="javascript">params["Patrols"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
                         <property name="resultSetColumn">Patrols</property>
                     </data>
                 </cell>

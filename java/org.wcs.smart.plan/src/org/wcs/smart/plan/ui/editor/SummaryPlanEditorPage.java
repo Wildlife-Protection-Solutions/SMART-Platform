@@ -90,6 +90,8 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
  */
 public class SummaryPlanEditorPage extends EditorPart {
 
+	private static final int SECTION_SPACING = 8;
+	
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
 	private Form form;
@@ -103,7 +105,9 @@ public class SummaryPlanEditorPage extends EditorPart {
 	private Text txtDescription;
 	private Text txtStartDate;
 	private Text txtEndDate;
-
+	private Label txtCreator;
+	private Text txtComment;
+	
 	private TargetProgressViewer targetList;
 	private TargetProgressViewer targetList2; //the child plan's targets
 
@@ -231,7 +235,10 @@ public class SummaryPlanEditorPage extends EditorPart {
 		form = toolkit.createForm(parent);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		form.getBody().setLayout(new GridLayout(1, true));
+		GridLayout glayout = new GridLayout();
+		glayout.verticalSpacing = 0;
+		glayout.marginHeight = 0;
+		form.getBody().setLayout(glayout);
 		if (this.parentEditor.canEdit()) {
 			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.PlanEditor_Translate_Link, SWT.WRAP);
 			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
@@ -254,14 +261,14 @@ public class SummaryPlanEditorPage extends EditorPart {
 
 		final Section summary = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE );
 		summary.setLayout(new GridLayout(2, false));
-		summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		summary.setText(Messages.PlanEditor_Summary_Label);
 		summary.addExpansionListener(new ExpansionAdapter() {
 			
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				if (summary.isExpanded()){
-					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));			
+					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
 				}else{
 					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}
@@ -288,15 +295,15 @@ public class SummaryPlanEditorPage extends EditorPart {
 		GridLayout layout2 = new GridLayout(2, false);
 		layout2.marginHeight = 0;
 		topContent.setLayout(layout1);
-		topContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		topContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite leftContent = toolkit.createComposite(topContent, SWT.NONE);
 		leftContent.setLayout(new GridLayout(3, false));
-		leftContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		leftContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite rightContent = toolkit.createComposite(topContent, SWT.NONE);
 		rightContent.setLayout(new GridLayout(3, false));
-		rightContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		rightContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)rightContent.getLayout()).marginLeft = 20;
 		
 		//left
@@ -310,14 +317,16 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(leftContent, ""); //$NON-NLS-1$
-		
-		toolkit.createLabel(leftContent, Messages.PlanEditor_Description_Label);
-		txtDescription = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
-		txtDescription.setEditable(false);
-		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)txtDescription.getLayoutData()).widthHint = 100;
 		createEditLink(toolkit, leftContent, PanelType.PLANID);
+		
+		int height = txtName.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		Label clbl = toolkit.createLabel(leftContent, Messages.SummaryPlanEditorPage_CreatorLabel);
+		clbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)clbl.getLayoutData()).heightHint = height;
+		
+		txtCreator = toolkit.createLabel(leftContent, "", SWT.NONE); //$NON-NLS-1$
+		txtCreator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)txtCreator.getLayoutData()).heightHint = height;
 		
 		// - right
 		toolkit.createLabel(rightContent, Messages.PlanEditor_Type_Label);
@@ -325,7 +334,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtType.setEditable(false);
 		txtType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, rightContent, PanelType.TYPE);
-
+		
 		toolkit.createLabel(rightContent, Messages.PlanEditor_UnavailableEmployees_Label);
 		txtUnavailableEmployees = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtUnavailableEmployees.setEditable(false);
@@ -338,10 +347,17 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtParentPlanId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, rightContent, PanelType.PLANPARENTID);
 
-		// left
+		
+		//left and right spacer
 		Label lbl = toolkit.createLabel(leftContent, ""); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
+		((GridData)lbl.getLayoutData()).heightHint = SECTION_SPACING;
 		
+		lbl = toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
+		((GridData)lbl.getLayoutData()).heightHint = SECTION_SPACING;
+		
+		// left
 		toolkit.createLabel(leftContent, Messages.PlanEditor_StartDate_Label);
 		txtStartDate = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
@@ -356,9 +372,6 @@ public class SummaryPlanEditorPage extends EditorPart {
 		createEditLink(toolkit, leftContent, PanelType.STARTDATE);
 		
 		//right
-		Label lbl1 = toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
-		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
-		
 		toolkit.createLabel(rightContent, Messages.PlanEditor_Station_Label);
 		txtStation = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStation.setEditable(false);
@@ -371,12 +384,52 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtTeam.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, rightContent, PanelType.STATION);
 		
-		//bottom
+		
+		//left and right spacer
+		lbl = toolkit.createLabel(leftContent, ""); //$NON-NLS-1$
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
+		((GridData)lbl.getLayoutData()).heightHint = SECTION_SPACING;
+				
+		lbl = toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
+		((GridData)lbl.getLayoutData()).heightHint = SECTION_SPACING;
+				
+		
+		//left
+		lbl = toolkit.createLabel(leftContent, Messages.PlanEditor_Description_Label);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		txtDescription = toolkit.createText(leftContent, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
+		txtDescription.setEditable(false);
+		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
+		gd.heightHint = 40;
+		txtDescription.setLayoutData(gd);
+		Hyperlink lnk = createEditLink(toolkit, leftContent, PanelType.PLANID);
+		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		
+		// right
+		lbl = toolkit.createLabel(rightContent, Messages.SummaryPlanEditorPage_CommentLabel);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		txtComment = toolkit.createText(rightContent, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
+		txtComment.setEditable(false);
+		gd = new GridData(SWT.FILL, SWT.FILL, true,true);
+		gd.heightHint = 40;
+		gd.widthHint = txtTeam.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		txtComment.setLayoutData(gd);
+		lnk = createEditLink(toolkit, rightContent, PanelType.COMMENT);
+		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		
+//		//bottom
 		final Composite bottomContent = toolkit.createComposite(content, SWT.NONE);
-		bottomContent.setLayout(new GridLayout(2, false));
+		glayout = new GridLayout(2, false);
+		glayout.verticalSpacing = 0;
+		glayout.marginHeight = 0;
+		glayout.marginBottom = 5;
+		bottomContent.setLayout(glayout);
 		bottomContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		
+	
 		Label l = toolkit.createLabel(bottomContent, Messages.PlanEditor_PatrolLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridData)l.getLayoutData()).verticalIndent = 4;
@@ -413,9 +466,15 @@ public class SummaryPlanEditorPage extends EditorPart {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				if (targetSection.isExpanded()){
-					targetSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+					targetSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
+					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}else{
 					targetSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					if (summary.isExpanded()){
+						summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					}else{
+						summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					}
 				}
 				targetSection.getParent().layout();
 			}
@@ -569,6 +628,18 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getStartDate()));
 		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
 
+		if (plan.getCreator() != null){
+			txtCreator.setText(plan.getCreator().getFullLabel());
+		}else{
+			txtCreator.setText(""); //$NON-NLS-1$
+		}
+		
+		if (plan.getComment() != null){
+			txtComment.setText(plan.getComment());
+		}else{
+			txtComment.setText(""); //$NON-NLS-1$
+		}
+		
 		for (Control kid : patrolLinks.getChildren()) {
 			kid.dispose();
 		}
