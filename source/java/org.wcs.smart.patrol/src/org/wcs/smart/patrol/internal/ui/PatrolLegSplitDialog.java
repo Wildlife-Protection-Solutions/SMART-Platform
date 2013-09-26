@@ -26,7 +26,6 @@ import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -387,8 +386,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartUtils.convertDate(existingLeg.getStartDate());
-		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		SmartUtils.initDateDateTimeWidget(startDate, existingLeg.getStartDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_TimeOfSplit_Label);
@@ -413,7 +411,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		opCustom.addSelectionListener(opAdapter);
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
-		startTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		
+		SmartUtils.initTimeDateTimeWidget(startTime, existingLeg.getStartDate());
+		
 		startTime.addSelectionListener(opAdapter);
 		startTime.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
@@ -444,8 +444,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartUtils.convertDate(existingLeg.getEndDate());
-		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		SmartUtils.initDateDateTimeWidget(endDate, existingLeg.getEndDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_TimeGroupsJoined_Label);
@@ -470,7 +469,8 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		endTime.setEnabled(false);
 		
-		endTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		SmartUtils.initTimeDateTimeWidget(endTime, existingLeg.getEndDate());
+
 		endTime.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				validate();

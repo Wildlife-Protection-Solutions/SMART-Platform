@@ -104,10 +104,8 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @param endDate the end date
 	 */
 	public void setValues(Date startDate, Date endDate){
-		Calendar cal = SmartUtils.convertDate(startDate);
-        dtStartDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
-        cal = SmartUtils.convertDate(endDate);
-        dtEndDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+		SmartUtils.initDateDateTimeWidget(dtStartDate, startDate);
+		SmartUtils.initDateDateTimeWidget(dtEndDate, endDate);
 	}
 	
 	/**
@@ -132,12 +130,10 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	public void setValues(Patrol p, Session session) {
 	    if (p.getStartDate() != null){
-	    	Calendar cal = SmartUtils.convertDate(p.getStartDate());
-	        dtStartDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    	SmartUtils.initDateDateTimeWidget(dtStartDate, p.getStartDate());
 	    }
 	    if (p.getEndDate() != null){
-	    	Calendar cal = SmartUtils.convertDate(p.getEndDate());
-	    	dtEndDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    	SmartUtils.initDateDateTimeWidget(dtEndDate, p.getEndDate());
 	    }
 	}
 

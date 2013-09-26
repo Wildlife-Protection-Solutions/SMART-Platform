@@ -33,7 +33,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -667,9 +666,9 @@ public class GPSDataImport {
 				//the date of GMT timezone and assign that to the point.
 				//we need to take the year,month,date, hour, min, sec and assign it to a date with
 				//a time zone of gmt
-				Calendar c1 = GregorianCalendar.getInstance();
+				Calendar c1 = Calendar.getInstance();
 				c1.setTimeInMillis((long)c.z);
-				Calendar c2 = GregorianCalendar.getInstance();
+				Calendar c2 = Calendar.getInstance();
 				c2.setTimeZone(Track.ZTIMEZONE);
 				c2.setTimeInMillis(0);
 				c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));

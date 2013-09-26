@@ -324,8 +324,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartUtils.convertDate(editLeg.getStartDate());
-		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		SmartUtils.initDateDateTimeWidget(startDate, editLeg.getStartDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegStartTime_Label);
@@ -349,20 +348,24 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
-		startTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		SmartUtils.initTimeDateTimeWidget(startTime, editLeg.getStartDate());
+		
 		startTime.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				validate();
 			}
 		});
-
+		
+		Calendar ca = SmartUtils.convertDate(editLeg.getStartDate());
 		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 0 && ca.get(Calendar.MINUTE) == 0 && ca.get(Calendar.SECOND) == 0;
+		
 		opStart.setSelection(enabled);
 		opCustom.setSelection(!enabled);
 		startTime.setEnabled(!enabled);
 	}
-private void createEndTimeComposite(Composite parent) {
+	
+	private void createEndTimeComposite(Composite parent) {
 		
 		Composite timecomp = new Composite(parent, SWT.NONE);
 		timecomp.setLayout(new GridLayout(2, false));
@@ -379,8 +382,7 @@ private void createEndTimeComposite(Composite parent) {
 			}
 			
 		});
-		Calendar ca = SmartUtils.convertDate(editLeg.getEndDate());
-		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		SmartUtils.initDateDateTimeWidget(endDate, editLeg.getEndDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegEndTime_Label);
@@ -403,7 +405,8 @@ private void createEndTimeComposite(Composite parent) {
 		opEndCustom.addSelectionListener(opAdapter);
 		
 		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
-		endTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		SmartUtils.initTimeDateTimeWidget(endTime, editLeg.getEndDate());
+		
 		endTime.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -411,7 +414,10 @@ private void createEndTimeComposite(Composite parent) {
 				validate();
 			}
 		});
+		
+		Calendar ca = SmartUtils.convertDate(editLeg.getEndDate());
 		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 23 && ca.get(Calendar.MINUTE) == 59 && ca.get(Calendar.SECOND) == 59;
+		
 		opEnd.setSelection(enabled);
 		opEndCustom.setSelection(!enabled);
 		endTime.setEnabled(!enabled);
@@ -436,17 +442,11 @@ private void createEndTimeComposite(Composite parent) {
 	private String validateDates(){
 		Date patrolStart = SmartUtils.getDatePart(patrolStartDate, false);
 		Date patrolEnd = SmartUtils.getDatePart(patrolEndDate, true);
-		
-		
+			
 		Date legStart = SmartUtils.getDate(startDate);
 		if (opCustom.getSelection()){
 			legStart = SmartUtils.combineDateTime(legStart, new Time(SmartUtils.getTime(startTime).getTime()));
 		}
-//		long legStart = SmartUtils.getDate(startDate).getTime();
-//		if (opCustom.getSelection()){
-//			legStart += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
-//		}
-		
 		
 		//update end date & Time
 		//long etime = SmartUtils.getDate(endDate).getTime();
@@ -456,13 +456,6 @@ private void createEndTimeComposite(Composite parent) {
 		}else{
 			legEnd = SmartUtils.getDatePart(legEnd, true);
 		}
-//		long legEnd = SmartUtils.getDate(endDate).getTime();
-//		if (opEndCustom.getSelection()){
-//			legEnd += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds();
-//		}else{
-//			legEnd += 24 * 60 * 60 * 1000 - 1000;
-//		}
-		
 		
 		if (legStart.before(patrolStart)){
 			return MessageFormat.format(

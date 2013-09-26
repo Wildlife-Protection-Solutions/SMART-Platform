@@ -43,6 +43,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -194,6 +196,12 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		((GridData)tblEmployee.getTable().getLayoutData()).heightHint = tblEmployee.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		
 		tblEmployee.setFilters(new ViewerFilter[]{nameFilter, activeFilter});
+		tblEmployee.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				editEmployee();
+			}
+		});
 		
 		final Button chActive = new Button(container, SWT.CHECK);
 		chActive.setText(Messages.EmployeePropertyPage_Op_IncludeInActive);

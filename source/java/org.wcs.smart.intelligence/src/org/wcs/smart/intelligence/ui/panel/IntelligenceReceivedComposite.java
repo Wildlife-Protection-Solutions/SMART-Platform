@@ -94,8 +94,7 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
 	@Override
 	public void initFromModel(Intelligence intelligence) {
 	    if (intelligence.getReceivedDate() != null) {
-	    	Calendar cal = SmartUtils.convertDate(intelligence.getReceivedDate());
-	    	dtReceivedDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    	SmartUtils.initDateDateTimeWidget(dtReceivedDate, intelligence.getReceivedDate());
 	    }
 	}
 }
