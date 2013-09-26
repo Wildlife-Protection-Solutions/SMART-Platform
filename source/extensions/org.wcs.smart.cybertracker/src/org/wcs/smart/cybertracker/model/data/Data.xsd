@@ -14,6 +14,7 @@
                       <xs:attribute type="xs:int" name="Static" use="optional"/>
                       <xs:attribute type="xs:string" name="Tag_0" use="optional"/>
                       <xs:attribute type="xs:string" name="Tag_1" use="optional"/>
+                      <xs:attribute type="xs:string" name="Tag_2" use="optional"/>
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
