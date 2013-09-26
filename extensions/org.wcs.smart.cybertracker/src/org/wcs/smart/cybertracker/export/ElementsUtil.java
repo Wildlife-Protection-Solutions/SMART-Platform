@@ -114,11 +114,16 @@ public class ElementsUtil {
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1) {
+		addElementsItem(elements, name, id, tag0, tag1, null);
+	}
+	
+	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2) {
 		Elements.List.Items.Item item = new Elements.List.Items.Item();
 		item.setName(name);
 		item.setId(id);
 		item.setTag0(tag0);
 		item.setTag1(tag1);
+		item.setTag2(tag2);
 		elements.getList().getItems().getItem().add(item);
 	}
 

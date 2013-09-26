@@ -173,7 +173,7 @@ public class ScreensObjectFactory {
         <DataClass>TctScreen</DataClass>
         <Data>
             <NextId>12</NextId>
-            <TemplateId>{AB59A6BF-A6CB-4446-8350-DA326FABA878}</TemplateId>
+            <TemplateId>{E4BFBBF6-F16B-4C0E-8729-FFCE68569AF3}</TemplateId>
             <Name>???</Name>
             <Controls>
                 <Control>...</Control>
@@ -181,7 +181,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public Node createNodeChecklist(String id, String name, List<String> values, String trElements, String trLinks, Integer minChecks) {
+	public Node createNodeMultiList(String id, String name, List<String> values, String trElements, String trLinks, Integer minChecks) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -193,7 +193,7 @@ public class ScreensObjectFactory {
 		
 		Node.Data data = new Node.Data();
 		data.setNextId(12);
-		data.setTemplateId("{AB59A6BF-A6CB-4446-8350-DA326FABA878}"); //$NON-NLS-1$
+		data.setTemplateId("{E4BFBBF6-F16B-4C0E-8729-FFCE68569AF3}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
