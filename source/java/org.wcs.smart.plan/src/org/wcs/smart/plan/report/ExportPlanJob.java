@@ -97,6 +97,9 @@ public class ExportPlanJob extends Job {
 			}else{
 				reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
 			}
+			reportParameters.put(ReportPlan.PLAN_COMMENT, plan.getComment() == null ? "" : plan.getComment()); //$NON-NLS-1$
+			reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : plan.getCreator().getFullLabel()); //$NON-NLS-1$
+						
 			StringBuilder sb = new StringBuilder();
 			List<PatrolEditorInput> ins = PlanHibernateManager.getPatrols(plan, session);
 			for (PatrolEditorInput in : ins){

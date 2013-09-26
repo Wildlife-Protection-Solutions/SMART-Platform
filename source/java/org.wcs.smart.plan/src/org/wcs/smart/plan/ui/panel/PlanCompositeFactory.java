@@ -55,7 +55,7 @@ public class PlanCompositeFactory {
 		case STATION:    return new PlanStationTeamComposite(parent, style);
 		case PLANPARENTID:    return new PlanParentIdComposite(parent, style);
 		case PATROLPLAN: return new PatrolPlanComposite(parent, style);
-		
+		case COMMENT: return new PlanCommentComposite(parent, style);
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
 		}
 	}
@@ -70,7 +70,7 @@ public class PlanCompositeFactory {
 		case STATION: return Messages.PlanCompositeFactory_Title_Station;
 		case PLANPARENTID: return Messages.PlanCompositeFactory_Title_ParentId;
 		case PATROLPLAN: return PatrolPlanComposite.TITLE;
-		
+		case COMMENT: return Messages.PlanCompositeFactory_Title_Comment;
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
 		}
 	}
@@ -86,7 +86,8 @@ public class PlanCompositeFactory {
 		STARTDATE,
 		ENDDATE,
 		TARGETS,
-		PATROLPLAN;
+		PATROLPLAN,
+		COMMENT;
 	}
 
 }

@@ -96,4 +96,17 @@ ALTER TABLE smart.waypoint_query
 GRANT ALL PRIVILEGES  ON smart.WAYPOINT_QUERY to manager;
 GRANT ALL PRIVILEGES  ON smart.WAYPOINT_QUERY to analyst;
 
+
+
+--Updates for Plans -addition of creator and comments field
+ALTER TABLE smart.plan ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
+ALTER TABLE smart.plan ADD COLUMN comment LONG VARCHAR;
+ALTER TABLE smart.plan 
+	ADD CONSTRAINT plan_creator_uuid_fk FOREIGN KEY (creator_uuid)
+	REFERENCES smart.employee (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+
 update smart.db_version set version = '2.0.0';

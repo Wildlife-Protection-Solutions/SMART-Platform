@@ -38,6 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.Team;
@@ -56,6 +57,7 @@ public class Plan extends NamedItem {
 
 	public static final int MAX_ID_LENGTH = 32;
 	public static final int MAX_DESC_LENGTH = 256;
+	public static final int MAX_COMMENT_LENGTH = 32700;
 	
 	/**
 	 * Various plan types
@@ -95,7 +97,8 @@ public class Plan extends NamedItem {
 	private Integer activeEmployees;
 	private List<Plan> children = new ArrayList<Plan>();
 	private Plan parent = null;
-	
+	private Employee creator;
+	private String comment;
 	
 	private Plan template = null;
 	
@@ -233,6 +236,40 @@ public class Plan extends NamedItem {
 		this.activeEmployees = activeEmployees;
 	}
 	
+	/**
+	 * 
+	 * @return plan creator
+	 */
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="creator_uuid", referencedColumnName="uuid")
+	public Employee getCreator(){
+		return creator;
+	}
+	
+	/**
+	 * Set the plan creator
+	 * @param creator
+	 */
+	public void setCreator(Employee creator){
+		this.creator = creator;
+	}
+	
+	/**
+	 * 
+	 * @return plan comments
+	 */
+	@Column(name="comment")
+	public String getComment(){
+		return comment;
+	}
+	
+	/**
+	 * Sets the plan comment
+	 * @param comment
+	 */
+	public void setComment(String comment){
+		this.comment = comment;
+	}
 	/**
 	 * 
 	 * @return plan targets
