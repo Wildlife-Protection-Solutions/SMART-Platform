@@ -135,8 +135,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartUtils.convertDate(existingLeg.getStartDate());
-		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		SmartUtils.initDateDateTimeWidget(startDate, existingLeg.getStartDate());
 		
 		//time of change
 		lbl = new Label(timecomp, SWT.NONE);

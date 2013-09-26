@@ -141,8 +141,21 @@ public class SmartUtils {
 	 * 
 	 */
 	public static Date getDate(DateTime dt) {
-		//Calendar calendar = new GregorianCalendar();
-		Calendar calendar = GregorianCalendar.getInstance();
+		return getCalendar(dt).getTime();
+	}
+
+	/**
+	 * Converts a date time widget to a date object only setting year
+	 * month and day.  The hour, minute, second and millisecond are all set to 0
+	 * 
+	 * @param dt
+	 * @return
+	 */
+	public static Calendar getCalendar(DateTime dt){
+		
+		//DateTime widget seems to always return data in Gregorian calendar
+		Calendar calendar = new GregorianCalendar();
+		
 		calendar.set(Calendar.YEAR, dt.getYear());
 		calendar.set(Calendar.MONTH, dt.getMonth());
 		calendar.set(Calendar.DAY_OF_MONTH, dt.getDay());
@@ -150,11 +163,39 @@ public class SmartUtils {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
+		
+		//return calendar in correct locale
+		Calendar current = Calendar.getInstance();
+		current.setTime(calendar.getTime());
+		return current;
+	}
 
-		return calendar.getTime();
+	/**
+	 * initialized the date fields of a datetime widget
+	 * @param dtWidget
+	 * @param date
+	 */
+	public static void initDateDateTimeWidget(DateTime dtWidget, Date date){
+		//datetime widget uses gregorian calendar for fields
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		
+		dtWidget.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
 	}
 	
-
+	/**
+	 * initialized the time fields of a datetime widget
+	 * @param dtWidget
+	 * @param date
+	 */
+	public static void initTimeDateTimeWidget(DateTime dtWidget, Date date){
+		//datetime widget uses gregorian calendar for fields
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		dtWidget.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+	}
+	
+	
 	/**
 	 * Gets only the date part of a given date. Sets the time to 0 is not
 	 * endOfDay; sets the time to 23:59:59 if end of day.
@@ -163,8 +204,7 @@ public class SmartUtils {
 	 * @return date only date
 	 */
 	public static Date getDatePart(Date date, boolean endOfDay) {
-		//Calendar calendar = new GregorianCalendar();
-		Calendar calendar = GregorianCalendar.getInstance();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		if (!endOfDay) {
 			calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -188,9 +228,9 @@ public class SmartUtils {
 	 * @return date only date
 	 */
 	public static Date combineDateTime(Date date, Time time) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		Calendar calendar2 = new GregorianCalendar();
+		Calendar calendar2 = Calendar.getInstance();
 		calendar2.setTime(time);
 
 		calendar.set(Calendar.HOUR_OF_DAY, calendar2.get(Calendar.HOUR_OF_DAY));
@@ -206,7 +246,7 @@ public class SmartUtils {
 	 * seconde
 	 */
 	public static Date getTime(DateTime dt) {
-		Calendar calendar = GregorianCalendar.getInstance();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(0);
 		calendar.set(Calendar.HOUR_OF_DAY, dt.getHours());
 		calendar.set(Calendar.MINUTE, dt.getMinutes());
@@ -219,7 +259,7 @@ public class SmartUtils {
 	 * @return
 	 */
 	public static Date getMidnight() {
-		Calendar cal = GregorianCalendar.getInstance();
+		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(0);
 		cal.set(Calendar.MILLISECOND, 0);
 		cal.set(Calendar.SECOND, 0);
@@ -231,10 +271,10 @@ public class SmartUtils {
 	/**
 	 * converts a Date to a Calendar object
 	 */
-	public static GregorianCalendar convertDate(Date d) {
-		Calendar calendar = GregorianCalendar.getInstance();
+	public static Calendar convertDate(Date d) {
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(d);
-		return (GregorianCalendar)calendar;
+		return calendar;
 
 	}
 
@@ -607,8 +647,9 @@ public class SmartUtils {
 		if (d == null) {
 			return null;
 		}
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
+		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(d);
+		
 		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
 		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);

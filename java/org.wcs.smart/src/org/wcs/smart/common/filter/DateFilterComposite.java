@@ -23,7 +23,6 @@ package org.wcs.smart.common.filter;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -301,10 +300,8 @@ public class DateFilterComposite extends Composite {
 		if (enabled) {
 			dateViewer.setSelection(new StructuredSelection(dateFilter));
 			if (dateFilter == DateFilter.CUSTOM) {
-				GregorianCalendar cal = SmartUtils.convertDate(startDate);
-				dtStart.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-				cal = SmartUtils.convertDate(endDate);
-				dtEnd.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+				SmartUtils.initDateDateTimeWidget(dtStart, startDate);
+				SmartUtils.initDateDateTimeWidget(dtEnd, endDate);
 			}
 		} else {
 			dateViewer.setSelection(getDefaultDateViewerSelection());

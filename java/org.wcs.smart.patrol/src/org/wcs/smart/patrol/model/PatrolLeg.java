@@ -28,7 +28,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -212,7 +211,7 @@ public class PatrolLeg {
 	
 	
 	private Time createPatrolTime(int hours, int minute, int second){
-		Calendar cForProcessing = GregorianCalendar.getInstance();
+		Calendar cForProcessing = Calendar.getInstance();
 		cForProcessing.setTimeInMillis(0);
 		
 		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
@@ -225,7 +224,7 @@ public class PatrolLeg {
 	
 	
 	private Time convertDateToTime(Date d){
-		Calendar c = GregorianCalendar.getInstance();
+		Calendar c = Calendar.getInstance();
 		c.setTime(d);		
 		return createPatrolTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
 		
@@ -249,8 +248,8 @@ public class PatrolLeg {
 		}
 		
 		//determine start & end dates
-		GregorianCalendar calStart = SmartUtils.convertDate( SmartUtils.getDatePart(getStartDate(), false) );
-		GregorianCalendar calEnd= SmartUtils.convertDate( SmartUtils.getDatePart(getEndDate(), false) );
+		Calendar calStart = SmartUtils.convertDate( SmartUtils.getDatePart(getStartDate(), false) );
+		Calendar calEnd= SmartUtils.convertDate( SmartUtils.getDatePart(getEndDate(), false) );
 		
 		//---- the first patrol leg day
 		

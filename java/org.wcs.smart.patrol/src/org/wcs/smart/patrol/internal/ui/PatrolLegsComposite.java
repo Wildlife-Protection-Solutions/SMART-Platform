@@ -30,7 +30,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -487,9 +486,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}
 		
 		/* ensure there is at least one leg for each day in the patrol */
-		GregorianCalendar calStart = SmartUtils.convertDate(patrolStartDate);
-		calStart = new GregorianCalendar(calStart.get(Calendar.YEAR), calStart.get(Calendar.MONTH), calStart.get(Calendar.DAY_OF_MONTH), 0,0,0);		
-		GregorianCalendar calEnd = SmartUtils.convertDate(patrolEndDate);
+		Calendar calStart = SmartUtils.convertDate(patrolStartDate);
+		calStart.set(Calendar.HOUR, 0);
+		calStart.set(Calendar.MINUTE, 0);
+		calStart.set(Calendar.SECOND, 0);
+		calStart.set(Calendar.MILLISECOND, 0);
+				
+		Calendar calEnd = SmartUtils.convertDate(patrolEndDate);
 		
 		while (calStart.before(calEnd) || calStart.equals(calEnd)){
 			boolean found = false;

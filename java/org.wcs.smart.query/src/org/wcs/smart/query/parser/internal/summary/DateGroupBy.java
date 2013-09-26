@@ -23,12 +23,14 @@ package org.wcs.smart.query.parser.internal.summary;
 
 
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -147,9 +149,10 @@ public class DateGroupBy implements IGroupBy {
 				}
 			}
 		}
-		Calendar cals = GregorianCalendar.getInstance();
+		Calendar cals = Calendar.getInstance();
 		cals.setTime(startdate);
-		Calendar cale = GregorianCalendar.getInstance();
+		
+		Calendar cale = Calendar.getInstance();
 		cale.setTime(enddate);
 		
 		if (op == DateGroupByOption.DAY){
@@ -163,11 +166,15 @@ public class DateGroupBy implements IGroupBy {
 		}else if (op == DateGroupByOption.MONTH){
 			//each month between start and end of 
 			//form "m/yyyy"
+			SimpleDateFormat nameFormat = new SimpleDateFormat("MM/yyyy");
+			SimpleDateFormat keyFormat = new SimpleDateFormat("M/yyyy", Locale.ENGLISH);
+			
 			cals.set(Calendar.DAY_OF_MONTH, 1);
 			cale.set(Calendar.DAY_OF_MONTH, cale.getActualMaximum(Calendar.DAY_OF_MONTH));
 			while(cals.before(cale)){
-				String key = (cals.get(Calendar.MONTH)+1) + "/" +cals.get(Calendar.YEAR); //$NON-NLS-1$
-				items.add(new ListItem(null, key,key));
+				String key = keyFormat.format(cals.getTime());
+				String name = nameFormat.format(cals.getTime());
+				items.add(new ListItem(null, name, key));
 				cals.add(Calendar.MONTH, 1);
 			}
 			
@@ -175,8 +182,13 @@ public class DateGroupBy implements IGroupBy {
 			//each year in form yyyy
 			int year = cals.get(Calendar.YEAR);
 			int year2 = cale.get(Calendar.YEAR);
+			GregorianCalendar gcal = new GregorianCalendar();
 			while(year <= year2){
-				items.add(new ListItem(null, String.valueOf(year), String.valueOf(year)));
+				Calendar c = Calendar.getInstance();
+				c.set(year, 0, 1);
+				gcal.setTime(c.getTime());
+				
+				items.add(new ListItem(null, String.valueOf(year), String.valueOf(gcal.get(Calendar.YEAR))));
 				year ++;
 			}
 			

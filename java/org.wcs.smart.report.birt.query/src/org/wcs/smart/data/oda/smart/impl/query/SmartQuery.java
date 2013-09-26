@@ -26,7 +26,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -208,7 +207,7 @@ public class SmartQuery implements IQuery {
 			if (smartQuery.getType() == QueryType.SUMMARY){
 				//we choose to run summaries in order to get 
 				//all header information
-				Calendar cal = GregorianCalendar.getInstance();
+				Calendar cal = Calendar.getInstance();
 				cal.set(1900, Calendar.JANUARY, 1);
 				startDate = new Date( cal.getTimeInMillis() );
 				endDate = new Date(startDate.getTime());

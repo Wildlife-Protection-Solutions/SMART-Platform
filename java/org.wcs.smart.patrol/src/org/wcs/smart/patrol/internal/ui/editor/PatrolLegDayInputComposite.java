@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -200,7 +199,7 @@ public class PatrolLegDayInputComposite {
 	public void setData(PatrolLegDay data) {
 		this.patrolLegDate = data;
 		
-		Calendar cal = new GregorianCalendar();
+		Calendar cal = Calendar.getInstance();
 		if (data.getStartTime() != null) {
 			cal.setTime(data.getStartTime());
 			dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
@@ -485,9 +484,9 @@ public class PatrolLegDayInputComposite {
 	}
 	
 	private boolean timeEqual(long t1, long t2){
-		Calendar c1 = new GregorianCalendar();
+		Calendar c1 = Calendar.getInstance();
 		c1.setTimeInMillis(t1);
-		Calendar c2 = new GregorianCalendar();
+		Calendar c2 = Calendar.getInstance();
 		c2.setTimeInMillis(t2);
 		
 		int[] fields = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};

@@ -24,7 +24,6 @@ package org.wcs.smart.plan.ui.panel;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -142,20 +141,9 @@ public class PlanDatesComposite extends PlanComposite {
 				thisParentPlan = (Plan) session.load(Plan.class, plan.getParent().getUuid());
 			}
 
-			Calendar startDate; 
-			Calendar endDate; 
-			if(plan.getStartDate() != null){
-				startDate = SmartUtils.convertDate(plan.getStartDate());
-			}else{
-				startDate = SmartUtils.convertDate(new Date());
-			}
-			if(plan.getEndDate() != null){
-				endDate = SmartUtils.convertDate(plan.getEndDate());
-			}else{
-				endDate = SmartUtils.convertDate(new Date()); 
-			}
-			dtStartDate.setDate(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH), startDate.get(Calendar.DATE));
-			dtEndDate.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
+			SmartUtils.initDateDateTimeWidget(dtStartDate, plan.getStartDate() != null ? plan.getStartDate() : new Date());
+			SmartUtils.initDateDateTimeWidget(dtEndDate, plan.getEndDate() != null ? plan.getEndDate() : new Date());
+			
 			if(thisParentPlan != null){
 				parentStartDate = thisParentPlan.getStartDate();
 			}else{

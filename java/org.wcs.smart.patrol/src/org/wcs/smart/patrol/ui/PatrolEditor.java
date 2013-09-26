@@ -26,7 +26,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import net.refractions.udig.project.internal.Map;
@@ -314,9 +313,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			}
 			int insertindex = 1;
-			GregorianCalendar calStart = SmartUtils.convertDate(getPatrol().getStartDate());
-			calStart = new GregorianCalendar(calStart.get(Calendar.YEAR),calStart.get(Calendar.MONTH),calStart.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
-			GregorianCalendar calEnd = SmartUtils.convertDate(getPatrol().getEndDate());
+			Calendar calStart = SmartUtils.convertDate(getPatrol().getStartDate());
+			calStart.set(Calendar.HOUR, 0);
+			calStart.set(Calendar.MINUTE, 0);
+			calStart.set(Calendar.SECOND, 0);
+			calStart.set(Calendar.MILLISECOND, 0);
+			
+			Calendar calEnd = SmartUtils.convertDate(getPatrol().getEndDate());
 			
 			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
 				PatrolDayEditorInput input = new PatrolDayEditorInput(calStart.getTime());

@@ -23,9 +23,7 @@ package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -114,9 +112,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		if (x != null){
 			try{
 				Date d = sdf.parse(x);
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(d);
-				startPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+				SmartUtils.initDateDateTimeWidget(startPicker, d);
 			}catch (Exception ex){
 				//eat me
 			}
@@ -129,9 +125,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		if (x != null){
 			try{
 				Date d = sdf.parse(x);
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(d);
-				endPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+				SmartUtils.initDateDateTimeWidget(endPicker, d);
 			}catch (Exception ex){
 				//eat me
 			}
@@ -151,17 +145,13 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				if (!enabled && filterOp != null){
 					Date[] d = filterOp.getDates();
 					if (d != null){
-						Calendar cal = GregorianCalendar.getInstance();
 						if (d.length >=1){
-							cal.setTime(d[0]);
-							startPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+							SmartUtils.initDateDateTimeWidget(startPicker, d[0]);
 						}
 						if (d.length == 2){
-							cal.setTime(d[1]);
-							endPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+							SmartUtils.initDateDateTimeWidget(endPicker, d[1]);
 						}else{
-							cal.setTime(new Date());
-							endPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+							SmartUtils.initDateDateTimeWidget(endPicker, new Date());
 						}
 					}
 				}

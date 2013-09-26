@@ -136,15 +136,14 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
 	@Override
 	public void initFromModel(Intelligence intelligence) {
 	    if (intelligence.getFromDate() != null) {
-	    	Calendar cal = SmartUtils.convertDate(intelligence.getFromDate());
-	    	dtFromDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    	SmartUtils.initDateDateTimeWidget(dtFromDate, intelligence.getFromDate());
 	    }
 	    if (intelligence.getToDate() != null) {
-	    	Calendar cal = SmartUtils.convertDate(intelligence.getToDate());
-	    	dtToDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    	SmartUtils.initDateDateTimeWidget(dtToDate, intelligence.getToDate());
 	    	multipleDays.setSelection(true);
 	    } else {
 	    	dtToDate.setDate(dtFromDate.getYear(), dtFromDate.getMonth(), dtFromDate.getDay());
+	    	multipleDays.setSelection(false);
 	    }
 	    applyCurrentState();
 	}

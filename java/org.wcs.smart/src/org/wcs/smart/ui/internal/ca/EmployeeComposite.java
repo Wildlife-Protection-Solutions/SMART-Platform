@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -449,10 +448,12 @@ public class EmployeeComposite extends Composite {
 		}
 		
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
-		Calendar now = new GregorianCalendar(); 
-		Calendar min = new GregorianCalendar(now.get(Calendar.YEAR) - Employee.MIN_EMPLOYEE_AGE, now.get(Calendar.MONTH),now.get(Calendar.DATE));
-		Calendar calBirthDate = new GregorianCalendar(dtBirthDate.getYear(), dtBirthDate.getMonth(), dtBirthDate.getDay());
-
+		Calendar now = Calendar.getInstance();
+		Calendar min = Calendar.getInstance();
+		min.set(Calendar.YEAR, now.get(Calendar.YEAR)- Employee.MIN_EMPLOYEE_AGE );
+		
+		
+		Calendar calBirthDate = SmartUtils.getCalendar(dtBirthDate);
 		if(min.before(calBirthDate)){
 			cdBirthDate.show();
 			cdBirthDate.setDescriptionText(
@@ -465,9 +466,10 @@ public class EmployeeComposite extends Composite {
 		}
 		
 		// test for startdate being at least Employee.MIN_EMPLOYEE_AGE since birthdate
-		min = new GregorianCalendar(dtBirthDate.getYear() + Employee.MIN_EMPLOYEE_AGE, dtBirthDate.getMonth(), dtBirthDate.getDay());
-		Calendar calStartDate = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay());
+		min = Calendar.getInstance();
+		min.set(Calendar.YEAR, dtBirthDate.getYear() + Employee.MIN_EMPLOYEE_AGE);
 		
+		Calendar calStartDate = SmartUtils.getCalendar(dtEmploymentStart);
 		if(calStartDate.before(min)){
 			cdEmploymentStart.show();
 			cdEmploymentStart.setDescriptionText(
@@ -483,8 +485,9 @@ public class EmployeeComposite extends Composite {
 			boolean hide = true;
 			if(chNotActive.getSelection()){
 				//test for EmploymentEnd being before employment start
-				Calendar start = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay() );
-				Calendar end = new GregorianCalendar(dtEmploymentEnd.getYear(), dtEmploymentEnd.getMonth(), dtEmploymentEnd.getDay() );
+				Calendar start = SmartUtils.getCalendar(dtEmploymentStart);
+				Calendar end = SmartUtils.getCalendar(dtEmploymentEnd);
+				
 				if(end.before(start)){
 					cdEmploymentEnd.show();
 					cdEmploymentEnd.setDescriptionText(Messages.EmployeeComposite_Error_InvalidEndDate);
@@ -560,17 +563,14 @@ public class EmployeeComposite extends Composite {
 		opFemale.setSelection(e.getGender() == Employee.DB_FEMALE);
 		opMale.setSelection(e.getGender() ==  Employee.DB_MALE);
 		
-		Calendar birthDate = SmartUtils.convertDate(e.getBirthDate());
-		dtBirthDate.setDate(birthDate.get(Calendar.YEAR), birthDate.get(Calendar.MONTH), birthDate.get(Calendar.DATE));
+		SmartUtils.initDateDateTimeWidget(dtBirthDate, e.getBirthDate());
+		SmartUtils.initDateDateTimeWidget(dtEmploymentStart, e.getStartEmploymentDate());
 		
-		Calendar employmentStartDate = SmartUtils.convertDate(e.getStartEmploymentDate());
-		dtEmploymentStart.setDate(employmentStartDate.get(Calendar.YEAR), employmentStartDate.get(Calendar.MONTH), employmentStartDate.get(Calendar.DATE));
 		
 		if (e.getEndEmploymentDate() != null){
 			chNotActive.setSelection(true);
 			dtEmploymentEnd.setEnabled(true);
-			Calendar endDate = SmartUtils.convertDate(e.getEndEmploymentDate());
-			dtEmploymentEnd.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
+			SmartUtils.initDateDateTimeWidget(dtEmploymentEnd, e.getEndEmploymentDate());
 		}else{
 			chNotActive.setSelection(false);
 			dtEmploymentEnd.setEnabled(false);

@@ -23,7 +23,6 @@ package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -36,7 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Date PArameter UI element
+ * Date Parameter UI element
  * @author egouge
  * @since 1.0.0
  */
@@ -100,9 +99,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 			datePicker = new DateTime(param, dFormat);
 			datePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			if (this.defaultValue != null){
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(defaultValue);
-				datePicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+				SmartUtils.initDateDateTimeWidget(datePicker, defaultValue);
 			}
 			
 		}
@@ -110,9 +107,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 			timePicker = new DateTime(param, tFormat);
 			timePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			if (this.defaultValue != null){
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(defaultValue);
-				datePicker.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+				SmartUtils.initTimeDateTimeWidget(timePicker, defaultValue);
 			}
 		}
 		return param;
