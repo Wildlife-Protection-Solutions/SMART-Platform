@@ -819,14 +819,14 @@
                 <structure>
                     <property name="name">StartDate</property>
                     <text-property name="displayName">StartDate</text-property>
-                    <expression name="expression" type="javascript">params["StartDate"].value</expression>
+                    <expression name="expression" type="javascript">(new Date(params["StartDate"].value.getTime())).toLocaleDateString()</expression>
                     <property name="dataType">string</property>
                     <property name="allowExport">true</property>
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
                     <text-property name="displayName">EndDate</text-property>
-                    <expression name="expression" type="javascript">params["EndDate"].value</expression>
+                    <expression name="expression" type="javascript">(new Date(params["EndDate"].value.getTime())).toLocaleDateString()</expression>
                     <property name="dataType">string</property>
                     <property name="allowExport">true</property>
                 </structure>
@@ -844,6 +844,13 @@
                     <property name="dataType">string</property>
                     <property name="allowExport">true</property>
                 </structure>
+                <structure>
+                    <property name="name">Patrols</property>
+                    <text-property name="displayName">Patrols</text-property>
+                    <expression name="expression" type="javascript">params["Patrols"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
             </list-property>
             <column id="45">
                 <property name="width">0.8958333333333334in</property>
@@ -852,14 +859,15 @@
                 <property name="width">3.0208333333333335in</property>
             </column>
             <column id="47">
-                <property name="width">1.5833333333333333in</property>
+                <property name="width">1.75in</property>
             </column>
             <column id="48">
-                <property name="width">2.4479166666666665in</property>
+                <property name="width">2.28125in</property>
             </column>
             <row id="49">
                 <cell id="50">
                     <label id="74">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Plan ID:</text-property>
                     </label>
                 </cell>
@@ -870,6 +878,7 @@
                 </cell>
                 <cell id="52">
                     <label id="79">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Plan Type:</text-property>
                     </label>
                 </cell>
@@ -882,6 +891,7 @@
             <row id="54">
                 <cell id="55">
                     <label id="75">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Plan Name:</text-property>
                     </label>
                 </cell>
@@ -892,6 +902,7 @@
                 </cell>
                 <cell id="57">
                     <label id="80">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Unavailable Employees:</text-property>
                     </label>
                 </cell>
@@ -904,6 +915,7 @@
             <row id="59">
                 <cell id="60">
                     <label id="76">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Creator:</text-property>
                     </label>
                 </cell>
@@ -914,6 +926,7 @@
                 </cell>
                 <cell id="62">
                     <label id="109">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Active Employees:</text-property>
                     </label>
                 </cell>
@@ -928,6 +941,7 @@
                 <cell id="66"/>
                 <cell id="67">
                     <label id="81">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Parent Plan:</text-property>
                     </label>
                 </cell>
@@ -938,7 +952,7 @@
                 </cell>
             </row>
             <row id="345">
-                <property name="height">20px</property>
+                <property name="height">15px</property>
                 <cell id="346"/>
                 <cell id="347"/>
                 <cell id="348"/>
@@ -947,6 +961,7 @@
             <row id="69">
                 <cell id="70">
                     <label id="77">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Start Date:</text-property>
                     </label>
                 </cell>
@@ -957,6 +972,7 @@
                 </cell>
                 <cell id="72">
                     <label id="82">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Station:</text-property>
                     </label>
                 </cell>
@@ -969,6 +985,7 @@
             <row id="103">
                 <cell id="104">
                     <label id="78">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">End Date:</text-property>
                     </label>
                 </cell>
@@ -979,6 +996,7 @@
                 </cell>
                 <cell id="106">
                     <label id="83">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Team:</text-property>
                     </label>
                 </cell>
@@ -989,7 +1007,7 @@
                 </cell>
             </row>
             <row id="364">
-                <property name="height">20px</property>
+                <property name="height">15px</property>
                 <cell id="365"/>
                 <cell id="366"/>
                 <cell id="367"/>
@@ -998,54 +1016,57 @@
             <row id="340">
                 <cell id="341">
                     <label id="355">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Description:</text-property>
                     </label>
                 </cell>
                 <cell id="342">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
                     <data id="356">
                         <property name="resultSetColumn">PlanDescription</property>
                     </data>
                 </cell>
-                <cell id="343">
+            </row>
+            <row id="375">
+                <property name="height">15px</property>
+                <cell id="376"/>
+                <cell id="377"/>
+                <cell id="378"/>
+                <cell id="379"/>
+            </row>
+            <row id="370">
+                <cell id="371">
                     <label id="362">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Comments:</text-property>
                     </label>
                 </cell>
-                <cell id="344">
+                <cell id="372">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
                     <data id="363">
                         <property name="resultSetColumn">Comment</property>
                     </data>
                 </cell>
             </row>
-        </grid>
-        <label id="94">
-            <property name="fontFamily">sans-serif</property>
-        </label>
-        <grid id="95">
-            <property name="fontFamily">sans-serif</property>
-            <property name="width">7.947916666666667in</property>
-            <list-property name="boundDataColumns">
-                <structure>
-                    <property name="name">Patrols</property>
-                    <text-property name="displayName">Patrols</text-property>
-                    <expression name="expression" type="javascript">params["Patrols"].value</expression>
-                    <property name="dataType">string</property>
-                    <property name="allowExport">true</property>
-                </structure>
-            </list-property>
-            <column id="96">
-                <property name="width">0.6354166666666666in</property>
-            </column>
-            <column id="97">
-                <property name="width">7.3125in</property>
-            </column>
-            <row id="98">
-                <cell id="99">
+            <row id="380">
+                <property name="height">15px</property>
+                <cell id="381"/>
+                <cell id="382"/>
+                <cell id="383"/>
+                <cell id="384"/>
+            </row>
+            <row id="385">
+                <cell id="386">
                     <label id="101">
+                        <property name="fontWeight">bold</property>
                         <text-property name="text">Patrols:</text-property>
                     </label>
                 </cell>
-                <cell id="100">
+                <cell id="387">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
                     <data id="102">
                         <property name="resultSetColumn">Patrols</property>
                     </data>

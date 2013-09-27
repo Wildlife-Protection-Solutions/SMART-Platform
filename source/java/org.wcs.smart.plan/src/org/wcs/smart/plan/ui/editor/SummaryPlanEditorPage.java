@@ -321,7 +321,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		
 		int height = txtName.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		Label clbl = toolkit.createLabel(leftContent, Messages.SummaryPlanEditorPage_CreatorLabel);
-		clbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		clbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		((GridData)clbl.getLayoutData()).heightHint = height;
 		
 		txtCreator = toolkit.createLabel(leftContent, "", SWT.NONE); //$NON-NLS-1$
@@ -404,6 +404,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.heightHint = 40;
+		gd.widthHint = 40;
 		txtDescription.setLayoutData(gd);
 		Hyperlink lnk = createEditLink(toolkit, leftContent, PanelType.PLANID);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
@@ -416,12 +417,12 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtComment.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.heightHint = 40;
-		gd.widthHint = txtTeam.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		gd.widthHint = 40;
 		txtComment.setLayoutData(gd);
 		lnk = createEditLink(toolkit, rightContent, PanelType.COMMENT);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
-//		//bottom
+		//bottom
 		final Composite bottomContent = toolkit.createComposite(content, SWT.NONE);
 		glayout = new GridLayout(2, false);
 		glayout.verticalSpacing = 0;
