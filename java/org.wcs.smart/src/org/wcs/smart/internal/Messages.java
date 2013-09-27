@@ -774,7 +774,7 @@ public class Messages extends NLS {
 	public static String RestoreHandler_DialogTitle;
 	public static String RestoreHandler_Error_DialogTitle;
 	public static String RestoreHandler_Error_Message;
-	public static String RestoreHandler_ReportComplete_DialogMessage;
+	public static String RestoreHandler_ReportComplete_DialogMessage1;
 	public static String RestoreHandler_ReportComplete_DialogTitle;
 	public static String RestoreHandler_ReportFailed_Message;
 	public static String RestoreHandler_RestoreButton;
