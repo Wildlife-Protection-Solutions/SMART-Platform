@@ -24,13 +24,16 @@ package org.wcs.smart.ui.internal.backup;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.equinox.app.IApplication;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyRestoreEngine;
@@ -105,9 +108,12 @@ public class RestoreHandler {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage);
+								MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage1);
 								
 							}});
+						
+						//restart
+						System.exit(IApplication.EXIT_RESTART);						
 					}catch (final Exception ex){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
