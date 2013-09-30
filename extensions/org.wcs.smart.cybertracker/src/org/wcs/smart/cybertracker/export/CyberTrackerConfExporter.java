@@ -70,7 +70,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 2.0.0
  */
-public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
+public class CyberTrackerConfExporter {
 
 	private static final String NODE_DEPTH_RESULT_PREFIX = "node"; //$NON-NLS-1$
 	private static final String NODE_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
@@ -97,7 +97,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
 			newWpElementsIds = createNewWpElementsIds(elements);
 			defaultAttrValuesResultId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId());
+			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			return performExport(destFolder, model, monitor, session);
 		} finally {
 			defaultAttrValuesResultId = null;
@@ -255,7 +255,6 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			if (AttributeType.LIST.equals(attribute.getType())) {
 				if (isMultiselect(cmAttr) && isVisible(cmAttr)) {
 					List<CyberTrackerId> multiIds = addListElements(cmAttr, true, null); //TODO: add number attribute support 
-					//TODO: should multiIds elements contain indexes used for the rest of attributes in one of there TagX values?
 					Node mNode = buildMultiSelectNode(cmAttr, startId, multiIds);
 					Control control2 = ScreensObjectFactory.getNavigationControl(mNode);
 					CyberTrackerId nextId = new CyberTrackerId();
@@ -290,7 +289,8 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		
 		List<AttributeListItem> activeItems = attribute.getActiveListItems();
 		if (activeItems == null || activeItems.isEmpty()) {
-			return ids; //TODO: this should never happen as it is tracked by split(...) logic!!!
+			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
+			throw new IllegalArgumentException("Cannot add a screen without any items to display"); //$NON-NLS-1$
 		}
 		List<String> itemNames = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
@@ -364,7 +364,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			boolean linkToNext = terminare || i < attrList.size() - 1;
 			if (!isVisible(cmAttr)) {
 				//should NEVER happen
-				//TODO: remove throw block after testing
+				//development validation! remove throw block after testing
 				throw new IllegalArgumentException("Arguments passed to this method MUST be visible"); //$NON-NLS-1$
 			}
 			Attribute attribute = cmAttr.getAttribute();
@@ -479,7 +479,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 	private String recordDefaultValue(Attribute attribute, String defaultValue) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
-		ElementsUtil.addElementsItem(elements, attribute.getName(), ctid, SmartUtils.encodeHex(attribute.getUuid()), defaultValue);
+		ElementsUtil.addElementsItem(elements, attribute.getName(), ctid, SmartUtils.encodeHex(attribute.getUuid()), null, defaultValue);
 		return ctid;
 	}
 	

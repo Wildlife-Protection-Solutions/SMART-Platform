@@ -50,6 +50,7 @@ public class ElementsUtil {
 	public static final String CATEGORY_ELEMENT_TAG = "c"; //$NON-NLS-1$
 	public static final String MEMBER_ELEMENT_TAG = "m"; //$NON-NLS-1$
 	public static final String MULISELECT_ELEMENT_TAG = "s"; //$NON-NLS-1$
+	public static final String DEFAULT_VALUES_ELEMENT_TAG = "d"; //$NON-NLS-1$
 	
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
