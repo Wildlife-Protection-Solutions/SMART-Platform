@@ -155,10 +155,27 @@ public class CaInfoComposite extends Composite {
 	}
 	
 	public void updateValues(ConservationArea ca){
-		txtIdentifier.setText(ca.getId());
-		txtName.setText(ca.getName());
-		txtDescription.setText(ca.getDescription());
-		txtDesignation.setText(ca.getDesignation());
+		if (ca.getId() != null){
+			txtIdentifier.setText(ca.getId());
+		}else{
+			txtIdentifier.setText(""); //$NON-NLS-1$
+		}
+		if (ca.getName() != null){
+			txtName.setText(ca.getName());
+		}else{
+			txtName.setText(""); //$NON-NLS-1$
+		}
+		if (ca.getDescription() != null){
+			txtDescription.setText(ca.getDescription());
+		}else{
+			txtDescription.setText(""); //$NON-NLS-1$
+		}
+		if (ca.getDesignation() != null){
+			txtDesignation.setText(ca.getDesignation());
+		}else{
+			txtDesignation.setText(""); //$NON-NLS-1$
+		}
+		validate();
 	}
 	
 	/**
