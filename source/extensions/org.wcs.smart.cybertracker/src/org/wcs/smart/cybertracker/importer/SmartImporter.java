@@ -301,7 +301,7 @@ public class SmartImporter {
 					attributes.put(tag2, aList);
 				}
 				aList.add(a);
-			} else if (PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(e.getN())) {
+			} else if (ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG.equals(e.getTag1())) {
 				defaultValue = a;
 			} else if (ElementsUtil.MULISELECT_ELEMENT_TAG.equals(e.getTag1())) {
 				Integer tag2 = e.getTag2() != null ? Integer.valueOf(e.getTag2()) : 0;
@@ -339,13 +339,14 @@ public class SmartImporter {
 			if (a.getV() == null)
 				continue;
 			
-			//TODO: use tag1 as identifier, use tag2 for default value
-			if (PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(a.getN())) {
+			E e = eMap.get(a.getI());
+
+			if (ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG.equals(e.getTag1())) {
 				//handling default values
 				String[] ctIdArray = a.getV().split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 				for (String ctid : ctIdArray) {
-					E e = eMap.get(ctid);
-					WaypointObservationAttribute wpoa = createWaypointObservationAttribute(e, e.getTag1(), eMap, session);
+					E de = eMap.get(ctid);
+					WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, de.getTag2(), eMap, session);
 					if (wpoa == null)
 						continue;
 					wpoa.setObservation(obs);
@@ -354,7 +355,6 @@ public class SmartImporter {
 				continue;
 			}
 				
-			E e = eMap.get(a.getI());
 			if (!ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
 				continue;
 
