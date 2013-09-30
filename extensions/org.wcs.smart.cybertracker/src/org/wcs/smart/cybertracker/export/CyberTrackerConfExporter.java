@@ -254,7 +254,7 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 			Attribute attribute = cmAttr.getAttribute();
 			if (AttributeType.LIST.equals(attribute.getType())) {
 				if (isMultiselect(cmAttr) && isVisible(cmAttr)) {
-					List<CyberTrackerId> multiIds = addListElements(cmAttr);
+					List<CyberTrackerId> multiIds = addListElements(cmAttr, true, null); //TODO: add number attribute support 
 					//TODO: should multiIds elements contain indexes used for the rest of attributes in one of there TagX values?
 					Node mNode = buildMultiSelectNode(cmAttr, startId, multiIds);
 					Control control2 = ScreensObjectFactory.getNavigationControl(mNode);
@@ -278,8 +278,12 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 	}
 
 	private List<CyberTrackerId> addListElements(CmAttribute cmAttr) {
+		return addListElements(cmAttr, false, null);
+	}
+
+	private List<CyberTrackerId> addListElements(CmAttribute listAttr, boolean isMulti, CmAttribute numAttr) {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
-		Attribute attribute = cmAttr.getAttribute();
+		Attribute attribute = listAttr.getAttribute();
 		if (!AttributeType.LIST.equals(attribute.getType())) {
 			throw new IllegalArgumentException("This operation can be performed only on lists"); //$NON-NLS-1$
 		}
@@ -293,8 +297,26 @@ public class CyberTrackerConfExporter {//extends CyberTrackerExporter {
 		for (AttributeListItem listItem : activeItems) {
 			itemNames.add(listItem.getName());
 			tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
+			
 		}
-		ids = ElementsUtil.addCustomElements(elements, itemNames, tag0Values);
+		//tag0 - listAttrValue uuid
+		//tag1 - identifier
+		//tag2 - order
+		//tag3 - reference to listAttr in Elements.xml
+		//tag4 - reference to numAttr in Elements.xml
+
+		String tag1 = isMulti ? ElementsUtil.MULISELECT_ELEMENT_TAG : null;
+		String tag3 = isMulti ? getAttributeResultElementId(attribute, 0).getItemId() : null;
+		String tag4 = numAttr != null ? getAttributeResultElementId(numAttr.getAttribute(), 0).getItemId() : null;
+		for (int i = 0; i < activeItems.size(); i++) {
+			AttributeListItem listItem = activeItems.get(i);
+			String name = listItem.getName();
+			String tag0 = SmartUtils.encodeHex(listItem.getUuid());
+			String tag2 = isMulti ? String.valueOf(i) : null;
+			CyberTrackerId id = new CyberTrackerId();
+			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
+			ids.add(id);
+		}
 		return ids;
 		
 	}
