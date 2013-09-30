@@ -49,6 +49,7 @@ public class ElementsUtil {
 	public static final String ATTRIBUTE_ELEMENT_TAG = "a"; //$NON-NLS-1$
 	public static final String CATEGORY_ELEMENT_TAG = "c"; //$NON-NLS-1$
 	public static final String MEMBER_ELEMENT_TAG = "m"; //$NON-NLS-1$
+	public static final String MULISELECT_ELEMENT_TAG = "s"; //$NON-NLS-1$
 	
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
@@ -107,24 +108,30 @@ public class ElementsUtil {
 	}
 	
 	public static void addElementsItem(Elements elements, String name, String id) {
-		addElementsItem(elements, name, id, null, null);
+		addElementsItem(elements, name, id, null, null, null, null, null);
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0) {
-		addElementsItem(elements, name, id, tag0, null);
+		addElementsItem(elements, name, id, tag0, null, null, null, null);
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1) {
-		addElementsItem(elements, name, id, tag0, tag1, null);
+		addElementsItem(elements, name, id, tag0, tag1, null, null, null);
+	}
+
+	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2) {
+		addElementsItem(elements, name, id, tag0, tag1, tag2, null, null);
 	}
 	
-	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2) {
+	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4) {
 		Elements.List.Items.Item item = new Elements.List.Items.Item();
 		item.setName(name);
 		item.setId(id);
 		item.setTag0(tag0);
 		item.setTag1(tag1);
 		item.setTag2(tag2);
+		item.setTag3(tag3);
+		item.setTag4(tag4);
 		elements.getList().getItems().getItem().add(item);
 	}
 
