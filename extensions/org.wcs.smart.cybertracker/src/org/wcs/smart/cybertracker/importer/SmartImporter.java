@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -257,37 +258,88 @@ public class SmartImporter {
 	}
 
 	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
-		List<A> aList = fetchObservationRecords(s, eMap);
+		List<List<A>> aList = splitObservationRecords(s, eMap);
 		if (aList.isEmpty())
 			return;
-		Category category = fetchCategory(aList, eMap, session);
+		List<A> catList = aList.get(0);
+		if (catList.isEmpty())
+			return;
+		
+		Category category = fetchCategory(catList, eMap, session);
 		if (category == null)
 			return;
-		WaypointObservation obs = new WaypointObservation();
-		obs.setWaypoint(wp);
-		obs.setCategory(category);
-		obs.setAttributes(fetchAttributes(obs, aList, eMap, session));
 		
-		wp.getObservations().add(obs);
+		for (int i = 1; i < aList.size(); i++) {
+			List<A> attrList = aList.get(i);
+			WaypointObservation obs = new WaypointObservation();
+			obs.setWaypoint(wp);
+			obs.setCategory(category);
+			obs.setAttributes(fetchAttributes(obs, attrList, eMap, session));
+			
+			wp.getObservations().add(obs);
+		}
 	}
 
-	private List<A> fetchObservationRecords(S s, Map<String, E> eMap) {
-		List<A> result = new ArrayList<A>();
-		//must have at least one attribute
+	/**
+	 * @param s
+	 * @param eMap
+	 * @return First list is a list of categories, all the rest are list of attributes
+	 */
+	private List<List<A>> splitObservationRecords(S s, Map<String, E> eMap) {
+		List<A> categories = new ArrayList<A>();
+		Map<Integer, List<A>> attributes = new HashMap<Integer, List<A>>();
+		A defaultValue = null;
 		for (A a : s.getA()) {
 			E e = eMap.get(a.getI());
-			if (ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()) || PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(e.getN()))
-				result.add(a);
+			if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1())) {
+				categories.add(a);
+			} else if (ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1())) {
+				Integer tag2 = e.getTag2() != null ? Integer.valueOf(e.getTag2()) : 0;
+				List<A> aList = attributes.get(tag2);
+				if (aList == null) {
+					aList = new ArrayList<A>();
+					attributes.put(tag2, aList);
+				}
+				aList.add(a);
+			} else if (PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(e.getN())) {
+				defaultValue = a;
+			} else if (ElementsUtil.MULISELECT_ELEMENT_TAG.equals(e.getTag1())) {
+				Integer tag2 = e.getTag2() != null ? Integer.valueOf(e.getTag2()) : 0;
+				List<A> aList = attributes.get(tag2);
+				if (aList == null) {
+					aList = new ArrayList<A>();
+					attributes.put(tag2, aList);
+				}
+				//create fake record as if it is result element for listAttribute with listAttributeValue
+				A fakeA = new A();
+				fakeA.setN("Attribute for item " + a.getN()); //will never be displayed //$NON-NLS-1$
+				fakeA.setI(e.getTag3());
+				fakeA.setV(a.getI());
+				fakeA.setValue(""); //$NON-NLS-1$
+				aList.add(fakeA);
+				//TODO: also need to add numberAttribute if this is multiselect+number (numAttr uuid in tag4, value in a.getV())
+			}
+		}
+		
+		List<List<A>> result = new ArrayList<List<A>>();
+		result.add(categories);
+		for (Integer i : attributes.keySet()) {
+			List<A> aList = attributes.get(i);
+			if (defaultValue != null) {
+				aList.add(defaultValue);
+			}
+			result.add(aList);
 		}
 		return result;
 	}
-
+	
 	private List<WaypointObservationAttribute> fetchAttributes(WaypointObservation obs, List<A> aList, Map<String, E> eMap, Session session) {
 		List<WaypointObservationAttribute> result = new ArrayList<WaypointObservationAttribute>();
 		for (A a : aList) {
 			if (a.getV() == null)
 				continue;
 			
+			//TODO: use tag1 as identifier, use tag2 for default value
 			if (PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES.equals(a.getN())) {
 				//handling default values
 				String[] ctIdArray = a.getV().split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
