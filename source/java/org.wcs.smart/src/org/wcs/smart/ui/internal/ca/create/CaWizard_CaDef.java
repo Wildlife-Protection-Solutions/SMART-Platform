@@ -54,7 +54,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CaWizard_CaDef extends CaWizardPage  {
 	
-
+	public static final String PAGE_NAME = Messages.CaWizard_CaDef_CaDef_PageName;
 	/* ui fields */
 	private CaInfoComposite composite = null;
 	
@@ -64,7 +64,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	 * Create the wizard.
 	 */
 	public CaWizard_CaDef() {
-		super(Messages.CaWizard_CaDef_CaDef_PageName);
+		super(PAGE_NAME);
 		setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
 		setTitle(Messages.CaWizard_CaDef_PageTitle);
 		setDescription(Messages.CaWizard_CaDef_PageDescription);
@@ -181,4 +181,15 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		ca.getLanguages().add(lang);
 	}
 	
+	public void initControls(ConservationArea ca){
+		composite.updateValues(ca);
+		
+		if (ca.getDefaultLanguage() != null){
+			lstViewer.setSelection(new StructuredSelection(ca.getDefaultLanguage()));
+			lstViewer.getControl().setEnabled(false);
+		}else{
+			lstViewer.getControl().setEnabled(true);
+		}
+		validate();
+	}
 }

@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.ui.internal.ca.create;
 
+import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -37,24 +40,32 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily Gouge, Refractions Research
  *
  */
-public class CreateCaWizard extends Wizard {
+public class CreateCaWizard extends Wizard implements IPageChangingListener {
 
 	private boolean completedOK = false;
 		
+	private ConservationArea newCa = null;
+	
 	/**
 	 * Creates a new wizard.
 	 */
 	public CreateCaWizard() {
 		setWindowTitle(Messages.CreateCaWizard_WziardName);
+		newCa = SmartUtils.createConservationArea();
 	}
 	
 	@Override
 	public void addPages() {
-		WizardPage page = new CaWizard_CaDef();
+		WizardPage page = new CaWizardTemplatePage();
+		super.addPage(page);
+		
+		page = new CaWizard_CaDef();
 		super.addPage(page);
 		
 		page = new CaWizard_UserDef();
 		super.addPage(page);
+		
+		((WizardDialog)getContainer()).addPageChangingListener(this);
 	}
 
 	/**
@@ -70,8 +81,6 @@ public class CreateCaWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		completedOK = false;
-		
-		ConservationArea newCa = SmartUtils.createConservationArea();
 
 		for (int i= 0; i < super.getPageCount(); i ++){
 			if (super.getPages()[i] instanceof CaWizardPage){
@@ -87,6 +96,12 @@ public class CreateCaWizard extends Wizard {
 		}
 		
 		return completedOK;
+	}
+
+	@Override
+	public void handlePageChanging(PageChangingEvent event) {
+		((CaWizardPage)event.getCurrentPage()).updateConservationArea(newCa);
+		((CaWizardPage)event.getTargetPage()).initControls(newCa);
 	}
 
 }

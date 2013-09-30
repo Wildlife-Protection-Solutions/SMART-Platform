@@ -52,6 +52,8 @@ public abstract class CaWizardPage extends WizardPage{
 	 */
 	abstract void updateConservationArea(ConservationArea ca);
 	
+	public void initControls(ConservationArea ca){}
+	
 	/*
 	 * Creates a control decoration for a wizard page field.
 	 */
