@@ -40,6 +40,7 @@ import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
@@ -249,62 +250,64 @@ public class AttributeGroupBy implements IGroupBy {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
-		
-		Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-		if (attribute == null){
-			throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_AttributeNotFoundError, new Object[]{attributeKey}));
-		}
-		DropItem it = null;
-		if (categoryHkey != null){
-			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-			if (category == null){
-				throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_CategoryNotFoundError, new Object[]{categoryHkey}));
+		try {
+			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, attributeKey);
+			if (attribute == null) {
+				throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_AttributeNotFoundError,new Object[] { attributeKey }));
 			}
-			category.getFullCategoryName();
-			if (attributeType == AttributeType.LIST){
-				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
-			}else{
-				it = DropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute, getTreeLevel(), category);
+			DropItem it = null;
+			if (categoryHkey != null) {
+				Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+				if (category == null) {
+					throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_CategoryNotFoundError,new Object[] { categoryHkey }));
+				}
+				category.getFullCategoryName();
+				if (attributeType == AttributeType.LIST) {
+					it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
+				} else {
+					it = DropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute,getTreeLevel(), category);
+				}
+			} else {
+				if (attributeType == AttributeType.LIST) {
+					it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(attribute);
+				} else {
+					it = DropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute,getTreeLevel());
+				}
 			}
-		}else{
-			if (attributeType == AttributeType.LIST){
-				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(attribute);
-			}else{
-				it = DropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute, getTreeLevel());
-			}
-			
-		}
 
-		if (attributeType == AttributeType.LIST){
-			if (filterHkeys != null){
-				ArrayList<ListItem> items = new ArrayList<ListItem>();
-				for (int i = 0; i < filterHkeys.length ; i++){
-					AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attribute.getKeyId(), filterHkeys[i]);
-					if (ali != null){
-						items.add(new ListItem(null, ali.getName(), ali.getKeyId()));
+			if (attributeType == AttributeType.LIST) {
+				if (filterHkeys != null) {
+					ArrayList<ListItem> items = new ArrayList<ListItem>();
+					for (int i = 0; i < filterHkeys.length; i++) {
+						AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session,attribute.getKeyId(), filterHkeys[i]);
+						if (ali != null) {
+							items.add(new ListItem(null, ali.getName(), ali.getKeyId()));
+						}
 					}
+					it.initializeData(items);
 				}
-				it.initializeData(items);
-			}
-			
-		}else if (attributeType == AttributeType.TREE){
-			if (filterHkeys != null){
-				HashSet<String> keys = new HashSet<String>();
-				for (int i = 0; i < filterHkeys.length; i ++){
-					keys.add(filterHkeys[i]);
-				}
-				ArrayList<ListItem> items = new ArrayList<ListItem>();
-				for (String hkey : keys){
-					AttributeTreeNode item = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attribute.getKeyId(), hkey);
-					if (item != null){
-						items.add(new ListItem(null, item.getName(), item.getHkey()));
+
+			} else if (attributeType == AttributeType.TREE) {
+				if (filterHkeys != null) {
+					HashSet<String> keys = new HashSet<String>();
+					for (int i = 0; i < filterHkeys.length; i++) {
+						keys.add(filterHkeys[i]);
 					}
+					ArrayList<ListItem> items = new ArrayList<ListItem>();
+					for (String hkey : keys) {
+						AttributeTreeNode item = QueryDataModelManager.getInstance().getAttributeTreeNode(session,attribute.getKeyId(), hkey);
+						if (item != null) {
+							items.add(new ListItem(null, item.getName(), item.getHkey()));
+						}
+					}
+
+					it.initializeData(items);
 				}
-				
-				it.initializeData(items);
 			}
+			return it;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
 		}
-		return it;
 	}
 	
 	/**

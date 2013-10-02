@@ -208,9 +208,9 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * @throws Exception
 	 */
 	public ListItem getEmployee(Session session, String value) throws Exception{
-		Query q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid"); //$NON-NLS-1$
-		
+		Query q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid and conservationArea = :ca"); //$NON-NLS-1$		
 		q.setParameter("uuid", SmartUtils.decodeHex(value)); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){

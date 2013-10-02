@@ -36,6 +36,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.AreaDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 
 
 /**
@@ -197,7 +198,11 @@ public class AreaFilter implements IFilter {
 	 */
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {		
-		return new DropItem[]{ new AreaDropItem(loadArea(session), geomType)};
+		try{
+			return new DropItem[]{ new AreaDropItem(loadArea(session), geomType)};
+		}catch(Exception ex){
+			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
+		}
 	}
 
 	/**

@@ -37,6 +37,7 @@ import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -213,25 +214,29 @@ public class CategoryAttributeFilter implements IFilter{
 		Category c = null;
 		Attribute att = null;
 		
-		c = categoryFilter.getCategory(session);
-		att = attributeFilter.getAttribute(session);
+		try{
+			c = categoryFilter.getCategory(session);
+			att = attributeFilter.getAttribute(session);
 
-		boolean found = false;
-		for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){
-			if (a.getKeyId().equals(att.getKeyId())){
-				found = true;
-				break;
+			boolean found = false;
+			for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){
+				if (a.getKeyId().equals(att.getKeyId())){
+					found = true;
+					break;
+				}
 			}
-		}
-		if (!found){
-			throw new Exception(MessageFormat.format(Messages.CategoryAttributeFilter_MissingCategoryAttribute, new Object[]{c.getKeyId(), att.getKeyId()}));
-		}
+			if (!found){
+				throw new Exception(MessageFormat.format(Messages.CategoryAttributeFilter_MissingCategoryAttribute, new Object[]{c.getKeyId(), att.getKeyId()}));
+			}
 		
-		CategoryAttribute ca = new CategoryAttribute(c,  att);
-		DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(ca);
-		attributeFilter.initDropItem(it, session);
+			CategoryAttribute ca = new CategoryAttribute(c,  att);
+			DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(ca);
+			attributeFilter.initDropItem(it, session);
 		
-		return new DropItem[]{it};
+			return new DropItem[]{it};
+		}catch (Exception ex){
+			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
+		}
 	}
 	
 	/**

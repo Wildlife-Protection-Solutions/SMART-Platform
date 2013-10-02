@@ -39,6 +39,7 @@ import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -270,10 +271,14 @@ public class AttributeFilter implements IFilter {
 	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 */
 	public DropItem[] getDropItems(Session session) throws Exception{
-		Attribute att = getAttribute(session);
-		DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(att);
-		initDropItem(it, session);
-		return new DropItem[]{it};
+		try{
+			Attribute att = getAttribute(session);
+			DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(att);
+			initDropItem(it, session);
+			return new DropItem[]{it};
+		}catch (Exception ex){
+			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
+		}
 	}
 	
 	/**
