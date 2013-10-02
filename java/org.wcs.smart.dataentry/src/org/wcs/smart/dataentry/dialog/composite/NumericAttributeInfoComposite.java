@@ -91,9 +91,9 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private void createNumericListControl(Composite parent) {
 		final Label label = new Label(parent, SWT.NONE);
-		label.setText("Numeric list:");
+		label.setText(Messages.CmAttributeInfoComposite_Option_Numeric);
 		final Button btnBool = new Button(parent, SWT.CHECK);
-		btnBool.setText("Numeric multi-select");
+		btnBool.setText(Messages.CmAttributeInfoComposite_Option_Numeric_Checkbox);
 		btnBool.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
