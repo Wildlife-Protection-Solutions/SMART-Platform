@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="org.wcs.smart.ca.export" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
 	<extension-point id="org.wcs.smart.ca.deleteAdvisor" name="Delete Advisor for Deleting Database Objects" schema="schema/org.wcs.smart.ca.deleteAdvisor.exsd"/>
+ <extension-point id="org.wcs.smart.ca.templateCloner" name="SMART Conservation Area Template Cloner" schema="schema/org.wcs.smart.ca.templateCloner.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"
@@ -855,7 +856,7 @@
             class="org.wcs.smart.ca.UuidItem">
       </class>
       <class
-            class="org.wcs.smart.ca.NamedDesciptionItem">
+            class="org.wcs.smart.ca.NamedDescriptionItem">
       </class>
       <class
             class="org.wcs.smart.ca.DescriptionLabel">
@@ -1081,6 +1082,13 @@
             %exportmap.wizard.description
          </description>
       </wizard>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.internal.ca.export.ConservationAreaTemplateCloner"
+            id="org.wcs.smart.conservationAreaCloner">
+      </templateCloner>
    </extension>
 
 </plugin>

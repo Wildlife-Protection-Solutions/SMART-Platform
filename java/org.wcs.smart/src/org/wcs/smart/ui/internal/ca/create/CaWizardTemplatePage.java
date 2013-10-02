@@ -20,11 +20,12 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
 
 public class CaWizardTemplatePage  extends CaWizardPage  {
 	
-	public static final String PAGE_NAME = "CA_TEMPLATE";
+	public static final String PAGE_NAME = "CA_TEMPLATE"; //$NON-NLS-1$
 	
 	private ComboViewer lstCa;
 	
@@ -38,8 +39,8 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 	public CaWizardTemplatePage() {
 		super(PAGE_NAME);
 		setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
-		setTitle("Create Conservation Area");
-		setDescription("Select template Conservation Area if desired");
+		setTitle(Messages.CaWizardTemplatePage_DialogTitle);
+		setDescription(Messages.CaWizardTemplatePage_DialogMessage);
 	}
 
 	/**
@@ -53,13 +54,13 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		
 		Composite center = new Composite(composite,  SWT.NONE);
 		center.setLayout(new GridLayout());
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		btnNew = new Button(center, SWT.RADIO);
-		btnNew.setText("Create Blank Conservation Area");
+		btnNew.setText(Messages.CaWizardTemplatePage_OpBlank);
 		
 		btnTemplate = new Button(center, SWT.RADIO);
-		btnTemplate.setText("Create Conservation Area using existing Conservation Area as Template");
+		btnTemplate.setText(Messages.CaWizardTemplatePage_OpTemplate);
 			
 		Composite templateComp = new Composite(center, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
@@ -68,7 +69,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		templateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		final Label l = new Label(templateComp, SWT.NONE);
-		l.setText("Template Conservation Area:");
+		l.setText(Messages.CaWizardTemplatePage_LblTemplate);
 		
 		lstCa = new ComboViewer(templateComp);
 		lstCa.setContentProvider(ArrayContentProvider.getInstance());
@@ -80,7 +81,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 				return super.getText(element);
 			}
 		});
-		lstCa.setInput(new String[]{"Loading"});
+		lstCa.setInput(new String[]{Messages.CaWizardTemplatePage_LoadingLabel});
 		lstCa.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnNew.setSelection(true);
 		
@@ -111,7 +112,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		String error = null;
 		if (btnTemplate.getSelection()){
 			if (!(((StructuredSelection)lstCa.getSelection()).getFirstElement() instanceof ConservationArea)){
-				error = "A template conservation area must be selected.";
+				error = Messages.CaWizardTemplatePage_TemplateRequired;
 			}
 		}
 		super.setErrorMessage(error);
@@ -124,6 +125,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 	 */
 	public void updateConservationArea(ConservationArea ca) {
 		if (btnNew.getSelection()){
+			templateCa = null;
 			ca.setDescription(null);
 			ca.setId(null);
 			ca.setDesignation(null);
@@ -148,6 +150,9 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		}
 	}
 	
+	public ConservationArea getTemplateCa(){
+		return this.templateCa;
+	}
 	public void initControls(ConservationArea ca){
 		validate();
 	}

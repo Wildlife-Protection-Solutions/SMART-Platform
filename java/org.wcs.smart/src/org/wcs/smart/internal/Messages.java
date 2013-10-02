@@ -264,6 +264,13 @@ public class Messages extends NLS {
 	public static String CaWizard_UserDef_PageDescription;
 	public static String CaWizard_UserDef_PageName;
 	public static String CaWizard_UserDef_PageTitle;
+	public static String CaWizardTemplatePage_DialogMessage;
+	public static String CaWizardTemplatePage_DialogTitle;
+	public static String CaWizardTemplatePage_LblTemplate;
+	public static String CaWizardTemplatePage_LoadingLabel;
+	public static String CaWizardTemplatePage_OpBlank;
+	public static String CaWizardTemplatePage_OpTemplate;
+	public static String CaWizardTemplatePage_TemplateRequired;
 	public static String ChangeUserPasswordDialog_ChangeUser_DialogMessage;
 	public static String ChangeUserPasswordDialog_ChangeUser_DialogTitle;
 	public static String ChangeUserPasswordDialog_Dialog_Message;
@@ -288,6 +295,9 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Updated_DialogTitle;
 	public static String ChangeUserPasswordDialog_Username_Label;
 	public static String ChangeUserPasswordDialog_UserNameValidationError;
+	public static String ConservationAreaClonerEngine_Error_CircularDependency;
+	public static String ConservationAreaClonerEngine_ErrorCleanUpRequired;
+	public static String ConservationAreaClonerEngine_Progress_CopyingCa;
 	public static String ConservationAreaListView_CaInfo;
 	public static String ConservationAreaListView_CaLabel;
 	public static String ConservationAreaListView_ModifyLink;
@@ -295,7 +305,14 @@ public class Messages extends NLS {
 	public static String ConservationAreaManager_Progress_DeleteCa;
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
 	public static String ConservationAreaManager_Progress_Restarting;
+	public static String ConservationAreaTemplateCloner_Progress_CopyAgencyRank;
+	public static String ConservationAreaTemplateCloner_Progress_CopyCaInfo;
+	public static String ConservationAreaTemplateCloner_Progress_CopyDataModel;
+	public static String ConservationAreaTemplateCloner_Progress_CopyProjection;
+	public static String ConservationAreaTemplateCloner_Progress_CopyStation;
 	public static String CreateCaWizard_Error_CreateCaError;
+	public static String CreateCaWizard_ErrorCopyInfo;
+	public static String CreateCaWizard_ErrorCreateFromTemplate;
 	public static String CreateCaWizard_WziardName;
 	public static String CrossCaView_Header;
 	public static String CrossCaView_Message1;
