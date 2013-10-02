@@ -50,7 +50,7 @@ public class ReportPlan {
 	/**
 	 * plan template file name
 	 */
-	private static final String PLAN_TEMPLATE = "planTemplate.rptdesign"; //$NON-NLS-1$
+	public static final String PLAN_TEMPLATE = "planTemplate.rptdesign"; //$NON-NLS-1$
 		
 	/**
 	 * Plan template parameters

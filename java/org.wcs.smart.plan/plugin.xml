@@ -746,5 +746,15 @@
             maplayer="org.wcs.smart.plan.report.PlanTargetMapLayer">
       </MapLayer>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.plan.PlanTemplateCloner"
+            id="org.wcs.smart.planTemplateCloner">
+         <require
+               id="org.wcs.smart.conservationAreaCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>
