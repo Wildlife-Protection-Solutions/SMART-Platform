@@ -118,5 +118,15 @@
             icon="images/etool16/import.png">
       </image>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.cybertracker.CybertrackerTemplateCloner"
+            id="org.wcs.smart.cybertrackerTemplateCloner">
+         <require
+               id="org.wcs.smart.conservationAreaCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>
