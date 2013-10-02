@@ -43,6 +43,9 @@ public class ScreensObjectFactory {
 	private static final int CONTROL_NUMBER_MAIN_INDEX = 3;
 	private static final int CONTROL_NOTE_MAIN_INDEX = 3;
 
+	private static final int LIST_MODE_DEFAULT = 1;
+	private static final int LIST_MODE_NUMBERS = 5;
+
 	private CyberTrackerProperties ctProperties;
 	
 	public ScreensObjectFactory(CyberTrackerProperties properties) {
@@ -181,7 +184,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public Node createNodeMultiList(String id, String name, List<String> values, String trElements, String trLinks, Integer minChecks) {
+	public Node createNodeMultiList(String id, String name, List<String> values, String trElements, String trLinks, Integer minChecks, boolean withNumbers) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -198,7 +201,7 @@ public class ScreensObjectFactory {
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
-		controls.getControl().add(createChecklistControl7(trElements, trLinks, minChecks));
+		controls.getControl().add(withNumbers ? createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_NUMBERS, "True") : createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_DEFAULT, null)); //$NON-NLS-1$
 		controls.getControl().add(createControl11());
 		data.setControls(controls);
 		node.setData(data);
@@ -469,13 +472,14 @@ public class ScreensObjectFactory {
         <ItemHeight>25</ItemHeight>
         <Version>1</Version>
         <Attribute>0</Attribute>
-        <ListMode>1</ListMode>
+        <ListMode>???</ListMode>
+        <NumberChecks>???</NumberChecks>
         <MinChecks>???</MinChecks>
         <Translate__Elements>???</Translate__Elements>
         <Translate__Links>???</Translate__Links>
     </Control>
 	 */
-	public Controls.Control createChecklistControl7(String trElements, String trLinks, Integer minChecks) {
+	public Controls.Control createChecklistControl7(String trElements, String trLinks, Integer minChecks, Integer listMode, String numberChecks) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
 		control.setVersion(1);
@@ -489,7 +493,8 @@ public class ScreensObjectFactory {
 		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
 		control.setItemHeight(25);
 		control.setAttribute(0);
-		control.setListMode(1);
+		control.setListMode(listMode);
+		control.setNumberChecks(numberChecks);
 		control.setMinChecks(minChecks);
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
