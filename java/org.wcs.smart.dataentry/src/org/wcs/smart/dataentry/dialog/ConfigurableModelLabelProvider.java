@@ -37,6 +37,7 @@ import org.wcs.smart.dataentry.model.CmNode;
  * @author elitvin
  */
 public class ConfigurableModelLabelProvider extends LabelProvider {
+
 	@Override
 	public String getText(Object element) {
 		if (element instanceof NamedItem) {
