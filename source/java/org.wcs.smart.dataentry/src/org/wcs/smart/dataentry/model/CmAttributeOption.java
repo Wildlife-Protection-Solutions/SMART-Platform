@@ -43,6 +43,7 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_DEFAULT_VALUE = "DEFAULT_VALUE"; //$NON-NLS-1$
 	public static final String ID_MULTISELECT = "MULTISELECT"; //$NON-NLS-1$
 	public static final String ID_FLATTEN_TREE = "FLATTEN_TREE"; //$NON-NLS-1$
+	public static final String ID_NUMERIC = "NUMERIC"; //$NON-NLS-1$
 	
 	private CmAttribute cmAttribute;
 	private String optionId;

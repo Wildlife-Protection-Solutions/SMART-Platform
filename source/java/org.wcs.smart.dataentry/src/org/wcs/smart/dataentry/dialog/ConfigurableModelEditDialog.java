@@ -44,9 +44,14 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
+import org.wcs.smart.dataentry.dialog.composite.BooleanAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.ListAttributeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.NumericAttributeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.TextAttributeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.TreeAttributeInfoComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -109,6 +114,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 				boolean ok = super.performDrop(data);
 				if (ok) {
 					setChangesMade(true);
+					updateRightPanelState();
 				}
 				return ok;
 			}
@@ -146,12 +152,28 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
-		for (AttributeType type : AttributeType.values()) {
-			CmAttributeInfoComposite attrComposite = new CmAttributeInfoComposite(infoInnerPanel, model, type, session);
-			attrComposite.addModelChangedListener(modelChangeListener);
-			attributeComposites.put(type, attrComposite);
-		}
-				
+		CmAttributeInfoComposite attrComposite;
+
+		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.NUMERIC, attrComposite);
+		
+		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.TEXT, attrComposite);
+
+		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.LIST, attrComposite);
+
+		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.TREE, attrComposite);
+
+		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);
+
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
 
