@@ -34,6 +34,7 @@ import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
@@ -152,19 +153,23 @@ public class CategoryGroupBy implements IGroupBy {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
-		DropItem it = DropItemFactory.INSTANCE.createCategoryGroupByDropItem(treeLevel);
-		if (filterHkeys != null){
-			ArrayList<ListItem> inits = new ArrayList<ListItem>();
-			for (int i = 0; i < filterHkeys.length; i ++){
-				Category child = QueryDataModelManager.getInstance().getCategory(session, filterHkeys[i]);
-				if (child == null){
-					throw new Exception(MessageFormat.format(Messages.CategoryGroupBy_CategoryNotFoundError, new Object[]{filterHkeys[i]}));
+		try{
+			DropItem it = DropItemFactory.INSTANCE.createCategoryGroupByDropItem(treeLevel);
+			if (filterHkeys != null){
+				ArrayList<ListItem> inits = new ArrayList<ListItem>();
+				for (int i = 0; i < filterHkeys.length; i ++){
+					Category child = QueryDataModelManager.getInstance().getCategory(session, filterHkeys[i]);
+					if (child == null){
+						throw new Exception(MessageFormat.format(Messages.CategoryGroupBy_CategoryNotFoundError, new Object[]{filterHkeys[i]}));
+					}
+					inits.add(new ListItem(null, child.getName(), filterHkeys[i]));
 				}
-				inits.add(new ListItem(null, child.getName(), filterHkeys[i]));
+				it.initializeData(inits);
 			}
-			it.initializeData(inits);
+			return it;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
 		}
-		return it;
 	}
 	
 	/**

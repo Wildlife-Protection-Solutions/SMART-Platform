@@ -35,6 +35,7 @@ import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
@@ -143,19 +144,23 @@ public class AreaGroupBy implements IGroupBy {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
-		DropItem it = DropItemFactory.INSTANCE.createAreaGroupByDropItem(areaType);
-		if (filterkeys != null){
-			ArrayList<ListItem> inits = new ArrayList<ListItem>();
-			for (int i = 0; i < filterkeys.length; i ++){
-				Area a = HibernateManager.findArea(areaType, filterkeys[i], session);
-				if (a == null){
-					throw new Exception(MessageFormat.format(Messages.AreaGroupBy_AreaGroupByNotFound, new Object[]{filterkeys[i], areaType.getGuiName()}));
+		try{
+			DropItem it = DropItemFactory.INSTANCE.createAreaGroupByDropItem(areaType);
+			if (filterkeys != null){
+				ArrayList<ListItem> inits = new ArrayList<ListItem>();
+				for (int i = 0; i < filterkeys.length; i ++){
+					Area a = HibernateManager.findArea(areaType, filterkeys[i], session);
+					if (a == null){
+						throw new Exception(MessageFormat.format(Messages.AreaGroupBy_AreaGroupByNotFound, new Object[]{filterkeys[i], areaType.getGuiName()}));
+					}
+					inits.add(new ListItem(null, a.getName(), a.getKeyId()));
 				}
-				inits.add(new ListItem(null, a.getName(), a.getKeyId()));
+				it.initializeData(inits);
 			}
-			it.initializeData(inits);
+			return it;
+		}catch (Exception ex){
+			return new ErrorDropItem(ex.getMessage());
 		}
-		return it;
 	}
 	
 	/**

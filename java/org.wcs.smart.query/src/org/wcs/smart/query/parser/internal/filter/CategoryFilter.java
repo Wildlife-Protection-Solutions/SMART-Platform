@@ -33,6 +33,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 
 /**
  * A data model category filter. Of the form<br>
@@ -128,8 +129,14 @@ public class CategoryFilter implements IFilter {
 	 */
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception{
-		Category cat = getCategory(session);
-		DropItem it = DropItemFactory.INSTANCE.createCategoryDropItem(cat);
+		DropItem it = null;
+		try{
+			Category cat = getCategory(session);
+			it = DropItemFactory.INSTANCE.createCategoryDropItem(cat);
+		}catch (Exception ex){
+			it = new ErrorDropItem(ex.getMessage());
+		}
+		
 		return new DropItem[]{it};
 	}
 	

@@ -38,6 +38,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 
 /**
  * Creates a new value item that represents
@@ -298,50 +299,54 @@ public class AttributeValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-		if (att == null){
-			throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AttributeNotFoundError, new Object[]{attributeKey}));
-		}
-		DropItem di = null;
-		Category cat = null;
-		if (categoryKey != null){
-			cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
-			if (cat == null){
-				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_CategoryNotFoundError, new Object[]{categoryKey}));
+		try{
+			Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
+			if (att == null){
+				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AttributeNotFoundError, new Object[]{attributeKey}));
 			}
-			cat.getFullCategoryName();			
-		}
-		if (attributeType == AttributeType.NUMERIC){
-			if (cat == null){
-				di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
-			}else{
-				di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+			DropItem di = null;
+			Category cat = null;
+			if (categoryKey != null){
+				cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
+				if (cat == null){
+					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_CategoryNotFoundError, new Object[]{categoryKey}));
+				}
+				cat.getFullCategoryName();			
 			}
-		}else if (attributeType == AttributeType.LIST){
-			AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
-			if (ali == null){
-				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_ListItemNotFound, new Object[]{attributeKey, itemKey}));		
-			}
-			if (cat == null){
-				di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
-			}else{
-				di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
-			}
+			if (attributeType == AttributeType.NUMERIC){
+				if (cat == null){
+					di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+				}else{
+					di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+				}
+			}else if (attributeType == AttributeType.LIST){
+				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
+				if (ali == null){
+					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_ListItemNotFound, new Object[]{attributeKey, itemKey}));		
+				}
+				if (cat == null){
+					di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
+				}else{
+					di = DropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
+				}
 			
-		}else if (attributeType == AttributeType.TREE){
-			AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
-			if (atn == null){
-				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_TreeNodeNotFound, new Object[]{attributeKey, itemKey}));		
+			}else if (attributeType == AttributeType.TREE){
+				AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
+				if (atn == null){
+					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_TreeNodeNotFound, new Object[]{attributeKey, itemKey}));		
+				}
+				if (cat == null){
+					di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
+				}else{
+					di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
+				}
 			}
-			if (cat == null){
-				di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
-			}else{
-				di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
-			}
-		}
 		
-		di.initializeData(new Object[]{getDropItemInitializeData(), null});
-		return di;
+			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			return di;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
+		}
 	}
 	
 	/**

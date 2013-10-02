@@ -32,7 +32,6 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
@@ -41,6 +40,7 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.SmartUtils;
 
@@ -170,8 +170,8 @@ public class PatrolGroupBy implements IGroupBy {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
-		DropItem it = DropItemFactory.INSTANCE.createPatrolGroupByDropItem(option);
 		try {
+			DropItem it = DropItemFactory.INSTANCE.createPatrolGroupByDropItem(option);
 			if (items != null){
 				ListItem[] initItems = new ListItem[items.length];
 				for (int i = 0; i < initItems.length; i++) {
@@ -188,11 +188,11 @@ public class PatrolGroupBy implements IGroupBy {
 				}
 				it.initializeData(initItems);
 			}
+			return it;
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog(Messages.PatrolGroupBy_CouldNotParse + ex.getLocalizedMessage(),
-					ex);
+			return new ErrorDropItem(Messages.PatrolGroupBy_CouldNotParse + ex.getLocalizedMessage());
 		}
-		return it;
+		
 	}
 	
 	/**

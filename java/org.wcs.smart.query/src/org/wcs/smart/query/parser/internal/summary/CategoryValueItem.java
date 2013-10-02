@@ -31,6 +31,7 @@ import org.wcs.smart.query.parser.AllCategory;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 
 /**
  * A category value item that represents computing
@@ -133,17 +134,21 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
-		if (categoryHkey == null){
-			return DropItemFactory.INSTANCE.createCategoryValueDropItem();
+		try{
+			if (categoryHkey == null){
+				return DropItemFactory.INSTANCE.createCategoryValueDropItem();
+			}
+			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+			if (category == null){
+				throw new Exception(MessageFormat.format(Messages.CategoryValueItem_CategoryNotFoundError, new Object[]{categoryHkey}));
+			}
+			category.getFullCategoryName();		//cache this
+			DropItem di = DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			return di;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
 		}
-		Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-		if (category == null){
-			throw new Exception(MessageFormat.format(Messages.CategoryValueItem_CategoryNotFoundError, new Object[]{categoryHkey}));
-		}
-		category.getFullCategoryName();		//cache this
-		DropItem di = DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-		di.initializeData(new Object[]{getDropItemInitializeData(), null});
-		return di;
 		
 	}
 	

@@ -39,6 +39,7 @@ import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -265,21 +266,24 @@ public class PatrolFilter implements IFilter {
 		}else if (option == PatrolQueryOption.MANDATE){
 			ListItem m = QueryHibernateManager.getInstance().getPatrolMandate(session, value1);
 			if (m == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolFilter_MandateNotFound, new Object[]{value1}));
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolFilter_MandateNotFound, new Object[]{value1}));
+			}else{
+				it.initializeData(m);
 			}
-			it.initializeData(m);
 		}else if (option == PatrolQueryOption.STATION){
 			ListItem m = QueryHibernateManager.getInstance().getStation(session, value1);
 			if (m == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolFilter_StationNotFound, new Object[]{value1}));
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolFilter_StationNotFound, new Object[]{value1}));
+			}else{
+				it.initializeData(m);
 			}
-			it.initializeData(m);
 		}else if (option == PatrolQueryOption.TEAM ){
 			ListItem m = QueryHibernateManager.getInstance().getTeam(session, value1);
 			if (m == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolFilter_TeamNotFound, new Object[]{value1}));
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolFilter_TeamNotFound, new Object[]{value1}));
+			}else{
+				it.initializeData(m);
 			}
-			it.initializeData(m);
 		}else if (option == PatrolQueryOption.TEAM_KEY || option== PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY || option == PatrolQueryOption.MANDATE_KEY){
 			List<ListItem> items = null;
 			//TODO: should get all not just active
@@ -300,13 +304,16 @@ public class PatrolFilter implements IFilter {
 					}
 				}
 			}
-			if (!found) throw new Exception(MessageFormat.format(Messages.PatrolFilter_TeamNotFound, new Object[]{value1}));
+			if (!found){
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolFilter_TeamNotFound, new Object[]{value1}));
+			}
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
 			ListItem m = QueryHibernateManager.getInstance().getTransportType(session, value1);
 			if (m == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolFilter_TransportTypeNotFound, new Object[]{value1}));
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolFilter_TransportTypeNotFound, new Object[]{value1}));
+			}else{
+				it.initializeData(m);
 			}
-			it.initializeData(m);
 			
 		}else if (option == PatrolQueryOption.PATROL_TYPE){
 			PatrolType.Type t = PatrolType.Type.valueOf( value1 );
@@ -318,12 +325,11 @@ public class PatrolFilter implements IFilter {
 				){
 			ListItem m = QueryHibernateManager.getInstance().getEmployee(session, value1);
 			if (m == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolFilter_EmployeeNotFound, new Object[]{value1}));
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolFilter_EmployeeNotFound, new Object[]{value1}));
+			}else{
+				it.initializeData(m);
 			}
-			it.initializeData(m);
-			
 		}
-		
 		return new DropItem[]{it};
 	}
 	
