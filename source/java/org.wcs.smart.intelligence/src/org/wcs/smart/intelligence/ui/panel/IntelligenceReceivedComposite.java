@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.intelligence.ui.panel;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.swt.SWT;
