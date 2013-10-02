@@ -841,4 +841,14 @@
             EditorManager="org.wcs.smart.birt.ui.BasicReportEditorManager">
       </EditorManager>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.report.ReportTemplateCloner"
+            id="org.wcs.smart.reportCloner">
+         <require
+               id="org.wcs.smart.queryAreaCloner">
+         </require>
+      </templateCloner>
+   </extension>
 </plugin>
