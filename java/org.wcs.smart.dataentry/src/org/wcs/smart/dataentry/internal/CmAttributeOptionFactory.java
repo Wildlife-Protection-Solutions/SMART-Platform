@@ -36,28 +36,14 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
  */
 public class CmAttributeOptionFactory {
 	
-//	public static List<CmAttributeOption> buildDefaultOptions(CmAttribute attribute, AttributeType type) {
-//		List<CmAttributeOption> result = new ArrayList<CmAttributeOption>();
-//		result.add(createIsVisibleOption(attribute));
-//		result.add(createDefaultValueOption(attribute));
-//		switch (type) {
-//		case LIST:
-//			result.add(createMultiselectOption(attribute));
-//			break;
-//		case TREE:
-//			result.add(createFlattenTreeOption(attribute));
-//			break;
-//		default:
-//			break;
-//		}
-//		return result;
-//	}
-
 	public static Map<String, CmAttributeOption> buildDefaultOptions(CmAttribute attribute, AttributeType type) {
 		Map<String, CmAttributeOption> result = new HashMap<String, CmAttributeOption>();
 		result.put(CmAttributeOption.ID_IS_VISIBLE, createIsVisibleOption(attribute));
 		result.put(CmAttributeOption.ID_DEFAULT_VALUE, createDefaultValueOption(attribute));
 		switch (type) {
+		case NUMERIC:
+			result.put(CmAttributeOption.ID_NUMERIC, createNumericOption(attribute));
+			break;
 		case LIST:
 			result.put(CmAttributeOption.ID_MULTISELECT, createMultiselectOption(attribute));
 			break;
@@ -97,6 +83,14 @@ public class CmAttributeOptionFactory {
 		CmAttributeOption option = new CmAttributeOption();
 		option.setCmAttribute(attribute);
 		option.setOptionId(CmAttributeOption.ID_FLATTEN_TREE);
+		option.setDoubleValue(0.0); //false by default
+		return option;
+	}
+
+	private static CmAttributeOption createNumericOption(CmAttribute attribute) {
+		CmAttributeOption option = new CmAttributeOption();
+		option.setCmAttribute(attribute);
+		option.setOptionId(CmAttributeOption.ID_NUMERIC);
 		option.setDoubleValue(0.0); //false by default
 		return option;
 	}

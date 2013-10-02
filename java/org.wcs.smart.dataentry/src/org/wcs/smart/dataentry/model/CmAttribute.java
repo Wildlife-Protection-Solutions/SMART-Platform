@@ -33,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -95,4 +96,23 @@ public class CmAttribute extends NamedItem {
 	public void setOrder(int order) {
 		this.order = order;
 	}
+	
+	@Transient
+	public boolean isVisible() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE);
+		return option == null || Boolean.TRUE.equals(option.getBooleanValue());
+	}
+
+	@Transient
+	public boolean isMultiselect() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
+		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
+	}
+
+	@Transient
+	public boolean isNumeric() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_NUMERIC);
+		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
+	}
+	
 }

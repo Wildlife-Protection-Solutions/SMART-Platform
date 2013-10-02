@@ -22,8 +22,6 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -31,9 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -45,19 +41,19 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  * @author elitvin
  * @since 2.0.0
  */
-public class CmAttributeInfoComposite extends AbstractInfoComposite {
+public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 
 	private CmAttribute attribute;
 
 	private Label lblAttribute;
 	private Label lblKey;
 	
-	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, AttributeType attrType, Session session) {
+	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, model, session);
-		createControls(attrType);
+		createControls();
 	}
 	
-	private void createControls(AttributeType attrType) {
+	private void createControls() {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -92,29 +88,17 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 				}
 			}
 		});
-		
-		
-		createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, Messages.CmAttributeInfoComposite_Option_IsVisible, Messages.CmAttributeInfoComposite_Option_Visible_Checkbox);
-		switch (attrType) {
-		case BOOLEAN:
-			//TODO: boolean default value might vary depending on required flag -> true/false or true/false/null 
-			break;
-		case NUMERIC:
-			createTextNumberControl(container, CmAttributeOption.ID_DEFAULT_VALUE, Messages.CmAttributeInfoComposite_Option_DefaultValue);
-			break;
-		case TEXT:
-			createTextStringControl(container, CmAttributeOption.ID_DEFAULT_VALUE, Messages.CmAttributeInfoComposite_Option_DefaultValue);
-			break;
-		case LIST:
-			createBooleanControl(container, CmAttributeOption.ID_MULTISELECT, Messages.CmAttributeInfoComposite_Option_Multiselect, Messages.CmAttributeInfoComposite_Option_Multi_Checkbox);
-			break;
-		case TREE:
-			createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, Messages.CmAttributeInfoComposite_Option_Flatten_Checkbox);
-			break;
-		}
+
+		createTypeSpecificControls(container);
 	}
 
-	private Button createBooleanControl(Composite parent, final String optionId, String text, String cbText) {
+	protected abstract void createTypeSpecificControls(Composite container);
+	
+	protected Button createIsVisibleControl(Composite container) {
+		return createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, Messages.CmAttributeInfoComposite_Option_IsVisible, Messages.CmAttributeInfoComposite_Option_Visible_Checkbox);
+	}
+	
+	protected Button createBooleanControl(Composite parent, final String optionId, String text, String cbText) {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(text);
 		final Button btnBool = new Button(parent, SWT.CHECK);
@@ -140,70 +124,6 @@ public class CmAttributeInfoComposite extends AbstractInfoComposite {
 		return btnBool;
 	}
 
-	private Text createTextStringControl(Composite parent, final String optionId, String labelText) {
-		final Label label = new Label(parent, SWT.NONE);
-		label.setText(labelText);
-		final Text text = new Text(parent, SWT.BORDER);
-		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
-		text.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (internalChange[0])
-					return;
-				getSourceObject().getCmAttributeOptions().get(optionId).setStringValue(text.getText());
-				fireModelChanged();
-			}
-		});
-		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
-			@Override
-			public void sourceObjectChanged(Object newObject) {
-				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
-				text.setVisible(option != null);
-				label.setVisible(option != null);
-				if (option != null) {
-					internalChange[0] = true;
-					text.setText(option.getStringValue() != null ? option.getStringValue() : ""); //$NON-NLS-1$
-					internalChange[0] = false;
-				}
-			}
-		});
-		return text;
-	}
-
-	private Text createTextNumberControl(Composite parent, final String optionId, String labelText) {
-		final Label label = new Label(parent, SWT.NONE);
-		label.setText(labelText);
-		final Text text = new Text(parent, SWT.BORDER);
-		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
-		text.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (internalChange[0])
-					return;
-				Double value = text.getText() == null || text.getText().isEmpty() ? null : Double.valueOf(text.getText());
-				getSourceObject().getCmAttributeOptions().get(optionId).setDoubleValue(value);
-				fireModelChanged();
-			}
-		});
-		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
-			@Override
-			public void sourceObjectChanged(Object newObject) {
-				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
-				text.setVisible(option != null);
-				label.setVisible(option != null);
-				if (option != null) {
-					Double value = option.getDoubleValue();
-					internalChange[0] = true;
-					text.setText(value != null ? value.toString() : ""); //$NON-NLS-1$
-					internalChange[0] = false;
-				}
-			}
-		});
-		return text;
-	}
-	
 	@Override
 	public CmAttribute getSourceObject() {
 		return attribute;
