@@ -68,8 +68,8 @@ public class PatrolGroupBy implements IGroupBy {
 		return new PatrolGroupBy(key);
 	}
 
-	public PatrolQueryOption option;
-	public String[] items;
+	private PatrolQueryOption option;
+	private String[] items;
 	
 	/**
 	 * Creates a new patrol group by option
@@ -90,6 +90,11 @@ public class PatrolGroupBy implements IGroupBy {
 		}else{
 			items = null;
 		}
+	}
+	
+	
+	public String[] getRawItems(){
+		return this.items;
 	}
 	
 	/**

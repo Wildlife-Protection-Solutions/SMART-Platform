@@ -48,6 +48,33 @@ public class QueryFactory {
 		
 	}
 	
+	/**
+	 * Creates a new query with none of the query fields initialized.
+	 * @param querytype
+	 * @return
+	 */
+	public static Query createBlankQuery(QueryType querytype){
+		if (querytype == QueryType.OBSERVATION){
+			return new ObservationQuery();
+		}else if (querytype == QueryType.GRIDDED){
+			return new GriddedQuery();
+		}else if (querytype == QueryType.PATROL){
+			return new PatrolQuery();
+		}else if (querytype == QueryType.WAYPOINT){
+			return new WaypointQuery();
+		}else if (querytype == QueryType.SUMMARY){
+			return new SummaryQuery();
+		}
+		return null;
+	}
+	
+	/**
+	 * Creates a new query with the various known (conservation area etc)
+	 *  query fields initialized.
+	 * 
+	 * @param querytype
+	 * @return
+	 */
 	public static Query createQuery(QueryType querytype){
 		if (querytype == QueryType.OBSERVATION){
 			return createObservationQuery();
