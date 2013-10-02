@@ -224,6 +224,7 @@ public class Messages extends NLS {
 	public static String PlanTargetStatus_Complete;
 	public static String PlanTargetStatus_Incomplete;
 	public static String PlanTargetStatus_Unknown;
+	public static String PlanTemplateCloner_Progress;
 	public static String PlanType_ConservationArea;
 	public static String PlanType_Patrol;
 	public static String PlanType_Station;
