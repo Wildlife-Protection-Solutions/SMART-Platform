@@ -166,8 +166,8 @@ public class DateGroupBy implements IGroupBy {
 		}else if (op == DateGroupByOption.MONTH){
 			//each month between start and end of 
 			//form "m/yyyy"
-			SimpleDateFormat nameFormat = new SimpleDateFormat("MM/yyyy");
-			SimpleDateFormat keyFormat = new SimpleDateFormat("M/yyyy", Locale.ENGLISH);
+			SimpleDateFormat nameFormat = new SimpleDateFormat("MM/yyyy"); //$NON-NLS-1$
+			SimpleDateFormat keyFormat = new SimpleDateFormat("M/yyyy", Locale.ENGLISH); //$NON-NLS-1$
 			
 			cals.set(Calendar.DAY_OF_MONTH, 1);
 			cale.set(Calendar.DAY_OF_MONTH, cale.getActualMaximum(Calendar.DAY_OF_MONTH));

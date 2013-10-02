@@ -97,7 +97,7 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.add(Restrictions.isNull("employee")) //$NON-NLS-1$
 					.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
-						caRootFolder.setChildren(rootFolders);
+			caRootFolder.setChildren(rootFolders);
 		}
 			@SuppressWarnings("unchecked")
 		List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)

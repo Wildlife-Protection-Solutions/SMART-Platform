@@ -37,7 +37,7 @@ public class QueryHibernateManager {
 	
 	public static IQueryHibernateManager getInstance(){
 		if (instance == null){
-			if (SmartDB.isMultipleAnalysis()){
+			if (SmartDB.getCurrentConservationArea() != null && SmartDB.isMultipleAnalysis()){
 				instance = new MultiCaQueryHibernateManagerImpl();
 			}else{
 				instance = new CaQueryHibernateManagerImpl();

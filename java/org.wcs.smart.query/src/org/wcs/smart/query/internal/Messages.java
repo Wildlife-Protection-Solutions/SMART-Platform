@@ -507,6 +507,13 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_Keyword5;
 	public static String QueryServiceInfo_Keyword6;
 	public static String QueryServiceInfo_ServiceName;
+	public static String QueryTemplateCloner_ProgressCopyFolders;
+	public static String QueryTemplateCloner_ProgressCopyGridded;
+	public static String QueryTemplateCloner_ProgressCopyObservation;
+	public static String QueryTemplateCloner_ProgressCopyPatrols;
+	public static String QueryTemplateCloner_ProgressCopySummary;
+	public static String QueryTemplateCloner_ProgressCopyWaypoint;
+	public static String QueryTemplateCloner_ProgressQuery;
 	public static String QueryTypeDialog_CreateButton;
 	public static String QueryTypeDialog_DialogText;
 	public static String QueryTypeDialog_Message;

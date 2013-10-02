@@ -1029,14 +1029,14 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				groupByInnerSql.append(name + " as " + "gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
 				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
-				if (((PatrolGroupBy)gb).option == PatrolQueryOption.EMPLOYEE){
+				if (((PatrolGroupBy)gb).getOption() == PatrolQueryOption.EMPLOYEE){
 					fromSql.append(" left join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(PatrolLegMember.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(prefix(PatrolLegMember.class));
 					fromSql.append(" on temp.pl_uuid = " + prefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				}else if (((PatrolGroupBy)gb).option.getType() == PatrolQueryOptionType.KEY){
-					PatrolQueryOption op = ((PatrolGroupBy)gb).option;
+				}else if (((PatrolGroupBy)gb).getOption().getType() == PatrolQueryOptionType.KEY){
+					PatrolQueryOption op = ((PatrolGroupBy)gb).getOption();
 					fromSql.append(" left join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(op.getSourceClass()));
 					fromSql.append(" on temp."); //$NON-NLS-1$

@@ -74,21 +74,21 @@ public class ConservationAreaFilter implements IFilter {
 					Messages.ConservationAreaFilter_InvalidCaFilter, ex);
 			}
 		}
+
 		ArrayList<byte[]> missing = new ArrayList<byte[]>();
 		for (Iterator<byte[]> iterator = filter.caFilters.iterator(); iterator.hasNext();) {
 			byte[] type = (byte[]) iterator.next();
 			boolean found = false;
-			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				if (Arrays.equals(type, ca.getUuid())){
+			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()) {
+				if (Arrays.equals(type, ca.getUuid())) {
 					found = true;
 					break;
 				}
 			}
-			if (!found){
+			if (!found) {
 				missing.add(type);
 				iterator.remove();
 			}
-			
 		}
 		if (missing.size() > 0){
 			filter.setMissingConservationAreas(missing);
