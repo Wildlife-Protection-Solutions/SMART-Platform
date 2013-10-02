@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.text.MessageFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
