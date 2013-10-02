@@ -333,7 +333,7 @@ public class PatrolScreensUtil {
 		List<String> values = ctUtil.listItemIds(memberIds);
 		String trElements = ctUtil.translateElements(memberIds);
 		String trLinks = ctUtil.translateLinks(memberIds, false);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks, 1);
+		Node node = screensFactory.createNodeMultiList(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks, 1, false);
 		container.screenNodes.add(node);
 		return toNextScreen(node);
 	}

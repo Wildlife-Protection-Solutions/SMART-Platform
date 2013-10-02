@@ -312,12 +312,20 @@ public class SmartImporter {
 				}
 				//create fake record as if it is result element for listAttribute with listAttributeValue
 				A fakeA = new A();
-				fakeA.setN("Attribute for item " + a.getN()); //will never be displayed //$NON-NLS-1$
+				fakeA.setN("List Attribute for item " + a.getN()); //will never be displayed //$NON-NLS-1$
 				fakeA.setI(e.getTag3());
 				fakeA.setV(a.getI());
 				fakeA.setValue(""); //$NON-NLS-1$
 				aList.add(fakeA);
-				//TODO: also need to add numberAttribute if this is multiselect+number (numAttr uuid in tag4, value in a.getV())
+				if (e.getTag4() != null && !e.getTag4().isEmpty()) {
+					//also need to add numberAttribute if this is multiselect+number (reference to numAttr in tag4, value in a.getV())
+					fakeA = new A();
+					fakeA.setN("Number Attribute for item " + a.getN()); //will never be displayed //$NON-NLS-1$
+					fakeA.setI(e.getTag4());
+					fakeA.setV(a.getV());
+					fakeA.setValue(""); //$NON-NLS-1$
+					aList.add(fakeA);
+				}
 			}
 		}
 		

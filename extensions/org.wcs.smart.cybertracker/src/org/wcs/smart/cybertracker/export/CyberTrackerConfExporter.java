@@ -172,7 +172,6 @@ public class CyberTrackerConfExporter {
 				columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
 			}
 			for (Attribute attribute : attr2resultId.keySet()) {
-//				columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
 				Map<Integer, CyberTrackerId> map = attr2resultId.get(attribute);
 				for (Integer i : map.keySet()) {
 					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), attribute.getName() + "#" + i)); //$NON-NLS-1$
@@ -253,14 +252,17 @@ public class CyberTrackerConfExporter {
 			CmAttribute cmAttr = toShow.get(0);
 			Attribute attribute = cmAttr.getAttribute();
 			if (AttributeType.LIST.equals(attribute.getType())) {
-				if (isMultiselect(cmAttr) && isVisible(cmAttr)) {
-					List<CyberTrackerId> multiIds = addListElements(cmAttr, true, null); //TODO: add number attribute support 
-					Node mNode = buildMultiSelectNode(cmAttr, startId, multiIds);
+				if (cmAttr.isMultiselect() && cmAttr.isVisible()) {
+					CmAttribute numAttr = toShow.size() > 1 && toShow.get(1).isNumeric() ? toShow.get(1) : null;
+					List<CyberTrackerId> multiIds = addListElements(cmAttr, true, numAttr); 
+					Node mNode = buildMultiSelectNode(cmAttr, startId, multiIds, numAttr != null);
 					Control control2 = ScreensObjectFactory.getNavigationControl(mNode);
 					CyberTrackerId nextId = new CyberTrackerId();
 					//reference to "Next" screen
 					control2.setTranslateNextScreenId(nextId.getNodeId());
 					result.add(mNode);
+					if (numAttr != null)
+						toShow.remove(1);
 					toShow.remove(0); //as we just added a node for it
 					List<AttributeListItem> activeItems = attribute.getActiveListItems();
 					for (int i = 0; i < multiIds.size(); i++) {
@@ -321,13 +323,13 @@ public class CyberTrackerConfExporter {
 		
 	}
 	
-	private Node buildMultiSelectNode(CmAttribute cmAttr, CyberTrackerId id /*=startId*/, List<CyberTrackerId> childIds) {
+	private Node buildMultiSelectNode(CmAttribute cmAttr, CyberTrackerId id /*=startId*/, List<CyberTrackerId> childIds, boolean withNumbers) {
 		if (childIds == null || childIds.isEmpty())
 			return null;
 		List<String> values = ctUtil.listItemIds(childIds);
 		String trElements = ctUtil.translateElements(childIds);
 		String trLinks = ctUtil.translateLinks(childIds, true);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), cmAttr.getName(), values, trElements, trLinks, 1);
+		Node node = screensFactory.createNodeMultiList(id.getNodeId(), cmAttr.getName(), values, trElements, trLinks, 1, withNumbers);
 		//NOTE: next screen is not set here
 		return node;
 	}
@@ -336,7 +338,7 @@ public class CyberTrackerConfExporter {
 		String defaultValues = ""; //$NON-NLS-1$
 		for (int i = 0; i < invisibleList.size(); i++) {
 			CmAttribute cmAttr = invisibleList.get(i);
-			if (isVisible(cmAttr)) {
+			if (cmAttr.isVisible()) {
 				//should NEVER happen
 				throw new IllegalArgumentException("Arguments passed to this method MUST be invisible"); //$NON-NLS-1$
 			}
@@ -362,7 +364,7 @@ public class CyberTrackerConfExporter {
 		for (int i = 0; i < attrList.size(); i++) {
 			CmAttribute cmAttr = attrList.get(i);
 			boolean linkToNext = terminare || i < attrList.size() - 1;
-			if (!isVisible(cmAttr)) {
+			if (!cmAttr.isVisible()) {
 				//should NEVER happen
 				//development validation! remove throw block after testing
 				throw new IllegalArgumentException("Arguments passed to this method MUST be visible"); //$NON-NLS-1$
@@ -404,9 +406,8 @@ public class CyberTrackerConfExporter {
 			case TREE:
 			{
 				String nodeId = id.getNodeId();
-				id = new CyberTrackerId(); //this id will be used for next screen
-				//TODO: handle linkToNext & label
-				result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId()));
+				id = linkToNext ? new CyberTrackerId() : null; //this id will be used for next screen
+				result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId(), label));
 				break;
 			}
 			case BOOLEAN:
@@ -551,27 +552,27 @@ public class CyberTrackerConfExporter {
 	 * @param nodeId
 	 * @return
 	 */
-	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId) {
+	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label) {
 		List<Node> result = new ArrayList<Node>();
 		List<AttributeTreeNode> activeTreeNodes = new ArrayList<AttributeTreeNode>();
 		activeTreeNodes.addAll(treeAttribute.getActiveTreeNodes());
 		
 		Map<AttributeTreeNode, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null);
-		if (!treeAttribute.getIsRequired()) {
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName() + label, childIds, null);
+		if (!treeAttribute.getIsRequired() && navId != null) {
 			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
 			navControl.setTranslateSkipScreenId(navId.getNodeId());
 		}
 		result.add(treeRootNode);
 		for (AttributeTreeNode treeNode : activeTreeNodes) {
-			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId));
+			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, label));
 		}
 		ElementsUtil.addElements(elements, map);
 		return result;
 	}
 	
-	private List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId) {
+	private List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, String label) {
 		List<Node> result = new ArrayList<Node>();
 		if (treeNode == null)
 			return result;
@@ -582,9 +583,11 @@ public class CyberTrackerConfExporter {
 			CyberTrackerId id = map.get(treeNode);
 			List<CyberTrackerId> childIds = new ArrayList<CyberTrackerId>();
 			childIds.add(id);
-			Node node = ctUtil.createRadioNode(id.getNodeId(), treeNode.getName(), childIds, resultElementId);
-			Control control2 = ScreensObjectFactory.getNavigationControl(node);
-			control2.setTranslateNextScreenId(navId.getNodeId());
+			Node node = ctUtil.createRadioNode(id.getNodeId(), treeNode.getName() + label, childIds, resultElementId);
+			if (navId != null) {
+				Control control2 = ScreensObjectFactory.getNavigationControl(node);
+				control2.setTranslateNextScreenId(navId.getNodeId());
+			}
 			result.add(node);
 			return result;
 		}
@@ -601,18 +604,20 @@ public class CyberTrackerConfExporter {
 		String id = map.get(treeNode).getNodeId();
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(treeNode.getActiveChildren(), map);
 		if (isEndScreen) {
-			Node node = ctUtil.createRadioNode(id, treeNode.getName(), childIds, resultElementId);
-			Control control2 = ScreensObjectFactory.getNavigationControl(node);
-			control2.setTranslateNextScreenId(navId.getNodeId());
+			Node node = ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, resultElementId);
+			if (navId != null) {
+				Control control2 = ScreensObjectFactory.getNavigationControl(node);
+				control2.setTranslateNextScreenId(navId.getNodeId());
+			}
 			result.add(node);
 			return result;
 		}
 		
 		//this is NOT an end screen, proceed recursively till the end
-		result.add(ctUtil.createRadioNode(id, treeNode.getName(), childIds, null));
+		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, null));
 		
 		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
-			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId));
+			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, label));
 		}		
 		return result;
 	}
@@ -652,19 +657,9 @@ public class CyberTrackerConfExporter {
 		return code;
 	}
 
-	private boolean isVisible(CmAttribute attribute) {
-		CmAttributeOption option = attribute.getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE);
-		return option == null || Boolean.TRUE.equals(option.getBooleanValue());
-	}
-
-	private boolean isMultiselect(CmAttribute attribute) {
-		CmAttributeOption option = attribute.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
-		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
-	}
-
 	private void split(List<CmAttribute> fullList, List<CmAttribute> toShow, List<CmAttribute> invisibleList) {
 		for (CmAttribute attr : fullList) {
-			if (isVisible(attr)) {
+			if (attr.isVisible()) {
 				Attribute attribute = attr.getAttribute();
 				switch (attribute.getType()) {
 				case LIST:
