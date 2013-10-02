@@ -479,10 +479,12 @@ public class DataModel {
 		
 		clone.setConservationArea(newCa);
 		Language ll = ca.getDefaultLanguage();
-		for (Language l : ca.getLanguages()){
-			if (l.getCode().equals(SmartDB.getCurrentLanguage().getCode())){
-				ll = l;
-				break;
+		if (SmartDB.getCurrentConservationArea() != null){
+			for (Language l : ca.getLanguages()){
+				if (l.getCode().equals(SmartDB.getCurrentLanguage().getCode())){
+					ll = l;
+					break;
+				}
 			}
 		}
 		

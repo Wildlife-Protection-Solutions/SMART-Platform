@@ -24,7 +24,6 @@ package org.wcs.smart.ui.internal.backup;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -33,7 +32,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyRestoreEngine;

@@ -120,7 +120,7 @@ public class ConservationAreaConfiguration {
 				break;
 			}
 		}
-		if (mainConservationArea == null){
+		if (mainConservationArea == null && conservationAreas.size() > 0){
 			mainConservationArea = conservationAreas.iterator().next();
 			this.language = mainConservationArea.getDefaultLanguage();
 		}

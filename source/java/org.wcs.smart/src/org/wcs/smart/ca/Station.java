@@ -40,7 +40,7 @@ import org.wcs.smart.internal.Messages;
  */
 @Entity
 @Table(name = "smart.station")
-public class Station extends NamedDesciptionItem {
+public class Station extends NamedDescriptionItem {
 
 	@Transient
 	public static final String ID = Messages.Station_Id_Label;

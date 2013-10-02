@@ -21,18 +21,14 @@
  */
 package org.wcs.smart.ca;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -43,9 +39,9 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Table(name="smart.language")
-public class Language {
+public class Language extends UuidItem{
 
-	private byte[] uuid;
+	
 	private String code;
 	private ConservationArea ca;
 	private boolean isDefault;
@@ -53,17 +49,6 @@ public class Language {
 	@Transient
 	private Locale locale;
 
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
-	
 	public String getCode() {
 		return code;
 	}
@@ -86,20 +71,7 @@ public class Language {
 	public void setDefault(boolean isDefault) {
 		this.isDefault = isDefault;
 	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Language){
-			Language s = (Language)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-	
+		
 	/**
 	 * Two languages are considered the same
 	 * if they have the same code;
@@ -108,13 +80,6 @@ public class Language {
 	 */
 	public boolean isSame(Language l){
 		return getCode().trim().equals(l.getCode().trim());
-	}
-	
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}
-		return super.hashCode();
 	}
 	
 	/**

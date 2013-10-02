@@ -708,14 +708,25 @@ public class HibernateManager extends SmartHibernateManager{
 	/**
 	 * 
 	 * @param session
-	 * @return list of projections available for the conservation
+	 * @return list of projections available for the current conservation area
+	 * area
+	 */
+	public static List<Projection> getCaProjectionList(Session session){
+		return getCaProjectionList(SmartDB.getCurrentConservationArea(), session);
+	}
+
+	/**
+	 * 
+	 * @param session
+	 * @return list of projections available for the given conservation
 	 * area
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Projection> getCaProjectionList(Session session){
-		return ((List<Projection>)session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list()); //$NON-NLS-1$
+	public static List<Projection> getCaProjectionList(ConservationArea ca, Session session){
+		return ((List<Projection>)session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", ca)).list()); //$NON-NLS-1$
 	}
 
+	
 	/**
 	 * 
 	 * @param session

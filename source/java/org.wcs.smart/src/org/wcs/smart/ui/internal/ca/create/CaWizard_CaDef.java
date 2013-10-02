@@ -172,13 +172,15 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	public void updateConservationArea(ConservationArea ca) {
 		composite.updateConservationArea(ca);
 		
-		Language lang = new Language();
-		lang.setCa(ca);
+		if (lstViewer.getControl().isEnabled()){
+			Language lang = new Language();
+			lang.setCa(ca);
 
-		Locale e = (Locale) ((IStructuredSelection)lstViewer.getSelection()).getFirstElement(); 
-		lang.setCode(SmartUtils.localeToString(e));
-		lang.setDefault(true);
-		ca.getLanguages().add(lang);
+			Locale e = (Locale) ((IStructuredSelection)lstViewer.getSelection()).getFirstElement(); 
+			lang.setCode(SmartUtils.localeToString(e));
+			lang.setDefault(true);
+			ca.getLanguages().add(lang);
+		}
 	}
 	
 	public void initControls(ConservationArea ca){

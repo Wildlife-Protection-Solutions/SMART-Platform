@@ -83,7 +83,7 @@ public class Label  {
 	@SuppressWarnings("unchecked")
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
-		if (elementuuid == null){
+		if (elementuuid == null || SmartDB.getCurrentConservationArea() == null){
 			return ""; //$NON-NLS-1$
 		}
 		

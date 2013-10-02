@@ -21,19 +21,15 @@
  */
 package org.wcs.smart.ui.internal.startup;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
@@ -54,69 +50,63 @@ import org.wcs.smart.ui.internal.backup.RestoreHandler;
  */
 public abstract class InitializeDialog  extends Dialog {
 
-	public final static int CANCEL = 0;
-	public final static int OK = 1;
+	private Button opCreateNew;
+	private Button opRestore;
+	private Button opImport;
 	
-	protected int result;
-	protected Shell shell;
-	
-
-	/**
-	 * Create the dialog.
-	 * 
-	 * @param parent
-	 * @param style
-	 */
-	public InitializeDialog(Shell parent) {
-		super(parent, SWT.APPLICATION_MODAL);
-		setText(getDialogText());
-
+	protected InitializeDialog(Shell parent) {
+		super(parent);
 	}
 
-	/**
-	 * Open the dialog.
-	 * 
-	 * @return the result
-	 */
-	public int open() {
-		createContents();
-		
-		Rectangle bds = shell.getDisplay().getMonitors()[0].getBounds();
-		Point p = shell.getSize();
-
-		int nLeft = (bds.width - p.x) / 2;
-		int nTop = (bds.height - p.y) / 2;
-
-		shell.setBounds(nLeft, nTop, p.x, p.y);
-		
-		shell.open();
-		shell.layout();
-		Display display = getParent().getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
+	@Override
+	protected void setShellStyle(int arg0){
+	    //Use the following not to show the default close X button in the title bar
+	    super.setShellStyle(SWT.APPLICATION_MODAL | getDefaultOrientation() | SWT.TITLE);
+	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
+		createButton(parent, IDialogConstants.OK_ID, Messages.InitializeDialog_Continue_Button, true);
+	}
+	
+	@Override
+	protected Point getInitialSize() {
+		return getParentShell().getSize();
+	}
+	
+	@Override
+	protected void buttonPressed(int buttonId) {
+		if (IDialogConstants.OK_ID == buttonId) {
+			if (opCreateNew.getSelection()) {
+				createConservationArea();
+			} else if (opRestore.getSelection()) {
+				restoreBackup();
+			}else if (opImport.getSelection()){
+				importCa();
 			}
+		} else if (IDialogConstants.CANCEL_ID == buttonId) {
+			cancelPressed();
 		}
-		return result;
 	}
-
+	
 	/**
 	 * Create contents of the dialog.
 	 */
-	private void createContents() {
-		shell = new Shell(getParent(), SWT.BORDER | SWT.TITLE);
-		shell.setSize(448, 324);
-		shell.setText(getText());
+	protected Control createDialogArea(Composite parent) {
+		super.getShell().setText(getDialogText());
+		
+		parent = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(1, false);
 		gl.verticalSpacing = gl.horizontalSpacing = gl.marginWidth = gl.marginHeight = 0;
-		shell.setLayout(gl);
-
+		parent.setLayout(gl);
+		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		DialogHeader dh = new DialogHeader(shell, SWT.NONE);
+		DialogHeader dh = new DialogHeader(parent, SWT.NONE);
 		dh.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		dh.setHeader(getHeaderText());
 
-		Composite contents = new Composite(shell, SWT.NONE);
+		Composite contents = new Composite(parent, SWT.NONE);
 		contents.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,true, true));
 		gl = new GridLayout(1, false);
 		gl.verticalSpacing = 10;
@@ -131,75 +121,37 @@ public abstract class InitializeDialog  extends Dialog {
 		gl.marginLeft = 20;
 		opComp.setLayout(gl);
 		
-		final Button opCreateNew = new Button(opComp, SWT.RADIO);
+		opCreateNew = new Button(opComp, SWT.RADIO);
 		opCreateNew.setText(Messages.InitializeDialog_CreateCa_Label);
 		opCreateNew.setSelection(true);
 		
 
-		final Button opRestore = new Button(opComp, SWT.RADIO);
+		opRestore = new Button(opComp, SWT.RADIO);
 		opRestore.setText(Messages.InitializeDialog_Restore_Label);
 
-		final Button opImport = new Button(opComp, SWT.RADIO);
+		opImport = new Button(opComp, SWT.RADIO);
 		opImport.setText(Messages.InitializeDialog_Import_Label);
 		
-		Label lbl = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label lbl = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,false));
 		
-		Composite buttonComp = new Composite(shell, SWT.NONE);
+		Composite buttonComp = new Composite(parent, SWT.NONE);
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		gl = new GridLayout(2, true);
 		gl.horizontalSpacing = 20;
 		gl.marginHeight = 10;
 		buttonComp.setLayout(gl);
 				
-		Button btnCancel = new Button(buttonComp, SWT.NONE);
-		btnCancel.setText(IDialogConstants.CANCEL_LABEL);
-		btnCancel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
-		btnCancel.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent c) {
-				result = CANCEL;
-				shell.dispose();
-				onCancel();
-			}
-		});
-
-		Button btnContinue = new Button(buttonComp, SWT.NONE);
-		btnContinue.setText(Messages.InitializeDialog_Continue_Button);
-		btnContinue.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
-		btnContinue.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				result = OK;
-				if (opCreateNew.getSelection()) {
-					createConservationArea();
-				} else if (opRestore.getSelection()) {
-					restoreBackup();
-				}else if (opImport.getSelection()){
-					importCa();
-				} else {
-					MessageDialog
-							.openError(shell, Messages.InitializeDialog_Error_DialogTitle,
-									Messages.InitializeDialog_Error_NoOp_DialogMessage);
-				}
-			}
-
-		});
-		
-		int b1 = btnContinue.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		int b2 = btnCancel.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		b1 = (int) ( Math.max(b1, b2) * 1.2 );
-		((GridData)btnContinue.getLayoutData()).widthHint = b1;
-		((GridData)btnCancel.getLayoutData()).widthHint = b1;
+		return parent;
 	}
 	
 	/**
 	 * Opens the new conservation area wizard.
 	 */
 	private void createConservationArea() {
-		if (SmartStartUp.openCreateNewCaWizard(shell)){
-			//hide this page
-			shell.dispose();
+		if (SmartStartUp.openCreateNewCaWizard(getParentShell())){
+			super.setReturnCode(OK);
+			close();
 		}
 	}
 	
@@ -210,10 +162,11 @@ public abstract class InitializeDialog  extends Dialog {
 	private void restoreBackup(){
 		RestoreHandler handler = new RestoreHandler();
 		try{
-			handler.execute(shell);
-			shell.dispose();
+			handler.execute(getShell());
+			super.setReturnCode(OK);
+			close();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
 		}
 	}
 	
@@ -223,10 +176,11 @@ public abstract class InitializeDialog  extends Dialog {
 	private void importCa(){
 		ImportCaHandler handler = new ImportCaHandler();
 		try{
-			handler.execute(shell);
-			shell.dispose();
+			handler.execute(getShell());
+			super.setReturnCode(OK);
+			close();
 		}catch(Exception ex){
-			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_ImportCa + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.InitializeDialog_Error_ImportCa + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

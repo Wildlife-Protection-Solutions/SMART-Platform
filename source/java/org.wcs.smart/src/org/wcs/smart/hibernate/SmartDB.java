@@ -24,6 +24,7 @@ package org.wcs.smart.hibernate;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -186,6 +187,9 @@ public class SmartDB {
 	 * it will return <code>null</code>.
 	 */
 	public static ConservationAreaConfiguration getConservationAreaConfiguration(){
+		if (caConfig == null){
+			return new ConservationAreaConfiguration(Collections.<ConservationArea>emptyList(), Collections.<Employee>emptyList());
+		}
 		return caConfig;
 	}
 	/**

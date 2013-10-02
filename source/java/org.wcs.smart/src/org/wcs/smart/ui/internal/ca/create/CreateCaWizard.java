@@ -21,13 +21,19 @@
  */
 package org.wcs.smart.ui.internal.ca.create;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -45,7 +51,7 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 	private boolean completedOK = false;
 		
 	private ConservationArea newCa = null;
-	
+	private CaWizardTemplatePage templatePage = null;
 	/**
 	 * Creates a new wizard.
 	 */
@@ -56,10 +62,10 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 	
 	@Override
 	public void addPages() {
-		WizardPage page = new CaWizardTemplatePage();
-		super.addPage(page);
+		templatePage = new CaWizardTemplatePage();
+		super.addPage(templatePage);
 		
-		page = new CaWizard_CaDef();
+		CaWizardPage page = new CaWizard_CaDef();
 		super.addPage(page);
 		
 		page = new CaWizard_UserDef();
@@ -88,11 +94,43 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 		
-		try{
-			HibernateManager.saveNewConservationArea(newCa);
-			completedOK = true;
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_Error_CreateCaError + ex.getLocalizedMessage(), ex);
+		ConservationArea templateCa =templatePage.getTemplateCa();
+		if (templateCa == null){
+			try{
+				HibernateManager.saveNewConservationArea(newCa);
+				completedOK = true;
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_Error_CreateCaError + ex.getLocalizedMessage(), ex);
+			}
+		}else{
+			final ConservationAreaClonerEngine engine = new ConservationAreaClonerEngine(templateCa, newCa);
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			try {
+				dialog.run(true, false, new IRunnableWithProgress() {
+					
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+						DisplayAccess.accessDisplayDuringStartup();
+						try{
+							engine.processTemplate(monitor);	
+						}catch (final Exception ex){
+							getShell().getDisplay().syncExec(new Runnable(){
+								@Override
+								public void run() {
+									SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_ErrorCopyInfo + ex.getLocalizedMessage(), ex);
+								}
+							});
+							
+						}
+						
+					}
+				});
+			} catch (Exception e) {
+				SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_ErrorCreateFromTemplate, e);
+			}
+			completedOK= true;
+			
 		}
 		
 		return completedOK;

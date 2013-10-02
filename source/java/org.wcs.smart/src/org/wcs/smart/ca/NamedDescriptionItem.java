@@ -52,7 +52,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class NamedDesciptionItem extends NamedItem {
+public class NamedDescriptionItem extends NamedItem {
 	
 	private byte[] descuuid;
 	
@@ -60,7 +60,7 @@ public class NamedDesciptionItem extends NamedItem {
 
 	private Set<DescriptionLabel> descriptions;
 
-	public NamedDesciptionItem() {
+	public NamedDescriptionItem() {
 		super();
 		this.descriptions = null;
 	}
@@ -90,14 +90,18 @@ public class NamedDesciptionItem extends NamedItem {
 //	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
 	@SuppressWarnings("unchecked")
 	@Transient
+	/**
+	 * If not previously loaded, this runs a database
+	 * query using the current active session and
+	 * associated transaction 
+	 * @return
+	 */
 	public Set<DescriptionLabel> getDescriptions() {
 		if (this.descriptions == null) {
-			this.descriptions = new HashSet<DescriptionLabel>();
+			this.descriptions = new HashSet<DescriptionLabel>();		
 			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid)); //$NON-NLS-1$
-			this.descriptions.addAll(c.list());
-			session.getTransaction().commit();
+			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", descuuid)); //$NON-NLS-1$
+			descriptions.addAll(c.list());
 		}
 		return this.descriptions;
 	}
