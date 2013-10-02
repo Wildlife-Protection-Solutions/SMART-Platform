@@ -164,8 +164,10 @@ public class PatrolHibernateManager extends HibernateManager{
 				op = ops.get(0);
 			}
 			s.getTransaction().commit();
+			
 			return op;
 		}catch (Exception ex){
+			
 			s.getTransaction().rollback();
 			s.close();
 			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoLoadPatrolOptions + ex.getLocalizedMessage(), ex);
@@ -181,7 +183,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param s active session
 	 * @return
 	 */
-	private static PatrolOptions createPatrolOption(ConservationArea ca, Session s){
+	public static PatrolOptions createPatrolOption(ConservationArea ca, Session s){
 		PatrolOptions po = new PatrolOptions();
 		po.setTrackDistanceDirection(false);
 		po.setEditTime(null);

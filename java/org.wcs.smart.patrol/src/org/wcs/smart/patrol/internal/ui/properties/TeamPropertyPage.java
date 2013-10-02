@@ -56,6 +56,7 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -275,7 +276,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		tableViewer.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				if (tableViewer.getCell(new Point(event.x, event.y)).getColumnIndex() == Column.KEY.ordinal()){
+				ViewerCell cell = tableViewer.getCell(new Point(event.x, event.y));
+				if (cell != null && cell.getColumnIndex() == Column.KEY.ordinal()){
 					editKey();
 				}
 			}
