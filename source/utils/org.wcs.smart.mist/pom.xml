@@ -202,31 +202,6 @@
         
     </executions>
 </plugin>
-
-
-
-
-
-
-
-	<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            </execution>
-            </executions>
-            <configuration>
-            <artifact>${jre.appLocation}/${jre.fileName}</artifact>
-            <outputDirectory>${jre.appLocation}</outputDirectory>
-   			</configuration>
-	</plugin>
  </plugins>
 	</build>
 
