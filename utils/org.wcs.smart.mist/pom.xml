@@ -17,8 +17,8 @@
 		<firebird.utilDir>firebird</firebird.utilDir>
 		<firebird.appLocation>${firebird.utilDir}/Firebird</firebird.appLocation>
 		
-		<jre.fileName>jre-7u40-windows-i586.tar.gz</jre.fileName>
-		<jre.downloadlink>http://download.oracle.com/otn-pub/java/jdk/7u40-b43/${jre.fileName}</jre.downloadlink>
+		<jre.fileName>jre.1.7.0_40.zip</jre.fileName>
+		<jre.downloadlink>file://L:\Refractions\SMART\Delivery\jres\windows_32/${jre.fileName}</jre.downloadlink>
 		
 		<jre.appLocation>jre_win32</jre.appLocation>
 	</properties>
@@ -195,7 +195,7 @@
             </goals>
             <configuration>
                 <url>${jre.downloadlink}</url>
-                <unpack>false</unpack>
+                <unpack>true</unpack>
                 <outputDirectory>${jre.appLocation}</outputDirectory>
             </configuration>
         </execution>
