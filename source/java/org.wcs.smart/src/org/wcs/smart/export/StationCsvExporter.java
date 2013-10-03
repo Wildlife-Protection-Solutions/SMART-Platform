@@ -24,17 +24,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.Rank;
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
@@ -42,20 +38,17 @@ import org.wcs.smart.util.SmartUtils;
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * CSV Query exporter for simple queries.
+ * CSV Query exporter for stations
  * 
- * @author Garrett
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ * @since 2.0.0
  */
-public class AgencyCsvExporter implements ICsvDataExporter {
-	protected List<Language> languages;
-	public ConservationArea ca;
+public class StationCsvExporter implements ICsvDataExporter {
 	
 	/**
-	 * Creates a new exporter that exports Agencies and their Ranks to csv format
+	 * Creates a new exporter that exports Stations to csv format
 	 */
-	public AgencyCsvExporter() {
+	public StationCsvExporter() {
 		//nothing
 	}
 
@@ -63,43 +56,27 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
 		CSVWriter writer = null;
 		try {
-			this.ca = ca;
-			languages = new ArrayList<Language>(ca.getLanguages());
+			List<Language> languages = new ArrayList<Language>(ca.getLanguages());
 			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
-			List<Agency> agencies = getAgencies(session);
+			List<Station> stations = getStations(ca, session);
 
 			// WriteHeaders
-			String[] agencyCols = createColumns(languages);
-			writer.writeNext(agencyCols);
+			String[] stationColumns = createColumns(languages);
+			writer.writeNext(stationColumns);
 
-			Set<Label> agentAllLang;
-			Set<Label> rankAllLang;
-			String csv_out[] = new String[agencyCols.length];
-			// must change the following to write one column for each of the
-			// corresponding languages
-			for (Agency agt : agencies) {
+			//for each station write one record
+			for (Station station : stations) {
 				if (monitor.isCanceled()) return false;
-				agentAllLang = agt.getNames();
+				
 				// entry in string array (csv_out) of names
-				for (Label agt_lbl : agentAllLang) {
-					csv_out[findcolumnIndex(agt_lbl)] = agt_lbl.getValue();
+				int i = 0;
+				String csvout[] = new String[stationColumns.length];
+				for(Language l : languages){
+					csvout[i++] = station.findName(l);
+					csvout[i++] = station.findDescriptionNull(l) == null ? "" : station.findDescriptionNull(l); //$NON-NLS-1$
 				}
-				writer.writeNext(csv_out);
-				// now for this agency get ranks
-				List<Rank> ranks = getRanks(agt);
-				if (!ranks.isEmpty()) {
-					for (Rank ranker : ranks) {
-						rankAllLang = ranker.getNames();
-						for (Label rnk_lbl : rankAllLang) {
-							csv_out[(languages.size() + findcolumnIndex(rnk_lbl))] = rnk_lbl.getValue();	
-						}
-						writer.writeNext(csv_out);
-					}
-					// clear the csv_out Array.
-					for (int i = 0; i < csv_out.length; i++) {
-						csv_out[i] = ""; //$NON-NLS-1$
-					}
-				}
+				writer.writeNext(csvout);
+				
 			}
 			writer.close();
 			return true;
@@ -116,43 +93,21 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] agtcols = new String[(2*langs.size())];
+		String[] stationCols = new String[(2*langs.size())];
 		
-		int i=0;
-		for (Language lng : langs) {
-			agtcols[i] = "Agent>" + lng.getCode(); //$NON-NLS-1$
-			i++;
-		}
-
-		for (Language lng : langs) {
-			agtcols[i] = "Rank>" + lng.getCode(); //$NON-NLS-1$
-			i++;
-		}
-		return agtcols;
-	}
-
-	private int findcolumnIndex(Label lbl){
 		int i = 0;
-		for (Language lng : languages) {
-			if (lbl.getLanguage().getCode().equals(lng.getCode())){
-				return i;
-			}
-			i++;
+		for (Language lng : langs) {
+			stationCols[i++] = "Name>" + lng.getCode(); //$NON-NLS-1$
+			stationCols[i++] = "Description>" + lng.getCode(); //$NON-NLS-1$
 		}
-		return -1;
+
+		return stationCols;
 	}
 
-	private List<Rank> getRanks(Agency agent) {
-		if (agent.getUuid() != null) {
-			return agent.getRanks();
-		}
-		return Collections.emptyList();
-	}
-
-	private List<Agency> getAgencies(Session session) {
+	private List<Station> getStations(ConservationArea ca, Session session) {
 		session.beginTransaction();
 		try{
-			return HibernateManager.getAgencies(ca, session);
+			return HibernateManager.getStations(ca, session);
 		}finally{
 			session.getTransaction().rollback();
 		}

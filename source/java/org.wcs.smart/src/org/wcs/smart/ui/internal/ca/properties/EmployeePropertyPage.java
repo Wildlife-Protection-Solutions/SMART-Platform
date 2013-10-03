@@ -265,7 +265,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		
 	
 		Button btnImport = new Button(composite, SWT.NONE);
-		btnImport.setText(Messages.EmployeePropertyPage_Import_Button);
+		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
 		btnImport.setToolTipText(Messages.EmployeePropertyPage_ImportButtonTooltip);
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -281,7 +281,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		});
 		
 		Button btnExport = new Button(composite, SWT.NONE);
-		btnExport.setText(Messages.EmployeePropertyPage_Export_Button);
+		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
 		btnExport.setToolTipText(Messages.EmployeePropertyPage_ExportButtonTooltip);
 		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
