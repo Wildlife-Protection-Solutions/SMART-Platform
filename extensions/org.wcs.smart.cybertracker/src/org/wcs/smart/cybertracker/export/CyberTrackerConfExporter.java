@@ -405,9 +405,19 @@ public class CyberTrackerConfExporter {
 			}
 			case TREE:
 			{
-				String nodeId = id.getNodeId();
-				id = linkToNext ? new CyberTrackerId() : null; //this id will be used for next screen
-				result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId(), label));
+				if (cmAttr.isFlattenTree()) {
+					List<CyberTrackerId> ids = addFinalTreeNodes(cmAttr);
+					List<String> values = ctUtil.listItemIds(ids);
+					String trElements = ctUtil.translateElements(ids);
+					String trLinks = ctUtil.translateLinks(ids, false);
+					Node node = screensFactory.createNodeRadio(id.getNodeId(), attribute.getName() + label, values, trElements, trLinks, resultElementId.getItemId());
+					result.add(node);
+				} else {
+					String nodeId = id.getNodeId();
+					id = linkToNext ? new CyberTrackerId() : null; //this id will be used for next screen
+					result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId(), label));
+					linkToNext = false; //for this case we track linking separately, we don't want any linking logic to be executed further for this attribute
+				}
 				break;
 			}
 			case BOOLEAN:
@@ -422,8 +432,8 @@ public class CyberTrackerConfExporter {
 				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
 			}
 
-			//tracking navigation for non-tree attributes (tree attributes are handle separately)
-			if (linkToNext && !Attribute.AttributeType.TREE.equals(attribute.getType())) {
+			//tracking navigation for non-tree or float trees attributes (tree attributes are handle separately)
+			if (linkToNext) {
 				//handle only cases for non-tree attributes, as all the have single ending screen
 				id = new CyberTrackerId(); //this id will be used for next screen
 				if (!result.isEmpty()) {
@@ -444,6 +454,39 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 
+	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr) {
+		Attribute attribute = cmAttr.getAttribute();
+		List<AttributeTreeNode> activeTreeNodes = attribute.getActiveTreeNodes();
+		if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
+			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
+			throw new IllegalArgumentException("Cannot add a flat tree screen without any items to display"); //$NON-NLS-1$
+		}
+		List<AttributeTreeNode> finalTreeNodes = listFinalTreeNodes(activeTreeNodes);
+		
+		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
+		for (AttributeTreeNode treeNode : finalTreeNodes) {
+			String name = treeNode.getName();
+			String tag0 = SmartUtils.encodeHex(treeNode.getUuid());
+			CyberTrackerId id = new CyberTrackerId();
+			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0);
+			ids.add(id);
+		}
+		return ids;
+	}
+
+	private List<AttributeTreeNode> listFinalTreeNodes(List<AttributeTreeNode> activeTreeNodes) {
+		List<AttributeTreeNode> result = new ArrayList<AttributeTreeNode>();
+		for (AttributeTreeNode treeNode : activeTreeNodes) {
+			List<AttributeTreeNode> activeChildren = treeNode.getActiveChildren();
+			if (activeChildren == null || activeChildren.isEmpty()) {
+				result.add(treeNode);
+			} else {
+				result.addAll(listFinalTreeNodes(activeChildren));
+			}
+		}
+		return result;
+	}
+	
 	private String recordDefaultValue(CmAttribute cmAttr) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		Map<String, CmAttributeOption> options = cmAttr.getCmAttributeOptions();
