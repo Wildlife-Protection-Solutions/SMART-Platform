@@ -114,5 +114,11 @@ public class CmAttribute extends NamedItem {
 		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_NUMERIC);
 		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
 	}
+
+	@Transient
+	public boolean isFlattenTree() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_FLATTEN_TREE);
+		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
+	}
 	
 }
