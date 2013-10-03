@@ -82,6 +82,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
@@ -275,7 +276,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		tblAgencies.refresh();
 		Button btnImport = new Button(container, SWT.NONE);
-		btnImport.setText(Messages.AgencyRankPropertyPage_Button_Import);
+		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -296,7 +297,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		Button btnExport = new Button(container, SWT.NONE);
-		btnExport.setText(Messages.AgencyRankPropertyPage_Button_Export);
+		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
 		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {

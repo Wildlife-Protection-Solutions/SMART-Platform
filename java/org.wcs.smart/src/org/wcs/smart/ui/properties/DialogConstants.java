@@ -47,4 +47,7 @@ public class DialogConstants {
 	
 	public static final String EDIT_KEY_BUTTON_TEXT = Messages.DialogConstants_EditKeyButtonText;
 	
+	public static final String IMPORT_BUTTON_TEXT = Messages.DialogConstants_ImportButton_Label;
+	public static final String EXPORT_BUTTON_TEXT = Messages.DialogConstants_ExportButton_Label;
+	
 }

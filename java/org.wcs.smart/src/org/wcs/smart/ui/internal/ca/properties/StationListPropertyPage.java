@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.collections.comparators.NullComparator;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -71,7 +73,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.engine.SessionImplementor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
@@ -81,6 +83,11 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.export.StationCsvImporter;
+import org.wcs.smart.export.config.impl.StationCsvExportConfig;
+import org.wcs.smart.export.config.impl.StationCsvImportConfig;
+import org.wcs.smart.export.dialog.CsvCaImportDialog;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -293,6 +300,44 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				}	
 			}
 		});
+		
+		Composite btnPanel = new Composite(container, SWT.NONE);
+		btnPanel.setLayout(new GridLayout(2, false));
+		
+		Button btnImport = new Button(btnPanel, SWT.PUSH);
+		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
+		btnImport.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				StationCsvImportConfig config = new StationCsvImportConfig();
+				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
+				int ret = dialog.open();
+				if (ret == IDialogConstants.CANCEL_ID) {
+					return;
+				} else {
+					Collection<Station> importedData = ((StationCsvImporter)config.getImporter()).getImportedData();
+					if (importedData != null && importedData.size() > 0){
+						stations.addAll(importedData);
+						tableViewer.refresh();
+						setChangesMade(true);
+					}
+				}
+				
+			}
+			
+		});
+		
+		Button btnExport = new Button(btnPanel, SWT.PUSH);
+		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+		btnExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CsvExportDialog dialog = new CsvExportDialog(getShell(), new StationCsvExportConfig());
+				dialog.open();
+			}
+			
+		});
 
 		setTitle(Messages.StationListPropertyPage_PageName);
 		setMessage(Messages.StationListPropertyPage_Dialog_Message);
@@ -357,13 +402,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (type == Column.NAME) {
 			String value = stn.findNameNull(lang);
 			if (value == null){
-				value = stn.getName();
+				value = stn.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			}
 			return value;
 		} else if (type == Column.DESCIPTION) {
 			String value = stn.findDescriptionNull(lang);
 			if (value == null){
-				value = stn.getDescription();
+				value = stn.findDescriptionNull(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 				if (value == null){
 					value = ""; //$NON-NLS-1$
 				}

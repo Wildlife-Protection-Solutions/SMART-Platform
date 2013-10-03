@@ -109,7 +109,11 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 	
 	private List<Employee> getEmployees(ConservationArea ca, Session session) {
 		session.beginTransaction();
-		return HibernateManager.getAllEmployees(ca, session);
+		try{
+			return HibernateManager.getAllEmployees(ca, session);
+		}finally{
+			session.getTransaction().rollback();
+		}
 	}
 	
 }
