@@ -46,7 +46,7 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_NUMERIC = "NUMERIC"; //$NON-NLS-1$
 	
 	private CmAttribute cmAttribute;
-	private String optionId;
+	private String optionId; //NOTE: we cannot map this as emun in case we want to support some external options
 	private String stringValue;
 	private Double doubleValue;
 	private byte[] uuidValue;
