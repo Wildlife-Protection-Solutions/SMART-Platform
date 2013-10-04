@@ -19,36 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.export.config.impl;
+package org.wcs.smart.patrol.internal.export;
 
-import org.wcs.smart.export.AgencyCsvExporter;
-import org.wcs.smart.export.AgencyCsvImporter;
-import org.wcs.smart.export.config.AbstractCsvImportConfig;
+import org.wcs.smart.export.config.AbstractCsvExportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
-import org.wcs.smart.export.config.ICsvDataImporter;
-import org.wcs.smart.export.dialog.CsvImportDialog;
-import org.wcs.smart.internal.Messages;
+import org.wcs.smart.export.dialog.CsvExportDialog;
+
+import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Configuration for current {@link CsvImportDialog} to import
- * agencies and ranks into csv file.
+ * Configuration for current {@link CsvExportDialog} to export
+ * stations into csv file
  * 
- * Note the imported imports data into memory, it does not
- * save the results to the database.
- * 
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ * @since 2.0.0
  */
-public class AgencyCsvImportConfig extends AbstractCsvImportConfig {
+public class PatrolTransportCsvExportConfig extends AbstractCsvExportConfig {
 
-	AgencyCsvExporter exporter = new AgencyCsvExporter();
-	AgencyCsvImporter importer = new AgencyCsvImporter();
-	
-	@Override
-	public ICsvDataImporter getImporter() {
-		return importer;
-	}
+	private PatrolTransportCsvExporter exporter = new PatrolTransportCsvExporter();
 
 	@Override
 	public ICsvDataExporter getExporter() {
@@ -56,35 +46,44 @@ public class AgencyCsvImportConfig extends AbstractCsvImportConfig {
 	}
 	
 	@Override
+	public boolean includeHasHeader() {
+		return false;
+	}
+
+	@Override
+	public String getHasHeaderText() {
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
 	public String getInfo() {
-		return Messages.CsvConfig_Agency_Import_Info + SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Import_Info_Content +
-				SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_Label +
-				SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_HeaderRow +
-				SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_ContentRow;
+		return Messages.PatrolTransportCsvExportConfig_Message1
+				+ SmartUtils.LINE_SEPARATOR
+				+ Messages.PatrolTransportCsvExportConfig_Message1a
+				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
+				+ Messages.PatrolTransportCsvExportConfig_Message2 + 
+				PatrolType.Type.AIR.name() + ","+ PatrolType.Type.MARINE.name() + "," +	PatrolType.Type.GROUND.name() + ". " + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Messages.PatrolTransportCsvExportConfig_Message3;
 	}
 
 	@Override
 	public String getTitle() {
-		return Messages.CsvConfig_Agency_Import_Title;
+		return Messages.PatrolTransportCsvExportConfig_Title;
 	}
 
 	@Override
 	public String getMessage() {
-		return Messages.CsvConfig_Agency_Import_Message;
+		return Messages.PatrolTransportCsvExportConfig_DialogMessage;
 	}
 
 	@Override
 	public String getSuccessMessage() {
-		return Messages.CsvConfig_Agency_Import_Success;
+		return Messages.PatrolTransportCsvExportConfig_OkMessage;
 	}
 
 	@Override
 	public String getFailMessage() {
-		return Messages.CsvConfig_Agency_Import_Fail;
+		return Messages.PatrolTransportCsvExportConfig_FailedMessage;
 	}
 
 }

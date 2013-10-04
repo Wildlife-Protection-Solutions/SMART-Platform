@@ -23,6 +23,7 @@ package org.wcs.smart.export.config.impl;
 
 import org.wcs.smart.export.StationCsvExporter;
 import org.wcs.smart.export.StationCsvImporter;
+import org.wcs.smart.export.config.AbstractCsvImportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;

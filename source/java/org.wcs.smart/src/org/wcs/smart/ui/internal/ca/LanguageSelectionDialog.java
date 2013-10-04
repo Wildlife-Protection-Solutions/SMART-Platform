@@ -26,7 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.internal.OptionSelectionDialog;
+import org.wcs.smart.ui.OptionSelectionDialog;
 
 /**
  * 

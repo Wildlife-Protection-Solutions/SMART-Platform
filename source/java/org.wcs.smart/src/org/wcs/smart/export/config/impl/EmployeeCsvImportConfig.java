@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.export.EmployeeCsvExporter;
 import org.wcs.smart.export.EmployeeCsvImporter;
+import org.wcs.smart.export.config.AbstractCsvImportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
