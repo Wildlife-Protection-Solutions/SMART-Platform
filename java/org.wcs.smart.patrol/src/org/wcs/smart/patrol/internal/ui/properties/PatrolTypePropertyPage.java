@@ -375,10 +375,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 						for (PatrolType type : patrolTypes){
 							if (type.getType().equals(t.getPatrolType())){
 								//new to validate keys
-								Collection<NamedKeyItem> siblings = new ArrayList<NamedKeyItem>();
-								for (PatrolType l : patrolTypes){
-									siblings.addAll(l.getTransportTypes());
-								}
+								Collection<PatrolTransportType> siblings = getAllTransportTypes();
 								if (NamedKeyItem.validateKey(t.getKeyId(), siblings) != null){
 									t.setKeyId(NamedKeyItem.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), siblings));
 								}
@@ -409,12 +406,20 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		return container;
 	}
 
-	private void editKey(){
-		ArrayList<PatrolTransportType> siblings = new ArrayList<PatrolTransportType>();
-		for (Iterator<?> iterator = patrolTypes.iterator(); iterator.hasNext();) {
-			PatrolType type = (PatrolType) iterator.next();
-			siblings.addAll(type.getTransportTypes());
+	/**
+	 * 
+	 * @return a collection of all transport types
+	 */
+	private List<PatrolTransportType> getAllTransportTypes(){
+		List<PatrolTransportType> siblings = new ArrayList<PatrolTransportType>();
+		for (PatrolType l : patrolTypes){
+			siblings.addAll(l.getTransportTypes());
 		}
+		return siblings;
+	}
+	
+	private void editKey(){
+		List<PatrolTransportType> siblings = getAllTransportTypes();
 		PatrolTransportType x = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
 		String currentKey = x.getKeyId();
 		InputDialog id = new KeyInputDialog(getShell(), currentKey,  siblings);
@@ -595,7 +600,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 							}else{
 								ttype.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
 								if (ttype.getKeyId() == null){
-									ttype.setKeyId(NamedKeyItem.generateKey((String)value, pt.getTransportTypes()));
+									ttype.setKeyId(NamedKeyItem.generateKey((String)value, getAllTransportTypes()));
 								}
 								setChangesMade(true);
 							}
@@ -654,11 +659,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		ArrayList<PatrolTransportType> siblings = new ArrayList<PatrolTransportType>();
-		for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
-			PatrolType type = (PatrolType) iterator.next();
-			siblings.addAll(type.getTransportTypes());
-		}
+		List<PatrolTransportType> siblings = getAllTransportTypes();
 		Session s = getSession();
 		s.beginTransaction();
 		try{
