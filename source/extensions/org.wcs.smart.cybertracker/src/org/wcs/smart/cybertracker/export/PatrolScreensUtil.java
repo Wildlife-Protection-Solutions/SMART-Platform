@@ -125,7 +125,7 @@ public class PatrolScreensUtil {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		CyberTrackerId id = addStartScreen(startId, result, elements);
 		//patrol type & transport
-		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 		String errorMsg = validatePatrolTypes(patrolTypes);
 		if (errorMsg != null) {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg, null);
