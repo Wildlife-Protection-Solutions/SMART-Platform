@@ -24,14 +24,12 @@ package org.wcs.smart.cybertracker.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.UuidItem;
 
 /**
  * Class responsible for representing CyberTracker Properties
@@ -41,7 +39,7 @@ import org.wcs.smart.ca.ConservationArea;
  */
 @Entity
 @Table(name = "smart.cybertracker_properties")
-public class CyberTrackerProperties {
+public class CyberTrackerProperties extends UuidItem {
 
 	public static final int STORAGE_TIME_MIN_VALUE = 0;
 	public static final int STORAGE_TIME_MAX_VALUE = 365;
@@ -105,7 +103,6 @@ public class CyberTrackerProperties {
 	public static final int SKIP_BUTTON_TIMEOUT_MIN_VALUE = 0;
 	public static final int SKIP_BUTTON_TIMEOUT_MAX_VALUE = Integer.MAX_VALUE;
 	
-	private byte[] uuid;
 	private ConservationArea conservationArea;
 	
 	//default properties
@@ -126,16 +123,6 @@ public class CyberTrackerProperties {
 	
 	private int storageTime = STORAGE_TIME_DEFAULT_VALUE; //indicates how many days ctx files will be stored in SMART storage
 
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
