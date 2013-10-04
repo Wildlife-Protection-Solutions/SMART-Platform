@@ -157,24 +157,29 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
-			s.doWork(new Work(){
+			try{
+				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+				s.doWork(new Work(){
 
-				@Override
-				public void execute(Connection c) throws SQLException {
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
-						q.next();
-						double minx = q.getDouble(1);
-						double maxx = q.getDouble(2);
-						double miny = q.getDouble(3);
-						double maxy = q.getDouble(4);
+					@Override
+					public void execute(Connection c) throws SQLException {
+						ResultSet q = c.createStatement().executeQuery(sql);
+						try{
+							q.next();
+							double minx = q.getDouble(1);
+							double maxx = q.getDouble(2);
+							double miny = q.getDouble(3);
+							double maxy = q.getDouble(4);
 					
-						bounds = new Envelope(minx, maxx, miny, maxy);
-					}finally{
-						q.close();
-					}
-				}});
+							bounds = new Envelope(minx, maxx, miny, maxy);
+						}finally{
+							q.close();
+						}
+					}	
+				});
+			}finally{
+				s.getTransaction().rollback();
+			}
 		}
 		return bounds;
 		
@@ -190,13 +195,15 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			}
 			String key = sortColumn.getKey();
 			key = key.split(":")[1]; //$NON-NLS-1$
-			session.beginTransaction();
 			Attribute attribute = null;
+			
+			session.beginTransaction();
 			try{
 				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
 			}catch (Exception ex){
 				session.getTransaction().commit();
 			}
+			
 			switch (attribute.getType()) {
 			case BOOLEAN:
 			case NUMERIC:
@@ -654,6 +661,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				}catch (Exception ex){
 					//sometimes during shut down the connection is closed before this 
 					//commit is called
+					ex.printStackTrace();
 				}
 				
 				try{

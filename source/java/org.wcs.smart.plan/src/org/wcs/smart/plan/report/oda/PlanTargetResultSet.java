@@ -75,6 +75,7 @@ public class PlanTargetResultSet  implements IResultSet {
 		
 		session = HibernateManager.openSession();
 		session.beginTransaction();
+		try{
 		Set<Plan> addedPlans = new HashSet<Plan>();
 		for (int i = 0; i < planUuids.length; i ++){
 			try{
@@ -103,6 +104,9 @@ public class PlanTargetResultSet  implements IResultSet {
 			}catch (Exception ex){
 				SmartPlanPlugIn.log("Error creating plan target result set", ex); //$NON-NLS-1$
 			}
+		}
+		}finally{
+			session.getTransaction().commit();
 		}
 	}
 
@@ -148,7 +152,7 @@ public class PlanTargetResultSet  implements IResultSet {
 		currentRow = 0;
 		
 		if (session != null && session.isOpen()){
-			session.getTransaction().rollback();
+			
 			session.close();
 		}
 		session = null;

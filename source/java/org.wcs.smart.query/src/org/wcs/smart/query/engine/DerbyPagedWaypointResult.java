@@ -130,24 +130,27 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
-			s.doWork(new Work(){
-
-				@Override
-				public void execute(Connection c) throws SQLException {
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
-						q.next();
-						double minx = q.getDouble(1);
-						double maxx = q.getDouble(2);
-						double miny = q.getDouble(3);
-						double maxy = q.getDouble(4);
-					
-						bounds = new Envelope(minx, maxx, miny, maxy);
-					}finally{
-						q.close();
+			try{
+				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+				s.doWork(new Work(){
+					@Override
+					public void execute(Connection c) throws SQLException {
+						ResultSet q = c.createStatement().executeQuery(sql);
+						try{
+							q.next();
+							double minx = q.getDouble(1);
+							double maxx = q.getDouble(2);
+							double miny = q.getDouble(3);
+							double maxy = q.getDouble(4);
+							bounds = new Envelope(minx, maxx, miny, maxy);
+						}finally{
+							q.close();
+						}
 					}
-				}});
+				});
+			}finally{
+				s.getTransaction().commit();
+			}
 		}
 		return bounds;
 		
