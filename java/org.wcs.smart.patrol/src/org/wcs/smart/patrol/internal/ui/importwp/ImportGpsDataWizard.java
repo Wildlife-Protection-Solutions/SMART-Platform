@@ -42,9 +42,11 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.patrol.internal.ui.importwp.csv.CSVImportConfiguration;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.Waypoint;
 
 /**
  * Wizard for importing data from GPS Device
@@ -69,7 +71,17 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	//a track or a list of waypoints
 	private Object importedData = null;
 	private List<WptType> allWaypoints = null;	//list of waypoint for either importing waypoints or importing track points
+	private List<Waypoint> allWaypointsCsv = null;	//list of waypoints from csv import
 	private boolean allData = false;
+	
+	//CSV options for getting all data, current day's data or select which point;
+	//probably could use the same variables from other options, but for CSV it isn't on the previous page so I want to store the selected choice explicity.
+	private boolean selectPoints = false;
+	private boolean onlyTodays = false;
+	private boolean allCsvData = true;
+	
+	private CSVImportConfiguration csvConfig;
+	
 	/**
 	 * Creates a new wizard.
 	 */
@@ -124,6 +136,15 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	public List<WptType> getWaypoints(){
 		return this.allWaypoints;
 	}
+	
+	
+	public void setAllWaypointsObj(List<Waypoint> allWaypointsObj){
+		this.allWaypointsCsv = allWaypointsObj;
+	}
+	public List<Waypoint> getWaypointObj(){
+		return this.allWaypointsCsv;
+	}
+	
 	
 	/**
 	 * 
@@ -183,6 +204,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 						}
 					}
 				});
+				
 			} catch (Exception ex) {
 				SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getLocalizedMessage(), ex);
 				return false;
@@ -194,14 +216,36 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			//select data to import
 			if (type == GPSDataImport.ImportType.WAYPOINT){
 				importedData = GPSDataImport.convertWaypoints( ((ImportWpSelectWizardPage)lastPage).getSelectedWaypoints() );
+			}else if(type == GPSDataImport.ImportType.WAYPOINTCSV){
+				importedData = ((ImportWpSelectWizardPage)lastPage).getSelectedWaypointsObj();
 			}else if (type == GPSDataImport.ImportType.TRACK){
 				importedData = GPSDataImport.convertPointsToTrack( ((ImportWpSelectWizardPage)lastPage).getSelectedWaypoints() );
 			}
-			
 		}else if (lastPage instanceof ImportFromWaypointWizardPage){
 			// ---- GENERATE TRACKS FROM WAYPOINTS ----
 			allData = ((ImportFromWaypointWizardPage)lastPage).getImportAll();
 			importedData = CREATE_FROM_WAYPOINTS;
+		}else if (lastPage instanceof ImportCsvDetailsWizardPage ){
+			setCsvConfigs((ImportCsvDetailsWizardPage)lastPage);
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+						if (onlyTodays){
+							importedData = csvConfig.getWaypoints(monitor, currentDay.getDate());
+						}else{
+							importedData = csvConfig.getWaypoints(monitor, null);
+						}
+					}
+				});
+			} catch (Exception ex) {
+				SmartPatrolPlugIn.displayLog("Error Loading waypoints from CSV file" , ex);
+				return false;
+			}
+			
 		}
 		
 		//validation
@@ -270,6 +314,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
 		allWaypoints = null;
+		allWaypointsCsv = null;
 		if (event.getTargetPage() instanceof ImportWpSelectWizardPage){
 			if (event.getCurrentPage() instanceof ImportGpxWizardPage){
 				//read all waypoints from gpx file
@@ -288,7 +333,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex); //$NON-NLS-1$
+					SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex);
 					event.doit = false;
 				}
 				
@@ -341,14 +386,35 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 				}
 				
 	
+			}else if(event.getCurrentPage() instanceof ImportCsvDetailsWizardPage){
+				final ImportCsvDetailsWizardPage currentPage = (ImportCsvDetailsWizardPage)event.getCurrentPage();
+				type = GPSDataImport.ImportType.WAYPOINTCSV;
+				setCsvConfigs((ImportCsvDetailsWizardPage)event.getCurrentPage());
+
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+				try{
+					pmd.run(true, false, new IRunnableWithProgress() {
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+							allWaypointsCsv = csvConfig.getWaypoints(monitor, null);
+						}
+					});
+				}catch (Exception ex){
+					SmartPatrolPlugIn.displayLog("Could not import data from CSV file", ex);
+					event.doit = false;
+				}
 			}
-			if (allWaypoints == null){
+			if (allWaypoints == null && allWaypointsCsv == null){
 				event.doit = false;
-			}else if (allWaypoints.size() == 0){
+			}else if ((allWaypoints == null || allWaypoints.size() == 0) && (allWaypointsCsv == null || allWaypointsCsv.size() == 0)){
 				MessageDialog.openInformation(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_File_WarningNoneFound, new Object[]{ type.guiName }));
 				event.doit = false;
 			}else{
-				((ImportWpSelectWizardPage)event.getTargetPage()).setWaypoints(allWaypoints);
+				if(allWaypointsCsv == null){
+					((ImportWpSelectWizardPage)event.getTargetPage()).setWaypoints(allWaypoints);
+				}else{
+					((ImportWpSelectWizardPage)event.getTargetPage()).setWaypointsFromObjects(allWaypointsCsv);
+				}
 			}
 		}
 		
@@ -359,5 +425,74 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	}
 	private WizardPage lastPage = null;
 
+	//pass in:
+	//1- all data
+	//2- only current day
+	//3- select which ones
+	//I went with this option because I couldn't think of a worse way to do it...
+	public void setCsvDataOption(int option){
+		if(option ==1){
+			allCsvData = true;
+			onlyTodays = false;
+			selectPoints = false;
+			allData = true;
+			
+		}else if(option ==2){
+			allCsvData = false;
+			onlyTodays = true;
+			selectPoints = false;
+			allData = false;
+			
+		}else if(option==3){
+			allCsvData = false;
+			onlyTodays = false;
+			selectPoints = true;
+			allData = false;
+		}
+	}
 	
+
+	public boolean showCsvSelection(){
+		return selectPoints;
+	}
+  
+	public boolean loadAllCsv(){
+		return allCsvData;
+	}
+	
+	public void setCsvFile(String file){
+		csvConfig = new CSVImportConfiguration();
+		csvConfig.setFileName(file);
+	}
+
+	private void setCsvConfigs(ImportCsvDetailsWizardPage currentPage){
+		csvConfig.setDateFormat(currentPage.getDateFormat() );
+		
+		csvConfig.setXColumn(currentPage.getXColumnNumber());
+		csvConfig.setYColumn(currentPage.getYColumnNumber());
+		csvConfig.setDateColumn(currentPage.getDateColumnNumber());
+		csvConfig.setTimeColumn(currentPage.getTimeColumnNumber());
+		
+		csvConfig.setIdColumn(currentPage.getIdColumnNumber());
+		csvConfig.setCommentsColumn(currentPage.getCommentsColumnNumber());
+		
+		csvConfig.setXColumn(currentPage.getXColumnNumber());
+		csvConfig.setXColumn(currentPage.getXColumnNumber());
+		
+		csvConfig.setProjection(currentPage.getProjection());
+		csvConfig.setSkipHeaders(currentPage.skipHeaders() );
+
+		List<Waypoint> list = currentDay.getWaypoints();
+		int x= 0;
+		int max = 0;
+		while(x < list.size()){
+			int id = list.get(x).getId();
+			if( id > max){
+				max = id; 
+			}
+			x++;
+		}
+		csvConfig.setMaxId(max);
+		
+	}
 }

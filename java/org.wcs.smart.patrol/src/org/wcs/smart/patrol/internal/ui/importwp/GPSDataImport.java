@@ -83,7 +83,8 @@ public class GPSDataImport {
 	 */
 	public enum ImportType{
 		WAYPOINT (Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription), 
-		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption);
+		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption),
+		WAYPOINTCSV(Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription);
 		
 		public String guiName;
 		public String importDesc;
@@ -554,7 +555,7 @@ public class GPSDataImport {
 	
 	/**
 	 * 
-	 * Reads data from a pgx file.  If dataType is WAYPOINT then
+	 * Reads data from a gpx file.  If dataType is WAYPOINT then
 	 * reads all Wpts from the gpx file and returns a list of Waypoints.  If TRACK then
 	 * it reads all track points, converts them to coordinates and returns a list of coordinates.
 	 * 
@@ -704,4 +705,5 @@ public class GPSDataImport {
 		}
 		return trackCoords;
 	}
+
 }

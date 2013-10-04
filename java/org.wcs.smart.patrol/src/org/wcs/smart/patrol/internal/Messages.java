@@ -196,6 +196,7 @@ public class Messages extends NLS {
 	public static String ImportWpSelectWizardPage_PageName;
 	public static String ImportWpSelectWizardPage_PageTitle;
 	public static String ImportWpSelectWizardPage_SelectAll;
+	public static String ImportWpTypeWizardPage_0;
 	public static String ImportWpTypeWizardPage_GenerateWaypointsOp;
 	public static String ImportWpTypeWizardPage_GPSOp;
 	public static String ImportWpTypeWizardPage_GPXOp;
