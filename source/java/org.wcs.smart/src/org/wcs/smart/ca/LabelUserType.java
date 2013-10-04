@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.type.BinaryType;
 import org.hibernate.usertype.UserType;
 
@@ -50,18 +51,21 @@ public class LabelUserType implements UserType {
 		return x == null ? y == null : x.equals(y);
 	}
 
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
-			throws HibernateException, SQLException {
+	@Override
+	public Object nullSafeGet(ResultSet rs, String[] names,
+			SessionImplementor implementor, Object object) throws HibernateException,
+			SQLException {
 		assert names.length == 1;
 		byte[] uuid = (byte[]) rs.getBytes(names[0]);
 		return Label.getDescription(uuid);
 	}
 
-	public void nullSafeSet(PreparedStatement st, Object value, int index)
-			throws HibernateException, SQLException {
-		//does nothing
+	@Override
+	public void nullSafeSet(PreparedStatement arg0, Object arg1, int arg2,
+			SessionImplementor arg3) throws HibernateException, SQLException {
+		// does nothing
 	}
-
+	
 	public Object deepCopy(Object value) throws HibernateException {
 		return value; // strings are immutable
 	}
@@ -93,4 +97,6 @@ public class LabelUserType implements UserType {
 			throws HibernateException {
 		return cached;
 	}
+
+
 }

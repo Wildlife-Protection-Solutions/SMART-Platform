@@ -157,13 +157,11 @@ public class LoadDefaultLayersJob extends Job{
 	
 	private Projection getDefaultCrs(){
 		Session s = HibernateManager.openSession();
+		s.beginTransaction();
 		try{
-			s.beginTransaction();
 			return HibernateManager.getDefaultProjection(s);	
 		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().commit();
-			}
+			s.getTransaction().commit();
 			s.close();
 		}
 		
@@ -174,13 +172,12 @@ public class LoadDefaultLayersJob extends Job{
 		if (selection != null) return selection;
 		
 		Session s = HibernateManager.openSession();
+		s.beginTransaction();
 		try{
-			s.beginTransaction();
+			
 			return HibernateManager.getDefaultBasemapDefinition(s);	
 		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
+			s.getTransaction().rollback();
 			s.close();
 		}
 		
@@ -191,13 +188,11 @@ public class LoadDefaultLayersJob extends Job{
 			return null;
 		}
 		Session s = HibernateManager.openSession();
+		s.beginTransaction();
 		try{
-			s.beginTransaction();
 			return HibernateManager.getBasemapDefinition(s, basemapUuid);	
 		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
+			s.getTransaction().rollback();
 			s.close();
 		}
 		

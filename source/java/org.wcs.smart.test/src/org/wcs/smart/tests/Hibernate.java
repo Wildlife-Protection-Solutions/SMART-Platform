@@ -29,7 +29,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -87,7 +87,7 @@ public class Hibernate {
 			
 			sessionFactory = config.buildSessionFactory();
 				
-			if (!((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().supportsSequences()){
+			if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
 				//fail
 				throw new IllegalStateException("You can't use this database - it does not support sequences");
 			}				
@@ -102,7 +102,7 @@ public class Hibernate {
 		c.setTime(e.getBirthDate());
 		int year = c.get(Calendar.YEAR);
 		
-		String query = (((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().getSequenceNextValString("smart.smart_user_id_seq"));
+		String query = (((SessionFactoryImplementor)sessionFactory).getDialect().getSequenceNextValString("smart.smart_user_id_seq"));
 		List results = session.createSQLQuery(query).list();
 		e.setId(year + "" + ID_FORMATTER.format(results.get(0)));
 	}
