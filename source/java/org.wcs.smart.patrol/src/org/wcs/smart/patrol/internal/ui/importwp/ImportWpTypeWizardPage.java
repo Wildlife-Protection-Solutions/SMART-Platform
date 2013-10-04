@@ -48,6 +48,7 @@ public class ImportWpTypeWizardPage extends WizardPage {
 	private Button opGPS;
 	private Button opGPX;
 	private Button opWaypoint;
+	private Button opCsvWaypoints;
 	
 	public static final int IMPORT_GPS = 2;
 	public static final int IMPORT_GPX = 4;
@@ -57,6 +58,7 @@ public class ImportWpTypeWizardPage extends WizardPage {
 	private ImportGPSWizardPage devicePage;
 	private ImportGpxWizardPage gpxPage;
 	private ImportFromWaypointWizardPage waypointPage;
+	private ImportCsvWizardPage csvWaypointPage;
 	
 	/**
 	 * @param pageName
@@ -97,6 +99,11 @@ public class ImportWpTypeWizardPage extends WizardPage {
 			opWaypoint.setText(Messages.ImportWpTypeWizardPage_GenerateWaypointsOp);
 		}
 		
+		if (  ((ImportGpsDataWizard)getWizard()).getType() == ImportType.WAYPOINT ){
+			opCsvWaypoints = new Button(ops, SWT.RADIO);
+			opCsvWaypoints.setText(Messages.ImportWpTypeWizardPage_0);
+		}
+		
 		super.setTitle(Messages.ImportWpTypeWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(MessageFormat.format(Messages.ImportWpTypeWizardPage_PageMessage, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase()}));
 		super.setControl(comp);
@@ -114,11 +121,17 @@ public class ImportWpTypeWizardPage extends WizardPage {
 				gpxPage = new ImportGpxWizardPage((ImportGpsDataWizard)getWizard());
 			}
 			return gpxPage;
+		}else if (opCsvWaypoints.getSelection()){
+			if (csvWaypointPage == null){
+				csvWaypointPage = new ImportCsvWizardPage((ImportGpsDataWizard)getWizard());
+			}
+			return csvWaypointPage;
 		}else if (opWaypoint.getSelection()){
 			if (waypointPage == null){
 				waypointPage = new ImportFromWaypointWizardPage((ImportGpsDataWizard)getWizard());
 			}
 			return waypointPage;
+
 		}
 		return null;
     }

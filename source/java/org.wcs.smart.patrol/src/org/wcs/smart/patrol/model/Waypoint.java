@@ -280,7 +280,7 @@ public class Waypoint {
 			for (WaypointAttachment sp : this.attachments) {
 				WaypointAttachment att = new WaypointAttachment();
 				try {
-					// copy file to emp location so it won't be deleted out from
+					// copy file to temp location so it won't be deleted out from
 					// under us
 					File tmpLocation = File.createTempFile(
 							"smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -322,4 +322,5 @@ public class Waypoint {
 		}
 		return false;
 	}
+
 }
