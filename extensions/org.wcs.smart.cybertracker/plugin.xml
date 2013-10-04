@@ -41,6 +41,11 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.cybertracker.patrolmeta"
+                  label="Patrol Screens Configuration ..."
+                  style="push">
+            </command>
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -75,6 +80,10 @@
             id="org.wcs.smart.cybertracker.properties"
             name="%cybertracker.properties.command.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.patrolmeta"
+            name="Patrol Screens Configuration">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -89,6 +98,10 @@
       <handler
             class="org.wcs.smart.cybertracker.handler.CyberTrackerPropertiesHandler"
             commandId="org.wcs.smart.cybertracker.properties">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.handler.CyberTrackerPartolMetaHandler"
+            commandId="org.wcs.smart.cybertracker.patrolmeta">
       </handler>
    </extension>
    <extension
