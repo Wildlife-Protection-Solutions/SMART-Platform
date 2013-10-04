@@ -121,23 +121,19 @@ public class ConservationAreaManager {
 				}
 			}
 			monitor.worked(1);
-			
 			monitor.subTask(Messages.ConservationAreaManager_Progress_Restarting);
-
-			//logout
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					PlatformUI.getWorkbench().restart();
-				}});
-			
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			throw ex;
 		}finally{
 			session.close();
 		}
-		
+		//logout
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				PlatformUI.getWorkbench().restart();
+			}});
 	}
 	
 	/**

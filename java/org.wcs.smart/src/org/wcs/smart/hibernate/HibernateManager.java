@@ -42,7 +42,7 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
@@ -172,7 +172,7 @@ public class HibernateManager extends SmartHibernateManager{
 			if (m instanceof Joinable){
 				Joinable j = ((Joinable)m);
 				if (((AbstractEntityPersister)m).getRootTableName().equals(j.getTableName())){
-					TableInfo info = new TableInfo(m.getMappedClass(EntityMode.POJO), j.getTableName());
+					TableInfo info = new TableInfo(m.getMappedClass(), j.getTableName());
 					//find conservation area property if available
 					for (int k = 0; k < m.getPropertyTypes().length; k ++){
 						if (m.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
@@ -446,7 +446,7 @@ public class HibernateManager extends SmartHibernateManager{
 		c.setTime(e.getBirthDate());
 		int year = c.get(Calendar.YEAR);
 		
-		String query = (((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().getSequenceNextValString("smart.smart_user_id_seq")); //$NON-NLS-1$
+		String query = (((SessionFactoryImplementor)sessionFactory).getDialect().getSequenceNextValString("smart.smart_user_id_seq")); //$NON-NLS-1$
 		List<?> results = session.createSQLQuery(query).list();
 		e.setId(year + ID_FORMATTER.format(results.get(0)));
 	}

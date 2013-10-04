@@ -31,10 +31,12 @@ import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hibernate.hql.QueryTranslator;
-import org.hibernate.hql.QueryTranslatorFactory;
-import org.hibernate.impl.SessionFactoryImpl;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.hql.spi.QueryTranslator;
+import org.hibernate.hql.spi.QueryTranslatorFactory;
+import org.hibernate.internal.SessionFactoryImpl;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 
 /**
  * Manage hibernate connections and mappings.
@@ -99,9 +101,12 @@ public class SmartHibernateManager {
 			for (Class<?> c: getMappings()){
 				config.addAnnotatedClass(c);
 			}
-			sessionFactory = config.buildSessionFactory();
-				
-			if (!((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().supportsSequences()){
+			
+			ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
+			sessionFactory = config.buildSessionFactory(service);
+			
+			
+			if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
 				//fail
 				throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
 			}
@@ -144,7 +149,6 @@ public class SmartHibernateManager {
 			session = sessionFactory.openSession();
 			sessionMapsThreadLocal.set(session);
 		}
-		
 		return session;
 	}
 	
@@ -159,9 +163,10 @@ public class SmartHibernateManager {
 		}
 		Session session = (Session) sessionMapsThreadLocal.get();
 		if (session == null || !session.isOpen() ){
-			session = sessionFactory.openSession(interceptor);
+			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
 			sessionMapsThreadLocal.set(session);
 		}
+		
 		return session;
 	}
 	

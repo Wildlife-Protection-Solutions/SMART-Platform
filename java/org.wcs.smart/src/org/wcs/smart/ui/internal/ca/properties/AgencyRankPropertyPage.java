@@ -30,11 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.comparators.NullComparator;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
@@ -105,8 +104,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 
 	/* agencies and rank lists */
 	private Agency current = null;
-	private WritableList currentRankSet;
-	private WritableList agencies ;
+	private List<Rank> currentRankSet;
+	private List<Agency> agencies ;
 	private HashSet<Agency> toDelete;
 	
 	private AgencySorter agencySorter;
@@ -215,17 +214,12 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				IStructuredSelection selection = ((IStructuredSelection)tblAgencies.getSelection());
 				if (selection.isEmpty()){
 					current = null;
-					if (currentRankSet != null){
-						currentRankSet.dispose();
-					}
 					currentRankSet = null;
 					btnDeleteAgency.setEnabled(false);
 					enableRank(false);
 				}else{
 					Agency agent = (Agency)selection.getFirstElement();
-					getSession().beginTransaction();
-					currentRankSet = new WritableList(agent.getRanks(), Rank.class);
-					getSession().getTransaction().rollback();
+					currentRankSet = agent.getRanks();
 					tblRank.setInput(currentRankSet);
 					current = agent;
 					enableRank(true);
@@ -313,7 +307,12 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void resetAgencyList() {
 		Session s = getSession();
 		s.beginTransaction();
-		List<Agency> lst = HibernateManager.getAgencies(currentCa,s );
+		List<Agency> lst = Collections.<Agency>emptyList();
+		try{
+			lst = HibernateManager.getAgencies(currentCa,s );
+		}finally{
+			s.getTransaction().rollback();
+		}
 		Collections.sort(lst, new Comparator<Agency>(){
 
 			@Override
@@ -325,9 +324,9 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				return Collator.getInstance().compare(a, b);
 			}});
 		
-		agencies = new WritableList(lst, Agency.class);
+		agencies = lst;
 		
-		s.getTransaction().rollback();
+		
 	}
 	
 	/**
@@ -356,7 +355,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			if (name == null || !name.equals(newName)){
 				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
 					Integer matches = 0;
-					for (@SuppressWarnings("unchecked")	Iterator<Agency> itr = agencies.iterator(); itr.hasNext();) {
+					for (Iterator<Agency> itr = agencies.iterator(); itr.hasNext();) {
 						Agency a = itr.next();
 						if( a != element && 
 								a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
@@ -407,7 +406,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 						
 				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
 					Integer matches = 0;
-					for (@SuppressWarnings("unchecked")	Iterator<Rank> itr = currentRankSet.iterator(); itr.hasNext();) {
+					for (Iterator<Rank> itr = currentRankSet.iterator(); itr.hasNext();) {
 						Rank a = itr.next();
 						if( a != element && a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
 							matches++;
@@ -449,7 +448,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private TableViewer createAgencyTableViewer(Composite parent){
 		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		tableViewer.setContentProvider(new ObservableListContentProvider());
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 
 		resetAgencyList();
 		
@@ -501,14 +500,11 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private TableViewer createRankTableViewer(Composite parent){
 		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
-		
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		
-		tableViewer.setContentProvider(new ObservableListContentProvider());
-
-		
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
+
 		for (int i = 0; i < RankColumn.values().length; i ++){
 			final RankColumn colum = RankColumn.values()[i];
 			final TableViewerColumn col = createTableViewerColumn(tableViewer, colum.name, colum.bounds, i);
@@ -599,12 +595,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	public boolean close(){
 		boolean ret = super.close();
 		if (ret){
-			if (currentRankSet != null){
-				currentRankSet.dispose();
-			}
-			if (agencies != null ){
-				agencies.dispose();
-			}
+			currentRankSet = null;
+			agencies = null;
 		}
 		return ret;
 	}

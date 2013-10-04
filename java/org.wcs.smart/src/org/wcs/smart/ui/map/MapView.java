@@ -42,9 +42,8 @@ import org.wcs.smart.map.internal.ZoomHandler;
 /**
  * A map view.
  * 
- * @author Emily Gouge, Graham Davis (Refractions Research, Inc.)
- * @since 1.1.0
- * @version 1.3.0
+ * @author Emily Gouge
+ * @since 1.0.0
  */
 public class MapView extends ViewPart implements MapPart, IAdaptable {
 

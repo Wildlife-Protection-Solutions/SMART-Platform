@@ -67,6 +67,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public void close() throws IOException {
+		itemCursor.close();
 		session.getTransaction().rollback();
 		session.close();
 	}
