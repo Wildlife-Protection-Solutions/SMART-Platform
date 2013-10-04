@@ -42,7 +42,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.internal.OptionSelectionDialog;
+import org.wcs.smart.ui.OptionSelectionDialog;
 
 import au.com.bytecode.opencsv.CSVReader;
 

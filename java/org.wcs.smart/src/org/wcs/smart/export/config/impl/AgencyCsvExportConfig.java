@@ -1,6 +1,7 @@
 package org.wcs.smart.export.config.impl;
 
 import org.wcs.smart.export.AgencyCsvExporter;
+import org.wcs.smart.export.config.AbstractCsvExportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.internal.Messages;

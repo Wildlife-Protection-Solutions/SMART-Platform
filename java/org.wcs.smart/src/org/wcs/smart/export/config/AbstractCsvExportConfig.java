@@ -19,20 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.export.config.impl;
+package org.wcs.smart.export.config;
 
 import org.eclipse.swt.SWT;
-import org.wcs.smart.export.config.ICsvImportDialogConfig;
-import org.wcs.smart.export.dialog.CsvImportDialog;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.internal.Messages;
 
 /**
- * Basic import configuration for {@link CsvImportDialog}
+ * Basic export configuration for {@link CsvExportDialog}
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class AbstractCsvImportConfig implements ICsvImportDialogConfig {
+public abstract class AbstractCsvExportConfig implements ICsvExportDialogConfig {
 
 	@Override
 	public boolean includeHasHeader() {
@@ -46,17 +45,17 @@ public abstract class AbstractCsvImportConfig implements ICsvImportDialogConfig 
 
 	@Override
 	public String getActionButtonText() {
-		return Messages.CsvConfig_Action_Import;
+		return Messages.CsvConfig_Action_Export;
 	}
 
 	@Override
 	public int getFileDialogStyle() {
-		return SWT.OPEN;
+		return SWT.SAVE;
 	}
-
+	
 	@Override
 	public boolean appendFileExtension() {
-		return false;
+		return true;
 	}
 	
 }

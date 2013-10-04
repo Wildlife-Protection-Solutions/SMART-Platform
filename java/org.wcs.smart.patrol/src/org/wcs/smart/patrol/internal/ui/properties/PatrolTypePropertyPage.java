@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.properties;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -67,10 +68,15 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.export.dialog.CsvCaImportDialog;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.export.PatrolTransportCsvExportConfig;
+import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImportConfig;
+import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImporter;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -347,6 +353,54 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				deleteTransportType();
+			}
+		});
+		
+		
+		Composite buttonComp = new Composite(container, SWT.NONE);
+		buttonComp.setLayout(new GridLayout(2, true));
+		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false,false,3,1));
+		
+		Button btnImport = new Button(buttonComp, SWT.PUSH);
+		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
+		btnImport.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PatrolTransportCsvImportConfig config = new PatrolTransportCsvImportConfig();
+				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
+				if (dialog.open() == Window.OK){
+					Collection<PatrolTransportType> types = ((PatrolTransportCsvImporter)config.getImporter()).getImportedData();
+					for (PatrolTransportType t : types){
+						for (PatrolType type : patrolTypes){
+							if (type.getType().equals(t.getPatrolType())){
+								//new to validate keys
+								Collection<NamedKeyItem> siblings = new ArrayList<NamedKeyItem>();
+								for (PatrolType l : patrolTypes){
+									siblings.addAll(l.getTransportTypes());
+								}
+								if (NamedKeyItem.validateKey(t.getKeyId(), siblings) != null){
+									t.setKeyId(NamedKeyItem.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), siblings));
+								}
+								type.getTransportTypes().add(t);
+							}
+						}
+					}
+					setChangesMade(true);
+					transportTblViewer.refresh();
+				}
+				
+			}
+		});
+		
+		Button btnExport = new Button(buttonComp, SWT.PUSH);
+		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+		btnExport.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CsvExportDialog dialog = new CsvExportDialog(getShell(), new PatrolTransportCsvExportConfig());
+				dialog.open();
 			}
 		});
 		
