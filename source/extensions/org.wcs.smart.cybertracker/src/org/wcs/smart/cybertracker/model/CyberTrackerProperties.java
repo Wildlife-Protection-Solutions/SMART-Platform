@@ -21,15 +21,22 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption.PatrolMeta;
 
 /**
  * Class responsible for representing CyberTracker Properties
@@ -123,6 +130,8 @@ public class CyberTrackerProperties extends UuidItem {
 	
 	private int storageTime = STORAGE_TIME_DEFAULT_VALUE; //indicates how many days ctx files will be stored in SMART storage
 
+	private Map<PatrolMeta, CyberTrackerPatrolOption> patrolOptions;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -220,6 +229,17 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setExitPin(int exitPin) {
 		this.exitPin = exitPin;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="properties", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@MapKey(name="type")
+	public Map<PatrolMeta, CyberTrackerPatrolOption> getPatrolOptions() {
+		if (patrolOptions == null)
+			patrolOptions = new HashMap<PatrolMeta, CyberTrackerPatrolOption>();
+		return patrolOptions;
+	}
+	public void setPatrolOptions(Map<PatrolMeta, CyberTrackerPatrolOption> patrolOptions) {
+		this.patrolOptions = patrolOptions;
 	}
 
 }

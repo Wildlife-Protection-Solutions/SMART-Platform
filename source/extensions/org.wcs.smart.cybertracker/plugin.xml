@@ -109,6 +109,10 @@
       <class
             class="org.wcs.smart.cybertracker.model.CyberTrackerProperties">
       </class>
+      <class
+            ca_property=".properties.conservationArea"
+            class="org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
