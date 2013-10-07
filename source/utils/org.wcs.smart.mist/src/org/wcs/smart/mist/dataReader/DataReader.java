@@ -81,7 +81,8 @@ public class DataReader {
 		
 		//PATROL TYPES
 		CSVWriter pWriter = new CSVWriter(new FileWriter("patrol_types.csv"), ',');
-		
+		String[] pheader = {"Type","Key", "Name>"+ lang};
+		pWriter.writeNext(pheader);
 		try{
 			ResultSet rs = c
 				.createStatement()
@@ -90,7 +91,7 @@ public class DataReader {
 						"FROM GROUND_PATROLS GP "+
 						"LEFT JOIN LK_GROUND_PATROL_TYPES LGPT ON LGPT.PATROL_TYPE_ID = GP.PATROL_TYPE_ID ");
 			while (rs.next()) {
-			    String[] entries = {"Ground", rs.getString(1)};
+			    String[] entries = {"Ground", "", rs.getString(1)};
 			    pWriter.writeNext(entries);
 			}
 		}finally{
