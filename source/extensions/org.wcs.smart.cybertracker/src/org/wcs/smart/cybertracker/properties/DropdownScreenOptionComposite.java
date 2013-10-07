@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
 
 /**
@@ -53,7 +54,7 @@ public class DropdownScreenOptionComposite extends Composite {
 			return null;
 		}
 		public String getName() {
-			return "<empty>";
+			return Messages.ScreenOptionComposite_Dropdown_NoValue;
 		}
 	};
 
@@ -86,7 +87,7 @@ public class DropdownScreenOptionComposite extends Composite {
 		group.setLayout(new GridLayout(2, false));
 
 		Label label = new Label(group, SWT.NONE);
-		label.setText("Display Page:");
+		label.setText(Messages.ScreenOptionComposite_DisplayPage);
 		btnDisplayPage = new Button(group, SWT.CHECK);
 		btnDisplayPage.setSelection(model.isVisible());
 		btnDisplayPage.addSelectionListener(new SelectionAdapter() {
@@ -97,7 +98,7 @@ public class DropdownScreenOptionComposite extends Composite {
 		});
 		
 		label = new Label(group, SWT.NONE);
-		label.setText("Default value:");
+		label.setText(Messages.ScreenOptionComposite_DefaultValue);
 		
 		viewer = new ComboViewer(group, SWT.READ_ONLY);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
