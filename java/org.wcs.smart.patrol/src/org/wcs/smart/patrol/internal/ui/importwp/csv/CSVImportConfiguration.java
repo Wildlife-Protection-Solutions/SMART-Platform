@@ -9,15 +9,25 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 public class CSVImportConfiguration {
 
+	private static final GeometryFactory gf = new GeometryFactory();
 	private static String filename; //the csv filename
 	
 	private int XColumn = -1;
@@ -50,6 +60,10 @@ public class CSVImportConfiguration {
 			while(counter < csvData.size()-1){
 				Date ptDate = null; 
 				row = csvData.get(counter);
+				
+				if(row.length <4){
+					break;//sometimes files will have blank rows at the end etc
+				}
 				SimpleDateFormat sdf = new SimpleDateFormat(DateFormat);
 				try {
 					ptDate = sdf.parse( row[DateColumn].replaceAll("\\s+","") );
@@ -64,8 +78,15 @@ public class CSVImportConfiguration {
 				if(singleDay == null ||  day0.equals(day1)){
 				 
 					Waypoint curWP = new Waypoint();
-				 	curWP.setX(Double.parseDouble( row[XColumn].replaceAll("\\s+","") ));
-				 	curWP.setY(Double.parseDouble( row[YColumn].replaceAll("\\s+","") ));
+					//reproject
+
+					CoordinateReferenceSystem sourceCrs = projection.getCrs();
+					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") )));
+					Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+
+					
+				 	curWP.setX(p.getX() );
+				 	curWP.setY(p.getY());
 				 	curWP.setImportedDate(ptDate);
 
 				 	try {
@@ -73,7 +94,8 @@ public class CSVImportConfiguration {
 					 	Date dateTime = format.parse( row[TimeColumn].replaceAll("\\s+","") );
 					 	Time time = new Time(dateTime.getTime());
 					 	curWP.setTime( time);
-				 	} catch (UnsupportedOperationException e) {
+				 	} catch (ParseException e) {
+				 		SmartPatrolPlugIn.displayLog("could not parse date on row" + counter + "(" + row[TimeColumn].replaceAll("\\s+","") + ").", e );
 				 	}
 				 
 				 
