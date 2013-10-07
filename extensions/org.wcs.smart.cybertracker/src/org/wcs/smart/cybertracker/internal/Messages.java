@@ -220,6 +220,9 @@ public class Messages extends NLS {
 	public static String PatrolSelectorDialog_Message;
 	public static String PatrolSelectorDialog_PatrolID;
 	public static String PatrolSelectorDialog_Title;
+	public static String ScreenOptionComposite_DefaultValue;
+	public static String ScreenOptionComposite_DisplayPage;
+	public static String ScreenOptionComposite_Dropdown_NoValue;
 	public static String SmartImporter_ImportErrorDialogTitle;
 	public static String SmartImporter_LeaderTitle;
 	public static String SmartImporter_NoEmployeesErrorMessage;

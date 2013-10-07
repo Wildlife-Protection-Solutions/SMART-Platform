@@ -29,6 +29,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 
@@ -72,7 +73,7 @@ public class CyberTrackerPatrolOption extends UuidItem {
 	private PatrolMeta type;
 	private boolean visible = true;
 	private String stringValue;
-	private Double doubleValue;
+	private Boolean booleanValue;
 	private byte[] uuidValue;
 
 	
@@ -110,14 +111,15 @@ public class CyberTrackerPatrolOption extends UuidItem {
 		this.stringValue = stringValue;
 	}
 
-	@Column(name="double_value")
-	public Double getDoubleValue() {
-		return doubleValue;
+	@Column(name="boolean_value")
+	public Boolean getBooleanValue() {
+		return booleanValue;
 	}
-	public void setDoubleValue(Double doubleValue) {
-		this.doubleValue = doubleValue;
+	public void setBooleanValue(Boolean value) {
+		booleanValue = value;
 	}
-
+	
+	
 	@Column(name="uuid_value")
 	public byte[] getUuidValue() {
 		return uuidValue;

@@ -49,22 +49,6 @@ public class CyberTrackerPatrol {
 	
 	public enum ErrorType{ERROR, WARNING};
 	
-//	public enum PatrolMeta {
-//		START_DATE,
-//		END_DATE,
-//		TYPE,
-//		TRANSPORT,
-//		ARMED,
-//		MANDATE,
-//		TEAM,
-//		STATION,
-//		OBJECTIVE,
-//		COMMENT,
-//		LEADER,
-//		PILOT,
-//		MEMBERS
-//	}
-
 	private Map<PatrolMeta, List<ImportError>> problems = new HashMap<PatrolMeta, List<ImportError>>();
 	
 	private Map<String, E> elementsMap;
