@@ -157,7 +157,7 @@ public class CyberTrackerStartupJob extends Job {
 								"type VARCHAR(10), "+ //$NON-NLS-1$
 								"is_visible BOOLEAN, "+ //$NON-NLS-1$
 								"string_value VARCHAR(8192), "+ //same as patrol.comment //$NON-NLS-1$
-								"double_value DOUBLE, "+ //$NON-NLS-1$
+								"boolean_value BOOLEAN, "+ //$NON-NLS-1$
 								"uuid_value CHAR(16) for bit data, "+ //$NON-NLS-1$
 								"PRIMARY KEY (UUID))"; //$NON-NLS-1$
 
