@@ -34,7 +34,7 @@ import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableC
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption.PatrolMeta;
 
 /**
  * Table containing data for imported patrols

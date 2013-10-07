@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -33,6 +40,20 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Station;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption.PatrolMeta;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -44,36 +65,77 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
-	public enum PatrolMetaScreen {
-		PATROL_TYPE("Patrol Type"),
-		TRANSPORT("Transport Type"),
-		ARMED("Armed"),
-		STATION("Station"),
-		TEAM("Team"),
-		MANDATE("Patrol Mandate"),
-		OBJECTIVE("Patrol Objective"),
-		COMMENT("Patrol Comment"),
-		MEMBER("Patrol Members"),
-		LEADER("Patrol Leader"),
-		PILOT("Patrol Pilot");
-		
-		private String label;
-		public String getLabel() {
-			return label;
-		}
+	private PatrolMeta[] optionsToShow = {
+			PatrolMeta.TYPE,
+			PatrolMeta.TRANSPORT,
+			PatrolMeta.ARMED,
+			PatrolMeta.TEAM,
+			PatrolMeta.STATION,
+			PatrolMeta.MANDATE,
+			PatrolMeta.OBJECTIVE,
+			PatrolMeta.COMMENT,
+			PatrolMeta.MEMBERS,
+			PatrolMeta.LEADER,
+			PatrolMeta.PILOT };
+
+	private CyberTrackerProperties ctProperties;
+	private List<PatrolType> patrolTypes;
+	private List<Team> teams;
+	private List<Station> stations;
+	private List<PatrolMandate> mandates;
+	private List<Employee> members;
 	
-		private PatrolMetaScreen(String label){
-			this.label = label;
-		}
-	}
 	
 	private TableViewer modelListViewer;
 
 	private Composite infoInnerPanel;
 	private Composite emptyComposite;
+
+	private Map<PatrolMeta, Composite> screenComposites;
+//	private Map<PatrolMeta, List<? extends NamedItem>> screensDropData;
 	
 	public PatrolMetaConfigDialog() {
 		super(Display.getDefault().getActiveShell(), "Patrol Metadata Data Collection Configuration");
+		initData();
+	}
+
+	private void initData() {
+		Session session = HibernateManager.openSession();
+		try {
+			ctProperties = CyberTrackerHibernateManager.getProperties(session);
+			Map<PatrolMeta, CyberTrackerPatrolOption> options = ctProperties.getPatrolOptions();
+			//creating missing options
+			for (PatrolMeta meta : optionsToShow) {
+				CyberTrackerPatrolOption cto = options.get(meta);
+				if (cto == null) {
+					cto = new CyberTrackerPatrolOption();
+					cto.setType(meta);
+					options.put(meta, cto);
+				}
+			}
+
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
+			for (PatrolType type : patrolTypes) {
+				type.getTransportTypes(); //load lazy items
+			}
+			teams = PatrolHibernateManager.getActiveTeams(ca, session);
+			stations = PatrolHibernateManager.getActiveStations(ca, session);
+			mandates = PatrolHibernateManager.getActiveMandates(ca, session);
+			members = PatrolHibernateManager.getActiveEmployees(ca, session);
+			Collections.sort(members, new Comparator<Employee>() {
+				@Override
+				public int compare(Employee e1, Employee e2) {
+					return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+				}
+			});
+			
+		} finally {
+			session.close();
+		}
+		if (ctProperties == null)
+			ctProperties = new CyberTrackerProperties();
+		
 	}
 
 	@Override
@@ -84,7 +146,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
 		modelListViewer.setLabelProvider(new PatrolMetaScreenLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		modelListViewer.setInput(PatrolMetaScreen.values());
+		modelListViewer.setInput(optionsToShow);
 		modelListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -103,6 +165,15 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+		screenComposites = new HashMap<PatrolMeta, Composite>();
+		Map<PatrolMeta, CyberTrackerPatrolOption> options = ctProperties.getPatrolOptions();
+//		screenComposites.put(PatrolMeta.TYPE, new DropdownScreenOptionComposite(infoInnerPanel, new CyberTrackerPatrolOption()));
+//		screenComposites.put(PatrolMeta.TRANSPORT, new DropdownScreenOptionComposite(infoInnerPanel, new CyberTrackerPatrolOption()));
+
+		
+		screenComposites.put(PatrolMeta.TEAM, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TEAM), teams));
+		screenComposites.put(PatrolMeta.STATION, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.STATION), stations));
 		
 		return container;
 	}
@@ -111,8 +182,9 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		Object obj = selection.getFirstElement();
 
-		if (obj instanceof PatrolMetaScreen) {
-			//TODO: implement
+		if (obj instanceof PatrolMeta) {
+			PatrolMeta meta = (PatrolMeta) obj;
+			((StackLayout)infoInnerPanel.getLayout()).topControl = screenComposites.get(meta);
 		} else {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 		}
@@ -126,12 +198,11 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	private class PatrolMetaScreenLabelProvider extends LabelProvider {
-
 		@Override
 		public String getText(Object element) {
-			if (element instanceof PatrolMetaScreen) {
-				PatrolMetaScreen i = (PatrolMetaScreen)element;
-				return i.getLabel();
+			if (element instanceof PatrolMeta) {
+				PatrolMeta i = (PatrolMeta)element;
+				return i.getGuiLabel();
 			}
 			return super.getText(element);
 		}
