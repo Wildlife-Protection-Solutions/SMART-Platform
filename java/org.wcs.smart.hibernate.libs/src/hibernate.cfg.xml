@@ -8,7 +8,7 @@
 		<property name="connection.url">jdbc:derby:./data/database/smartdb;create=false</property>
 
 		<!--  (use the built-in) -->
-		<property name="connection.pool_size">2</property>
+		<property name="connection.pool_size">5</property>
 		<!-- SQL dialect -->
 		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>
 
