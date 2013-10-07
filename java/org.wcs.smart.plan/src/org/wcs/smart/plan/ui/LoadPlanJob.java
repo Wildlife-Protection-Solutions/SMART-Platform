@@ -102,6 +102,7 @@ public class LoadPlanJob extends Job {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (planViewer.getViewer().getTree().isDisposed()) return;
 					planViewer.setRootPlans(roots.toArray());
 					planViewer.refresh();
 					planViewer.getViewer().expandAll();
