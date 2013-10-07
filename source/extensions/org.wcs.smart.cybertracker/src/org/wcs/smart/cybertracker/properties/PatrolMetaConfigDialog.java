@@ -92,7 +92,6 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private Composite emptyComposite;
 
 	private Map<PatrolMeta, Composite> screenComposites;
-//	private Map<PatrolMeta, List<? extends NamedItem>> screensDropData;
 	
 	public PatrolMetaConfigDialog() {
 		super(Display.getDefault().getActiveShell(), "Patrol Metadata Data Collection Configuration");
@@ -172,8 +171,10 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 //		screenComposites.put(PatrolMeta.TRANSPORT, new DropdownScreenOptionComposite(infoInnerPanel, new CyberTrackerPatrolOption()));
 
 		
-		screenComposites.put(PatrolMeta.TEAM, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TEAM), teams));
+		screenComposites.put(PatrolMeta.ARMED,   new ArmedScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.ARMED)));
+		screenComposites.put(PatrolMeta.TEAM,    new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TEAM), teams));
 		screenComposites.put(PatrolMeta.STATION, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.STATION), stations));
+		screenComposites.put(PatrolMeta.MANDATE, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.MANDATE), mandates));
 		
 		return container;
 	}
