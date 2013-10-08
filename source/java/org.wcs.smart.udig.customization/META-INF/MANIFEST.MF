@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Customization
+Bundle-Name: SMART uDig Customization
 Bundle-SymbolicName: org.wcs.smart.udig.customization
 Bundle-Version: 2.0.0
 Bundle-Activator: org.wcs.smart.udig.customization.Activator
