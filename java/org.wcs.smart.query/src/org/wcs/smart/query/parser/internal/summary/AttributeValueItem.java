@@ -341,8 +341,9 @@ public class AttributeValueItem implements IValueItem {
 					di = DropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
 				}
 			}
-		
-			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			if (di != null){
+				di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			}
 			return di;
 		} catch (Exception ex) {
 			return new ErrorDropItem(ex.getMessage());
