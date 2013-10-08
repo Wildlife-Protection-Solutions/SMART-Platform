@@ -249,9 +249,12 @@ public class SummaryPlanEditorPage extends EditorPart {
 							getEditorSite().getShell(), SummaryPlanEditorPage.this.parentEditor.getPlan());
 					
 					if (dialog.open() == IDialogConstants.OK_ID) {
-						//session is closed by savePlan()
-						PlanHibernateManager.savePlan(SummaryPlanEditorPage.this.parentEditor.getPlan(),
-								SmartHibernateManager.openSession()); 
+						Session session = SmartHibernateManager.openSession();
+						try{
+							PlanHibernateManager.savePlan(SummaryPlanEditorPage.this.parentEditor.getPlan(),session);
+						}finally{
+							session.close();
+						}
 						PlanEventManager.getInstance()
 								.planChanged(0, SummaryPlanEditorPage.this.parentEditor.getPlan());
 					}
@@ -311,12 +314,14 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtPlanID= toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtPlanID.setEditable(false);
 		txtPlanID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtPlanID.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(leftContent, "");  //$NON-NLS-1$
 		
 		toolkit.createLabel(leftContent, Messages.PlanEditor_Name_Label);
 		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtName.getLayoutData()).widthHint = 100;
 		createEditLink(toolkit, leftContent, PanelType.PLANID);
 		
 		int height = txtName.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
@@ -327,24 +332,28 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtCreator = toolkit.createLabel(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtCreator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)txtCreator.getLayoutData()).heightHint = height;
+		((GridData)txtCreator.getLayoutData()).widthHint = 100;
 		
 		// - right
 		toolkit.createLabel(rightContent, Messages.PlanEditor_Type_Label);
 		txtType = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtType.setEditable(false);
 		txtType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtType.getLayoutData()).widthHint = 100;
 		createEditLink(toolkit, rightContent, PanelType.TYPE);
 		
 		toolkit.createLabel(rightContent, Messages.PlanEditor_UnavailableEmployees_Label);
 		txtUnavailableEmployees = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtUnavailableEmployees.setEditable(false);
 		txtUnavailableEmployees.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtUnavailableEmployees.getLayoutData()).widthHint = 100;
 		createEditLink(toolkit, rightContent, PanelType.TYPE);
 		
 		toolkit.createLabel(rightContent, Messages.PlanEditor_ParentPlan_Label);
 		txtParentPlanId = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtParentPlanId.setEditable(false);
 		txtParentPlanId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtParentPlanId.getLayoutData()).widthHint = 100;
 		createEditLink(toolkit, rightContent, PanelType.PLANPARENTID);
 
 		
@@ -362,12 +371,14 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtStartDate = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
 		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtStartDate.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(leftContent, ""); //$NON-NLS-1$
 
 		toolkit.createLabel(leftContent, Messages.PlanEditor_EndDate_Label);
 		txtEndDate = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtEndDate.setEditable(false);
 		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtEndDate.getLayoutData()).widthHint = 100;
 		
 		createEditLink(toolkit, leftContent, PanelType.STARTDATE);
 		
@@ -376,12 +387,14 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtStation = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStation.setEditable(false);
 		txtStation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtStation.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(rightContent, "");  //$NON-NLS-1$
 
 		toolkit.createLabel(rightContent, Messages.PlanEditor_Team_Label);
 		txtTeam = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtTeam.setEditable(false);
 		txtTeam.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtTeam.getLayoutData()).widthHint = 100;
 		createEditLink(toolkit, rightContent, PanelType.STATION);
 		
 		
@@ -404,7 +417,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.heightHint = 40;
-		gd.widthHint = 40;
+		gd.widthHint = 100;
 		txtDescription.setLayoutData(gd);
 		Hyperlink lnk = createEditLink(toolkit, leftContent, PanelType.PLANID);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
@@ -417,7 +430,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtComment.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.heightHint = 40;
-		gd.widthHint = 40;
+		gd.widthHint = 100;
 		txtComment.setLayoutData(gd);
 		lnk = createEditLink(toolkit, rightContent, PanelType.COMMENT);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
@@ -582,7 +595,14 @@ public class SummaryPlanEditorPage extends EditorPart {
 			dialog.open();
 			ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 			if (dialog.isSavePerformed()) {
-				if (PlanHibernateManager.savePlan(parentEditor.getPlan(), HibernateManager.openSession())) {
+				boolean saved = false;
+				Session session = HibernateManager.openSession();
+				try{
+					saved = PlanHibernateManager.savePlan(parentEditor.getPlan(), session);
+				}finally{
+					session.close();
+				}
+				if (saved) {
 					PlanEventManager.getInstance().planChanged(0, parentEditor.getPlan());
 				}
 			}

@@ -97,7 +97,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         name = new Text(this, SWT.BORDER | SWT.LEFT);
-        name.setTextLimit(32);
+        name.setTextLimit(org.wcs.smart.ca.Label.MAX_LENGTH);
         name.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -105,7 +105,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 			}
 		});
         
-        GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+        GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         data.horizontalIndent = 8;
         data.widthHint = 170;
         name.setLayoutData(data);
@@ -174,7 +174,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 	
 	private boolean isIdValid() {
 		boolean idIsSimple = SmartUtils.isSimpleString(id.getText(),
-				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, 32, 2);
+				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Plan.MAX_ID_LENGTH, 2);
 
 		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), currentPlan.getUuid())){
 			idDecoration.show();

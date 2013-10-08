@@ -113,10 +113,8 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 	@Override
 	public boolean updateModel(Plan p) {
 		Plan source = null;
-	
+		
 		Session s = ((CreatePlanWizard)getWizard()).getSession();
-		
-		
 		PlanEditorInput inputPlan  = (PlanEditorInput) planTreeViewer.getSelectedPlan();
 		if (inputPlan == null){
 			return true;

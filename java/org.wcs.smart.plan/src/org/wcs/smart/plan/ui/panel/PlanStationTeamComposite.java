@@ -63,10 +63,25 @@ public class PlanStationTeamComposite extends PlanComposite {
 	private void createControls() {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-	        				
+	        	
+		stationList = new StationComposite();
+		Composite compStations = stationList.createComponent(this,  SWT.NONE);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 250;
+		compStations.setLayoutData(gd);
+		stationList.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fireInputChangeListeners();	
+			}
+		});
+		
 		teamList = new TeamComposite();
-		teamList.createComponent(this, SWT.NONE);
-
+		Composite teamComp = teamList.createComponent(this, SWT.NONE);
+		GridData gd2 = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd2.widthHint = 250;
+		teamComp.setLayoutData(gd2);
+		
 		teamList.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -74,15 +89,8 @@ public class PlanStationTeamComposite extends PlanComposite {
 			}
 		});
 		
-		stationList = new StationComposite();
-		stationList.createComponent(this,  SWT.NONE);
 		
-		stationList.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				fireInputChangeListeners();	
-			}
-		});
+		
 		        
 	}
 	
@@ -101,6 +109,7 @@ public class PlanStationTeamComposite extends PlanComposite {
 			List<? extends Object> teams = null;
 			List<? extends Object> stations = null;
 			try{
+				
 				teams =  PatrolHibernateManager.getActiveTeams(plan.getConservationArea(), session);
 				stations = PatrolHibernateManager.getActiveStations(plan.getConservationArea(), session);
 			}catch (Exception ex){

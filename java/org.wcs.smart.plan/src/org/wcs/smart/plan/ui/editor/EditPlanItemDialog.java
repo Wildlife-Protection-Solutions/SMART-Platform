@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
@@ -84,7 +85,14 @@ public class EditPlanItemDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 		content.updateModel(plan);
-		if (PlanHibernateManager.savePlan(plan, HibernateManager.openSession())) {
+		boolean saved = false;
+		Session session = HibernateManager.openSession();
+		try{
+			saved = PlanHibernateManager.savePlan(plan, session);
+		}finally{
+			session.close();
+		}
+		if (saved) {
 			setChangesMade(false);
 			PlanEventManager.getInstance().planChanged(0, plan);
 			return true;

@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -80,6 +81,9 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		plan.setCreator(SmartDB.getCurrentEmployee());
 		plan.setConservationArea(SmartDB.getCurrentConservationArea());
 		plan.setId(PlanHibernateManager.generatePlanId(plan, getSession()));
+		plan.getName();
+		plan.getDescription();
+		plan.getId();
 }
 
 	/*
@@ -125,7 +129,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	 */
 	@Override
 	public void dispose() {
-		super.dispose();
+		
 		Session tmp = getSession();
 		if (tmp != null && tmp.isOpen()) {
 			if(tmp.getTransaction().isActive()){
@@ -133,6 +137,8 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			}
 			tmp.close();
 		}
+		
+		super.dispose();
 	}
 
 	@Override
@@ -217,7 +223,13 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 
-		boolean ret = PlanHibernateManager.savePlan(p,getSession());
+		boolean saved = false;
+		Session s = HibernateManager.openSession();
+		try{
+			saved = PlanHibernateManager.savePlan(p,s);
+		}finally{
+			s.close();
+		}
 		
 		 // fire events
 		PlanEventManager.getInstance().planAdded(getPlan());
@@ -232,7 +244,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		} catch (WorkbenchException e) {
 			SmartPatrolPlugIn.displayLog(Messages.CreatePlanWizard_LoadPerspective_Error, e);
 		}
-		return ret;
+		return saved;
 	}
 
 	/**
