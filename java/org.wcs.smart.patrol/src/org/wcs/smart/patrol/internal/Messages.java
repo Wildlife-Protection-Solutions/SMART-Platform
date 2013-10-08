@@ -150,11 +150,18 @@ public class Messages extends NLS {
 	public static String GPSDataImport_WaypointImportDescription;
 	public static String GPSDataImport_WaypointName;
 	public static String GPSDataImport_WaypointProgress_ReadingGpx;
+	public static String ImportCsvDetailsWizardPage_0;
+	public static String ImportCsvWizardPage_0;
+	public static String ImportCsvWizardPage_1;
+	public static String ImportCsvWizardPage_2;
 	public static String ImportFromWaypointWizardPage_OpGenerateAllTracks;
 	public static String ImportFromWaypointWizardPage_OpGenerateDayTracks1;
 	public static String ImportFromWaypointWizardPage_PageMessage;
 	public static String ImportFromWaypointWizardPage_PageName;
 	public static String ImportFromWaypointWizardPage_PageTitle;
+	public static String ImportGpsDataWizard_0;
+	public static String ImportGpsDataWizard_1;
+	public static String ImportGpsDataWizard_2;
 	public static String ImportGpsDataWizard_DialogTitle;
 	public static String ImportGpsDataWizard_File_WarningNoneFound;
 	public static String ImportGpsDataWizard_GPS_WarningNoneFound;

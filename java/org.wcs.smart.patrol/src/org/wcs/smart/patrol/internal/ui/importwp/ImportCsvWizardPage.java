@@ -52,7 +52,7 @@ public class ImportCsvWizardPage extends WizardPage{
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "Select CSV File";
+	public static final String PAGE_NAME = Messages.ImportCsvWizardPage_0;
 
 	private ImportCSVOptionsComposite ops;
 	private ImportOptionsComposite ops2;
@@ -107,7 +107,7 @@ public class ImportCsvWizardPage extends WizardPage{
 	
 	private void updateComplete(){
 		
-		if(ops.getFileText() != ""){
+		if(!ops.getFileText().equals( Messages.ImportCsvWizardPage_1)){
 			setPageComplete(true);
 			((ImportGpsDataWizard)getWizard()).setCanFinish(false);
 		}
@@ -140,7 +140,7 @@ public class ImportCsvWizardPage extends WizardPage{
 				columnNames[i] = new CsvHeader(headers[i], i);
 	         }
 		}catch (Exception e) {
-			SmartPatrolPlugIn.displayLog("Could not read selected CSV file, Confirm the file is valid and try again.", e);
+			SmartPatrolPlugIn.displayLog(Messages.ImportCsvWizardPage_2, e);
 			return null;
 		}
 

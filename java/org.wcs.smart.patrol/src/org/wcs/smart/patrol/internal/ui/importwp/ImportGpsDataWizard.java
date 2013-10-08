@@ -242,7 +242,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog("Error Loading waypoints from CSV file" , ex);
+				SmartPatrolPlugIn.displayLog(Messages.ImportGpsDataWizard_0 , ex);
 				return false;
 			}
 			
@@ -333,7 +333,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex);
+					SmartPatrolPlugIn.displayLog(Messages.ImportGpsDataWizard_1, ex);
 					event.doit = false;
 				}
 				
@@ -387,7 +387,6 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 				
 	
 			}else if(event.getCurrentPage() instanceof ImportCsvDetailsWizardPage){
-				final ImportCsvDetailsWizardPage currentPage = (ImportCsvDetailsWizardPage)event.getCurrentPage();
 				type = GPSDataImport.ImportType.WAYPOINTCSV;
 				setCsvConfigs((ImportCsvDetailsWizardPage)event.getCurrentPage());
 
@@ -400,7 +399,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 						}
 					});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not import data from CSV file", ex);
+					SmartPatrolPlugIn.displayLog(Messages.ImportGpsDataWizard_2, ex);
 					event.doit = false;
 				}
 			}

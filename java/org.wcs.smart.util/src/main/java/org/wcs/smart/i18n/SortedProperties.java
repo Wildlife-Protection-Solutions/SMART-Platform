@@ -1,6 +1,12 @@
 package org.wcs.smart.i18n;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Vector;
 
 /**
  * Extension of Properties with sorted keys for alphabetic output. Neither

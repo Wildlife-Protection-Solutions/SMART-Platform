@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp.csv;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -47,7 +46,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.importwp.DateFormat;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 
@@ -62,16 +60,15 @@ public class ImportCSVDetailsComposite extends Composite{
 	boolean valid;
 	CsvHeader[] columnNames;
 	
-	private Label lbl;
+	
 	private Label lblX;
 	private Label lblY;
 	private Label lblDate;
 	private Label lblTime;
 	private Label lblId;
 	private Label lblComments;
-	private Label lblP;
-	private Label lblD;
-
+	
+	
 	private ComboViewer cmbColumnSelectorX;
 	private ComboViewer cmbColumnSelectorY;
 	private ComboViewer cmbColumnSelectorDate;
@@ -107,12 +104,12 @@ public class ImportCSVDetailsComposite extends Composite{
 		session.getTransaction().commit();
 		
 		dateFormats = new DateFormat[6];
-		dateFormats[0] = new DateFormat("d/M/y"); //$NON-NLS-2$
-		dateFormats[1] = new DateFormat("d-M-y"); //$NON-NLS-2$
-		dateFormats[2] = new DateFormat("M/d/y"); //$NON-NLS-2$
-		dateFormats[3] = new DateFormat("M-d-y"); //$NON-NLS-2$
-		dateFormats[4] = new DateFormat("y/M/d"); //$NON-NLS-2$
-		dateFormats[5] = new DateFormat("y-M-d"); //$NON-NLS-2$
+		dateFormats[0] = new DateFormat("d/M/y"); //$NON-NLS-1$
+		dateFormats[1] = new DateFormat("d-M-y"); //$NON-NLS-1$
+		dateFormats[2] = new DateFormat("M/d/y"); //$NON-NLS-1$
+		dateFormats[3] = new DateFormat("M-d-y"); //$NON-NLS-1$
+		dateFormats[4] = new DateFormat("y/M/d"); //$NON-NLS-1$
+		dateFormats[5] = new DateFormat("y-M-d"); //$NON-NLS-1$
 
 		createControls(parent);
 	}
@@ -129,10 +126,10 @@ public class ImportCSVDetailsComposite extends Composite{
 		Group main = new Group(this, SWT.NONE );
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		main.setLayout(new GridLayout(2, false));
-		main.setText("Select Required Columns Containing:");
+		main.setText(Messages.ImportCSVDetailsComposite_0);
 		
 		lblX = new Label(main, SWT.NONE);
-		lblX.setText("X coordinate:");
+		lblX.setText(Messages.ImportCSVDetailsComposite_1);
 		lblX.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorX = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
@@ -152,7 +149,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		});
 
 		lblY = new Label(main, SWT.NONE);
-		lblY.setText("Y coordinate:");
+		lblY.setText(Messages.ImportCSVDetailsComposite_2);
 		lblY.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorY = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
@@ -169,7 +166,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 		
 		lblDate = new Label(main, SWT.NONE);
-		lblDate.setText("Date:");
+		lblDate.setText(Messages.ImportCSVDetailsComposite_3);
 		lblDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorDate = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
@@ -185,7 +182,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		});
 
 		lblTime = new Label(main, SWT.NONE);
-		lblTime.setText("Time (HH:MM:SS) :");
+		lblTime.setText(Messages.ImportCSVDetailsComposite_4);
 		lblTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorTime = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
@@ -202,10 +199,10 @@ public class ImportCSVDetailsComposite extends Composite{
 		Group optional = new Group(this, SWT.NONE );
 		optional.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		optional.setLayout(new GridLayout(2, false));
-		optional.setText("Optional Columns to Load:");
+		optional.setText(Messages.ImportCSVDetailsComposite_5);
 	
 		lblId = new Label(optional, SWT.NONE);
-		lblId.setText("Waypoint ID:");
+		lblId.setText(Messages.ImportCSVDetailsComposite_6);
 		lblId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorId = new ComboViewer(optional, SWT.READ_ONLY | SWT.BORDER);
@@ -221,7 +218,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		});
 
 		lblComments = new Label(optional, SWT.NONE);
-		lblComments.setText("Comments Field:");
+		lblComments.setText(Messages.ImportCSVDetailsComposite_7);
 		lblComments.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorComments = new ComboViewer(optional, SWT.READ_ONLY | SWT.BORDER);
@@ -238,11 +235,11 @@ public class ImportCSVDetailsComposite extends Composite{
 		Group additional = new Group(this, SWT.NONE );
 		additional.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		additional.setLayout(new GridLayout(2, false));
-		additional.setText("Data Specifications:");
+		additional.setText(Messages.ImportCSVDetailsComposite_8);
 
 		
 		Label lblP = new Label(additional, SWT.NONE);
-		lblP.setText("Coordinate Projection:");
+		lblP.setText(Messages.ImportCSVDetailsComposite_9);
 		lblP.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		lstProjections = new ComboViewer(additional, SWT.READ_ONLY);
@@ -271,7 +268,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 		
 		Label lblD = new Label(additional, SWT.NONE);
-		lblD.setText("Date Format:");
+		lblD.setText(Messages.ImportCSVDetailsComposite_10);
 		lblD.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		cmbColumnSelectorDateFormat = new ComboViewer(additional, SWT.DROP_DOWN );
@@ -293,7 +290,7 @@ public class ImportCSVDetailsComposite extends Composite{
 
 		
 		skipHeaders = new Button(additional, SWT.CHECK);
-		skipHeaders.setText("Skip the first row of column heading when importing.");
+		skipHeaders.setText(Messages.ImportCSVDetailsComposite_11);
 		skipHeaders.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2,1));
 		
 		
@@ -336,7 +333,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		valid = true;
 		if(cmbColumnSelectorX.getSelection().isEmpty()){
 			cdX.show();
-			cdX.setDescriptionText("Required data missing, select a column");
+			cdX.setDescriptionText(Messages.ImportCSVDetailsComposite_12);
 			valid = false;
 		}else{
 			cdX.hide();
@@ -344,7 +341,7 @@ public class ImportCSVDetailsComposite extends Composite{
 
 		if(cmbColumnSelectorY.getSelection().isEmpty()){
 			cdY.show();
-			cdY.setDescriptionText("Required data missing, select a column");
+			cdY.setDescriptionText(Messages.ImportCSVDetailsComposite_13);
 			valid = false;
 		}else{
 			cdY.hide();
@@ -352,14 +349,14 @@ public class ImportCSVDetailsComposite extends Composite{
 
 		if(cmbColumnSelectorDate.getSelection().isEmpty()){
 			cdDate.show();
-			cdDate.setDescriptionText("Required data missing, select a column");
+			cdDate.setDescriptionText(Messages.ImportCSVDetailsComposite_14);
 			valid = false;
 		}else{
 			cdDate.hide();
 		}
 		if(cmbColumnSelectorTime.getSelection().isEmpty()){
 			cdTime.show();
-			cdTime.setDescriptionText("Required data missing, select a column");
+			cdTime.setDescriptionText(Messages.ImportCSVDetailsComposite_15);
 			valid = false;
 		}else{
 			cdTime.hide();
@@ -370,17 +367,18 @@ public class ImportCSVDetailsComposite extends Composite{
 		if(cmbColumnSelectorDateFormat.getSelection().isEmpty()){
 			cdDateFormat.show();
 			String format = getDateFormat();
-			if(format == ""){
-				cdDateFormat.setDescriptionText("Required data missing, select a column");
+			if(format.equals("")){ //$NON-NLS-1$
+				cdDateFormat.setDescriptionText(Messages.ImportCSVDetailsComposite_16);
 				valid = false;
 				return;
 			}
 			cdDateFormat.hide();
 			try {
+				@SuppressWarnings("unused")
 				SimpleDateFormat sdf = new SimpleDateFormat(format);
 			} catch (Exception e) {
 				cdDateFormat.show();
-				cdDateFormat.setDescriptionText("Invalid Date Format");
+				cdDateFormat.setDescriptionText(Messages.ImportCSVDetailsComposite_17);
 				valid = false;
 			}
 		}else{
