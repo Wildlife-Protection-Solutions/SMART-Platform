@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Birt
+Bundle-Name: SMART BIRT Extensions
 Bundle-SymbolicName: org.wcs.smart.birt;singleton:=true
 Bundle-Version: 2.0.0
 Bundle-Activator: org.wcs.smart.birt.Activator

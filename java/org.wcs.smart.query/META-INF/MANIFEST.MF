@@ -7,7 +7,7 @@ Bundle-Activator: org.wcs.smart.query.QueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart;visibility:=reexport,
- org.wcs.smart.patrol,
+ org.wcs.smart.patrol;bundle-version="2.0.0",
  org.eclipse.jface.databinding;bundle-version="1.5.0",
  org.eclipse.core.databinding.observable;bundle-version="1.4.0",
  org.eclipse.ui.forms;bundle-version="3.5.100",
