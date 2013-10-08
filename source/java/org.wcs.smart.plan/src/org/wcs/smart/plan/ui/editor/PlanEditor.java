@@ -92,9 +92,8 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 				if (type != PlanEventManager.PATROL_PLAN_ATTRIBUTE){
 					//force reload plan to get latest changes
 					plan = loadPlan();
-					summaryPage.initValues();
-					computeStatus.schedule();
-					mapPage.refreshPlanTargets();
+					initEditor();
+					mapPage.refreshPlanTargets();				
 				}	
 			}
 			
@@ -355,8 +354,11 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.PlanEditor_ErrorOpeningPlanEditor + ex.getMessage(), ex);
 		}
-		
-		summaryPage.initValues();
+		initEditor();
+	}
+	
+	private void initEditor(){
+		summaryPage.initValues();	//loads the plan
 		setPartName(plan.getLabel());
 		setTitleImage(((PlanEditorInput)getEditorInput()).getImageDescriptor().createImage());
 		computePlanTargetStatus();

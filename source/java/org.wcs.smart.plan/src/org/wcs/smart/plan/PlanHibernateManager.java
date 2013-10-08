@@ -41,6 +41,7 @@ import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
@@ -145,35 +146,39 @@ public class PlanHibernateManager{
 	 * @return plan id for given plan
 	 */
 	public static String generatePlanId(Plan p, Session s) {
-		s.beginTransaction();
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
-
-		Query q = s
-				.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc"); //$NON-NLS-1$
-		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		long idNumber = 0;
-		List<?> results = q.list();
-		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			String localId = (String) iterator.next();
-			try {
-				idNumber = Integer.parseInt(localId.substring(localId
-						.lastIndexOf('_') + 1));
-				break;
-			} catch (Exception ex) {
-				// not of the form CAID_# skip this one
-			}finally{
-				s.getTransaction().rollback();
-			}
-		}
 		sb.append("_"); //$NON-NLS-1$
-		idNumber = (idNumber + 1) % 1000000;
-		if (idNumber <= 0) {
-			idNumber = 1;
-		}
-		sb.append(PLAN_ID_FORMATTER.format(idNumber));
+		
+		Transaction tx = s.getTransaction();
+		tx.begin();
+		try{
+			Query q = s.createQuery("SELECT id FROM Plan WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
+			q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+			q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
+			long idNumber = 0;
+			List<?> results = q.list();
+			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+				String localId = (String) iterator.next();
+				try {
+					idNumber = Integer.parseInt(localId.substring(localId.lastIndexOf('_') + 1));
+					break;
+				} catch (Exception ex) {
+					// not of the form CAID_# skip this one
+				}
+			}
+			idNumber = (idNumber + 1) % 1000000;
+			if (idNumber <= 0) {
+				idNumber = 1;
+			}
+			
+			sb.append(PLAN_ID_FORMATTER.format(idNumber));
+		}finally{
+			tx.commit();
+			
+		}
 		return sb.toString();
 	}
 	
@@ -200,8 +205,6 @@ public class PlanHibernateManager{
 			session.getTransaction().rollback();
 			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_SavePlan_Error + ex.getMessage(), ex);
 			return false;
-		}finally{
-			session.close();
 		}
 		return true;
 	}
@@ -217,7 +220,7 @@ public class PlanHibernateManager{
 	 * @return
 	 */
 	public static boolean isDuplicatePlanId(Session s, String id, byte[] excludePlanUuid) {
-		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id)); //$NON-NLS-1$
+		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
 		if (excludePlanUuid != null){
 			c.add(Restrictions.ne("uuid", excludePlanUuid)); //$NON-NLS-1$
 		}
