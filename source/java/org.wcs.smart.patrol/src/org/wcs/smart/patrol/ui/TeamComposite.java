@@ -111,7 +111,9 @@ public class TeamComposite extends PatrolItemComposite{
 			SmartPatrolPlugIn.displayLog(Messages.TeamComposite_Error_CouldNotLoadTeams, ex);
 			session.close();
 		}
-		
+		if (teams == null){
+			teams = Collections.emptyList();
+		}
 		setInput(teams, p.getTeam());
 		
 	}
