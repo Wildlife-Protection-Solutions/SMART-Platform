@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -66,9 +65,9 @@ public class CSVImportConfiguration {
 				}
 				SimpleDateFormat sdf = new SimpleDateFormat(DateFormat);
 				try {
-					ptDate = sdf.parse( row[DateColumn].replaceAll("\\s+","") );
+					ptDate = sdf.parse( row[DateColumn].replaceAll("\\s+","") ); //$NON-NLS-1$ //$NON-NLS-2$
 				} catch (ParseException e) {
-				 	SmartPatrolPlugIn.displayLog("Error Parsing Date in row: " + counter + "(" + row[DateColumn] + ")", e ); 
+				 	SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_2 + counter + "(" + row[DateColumn] + ")", e );   //$NON-NLS-1$//$NON-NLS-2$ 
 				}
 				Date day0 = new Date(0);
 				if( singleDay != null){
@@ -81,7 +80,7 @@ public class CSVImportConfiguration {
 					//reproject
 
 					CoordinateReferenceSystem sourceCrs = projection.getCrs();
-					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") )));
+					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 
 					
@@ -90,20 +89,41 @@ public class CSVImportConfiguration {
 				 	curWP.setImportedDate(ptDate);
 
 				 	try {
-					 	SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-					 	Date dateTime = format.parse( row[TimeColumn].replaceAll("\\s+","") );
+				 		String strTime = row[TimeColumn].replaceAll("\\s+",""); //$NON-NLS-1$ //$NON-NLS-2$
+				 		SimpleDateFormat format;
+				 		String seconds;
+				 		int minute_break = strTime.indexOf(":");  //$NON-NLS-1$
+				 		if(strTime.length() > (minute_break + 3)){
+				 			if( strTime.charAt(minute_break + 3) == ':'){
+				 				seconds = ":ss"; //$NON-NLS-1$
+				 			}else{
+				 				seconds = ""; //$NON-NLS-1$
+				 			}
+				 		}else{
+				 			seconds = ""; //$NON-NLS-1$
+				 		}
+				 		if(strTime.contains("+") || strTime.contains("-")){ //$NON-NLS-1$ //$NON-NLS-2$
+				 			format = new SimpleDateFormat(DateFormat + " HH:mm" + seconds + "z"); //$NON-NLS-1$ //$NON-NLS-2$
+				 		}else if(strTime.contains("AM") || strTime.contains("PM") || strTime.contains("am") || strTime.contains("pm")){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				 			format = new SimpleDateFormat(DateFormat + " hh:mm" + seconds + "a"); //$NON-NLS-1$ //$NON-NLS-2$
+				 		}else{
+				 			format = new SimpleDateFormat(DateFormat + " HH:mm" + seconds); //$NON-NLS-1$
+				 		}
+					 	Date dateTime = new Date(); 
+					 	dateTime.setTime(ptDate.getTime());
+					 	dateTime = format.parse( row[DateColumn].replaceAll("\\s+","") + " " + strTime ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					 	Time time = new Time(dateTime.getTime());
 					 	curWP.setTime( time);
 				 	} catch (ParseException e) {
-				 		SmartPatrolPlugIn.displayLog("could not parse date on row" + counter + "(" + row[TimeColumn].replaceAll("\\s+","") + ").", e );
+				 		SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_9 + counter + "(" + row[TimeColumn] + ").", e );  //$NON-NLS-1$//$NON-NLS-2$ 
 				 	}
 				 
 				 
 				 	if(IdColumn != -1){
 					 	try {
-						 	curWP.setId(Integer.parseInt( (row[IdColumn].replaceAll("\\s+","")) ));
+						 	curWP.setId(Integer.parseInt( (row[IdColumn].replaceAll("\\s+","")) )); //$NON-NLS-1$ //$NON-NLS-2$
 					 	} catch (NumberFormatException e) {
-					 		SmartPatrolPlugIn.displayLog("Alls waypoint IDs must be integers, ignoring ID in row: " + counter + "(" + row[IdColumn] + ")", e ); 
+					 		SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_11 + counter + "(" + row[IdColumn] + ")", e );   //$NON-NLS-1$//$NON-NLS-2$ 
 					 	}
 				 	}else{
 				 		curWP.setId(maxId + 1);
@@ -119,7 +139,7 @@ public class CSVImportConfiguration {
 				counter++;
 			}
 		}catch (Exception e) {
-			SmartPatrolPlugIn.displayLog("Error parsing selected CSV file, confirm the file is valid and try again.", e);
+			SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_12, e);
 			return null;
 		}
 		return allPoints;
@@ -187,7 +207,7 @@ public class CSVImportConfiguration {
 
 
 	public void setFileName(String file) {
-		this.filename = file;
+		CSVImportConfiguration.filename = file;
 	}
 
 

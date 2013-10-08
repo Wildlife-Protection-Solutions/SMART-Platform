@@ -99,12 +99,12 @@ public class ImportWpSelectWizardPage extends WizardPage {
 						value.append (" (" + wp.getComment() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					if(wp.getImportedDate() != null){
-						DateFormat formatter = new SimpleDateFormat("M/d/y");
+						DateFormat formatter = new SimpleDateFormat("M/d/y"); //$NON-NLS-1$
 						String dateFormatted = formatter.format(wp.getImportedDate());
-						value.append(" [ " + dateFormatted); //$NON-NLS-1$ //$NON-NLS-2$
+						value.append(" [ " + dateFormatted); //$NON-NLS-1$ 
 					}
 					if (wp.getTime() != null){
-						DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+						DateFormat formatter = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
 						String dateFormatted = formatter.format(wp.getTime());
 						value.append(" " + dateFormatted + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 					}

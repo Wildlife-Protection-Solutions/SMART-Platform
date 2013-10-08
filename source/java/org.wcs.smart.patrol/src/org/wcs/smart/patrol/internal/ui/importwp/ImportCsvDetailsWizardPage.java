@@ -43,7 +43,7 @@ public class ImportCsvDetailsWizardPage extends WizardPage{
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "Select CSV Import Options";
+	public static final String PAGE_NAME = Messages.ImportCsvDetailsWizardPage_0;
 
 	private ImportCSVDetailsComposite ops;
 	private CsvHeader[] columnNames;
