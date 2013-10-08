@@ -27,6 +27,9 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -38,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
 
@@ -113,12 +117,18 @@ public class DropdownScreenOptionComposite extends Composite {
 				break;
 			}
 		}
-//		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-//		@Override
-//		public void selectionChanged(SelectionChangedEvent event) {
-//			setChangesMade(true);
-//		}
-//	});
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+ 			@Override
+ 			public void selectionChanged(SelectionChangedEvent event) {
+ 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+ 				Object obj = selection.getFirstElement();
+ 				if (obj instanceof UuidItem) {
+ 					UuidItem i = (UuidItem) obj;
+ 					model.setUuidValue(i.getUuid());
+ 	 				//setChangesMade(true);
+ 				}
+ 			}
+ 		});
 	}
 	
 }

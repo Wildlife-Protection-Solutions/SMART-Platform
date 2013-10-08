@@ -116,7 +116,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 			for (PatrolType type : patrolTypes) {
-				type.getTransportTypes(); //load lazy items
+				type.getTransportTypes().size(); //load lazy items
 			}
 			teams = PatrolHibernateManager.getActiveTeams(ca, session);
 			stations = PatrolHibernateManager.getActiveStations(ca, session);
@@ -167,14 +167,14 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
 		screenComposites = new HashMap<PatrolMeta, Composite>();
 		Map<PatrolMeta, CyberTrackerPatrolOption> options = ctProperties.getPatrolOptions();
-//		screenComposites.put(PatrolMeta.TYPE, new DropdownScreenOptionComposite(infoInnerPanel, new CyberTrackerPatrolOption()));
-//		screenComposites.put(PatrolMeta.TRANSPORT, new DropdownScreenOptionComposite(infoInnerPanel, new CyberTrackerPatrolOption()));
 
-		
-		screenComposites.put(PatrolMeta.ARMED,   new ArmedScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.ARMED)));
-		screenComposites.put(PatrolMeta.TEAM,    new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TEAM), teams));
-		screenComposites.put(PatrolMeta.STATION, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.STATION), stations));
-		screenComposites.put(PatrolMeta.MANDATE, new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.MANDATE), mandates));
+		Composite cmp = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TYPE), options.get(PatrolMeta.TRANSPORT), patrolTypes);
+		screenComposites.put(PatrolMeta.TYPE,      cmp);
+		screenComposites.put(PatrolMeta.TRANSPORT, cmp);
+		screenComposites.put(PatrolMeta.ARMED,     new ArmedScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.ARMED)));
+		screenComposites.put(PatrolMeta.TEAM,      new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TEAM), teams));
+		screenComposites.put(PatrolMeta.STATION,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.STATION), stations));
+		screenComposites.put(PatrolMeta.MANDATE,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.MANDATE), mandates));
 		
 		return container;
 	}
