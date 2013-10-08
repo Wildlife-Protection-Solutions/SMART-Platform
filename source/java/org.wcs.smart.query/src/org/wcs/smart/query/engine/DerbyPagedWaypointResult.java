@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -327,17 +328,16 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 			}catch (Exception ex){
 				QueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
 			} finally {
-				
 				try{
 					session.getTransaction().commit();
 				}catch (Exception ex){
-					//sometimes during shut down the connection is closed before this 
-					//commit is called
+					SmartPlugIn.log(ex.getMessage(), ex);
 				}
-				
 				try{
 					session.close();
-				}catch(Exception ex){}
+				}catch (Exception ex){
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
 			}
 			return Status.OK_STATUS;
 		}

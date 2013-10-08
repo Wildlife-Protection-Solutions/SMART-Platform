@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -200,8 +201,8 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			session.beginTransaction();
 			try{
 				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
-			}catch (Exception ex){
-				session.getTransaction().commit();
+			}finally{
+				session.getTransaction().rollback();
 			}
 			
 			switch (attribute.getType()) {
@@ -659,14 +660,13 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				try{
 					session.getTransaction().commit();
 				}catch (Exception ex){
-					//sometimes during shut down the connection is closed before this 
-					//commit is called
-					ex.printStackTrace();
+					SmartPlugIn.log(ex.getMessage(), ex);
 				}
-				
 				try{
 					session.close();
-				}catch(Exception ex){}
+				}catch (Exception ex){
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
 			}
 			return Status.OK_STATUS;
 		}
