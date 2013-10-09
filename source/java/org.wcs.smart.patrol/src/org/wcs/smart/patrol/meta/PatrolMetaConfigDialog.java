@@ -44,15 +44,15 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.ScreenOption;
-import org.wcs.smart.ca.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**

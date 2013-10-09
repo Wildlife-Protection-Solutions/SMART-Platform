@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca;
+package org.wcs.smart.patrol.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,6 +29,9 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.UuidItem;
 
 
 /**

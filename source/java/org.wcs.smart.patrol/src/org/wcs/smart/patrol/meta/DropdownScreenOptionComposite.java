@@ -36,9 +36,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.ScreenOption;
 
 /**
  * Screen option with dropdown as default value selector.

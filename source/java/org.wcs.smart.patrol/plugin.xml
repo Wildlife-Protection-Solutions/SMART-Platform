@@ -651,7 +651,7 @@
             class="org.wcs.smart.patrol.model.Track">
       </class>
       <class
-            class="org.wcs.smart.ca.ScreenOption">
+            class="org.wcs.smart.patrol.model.ScreenOption">
       </class>
    </extension>
    <extension
