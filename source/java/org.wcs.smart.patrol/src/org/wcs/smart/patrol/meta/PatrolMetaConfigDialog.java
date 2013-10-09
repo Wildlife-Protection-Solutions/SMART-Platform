@@ -42,13 +42,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.ScreenOption.ScreenOptionMeta;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -77,6 +77,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 			ScreenOptionMeta.PILOT };
 
 	private ConservationArea ca;
+	
 	private List<PatrolType> patrolTypes;
 	private List<Team> teams;
 	private List<Station> stations;
@@ -97,40 +98,33 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	private void initData() {
-		Session session = HibernateManager.openSession();
-		try {
-			ca = (ConservationArea) session.load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-			Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
-			//creating missing options
-			for (ScreenOptionMeta meta : optionsToShow) {
-				ScreenOption cto = options.get(meta);
-				if (cto == null) {
-					cto = new ScreenOption();
-					cto.setType(meta);
-					options.put(meta, cto);
-				}
+		ca = (ConservationArea) getSession().load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+		Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
+		//creating missing options
+		for (ScreenOptionMeta meta : optionsToShow) {
+			ScreenOption cto = options.get(meta);
+			if (cto == null) {
+				cto = new ScreenOption();
+				cto.setConservationArea(ca);
+				cto.setType(meta);
+				options.put(meta, cto);
 			}
-
-//			ConservationArea ca = SmartDB.getCurrentConservationArea();
-			patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
-			for (PatrolType type : patrolTypes) {
-				type.getTransportTypes().size(); //load lazy items
-			}
-			teams = PatrolHibernateManager.getActiveTeams(ca, session);
-			stations = PatrolHibernateManager.getActiveStations(ca, session);
-			mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-			members = PatrolHibernateManager.getActiveEmployees(ca, session);
-			Collections.sort(members, new Comparator<Employee>() {
-				@Override
-				public int compare(Employee e1, Employee e2) {
-					return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
-				}
-			});
-			
-		} finally {
-			session.close();
 		}
-		
+
+		patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
+		for (PatrolType type : patrolTypes) {
+			type.getTransportTypes().size(); //load lazy items
+		}
+		teams = PatrolHibernateManager.getActiveTeams(ca, session);
+		stations = PatrolHibernateManager.getActiveStations(ca, session);
+		mandates = PatrolHibernateManager.getActiveMandates(ca, session);
+		members = PatrolHibernateManager.getActiveEmployees(ca, session);
+		Collections.sort(members, new Comparator<Employee>() {
+			@Override
+			public int compare(Employee e1, Employee e2) {
+				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+			}
+		});
 	}
 
 	@Override
@@ -210,8 +204,20 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected boolean performSave() {
-		// TODO Auto-generated method stub
-		return false;
+		Session session = getSession();
+		session.beginTransaction();
+		try {
+			for (ScreenOption option : ca.getScreenOptions().values()) {
+				session.saveOrUpdate(option);
+			}
+			session.getTransaction().commit();
+			setChangesMade(false);
+			return true;
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			SmartPatrolPlugIn.displayLog("Failed to save screen options" + "\n"+ ex.getLocalizedMessage(), ex);
+			return false;
+		}
 	}
 
 	private class PatrolMetaScreenLabelProvider extends LabelProvider {
