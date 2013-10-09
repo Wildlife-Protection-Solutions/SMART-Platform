@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Option composite for importing waypoints from csv.  
@@ -58,17 +59,17 @@ public class ImportCSVOptionsComposite extends Composite{
 		
 		final FileDialog fd = new FileDialog(getShell(), parent.getStyle());
 		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{org.wcs.smart.patrol.internal.ui.importwp.Messages.ImportCSVOptionsComposite_0,org.wcs.smart.patrol.internal.ui.importwp.Messages.ImportCSVOptionsComposite_1});
+		fd.setFilterNames(new String[]{Messages.ImportCSVOptionsComposite_0,Messages.ImportCSVOptionsComposite_1});
 		
 		lblFile = new Label(this, SWT.NONE);
-		lblFile.setText(org.wcs.smart.patrol.internal.ui.importwp.Messages.ImportCSVOptionsComposite_2);
+		lblFile.setText(Messages.ImportCSVOptionsComposite_2);
 		lblFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtFile = new Text(this, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		btnBrowse = new Button(this, SWT.NONE);
-		btnBrowse.setText(org.wcs.smart.patrol.internal.ui.importwp.Messages.ImportCSVOptionsComposite_3);
+		btnBrowse.setText(Messages.ImportCSVOptionsComposite_3);
 		btnBrowse.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {

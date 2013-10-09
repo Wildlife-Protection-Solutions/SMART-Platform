@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,7 +45,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
-import org.wcs.smart.patrol.gpx.WptType;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 
@@ -52,7 +55,7 @@ import org.wcs.smart.patrol.model.Waypoint;
  * @author Emily
  * @since 1.0.0
  */
-public class ImportWpSelectWizardPage extends WizardPage { 
+public class ImportWpSelectWizardPage extends WizardPage implements IImportWizardPage { 
 	/**
 	 * 
 	 */
@@ -60,6 +63,8 @@ public class ImportWpSelectWizardPage extends WizardPage {
 	
 	
 	private CheckboxTableViewer tblWaypoint;
+	private List<Waypoint> initialWaypoints = null;
+	
 	/**
 	 * @param pageName
 	 */
@@ -80,34 +85,24 @@ public class ImportWpSelectWizardPage extends WizardPage {
 		tblWaypoint = CheckboxTableViewer.newCheckList(comp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		tblWaypoint.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				if (element instanceof WptType) {
-					WptType wp = (WptType) element;
-					StringBuilder value = new StringBuilder(wp.getName());
-					
-					if (wp.getCmt() != null && !wp.getCmt().toLowerCase().equals("null")){ //$NON-NLS-1$
-						value.append (" (" + wp.getCmt() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					if (wp.getTime() != null){
-						value.append(" [ " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM).format(wp.getTime().toGregorianCalendar().getTime()) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					return value.toString();
-				}else if (element instanceof Waypoint) {
+				if (element instanceof Waypoint) {
 					Waypoint wp = (Waypoint) element;
-					StringBuilder value = new StringBuilder( wp.getId() );
-					value.append(wp.getId());	
+					StringBuilder value = new StringBuilder( );
+					value.append(wp.getId());
 					if (wp.getComment() != null && !wp.getComment().toLowerCase().equals("null")){ //$NON-NLS-1$
 						value.append (" (" + wp.getComment() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
+					value.append(" ["); //$NON-NLS-1$
 					if(wp.getImportedDate() != null){
-						DateFormat formatter = new SimpleDateFormat("M/d/y"); //$NON-NLS-1$
-						String dateFormatted = formatter.format(wp.getImportedDate());
-						value.append(" [ " + dateFormatted); //$NON-NLS-1$ 
+						String dateFormatted = DateFormat.getDateInstance().format(wp.getImportedDate());
+						value.append(dateFormatted); 
 					}
 					if (wp.getTime() != null){
-						DateFormat formatter = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
-						String dateFormatted = formatter.format(wp.getTime());
-						value.append(" " + dateFormatted + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+						value.append(" "); //$NON-NLS-1$
+						String dateFormatted = DateFormat.getTimeInstance().format(wp.getTime());
+						value.append(dateFormatted); 
 					}
+					value.append("]"); //$NON-NLS-1$
 					return value.toString();
 				}
 				return super.getText(element);
@@ -135,11 +130,8 @@ public class ImportWpSelectWizardPage extends WizardPage {
 		
 		
 		tblWaypoint.setContentProvider(ArrayContentProvider.getInstance());
-		if(((ImportGpsDataWizard)getWizard()).getWaypoints() == null){
-			tblWaypoint.setInput(   ((ImportGpsDataWizard)getWizard()).getWaypointObj());
-		}else{
-			tblWaypoint.setInput(   ((ImportGpsDataWizard)getWizard()).getWaypoints().toArray() );
-		}
+		tblWaypoint.setInput(initialWaypoints);
+
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = Math.min(tblWaypoint.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 400);
 		tblWaypoint.getTable().setLayoutData(gd);
@@ -170,52 +162,79 @@ public class ImportWpSelectWizardPage extends WizardPage {
 		super.setControl(comp);
 	}
 	
-	/**
-	 * 
-	 * @return the list of selected waypoints 
-	 */
-	public List<WptType> getSelectedWaypoints(){
-		List<WptType> wps = new ArrayList<WptType>();
-		Object[] checked = tblWaypoint.getCheckedElements();
-		for (int i = 0; i < checked.length; i ++){
-			wps.add((WptType)checked[i]);
-		}
-		return wps;
-	}
-
-	/**
-	 * Sets the list of waypoints to choose from 
-	 * @param waypoints
-	 */
-	public void setWaypoints(List<WptType> waypoints){
-		if (tblWaypoint != null){
-			tblWaypoint.setInput(   waypoints.toArray() );
-		}
-		((ImportGpsDataWizard)getWizard()).setCanFinish(true);
-	}
-	
 	@Override
     public IWizardPage getNextPage() {
 		return null;
     }
 
-	public void setWaypointsFromObjects(List<Waypoint> allWaypoints) {
+	/*
+	 * Sets initial waypoints
+	 */
+	private void setWaypointsFromObjects(List<Waypoint> allWaypoints) {
+		this.initialWaypoints = allWaypoints;
 		if (tblWaypoint != null){
-			tblWaypoint.setInput(   allWaypoints.toArray() );
+			tblWaypoint.setInput(initialWaypoints);
+			tblWaypoint.refresh();
 		}
-		((ImportGpsDataWizard)getWizard()).setCanFinish(true);
+		if (initialWaypoints == null || initialWaypoints.size() == 0){
+			String type = ((ImportGpsDataWizard)getWizard()).getType().guiName;
+			setErrorMessage(MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new Object[]{type, type}));
+			((ImportGpsDataWizard)getWizard()).setCanFinish(false);
+		}else{
+			setErrorMessage(null);
+			((ImportGpsDataWizard)getWizard()).setCanFinish(true);
+		}
+		
 	}
 	
 	/**
 	 * 
 	 * @return the list of selected waypoints 
 	 */
-	public List<Waypoint> getSelectedWaypointsObj(){
+	private List<Waypoint> getSelectedWaypointsObj(){
 		List<Waypoint> wps = new ArrayList<Waypoint>();
 		Object[] checked = tblWaypoint.getCheckedElements();
 		for (int i = 0; i < checked.length; i ++){
 			wps.add((Waypoint)checked[i]);
 		}
 		return wps;
+	}
+
+	@Override
+	public boolean beforeMoveNext() {
+		ImportGpsDataWizard wizard = ((ImportGpsDataWizard)getWizard());
+		wizard.setImportedData(getSelectedWaypointsObj());
+		return true;
+	}
+
+	@Override
+	public boolean init() {
+		final boolean[] error = new boolean[]{false};
+		final ImportGpsDataWizard wizard = ((ImportGpsDataWizard)getWizard());
+		
+		try {
+			getWizard().getContainer().run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException{
+					monitor.beginTask(Messages.ImportWpSelectWizardPage_ProgressReadingWaypoints, 2);
+					try{
+						List<Waypoint> points = wizard.getImportEngine().getWaypoints(wizard.getImportOption(), wizard.getType(), null, monitor);
+						monitor.worked(1);
+						setWaypointsFromObjects(points);
+					}catch(Exception ex){
+						error[0] = true;
+						SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+					}finally{
+						monitor.done();
+					}
+				
+				}
+			});
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(e.getMessage(), e);
+			return false;
+		}
+		return !error[0];
 	}
 }

@@ -51,7 +51,7 @@ import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
  * @author Emily
  * @since 1.0.0
  */
-public class ImportGPSWizardPage extends WizardPage {
+public class ImportGPSWizardPage extends WizardPage implements IImportWizardPage{
 	/**
 	 * 
 	 */
@@ -72,16 +72,7 @@ public class ImportGPSWizardPage extends WizardPage {
 		wizard.addPage(this);
 	}
 
-	/**
-	 * 
-	 * @return <code>true</code> if all waypoints are to be imported 
-	 * and assigned to the correct day; <code>false</code> if waypoints
-	 * are to be imported for only the current day or if waypoints
-	 * are to be selected from a list.
-	 */
-	public boolean getImportAll(){
-		return ops.getImportOption() == ImportOption.ALL;
-	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -169,7 +160,7 @@ public class ImportGPSWizardPage extends WizardPage {
 	 * 
 	 * @return the type of device selected
 	 */
-	public String getDeviceType(){
+	private String getDeviceType(){
 		DeviceSelection ds = (DeviceSelection) ((StructuredSelection)this.gpsViewer.getSelection()).getFirstElement();
 		if (ds != null){
 			return ds.name;
@@ -205,4 +196,16 @@ public class ImportGPSWizardPage extends WizardPage {
 		}
 		return null;
     }
+
+	@Override
+	public boolean beforeMoveNext() {
+		((ImportGpsDataWizard)getWizard()).setImportOption(ops.getImportOption());
+		((GpsImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).setDeviceType(getDeviceType());
+		return true;
+	}
+
+	@Override
+	public boolean init() {
+		return true;
+	}
 }

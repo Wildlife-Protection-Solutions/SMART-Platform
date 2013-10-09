@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -30,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -47,17 +47,22 @@ import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.GpxType;
 import org.wcs.smart.patrol.gpx.TrkType;
 import org.wcs.smart.patrol.gpx.TrksegType;
 import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.ui.SavePatrolPartJob;
+import org.wcs.smart.patrol.ui.SaveWaypointJob;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -65,13 +70,18 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Class that imports data from gps device.
+ * Class of utilties that support
+ * the importing of waypoints and tracks from a variety 
+ * of sources 
  * 
  * @author Emily
  * @since 1.0.0
  */
 public class GPSDataImport {
 
+	/*
+	 * gpx metadata link
+	 */
 	private static final String GPX_METADATA_CLASSES = "org.wcs.smart.patrol.gpx"; //$NON-NLS-1$
 	
 	/**
@@ -83,8 +93,7 @@ public class GPSDataImport {
 	 */
 	public enum ImportType{
 		WAYPOINT (Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription), 
-		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption),
-		WAYPOINTCSV(Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription);
+		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption);
 		
 		public String guiName;
 		public String importDesc;
@@ -95,25 +104,124 @@ public class GPSDataImport {
 		}
 	};
 	
+	/**
+	 * Saves the generated tracks to the database 
+	 * @param tracks tracks to save
+	 * @throws Exception
+	 */
+	public static void saveTracks(final HashMap<PatrolLegDay, Track> tracks) throws Exception {
+
+		//update object references
+		for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
+			Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
+			PatrolLegDay pld = type.getKey();
+			Track t = type.getValue();
+			if (t != null){
+				pld.setTrack(t);
+				t.setPatrolLegDay(pld);
+			}else{;
+				pld.setTrack(null);
+			}
+		}
+		
+		//save first
+		for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
+			PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
+			SavePatrolPartJob saveJob = new SavePatrolPartJob(pldToSave.getPatrolLeg().getPatrol(), pldToSave);
+			saveJob.schedule();
+			saveJob.join();
+		}
+		
+		//fire events
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
+					PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
+					PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pldToSave);
+				}
+			}
+		});
+	}
 	
 	/**
-	 * Display the wizard that imports data from GPS device.  Then parses the input
-	 * and returns the parsed data.
+	 * Saves a set of waypoints to the database
+	 * 
+	 * @param op import option
+	 * @param patrol patrol
+	 * @param currentLeg current leg (used if import option = DATE)
+	 * @param waypoints set of waypoints
+	 * @return status message
+	 * @throws InterruptedException
+	 */
+	public static String saveWaypoints(ImportOption op, Patrol patrol, final PatrolLegDay currentLeg, List<Waypoint> waypoints) throws InterruptedException{
+		String message = null;
+		final Set<PatrolLegDay> modified = new HashSet<PatrolLegDay>();
+		
+		if (op == ImportOption.ALL){
+			//assign waypoints to days
+			modified.addAll(GPSDataImport.assignWaypoints(waypoints, patrol.getLegs()));
+
+			//remove unassigned waypoints
+			for (Iterator<Waypoint> iterator = waypoints.iterator(); iterator.hasNext();) {
+				Waypoint wpnt = (Waypoint) iterator.next();
+				if (wpnt.getPatrolLegDay() == null){
+					iterator.remove();
+				}
+			}
+			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{waypoints.size(), modified.size()});
+	
+		}else{
+			modified.add(currentLeg);
+			
+			for (Waypoint w : waypoints){
+				w.setPatrolLegDay(currentLeg);
+				if (w.getTime() == null){
+					w.setTime(new Time(SmartUtils.getMidnight().getTime()));
+				}
+			}
+			currentLeg.getWaypoints().addAll(waypoints);
+			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImportedCurrentDay, new Object[]{waypoints.size()});
+		}
+		
+		//start up a save job
+		SaveWaypointJob saveJob = new SaveWaypointJob();
+		saveJob.setWaypoints(waypoints);
+		saveJob.schedule();
+		saveJob.join();
+		
+		//fire events
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				for (PatrolLegDay day : modified){	
+					PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, day);
+				}
+			}});
+	
+		
+		return message;
+	}
+	
+	
+	/**
+	 * Connects to GPSBabel to get gps data from device
 	 * 
 	 * @param deviceType the type of gps data
 	 * @param day the day to import data for; if null all data is imported
 	 *
 	 * @return a map of type of data imported 
+	 * @throws Exception 
 	 */
-	public static Map<ImportType, Object> importGpsData(final String deviceType, final Date day, final Set<ImportType> dataType, IProgressMonitor monitor) throws IOException {
+	public static Map<ImportType, List<Waypoint>> importGpsData(final String deviceType, final Date day, final Set<ImportType> dataType, IProgressMonitor monitor) throws Exception {
 		
-		final HashMap<ImportType, Object> data = new HashMap<ImportType, Object>();
+		final HashMap<ImportType, List<Waypoint>> data = new HashMap<ImportType, List<Waypoint>>();
 
 		monitor.setTaskName(Messages.GPSDataImport_Progress_ImportingFromGPS);
 		File f = GPSBabel.getData(deviceType, dataType);
 		try {
 			monitor.setTaskName(Messages.GPSDataImport_Progress_ReadingData);
-			Map<ImportType, Object> vals = convertGpx(Collections.singletonList(f.getCanonicalPath()), day, dataType, monitor);
+			Map<ImportType, List<Waypoint>> vals = convertGpx(Collections.singletonList(f.getCanonicalPath()), day, dataType, monitor);
 			for (ImportType type : dataType) {
 				data.put(type, vals.get(type));
 			}
@@ -129,13 +237,14 @@ public class GPSDataImport {
 	}
 	
 	/**
-	 * Reads waypoints from a gpx file.
+	 * Reads trackpoints from a gpx file 
+	 * 
 	 * @param gpsFile the gps file name
 	 * @param monitor
 	 * 
-	 * @return list of waypoints in the gpx file
+	 * @return list of trackpoints
 	 */
-	public static List<TrkType> getTracksGpx(File gpxFile, IProgressMonitor monitor){
+	public static List<TrkType> getTracksGpx(File gpxFile, IProgressMonitor monitor) throws Exception{
 		GpxType type = null;
 		try {
 			monitor.subTask(Messages.GPSDataImport_TrackProgress_ReadingGPXData);
@@ -144,14 +253,12 @@ public class GPSDataImport {
 			Object o = un.unmarshal(gpxFile);
 			type = (GpxType) ((JAXBElement<?>) o).getValue();
 		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog(MessageFormat.format(
-					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
-			return null;
+			throw new Exception(MessageFormat.format(
+					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
 		}
 		
 		if (type == null){
-			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackError_CouldNotParseFile, new Object[]{ gpxFile.getAbsolutePath()}), null);
-			return null;
+			throw new Exception(MessageFormat.format(Messages.GPSDataImport_TrackError_CouldNotParseFile, new Object[]{ gpxFile.getAbsolutePath()}), null);
 		}
 		
 		monitor.subTask(Messages.GPSDataImport_Progress_ParsingTracks);
@@ -172,11 +279,11 @@ public class GPSDataImport {
 	 * @param patrolLegDays
 	 * @return
 	 */
-	public static HashMap<PatrolLegDay, Track> computeTracksFromWaypoints(List<PatrolLeg> patrolLegs){
+	public static HashMap<PatrolLegDay, Track> computeTracksFromWaypoints(Collection<PatrolLeg> patrolLegs){
 		HashMap<PatrolLegDay, Track> output = new HashMap<PatrolLegDay, Track> ();
 		for(PatrolLeg leg : patrolLegs){
 			for (PatrolLegDay day : leg.getPatrolLegDays()){
-				Track newTrack = createTrackFromWaypoints(day);
+				Track newTrack = computeTrackFromWaypoints(day);
 				output.put(day, newTrack);
 			}
 		}
@@ -190,38 +297,44 @@ public class GPSDataImport {
 	 * @param day
 	 * @return
 	 */
-	public static Track createTrackFromWaypoints(PatrolLegDay day) {
+	public static Track computeTrackFromWaypoints(PatrolLegDay day) {
 		if (day.getWaypoints().size() < 2){
 			return null;
 		}
-		List<Coordinate> coords = new ArrayList<Coordinate>();
+		List<Waypoint> coords = new ArrayList<Waypoint>();
 		for (Waypoint wp : day.getWaypoints()){
 			Date d = SmartUtils.combineDateTime(wp.getPatrolLegDay().getDate(), wp.getTime());
-			coords.add(new Coordinate(wp.getX(), wp.getY(),d.getTime()));
+			
+			Waypoint tmp = new Waypoint();
+			tmp.setX(wp.getX());
+			tmp.setY(wp.getY());
+			tmp.setTime(new Time(d.getTime()));
+			coords.add(tmp);
 		}
-		Track newTrack = convertToTrack(coords);
+		Track newTrack = convertToTrack(coords, day.getDate());
 		return newTrack;
 	}
 	
 	
 	/**
-	 * Converts coordinates to tracks based on date (provided in Z) and the patrol leg dates.
+	 * Converts waypoints to tracks based on 
+	 * imported date and the patrol leg dates.
 	 * 
-	 * @param trackpoints
+	 * @param trackpoints list of waypoints to use to make up tracks
 	 * @param patrolLegs
 	 * @return HashMap of patrol leg to track
 	 */
-	public static HashMap<PatrolLegDay, Track> convertTracks(List<Coordinate> trackpoints, List<PatrolLeg> patrolLegs){
+	public static HashMap<PatrolLegDay, Track> convertTracks(List<Waypoint> trackpoints, List<PatrolLeg> patrolLegs){
 		
-		HashMap<PatrolLegDay, List<Coordinate>> tracks = new HashMap<PatrolLegDay, List<Coordinate>>();
+		HashMap<PatrolLegDay, List<Waypoint>> tracks = new HashMap<PatrolLegDay, List<Waypoint>>();
 		
-		for (Coordinate point : trackpoints){
-			if (Double.isNaN(point.z)){
+		for (Waypoint point : trackpoints){
+			if (point.getTime() == null){
 				continue;
 			}
 			
 			boolean found = false;
-			Date wpdt = new Date((long)point.z);
+			Date wpdt = SmartUtils.combineDateTime(point.getImportedDate(), point.getTime());
 			for(PatrolLeg leg : patrolLegs){
 				if (betweenDates(SmartUtils.getDatePart(wpdt, false), 
 						SmartUtils.getDatePart(leg.getStartDate(), false),
@@ -234,9 +347,9 @@ public class GPSDataImport {
 						if (betweenDates(wpdt, start, end)){
 							found = true;
 							
-							List<Coordinate> trackpnts = tracks.get(legday);
+							List<Waypoint> trackpnts = tracks.get(legday);
 							if (trackpnts == null){
-								trackpnts = new ArrayList<Coordinate>();
+								trackpnts = new ArrayList<Waypoint>();
 								tracks.put(legday, trackpnts);
 							}
 							trackpnts.add(point);
@@ -253,14 +366,15 @@ public class GPSDataImport {
 				// start time could not be found; assign based on date only
 				for(PatrolLeg leg : patrolLegs){
 					for (PatrolLegDay legday : leg.getPatrolLegDays()) {
-						List<Coordinate> trackpnts = tracks.get(legday);
+						List<Waypoint> trackpnts = tracks.get(legday);
 						if (trackpnts == null) {
-							trackpnts = new ArrayList<Coordinate>();
+							trackpnts = new ArrayList<Waypoint>();
 							tracks.put(legday, trackpnts);
 						}
 						if (SmartUtils.getDatePart(wpdt, false).equals(
 							SmartUtils.getDatePart(legday.getDate(),
 								false))) {
+							
 							trackpnts.add(point);
 						}
 						found = true;
@@ -274,9 +388,9 @@ public class GPSDataImport {
 		
 		HashMap<PatrolLegDay, Track> output = new HashMap<PatrolLegDay, Track>();
 		//convert to tracks
-		for (Iterator<Entry<PatrolLegDay, List<Coordinate>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
-			Entry<PatrolLegDay, List<Coordinate>> value = (Entry<PatrolLegDay, List<Coordinate>>) iterator.next();
-			Track newTrack = convertToTrack(value.getValue());
+		for (Iterator<Entry<PatrolLegDay, List<Waypoint>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
+			Entry<PatrolLegDay, List<Waypoint>> value = (Entry<PatrolLegDay, List<Waypoint>>) iterator.next();
+			Track newTrack = convertToTrack(value.getValue(), value.getKey().getDate());
 			if (newTrack != null){
 				output.put(value.getKey(), newTrack);
 			}
@@ -379,7 +493,7 @@ public class GPSDataImport {
 			} catch (Exception ex) {
 				displayLog(MessageFormat.format(
 						Messages.GPSDataImport_WaypointError_CouldNotReadFile,
-						new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
+						new Object[]{gpxFile.getAbsolutePath()}) + "\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				continue;
 			}
 		
@@ -556,22 +670,26 @@ public class GPSDataImport {
 	/**
 	 * 
 	 * Reads data from a gpx file.  If dataType is WAYPOINT then
-	 * reads all Wpts from the gpx file and returns a list of Waypoints.  If TRACK then
-	 * it reads all track points, converts them to coordinates and returns a list of coordinates.
+	 * reads all Wpts from the gpx file and returns a list of Waypoints.  
+	 * If TRACK then
+	 * it reads all track points, converts them to waypoints and returns this list
+	 * 
 	 * 
 	 * <p>
-	 * If day is provided then only waypoints or trackpoints that occur on that day are imported.
+	 * If day is provided then only waypoints or trackpoints that 
+	 * occur on that day are imported.
 	 * </p>
 	 * 
 	 * @param gpxFile the gpx file name 
 	 * @param day the day to import data for; if null all data is imported
 	 * @param monitor a progress monitor
 	 * @return a hashmap that contains a key for each ImportType provided.   
+	 * @throws Exception 
 	 * 
 	 */
-	public static Map<ImportType, Object> convertGpx(List<String> gpxFiles, Date day, Set<ImportType> dataType, IProgressMonitor monitor){
+	public static Map<ImportType, List<Waypoint>> convertGpx(List<String> gpxFiles, Date day, Set<ImportType> dataType, IProgressMonitor monitor) throws Exception{
 		
-		HashMap<ImportType, Object> data = new HashMap<ImportType, Object>();		
+		HashMap<ImportType, List<Waypoint>> data = new HashMap<ImportType, List<Waypoint>>();		
 		Date plddt = null;
 		if (day != null){
 			plddt = SmartUtils.getDatePart(day, false);
@@ -599,11 +717,16 @@ public class GPSDataImport {
 						}
 					}
 				}
-				data.put(ImportType.WAYPOINT, newwaypoints);
+				List<Waypoint> pnts = data.get(ImportType.WAYPOINT);
+				if (pnts == null){
+					pnts = new ArrayList<Waypoint>();
+					data.put(ImportType.WAYPOINT, pnts);
+				}
+				pnts.addAll(newwaypoints);
 			}
 			if (dataType.contains(ImportType.TRACK)) {
 				monitor.subTask(Messages.GPSDataImport_Progress_ParsingTracks);
-				List<Coordinate> trackCoords = new ArrayList<Coordinate>();
+				List<Waypoint> trackCoords = new ArrayList<Waypoint>();
 
 				List<TrkType> tracks = getTracksGpx(gpxFile, monitor);
 				for (TrkType trk : tracks) {
@@ -615,21 +738,26 @@ public class GPSDataImport {
 							double x = pnt.getLon().doubleValue();
 							Date datetime = findWaypointDate(pnt);
 
+							Waypoint c = new Waypoint();
+							try{
+								c.setId( Integer.parseInt(pnt.getName()) );
+							}catch (Exception ex){}
+							c.setX(x);
+							c.setY(y);
+							c.setImportedDate(datetime);
+							if (datetime != null){
+								c.setTime(new Time(datetime.getTime()));
+							}
+							c.setComment((trk.getName() == null ? "" : trk.getName()) + (pnt.getName() == null ? "" :  " - " + pnt.getName())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							
 							if (plddt == null) {
 								// include all
-								double time = Double.NaN;
-								if (datetime != null) {
-									time = datetime.getTime();
-								}
-								Coordinate c = new Coordinate(x, y, time);
 								trackCoords.add(c);
 							} else if (plddt != null && datetime != null) {
 								// include only waytpoints which match current
 								// date
 								if (SmartUtils.getDatePart(datetime, false)
 										.equals(plddt)) {
-									Coordinate c = new Coordinate(x, y,
-											datetime.getTime());
 									trackCoords.add(c);
 								}
 							}
@@ -637,47 +765,49 @@ public class GPSDataImport {
 						}
 					}
 				}
-				data.put(ImportType.TRACK, trackCoords);
+				List<Waypoint> pnts = data.get(ImportType.TRACK);
+				if (pnts == null){
+					pnts = new ArrayList<Waypoint>();
+					data.put(ImportType.TRACK, pnts);
+				}
+				pnts.addAll(trackCoords);
 			}
 		}
 		return data;
 	}
 	
 	/**
-	 * Converts a set of coordinates to a track.  Coordinates are first sorted
+	 * Converts a set of waypoints to a track.  Coordinates are first sorted
 	 * by date/time.
 	 * @param coordinates set of coordinates
 	 * @return track
 	 */
-	public static Track convertToTrack(List<Coordinate> coordinates){
+	public static Track convertToTrack(List<Waypoint> coordinates, Date date){
 		if (coordinates.size() < 2){
 			return null;
 		}
 			GeometryFactory gf = new GeometryFactory();
-			Collections.sort(coordinates, new Comparator<Coordinate>() {
+			Collections.sort(coordinates, new Comparator<Waypoint>() {
 				@Override
-				public int compare(Coordinate o1, Coordinate o2) {
-					return ((Double) o1.z).compareTo((Double) o2.z);
+				public int compare(Waypoint o1, Waypoint o2) {
+					return o1.getTime().compareTo(o2.getTime());
 				}
 			});
-			
-			for (Coordinate c : coordinates){
 
-				//c.z is the date taking into account the current timezone.  We want to compute
-				//the date of GMT timezone and assign that to the point.
-				//we need to take the year,month,date, hour, min, sec and assign it to a date with
-				//a time zone of gmt
+			List<Coordinate> cs = new ArrayList<Coordinate>();
+			for (Waypoint w : coordinates){
 				Calendar c1 = Calendar.getInstance();
-				c1.setTimeInMillis((long)c.z);
+				c1.setTimeInMillis(SmartUtils.combineDateTime(date,w.getTime()).getTime());
 				Calendar c2 = Calendar.getInstance();
 				c2.setTimeZone(Track.ZTIMEZONE);
 				c2.setTimeInMillis(0);
 				c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
 				
-				c.z = c2.getTime().getTime();
-				
+				Coordinate c = new Coordinate(w.getX(), w.getY(),c2.getTime().getTime());
+				cs.add(c);
 			}
-			LineString track = gf.createLineString(coordinates
+			
+			LineString track = gf.createLineString(cs
 					.toArray(new Coordinate[coordinates.size()]));
 			Track t = new Track();
 			t.setLineString(track);

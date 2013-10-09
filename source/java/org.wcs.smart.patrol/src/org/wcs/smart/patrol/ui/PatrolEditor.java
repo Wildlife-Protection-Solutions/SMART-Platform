@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.ui;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -65,8 +64,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -404,34 +401,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		for (int i = 0; i < getPageCount(); i ++){
 			getEditor(i).doSave(new NullProgressMonitor());
 		}
-		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session saveSession = HibernateManager
-						.openSession(new WaypointAttachmentInterceptor());
-				try{
-					saveSession.beginTransaction();
-					if (object instanceof Patrol) {
-						if (((Patrol) object).getId() == null) {
-							String id = PatrolHibernateManager.generatePatrolId(
-								((Patrol) object), saveSession);
-							((Patrol) object).setId(id);
-						}
-					}
-				
-					saveSession.saveOrUpdate(object);
-					saveSession.getTransaction().commit();
-				}catch (Exception ex){
-					if (saveSession.getTransaction().isActive()){
-						saveSession.getTransaction().rollback();
-					}
-					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
-				}finally{
-					saveSession.close();
-				}				
-				PatrolEventManager.getInstance().patrolSaved(patrol, false);
-				return Status.OK_STATUS;
-			}};
+		SavePatrolPartJob saveJob = new SavePatrolPartJob(patrol, object);		
 			saveJob.schedule();
 			try{
 				saveJob.join();
@@ -528,70 +498,4 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return super.getAdapter(adaptee);
 	}
 	
-	
-	
-	class SaveWaypointJob extends Job {
-
-		private Collection<Waypoint> waypoints;
-
-		public SaveWaypointJob() {
-			super(Messages.PatrolEditor_SaveWaypoints_JobName);
-		}
-
-		public void setWaypoints(Collection<Waypoint> points) {
-			synchronized (this) {
-				this.waypoints = points;
-			}
-
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			ArrayList<Waypoint> pnts = new ArrayList<Waypoint>();
-			synchronized (this) {
-				pnts.addAll(waypoints);
-			}
-			Session saveSession = HibernateManager
-					.openSession(new WaypointAttachmentInterceptor());
-			try {
-				saveSession.beginTransaction();
-				for (Waypoint wp : pnts) {
-					saveSession.saveOrUpdate(wp);
-					saveSession.flush();
-					// remove observations with no data
-					if (wp.getObservations() != null) {
-						for (WaypointObservation wo : wp.getObservations()) {
-							List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-							for (WaypointObservationAttribute att : wo
-									.getAttributes()) {
-								if (!att.hasValue()) {
-									toDelete.add(att);
-								}
-							}
-							wo.getAttributes().removeAll(toDelete);
-						}
-					}
-				}
-				saveSession.getTransaction().commit();
-			} catch (Exception ex) {
-				if (saveSession.getTransaction().isActive()) {
-					saveSession.getTransaction().rollback();
-				}
-				SmartPatrolPlugIn
-						.displayLog(
-								Messages.PatrolEditor_Error_SavingWaypoints
-										+ ex.getLocalizedMessage(), ex);
-			} finally {
-				saveSession.close();
-			}
-			for (Waypoint wp : waypoints){
-				try{
-					PatrolEventManager.getInstance().waypointModified(wp);
-				}catch (Exception ex){
-					SmartPatrolPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
-				}
-			}
-			return Status.OK_STATUS;
-		}
-	}
 }

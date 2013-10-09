@@ -19,33 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package org.wcs.smart.patrol.internal.ui.importwp;
 
-package org.wcs.smart.patrol.internal.ui.importwp.csv;
+public interface IImportWizardPage {
 
-/**
- * 
- * Class for tracking CSV header information.
- * 
- * @author Jeff
- * @author Emily
- *
- */
-public class CsvHeader {
-	private final String name;
-	private final int col;
-
-	public CsvHeader(String name, int columnNum){
-        this.name = name;
-        this.col = columnNum;
-    }
-
-    public String toString(){
-    	return name;
-    }
-    
-    public int getColumnNumber(){
-        return col;
-    }
-    
+	/**
+	 * Called before the page is left for the
+	 * next page.
+	 * 
+	 * @return <code>true</code> if can move to next page; <code>false</code> if not 
+	 */
+	public boolean beforeMoveNext();
+	
+	/**
+	 * 
+	 * @return <code>true</code> if page can be displayed,
+	 * <code>false</code> if it should remain on current page
+	 */
+	public boolean init();
 }
-

@@ -56,7 +56,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  * @since 1.0.0
  */
-public class ImportGpxWizardPage extends WizardPage { 
+public class ImportGpxWizardPage extends WizardPage implements IImportWizardPage { 
 	/**
 	 * 
 	 */
@@ -78,16 +78,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		super(PAGE_NAME);
 		wizard.addPage(this);
 	}
-	/**
-	 * 
-	 * @return <code>true</code> if all waypoints are to be imported 
-	 * and assigned to the correct day; <code>false</code> if waypoints
-	 * are to be imported for only the current day or if waypoints
-	 * are to be selected from a list.
-	 */
-	public boolean getImportAll(){
-		return ops.getImportOption() == ImportOption.ALL;
-	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -218,4 +209,16 @@ public class ImportGpxWizardPage extends WizardPage {
 		}
 		return null;
     }
+	
+	@Override
+	public boolean beforeMoveNext() {
+		((ImportGpsDataWizard)getWizard()).setImportOption(ops.getImportOption());
+		((GpxImportEngine)(((ImportGpsDataWizard)getWizard()).getImportEngine())).setFile(getFiles());
+		return true;
+	}
+	
+	@Override
+	public boolean init() {
+		return true;
+	}
 }

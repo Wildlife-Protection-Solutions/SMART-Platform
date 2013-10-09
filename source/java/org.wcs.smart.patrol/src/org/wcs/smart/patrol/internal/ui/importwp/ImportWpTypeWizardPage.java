@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -32,39 +34,29 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 
 /**
- * Wizard page to select where to import waypoint data from
+ * Wizard page to select waypoint import location option.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-public class ImportWpTypeWizardPage extends WizardPage {
+public class ImportWpTypeWizardPage extends WizardPage implements IImportWizardPage{
 
 	/**
 	 * 
 	 */
 	public static final String PAGE_NAME = Messages.ImportWpTypeWizardPage_PageName;
-	private Button opGPS;
-	private Button opGPX;
-	private Button opWaypoint;
-	private Button opCsvWaypoints;
-	
-	public static final int IMPORT_GPS = 2;
-	public static final int IMPORT_GPX = 4;
-	public static final int IMPORT_WAYPOINT = 6;
-	
-	//next pages
-	private ImportGPSWizardPage devicePage;
-	private ImportGpxWizardPage gpxPage;
-	private ImportFromWaypointWizardPage waypointPage;
-	private ImportCsvWizardPage csvWaypointPage;
+
+	private List<Button> options;
+	private List<IImportEngine> supportedEngines;
 	
 	/**
 	 * @param pageName
 	 */
-	protected ImportWpTypeWizardPage( ) {
+	protected ImportWpTypeWizardPage(List<IImportEngine> engines ) {
 		super(PAGE_NAME);
+		this.supportedEngines = engines;
 	}
 
 	/* (non-Javadoc)
@@ -88,22 +80,15 @@ public class ImportWpTypeWizardPage extends WizardPage {
 		Composite ops = new Composite(center, SWT.NONE);
 		ops.setLayout(new GridLayout(1, false));
 		((GridLayout)ops.getLayout()).marginLeft = 20;
-		opGPS = new Button(ops, SWT.RADIO);
-		opGPS.setText(Messages.ImportWpTypeWizardPage_GPSOp);
-		opGPX = new Button(ops, SWT.RADIO);
-		opGPX.setText(Messages.ImportWpTypeWizardPage_GPXOp);
-		opGPS.setSelection(true);
 		
-		if (  ((ImportGpsDataWizard)getWizard()).getType() == ImportType.TRACK ){
-			opWaypoint = new Button(ops, SWT.RADIO);
-			opWaypoint.setText(Messages.ImportWpTypeWizardPage_GenerateWaypointsOp);
+		options = new ArrayList<Button>();
+		for(IImportEngine engine : supportedEngines){
+			Button op = new Button(ops, SWT.RADIO);
+			op.setText(engine.getName());
+			options.add(op);
 		}
-		
-		if (  ((ImportGpsDataWizard)getWizard()).getType() == ImportType.WAYPOINT ){
-			opCsvWaypoints = new Button(ops, SWT.RADIO);
-			opCsvWaypoints.setText(Messages.ImportWpTypeWizardPage_0);
-		}
-		
+		options.get(0).setSelection(true);
+	
 		super.setTitle(Messages.ImportWpTypeWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(MessageFormat.format(Messages.ImportWpTypeWizardPage_PageMessage, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase()}));
 		super.setControl(comp);
@@ -111,28 +96,29 @@ public class ImportWpTypeWizardPage extends WizardPage {
 	
 	@Override
     public IWizardPage getNextPage() {
-		if (opGPS.getSelection()){
-			if (devicePage == null){
-				devicePage = new ImportGPSWizardPage( (ImportGpsDataWizard)getWizard());
+		for (int i = 0; i < options.size(); i ++){
+			if (options.get(i).getSelection()){
+				return (IWizardPage) supportedEngines.get(i).getFirstWizardPage((ImportGpsDataWizard)getWizard());
 			}
-			return devicePage;
-		}else if (opGPX.getSelection()){
-			if (gpxPage == null){
-				gpxPage = new ImportGpxWizardPage((ImportGpsDataWizard)getWizard());
-			}
-			return gpxPage;
-		}else if (opCsvWaypoints.getSelection()){
-			if (csvWaypointPage == null){
-				csvWaypointPage = new ImportCsvWizardPage((ImportGpsDataWizard)getWizard());
-			}
-			return csvWaypointPage;
-		}else if (opWaypoint.getSelection()){
-			if (waypointPage == null){
-				waypointPage = new ImportFromWaypointWizardPage((ImportGpsDataWizard)getWizard());
-			}
-			return waypointPage;
-
 		}
 		return null;
+		
     }
+
+
+	@Override
+	public boolean beforeMoveNext() {
+		for (int i = 0; i < options.size(); i ++){
+			if (options.get(i).getSelection()){
+				((ImportGpsDataWizard)getWizard()).setImportEngine(supportedEngines.get(i));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean init() {
+		return false;
+	}
 }

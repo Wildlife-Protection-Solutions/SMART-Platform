@@ -1,7 +1,30 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.wcs.smart.patrol.internal.ui.importwp.csv;
 
 import java.io.FileReader;
 import java.sql.Time;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,81 +38,113 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-
-import au.com.bytecode.opencsv.CSVReader;
-
+/**
+ * 
+ * Class for tracking CSV import configuration 
+ * information.  Maps CSV columns to waypoint fields.
+ * 
+ * 
+ * @author Jeff
+ * @author Emily
+ *
+ */
 public class CSVImportConfiguration {
 
-	private static final GeometryFactory gf = new GeometryFactory();
-	private static String filename; //the csv filename
+	private String filename; //the csv filename
 	
 	private int XColumn = -1;
 	private int YColumn = -1;
-	private int DateColumn = -1;
-	private int TimeColumn = -1;
-	private int CommentsColumn = -1;
-	private int IdColumn = -1;
+	private int dateColumn = -1;
+	private int timeColumn = -1;
+	private int commentColumn = -1;
+	private int idColumn = -1;
 	
 	private Projection projection;
-
-	private String DateFormat;
+	private String dateFormat;
 	
 	private boolean skipHeaders;
 	private int maxId = 0;
+
+	private CsvHeader[] availableColumns;
 	
-	public List<Waypoint> getWaypoints(IProgressMonitor monitor, Date singleDay) {
+	public CSVImportConfiguration(){
+		
+	}
+	
+	public void setAvailableColumns(CsvHeader[] cols){
+		this.availableColumns = cols;
+	}
+	public CsvHeader[] getAvailableColumns(){
+		return this.availableColumns;
+	}
+	
+	/**
+	 * Gets all the waypoints in the given csv file
+	 * @param monitor
+	 * @param singleDay if only waypoints for one day are to imported this will
+	 * be the day otherwise it will be null
+	 * 
+	 * @return
+	 * @throws Exception 
+	 */
+	public List<Waypoint> getWaypoints(IProgressMonitor monitor, Date singleDay) throws Exception {
+	
+		GeometryFactory gf = new GeometryFactory();
 		List<Waypoint> allPoints = new ArrayList<Waypoint>();
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		
+		Date day0 = null;
+		if( singleDay != null){
+			day0 = SmartUtils.getDatePart(singleDay, false);
+		}
+		
 		try{
 			CSVReader reader = new CSVReader(new FileReader(filename) );
-			List<String[]> csvData = reader.readAll();
-			int counter; 
+
+			int counter = 0;
 			if(skipHeaders){
 				counter = 1;
-			}else{
-				counter = 0;
+				reader.readNext();	//skip header
 			}
 			
 			String[] row;
-			while(counter < csvData.size()-1){
+			while((row = reader.readNext()) != null){
+				counter++;
 				Date ptDate = null; 
-				row = csvData.get(counter);
-				
-				if(row.length <4){
-					break;//sometimes files will have blank rows at the end etc
+				if (row.length == 1 && row[0].trim().length() == 0){
+					//this is a blank line; skip it
+					break;
 				}
-				SimpleDateFormat sdf = new SimpleDateFormat(DateFormat);
+
 				try {
-					ptDate = sdf.parse( row[DateColumn].replaceAll("\\s+","") ); //$NON-NLS-1$ //$NON-NLS-2$
+					ptDate = sdf.parse( row[dateColumn].replaceAll("\\s+","") ); //$NON-NLS-1$ //$NON-NLS-2$
 				} catch (ParseException e) {
-				 	SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_2 + counter + "(" + row[DateColumn] + ")", e );   //$NON-NLS-1$//$NON-NLS-2$ 
+					throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_2, new Object[]{counter, row[dateColumn]}), e); 
 				}
-				Date day0 = new Date(0);
-				if( singleDay != null){
-					day0 = SmartUtils.getDatePart(singleDay, false);
-				}
+				
 				Date day1 =SmartUtils.getDatePart(ptDate, false);
 				if(singleDay == null ||  day0.equals(day1)){
-				 
 					Waypoint curWP = new Waypoint();
 					//reproject
-
 					CoordinateReferenceSystem sourceCrs = projection.getCrs();
 					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 
-					
 				 	curWP.setX(p.getX() );
 				 	curWP.setY(p.getY());
 				 	curWP.setImportedDate(ptDate);
 
 				 	try {
-				 		String strTime = row[TimeColumn].replaceAll("\\s+",""); //$NON-NLS-1$ //$NON-NLS-2$
+				 		String strTime = row[timeColumn].replaceAll("\\s+",""); //$NON-NLS-1$ //$NON-NLS-2$
 				 		SimpleDateFormat format;
 				 		String seconds;
 				 		int minute_break = strTime.indexOf(":");  //$NON-NLS-1$
@@ -103,45 +158,56 @@ public class CSVImportConfiguration {
 				 			seconds = ""; //$NON-NLS-1$
 				 		}
 				 		if(strTime.contains("+") || strTime.contains("-")){ //$NON-NLS-1$ //$NON-NLS-2$
-				 			format = new SimpleDateFormat(DateFormat + " HH:mm" + seconds + "z"); //$NON-NLS-1$ //$NON-NLS-2$
+				 			format = new SimpleDateFormat(dateFormat + " HH:mm" + seconds + "z"); //$NON-NLS-1$ //$NON-NLS-2$
 				 		}else if(strTime.contains("AM") || strTime.contains("PM") || strTime.contains("am") || strTime.contains("pm")){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				 			format = new SimpleDateFormat(DateFormat + " hh:mm" + seconds + "a"); //$NON-NLS-1$ //$NON-NLS-2$
+				 			format = new SimpleDateFormat(dateFormat + " hh:mm" + seconds + "a"); //$NON-NLS-1$ //$NON-NLS-2$
 				 		}else{
-				 			format = new SimpleDateFormat(DateFormat + " HH:mm" + seconds); //$NON-NLS-1$
+				 			format = new SimpleDateFormat(dateFormat + " HH:mm" + seconds); //$NON-NLS-1$
 				 		}
 					 	Date dateTime = new Date(); 
 					 	dateTime.setTime(ptDate.getTime());
-					 	dateTime = format.parse( row[DateColumn].replaceAll("\\s+","") + " " + strTime ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					 	dateTime = format.parse( row[dateColumn].replaceAll("\\s+","") + " " + strTime ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					 	Time time = new Time(dateTime.getTime());
 					 	curWP.setTime( time);
 				 	} catch (ParseException e) {
-				 		SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_9 + counter + "(" + row[TimeColumn] + ").", e );  //$NON-NLS-1$//$NON-NLS-2$ 
+				 		throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_9, new Object[]{counter, row[timeColumn]}), e);
 				 	}
 				 
 				 
-				 	if(IdColumn != -1){
+				 	if(idColumn != -1){
 					 	try {
-						 	curWP.setId(Integer.parseInt( (row[IdColumn].replaceAll("\\s+","")) )); //$NON-NLS-1$ //$NON-NLS-2$
+						 	curWP.setId(Integer.parseInt( (row[idColumn].replaceAll("\\s+","")) )); //$NON-NLS-1$ //$NON-NLS-2$
 					 	} catch (NumberFormatException e) {
-					 		SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_11 + counter + "(" + row[IdColumn] + ")", e );   //$NON-NLS-1$//$NON-NLS-2$ 
+					 		SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.CSVImportConfiguration_11, new Object[]{counter, row[idColumn]}), e );   
+					 		curWP.setId(maxId + 1);
+					 		maxId++;
 					 	}
 				 	}else{
 				 		curWP.setId(maxId + 1);
 				 		maxId++;
 				 	}
-				 	if(CommentsColumn != -1){
-					 	curWP.setComment(row[CommentsColumn]);
+				 	
+				 	if(commentColumn != -1){
+					 	curWP.setComment(row[commentColumn]);
 				 	}
 				 
-
 				 	allPoints.add(curWP);
 				}
 				counter++;
 			}
 		}catch (Exception e) {
-			SmartPatrolPlugIn.displayLog(Messages.CSVImportConfiguration_12, e);
-			return null;
+			throw new Exception(Messages.CSVImportConfiguration_12 + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 		}
+		
+		//compute maximum id
+		int max = 0;
+		for(Waypoint wp : allPoints){
+			if (wp.getId() > max){
+				max = wp.getId();
+			}
+		}
+		setMaxId(max);
+		
 		return allPoints;
 	}
 
@@ -167,57 +233,57 @@ public class CSVImportConfiguration {
 
 
 	public int getDateColumn() {
-		return DateColumn;
+		return dateColumn;
 	}
 
 
 	public void setDateColumn(int dateColumn) {
-		DateColumn = dateColumn;
+		this.dateColumn = dateColumn;
 	}
 
 
 	public int getTimeColumn() {
-		return TimeColumn;
+		return timeColumn;
 	}
 
 
 	public void setTimeColumn(int timeColumn) {
-		TimeColumn = timeColumn;
+		this.timeColumn = timeColumn;
 	}
 
 
 	public int getCommentsColumn() {
-		return CommentsColumn;
+		return commentColumn;
 	}
 
 
 	public void setCommentsColumn(int commentsColumn) {
-		CommentsColumn = commentsColumn;
+		this.commentColumn = commentsColumn;
 	}
 
 
 	public int getIdColumn() {
-		return IdColumn;
+		return idColumn;
 	}
 
 
 	public void setIdColumn(int idColumn) {
-		IdColumn = idColumn;
+		this.idColumn = idColumn;
 	}
 
 
 	public void setFileName(String file) {
-		CSVImportConfiguration.filename = file;
+		this.filename = file;
 	}
 
 
 	public String getDateFormat() {
-		return DateFormat;
+		return dateFormat;
 	}
 
 
 	public void setDateFormat(String dateFormat) {
-		DateFormat = dateFormat;
+		this.dateFormat = dateFormat;
 	}
 
 

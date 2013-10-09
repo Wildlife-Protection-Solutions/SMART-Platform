@@ -35,8 +35,9 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.patrol.internal.ui.importwp.csv.CSVImportConfiguration;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvHeader;
+import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvImportEngine;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.ImportCSVOptionsComposite;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -48,7 +49,7 @@ import au.com.bytecode.opencsv.CSVReader;
  * @since 2.0
  */
 
-public class ImportCsvWizardPage extends WizardPage{
+public class ImportCsvWizardPage extends WizardPage implements IImportWizardPage{
 	/**
 	 * 
 	 */
@@ -56,18 +57,14 @@ public class ImportCsvWizardPage extends WizardPage{
 
 	private ImportCSVOptionsComposite ops;
 	private ImportOptionsComposite ops2;
-	
-	private ImportGpsDataWizard wizard;
-
-	
+		
 	private ImportCsvDetailsWizardPage nextPage;
 	/**
 	 * @param pageName
 	 */
-	protected ImportCsvWizardPage( ImportGpsDataWizard wizard ) {
+	public ImportCsvWizardPage( ImportGpsDataWizard wizard ) {
 		super(PAGE_NAME);
 		wizard.addPage(this);
-		this.wizard = wizard;
 	}
 	
 	/* (non-Javadoc)
@@ -115,37 +112,39 @@ public class ImportCsvWizardPage extends WizardPage{
 	}
 	
 	
-	
 	@Override
     public IWizardPage getNextPage() {
-		final CsvHeader[] columnNames;
-
-		int option = 1;
-		if (ops2.getImportOption() == ImportOption.ALL){
-			option = 1;
-		}else if (ops2.getImportOption() == ImportOption.DATE){
-			option = 2;
-		}else if (ops2.getImportOption() == ImportOption.SELECT){
-			option = 3;
+		if (nextPage == null){
+			nextPage = new ImportCsvDetailsWizardPage((ImportGpsDataWizard)getWizard());
 		}
+		return nextPage;
+	}
 
-		wizard.setCsvDataOption(option);
-		wizard.setCsvFile(ops.getFileText());		
+	@Override
+	public boolean beforeMoveNext() {
+		((ImportGpsDataWizard)getWizard()).setImportOption(ops2.getImportOption());
+		
+		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
+		config.setFileName(ops.getFileText());
 		
 		try{
 			CSVReader reader = new CSVReader(new FileReader(ops.getFileText() ) );
 			String[] headers = reader.readNext();
-			columnNames = new CsvHeader[headers.length];
+			CsvHeader[] columnNames = new CsvHeader[headers.length];
 			for(int i=0; i<headers.length; i++){
 				columnNames[i] = new CsvHeader(headers[i], i);
 	         }
+			config.setAvailableColumns(columnNames);
 		}catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(Messages.ImportCsvWizardPage_2, e);
-			return null;
+			return false;
 		}
+		return true;
+	}
 
-		nextPage = new ImportCsvDetailsWizardPage((ImportGpsDataWizard)getWizard(),columnNames);
-		return nextPage;
+	@Override
+	public boolean init() {
+		return true;
 	}
 
 }
