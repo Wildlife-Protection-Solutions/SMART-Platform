@@ -36,6 +36,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -57,6 +58,9 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 
 	private ComboViewer typeViewer;
 	private ComboViewer transportViewer;
+
+	private TransportOptionGroup transportGroup;
+//	private Label transportLabel;
 	
 	public TypeTransportScreenOptionComposite(Composite parent, ScreenOption typeOption, ScreenOption transportOption, List<PatrolType> patrolTypes) {
 		super(parent);
@@ -65,7 +69,14 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		this.patrolTypes = patrolTypes;
 		
 		new TypeOptionGroup(this, this.typeOption);
-		new TransportOptionGroup(this, this.transportOption);
+		
+		transportGroup = new TransportOptionGroup(this, this.transportOption);
+		transportGroup.setVisible(!typeOption.isVisible());
+		
+//		transportLabel = new Label(this, SWT.NONE);
+//		transportLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+//		transportLabel.setText("* Transport configuration becomes available only\nif Type page is not displayed.");
+//		transportLabel.setVisible(!transportGroup.isVisible());
 	}
 
 	private PatrolType.Type getPatrolType(ScreenOption option) {
@@ -152,9 +163,12 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 
 		@Override
 		protected void onBtnDisplayPageClick() {
-			boolean visible = getBtnDisplayPage().getSelection();
-			typeOption.setVisible(visible);
-			typeViewer.getControl().setEnabled(!visible);
+			boolean display = getBtnDisplayPage().getSelection();
+			typeOption.setVisible(display);
+			typeViewer.getControl().setEnabled(!display);
+			transportGroup.setVisible(!display);
+//			transportLabel.setVisible(display);
+			TypeTransportScreenOptionComposite.this.layout(true, true);
 			fireScreenOptionListeners();
 		}
 	}
