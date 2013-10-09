@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.lo"
       label="SMART Lao Language Pack"
-      version="1.0.5">
+      version="2.0.0">
 
    <description url="http://www.example.com/description">
       Complete lao language pack includes required BIRT language fragements and eclipse fragments.
@@ -48,6 +48,14 @@
          fragment="true"
          unpack="false"/>
 
+    <plugin
+         id="org.wcs.smart.dataentry.nl_lo"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+         
    <plugin
          id="org.wcs.smart.patrol.nl_lo"
          download-size="0"

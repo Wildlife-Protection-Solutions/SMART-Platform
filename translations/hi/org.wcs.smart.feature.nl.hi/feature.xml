@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.hi"
       label="SMART Hindi Language Pack"
-      version="1.0.5">
+      version="2.0.0">
 
    <description url="http://www.example.com/description">
       Complete hindi language pack includes required BIRT language fragements and eclipse fragments.
@@ -42,6 +42,14 @@
 
    <plugin
          id="org.wcs.smart.nl_hi"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+   
+    <plugin
+         id="org.wcs.smart.dataentry.nl_hi"
          download-size="0"
          install-size="0"
          version="0.0.0"
