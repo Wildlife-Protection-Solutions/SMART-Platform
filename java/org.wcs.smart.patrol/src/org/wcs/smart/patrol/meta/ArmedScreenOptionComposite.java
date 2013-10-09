@@ -24,14 +24,10 @@ package org.wcs.smart.patrol.meta;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.ScreenOption;
-import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Screen armed option configuration panel.
@@ -39,53 +35,43 @@ import org.wcs.smart.patrol.internal.Messages;
  * @author elitvin
  * @since 2.0.0
  */
-public class ArmedScreenOptionComposite extends Composite {
-
-	private ScreenOption model;
-	
-	private Button btnDisplayPage;
-	private Button btnArmed;
+public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 
 	public ArmedScreenOptionComposite(Composite parent, ScreenOption model) {
-		super(parent, SWT.NONE);
-		this.model = model;
-
-		createControls();
+		super(parent);
+		new BooleanScreenOptionGroup(this, model);
 	}
 
-	protected void createControls() {
-		this.setLayout(new GridLayout(1, false));
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Group group = new Group(this,  SWT.NONE);
-		group.setText(model.getType().getGuiLabel());
-		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		group.setLayout(new GridLayout(2, false));
+	private class BooleanScreenOptionGroup extends ScreenOptionGroup {
 
-		Label label = new Label(group, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DisplayPage);
-		btnDisplayPage = new Button(group, SWT.CHECK);
-		btnDisplayPage.setSelection(model.isVisible());
-		btnDisplayPage.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				btnArmed.setEnabled(!btnDisplayPage.getSelection());
-			}
-		});
+		private Button btnArmed;
 		
-		label = new Label(group, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DefaultValue);
-		btnArmed = new Button(group, SWT.CHECK);
-		btnArmed.setText("Armed?");
-		btnArmed.setEnabled(!model.isVisible());
-		btnArmed.setSelection(Boolean.TRUE.equals(model.getBooleanValue()));
-		btnArmed.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				model.setBooleanValue(btnArmed.getSelection());
-			}
-		});
+		public BooleanScreenOptionGroup(Composite parent, ScreenOption option) {
+			super(parent, option);
+		}
+
+		@Override
+		protected void createDefaultControl(Group group) {
+			btnArmed = new Button(group, SWT.CHECK);
+			btnArmed.setText("Armed?");
+			btnArmed.setEnabled(!getModel().isVisible());
+			btnArmed.setSelection(Boolean.TRUE.equals(getModel().getBooleanValue()));
+			btnArmed.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					getModel().setBooleanValue(btnArmed.getSelection());
+					fireScreenOptionListeners();
+				}
+			});
+		}
+
+		@Override
+		protected void onBtnDisplayPageClick() {
+			boolean visible = getBtnDisplayPage().getSelection();
+			getModel().setVisible(visible);
+			btnArmed.setEnabled(!visible);
+			fireScreenOptionListeners();
+		}
 		
 	}
-	
 }

@@ -33,18 +33,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 
@@ -54,158 +48,24 @@ import org.wcs.smart.patrol.model.PatrolType;
  * @author elitvin
  * @since 2.0.0
  */
-public class TypeTransportScreenOptionComposite extends Composite {
+public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 
 	private ScreenOption typeOption;
 	private ScreenOption transportOption;
 	
 	private List<PatrolType> patrolTypes;
 
-	private Button btnTypeDisplayPage;
-	private Button btnTransportDisplayPage;
 	private ComboViewer typeViewer;
 	private ComboViewer transportViewer;
 	
 	public TypeTransportScreenOptionComposite(Composite parent, ScreenOption typeOption, ScreenOption transportOption, List<PatrolType> patrolTypes) {
-		super(parent, SWT.NONE);
+		super(parent);
 		this.typeOption = typeOption;
 		this.transportOption = transportOption;
 		this.patrolTypes = patrolTypes;
 		
-		createControls();
-	}
-
-	protected void createControls() {
-		this.setLayout(new GridLayout(1, false));
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Group typeGroup = new Group(this,  SWT.NONE);
-		typeGroup.setText(typeOption.getType().getGuiLabel());
-		typeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		typeGroup.setLayout(new GridLayout(2, false));
-
-		Label label = new Label(typeGroup, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DisplayPage);
-		btnTypeDisplayPage = new Button(typeGroup, SWT.CHECK);
-		btnTypeDisplayPage.setSelection(typeOption.isVisible());
-		btnTypeDisplayPage.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				typeViewer.getControl().setEnabled(!btnTypeDisplayPage.getSelection());
-			}
-		});
-		
-		label = new Label(typeGroup, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DefaultValue);
-		
-		typeViewer = new ComboViewer(typeGroup, SWT.READ_ONLY);
-		typeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		typeViewer.getControl().setEnabled(!typeOption.isVisible());
-		typeViewer.setContentProvider(ArrayContentProvider.getInstance());
-		typeViewer.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof PatrolType) {
-					PatrolType i = (PatrolType) element;
-					return i.getType().getGuiName();
-				}
-				return super.getText(element);
-			}
-		});
- 		typeViewer.setInput(patrolTypes);
- 		PatrolType.Type type = getPatrolType(typeOption);
- 		if (type == null && !patrolTypes.isEmpty()) {
- 			type = patrolTypes.get(0).getType();
- 			typeOption.setStringValue(type.name());
- 		}
- 		if (type != null) {
- 			for (PatrolType item : patrolTypes) {
- 				if (item.getType() == type) {
- 					typeViewer.setSelection(new StructuredSelection(item));
- 					break;
- 				}
- 			}
- 		}
- 		typeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
- 			@Override
- 			public void selectionChanged(SelectionChangedEvent event) {
- 				IStructuredSelection selection = (IStructuredSelection) typeViewer.getSelection();
- 				Object obj = selection.getFirstElement();
- 				if (obj instanceof PatrolType) {
- 					PatrolType pt = (PatrolType) obj;
- 	 				typeOption.setStringValue(pt.getType().name());
-
- 	 				List<PatrolTransportType> tTypes = getTransportTypes();
- 	 		 		transportViewer.setInput(tTypes);
- 	 		 		byte[] uuid = tTypes.isEmpty() ? null : tTypes.get(0).getUuid();
- 		 			transportOption.setUuidValue(uuid);
- 	 		 		if (uuid != null) {
- 	 		 			for (NamedItem item : tTypes) {
- 	 		 				if (Arrays.equals(item.getUuid(), uuid)) {
- 	 		 					transportViewer.setSelection(new StructuredSelection(item));
- 	 		 					break;
- 	 		 				}
- 	 		 			}
- 	 		 		}
- 	 				//setChangesMade(true);
- 				}
- 			}
- 		});
-		
- 		//============== transport ==============
- 		
-		Group transportGroup = new Group(this,  SWT.NONE);
-		transportGroup.setText(transportOption.getType().getGuiLabel());
-		transportGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		transportGroup.setLayout(new GridLayout(2, false));
-
-		label = new Label(transportGroup, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DisplayPage);
-		btnTransportDisplayPage = new Button(transportGroup, SWT.CHECK);
-		btnTransportDisplayPage.setSelection(transportOption.isVisible());
-		btnTransportDisplayPage.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				transportViewer.getControl().setEnabled(!btnTransportDisplayPage.getSelection());
-			}
-		});
-		
-		label = new Label(transportGroup, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DefaultValue);
-		
-		transportViewer = new ComboViewer(transportGroup, SWT.READ_ONLY);
-		transportViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		transportViewer.getControl().setEnabled(!transportOption.isVisible());
-		transportViewer.setContentProvider(ArrayContentProvider.getInstance());
-		transportViewer.setLabelProvider(new NamedItemLabelProvider());
-		List<PatrolTransportType> tTypes = getTransportTypes();
- 		transportViewer.setInput(tTypes);
- 		byte[] uuid = transportOption.getUuidValue();
- 		if (uuid == null && !tTypes.isEmpty()) {
- 			uuid = tTypes.get(0).getUuid();
- 			transportOption.setUuidValue(uuid);
- 		}
- 		if (uuid != null) {
- 			for (NamedItem item : tTypes) {
- 				if (Arrays.equals(item.getUuid(), uuid)) {
- 					transportViewer.setSelection(new StructuredSelection(item));
- 					break;
- 				}
- 			}
- 		}
-		transportViewer.addSelectionChangedListener(new ISelectionChangedListener() {
- 			@Override
- 			public void selectionChanged(SelectionChangedEvent event) {
- 				IStructuredSelection selection = (IStructuredSelection) transportViewer.getSelection();
- 				Object obj = selection.getFirstElement();
- 				if (obj instanceof UuidItem) {
- 					UuidItem i = (UuidItem) obj;
- 					transportOption.setUuidValue(i.getUuid());
- 	 				//setChangesMade(true);
- 				}
- 			}
- 		});
- 		
+		new TypeOptionGroup(this, this.typeOption);
+		new TransportOptionGroup(this, this.transportOption);
 	}
 
 	private PatrolType.Type getPatrolType(ScreenOption option) {
@@ -225,6 +85,130 @@ public class TypeTransportScreenOptionComposite extends Composite {
  		}
 
 		return new ArrayList<PatrolTransportType>();
+	}
+	
+	private class TypeOptionGroup extends ScreenOptionGroup {
+
+		public TypeOptionGroup(Composite parent, ScreenOption option) {
+			super(parent, option);
+		}
+
+		@Override
+		protected void createDefaultControl(Group group) {
+			typeViewer = new ComboViewer(group, SWT.READ_ONLY);
+			typeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			typeViewer.getControl().setEnabled(!typeOption.isVisible());
+			typeViewer.setContentProvider(ArrayContentProvider.getInstance());
+			typeViewer.setLabelProvider(new LabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof PatrolType) {
+						PatrolType i = (PatrolType) element;
+						return i.getType().getGuiName();
+					}
+					return super.getText(element);
+				}
+			});
+	 		typeViewer.setInput(patrolTypes);
+	 		PatrolType.Type type = getPatrolType(typeOption);
+	 		if (type == null && !patrolTypes.isEmpty()) {
+	 			type = patrolTypes.get(0).getType();
+	 			typeOption.setStringValue(type.name());
+	 		}
+	 		if (type != null) {
+	 			for (PatrolType item : patrolTypes) {
+	 				if (item.getType() == type) {
+	 					typeViewer.setSelection(new StructuredSelection(item));
+	 					break;
+	 				}
+	 			}
+	 		}
+	 		typeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+	 			@Override
+	 			public void selectionChanged(SelectionChangedEvent event) {
+	 				IStructuredSelection selection = (IStructuredSelection) typeViewer.getSelection();
+	 				Object obj = selection.getFirstElement();
+	 				if (obj instanceof PatrolType) {
+	 					PatrolType pt = (PatrolType) obj;
+	 	 				typeOption.setStringValue(pt.getType().name());
+
+	 	 				List<PatrolTransportType> tTypes = getTransportTypes();
+	 	 		 		transportViewer.setInput(tTypes);
+	 	 		 		byte[] uuid = tTypes.isEmpty() ? null : tTypes.get(0).getUuid();
+	 		 			transportOption.setUuidValue(uuid);
+	 	 		 		if (uuid != null) {
+	 	 		 			for (NamedItem item : tTypes) {
+	 	 		 				if (Arrays.equals(item.getUuid(), uuid)) {
+	 	 		 					transportViewer.setSelection(new StructuredSelection(item));
+	 	 		 					break;
+	 	 		 				}
+	 	 		 			}
+	 	 		 		}
+	 	 				fireScreenOptionListeners();
+	 				}
+	 			}
+	 		});
+		}
+
+		@Override
+		protected void onBtnDisplayPageClick() {
+			boolean visible = getBtnDisplayPage().getSelection();
+			typeOption.setVisible(visible);
+			typeViewer.getControl().setEnabled(!visible);
+			fireScreenOptionListeners();
+		}
+	}
+
+	private class TransportOptionGroup extends ScreenOptionGroup {
+
+		public TransportOptionGroup(Composite parent, ScreenOption option) {
+			super(parent, option);
+		}
+
+		@Override
+		protected void createDefaultControl(Group group) {
+			transportViewer = new ComboViewer(group, SWT.READ_ONLY);
+			transportViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			transportViewer.getControl().setEnabled(!transportOption.isVisible());
+			transportViewer.setContentProvider(ArrayContentProvider.getInstance());
+			transportViewer.setLabelProvider(new NamedItemLabelProvider());
+			List<PatrolTransportType> tTypes = getTransportTypes();
+	 		transportViewer.setInput(tTypes);
+	 		byte[] uuid = transportOption.getUuidValue();
+	 		if (uuid == null && !tTypes.isEmpty()) {
+	 			uuid = tTypes.get(0).getUuid();
+	 			transportOption.setUuidValue(uuid);
+	 		}
+	 		if (uuid != null) {
+	 			for (NamedItem item : tTypes) {
+	 				if (Arrays.equals(item.getUuid(), uuid)) {
+	 					transportViewer.setSelection(new StructuredSelection(item));
+	 					break;
+	 				}
+	 			}
+	 		}
+			transportViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+	 			@Override
+	 			public void selectionChanged(SelectionChangedEvent event) {
+	 				IStructuredSelection selection = (IStructuredSelection) transportViewer.getSelection();
+	 				Object obj = selection.getFirstElement();
+	 				if (obj instanceof UuidItem) {
+	 					UuidItem i = (UuidItem) obj;
+	 					transportOption.setUuidValue(i.getUuid());
+	 	 				fireScreenOptionListeners();
+	 				}
+	 			}
+	 		});
+		}
+
+		@Override
+		protected void onBtnDisplayPageClick() {
+			boolean visible = getBtnDisplayPage().getSelection();
+			transportOption.setVisible(visible);
+			transportViewer.getControl().setEnabled(!visible);
+			fireScreenOptionListeners();
+		}
+		
 	}
 	
 }

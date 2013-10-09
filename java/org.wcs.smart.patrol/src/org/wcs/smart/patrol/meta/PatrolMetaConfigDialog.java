@@ -161,16 +161,36 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
+		IScreenOptionChangeListener listener = new IScreenOptionChangeListener() {
+			@Override
+			public void screenOptionChanged() {
+				setChangesMade(true);
+			}
+		};
+		
 		screenComposites = new HashMap<ScreenOptionMeta, Composite>();
 		Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
 
-		Composite cmp = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TYPE), options.get(ScreenOptionMeta.TRANSPORT), patrolTypes);
-		screenComposites.put(ScreenOptionMeta.TYPE,      cmp);
-		screenComposites.put(ScreenOptionMeta.TRANSPORT, cmp);
-		screenComposites.put(ScreenOptionMeta.ARMED,     new ArmedScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.ARMED)));
-		screenComposites.put(ScreenOptionMeta.TEAM,      new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TEAM), teams));
-		screenComposites.put(ScreenOptionMeta.STATION,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.STATION), stations));
-		screenComposites.put(ScreenOptionMeta.MANDATE,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.MANDATE), mandates));
+		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TYPE), options.get(ScreenOptionMeta.TRANSPORT), patrolTypes);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.TYPE,      soc);
+		screenComposites.put(ScreenOptionMeta.TRANSPORT, soc);
+		
+		soc = new ArmedScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.ARMED));
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.ARMED, soc);
+
+		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TEAM), teams);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.TEAM, soc);
+
+		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.STATION), stations);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.STATION, soc);
+
+		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.MANDATE), mandates);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.MANDATE, soc);
 		
 		return container;
 	}
