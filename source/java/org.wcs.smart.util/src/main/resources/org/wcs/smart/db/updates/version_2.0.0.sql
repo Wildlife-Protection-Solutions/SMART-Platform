@@ -108,5 +108,24 @@ ALTER TABLE smart.plan
 	ON DELETE RESTRICT
 ;
 
+--screen options tables
+CREATE TABLE smart.screen_option (
+	uuid CHAR(16) for bit data NOT NULL,
+	ca_uuid CHAR(16) for bit data  NOT NULL, 
+	type VARCHAR(10), 
+	is_visible BOOLEAN, 
+	string_value VARCHAR(8192), 
+	boolean_value BOOLEAN, 
+	uuid_value CHAR(16) for bit data, 
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.screen_option 
+	ADD CONSTRAINT screen_option_ca_uuid_fk FOREIGN KEY (CA_UUID) 
+	REFERENCES smart.conservation_area (UUID) 
+	ON UPDATE RESTRICT 
+	ON DELETE CASCADE
+;
+
 
 update smart.db_version set version = '2.0.0';
