@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.km"
       label="SMART Khmer Language Pack"
-      version="1.0.5">
+      version="2.0.0">
 
    <description url="http://www.example.com/description">
       Complete khmer language pack includes required BIRT language fragements and eclipse fragments.
@@ -47,7 +47,14 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-
+   <plugin
+         id="org.wcs.smart.dataentry.nl_km"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+         
    <plugin
          id="org.wcs.smart.patrol.nl_km"
          download-size="0"
