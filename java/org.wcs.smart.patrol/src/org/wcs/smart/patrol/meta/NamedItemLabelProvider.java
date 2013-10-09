@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.patrol.meta;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.wcs.smart.ca.NamedItem;

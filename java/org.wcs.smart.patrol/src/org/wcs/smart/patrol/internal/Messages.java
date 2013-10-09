@@ -624,6 +624,9 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_SelectType_Label;
 	public static String PatrolTypeWizardPage_Title;
 	public static String PatrolUtils_Edit_Link_Label;
+	public static String ScreenOptionComposite_DefaultValue;
+	public static String ScreenOptionComposite_DisplayPage;
+	public static String ScreenOptionComposite_Dropdown_NoValue;
 	public static String SearchTree_AddCategories_ToolTip;
 	public static String SearchTree_ClearSelection_Tooltip;
 	public static String SearchTree_DefaultText;

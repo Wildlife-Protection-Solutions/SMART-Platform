@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.model;
+package org.wcs.smart.ca;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,23 +29,21 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
-import org.wcs.smart.ca.UuidItem;
 
 /**
- * Options for patrol screens configuration.
+ * Options for screens configuration.
  * 
  * @author elitvin
  * @since 2.0.0
  */
 @Entity
-@Table(name = "smart.ct_patrol_option")
-public class CyberTrackerPatrolOption extends UuidItem {
+@Table(name = "smart.screen_option")
+public class ScreenOption extends UuidItem {
 
-	public enum PatrolMeta {
-		START_DATE("Start Date"),
-		END_DATE("End Date"),
+	public enum ScreenOptionMeta {
+//		START_DATE("Start Date"),
+//		END_DATE("End Date"),
 		TYPE("Patrol Type"),
 		TRANSPORT("Transport Type"),
 		ARMED("Armed"),
@@ -60,7 +58,7 @@ public class CyberTrackerPatrolOption extends UuidItem {
 		
 		private String guiLabel;
 		
-		private PatrolMeta(String guiLabel) {
+		private ScreenOptionMeta(String guiLabel) {
 			this.guiLabel = guiLabel;
 		}
 		
@@ -69,8 +67,8 @@ public class CyberTrackerPatrolOption extends UuidItem {
 		}
 	}
 
-	private CyberTrackerProperties properties;
-	private PatrolMeta type;
+	private ConservationArea ca;
+	private ScreenOptionMeta type;
 	private boolean visible = true;
 	private String stringValue;
 	private Boolean booleanValue;
@@ -78,20 +76,20 @@ public class CyberTrackerPatrolOption extends UuidItem {
 
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="properties_uuid", referencedColumnName="uuid")
-	public CyberTrackerProperties getProperties() {
-		return properties;
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return ca;
 	}
-	public void setProperties(CyberTrackerProperties properties) {
-		this.properties = properties;
+	public void setConservationArea(ConservationArea ca) {
+		this.ca = ca;
 	}
 	
 	@Column(name="type")
 	@Enumerated(EnumType.STRING)
-	public PatrolMeta getType() {
+	public ScreenOptionMeta getType() {
 		return type;
 	}
-	public void setType(PatrolMeta type) {
+	public void setType(ScreenOptionMeta type) {
 		this.type = type;
 	}
 	
@@ -118,7 +116,6 @@ public class CyberTrackerPatrolOption extends UuidItem {
 	public void setBooleanValue(Boolean value) {
 		booleanValue = value;
 	}
-	
 	
 	@Column(name="uuid_value")
 	public byte[] getUuidValue() {

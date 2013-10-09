@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.patrol.meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,10 +41,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 
@@ -56,8 +56,8 @@ import org.wcs.smart.patrol.model.PatrolType;
  */
 public class TypeTransportScreenOptionComposite extends Composite {
 
-	private CyberTrackerPatrolOption typeOption;
-	private CyberTrackerPatrolOption transportOption;
+	private ScreenOption typeOption;
+	private ScreenOption transportOption;
 	
 	private List<PatrolType> patrolTypes;
 
@@ -66,7 +66,7 @@ public class TypeTransportScreenOptionComposite extends Composite {
 	private ComboViewer typeViewer;
 	private ComboViewer transportViewer;
 	
-	public TypeTransportScreenOptionComposite(Composite parent, CyberTrackerPatrolOption typeOption, CyberTrackerPatrolOption transportOption, List<PatrolType> patrolTypes) {
+	public TypeTransportScreenOptionComposite(Composite parent, ScreenOption typeOption, ScreenOption transportOption, List<PatrolType> patrolTypes) {
 		super(parent, SWT.NONE);
 		this.typeOption = typeOption;
 		this.transportOption = transportOption;
@@ -208,7 +208,7 @@ public class TypeTransportScreenOptionComposite extends Composite {
  		
 	}
 
-	private PatrolType.Type getPatrolType(CyberTrackerPatrolOption option) {
+	private PatrolType.Type getPatrolType(ScreenOption option) {
  		String val = option.getStringValue();
  		return val == null ? null : PatrolType.Type.valueOf(val);
 	}

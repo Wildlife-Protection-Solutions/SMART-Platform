@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.patrol.meta;
 
 import java.text.Collator;
 import java.util.Collections;
@@ -42,12 +42,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
-import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption.PatrolMeta;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.ca.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -65,20 +63,20 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
-	private PatrolMeta[] optionsToShow = {
-			PatrolMeta.TYPE,
-			PatrolMeta.TRANSPORT,
-			PatrolMeta.ARMED,
-			PatrolMeta.TEAM,
-			PatrolMeta.STATION,
-			PatrolMeta.MANDATE,
-			PatrolMeta.OBJECTIVE,
-			PatrolMeta.COMMENT,
-			PatrolMeta.MEMBERS,
-			PatrolMeta.LEADER,
-			PatrolMeta.PILOT };
+	private ScreenOptionMeta[] optionsToShow = {
+			ScreenOptionMeta.TYPE,
+			ScreenOptionMeta.TRANSPORT,
+			ScreenOptionMeta.ARMED,
+			ScreenOptionMeta.TEAM,
+			ScreenOptionMeta.STATION,
+			ScreenOptionMeta.MANDATE,
+			ScreenOptionMeta.OBJECTIVE,
+			ScreenOptionMeta.COMMENT,
+			ScreenOptionMeta.MEMBERS,
+			ScreenOptionMeta.LEADER,
+			ScreenOptionMeta.PILOT };
 
-	private CyberTrackerProperties ctProperties;
+	private ConservationArea ca;
 	private List<PatrolType> patrolTypes;
 	private List<Team> teams;
 	private List<Station> stations;
@@ -91,7 +89,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private Composite infoInnerPanel;
 	private Composite emptyComposite;
 
-	private Map<PatrolMeta, Composite> screenComposites;
+	private Map<ScreenOptionMeta, Composite> screenComposites;
 	
 	public PatrolMetaConfigDialog() {
 		super(Display.getDefault().getActiveShell(), "Patrol Metadata Data Collection Configuration");
@@ -101,19 +99,19 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private void initData() {
 		Session session = HibernateManager.openSession();
 		try {
-			ctProperties = CyberTrackerHibernateManager.getProperties(session);
-			Map<PatrolMeta, CyberTrackerPatrolOption> options = ctProperties.getPatrolOptions();
+			ca = (ConservationArea) session.load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+			Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
 			//creating missing options
-			for (PatrolMeta meta : optionsToShow) {
-				CyberTrackerPatrolOption cto = options.get(meta);
+			for (ScreenOptionMeta meta : optionsToShow) {
+				ScreenOption cto = options.get(meta);
 				if (cto == null) {
-					cto = new CyberTrackerPatrolOption();
+					cto = new ScreenOption();
 					cto.setType(meta);
 					options.put(meta, cto);
 				}
 			}
 
-			ConservationArea ca = SmartDB.getCurrentConservationArea();
+//			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 			for (PatrolType type : patrolTypes) {
 				type.getTransportTypes().size(); //load lazy items
@@ -132,8 +130,6 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		} finally {
 			session.close();
 		}
-		if (ctProperties == null)
-			ctProperties = new CyberTrackerProperties();
 		
 	}
 
@@ -165,16 +161,16 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-		screenComposites = new HashMap<PatrolMeta, Composite>();
-		Map<PatrolMeta, CyberTrackerPatrolOption> options = ctProperties.getPatrolOptions();
+		screenComposites = new HashMap<ScreenOptionMeta, Composite>();
+		Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
 
-		Composite cmp = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TYPE), options.get(PatrolMeta.TRANSPORT), patrolTypes);
-		screenComposites.put(PatrolMeta.TYPE,      cmp);
-		screenComposites.put(PatrolMeta.TRANSPORT, cmp);
-		screenComposites.put(PatrolMeta.ARMED,     new ArmedScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.ARMED)));
-		screenComposites.put(PatrolMeta.TEAM,      new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.TEAM), teams));
-		screenComposites.put(PatrolMeta.STATION,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.STATION), stations));
-		screenComposites.put(PatrolMeta.MANDATE,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolMeta.MANDATE), mandates));
+		Composite cmp = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TYPE), options.get(ScreenOptionMeta.TRANSPORT), patrolTypes);
+		screenComposites.put(ScreenOptionMeta.TYPE,      cmp);
+		screenComposites.put(ScreenOptionMeta.TRANSPORT, cmp);
+		screenComposites.put(ScreenOptionMeta.ARMED,     new ArmedScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.ARMED)));
+		screenComposites.put(ScreenOptionMeta.TEAM,      new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TEAM), teams));
+		screenComposites.put(ScreenOptionMeta.STATION,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.STATION), stations));
+		screenComposites.put(ScreenOptionMeta.MANDATE,   new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.MANDATE), mandates));
 		
 		return container;
 	}
@@ -183,8 +179,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		Object obj = selection.getFirstElement();
 
-		if (obj instanceof PatrolMeta) {
-			PatrolMeta meta = (PatrolMeta) obj;
+		if (obj instanceof ScreenOptionMeta) {
+			ScreenOptionMeta meta = (ScreenOptionMeta) obj;
 			((StackLayout)infoInnerPanel.getLayout()).topControl = screenComposites.get(meta);
 		} else {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
@@ -201,8 +197,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private class PatrolMetaScreenLabelProvider extends LabelProvider {
 		@Override
 		public String getText(Object element) {
-			if (element instanceof PatrolMeta) {
-				PatrolMeta i = (PatrolMeta)element;
+			if (element instanceof ScreenOptionMeta) {
+				ScreenOptionMeta i = (ScreenOptionMeta)element;
 				return i.getGuiLabel();
 			}
 			return super.getText(element);

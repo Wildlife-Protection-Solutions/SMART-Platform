@@ -75,7 +75,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption.PatrolMeta;
+import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.ui.properties.DialogConstants;
 

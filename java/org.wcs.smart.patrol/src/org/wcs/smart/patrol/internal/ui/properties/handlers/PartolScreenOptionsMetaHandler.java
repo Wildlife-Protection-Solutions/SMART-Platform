@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.handler;
+package org.wcs.smart.patrol.internal.ui.properties.handlers;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.Dialog;
-import org.wcs.smart.cybertracker.properties.PatrolMetaConfigDialog;
+import org.wcs.smart.patrol.meta.PatrolMetaConfigDialog;
 
 /**
  * Handler for opening dialog to edit patrol screens meta information.
@@ -33,7 +33,7 @@ import org.wcs.smart.cybertracker.properties.PatrolMetaConfigDialog;
  * @author elitvin
  * @since 2.0.0
  */
-public class CyberTrackerPartolMetaHandler extends AbstractHandler {
+public class PartolScreenOptionsMetaHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
