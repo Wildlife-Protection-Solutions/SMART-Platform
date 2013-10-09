@@ -19,11 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package org.wcs.smart.patrol.internal.ui.importwp;
-
-
-import java.text.MessageFormat;
 
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -33,12 +29,21 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvHeader;
+import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.patrol.internal.ui.importwp.csv.CSVImportConfiguration;
+import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvImportEngine;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.ImportCSVDetailsComposite;
 
-public class ImportCsvDetailsWizardPage extends WizardPage{
+/**
+ * Wizard page for gathering CSV column to 
+ * field mappings. 
+ * 
+ * @author Jeff
+ * @author Emily
+ *
+ */
+public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWizardPage{
 
 	/**
 	 * 
@@ -46,17 +51,17 @@ public class ImportCsvDetailsWizardPage extends WizardPage{
 	public static final String PAGE_NAME = Messages.ImportCsvDetailsWizardPage_0;
 
 	private ImportCSVDetailsComposite ops;
-	private CsvHeader[] columnNames;
 	private ImportGpsDataWizard wizard;
+	
+	private ImportWpSelectWizardPage nextPage ;
 	
 	/**
 	 * @param pageName
 	 */
-	protected ImportCsvDetailsWizardPage( ImportGpsDataWizard wizard, CsvHeader[] columnNames ) {
+	protected ImportCsvDetailsWizardPage( ImportGpsDataWizard wizard) {
 		super(PAGE_NAME);
 		wizard.addPage(this);
-		this.columnNames = new CsvHeader[columnNames.length];
-		this.columnNames = columnNames;		
+		
 		this.wizard = wizard;
 	}
 	
@@ -75,7 +80,7 @@ public class ImportCsvDetailsWizardPage extends WizardPage{
 		center.setLayout(new GridLayout(3, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 				
-		ops = new ImportCSVDetailsComposite(center, columnNames);
+		ops = new ImportCSVDetailsComposite(center);
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		ops.addColumnsListener(new ISelectionChangedListener(){
 
@@ -85,11 +90,13 @@ public class ImportCsvDetailsWizardPage extends WizardPage{
 			}});
 		
 		
-		
+		if (((CsvImportEngine)wizard.getImportEngine()).getConfiguration().getAvailableColumns() != null){
+			ops.setColumnNames(((CsvImportEngine)wizard.getImportEngine()).getConfiguration().getAvailableColumns());
+		}
 		setPageComplete(false);
 		
 		super.setTitle(Messages.ImportGpxWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
-		super.setMessage(MessageFormat.format(Messages.ImportGpxWizardPage_PageMessage, new Object[]{ ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() }));
+		super.setMessage(Messages.ImportCsvDetailsWizardPage_PageMessage);
 		super.setControl(comp);
 	}
 	
@@ -99,7 +106,7 @@ public class ImportCsvDetailsWizardPage extends WizardPage{
 		if ( ops.isValid() ){
 			setPageComplete(true);
 			//we have a next page to go to in this case, can't finish yet.
-			if(wizard.showCsvSelection()){
+			if(wizard.getImportOption()==ImportOption.SELECT){
 				((ImportGpsDataWizard)getWizard()).setCanFinish(false);
 				return;
 			}
@@ -110,45 +117,54 @@ public class ImportCsvDetailsWizardPage extends WizardPage{
 		}
 		getWizard().getContainer().updateButtons();		
 	}
+
 	
-	
+	/**
+	 * updates the configuration object with the options
+	 * selected on the gui
+	 * 
+	 * @param config
+	 */
+	public void updateConfiguration(CSVImportConfiguration config){
+		config.setDateFormat(ops.getDateFormat());
+		config.setXColumn(ops.getXColumnNumber());
+		config.setYColumn(ops.getYColumnNumber());
+		config.setTimeColumn(ops.getTimeColumnNumber());
+		config.setIdColumn(ops.getIdColumnNumber());
+		config.setDateColumn(ops.getDateColumnNumber());
+		config.setCommentsColumn(ops.getCommentsColumnNumber());
+		config.setProjection(ops.getProjection());
+		config.setSkipHeaders(ops.skipHeaders());
+	}
 	
 	@Override
     public IWizardPage getNextPage() {
 
-		if(wizard.showCsvSelection()){
-			ImportWpSelectWizardPage nextPage = new ImportWpSelectWizardPage((ImportGpsDataWizard) getWizard());
+		if(wizard.getImportOption()==ImportOption.SELECT){
+			if (nextPage == null){
+				nextPage = new ImportWpSelectWizardPage((ImportGpsDataWizard) getWizard());
+			}
 			return nextPage;
 		}
 		return null;
 	}
 
-	public String getDateFormat(){
-		return ops.getDateFormat();
+
+	@Override
+	public boolean beforeMoveNext() {
+		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
+		updateConfiguration(config);
+		return true;
 	}
-	
-	public int getXColumnNumber(){
-		return ops.getXColumnNumber();
+
+
+	@Override
+	public boolean init() {
+		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
+		if (ops != null){
+			ops.setColumnNames(config.getAvailableColumns());
+		}
+		return true;
 	}
-	public int getYColumnNumber(){
-		return ops.getYColumnNumber();
-	}
-	public int getTimeColumnNumber(){
-		return ops.getTimeColumnNumber();
-	}
-	public int getIdColumnNumber(){
-		return ops.getIdColumnNumber();
-	}
-	public int getDateColumnNumber(){
-		return ops.getDateColumnNumber();
-	}
-	public int getCommentsColumnNumber(){
-		return ops.getCommentsColumnNumber();
-	}
-	public Projection getProjection(){
-		return ops.GetProjection();
-	}
-	public boolean skipHeaders(){
-		return ops.skipHeaders();
-	}
+
 }

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp.csv;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -46,7 +45,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.internal.ui.importwp.DateFormat;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 
 /**
@@ -57,9 +56,8 @@ import org.wcs.smart.ui.ProjectionLabelProvider;
  *
  */
 public class ImportCSVDetailsComposite extends Composite{
-	boolean valid;
-	CsvHeader[] columnNames;
 	
+	private boolean valid;	
 	
 	private Label lblX;
 	private Label lblY;
@@ -80,7 +78,7 @@ public class ImportCSVDetailsComposite extends Composite{
 	private Projection[] projections;
 	
 	private ComboViewer cmbColumnSelectorDateFormat;
-	private DateFormat[] dateFormats;
+	private String[] dateFormats;
 	
 	private Button skipHeaders;
 	
@@ -92,24 +90,31 @@ public class ImportCSVDetailsComposite extends Composite{
 	private ControlDecoration cdDateFormat;
 	
 		
-	public ImportCSVDetailsComposite(Composite parent, CsvHeader[] columnNames) {
+	public ImportCSVDetailsComposite(Composite parent) {
 		super(parent, SWT.NONE);
-		this.columnNames = columnNames;
 		
 		Session session = HibernateManager.openSession();
-		//load projection list
-		session.beginTransaction();
-		List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-		this.projections = tmp.toArray(new Projection[tmp.size()]);
-		session.getTransaction().commit();
+		try{
+			//	load projection list
+			session.beginTransaction();
+			try{
+				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+				this.projections = tmp.toArray(new Projection[tmp.size()]);
+			}finally{
+				session.getTransaction().commit();
+			}
+		}finally{
+			session.close();
+		}
 		
-		dateFormats = new DateFormat[6];
-		dateFormats[0] = new DateFormat("d/M/y"); //$NON-NLS-1$
-		dateFormats[1] = new DateFormat("d-M-y"); //$NON-NLS-1$
-		dateFormats[2] = new DateFormat("M/d/y"); //$NON-NLS-1$
-		dateFormats[3] = new DateFormat("M-d-y"); //$NON-NLS-1$
-		dateFormats[4] = new DateFormat("y/M/d"); //$NON-NLS-1$
-		dateFormats[5] = new DateFormat("y-M-d"); //$NON-NLS-1$
+		
+		dateFormats = new String[6];
+		dateFormats[0] = new String("d/M/y"); //$NON-NLS-1$
+		dateFormats[1] = new String("d-M-y"); //$NON-NLS-1$
+		dateFormats[2] = new String("M/d/y"); //$NON-NLS-1$
+		dateFormats[3] = new String("M-d-y"); //$NON-NLS-1$
+		dateFormats[4] = new String("y/M/d"); //$NON-NLS-1$
+		dateFormats[5] = new String("y-M-d"); //$NON-NLS-1$
 
 		createControls(parent);
 	}
@@ -118,9 +123,9 @@ public class ImportCSVDetailsComposite extends Composite{
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setLayout(new GridLayout(4, false));
 		
-		GridData gd0 = new GridData(SWT.FILL, SWT.FILL, false, false);
+		GridData gd0 = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd0.horizontalIndent = 5;
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false,1 ,1);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false,1 ,1);
 		gd.horizontalIndent = 5;
 		
 		Group main = new Group(this, SWT.NONE );
@@ -132,37 +137,26 @@ public class ImportCSVDetailsComposite extends Composite{
 		lblX.setText(Messages.ImportCSVDetailsComposite_1);
 		lblX.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		cmbColumnSelectorX = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
-		cmbColumnSelectorX.getCombo().setLayoutData(gd0);
-		cmbColumnSelectorX.setContentProvider(new ArrayContentProvider());
-		cmbColumnSelectorX.setInput(columnNames);
-		cmbColumnSelectorX.addSelectionChangedListener(new ISelectionChangedListener() {
+		ISelectionChangedListener validateListener = new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-//				ISelection selection = cmbColumnSelectorX.getSelection();
-//				if (!selection.isEmpty()) {
-//				   IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
-//				   ((CsvHeader) structuredSelection.getFirstElement()).setSelected(true);
-//				}
-				validate();
+				validate();	
 			}
-		});
-
+		};
+		
+		cmbColumnSelectorX = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
+		cmbColumnSelectorX.getCombo().setLayoutData(gd0);
+		cmbColumnSelectorX.setContentProvider(ArrayContentProvider.getInstance());
+		cmbColumnSelectorX.addSelectionChangedListener(validateListener);
+		
 		lblY = new Label(main, SWT.NONE);
 		lblY.setText(Messages.ImportCSVDetailsComposite_2);
 		lblY.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbColumnSelectorY = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorY.getCombo().setLayoutData(gd0);
-		cmbColumnSelectorY.setContentProvider(new ArrayContentProvider());
-		cmbColumnSelectorY.setInput(columnNames);
-		cmbColumnSelectorY.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-								
-				validate();
-			}
-		});
+		cmbColumnSelectorY.setContentProvider(ArrayContentProvider.getInstance());
+		cmbColumnSelectorY.addSelectionChangedListener(validateListener);
 		
 		
 		lblDate = new Label(main, SWT.NONE);
@@ -171,15 +165,9 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 		cmbColumnSelectorDate = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorDate.getCombo().setLayoutData(gd0);
-		cmbColumnSelectorDate.setContentProvider(new ArrayContentProvider());
-		cmbColumnSelectorDate.setInput(columnNames);
-		cmbColumnSelectorDate.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				
-				validate();
-			}
-		});
+		cmbColumnSelectorDate.setContentProvider(ArrayContentProvider.getInstance());
+		cmbColumnSelectorDate.addSelectionChangedListener(validateListener);
+		
 
 		lblTime = new Label(main, SWT.NONE);
 		lblTime.setText(Messages.ImportCSVDetailsComposite_4);
@@ -187,15 +175,9 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 		cmbColumnSelectorTime = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorTime.getCombo().setLayoutData(gd0);
-		cmbColumnSelectorTime.setContentProvider(new ArrayContentProvider());
-		cmbColumnSelectorTime.setInput(columnNames);
-		cmbColumnSelectorTime.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				
-				validate();
-			}
-		});
+		cmbColumnSelectorTime.setContentProvider(ArrayContentProvider.getInstance());
+		cmbColumnSelectorTime.addSelectionChangedListener(validateListener);
+		
 		Group optional = new Group(this, SWT.NONE );
 		optional.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		optional.setLayout(new GridLayout(2, false));
@@ -207,15 +189,8 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 		cmbColumnSelectorId = new ComboViewer(optional, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorId.getCombo().setLayoutData(gd0);
-		cmbColumnSelectorId.setContentProvider(new ArrayContentProvider());
-		cmbColumnSelectorId.setInput(columnNames);
-		cmbColumnSelectorId.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				
-				validate();
-			}
-		});
+		cmbColumnSelectorId.setContentProvider(ArrayContentProvider.getInstance());		
+		cmbColumnSelectorId.addSelectionChangedListener(validateListener);
 
 		lblComments = new Label(optional, SWT.NONE);
 		lblComments.setText(Messages.ImportCSVDetailsComposite_7);
@@ -223,15 +198,9 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 		cmbColumnSelectorComments = new ComboViewer(optional, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorComments.getCombo().setLayoutData(gd0);
-		cmbColumnSelectorComments.setContentProvider(new ArrayContentProvider());
-		cmbColumnSelectorComments.setInput(columnNames);
-		cmbColumnSelectorComments.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				
-				validate();
-			}
-		});
+		cmbColumnSelectorComments.setContentProvider(ArrayContentProvider.getInstance());
+		cmbColumnSelectorComments.addSelectionChangedListener(validateListener);
+		
 		Group additional = new Group(this, SWT.NONE );
 		additional.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		additional.setLayout(new GridLayout(2, false));
@@ -259,12 +228,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		if (defaultProj != null){
 			lstProjections.setSelection(new StructuredSelection(defaultProj));			
 		}
-		lstProjections.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		lstProjections.addSelectionChangedListener(validateListener);
 		
 		
 		Label lblD = new Label(additional, SWT.NONE);
@@ -273,14 +237,9 @@ public class ImportCSVDetailsComposite extends Composite{
 
 		cmbColumnSelectorDateFormat = new ComboViewer(additional, SWT.DROP_DOWN );
 		cmbColumnSelectorDateFormat.getCombo().setLayoutData(gd);
-		cmbColumnSelectorDateFormat.setContentProvider(new ArrayContentProvider());
+		cmbColumnSelectorDateFormat.setContentProvider(ArrayContentProvider.getInstance());
 		cmbColumnSelectorDateFormat.setInput(dateFormats);
-		cmbColumnSelectorDateFormat.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbColumnSelectorDateFormat.addSelectionChangedListener(validateListener);
 		cmbColumnSelectorDateFormat.getCombo().addListener(SWT.Modify, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -305,6 +264,15 @@ public class ImportCSVDetailsComposite extends Composite{
 		
 	}
 
+	public void setColumnNames(CsvHeader[] columnNames){
+		cmbColumnSelectorX.setInput(columnNames);
+		cmbColumnSelectorY.setInput(columnNames);
+		cmbColumnSelectorDate.setInput(columnNames);
+		cmbColumnSelectorTime.setInput(columnNames);
+		cmbColumnSelectorId.setInput(columnNames);
+		cmbColumnSelectorComments.setInput(columnNames);
+	}
+	
 	public void addColumnsListener(ISelectionChangedListener listener) {
 		cmbColumnSelectorX.addSelectionChangedListener(listener);
 		cmbColumnSelectorY.addSelectionChangedListener(listener);
@@ -365,21 +333,13 @@ public class ImportCSVDetailsComposite extends Composite{
 			valid = false;
 		}		
 		if(cmbColumnSelectorDateFormat.getSelection().isEmpty()){
-			cdDateFormat.show();
 			String format = getDateFormat();
 			if(format.equals("")){ //$NON-NLS-1$
+				cdDateFormat.show();
 				cdDateFormat.setDescriptionText(Messages.ImportCSVDetailsComposite_16);
 				valid = false;
-				return;
-			}
-			cdDateFormat.hide();
-			try {
-				@SuppressWarnings("unused")
-				SimpleDateFormat sdf = new SimpleDateFormat(format);
-			} catch (Exception e) {
-				cdDateFormat.show();
-				cdDateFormat.setDescriptionText(Messages.ImportCSVDetailsComposite_17);
-				valid = false;
+			}else{
+				cdDateFormat.hide();
 			}
 		}else{
 			cdDateFormat.hide();
@@ -390,9 +350,6 @@ public class ImportCSVDetailsComposite extends Composite{
 	public boolean isValid() {
 		return valid;
 	}
-	
-
-	
 	
 	public int getXColumnNumber(){
 		ISelection selection = cmbColumnSelectorX.getSelection();
@@ -423,13 +380,13 @@ public class ImportCSVDetailsComposite extends Composite{
 		ISelection selection = cmbColumnSelectorDateFormat.getSelection();
 		if (!selection.isEmpty()) {
 			   IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
-			   DateFormat date = (DateFormat)structuredSelection.getFirstElement();
-			   return date.toString();
+			   String date = (String)structuredSelection.getFirstElement();
+			   return date;
 		}
 		return cmbColumnSelectorDateFormat.getCombo().getText();
 	}
 	
-	public Projection GetProjection(){
+	public Projection getProjection(){
 		ISelection selection = lstProjections.getSelection();
 		if (!selection.isEmpty()) {
 			   IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
