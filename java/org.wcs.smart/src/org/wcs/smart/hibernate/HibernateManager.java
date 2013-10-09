@@ -35,7 +35,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
 import org.hibernate.Criteria;
-import org.hibernate.EntityMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
