@@ -27,7 +27,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.wcs.smart.ca.ScreenOption;
+import org.wcs.smart.patrol.model.ScreenOption;
 
 /**
  * Screen armed option configuration panel.

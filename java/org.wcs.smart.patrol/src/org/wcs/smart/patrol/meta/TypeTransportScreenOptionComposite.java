@@ -37,10 +37,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.ScreenOption;
 
 /**
  * Patrol Type/Transport screens configuration.

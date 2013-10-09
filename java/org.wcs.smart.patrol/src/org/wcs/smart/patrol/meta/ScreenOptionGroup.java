@@ -30,8 +30,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.ScreenOption;
 
 /**
  * Container for group common logic.
