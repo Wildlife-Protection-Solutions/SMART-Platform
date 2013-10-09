@@ -84,7 +84,7 @@ public class CyberTrackerStartupJob extends Job {
 	 * Ensures that required tables are present in database and add them is case they are not present
 	 */
 	private void buildTables() {
-		final boolean tables[] = {false, false}; //properties table & options table
+		final boolean tables[] = {false}; //properties table
 		Session session = HibernateManager.openSession();
 		//check is required table exists
 		try {
@@ -94,12 +94,12 @@ public class CyberTrackerStartupJob extends Job {
 			Integer result = (Integer) q.uniqueResult();
 			tables[0] = result > 0;
 			
-			sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'CT_PATROL_OPTION'"; //$NON-NLS-1$
-			q = session.createSQLQuery(sql);
-			result = (Integer) q.uniqueResult();
-			tables[1] = result > 0;
+//			sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'CT_PATROL_OPTION'"; //$NON-NLS-1$
+//			q = session.createSQLQuery(sql);
+//			result = (Integer) q.uniqueResult();
+//			tables[1] = result > 0;
 			
-			if (tables[0] && tables[1])
+			if (tables[0])
 				return; //required table exists
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to obtain information about CyberTracker plugin tables.", e)); //$NON-NLS-1$
@@ -150,31 +150,31 @@ public class CyberTrackerStartupJob extends Job {
 						c.createStatement().execute("GRANT SELECT ON smart.cybertracker_properties to login"); //$NON-NLS-1$
 					}
 
-					if (!tables[1]) {
-						String createSql = "CREATE TABLE smart.ct_patrol_option ("+ //$NON-NLS-1$
-								"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
-								"properties_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
-								"type VARCHAR(10), "+ //$NON-NLS-1$
-								"is_visible BOOLEAN, "+ //$NON-NLS-1$
-								"string_value VARCHAR(8192), "+ //same as patrol.comment //$NON-NLS-1$
-								"boolean_value BOOLEAN, "+ //$NON-NLS-1$
-								"uuid_value CHAR(16) for bit data, "+ //$NON-NLS-1$
-								"PRIMARY KEY (UUID))"; //$NON-NLS-1$
-
-						String alterSql = "ALTER TABLE smart.ct_patrol_option "+ //$NON-NLS-1$
-								"ADD CONSTRAINT cybertracker_ct_patrol_option_properties_uuid_fk FOREIGN KEY (PROPERTIES_UUID) "+ //$NON-NLS-1$
-								"REFERENCES smart.cybertracker_properties(UUID) "+ //$NON-NLS-1$
-								"ON UPDATE RESTRICT "+ //$NON-NLS-1$
-								"ON DELETE CASCADE"; //$NON-NLS-1$
-
-						c.createStatement().execute(createSql);
-						c.createStatement().execute(alterSql);
-						
-						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to data_entry"); //$NON-NLS-1$
-						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to manager"); //$NON-NLS-1$
-						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to analyst"); //$NON-NLS-1$
-						c.createStatement().execute("GRANT SELECT ON smart.ct_patrol_option to login"); //$NON-NLS-1$
-					}					
+//					if (!tables[1]) {
+//						String createSql = "CREATE TABLE smart.ct_patrol_option ("+ //$NON-NLS-1$
+//								"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
+//								"properties_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
+//								"type VARCHAR(10), "+ //$NON-NLS-1$
+//								"is_visible BOOLEAN, "+ //$NON-NLS-1$
+//								"string_value VARCHAR(8192), "+ //same as patrol.comment //$NON-NLS-1$
+//								"boolean_value BOOLEAN, "+ //$NON-NLS-1$
+//								"uuid_value CHAR(16) for bit data, "+ //$NON-NLS-1$
+//								"PRIMARY KEY (UUID))"; //$NON-NLS-1$
+//
+//						String alterSql = "ALTER TABLE smart.ct_patrol_option "+ //$NON-NLS-1$
+//								"ADD CONSTRAINT cybertracker_ct_patrol_option_properties_uuid_fk FOREIGN KEY (PROPERTIES_UUID) "+ //$NON-NLS-1$
+//								"REFERENCES smart.cybertracker_properties(UUID) "+ //$NON-NLS-1$
+//								"ON UPDATE RESTRICT "+ //$NON-NLS-1$
+//								"ON DELETE CASCADE"; //$NON-NLS-1$
+//
+//						c.createStatement().execute(createSql);
+//						c.createStatement().execute(alterSql);
+//						
+//						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to data_entry"); //$NON-NLS-1$
+//						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to manager"); //$NON-NLS-1$
+//						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to analyst"); //$NON-NLS-1$
+//						c.createStatement().execute("GRANT SELECT ON smart.ct_patrol_option to login"); //$NON-NLS-1$
+//					}					
 				}
 			});
 			session.getTransaction().commit();

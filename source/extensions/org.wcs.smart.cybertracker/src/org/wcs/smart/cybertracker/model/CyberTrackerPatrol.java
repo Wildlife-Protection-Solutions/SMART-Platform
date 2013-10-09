@@ -29,7 +29,6 @@ import java.util.Map;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption.PatrolMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -48,6 +47,22 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class CyberTrackerPatrol {
 	
 	public enum ErrorType{ERROR, WARNING};
+
+	public enum PatrolMeta {
+		START_DATE,
+		END_DATE,
+		TYPE,
+		TRANSPORT,
+		ARMED,
+		MANDATE,
+		TEAM,
+		STATION,
+		OBJECTIVE,
+		COMMENT,
+		LEADER,
+		PILOT,
+		MEMBERS
+	}
 	
 	private Map<PatrolMeta, List<ImportError>> problems = new HashMap<PatrolMeta, List<ImportError>>();
 	

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.patrol.meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +40,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.ca.ScreenOption;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Screen option with dropdown as default value selector.
@@ -64,12 +64,12 @@ public class DropdownScreenOptionComposite extends Composite {
 
 	List<NamedItem> ddInput;
 	
-	private CyberTrackerPatrolOption model;
+	private ScreenOption model;
 	
 	private Button btnDisplayPage;
 	private ComboViewer viewer;
 
-	public DropdownScreenOptionComposite(Composite parent, CyberTrackerPatrolOption model, List<? extends NamedItem> cInput) {
+	public DropdownScreenOptionComposite(Composite parent, ScreenOption model, List<? extends NamedItem> cInput) {
 		super(parent, SWT.NONE);
 
 		this.model = model;

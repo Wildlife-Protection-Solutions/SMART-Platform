@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.patrol.meta;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -30,8 +30,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
+import org.wcs.smart.ca.ScreenOption;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Screen armed option configuration panel.
@@ -41,12 +41,12 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrolOption;
  */
 public class ArmedScreenOptionComposite extends Composite {
 
-	private CyberTrackerPatrolOption model;
+	private ScreenOption model;
 	
 	private Button btnDisplayPage;
 	private Button btnArmed;
 
-	public ArmedScreenOptionComposite(Composite parent, CyberTrackerPatrolOption model) {
+	public ArmedScreenOptionComposite(Composite parent, ScreenOption model) {
 		super(parent, SWT.NONE);
 		this.model = model;
 
