@@ -24,26 +24,21 @@ package org.wcs.smart.ca;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.SmartProperties;
-import org.wcs.smart.ca.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -88,7 +83,6 @@ public class ConservationArea {
 	private List<Employee> employees;
 	private List<Agency> agencies;
 	private Set<Language> languages;
-	private Map<ScreenOptionMeta, ScreenOption> screenOptions;
 	
 	public ConservationArea(){
 		employees = new ArrayList<Employee>();
@@ -168,17 +162,6 @@ public class ConservationArea {
 		return null;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="conservationArea", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@MapKey(name="type")
-	public Map<ScreenOptionMeta, ScreenOption> getScreenOptions() {
-		if (screenOptions == null)
-			screenOptions = new HashMap<ScreenOptionMeta, ScreenOption>();
-		return screenOptions;
-	}
-	public void setScreenOptions(Map<ScreenOptionMeta, ScreenOption> patrolOptions) {
-		this.screenOptions = patrolOptions;
-	}
-
 	/**
 	 * 
 	 * @return conservation area label

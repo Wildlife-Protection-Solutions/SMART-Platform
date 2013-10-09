@@ -41,6 +41,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.ScreenOption;
@@ -76,7 +77,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 			ScreenOptionMeta.LEADER,
 			ScreenOptionMeta.PILOT };
 
-	private ConservationArea ca;
+//	private ConservationArea ca;
+	private Map<ScreenOptionMeta, ScreenOption> options;
 	
 	private List<PatrolType> patrolTypes;
 	private List<Team> teams;
@@ -98,8 +100,14 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	private void initData() {
-		ca = (ConservationArea) getSession().load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-		Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
+		Session session = getSession();
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		@SuppressWarnings("unchecked")
+		List<ScreenOption> results = session.createCriteria(ScreenOption.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+		options = new HashMap<ScreenOptionMeta, ScreenOption>();
+		for (ScreenOption screenOption : results) {
+			options.put(screenOption.getType(), screenOption);
+		}
 		//creating missing options
 		for (ScreenOptionMeta meta : optionsToShow) {
 			ScreenOption cto = options.get(meta);
@@ -163,7 +171,6 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		};
 		
 		screenComposites = new HashMap<ScreenOptionMeta, Composite>();
-		Map<ScreenOptionMeta, ScreenOption> options = ca.getScreenOptions();
 
 		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TYPE), options.get(ScreenOptionMeta.TRANSPORT), patrolTypes);
 		soc.addScreenOptionListener(listener);
@@ -207,8 +214,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		Session session = getSession();
 		session.beginTransaction();
 		try {
-			for (ScreenOption option : ca.getScreenOptions().values()) {
-				session.saveOrUpdate(option);
+			for (ScreenOption so : options.values()) {
+				session.saveOrUpdate(so);
 			}
 			session.getTransaction().commit();
 			setChangesMade(false);
