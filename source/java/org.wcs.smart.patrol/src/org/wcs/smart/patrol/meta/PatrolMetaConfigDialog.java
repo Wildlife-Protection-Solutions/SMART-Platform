@@ -51,8 +51,8 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -193,6 +193,14 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		soc.addScreenOptionListener(listener);
 		screenComposites.put(ScreenOptionMeta.MANDATE, soc);
 		
+		soc = new TextScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.OBJECTIVE));
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.OBJECTIVE, soc);
+
+		soc = new TextScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.COMMENT));
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.COMMENT, soc);
+
 		return container;
 	}
 

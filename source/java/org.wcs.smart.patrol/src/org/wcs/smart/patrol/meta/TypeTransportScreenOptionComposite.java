@@ -36,7 +36,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolTransportType;
