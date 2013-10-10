@@ -44,7 +44,6 @@ public class ImportCSVOptionsComposite extends Composite{
 	
 	private Label lblFile;
 	private Text txtFile;
-	private Text txtInfo;
 	private Button btnBrowse;
 	
 		
@@ -96,7 +95,6 @@ public class ImportCSVOptionsComposite extends Composite{
 		super.setEnabled(enabled);
 		lblFile.setEnabled(enabled);
 		txtFile.setEnabled(enabled);
-		txtInfo.setEnabled(enabled);
 		btnBrowse.setEnabled(enabled);
 	}
 }
