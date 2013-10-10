@@ -57,7 +57,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -239,7 +239,7 @@ public class SmartImporter {
 			Date from = combine(pld.getDate(), pld.getStartTime());
 			Date to = combine(pld.getDate(), pld.getEndTime());
 			List<Coordinate> coordinates = listPart(timerTrackList, from, to);
-			Track track = GPSDataImport.convertToTrack(coordinates);
+			Track track = PatrolUtils.convertToTrack(coordinates);
 			if (track != null) {
 				track.setPatrolLegDay(pld);
 				pld.setTrack(track);

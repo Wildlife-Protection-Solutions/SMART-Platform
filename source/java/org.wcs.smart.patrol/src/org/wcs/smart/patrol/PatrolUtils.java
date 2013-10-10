@@ -21,10 +21,20 @@
  */
 package org.wcs.smart.patrol;
 
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.Track;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 
 /**
  * A set of utility classes.
@@ -72,4 +82,48 @@ public class PatrolUtils {
 		}
 		return null;
 	}
+	
+	
+	
+	/**
+	 * Converts a set of coordinate to a track.  Coordinates are first sorted
+	 * by date/time which should be stored in the z coordinate
+	 * as the the date/time in the current timezone.  This function
+	 * convert the z to GMT time.
+	 * @param coordinates set of coordinates
+	 * @return track
+	 */
+	public static Track convertToTrack(List<Coordinate> coordinates){
+		if (coordinates.size() < 2) {
+			return null;
+		}
+		GeometryFactory gf = new GeometryFactory();
+		Collections.sort(coordinates, new Comparator<Coordinate>() {
+			@Override
+			public int compare(Coordinate o1, Coordinate o2) {
+				return ((Double) o1.z).compareTo((Double) o2.z);
+			}
+		});
+		
+		for (Coordinate c : coordinates){
+			//c.z is the date taking into account the current timezone.  We want to compute
+			//the date of GMT timezone and assign that to the point.
+			//we need to take the year,month,date, hour, min, sec and assign it to a date with
+			//a time zone of gmt
+			Calendar c1 = Calendar.getInstance();
+			c1.setTimeInMillis((long)c.z);
+			Calendar c2 = Calendar.getInstance();
+			c2.setTimeZone(Track.ZTIMEZONE);
+			c2.setTimeInMillis(0);
+			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+			
+			c.z = c2.getTime().getTime();
+			
+		}
+		LineString track = gf.createLineString(coordinates
+				.toArray(new Coordinate[coordinates.size()]));
+		Track t = new Track();
+		t.setLineString(track);
+		return t;
+}
 }

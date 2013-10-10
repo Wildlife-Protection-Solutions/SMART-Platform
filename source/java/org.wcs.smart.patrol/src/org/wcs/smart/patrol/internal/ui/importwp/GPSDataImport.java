@@ -775,7 +775,9 @@ public class GPSDataImport {
 		}
 		return data;
 	}
-	
+
+
+			
 	/**
 	 * Converts a set of waypoints to a track.  Coordinates are first sorted
 	 * by date/time.
@@ -783,35 +785,39 @@ public class GPSDataImport {
 	 * @return track
 	 */
 	public static Track convertToTrack(List<Waypoint> coordinates, Date date){
-		if (coordinates.size() < 2){
+		if (coordinates.size() < 2) {
 			return null;
 		}
-			GeometryFactory gf = new GeometryFactory();
-			Collections.sort(coordinates, new Comparator<Waypoint>() {
-				@Override
-				public int compare(Waypoint o1, Waypoint o2) {
-					return o1.getTime().compareTo(o2.getTime());
-				}
-			});
-
-			List<Coordinate> cs = new ArrayList<Coordinate>();
-			for (Waypoint w : coordinates){
-				Calendar c1 = Calendar.getInstance();
-				c1.setTimeInMillis(SmartUtils.combineDateTime(date,w.getTime()).getTime());
-				Calendar c2 = Calendar.getInstance();
-				c2.setTimeZone(Track.ZTIMEZONE);
-				c2.setTimeInMillis(0);
-				c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-				
-				Coordinate c = new Coordinate(w.getX(), w.getY(),c2.getTime().getTime());
-				cs.add(c);
+		GeometryFactory gf = new GeometryFactory();
+		Collections.sort(coordinates, new Comparator<Waypoint>() {
+			@Override
+			public int compare(Waypoint o1, Waypoint o2) {
+				return o1.getTime().compareTo(o2.getTime());
 			}
-			
-			LineString track = gf.createLineString(cs
-					.toArray(new Coordinate[coordinates.size()]));
-			Track t = new Track();
-			t.setLineString(track);
-			return t;
+		});
+
+		List<Coordinate> cs = new ArrayList<Coordinate>();
+		for (Waypoint w : coordinates) {
+			Calendar c1 = Calendar.getInstance();
+			c1.setTimeInMillis(SmartUtils.combineDateTime(date, w.getTime())
+					.getTime());
+			Calendar c2 = Calendar.getInstance();
+			c2.setTimeZone(Track.ZTIMEZONE);
+			c2.setTimeInMillis(0);
+			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH),
+					c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY),
+					c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+
+			Coordinate c = new Coordinate(w.getX(), w.getY(), c2.getTime()
+					.getTime());
+			cs.add(c);
+		}
+
+		LineString track = gf.createLineString(cs
+				.toArray(new Coordinate[coordinates.size()]));
+		Track t = new Track();
+		t.setLineString(track);
+		return t;
 	}
 	
 	
