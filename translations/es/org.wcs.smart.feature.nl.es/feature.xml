@@ -33,7 +33,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.dateentry.nl_es"
+         id="org.wcs.smart.dataentry.nl_es"
          download-size="0"
          install-size="0"
          version="0.0.0"
