@@ -24,8 +24,10 @@ package org.wcs.smart.patrol;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -41,6 +43,8 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Waypoint;
 
@@ -434,4 +438,13 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 	}
 
+	public static Map<ScreenOptionMeta, ScreenOption> getScreenOptions(ConservationArea ca, Session session) {
+		@SuppressWarnings("unchecked")
+		List<ScreenOption> results = session.createCriteria(ScreenOption.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+		Map<ScreenOptionMeta, ScreenOption> options = new HashMap<ScreenOptionMeta, ScreenOption>();
+		for (ScreenOption screenOption : results) {
+			options.put(screenOption.getType(), screenOption);
+		}
+		return options;
+	}
 }
