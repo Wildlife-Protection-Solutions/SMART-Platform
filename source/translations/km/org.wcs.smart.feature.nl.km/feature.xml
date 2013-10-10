@@ -17,22 +17,6 @@
    </license>
 
    <plugin
-         id="org.wcs.smart.data.oda.smart.nl_km"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.data.oda.smart.ui.nl_km"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.intelligence.nl_km"
          download-size="0"
          install-size="0"
@@ -47,6 +31,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
    <plugin
          id="org.wcs.smart.dataentry.nl_km"
          download-size="0"
@@ -54,7 +39,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-         
+
    <plugin
          id="org.wcs.smart.patrol.nl_km"
          download-size="0"
@@ -877,5 +862,13 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
+
+   <plugin
+         id="org.wcs.smart.report.birt.query.nl_km"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
 
 </feature>
