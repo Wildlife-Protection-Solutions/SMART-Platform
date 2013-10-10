@@ -107,7 +107,7 @@ public class ImportWpTypeWizardPage extends WizardPage implements IImportWizardP
 
 
 	@Override
-	public boolean beforeMoveNext() {
+	public boolean beforeMoveNext(WizardPage nextPage) {
 		for (int i = 0; i < options.size(); i ++){
 			if (options.get(i).getSelection()){
 				((ImportGpsDataWizard)getWizard()).setImportEngine(supportedEngines.get(i));
@@ -119,6 +119,6 @@ public class ImportWpTypeWizardPage extends WizardPage implements IImportWizardP
 
 	@Override
 	public boolean init() {
-		return false;
+		return true;
 	}
 }

@@ -151,7 +151,7 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 
 
 	@Override
-	public boolean beforeMoveNext() {
+	public boolean beforeMoveNext(WizardPage nextPage) {
 		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
 		updateConfiguration(config);
 		return true;
@@ -163,6 +163,8 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
 		if (ops != null){
 			ops.setColumnNames(config.getAvailableColumns());
+			ops.validate();
+			updateComplete();
 		}
 		return true;
 	}

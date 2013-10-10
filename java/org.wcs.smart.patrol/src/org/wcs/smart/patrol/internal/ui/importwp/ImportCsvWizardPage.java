@@ -121,23 +121,27 @@ public class ImportCsvWizardPage extends WizardPage implements IImportWizardPage
 	}
 
 	@Override
-	public boolean beforeMoveNext() {
-		((ImportGpsDataWizard)getWizard()).setImportOption(ops2.getImportOption());
-		
-		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
-		config.setFileName(ops.getFileText());
-		
-		try{
-			CSVReader reader = new CSVReader(new FileReader(ops.getFileText() ) );
-			String[] headers = reader.readNext();
-			CsvHeader[] columnNames = new CsvHeader[headers.length];
-			for(int i=0; i<headers.length; i++){
-				columnNames[i] = new CsvHeader(headers[i], i);
-	         }
-			config.setAvailableColumns(columnNames);
-		}catch (Exception e) {
-			SmartPatrolPlugIn.displayLog(Messages.ImportCsvWizardPage_2, e);
-			return false;
+	public boolean beforeMoveNext(WizardPage nextPage) {
+		if (nextPage instanceof ImportCsvDetailsWizardPage){
+			
+			((ImportGpsDataWizard)getWizard()).setImportOption(ops2.getImportOption());
+			final CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
+			config.setFileName(ops.getFileText());
+			
+			//read header fields
+			try{
+				CSVReader reader = new CSVReader(new FileReader(ops.getFileText() ) );
+				String[] headers = reader.readNext();
+				CsvHeader[] columnNames = new CsvHeader[headers.length];
+				for(int i=0; i<headers.length; i++){
+					columnNames[i] = new CsvHeader(headers[i], i);
+				}
+				config.setAvailableColumns(columnNames);
+			}catch (Exception e) {
+				SmartPatrolPlugIn.displayLog(Messages.ImportCsvWizardPage_2, e);
+				return false;
+			}
+			
 		}
 		return true;
 	}
