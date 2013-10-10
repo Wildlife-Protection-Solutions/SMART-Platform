@@ -41,7 +41,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
@@ -102,12 +101,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private void initData() {
 		Session session = getSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		@SuppressWarnings("unchecked")
-		List<ScreenOption> results = session.createCriteria(ScreenOption.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
-		options = new HashMap<ScreenOptionMeta, ScreenOption>();
-		for (ScreenOption screenOption : results) {
-			options.put(screenOption.getType(), screenOption);
-		}
+		options = PatrolHibernateManager.getScreenOptions(ca, session);
 		//creating missing options
 		for (ScreenOptionMeta meta : optionsToShow) {
 			ScreenOption cto = options.get(meta);
