@@ -103,7 +103,7 @@ public class ImportFromWaypointWizardPage extends WizardPage implements IImportW
 		return null;
     }
 	@Override
-	public boolean beforeMoveNext() {
+	public boolean beforeMoveNext(WizardPage nextPage) {
 		((ImportGpsDataWizard)getWizard()).setImportOption(ops.getImportOption());
 		return true;
 	}

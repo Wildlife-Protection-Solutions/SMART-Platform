@@ -201,7 +201,7 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 	}
 
 	@Override
-	public boolean beforeMoveNext() {
+	public boolean beforeMoveNext(WizardPage nextPage) {
 		ImportGpsDataWizard wizard = ((ImportGpsDataWizard)getWizard());
 		wizard.setImportedData(getSelectedWaypointsObj());
 		return true;

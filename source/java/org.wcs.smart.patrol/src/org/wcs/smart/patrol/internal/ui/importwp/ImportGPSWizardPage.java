@@ -198,7 +198,7 @@ public class ImportGPSWizardPage extends WizardPage implements IImportWizardPage
     }
 
 	@Override
-	public boolean beforeMoveNext() {
+	public boolean beforeMoveNext(WizardPage nextPage) {
 		((ImportGpsDataWizard)getWizard()).setImportOption(ops.getImportOption());
 		((GpsImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).setDeviceType(getDeviceType());
 		return true;

@@ -34,6 +34,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -143,7 +144,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 		if (lastPage == null){
 			return false;
 		}
-		if (!lastPage.beforeMoveNext()){
+		if (!lastPage.beforeMoveNext(null)){
 			return false;
 		}
 	
@@ -234,7 +235,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	 */
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (!((IImportWizardPage)event.getCurrentPage()).beforeMoveNext()){
+		if (!((IImportWizardPage)event.getCurrentPage()).beforeMoveNext((WizardPage)event.getTargetPage())){
 			event.doit = false;
 			return;
 		}

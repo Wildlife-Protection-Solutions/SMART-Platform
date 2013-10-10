@@ -21,15 +21,17 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
+import org.eclipse.jface.wizard.WizardPage;
+
 public interface IImportWizardPage {
 
 	/**
 	 * Called before the page is left for the
 	 * next page.
-	 * 
+	 * @param nextPage the next wizard page to display
 	 * @return <code>true</code> if can move to next page; <code>false</code> if not 
 	 */
-	public boolean beforeMoveNext();
+	public boolean beforeMoveNext(WizardPage nextPage);
 	
 	/**
 	 * 

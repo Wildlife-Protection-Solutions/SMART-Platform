@@ -297,7 +297,7 @@ public class ImportCSVDetailsComposite extends Composite{
 	 * 
 	 * @return <code>false</code> if not complete, <code>true</code> otherwise
 	 */
-	private void validate() {
+	public void validate() {
 		valid = true;
 		if(cmbColumnSelectorX.getSelection().isEmpty()){
 			cdX.show();
