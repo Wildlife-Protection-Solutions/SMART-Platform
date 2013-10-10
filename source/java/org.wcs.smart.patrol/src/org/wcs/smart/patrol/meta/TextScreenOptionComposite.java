@@ -63,6 +63,8 @@ public class TextScreenOptionComposite extends ScreenOptionComposite {
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 //			gd.widthHint = 150;
 //			gd.heightHint = 80;
+			String value = getModel().getStringValue();
+			text.setText(value != null ? value : ""); //$NON-NLS-1$
 			text.setLayoutData(gd);
 			text.setEnabled(!getModel().isVisible());
 			text.addModifyListener(new ModifyListener() {
