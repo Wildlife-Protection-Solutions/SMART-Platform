@@ -75,6 +75,7 @@ public class DatabaseCmdRunner {
 		args.put("srid", "4326");
 		net.sourceforge.hatbox.tools.CmdLine.spatialize(c, args);
 		net.sourceforge.hatbox.tools.CmdLine.buildIndex(c, args);
+		c.setAutoCommit(true);
 	}
 	
 	

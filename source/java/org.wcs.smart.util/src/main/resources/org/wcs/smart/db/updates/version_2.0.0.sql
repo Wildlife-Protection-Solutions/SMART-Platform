@@ -13,14 +13,6 @@ alter table smart.patrol_transport add column keyid varchar(128);
 -- only contain certain characters
 -- and not start with numbers
 --see KeyGenerator - the update script will need to run KeyGenerator for these tables
---update smart.team set keyid = (select lower(a.value) from smart.i18n_label a, smart.LANGUAGE c 
---where smart.team.uuid = a.element_uuid and a.language_uuid = c.uuid and c.isdefault);
---
---update smart.patrol_mandate set keyid = (select lower(a.value) from smart.i18n_label a, smart.LANGUAGE c 
---where smart.patrol_mandate.uuid = a.element_uuid and a.language_uuid = c.uuid and c.isdefault);
---
---update smart.patrol_transport set keyid = (select lower(a.value) from smart.i18n_label a, smart.LANGUAGE c 
---where smart.patrol_transport.uuid = a.element_uuid and a.language_uuid = c.uuid and c.isdefault);
 
 
 
