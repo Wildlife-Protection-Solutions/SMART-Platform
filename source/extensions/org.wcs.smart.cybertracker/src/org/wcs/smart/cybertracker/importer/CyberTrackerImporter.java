@@ -246,72 +246,8 @@ public class CyberTrackerImporter {
 				time = Time.valueOf(v);
 			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
 				ctPatrol.setId(v);
-			} else if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
-				E e = eMap.get(v);
-				String tag0 = e != null ? e.getTag0() : null;
-				if (tag0 != null) {
-					ctPatrol.setPatrolType(Type.valueOf(e.getTag0()));
-				}
-			} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
-				E e = eMap.get(v);
-				PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
-				if (transportType == null)
-					ctPatrol.addError(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
-				ctPatrol.setCtTransport(e.getN());
-				ctPatrol.setPatrolTransportType(transportType);
-			} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
-				E e = eMap.get(v);
-				String tag0 = e != null ? e.getTag0() : null;
-				if (tag0 != null) {
-					ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equals(tag0.toLowerCase()));
-				}				
-			} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
-				E e = eMap.get(v);
-				Team t = fetchFromTag0(Team.class, e, session);
-				if (t == null && e.getTag0() != null)
-					ctPatrol.addWarning(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
-				ctPatrol.setCtTeam(e.getN());
-				ctPatrol.setTeam(t);
-			} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
-				E e = eMap.get(v);
-				Station st = fetchFromTag0(Station.class, e, session);
-				if (st == null && e.getTag0() != null)
-					ctPatrol.addWarning(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
-				ctPatrol.setCtStation(e.getN());
-				ctPatrol.setStation(st);
-			} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
-				E e = eMap.get(v);
-				PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
-				if (m == null && e.getTag0() != null)
-					ctPatrol.addWarning(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
-				ctPatrol.setMandate(m);
-			} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
-				ctPatrol.setObjective(v);
-			} else if (PatrolScreensUtil.RESULT_COMMENTS.equals(n)) {
-				ctPatrol.setComment(v);
-			} else if (PatrolScreensUtil.RESULT_LEADER.equals(n)) {
-				E e = eMap.get(v);
-				Employee emp = fetchFromTag0(Employee.class, e, session);
-				if (emp == null && e.getTag0() != null)
-					ctPatrol.addError(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
-				ctPatrol.setCtLeader(e.getN());
-				ctPatrol.setLeader(emp);
-			} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
-				E e = eMap.get(v);
-				Employee emp = fetchFromTag0(Employee.class, e, session);
-				if (emp == null && e.getTag0() != null)
-					ctPatrol.addError(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
-				ctPatrol.setCtPilot(e.getN());
-				ctPatrol.setPilot(emp);
-			} else if (isMemberRecord(a, eMap)) {
-				E e = eMap.get(i);
-				Employee emp = fetchFromTag0(Employee.class, e, session);
-				if (emp == null && e.getTag0() != null)
-					ctPatrol.addWarning(PatrolMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, e.getN()));
-				ctPatrol.getCtMembers().add(e.getN());
-				if (emp != null) {
-					ctPatrol.getMembers().add(emp);
-				}
+			} else {
+				recordPatrolData(ctPatrol, eMap.get(i), v, eMap, session);
 			}
 		}
 		
@@ -339,13 +275,84 @@ public class CyberTrackerImporter {
 		ctPatrol.setEndDate(SmartImporter.combine(date, time));
 	}
 
-	private boolean isMemberRecord(S.A a, Map<String, E> eMap) {
-		if (!ICyberTrackerConstants.STR_TRUE.equals(a.getV()))
-			return false;
-		E e = eMap.get(a.getI());
-		return ElementsUtil.MEMBER_ELEMENT_TAG.equals(e.getTag1());
+	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) {
+		String n = i.getN();
+		if (PatrolScreensUtil.RESULT_DEFAULT_PATROL_VALUES.equals(n)) {
+			String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+			for (String ctid : ctIdArray) {
+				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
+				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
+			}
+		} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
+			ctPatrol.setId(v);
+		}if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
+			E e = eMap.get(v);
+			String tag0 = e != null ? e.getTag0() : null;
+			if (tag0 != null) {
+				ctPatrol.setPatrolType(Type.valueOf(e.getTag0()));
+			}
+		} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
+			E e = eMap.get(v);
+			PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
+			if (transportType == null)
+				ctPatrol.addError(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
+			ctPatrol.setCtTransport(e.getN());
+			ctPatrol.setPatrolTransportType(transportType);
+		} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
+			E e = eMap.get(v);
+			String tag0 = e != null ? e.getTag0() : null;
+			if (tag0 != null) {
+				ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equals(tag0.toLowerCase()));
+			}				
+		} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
+			E e = eMap.get(v);
+			Team t = fetchFromTag0(Team.class, e, session);
+			if (t == null && e.getTag0() != null)
+				ctPatrol.addWarning(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
+			ctPatrol.setCtTeam(e.getN());
+			ctPatrol.setTeam(t);
+		} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
+			E e = eMap.get(v);
+			Station st = fetchFromTag0(Station.class, e, session);
+			if (st == null && e.getTag0() != null)
+				ctPatrol.addWarning(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
+			ctPatrol.setCtStation(e.getN());
+			ctPatrol.setStation(st);
+		} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
+			E e = eMap.get(v);
+			PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
+			if (m == null && e.getTag0() != null)
+				ctPatrol.addWarning(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
+			ctPatrol.setMandate(m);
+		} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
+			ctPatrol.setObjective(v);
+		} else if (PatrolScreensUtil.RESULT_COMMENTS.equals(n)) {
+			ctPatrol.setComment(v);
+		} else if (PatrolScreensUtil.RESULT_LEADER.equals(n)) {
+			E e = eMap.get(v);
+			Employee emp = fetchFromTag0(Employee.class, e, session);
+			if (emp == null && e.getTag0() != null)
+				ctPatrol.addError(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
+			ctPatrol.setCtLeader(e.getN());
+			ctPatrol.setLeader(emp);
+		} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
+			E e = eMap.get(v);
+			Employee emp = fetchFromTag0(Employee.class, e, session);
+			if (emp == null && e.getTag0() != null)
+				ctPatrol.addError(PatrolMeta.PILOT, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Pilot, e.getN()));
+			ctPatrol.setCtPilot(e.getN());
+			ctPatrol.setPilot(emp);
+		} else if (ElementsUtil.MEMBER_ELEMENT_TAG.equals(i.getTag1())) { //check that this is a member record
+			Employee emp = fetchFromTag0(Employee.class, i, session);
+			if (emp == null && i.getTag0() != null)
+				ctPatrol.addWarning(PatrolMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, i.getN()));
+			ctPatrol.getCtMembers().add(i.getN());
+			if (emp != null) {
+				ctPatrol.getMembers().add(emp);
+			}
+		}		
 	}
-
+	
 	private <T> T fetchFromTag0(Class<T> clazz, E e, Session session) {
 		String tag0 = e != null ? e.getTag0() : null;
 		if (tag0 != null) {
