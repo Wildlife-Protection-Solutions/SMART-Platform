@@ -52,6 +52,13 @@ public class CreateSmartDb {
 	private static String userFile = "org/wcs/smart/db/smart-users.sql";
 	
 
+	private static String[] updateFiles = new String[]{
+		"org/wcs/smart/db/updates/version_1.0.5.sql",
+		"org/wcs/smart/db/updates/version_1.1.0.sql",
+		"org/wcs/smart/db/smart-tables-dataentry.sql",
+		"org/wcs/smart/db/updates/version_2.0.0.sql"
+	};
+	
 	private static String SMART_ADMIN_USER = "smart_admin";
 	private static String SMART_ADMIN_PASS = "smart_derby";
 
@@ -76,8 +83,14 @@ public class CreateSmartDb {
 			reader = new InputStreamReader(CreateSmartDb.class.getClassLoader().getResourceAsStream(tableFiles[i]));
 			DatabaseCmdRunner.processFile(c, reader);	
 		}
-		
 		DatabaseCmdRunner.spatialize(c,"SMART", "AREA_GEOMETRIES", "GEOM");
+		
+		/* run update scripts */ 
+		for (int i = 0; i < updateFiles.length; i ++){
+			reader = new InputStreamReader(CreateSmartDb.class.getClassLoader().getResourceAsStream(updateFiles[i]));
+			DatabaseCmdRunner.processFile(c, reader);	
+		}
+		
 		c.close();
 	}
 	
