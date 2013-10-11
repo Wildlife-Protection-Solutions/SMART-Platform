@@ -215,6 +215,11 @@ public class Messages extends NLS {
 	public static String PatrolScreens_StartPatrol;
 	public static String PatrolScreens_Station;
 	public static String PatrolScreens_Team;
+	public static String PatrolScreens_Transport;
+	public static String PatrolScreensUtil_Error_Meta_Mandate;
+	public static String PatrolScreensUtil_Error_Meta_Station;
+	public static String PatrolScreensUtil_Error_Meta_Team;
+	public static String PatrolScreensUtil_Error_Meta_Transport;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
 	public static String PatrolScreensUtil_Error_TypesNotSet;
 	public static String PatrolSelectorDialog_Message;

@@ -163,7 +163,7 @@ public class PatrolScreensUtil {
 		} else if (so.getUuidValue() != null) {
 			Team team = CyberTrackerHibernateManager.fetchByUuid(Team.class, so.getUuidValue(), session);
 			if (team == null) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Team\" refers to item that do not exist in database. Please fix screen setup first.", null);
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Team, null);
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
@@ -179,7 +179,7 @@ public class PatrolScreensUtil {
 		} else if (so.getUuidValue() != null) {
 			Station station = CyberTrackerHibernateManager.fetchByUuid(Station.class, so.getUuidValue(), session);
 			if (station == null) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Station\" refers to item that do not exist in database. Please fix screen setup first.", null);
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Station, null);
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
@@ -196,7 +196,7 @@ public class PatrolScreensUtil {
 		} else if (so.getUuidValue() != null) {
 			PatrolMandate mandate = CyberTrackerHibernateManager.fetchByUuid(PatrolMandate.class, so.getUuidValue(), session);
 			if (mandate == null) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Patrol Mandate\" refers to item that do not exist in database. Please fix screen setup first.", null);
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Mandate, null);
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
@@ -421,7 +421,7 @@ public class PatrolScreensUtil {
 				}
 				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pType));
 				String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
-				Node node = ctUtil.createRadioNode(id.getNodeId(), "Transport Type", trIds, resultTransportId);
+				Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Transport, trIds, resultTransportId);
 				container.screenNodes.add(node);
 				CyberTrackerId nextId = new CyberTrackerId();
 				Control control2 = ScreensObjectFactory.getNavigationControl(node);
@@ -430,7 +430,7 @@ public class PatrolScreensUtil {
 			} else {
 				PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, trOption.getUuidValue(), session);
 				if (transport == null) {
-					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Patrol Transport\" refers to item that do not exist in database. Please fix screen setup first.", null);
+					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Transport, null);
 					return null;
 				}
 				String trElId = (new CyberTrackerId()).getItemId();
