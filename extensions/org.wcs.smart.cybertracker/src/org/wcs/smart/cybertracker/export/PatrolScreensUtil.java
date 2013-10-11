@@ -27,7 +27,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -56,7 +58,10 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolType.Type;
+import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -83,6 +88,7 @@ public class PatrolScreensUtil {
 	
 	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
+	public static final String RESULT_DEFAULT_PATROL_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
 
 	/**
 	 * Contains data filled by {@link PatrolScreensUtil}
@@ -90,10 +96,12 @@ public class PatrolScreensUtil {
 	 * @since 1.0.0
 	 */
 	public static class ParolFilledDataContainer {
-		List<Node> screenNodes = new ArrayList<Node>();
-		List<IdNamePair> resultElements = new ArrayList<IdNamePair>();
-		CyberTrackerId rootId = null;
+		public List<Node> screenNodes = new ArrayList<Node>();
+		public List<IdNamePair> resultElements = new ArrayList<IdNamePair>();
+		public CyberTrackerId rootId = null;
+		protected List<String> defaultValues = new ArrayList<String>();
 	}
+	
 	public static class IdNamePair {
 		public String id;
 		public String name;
@@ -107,7 +115,7 @@ public class PatrolScreensUtil {
 	
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
-	
+
 	protected PatrolScreensUtil(CyberTrackerUtil ctUtil) {
 		this.ctUtil = ctUtil;
 		this.screensFactory = ctUtil.getScreensFactory();
@@ -120,9 +128,12 @@ public class PatrolScreensUtil {
 	 */
 	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 		ParolFilledDataContainer result = new ParolFilledDataContainer();
+		List<CyberTrackerId> cyberTrackerIds;
+		ScreenOption so;
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		Map<ScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
 		CyberTrackerId id = addStartScreen(startId, result, elements);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
@@ -131,27 +142,81 @@ public class PatrolScreensUtil {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg, null);
 			return null;
 		}
-		id = addTypeTransportNodes(id, result, elements, patrolTypes);
+		id = addTypeTransportNodes(id, result, elements, patrolTypes, screenOptions, session);
 		//patrol armed
-		List<CyberTrackerId> armedIds = ElementsUtil.buildBooleanElements(elements);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, RESULT_ARMED, armedIds, false);
+		so = screenOptions.get(ScreenOptionMeta.ARMED);
+		if (so == null || so.isVisible()) {
+			List<CyberTrackerId> armedIds = ElementsUtil.buildBooleanElements(elements);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, RESULT_ARMED, armedIds, false);
+		} else {
+			boolean value = Boolean.TRUE.equals(so.getBooleanValue());
+			String elId = (new CyberTrackerId()).getItemId();
+			ElementsUtil.addElementsItem(elements, "", elId, Boolean.toString(value)); //$NON-NLS-1$
+			result.defaultValues.add(createDefaultResultElement(RESULT_ARMED, elements, elId));
+		}
 
-		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
-		List<CyberTrackerId> cyberTrackerIds = toCyberTrackerIds(elements, teams);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, RESULT_TEAM, cyberTrackerIds, true);
+		so = screenOptions.get(ScreenOptionMeta.TEAM);
+		if (so == null || so.isVisible()) {
+			List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
+			cyberTrackerIds = toCyberTrackerIds(elements, teams);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, RESULT_TEAM, cyberTrackerIds, true);
+		} else if (so.getUuidValue() != null) {
+			Team team = CyberTrackerHibernateManager.fetchByUuid(Team.class, so.getUuidValue(), session);
+			if (team == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Team\" refers to item that do not exist in database. Please fix screen setup first.", null);
+				return null;
+			}
+			String elId = (new CyberTrackerId()).getItemId();
+			ElementsUtil.addElementsItem(elements, team.getName(), elId, SmartUtils.encodeHex(team.getUuid()));
+			result.defaultValues.add(createDefaultResultElement(RESULT_TEAM, elements, elId));
+		}
 
-		cyberTrackerIds.clear();
-		List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
-		cyberTrackerIds.addAll(toCyberTrackerIds(elements, stations));
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds, true);
+		so = screenOptions.get(ScreenOptionMeta.STATION);
+		if (so == null || so.isVisible()) {
+			List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
+			cyberTrackerIds = toCyberTrackerIds(elements, stations);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds, true);
+		} else if (so.getUuidValue() != null) {
+			Station station = CyberTrackerHibernateManager.fetchByUuid(Station.class, so.getUuidValue(), session);
+			if (station == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Station\" refers to item that do not exist in database. Please fix screen setup first.", null);
+				return null;
+			}
+			String elId = (new CyberTrackerId()).getItemId();
+			ElementsUtil.addElementsItem(elements, station.getName(), elId, SmartUtils.encodeHex(station.getUuid()));
+			result.defaultValues.add(createDefaultResultElement(RESULT_STATION, elements, elId));
+		}
 
-		cyberTrackerIds.clear();
-		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-		cyberTrackerIds.addAll(toCyberTrackerIds(elements, mandates));
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds, true);
+		so = screenOptions.get(ScreenOptionMeta.MANDATE);
+		if (so == null || so.isVisible()) {
+			List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
+			cyberTrackerIds = toCyberTrackerIds(elements, mandates);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds, true);
+			
+		} else if (so.getUuidValue() != null) {
+			PatrolMandate mandate = CyberTrackerHibernateManager.fetchByUuid(PatrolMandate.class, so.getUuidValue(), session);
+			if (mandate == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Patrol Mandate\" refers to item that do not exist in database. Please fix screen setup first.", null);
+				return null;
+			}
+			String elId = (new CyberTrackerId()).getItemId();
+			ElementsUtil.addElementsItem(elements, mandate.getName(), elId, SmartUtils.encodeHex(mandate.getUuid()));
+			result.defaultValues.add(createDefaultResultElement(RESULT_MANDATE, elements, elId));
+		}
 
-		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE, Patrol.MAX_OBJECTIVE_LENGTH);
-		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS, Patrol.MAX_COMMENT_LENGTH);
+		so = screenOptions.get(ScreenOptionMeta.OBJECTIVE);
+		if (so == null || so.isVisible()) {
+			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE, Patrol.MAX_OBJECTIVE_LENGTH);
+		} else {
+			result.defaultValues.add(createDefaultResultElement(RESULT_OBJECTIVE, elements, so.getStringValue()));
+		}
+
+		so = screenOptions.get(ScreenOptionMeta.COMMENT);
+		if (so == null || so.isVisible()) {
+			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS, Patrol.MAX_COMMENT_LENGTH);
+		} else {
+			result.defaultValues.add(createDefaultResultElement(RESULT_COMMENTS, elements, so.getStringValue()));
+		}
 
 		//getting all members names
 		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
@@ -183,7 +248,13 @@ public class PatrolScreensUtil {
 		addNavigationFormula(leaderNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
 		
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
-		addTaskNode(id, result, elements, startId, dmRootId, ctProps.getWaypointTimer());
+		StringBuilder defaults = new StringBuilder();
+		for (Iterator<String> i = result.defaultValues.iterator(); i.hasNext();) {
+			defaults.append(i.next());
+			if (i.hasNext())
+				defaults.append(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+		}
+		addTaskNode(id, result, elements, startId, dmRootId, ctProps.getWaypointTimer(), defaults.toString());
 		result.rootId = id;
 		return result;
 	}
@@ -199,6 +270,12 @@ public class PatrolScreensUtil {
 		return resultId.getItemId();
 	}
 
+	private String createDefaultResultElement(String name, Elements elements, String defaultValue) {
+		CyberTrackerId resultId = new CyberTrackerId();
+		ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), null, null, defaultValue);
+		return resultId.getItemId();
+	}
+	
 	private CyberTrackerId toNextScreen(Node node) {
 		return toNextScreen(node, false);
 	}
@@ -302,31 +379,95 @@ public class PatrolScreensUtil {
 		return list;
 	}
 	
-	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes) {
-		List<String> types = new ArrayList<String>();
-		List<String> tag0Types = new ArrayList<String>();
-		for (PatrolType patrolType : pTypes) {
-			types.add(patrolType.getType().getGuiName());
-			tag0Types.add(patrolType.getType().name());
-		}
-		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
-		String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
-		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
-		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
-		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
-		container.screenNodes.add(node);
-		container.resultElements.add(new IdNamePair(resultTypeElemId, RESULT_PATROL_TYPE));
-		CyberTrackerId nextId = new CyberTrackerId();
-		String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
-		container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
-		for (int i = 0; i < pTypes.size(); i++) {
-			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)));
-			node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
+	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes, Map<ScreenOptionMeta, ScreenOption> screenOptions, Session session) {
+		ScreenOption typeOption = screenOptions.get(ScreenOptionMeta.TYPE);
+		if (typeOption == null || typeOption.isVisible()) {
+			List<String> types = new ArrayList<String>();
+			List<String> tag0Types = new ArrayList<String>();
+			for (PatrolType patrolType : pTypes) {
+				types.add(patrolType.getType().getGuiName());
+				tag0Types.add(patrolType.getType().name());
+			}
+			List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
+			String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
+			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
+			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+			control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
 			container.screenNodes.add(node);
-			Control control2 = ScreensObjectFactory.getNavigationControl(node);
-			control2.setTranslateNextScreenId(nextId.getNodeId());
+			container.resultElements.add(new IdNamePair(resultTypeElemId, RESULT_PATROL_TYPE));
+			CyberTrackerId nextId = new CyberTrackerId();
+			String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
+			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
+			for (int i = 0; i < pTypes.size(); i++) {
+				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)));
+				node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
+				container.screenNodes.add(node);
+				Control control2 = ScreensObjectFactory.getNavigationControl(node);
+				control2.setTranslateNextScreenId(nextId.getNodeId());
+			}
+			return nextId;
+		} else {
+			Type value = PatrolType.Type.valueOf(typeOption.getStringValue());
+			String elId = (new CyberTrackerId()).getItemId();
+			ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
+			container.defaultValues.add(createDefaultResultElement(RESULT_PATROL_TYPE, elements, elId));
+			
+			ScreenOption trOption = screenOptions.get(ScreenOptionMeta.TRANSPORT);
+			if (trOption == null || trOption.isVisible()) {
+				PatrolType pType = null;
+				for (PatrolType pt : pTypes) {
+					if (value.equals(pt.getType()))
+						pType = pt;
+				}
+				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pType));
+				String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
+				Node node = ctUtil.createRadioNode(id.getNodeId(), "Transport Type", trIds, resultTransportId);
+				container.screenNodes.add(node);
+				CyberTrackerId nextId = new CyberTrackerId();
+				Control control2 = ScreensObjectFactory.getNavigationControl(node);
+				control2.setTranslateNextScreenId(nextId.getNodeId());
+				return nextId;
+			} else {
+				PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, trOption.getUuidValue(), session);
+				if (transport == null) {
+					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, "Screen option for \"Patrol Transport\" refers to item that do not exist in database. Please fix screen setup first.", null);
+					return null;
+				}
+				String trElId = (new CyberTrackerId()).getItemId();
+				ElementsUtil.addElementsItem(elements, transport.getName(), trElId, SmartUtils.encodeHex(transport.getUuid()));
+				container.defaultValues.add(createDefaultResultElement(RESULT_TRANSPORT, elements, trElId));
+				return id;
+			}
+			
 		}
-		return nextId;
+//		
+//		
+//		
+//		
+//		List<String> types = new ArrayList<String>();
+//		List<String> tag0Types = new ArrayList<String>();
+//		for (PatrolType patrolType : pTypes) {
+//			types.add(patrolType.getType().getGuiName());
+//			tag0Types.add(patrolType.getType().name());
+//		}
+//		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
+//		String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
+//		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
+//		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+//		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
+//		container.screenNodes.add(node);
+//		container.resultElements.add(new IdNamePair(resultTypeElemId, RESULT_PATROL_TYPE));
+//		CyberTrackerId nextId = new CyberTrackerId();
+//		String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
+//		container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
+//		for (int i = 0; i < pTypes.size(); i++) {
+//			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)));
+//			node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
+//			container.screenNodes.add(node);
+//			Control control2 = ScreensObjectFactory.getNavigationControl(node);
+//			control2.setTranslateNextScreenId(nextId.getNodeId());
+//		}
+//		return nextId;
 	}
 
 	private CyberTrackerId addMembersNode(CyberTrackerId id, ParolFilledDataContainer container, List<CyberTrackerId> memberIds) {
@@ -338,7 +479,7 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 
-	private void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, Integer timer) {
+	private void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, Integer timer, String defaultValues) {
 		CyberTrackerId resumeId = new CyberTrackerId();
 		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
 		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
@@ -369,6 +510,13 @@ public class PatrolScreensUtil {
 		// "Pause Patrol (Rest)" leads to "Paused" screen
 		links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
 		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
+		if (defaultValues != null && !defaultValues.isEmpty()) {
+			//adding default values
+			CyberTrackerId defId = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, RESULT_DEFAULT_PATROL_VALUES, defId.getItemId());
+			Control defaultAttr = screensFactory.createAttrubuteControl14(defId.getItemId(), false, defaultValues);
+			ScreensObjectFactory.addControlToNode(node, defaultAttr);
+		}
 		addGpsConfiguration(node, timer);
 		container.screenNodes.add(node);
 		container.screenNodes.add(resumeNode);
