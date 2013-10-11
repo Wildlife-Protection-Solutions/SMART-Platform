@@ -61,7 +61,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		
 		btnTemplate = new Button(center, SWT.RADIO);
 		btnTemplate.setText(Messages.CaWizardTemplatePage_OpTemplate);
-			
+		
 		Composite templateComp = new Composite(center, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.marginLeft = 20;
@@ -94,6 +94,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 			public void handleEvent(Event event) {
 				lstCa.getControl().setEnabled(!btnNew.getSelection());
 				l.setEnabled(!btnNew.getSelection());
+				validate();
 			}};
 			
 		btnNew.addListener(SWT.Selection, listener);
