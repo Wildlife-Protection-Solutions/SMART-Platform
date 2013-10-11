@@ -86,7 +86,8 @@ public abstract class InitializeDialog  extends Dialog {
 				importCa();
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
-			cancelPressed();
+			super.cancelPressed();
+			onCancel();
 		}
 	}
 	
