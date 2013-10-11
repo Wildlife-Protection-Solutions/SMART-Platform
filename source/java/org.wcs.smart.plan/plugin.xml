@@ -651,6 +651,10 @@
             advisor="org.wcs.smart.plan.advisors.TeamDeleteAdvisor"
             class="org.wcs.smart.patrol.model.Team">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.plan.advisors.EmployeePlanDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="org.wcs.smart.birt.reportEditorManager">

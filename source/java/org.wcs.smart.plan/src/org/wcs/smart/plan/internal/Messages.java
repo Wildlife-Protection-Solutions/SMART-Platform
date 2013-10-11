@@ -23,6 +23,8 @@ public class Messages extends NLS {
 	public static String DeletePlanHandler_Confirmation_Message;
 	public static String DeletePlanHandler_Confirmation_Warning;
 	public static String DeletePlanHandler_DeleteJob_Title;
+	public static String EmployeePlanDeleteAdvisor_CannotDelete;
+	public static String EmployeePlanDeleteAdvisor_InvalidObject;
 	public static String ExportPlanJob_ErrorExportingPlan;
 	public static String ExportPlanJob_JobName;
 	public static String ExportPlanJob_NoneLabel;
