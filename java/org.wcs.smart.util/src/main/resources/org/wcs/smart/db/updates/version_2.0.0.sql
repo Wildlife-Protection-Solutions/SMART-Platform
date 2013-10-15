@@ -119,5 +119,18 @@ ALTER TABLE smart.screen_option
 	ON DELETE CASCADE
 ;
 
+CREATE TABLE smart.screen_option_uuid (
+	uuid CHAR(16) for bit data NOT NULL,
+	option_uuid CHAR(16) for bit data NOT NULL, 
+	uuid_value CHAR(16) for bit data NOT NULL, 
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.screen_option_uuid 
+	ADD CONSTRAINT screen_option_uuid_option_uuid_fk FOREIGN KEY (OPTION_UUID) 
+	REFERENCES smart.screen_option (UUID) 
+	ON UPDATE RESTRICT 
+	ON DELETE CASCADE
+;
 
 update smart.db_version set version = '2.0.0';
