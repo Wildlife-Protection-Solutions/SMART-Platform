@@ -1,0 +1,136 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.meta;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
+import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
+import org.wcs.smart.patrol.model.ScreenOptionUuid;
+
+/**
+ * Patrol Members/Leader/Pilot screens configuration.
+ * 
+ * @author elitvin
+ * @since 2.0.0
+ */
+public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
+
+	private ScreenOption typeOption;
+	private ScreenOption membersOption;
+	private ScreenOption leaderOption;
+	private ScreenOption pilotOption;
+
+	private List<Employee> members;
+
+	private CheckboxTableViewer membersViewer;
+	
+	/**
+	 * @param parent
+	 */
+	public EmployeeScreenOptionComposite(Composite parent, Map<ScreenOptionMeta, ScreenOption> options, List<Employee> members) {
+		super(parent);
+		this.members = members;
+		
+		typeOption = options.get(ScreenOptionMeta.TYPE);
+		membersOption = options.get(ScreenOptionMeta.MEMBERS);
+		leaderOption = options.get(ScreenOptionMeta.LEADER);
+		pilotOption = options.get(ScreenOptionMeta.PILOT);
+
+		new MemberOptionGroup(this, membersOption);
+		
+	}
+
+	private class MemberOptionGroup extends ScreenOptionGroup {
+
+		public MemberOptionGroup(Composite parent, ScreenOption option) {
+			super(parent, option);
+		}
+
+		@Override
+		protected void createDefaultControl(Group group) {
+			new Label(group, SWT.NONE);
+	        Table table = new Table(group, SWT.CHECK | SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+			membersViewer = new CheckboxTableViewer(table);
+//			membersViewer = new CheckboxTableViewer(group, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+//			gd.widthHint = 150;
+			gd.heightHint = 120;
+			membersViewer.getControl().setLayoutData(gd);
+			membersViewer.getControl().setEnabled(!membersOption.isVisible());
+			membersViewer.setContentProvider(ArrayContentProvider.getInstance());
+			membersViewer.setLabelProvider(new EmployeeLabelProvider());
+			membersViewer.setInput(members);
+			
+			//set current value
+			List<Employee> pickedMembers = new ArrayList<Employee>();
+			for (ScreenOptionUuid sou : membersOption.getUuidList()) {
+				byte[] uuid = sou.getUuidValue();
+				for (Employee e : members) {
+					if (Arrays.equals(uuid, e.getUuid()))
+						pickedMembers.add(e);
+				}
+			}
+			membersViewer.setCheckedElements(pickedMembers.toArray());
+			
+			membersViewer.addCheckStateListener(new ICheckStateListener() {
+				@Override
+				public void checkStateChanged(CheckStateChangedEvent event) {
+	 				List<ScreenOptionUuid> uuids = membersOption.getUuidList();
+	 				uuids.clear();
+	 				for (Object element : membersViewer.getCheckedElements()) {
+	 					Employee e = (Employee) element;
+	 					ScreenOptionUuid sou = new ScreenOptionUuid();
+	 					sou.setScreenOption(membersOption);
+	 					sou.setUuidValue(e.getUuid());
+						uuids.add(sou);
+					}
+	 				fireScreenOptionListeners();
+				}
+			});
+		}
+
+		@Override
+		protected void onBtnDisplayPageClick() {
+			boolean display = getBtnDisplayPage().getSelection();
+			membersOption.setVisible(display);
+			membersViewer.getControl().setEnabled(!display);
+			fireScreenOptionListeners();
+		}
+	}
+	
+}

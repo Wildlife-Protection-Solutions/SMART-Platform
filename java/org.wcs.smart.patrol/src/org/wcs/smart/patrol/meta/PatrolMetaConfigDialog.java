@@ -195,6 +195,12 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		soc.addScreenOptionListener(listener);
 		screenComposites.put(ScreenOptionMeta.COMMENT, soc);
 
+		soc = new EmployeeScreenOptionComposite(infoInnerPanel, options, members);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(ScreenOptionMeta.MEMBERS, soc);
+		screenComposites.put(ScreenOptionMeta.LEADER, soc);
+		screenComposites.put(ScreenOptionMeta.PILOT, soc);
+		
 		return container;
 	}
 
