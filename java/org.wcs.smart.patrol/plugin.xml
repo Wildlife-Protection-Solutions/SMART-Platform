@@ -653,6 +653,10 @@
       <class
             class="org.wcs.smart.patrol.model.ScreenOption">
       </class>
+      <class
+            ca_property=".screenOption.conservationArea"
+            class="org.wcs.smart.patrol.model.ScreenOptionUuid">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.views">

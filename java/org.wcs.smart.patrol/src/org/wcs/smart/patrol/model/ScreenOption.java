@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -28,6 +32,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -76,6 +81,7 @@ public class ScreenOption extends UuidItem {
 	private String stringValue;
 	private Boolean booleanValue;
 	private byte[] uuidValue;
+	private List<ScreenOptionUuid> uuidList;
 
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -127,5 +133,16 @@ public class ScreenOption extends UuidItem {
 	public void setUuidValue(byte[] uuidValue) {
 		this.uuidValue = uuidValue;
 	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="screenOption", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<ScreenOptionUuid> getUuidList() {
+		if (uuidList == null)
+			uuidList = new ArrayList<ScreenOptionUuid>();
+		return uuidList;
+	}
+	public void setUuidList(List<ScreenOptionUuid> uuidList) {
+		this.uuidList = uuidList;
+	}
 
+	
 }
