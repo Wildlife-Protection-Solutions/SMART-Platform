@@ -522,12 +522,13 @@ a single group, or left to complete the patrol in separate groups.</p>
 <h4><a id="ImportWaypoints">Importing Waypoints</a></h4>
 
 <p>Waypoint coordinates are primarily entered into SMART through automated
-processes that extract the waypoints directly from a GPS unit or through the
-importation of standardized GPX files. The SMART import wizard has options to
-automatically assign the waypoints to the correct day based on the GPS
-timestamp or to have the user manually assign waypoints to a specific day if
-required. A manual option exists to enter in waypoint coordinates if the
-locational information was not captured by a GPS.</p>
+processes that extract the waypoints directly from a GPS unit, through the
+importation of standardized GPX files or from a structured CSV file. The SMART
+import wizard has options to automatically assign the waypoints to the correct
+day based on the GPS timestamp or to have the user manually assign waypoints to
+a specific day if required. A manual option exists to enter in waypoint
+coordinates if the locational information is not stored in a GPS or CSV
+file.</p>
 
 <p></p>
 
@@ -587,9 +588,13 @@ a mass storage device.</p>
 
 <p><strong>GPX Import -</strong> Select this method if the GPS functions as a
 mass storage device.</p>
-<br />
-<br />
 
+<p><strong>CSV File - </strong>Select this method if your data is stored in a
+CSV file.<strong></strong></p>
+
+<p><br />
+<br />
+</p>
 
 <p><strong><u>GPS Import Options</u></strong></p>
 
@@ -634,6 +639,74 @@ only the waypoints for the selected date.</p>
 
 <p><strong>Select which waypoints to import for &lt;date&gt; -</strong> The
 SMART user will select and assign waypoints to the selected date.</p>
+
+<p></p>
+
+<p><strong><span style="text-decoration: underline;">CSV File Import
+Options</span></strong></p>
+
+<p><strong>Select CSV File -</strong> Use this to select the CSV file from
+which you want to import your waypoints.</p>
+
+<p><strong>Import All (and assign to correct day) - </strong>SMART will use the
+time provided in the file and assign the collected waypoints to the correct
+date.</p>
+
+<p><strong>Import Only waypoints for &lt;date&gt; - </strong>SMART will import
+only the waypoints for the selected date.</p>
+
+<p><strong>Select which waypoints to import for &lt;date&gt; -</strong> The
+SMART user will select and assign waypoints to the selected date.</p>
+
+<p></p>
+
+<p><strong style="text-decoration: underline;">CSV File
+Configuration</strong></p>
+
+<p>X- Column - select the text from the first row of the file (header or value)
+which represents the column where theX co-ordinate values are stored.</p>
+
+<p>Y- Column - select the text from the first row of the file (header or value)
+which represents the column where the Y co-ordinate values are stored.</p>
+
+<p>Date - select the text from the first row of the file (header or value)
+which represents the column where the date values are stored.</p>
+
+<p>Time - select the text from the first row of the file (header or value)
+which represents the column where the time values are stored. Valid time
+formats are as follows:</p>
+<ol>
+  <li>HH:mm (24-hour time, no seconds given)</li>
+  <li>HH:mm:ss (24-hour time with seconds)</li>
+  <li>hh:mm am (12-hour time, no seconds followed by one of: "am", "pm", "AM"
+    or "PM"</li>
+  <li>hh:mm:ss pm (same as above with seconds)</li>
+  <li>HH:mm GMT-08:00 (24-hour time, with a GMT + or - timezone)</li>
+  <li>HH:mm:ss GMT+03:00 (same as above with seconds)</li>
+</ol>
+
+<p><strong>Optional Columns</strong></p>
+
+<p>Waypoint ID: Select the text which represents the waypoint id you would like
+to use. Left blank the system will select the next highest number in the
+patrol-leg-day as the id.</p>
+
+<p>Comments Field - Select the text which represents the comments you wish to
+be added to the waypoint. Left blank, the comments field in SMART will be
+blank.</p>
+
+<p><strong>Data Options</strong></p>
+
+<p>Coordinate Projection - Select what projection your X and Y coordinate data
+is stored in.</p>
+
+<p>Date Format - The format your dates from the Date column are stored in. See
+http://docs.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html
+for date representations, you may type into this field to describe your format
+if it does not match one of the listed formats. </p>
+
+<p>Skip first row - Check this box if you have a header row at the top of your
+data.</p>
 
 <p></p>
 
