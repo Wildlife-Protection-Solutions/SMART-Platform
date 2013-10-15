@@ -29,7 +29,13 @@ import java.util.Map;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -59,6 +65,9 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 
 	private CheckboxTableViewer membersViewer;
 	
+	private EmployeeDropOptionGroup leaderGroup;
+	private EmployeeDropOptionGroup pilotGroup;
+	
 	/**
 	 * @param parent
 	 */
@@ -72,9 +81,36 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		pilotOption = options.get(ScreenOptionMeta.PILOT);
 
 		new MemberOptionGroup(this, membersOption);
+		leaderGroup = new EmployeeDropOptionGroup(this, leaderOption);
+		pilotGroup = new EmployeeDropOptionGroup(this, pilotOption);
 		
 	}
 
+	private void updateEmployeeDropOptionGroup(EmployeeDropOptionGroup optionGroup) {
+		Object[] checkedElements = membersViewer.getCheckedElements();
+		optionGroup.getViewer().setInput(checkedElements);
+		byte[] uuid = optionGroup.getModel().getUuidValue();
+		for (Object object : checkedElements) {
+			Employee item = (Employee) object;
+			if (Arrays.equals(item.getUuid(), uuid)) {
+				optionGroup.getViewer().setSelection(new StructuredSelection(item));
+				return; //current option is allowed
+			}
+		}
+		//if we are here than selected leader or pilot was unchecked in members
+		if (checkedElements.length > 0) {
+			Employee item = (Employee) checkedElements[0];
+			optionGroup.getViewer().setSelection(new StructuredSelection(item));
+			optionGroup.getModel().setUuidValue(item.getUuid());
+		} else {
+			optionGroup.getModel().setUuidValue(null);
+		}
+	}
+
+	private boolean isPilotAllowed() {
+		return true;
+	}
+	
 	private class MemberOptionGroup extends ScreenOptionGroup {
 
 		public MemberOptionGroup(Composite parent, ScreenOption option) {
@@ -119,8 +155,11 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 	 					sou.setUuidValue(e.getUuid());
 						uuids.add(sou);
 					}
+	 				updateEmployeeDropOptionGroup(leaderGroup);
+	 				updateEmployeeDropOptionGroup(pilotGroup);
 	 				fireScreenOptionListeners();
 				}
+
 			});
 		}
 
@@ -129,7 +168,70 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			boolean display = getBtnDisplayPage().getSelection();
 			membersOption.setVisible(display);
 			membersViewer.getControl().setEnabled(!display);
+			leaderGroup.setVisible(!display);
+			pilotGroup.setVisible(!display && isPilotAllowed());
+
 			fireScreenOptionListeners();
+		}
+	}
+
+	private class EmployeeDropOptionGroup extends ScreenOptionGroup {
+
+		private ComboViewer viewer;
+		
+		public EmployeeDropOptionGroup(Composite parent, ScreenOption option) {
+			super(parent, option);
+		}
+
+		@Override
+		protected void createDefaultControl(Group group) {
+			viewer = new ComboViewer(group, SWT.READ_ONLY);
+			viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			viewer.getControl().setEnabled(!getModel().isVisible());
+			viewer.setContentProvider(ArrayContentProvider.getInstance());
+			viewer.setLabelProvider(new EmployeeLabelProvider());
+			Object[] pickedMembers = membersViewer.getCheckedElements();
+			viewer.setInput(pickedMembers);
+			
+	 		byte[] uuid = getModel().getUuidValue();
+	 		if (uuid == null && pickedMembers.length > 0) {
+	 			uuid = ((Employee) pickedMembers[0]).getUuid();
+	 			getModel().setUuidValue(uuid);
+	 		}
+	 		if (uuid != null) {
+	 			for (Object obj : pickedMembers) {
+	 				Employee item = (Employee) obj;
+	 				if (Arrays.equals(item.getUuid(), uuid)) {
+	 					viewer.setSelection(new StructuredSelection(item));
+	 					break;
+	 				}
+	 			}
+	 		}
+			
+			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+	 			@Override
+	 			public void selectionChanged(SelectionChangedEvent event) {
+	 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+	 				Object obj = selection.getFirstElement();
+	 				if (obj instanceof Employee) {
+	 					Employee i = (Employee) obj;
+	 					getModel().setUuidValue(i.getUuid());
+	 	 				fireScreenOptionListeners();
+	 				}
+	 			}
+	 		});
+		}
+
+		@Override
+		protected void onBtnDisplayPageClick() {
+			boolean visible = getBtnDisplayPage().getSelection();
+			getModel().setVisible(visible);
+			viewer.getControl().setEnabled(!visible);
+			fireScreenOptionListeners();
+		}
+		
+		protected Viewer getViewer() {
+			return viewer;
 		}
 	}
 	
