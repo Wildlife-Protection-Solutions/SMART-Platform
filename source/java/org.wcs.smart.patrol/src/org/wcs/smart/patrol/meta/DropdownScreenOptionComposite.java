@@ -39,6 +39,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Screen option with dropdown as default value selector.
