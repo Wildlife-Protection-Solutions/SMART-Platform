@@ -165,6 +165,8 @@ public class Messages extends NLS {
 	public static String ImportCsvWizardPage_0;
 	public static String ImportCsvWizardPage_1;
 	public static String ImportCsvWizardPage_2;
+	public static String CSVImportConfiguration_0;
+	public static String CSVImportConfiguration_1;
 	public static String CSVImportConfiguration_11;
 	public static String CSVImportConfiguration_12;
 	public static String CSVImportConfiguration_2;

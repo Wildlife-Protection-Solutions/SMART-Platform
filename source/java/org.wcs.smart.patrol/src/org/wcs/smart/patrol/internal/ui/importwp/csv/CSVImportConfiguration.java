@@ -72,7 +72,6 @@ public class CSVImportConfiguration {
 	private String dateFormat;
 	
 	private boolean skipHeaders;
-	private int maxId = 0;
 
 	private CsvHeader[] availableColumns;
 	
@@ -139,7 +138,13 @@ public class CSVImportConfiguration {
 					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 
-				 	curWP.setX(p.getX() );
+					if(p.getX() > 180 || p.getX() < -180){
+						throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_1, new Object[]{counter, row[XColumn]}));
+					}
+					if(p.getY() > 90 || p.getY() < -90){
+						throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_0, new Object[]{counter, row[YColumn]}));
+					}
+				 	curWP.setX(p.getX());
 				 	curWP.setY(p.getY());
 				 	curWP.setImportedDate(ptDate);
 
@@ -179,12 +184,15 @@ public class CSVImportConfiguration {
 						 	curWP.setId(Integer.parseInt( (row[idColumn].replaceAll("\\s+","")) )); //$NON-NLS-1$ //$NON-NLS-2$
 					 	} catch (NumberFormatException e) {
 					 		SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.CSVImportConfiguration_11, new Object[]{counter, row[idColumn]}), e );   
-					 		curWP.setId(maxId + 1);
-					 		maxId++;
+					 		//curWP.setId(maxId + 1);
+					 		//maxId++;
+					 		curWP.setId(-1);
 					 	}
 				 	}else{
-				 		curWP.setId(maxId + 1);
-				 		maxId++;
+				 		//could put this back if we want to show ID's 1 through # of points in the select your points screen.				 		
+				 		//curWP.setId(maxId + 1);
+				 		//maxId++;
+				 		curWP.setId(-1);
 				 	}
 				 	
 				 	if(commentColumn != -1){
@@ -198,16 +206,7 @@ public class CSVImportConfiguration {
 		}catch (Exception e) {
 			throw new Exception(Messages.CSVImportConfiguration_12 + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 		}
-		
-		//compute maximum id
-		int max = 0;
-		for(Waypoint wp : allPoints){
-			if (wp.getId() > max){
-				max = wp.getId();
-			}
-		}
-		setMaxId(max);
-		
+				
 		return allPoints;
 	}
 
@@ -296,7 +295,4 @@ public class CSVImportConfiguration {
 		this.skipHeaders = skipHeaders;
 	}
 
-	public void setMaxId(int max){
-		this.maxId = max;
-	}
 }
