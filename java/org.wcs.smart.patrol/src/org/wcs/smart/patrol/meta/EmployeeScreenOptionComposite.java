@@ -56,7 +56,6 @@ import org.wcs.smart.patrol.model.ScreenOptionUuid;
  */
 public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 
-	private ScreenOption typeOption;
 	private ScreenOption membersOption;
 	private ScreenOption leaderOption;
 	private ScreenOption pilotOption;
@@ -75,7 +74,6 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		super(parent);
 		this.members = members;
 		
-		typeOption = options.get(ScreenOptionMeta.TYPE);
 		membersOption = options.get(ScreenOptionMeta.MEMBERS);
 		leaderOption = options.get(ScreenOptionMeta.LEADER);
 		pilotOption = options.get(ScreenOptionMeta.PILOT);
