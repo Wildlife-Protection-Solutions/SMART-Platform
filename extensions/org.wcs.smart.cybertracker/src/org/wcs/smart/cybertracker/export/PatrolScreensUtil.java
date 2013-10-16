@@ -314,11 +314,19 @@ public class PatrolScreensUtil {
 		//TYPE is not visible (set to !GROUND)	- PILOT displayed without navigation formula
 		ScreenOption type_so = screenOptions.get(ScreenOptionMeta.TYPE);
 		if (type_so == null || type_so.isVisible()) {
-			//FIXME: if previous screen is transport than we need to update several screens with formula
-			Node prevNode = container.screenNodes.get(container.screenNodes.size()-1);
 			String pilotNodeId = id.getNodeId();
 			id = addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
-			addNavigationFormula(prevNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
+			//NOTE: if previous screen is transport than we need to update several screens with formula
+			for (int i = container.screenNodes.size()-2; i >= 0; i--) {
+				//need to change all prev screens that refer to this screen as their "next screen"
+				Node prevNode = container.screenNodes.get(i);
+				Control control2 = ScreensObjectFactory.getNavigationControl(prevNode);
+				if (pilotNodeId.equals(control2.getTranslateNextScreenId())) {
+					addNavigationFormula(prevNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
+				} else {
+					break;
+				}
+			}
 			return id;
 		} else if (Type.GROUND.name().equals(type_so.getStringValue())) {
 			return id;
