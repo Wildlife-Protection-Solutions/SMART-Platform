@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -60,8 +61,9 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
+import org.wcs.smart.patrol.model.ScreenOptionUuid;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -218,7 +220,6 @@ public class PatrolScreensUtil {
 			result.defaultValues.add(createDefaultResultElement(RESULT_COMMENTS, elements, so.getStringValue()));
 		}
 
-		//getting all members names
 		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
 		Collections.sort(employees, new Comparator<Employee>() {
 			@Override
@@ -226,26 +227,74 @@ public class PatrolScreensUtil {
 				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
 			}
 		});
-		List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
-		List<String> members = new ArrayList<String>();
-		for (Employee i : employees) {
-			members.add(i.getFullLabel());
-			CyberTrackerId mctid = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, i.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-			memberIds.add(mctid);
+		so = screenOptions.get(ScreenOptionMeta.MEMBERS);
+		if (so == null || so.isVisible()) {
+			//getting all members names
+			//displaying all screens
+			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
+			List<String> members = new ArrayList<String>();
+			for (Employee i : employees) {
+				members.add(i.getFullLabel());
+				CyberTrackerId mctid = new CyberTrackerId();
+				ElementsUtil.addElementsItem(elements, i.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				memberIds.add(mctid);
+				
+			}
+			
+			String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
+			if (filter != null) {
+				filter = SmartUtils.encodeHex(filter.getBytes());
+			}
+			
+			id = addMembersNode(id, result, memberIds);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, filter);
+			
+			id = addPilotScreen(id, result, elements, screenOptions, memberIds, patrolTypes, filter);
+		} else {
+			//adding default members
+			ScreenOption leader_so = screenOptions.get(ScreenOptionMeta.LEADER);
+			ScreenOption pilot_so = screenOptions.get(ScreenOptionMeta.PILOT);
+			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
+			CyberTrackerId leaderCtId = null;
+			CyberTrackerId pilotCtId = null;
+			for (ScreenOptionUuid sou : so.getUuidList()) {
+				for (Employee e : employees) {
+					if (Arrays.equals(sou.getUuidValue(), e.getUuid())) {
+						CyberTrackerId mctid = new CyberTrackerId();
+						ElementsUtil.addElementsItem(elements, e.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						result.defaultValues.add(mctid.getItemId());
+						memberIds.add(mctid);
+						if (leader_so.getUuidValue() != null && Arrays.equals(leader_so.getUuidValue(), e.getUuid())) {
+							leaderCtId = mctid;
+						}
+						if (pilot_so.getUuidValue() != null && Arrays.equals(pilot_so.getUuidValue(), e.getUuid())) {
+							pilotCtId = mctid;
+						}
+					}
+				}
+			}
+			
+			if (leader_so == null || leader_so.isVisible()) {
+				id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, false);
+			} else {
+				if (leaderCtId == null) {
+					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Leader, null);
+					return null;
+				}
+				result.defaultValues.add(createDefaultResultElement(RESULT_LEADER, elements, leaderCtId.getItemId()));
+			}
+
+			if (pilot_so == null || pilot_so.isVisible()) {
+				id = addPilotScreen(id, result, elements, screenOptions, memberIds, patrolTypes, null);
+			} else {
+				if (pilotCtId == null) {
+					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Pilot, null);
+					return null;
+				}
+				result.defaultValues.add(createDefaultResultElement(RESULT_PILOT, elements, pilotCtId.getItemId()));
+			}
 			
 		}
-		String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
-		if (filter != null) {
-			filter = SmartUtils.encodeHex(filter.getBytes());
-		}
-		
-		id = addMembersNode(id, result, memberIds);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, filter);
-		Node leaderNode = result.screenNodes.get(result.screenNodes.size()-1);
-		String pilotNodeId = id.getNodeId();
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
-		addNavigationFormula(leaderNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
 		
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
 		StringBuilder defaults = new StringBuilder();
@@ -259,6 +308,25 @@ public class PatrolScreensUtil {
 		return result;
 	}
 
+	private CyberTrackerId addPilotScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, Map<ScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
+		//TYPE is visible						- PILOT displayed with navigation formula
+		//TYPE is not visible (set to GROUND)	- PILOT in not displayed
+		//TYPE is not visible (set to !GROUND)	- PILOT displayed without navigation formula
+		ScreenOption type_so = screenOptions.get(ScreenOptionMeta.TYPE);
+		if (type_so == null || type_so.isVisible()) {
+			//FIXME: if previous screen is transport than we need to update several screens with formula
+			Node prevNode = container.screenNodes.get(container.screenNodes.size()-1);
+			String pilotNodeId = id.getNodeId();
+			id = addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
+			addNavigationFormula(prevNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
+			return id;
+		} else if (Type.GROUND.name().equals(type_so.getStringValue())) {
+			return id;
+		} else {
+			return addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, false);
+		}
+	}
+	
 	/**
 	 * @param name
 	 * @param elements
