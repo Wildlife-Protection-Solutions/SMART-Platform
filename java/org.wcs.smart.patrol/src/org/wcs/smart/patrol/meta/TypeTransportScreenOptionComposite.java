@@ -41,6 +41,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Patrol Type/Transport screens configuration.
