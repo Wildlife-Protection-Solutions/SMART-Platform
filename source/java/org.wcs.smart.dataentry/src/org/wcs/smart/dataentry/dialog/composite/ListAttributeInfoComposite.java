@@ -21,9 +21,14 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -32,6 +37,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Info composite for {@link CmAttribute} of list type
@@ -41,6 +47,13 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 
+	private Label lblMulti;
+	private Button btnMulti;
+	
+	private ComboViewer defaultViewer;
+	
+	private TableViewer listViewer;
+	
 	/**
 	 * @param parent
 	 * @param model
@@ -54,36 +67,90 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	protected void createTypeSpecificControls(Composite container) {
 		createIsVisibleControl(container);
 		createMultiselectControl(container);
-	}
-
-	private void createMultiselectControl(Composite parent) {
-		final Label label = new Label(parent, SWT.NONE);
-		label.setText(Messages.CmAttributeInfoComposite_Option_Multiselect);
-		final Button btnBool = new Button(parent, SWT.CHECK);
-		btnBool.setText(Messages.CmAttributeInfoComposite_Option_Multi_Checkbox);
-		btnBool.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT).setBooleanValue(btnBool.getSelection());
-				fireModelChanged();
-			}
-		});
+		createDefaultControl(container);
+		createListControl(container);
+		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
 			public void sourceObjectChanged(Object newObject) {
-				CmAttribute cmAttr = getSourceObject();
-				boolean isEnabled = cmAttr.getOrder() == 0; //must be the first element for this option to be enabled
-				CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
-				btnBool.setVisible(option != null);
-				label.setVisible(option != null);
-				btnBool.setEnabled(isEnabled);
-				if (option != null && isEnabled) {
-					btnBool.setSelection(option.getBooleanValue());
-				} else {
-					btnBool.setSelection(false);
-				}
+				updateMultiselectControl();
+				updateDefaultControl();
+				updateListControl();
 			}
 		});
 	}
 
+	private void createMultiselectControl(Composite parent) {
+		lblMulti = new Label(parent, SWT.NONE);
+		lblMulti.setText(Messages.CmAttributeInfoComposite_Option_Multiselect);
+		btnMulti = new Button(parent, SWT.CHECK);
+		btnMulti.setText(Messages.CmAttributeInfoComposite_Option_Multi_Checkbox);
+		btnMulti.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT).setBooleanValue(btnMulti.getSelection());
+				fireModelChanged();
+			}
+		});
+	}
+
+	private void updateMultiselectControl() {
+		CmAttribute cmAttr = getSourceObject();
+		boolean isEnabled = cmAttr.getOrder() == 0; //must be the first element for this option to be enabled
+		CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
+		btnMulti.setVisible(option != null);
+		lblMulti.setVisible(option != null);
+		btnMulti.setEnabled(isEnabled);
+		if (option != null && isEnabled) {
+			btnMulti.setSelection(option.getBooleanValue());
+		} else {
+			btnMulti.setSelection(false);
+		}
+	}
+	
+	private void createDefaultControl(Composite parent) {
+		Label label = new Label(parent, SWT.NONE);
+		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
+		
+		defaultViewer = new ComboViewer(parent, SWT.READ_ONLY);
+		defaultViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		defaultViewer.setContentProvider(ArrayContentProvider.getInstance());
+		defaultViewer.setLabelProvider(new NamedItemLabelProvider());
+	}
+	
+	private void updateDefaultControl() {
+		defaultViewer.setInput(getSourceObject().getAttribute().getActiveListItems());
+	}	
+	
+	private void createListControl(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(2, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		container.setLayout(layout);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		
+		listViewer = new TableViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		listViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		listViewer.setLabelProvider(new NamedItemLabelProvider());
+		listViewer.setContentProvider(ArrayContentProvider.getInstance());
+		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite buttonsCmp = new Composite(container, SWT.NONE);
+		buttonsCmp.setLayout(new GridLayout(1, false));
+		buttonsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		
+		Button btnEnable = new Button(buttonsCmp, SWT.PUSH);
+		btnEnable.setText("Enable");
+		
+		Button btnRename = new Button(buttonsCmp, SWT.PUSH);
+		btnRename.setText("Rename");
+	}
+
+	private void updateListControl() {
+		listViewer.setInput(getSourceObject().getAttribute().getActiveListItems());
+	}	
 }
