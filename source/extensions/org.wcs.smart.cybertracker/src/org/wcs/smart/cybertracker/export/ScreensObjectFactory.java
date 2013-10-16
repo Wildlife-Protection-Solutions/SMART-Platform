@@ -258,7 +258,7 @@ public class ScreensObjectFactory {
         <Name>???</Name>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>13</NextId>
+            <NextId>14</NextId>
             <TemplateId>{2F0173A3-6FF9-4B78-8ADF-80C16B1587B9}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -274,14 +274,14 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 
 		Node.Data data = new Node.Data();
-		data.setNextId(13);
+		data.setNextId(14);
 		data.setTemplateId("{2F0173A3-6FF9-4B78-8ADF-80C16B1587B9}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
 		controls.getControl().add(createControl11());
-		controls.getControl().add(createNoteControl12(resultElementId));
+		controls.getControl().add(createNoteControl13(resultElementId));
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -631,7 +631,7 @@ public class ScreensObjectFactory {
 	/**
     <Control>
         <Type>{49728018-D9F6-49B8-86E4-3EA49A29F4BC}</Type>
-        <Id>12</Id>
+        <Id>13</Id>
         <BorderWidth>1</BorderWidth>
         <Align>5</Align>
         <Left>0</Left>
@@ -641,10 +641,10 @@ public class ScreensObjectFactory {
         <Translate__Element>???</Translate__Element>
     </Control>
 	 */
-	public Controls.Control createNoteControl12(String element) {
+	public Controls.Control createNoteControl13(String element) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{49728018-D9F6-49B8-86E4-3EA49A29F4BC}"); //$NON-NLS-1$
-		control.setId(12);
+		control.setId(13);
 		control.setBorderWidth(1);
 		control.setAlign(5);
 		control.setLeft(0);
