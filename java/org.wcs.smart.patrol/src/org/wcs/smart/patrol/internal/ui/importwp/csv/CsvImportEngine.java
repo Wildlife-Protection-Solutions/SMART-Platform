@@ -34,6 +34,7 @@ import org.wcs.smart.patrol.internal.ui.importwp.ImportCsvWizardPage;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Waypoint;
 /**
@@ -98,6 +99,26 @@ public class CsvImportEngine implements IImportEngine {
 			IProgressMonitor monitor) throws Exception {
 
 		if(type == ImportType.WAYPOINT){
+
+			//if no ID was given, get the largest ID from the patrol so far and reset the id's of the points about to be saved. 
+			if (configuration.getIdColumn() == -1){
+				int max = 0;
+				Patrol p = currentLeg.getPatrolLeg().getPatrol();
+				for( PatrolLeg pl : p.getLegs() ){
+					for(PatrolLegDay pld : pl.getPatrolLegDays()){
+						for(Waypoint wp : pld.getWaypoints()){
+							if (wp.getId() > max){
+								max = wp.getId();
+							}
+						}
+					}
+				}
+				for(Waypoint wp : waypoints){
+					wp.setId(max + 1);
+					max++;
+				}
+			}
+			
 			return GPSDataImport.saveWaypoints(option, patrol, currentLeg, waypoints);
 		}
 		return null;
