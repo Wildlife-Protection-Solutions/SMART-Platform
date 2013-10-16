@@ -58,7 +58,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite container = createContentContainer(this);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		createDisplayNameControls(container);
 
