@@ -21,8 +21,15 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -33,6 +40,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -116,10 +125,32 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		defaultViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		defaultViewer.setContentProvider(ArrayContentProvider.getInstance());
 		defaultViewer.setLabelProvider(new NamedItemLabelProvider());
+		defaultViewer.addSelectionChangedListener(new ISelectionChangedListener(){
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) defaultViewer.getSelection();
+				Object obj = selection.getFirstElement();
+				if (obj instanceof UuidItem) {
+					UuidItem i = (UuidItem) obj;
+					CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+					option.setUuidValue(i.getUuid());
+					fireModelChanged();
+				}
+			}
+		});
 	}
 	
 	private void updateDefaultControl() {
-		defaultViewer.setInput(getSourceObject().getAttribute().getActiveListItems());
+		List<AttributeListItem> input = getSourceObject().getAttribute().getActiveListItems();
+		defaultViewer.setInput(input);
+		CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+		if (option.getUuidValue() != null) {
+			for (AttributeListItem item : input) {
+				if (Arrays.equals(item.getUuid(), option.getUuidValue())) {
+					defaultViewer.setSelection(new StructuredSelection(item));
+				}
+			}
+		}
 	}	
 	
 	private void createListControl(Composite parent) {
