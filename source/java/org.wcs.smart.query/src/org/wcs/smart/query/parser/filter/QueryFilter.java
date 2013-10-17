@@ -29,9 +29,19 @@ package org.wcs.smart.query.parser.filter;
  */
 public class QueryFilter {
 
+	/**
+	 * Creates a new query filter of type observation
+	 * @param filter
+	 */
 	public static QueryFilter createFilter(IFilter filter){
 		return new QueryFilter(filter);
 	}
+	
+	/**
+	 * Creates a new query filter of the given type
+	 * @param filter
+	 * @param filterType
+	 */
 	public static QueryFilter createFilter(IFilter filter, IFilter.FilterType filterType){
 		return new QueryFilter(filter, filterType);
 	}
@@ -39,24 +49,45 @@ public class QueryFilter {
 	private IFilter filter;
 	private IFilter.FilterType filterType;
 	
+	/**
+	 * Creates a new query filter of type observation
+	 * @param filter
+	 */
 	public QueryFilter(IFilter filter){
 		this.filter = filter;
 		this.filterType = IFilter.FilterType.OBSERVATION;
 	}
 	
+	/**
+	 * Creates a new query filter of the given type
+	 * @param filter
+	 * @param filterType
+	 */
 	public QueryFilter(IFilter filter, IFilter.FilterType filterType){
 		this.filter = filter;
 		this.filterType = filterType;
 	}
 	
+	/**
+	 * 
+	 * @return the string representation of the query
+	 */
 	public String asString(){
 		return filterType.getKey() + "|" + filter.asString(); //$NON-NLS-1$
 	}
 	
+	/**
+	 * 
+	 * @return the filter
+	 */
 	public IFilter getFilter(){
 		return this.filter;
 	}
 	
+	/**
+	 * 
+	 * @return the filter type
+	 */
 	public IFilter.FilterType getFilterType(){
 		return this.filterType;
 	}
