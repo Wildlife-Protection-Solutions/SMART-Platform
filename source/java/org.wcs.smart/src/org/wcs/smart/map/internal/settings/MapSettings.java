@@ -400,9 +400,9 @@ public class MapSettings {
 			Collections.sort(orderedLayers, new Comparator<Layer>() {
 				@Override
 				public int compare(Layer o1, Layer o2) {
-					LayerRegister info1 = definitionMap.get(o1.findGeoResource(IGeoResource.class));
-					LayerRegister info2 = definitionMap.get(o2.findGeoResource(IGeoResource.class));
-
+					LayerRegister info1 = definitionMap.get(o1.getID());
+					LayerRegister info2 = definitionMap.get(o2.getID());
+					
 					int index1 = userMap.getLayerList().indexOf(info1);
 					int index2 = userMap.getLayerList().indexOf(info2);
 					if (index1 < index2)
