@@ -116,6 +116,11 @@ public class CmNode extends NamedItem {
 	public void setCmAttributes(List<CmAttribute> cmAttributes) {
 		this.cmAttributes = cmAttributes;
 	}
+
+	@Transient
+	public boolean isPhoteRequired() {
+		return true;
+	}
 	
 	@Transient
 	public boolean isGroup() {

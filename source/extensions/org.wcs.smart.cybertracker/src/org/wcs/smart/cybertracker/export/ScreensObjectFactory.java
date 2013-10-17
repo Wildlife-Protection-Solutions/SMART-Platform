@@ -24,7 +24,9 @@ package org.wcs.smart.cybertracker.export;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
+import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.PdaUtil;
@@ -354,6 +356,48 @@ public class ScreensObjectFactory {
 		controls.getControl().add(createControl6());
 		controls.getControl().add(createControl11());
 		controls.getControl().add(createNumpadPasswordExitControl12(ctProperties.getExitPin()));
+		data.setControls(controls);
+		node.setData(data);
+		
+		return node;
+	}
+
+	/**
+    <Node>
+        <Id>???</Id>
+        <Name>???</Name>
+		<Items>
+			<Value>{82D16C8E-776E-4E8B-A459-6EBF62E50076}</Value> <!-- this is PHOTO_ID -->
+		</Items>        
+        <DataClass>TctScreen</DataClass>
+        <Data>
+            <NextId>14</NextId>
+            <TemplateId>{5DC23CAB-C51C-47A7-B8B6-C25DE35DDF4B}</TemplateId>
+            <Name>???</Name>
+            <Controls>
+                <Control>...</Control>
+                ...
+        </Data>
+    </Node>
+	 */
+	public Node createPhoto(String id, String name) {
+		Node node = new Node();
+		node.setId(id);
+		node.setName(name);
+		node.setDataClass("TctScreen"); //$NON-NLS-1$
+		
+		Node.Items items = new Node.Items();
+		items.getValue().add(ICyberTrackerConstants.PHOTO);
+		node.setItems(items);
+
+		Node.Data data = new Node.Data();
+		data.setNextId(14);
+		data.setTemplateId("{5DC23CAB-C51C-47A7-B8B6-C25DE35DDF4B}"); //$NON-NLS-1$
+		data.setName(name);
+		Controls controls = new Controls();
+		controls.getControl().add(createControl2());
+		controls.getControl().add(createControl11());
+		controls.getControl().add(createPhotoControl12());
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -753,6 +797,33 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+	<Control>
+	    <Type>{02F601F3-28BD-4D1F-A9DD-CAA71ABC25FC}</Type>
+	    <Id>12</Id>
+	    <Align>5</Align>
+	    <Left>0</Left>
+	    <Top>32</Top>
+	    <Width>240</Width>
+	    <Height>264</Height>
+	    <Translate__Font>Arial,12,B</Translate__Font>
+	    <Translate__Element>{82D16C8E-776E-4E8B-A459-6EBF62E50076}</Translate__Element>   <!-- this is PHOTO_ID -->
+	 </Control>
+	 */
+	private Control createPhotoControl12() {
+		Controls.Control control = new Controls.Control();
+		control.setType("{02F601F3-28BD-4D1F-A9DD-CAA71ABC25FC}"); //$NON-NLS-1$
+		control.setId(12);
+		control.setAlign(5);
+		control.setLeft(0);
+		control.setTop(32);
+		control.setWidth(240);
+		control.setHeight(264);
+		control.setTranslateFont("Arial,12,B"); //$NON-NLS-1$
+		control.setTranslateElement(ICyberTrackerConstants.PHOTO);
+		return control;
+	}
+	
 	/**
 	<Control>
 	     <Type>{C26ACA43-8C7C-497C-9586-382E5BD27115}</Type>
