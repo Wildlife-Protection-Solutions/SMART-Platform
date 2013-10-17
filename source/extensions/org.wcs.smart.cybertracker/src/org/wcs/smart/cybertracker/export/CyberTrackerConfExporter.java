@@ -26,7 +26,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -508,10 +510,47 @@ public class CyberTrackerConfExporter {
 			break;
 		}
 		case LIST:
-		case TREE:
-			if (defaultValueOption.getUuidValue() != null)
-				return recordDefaultValue(attribute, SmartUtils.encodeHex(defaultValueOption.getUuidValue()));
+		{
+			byte[] uuidValue = defaultValueOption.getUuidValue();
+			if (uuidValue != null) {
+				AttributeListItem def = null;
+				for (AttributeListItem item : attribute.getActiveListItems()) {
+					if (Arrays.equals(uuidValue, item.getUuid())) {
+						def = item; 
+						break;
+					}
+				}
+				if (def == null) {
+					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerConfExporter_DefaultValue_List_Error, attribute.getName()), null);
+					return null;
+				}
+				String elId = (new CyberTrackerId()).getItemId();
+				ElementsUtil.addElementsItem(elements, def.getName(), elId, SmartUtils.encodeHex(def.getUuid()));
+				return recordDefaultValue(attribute, elId);
+			}
 			break;
+		}
+		case TREE:
+		{
+			byte[] uuidValue = defaultValueOption.getUuidValue();
+			if (uuidValue != null) {
+				AttributeTreeNode def = null;
+				for (AttributeTreeNode item : attribute.getActiveTreeNodes()) {
+					if (Arrays.equals(uuidValue, item.getUuid())) {
+						def = item; 
+						break;
+					}
+				}
+				if (def == null) {
+					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerConfExporter_DefaultValue_Tree_Error, attribute.getName()), null);
+					return null;
+				}
+				String elId = (new CyberTrackerId()).getItemId();
+				ElementsUtil.addElementsItem(elements, def.getName(), elId, SmartUtils.encodeHex(def.getUuid()));
+				return recordDefaultValue(attribute, elId);
+			}
+			break;
+		}
 		case BOOLEAN:
 			if (defaultValueOption.getBooleanValue() != null)
 				return recordDefaultValue(attribute, defaultValueOption.getBooleanValue().toString());
