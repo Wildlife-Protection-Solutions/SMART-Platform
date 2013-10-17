@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -82,7 +83,6 @@ public class ImportCsvWizardPage extends WizardPage implements IImportWizardPage
 		
 		ops = new ImportCSVOptionsComposite(center);
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-
 		ops.addFileModifyListener(new Listener() {
 			
 			@Override
@@ -92,8 +92,18 @@ public class ImportCsvWizardPage extends WizardPage implements IImportWizardPage
 			}
 		});
 		
+	
 		ops2 = new ImportOptionsComposite(center, ((ImportGpsDataWizard)getWizard()).getCurrentDate(), ((ImportGpsDataWizard)getWizard()).getType());
 		ops2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		
+		Label lbl = new Label(center, SWT.WRAP);
+		lbl.setText(Messages.ImportCsvWizardPage_CSVImportMessage);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 100;
+		gd.horizontalIndent = 5;
+		gd.verticalIndent = 5;
+		lbl.setLayoutData(gd);
+		
 		
 		setPageComplete(false);
 		
