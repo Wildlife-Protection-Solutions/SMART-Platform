@@ -165,6 +165,7 @@ public class Messages extends NLS {
 	public static String ImportCsvWizardPage_0;
 	public static String ImportCsvWizardPage_1;
 	public static String ImportCsvWizardPage_2;
+	public static String ImportCsvWizardPage_CSVImportMessage;
 	public static String CSVImportConfiguration_0;
 	public static String CSVImportConfiguration_1;
 	public static String CSVImportConfiguration_11;
@@ -180,7 +181,6 @@ public class Messages extends NLS {
 	public static String ImportCSVDetailsComposite_14;
 	public static String ImportCSVDetailsComposite_15;
 	public static String ImportCSVDetailsComposite_16;
-	public static String ImportCSVDetailsComposite_17;
 	public static String ImportCSVDetailsComposite_2;
 	public static String ImportCSVDetailsComposite_3;
 	public static String ImportCSVDetailsComposite_4;
@@ -194,18 +194,11 @@ public class Messages extends NLS {
 	public static String ImportFromWaypointWizardPage_PageMessage;
 	public static String ImportFromWaypointWizardPage_PageName;
 	public static String ImportFromWaypointWizardPage_PageTitle;
-	public static String ImportGpsDataWizard_0;
-	public static String ImportGpsDataWizard_1;
-	public static String ImportGpsDataWizard_2;
 	public static String ImportGpsDataWizard_DialogTitle;
-	public static String ImportGpsDataWizard_File_WarningNoneFound;
 	public static String ImportGpsDataWizard_GPS_WarningNoneFound;
-	public static String ImportGpsDataWizard_GPSDeviceImportError;
 	public static String ImportGpsDataWizard_GPXFileImportError;
 	public static String ImportGpsDataWizard_ImportCompleteMessage;
 	public static String ImportGpsDataWizard_ImportDialog_Title;
-	public static String ImportGpsDataWizard_Progress_ImportingGPS;
-	public static String ImportGpsDataWizard_TrackWarningOverwriteAll;
 	public static String ImportGpsDataWizard_TrackWarningOverwriteNew;
 	public static String ImportGpxWizardPage_AllFilesFilterName;
 	public static String ImportGpxWizardPage_FilesLabel;
@@ -412,7 +405,6 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_ErrorImportWaypointWizard;
 	public static String PatrolLegDayInputComposite_ImportSuccessful_DialogTitle;
 	public static String PatrolLegDayInputComposite_ImportTrackError_DialogMessage;
-	public static String PatrolLegDayInputComposite_ImportTrackError_DialogTitle;
 	public static String PatrolLegDayInputComposite_ImportWaypointsLabel;
 	public static String PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage;
 	public static String PatrolLegDayInputComposite_InvalidTotalHoursPatrolled;
@@ -432,12 +424,8 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_StartTimeLabel;
 	public static String PatrolLegDayInputComposite_Time_ColumnHeader;
 	public static String PatrolLegDayInputComposite_TotalHoursPatrolled_Label;
-	public static String PatrolLegDayInputComposite_TrackAllImportSuccessful_DailogMessage;
-	public static String PatrolLegDayInputComposite_TrackSingleImportSuccessful_DailogMessage;
 	public static String PatrolLegDayInputComposite_ViewTrackLabel;
 	public static String PatrolLegDayInputComposite_WaypointID_ColumnHeader;
-	public static String PatrolLegDayInputComposite_WaypointImportAllSuccess;
-	public static String PatrolLegDayInputComposite_WaypointImportDaySuccess;
 	public static String PatrolLegLeaderChangeDialog_DateChange_Label;
 	public static String PatrolLegLeaderChangeDialog_DialogMessage;
 	public static String PatrolLegLeaderChangeDialog_DialogTitle;
