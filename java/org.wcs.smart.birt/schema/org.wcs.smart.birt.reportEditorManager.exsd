@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.birt" id="org.wcs.smart.birt.reportEditorManager" name="ReportEditorManager"/>
       </appinfo>
       <documentation>
-         Extension point for linking BIRT report editors to appropriate manager that deals with saving, and addition listeners.  The link is based on the editor input. So this extension point allows users to link certain editor inputs to given managers.
+         Extension point for linking BIRT report editors to appropriate manager that deals with saving, and adding listeners.  The link is based on the editor input. So this extension point allows users to link editor inputs to given managers.
       </documentation>
    </annotation>
 
