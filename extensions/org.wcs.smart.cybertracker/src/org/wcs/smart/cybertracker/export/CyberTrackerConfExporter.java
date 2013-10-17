@@ -268,13 +268,13 @@ public class CyberTrackerConfExporter {
 					toShow.remove(0); //as we just added a node for it
 					List<AttributeListItem> activeItems = attribute.getActiveListItems();
 					for (int i = 0; i < multiIds.size(); i++) {
-						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
+						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhoteRequired(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					result.add(createLastNode(nextId, startId, recordDefaultValues(invisibleList)));
+					result.addAll(createLastNodes(nextId, startId, recordDefaultValues(invisibleList), cmNode.isPhoteRequired()));
 					return result;
 				}
 			}
-			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, null, recordDefaultValues(invisibleList));
+			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhoteRequired(), null, recordDefaultValues(invisibleList));
 		}
 		return result;
 		
@@ -356,7 +356,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminare, String label, String defaultValues) {
+	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminare, boolean addPhoto, String label, String defaultValues) {
 		List<Node> result = new ArrayList<Node>();
 		if (label == null)
 			label = ""; //$NON-NLS-1$
@@ -437,25 +437,35 @@ public class CyberTrackerConfExporter {
 			//tracking navigation for non-tree or float trees attributes (tree attributes are handle separately)
 			if (linkToNext) {
 				//handle only cases for non-tree attributes, as all the have single ending screen
-				id = new CyberTrackerId(); //this id will be used for next screen
 				if (!result.isEmpty()) {
 					Node lastNode = result.get(result.size()-1);
-					Control control2 = ScreensObjectFactory.getNavigationControl(lastNode);
-					//reference to "Next" screen
-					control2.setTranslateNextScreenId(id.getNodeId());
-					if (!attribute.getIsRequired()) {
-						//skip button
-						control2.setTranslateSkipScreenId(id.getNodeId());
-					}
+					id = linkToNext(lastNode, !attribute.getIsRequired()); //this id will be used for next screen
+				} else {
+					id = new CyberTrackerId(); //this id will be used for next screen
 				}
 			}
 		}
 		if (terminare) {
-			result.add(createLastNode(id, startId, defaultValues));
+			result.addAll(createLastNodes(id, startId, defaultValues, addPhoto));
 		}
 		return result;
 	}
 
+	/**
+	 * @return id for next screen(node)
+	 */
+	private CyberTrackerId linkToNext(Node node, boolean showSkip) {
+		CyberTrackerId id = new CyberTrackerId(); //this id will be used for next screen
+		Control control2 = ScreensObjectFactory.getNavigationControl(node);
+		//reference to "Next" screen
+		control2.setTranslateNextScreenId(id.getNodeId());
+		if (showSkip) {
+			//skip button
+			control2.setTranslateSkipScreenId(id.getNodeId());
+		}
+		return id;
+	}
+	
 	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr) {
 		Attribute attribute = cmAttr.getAttribute();
 		List<AttributeTreeNode> activeTreeNodes = attribute.getActiveTreeNodes();
@@ -710,7 +720,13 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private Node createLastNode(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
+	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto) {
+		List<Node> nodeList = new ArrayList<Node>();
+		if (addPhoto) {
+			Node photeNode = screensFactory.createPhoto(id.getNodeId(), Messages.CyberTrackerExporter_ScreenTitle_Photo);
+			id = linkToNext(photeNode, true);
+			nodeList.add(photeNode);
+		}
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 //		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
 //		ScreensObjectFactory.addControlToNode(node, menoControl);
@@ -728,7 +744,8 @@ public class CyberTrackerConfExporter {
 		control2.setTranslateNextScreenId(null); //no next button at last screen
 		control2.setTranslateMajorScreenId(rootId.getNodeId());
 //		control2.setTranslateMinorScreenId(startId.getNodeId());
-		return node;
+		nodeList.add(node);
+		return nodeList;
 	}
 	
 	public int uploadPda(File file) throws Exception {
