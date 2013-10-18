@@ -52,7 +52,19 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	protected void createTypeSpecificControls(Composite container) {
 		createIsVisibleControl(container);
 		createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, Messages.CmAttributeInfoComposite_Option_Flatten_Checkbox);
+		createDefaultControl(container);
+		createTreeControl(container);
 
 	}
 
+	private void createDefaultControl(Composite container) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void createTreeControl(Composite container) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }
