@@ -240,6 +240,8 @@ public class Messages extends NLS {
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
 	public static String SmartImporter_Warn_CategoryTag0_Missing;
 	public static String SmartImporter_Warn_ElementNotDefined;
+	public static String SmartImporter_Warn_ExportMedia_FileNotFound;
+	public static String SmartImporter_Warn_ExportMedia_UnknownFolder;
 	public static String SmartImporter_Warn_NoAttributeInDatamodel;
 	public static String SmartImporter_Warn_NoCategoryInDatamodel;
 	public static String SmartImporter_Warn_NoListAttrItemInDatamodel;
