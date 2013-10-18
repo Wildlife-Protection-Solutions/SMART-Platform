@@ -46,6 +46,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	private Label lblCategory;
 	private Label lblKey;
+
+	private Button btnPhoto;
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
 		super(parent, model, session);
@@ -82,16 +84,30 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		label.setText(Messages.CmNodeInfoComposite_Key);
 		lblKey = new Label(container, SWT.NONE);
 		lblKey.setText(""); //$NON-NLS-1$
+
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmNodeInfoComposite_PhotoAllowed);
+		btnPhoto = new Button(container, SWT.CHECK);
+		btnPhoto.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
+				fireModelChanged();
+			}
+		});
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
 			public void sourceObjectChanged(Object newObject) {
 				CmNode n = getSourceObject();
-				if (!n.isGroup()) {
+				boolean isGroup = n.isGroup();
+				if (!isGroup) {
 					if (lblCategory != null)
 						lblCategory.setText(n.getCategory().getFullCategoryName());
 					if (lblKey != null)
 						lblKey.setText(n.getCategory().getKeyId());
+					if (btnPhoto != null)
+						btnPhoto.setSelection(n.isPhotoAllowed());
 					CmNodeInfoComposite.this.layout(true, true);
 				}
 			}
