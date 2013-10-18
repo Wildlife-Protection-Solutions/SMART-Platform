@@ -23,6 +23,7 @@ package org.wcs.smart.upgrade;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -97,6 +98,23 @@ public class UpgradeSmartEngine {
 		}
 	}
 
+	
+	/**
+	 * Runs an file containing a set of sql commands.  
+	 * Note: input stream is closed when complete 
+	 * 
+	 * @param databaseConnection current database connection
+	 * @param updateScript inputstream representing the queries to run
+	 */
+	public static void runScript(Connection databaseConnection, InputStream in) throws Exception{
+		try{
+			ij.runScript(databaseConnection, in, "utf-8", System.out, "utf-8");
+		}finally{
+			in.close();
+		}
+	}
+	
+	
 	/**
 	 * Runs update script
 	 * @param databaseFile

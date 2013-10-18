@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart</groupId>
-	<artifactId>SmartUpgrade112</artifactId>
+	<artifactId>SmartUpgrade</artifactId>
 	<packaging>jar</packaging>
 	<version>1.1.2</version>
 	<name>SMARTUpgradeScript</name>
@@ -26,7 +26,14 @@
       				<configuration>
         				<outputDirectory>${package.dir.lib}</outputDirectory>
       				</configuration>
-    			</plugin>
+    		</plugin>
+    		<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-eclipse-plugin</artifactId>
+ 				<configuration>
+ 					<addVersionToProjectName>true</addVersionToProjectName>
+ 				</configuration>
+ 			</plugin>
 			<plugin>
         			<groupId>org.apache.maven.plugins</groupId>
         			<artifactId>maven-dependency-plugin</artifactId>
@@ -157,8 +164,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.wcs.smart</groupId>
-			<artifactId>SmartUpgrade</artifactId>
-			<version>1.1.1</version>
+			<artifactId>SmartUpgradeCore</artifactId>
+			<version>1.1.2</version>
 		</dependency>
 	</dependencies>
 </project>
