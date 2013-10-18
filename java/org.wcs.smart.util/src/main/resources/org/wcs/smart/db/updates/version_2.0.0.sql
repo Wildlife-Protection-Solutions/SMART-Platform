@@ -133,4 +133,8 @@ ALTER TABLE smart.screen_option_uuid
 	ON DELETE CASCADE
 ;
 
+
+-- update cross conservation area analysis name & id
+update smart.conservation_area set name = 'Cross Conservation Area Analysis', id = 'CCAA' where uuid = x'00000000000000000000000000000000';
+  
 update smart.db_version set version = '2.0.0';
