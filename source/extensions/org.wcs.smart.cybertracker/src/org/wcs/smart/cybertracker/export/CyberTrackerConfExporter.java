@@ -268,13 +268,13 @@ public class CyberTrackerConfExporter {
 					toShow.remove(0); //as we just added a node for it
 					List<AttributeListItem> activeItems = attribute.getActiveListItems();
 					for (int i = 0; i < multiIds.size(); i++) {
-						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhoteRequired(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
+						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhotoAllowed(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					result.addAll(createLastNodes(nextId, startId, recordDefaultValues(invisibleList), cmNode.isPhoteRequired()));
+					result.addAll(createLastNodes(nextId, startId, recordDefaultValues(invisibleList), cmNode.isPhotoAllowed()));
 					return result;
 				}
 			}
-			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhoteRequired(), null, recordDefaultValues(invisibleList));
+			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhotoAllowed(), null, recordDefaultValues(invisibleList));
 		}
 		return result;
 		
