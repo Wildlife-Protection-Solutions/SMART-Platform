@@ -44,6 +44,13 @@ public class PdaUtil {
 		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
 				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_NAME);
 	}
+
+	public static String getCTMediaFolder() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		String path = System.getProperty("user.home"); //$NON-NLS-1$
+		return path + "\\Documents\\CyberTracker\\ExportMedia\\"; //$NON-NLS-1$
+//		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+//				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_EXPORT_MEDIA);
+	}
 	
 	public static File createTempDirectory() throws IOException {
 		final File temp;

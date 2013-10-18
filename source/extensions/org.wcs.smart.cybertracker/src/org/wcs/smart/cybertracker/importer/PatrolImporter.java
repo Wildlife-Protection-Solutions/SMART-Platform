@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 
 /**
  * Imports from {@link CyberTrackerPatrol} to {@link Patrol} object
@@ -54,7 +55,7 @@ public class PatrolImporter extends SmartImporter {
 		for (String warning : ctPatrol.getWarnings()) {
 			addWarning(warning);
 		}
-		Session session = HibernateManager.openSession();
+		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			session.beginTransaction();
 			Patrol patrol = buildPatrol(ctPatrol);

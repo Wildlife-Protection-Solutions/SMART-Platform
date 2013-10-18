@@ -42,6 +42,7 @@ public interface ICyberTrackerConstants {
 	public static final String REG_KEY_PATH = "Software\\CyberTracker3"; //$NON-NLS-1$
 	public static final String REG_KEY_NAME = "Path"; //$NON-NLS-1$
 	public static final String REG_KEY_SMART = "SMART"; //$NON-NLS-1$
+	public static final String REG_KEY_EXPORT_MEDIA = "ExportMedia"; //$NON-NLS-1$
 
 	public static final String COMMAND_CREATE = "/createctx"; //$NON-NLS-1$
 	public static final String COMMAND_UPLOAD = "/uploadpda"; //$NON-NLS-1$

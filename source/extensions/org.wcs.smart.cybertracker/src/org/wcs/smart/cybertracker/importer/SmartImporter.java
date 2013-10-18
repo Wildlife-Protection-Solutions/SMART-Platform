@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.io.File;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -55,6 +56,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
+import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
@@ -64,6 +66,7 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.WaypointAttachment;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
@@ -255,6 +258,7 @@ public class SmartImporter {
 		
 		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
 		addObservations(wp, s, eMap, session);
+		addAttachments(wp, s);
 	}
 
 	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
@@ -570,6 +574,36 @@ public class SmartImporter {
 		}
 	}
 
+	private void addAttachments(Waypoint wp, S s) {
+		String mediaFolder = null;
+		try {
+			mediaFolder = PdaUtil.getCTMediaFolder();
+		} catch (Exception ex) {
+			CyberTrackerPlugIn.log("Could not determine CyberTracker ExportMedia folder", ex); //$NON-NLS-1$
+		}
+		for (S.A a : s.getA()) {
+			if (ICyberTrackerConstants.PHOTO.equals(a.getI())) {
+				if (mediaFolder == null) {
+					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ExportMedia_UnknownFolder, a.getV()));
+					continue;
+				}
+				File file = new File(mediaFolder + a.getV());
+				if (!file.exists()) {
+					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ExportMedia_FileNotFound, mediaFolder, a.getV()));
+					continue;
+				}
+				if (wp.getAttachments() == null) {
+					wp.setAttachments(new ArrayList<WaypointAttachment>());
+				}
+				WaypointAttachment attachment = new WaypointAttachment();
+				attachment.setWaypoint(wp);
+				attachment.setFilename(a.getV());
+				attachment.setCopyFromLocation(file);
+				wp.getAttachments().add(attachment);
+			}
+		}
+	}
+	
 	/**
 	 * Displays warnings dialog if warnings present and returns if user choose to proceed with import
 	 * @return
