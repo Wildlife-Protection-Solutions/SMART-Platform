@@ -51,7 +51,6 @@ public class Messages extends NLS {
 	public static String MapPlanEditorPage_RefreshError;
 	public static String MapPlanEditorPage_RefreshMapJobName;
 	public static String MapPlanEditorPage_SubPlanError;
-	public static String MapPlanEditorPage_SubPlanRefreshError;
 	public static String MapPlanEditorPage_SubplanJobName;
 	public static String MapPlanEditorPage_UnknownError;
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Message;
@@ -209,7 +208,6 @@ public class Messages extends NLS {
 	public static String PlanTargetDataSourceFactory_PlanSubPlanParameterName;
 	public static String PlanTargetDataSourceFactory_PlanUuidParameterName;
 	public static String PlanTargetDataSourceFactory_ReadOnly;
-	public static String PlanTargetEngine_Missed_Message;
 	public static String PlanTargetGeoResource_ErrorGeneratingStyle;
 	public static String PlanTargetResultSetMetadata_PlanIdColumnLabel;
 	public static String PlanTargetResultSetMetadata_StatusDescriptionTargetLabel;
