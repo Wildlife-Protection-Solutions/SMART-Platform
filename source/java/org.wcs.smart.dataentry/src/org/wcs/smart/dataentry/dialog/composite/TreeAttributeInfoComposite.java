@@ -21,12 +21,17 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
  * Info composite for {@link CmAttribute} of tree type
@@ -36,6 +41,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 
+	private TreeEditorField treeEditor;
+	
 	/**
 	 * @param parent
 	 * @param model
@@ -55,10 +62,31 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		createDefaultControl(container);
 		createTreeControl(container);
 
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				treeEditor.setAttribute(getSourceObject().getAttribute());
+				treeEditor.clear();
+//				Object getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+			}
+		});
 	}
 
 	private void createDefaultControl(Composite container) {
-		// TODO Auto-generated method stub
+		Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
+		
+		
+		treeEditor = new TreeEditorField();
+		treeEditor.createComposite(container);
+		
+		getShell().addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				treeEditor.dispose();
+			}
+		});
 		
 	}
 

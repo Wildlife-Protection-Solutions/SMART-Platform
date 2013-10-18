@@ -56,12 +56,12 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.TreeDropDown;
 import org.wcs.smart.patrol.internal.ui.observation.ObservationWizard;
 import org.wcs.smart.patrol.internal.ui.observation.ObservationWizardDialog;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
+import org.wcs.smart.ui.properties.TreeDropDown;
 
 /**
  * Editor for editing the patrol observation table cell.

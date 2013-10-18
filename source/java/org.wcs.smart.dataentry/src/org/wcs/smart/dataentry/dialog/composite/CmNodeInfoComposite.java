@@ -77,9 +77,12 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmNodeInfoComposite_Category);
-		lblCategory = new Label(container, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		lblCategory = new Label(container, SWT.WRAP);
 		lblCategory.setText(""); //$NON-NLS-1$
-
+		lblCategory.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		((GridData)lblCategory.getLayoutData()).widthHint = 100;
+		
 		label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmNodeInfoComposite_Key);
 		lblKey = new Label(container, SWT.NONE);

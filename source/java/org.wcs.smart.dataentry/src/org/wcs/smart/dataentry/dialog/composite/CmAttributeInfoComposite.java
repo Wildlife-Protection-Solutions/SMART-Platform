@@ -64,7 +64,11 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Attribute);
-		lblAttribute = new Label(container, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		lblAttribute = new Label(container, SWT.WRAP);
+		lblAttribute.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		((GridData)lblAttribute.getLayoutData()).widthHint = 100;
 		lblAttribute.setText(""); //$NON-NLS-1$
 
 		label = new Label(container, SWT.NONE);
