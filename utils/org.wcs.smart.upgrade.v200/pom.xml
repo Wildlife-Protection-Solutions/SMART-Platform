@@ -4,28 +4,30 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart</groupId>
-	<artifactId>SmartUpgradeCore</artifactId>
+	<artifactId>SmartUpgrade</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1.2</version>
+	<version>2.0.0</version>
+	<name>SMARTUpgradeScript</name>
 
 	<properties>
 		<package.dir>${project.build.directory}/../Target/${project.name}.${version}</package.dir>
 		<package.dir.lib>${project.build.directory}/../Target/${project.name}.${version}/lib</package.dir.lib>
-		<source.db.version>1.0.5</source.db.version>
-		<target.db.version>1.1.0</target.db.version>
+		<source.db.version>1.1.2</source.db.version>
+		<target.db.version>2.0.0</target.db.version>
 	</properties>
 	
 	<build>
 		<sourceDirectory>src/</sourceDirectory>
+		
 		<resources>
-      		<resource>
-        	<directory>src/</directory>
-        	<includes>
-          		<include>**/*.gif</include>
-        	</includes>
-      		</resource>
-      
+			<resource>
+        	<directory>src</directory>
+			<includes>
+				<include>**/*.sql</include>
+			</includes>
+			</resource>
     	</resources>
+    
 		<plugins>
 			<plugin>
       				<groupId>org.apache.maven.plugins</groupId>
@@ -34,7 +36,14 @@
       				<configuration>
         				<outputDirectory>${package.dir.lib}</outputDirectory>
       				</configuration>
-    			</plugin>
+    		</plugin>
+    		<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-eclipse-plugin</artifactId>
+ 				<configuration>
+ 					<addVersionToProjectName>true</addVersionToProjectName>
+ 				</configuration>
+ 			</plugin>
 			<plugin>
         			<groupId>org.apache.maven.plugins</groupId>
         			<artifactId>maven-dependency-plugin</artifactId>
@@ -100,14 +109,6 @@
                        							<token>%CP2%</token>
                        							<value>;lib/${project.build.finalName}.jar</value>
                    						</replacement>      
-                   						<replacement>
-                       							<token>%TARGETVERSION%</token>
-                       							<value>${target.db.version}</value>
-                   						</replacement>             
-                   						<replacement>
-                       							<token>%SOURCEVERSION%</token>
-                       							<value>${source.db.version}</value>
-                   						</replacement>
                						</replacements>
            					</configuration>
                				</execution>
@@ -116,7 +117,7 @@
                    				<phase>package</phase>
                    				<goals><goal>replace</goal></goals>                   
                    				<configuration>
-                   					<file>upgradeSmart.sh</file>
+                   					<file>upgradeSmart.command</file>
                						<outputFile>${package.dir}/upgradeSmart.sh</outputFile>
                						<replacements>
                    						<replacement>
@@ -126,15 +127,7 @@
                    						<replacement>
                        							<token>%CP2%</token>
                        							<value>:lib/${project.build.finalName}.jar</value>
-                   						</replacement>
-                   						<replacement>
-                       							<token>%TARGETVERSION%</token>
-                       							<value>${target.db.version}</value>
-                   						</replacement>             
-                   						<replacement>
-                       							<token>%SOURCEVERSION%</token>
-                       							<value>${source.db.version}</value>
-                   						</replacement>    
+                   						</replacement>   
                						</replacements>
            					</configuration>
                				</execution>
@@ -179,6 +172,10 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.5</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.wcs.smart</groupId>
+			<artifactId>SmartUpgradeCore</artifactId>
+			<version>1.1.2</version>
+		</dependency>
 	</dependencies>
 </project>
