@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -35,7 +36,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -154,31 +154,30 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	}	
 	
 	private void createListControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout(2, false);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		container.setLayout(layout);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		
-		listViewer = new TableViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		Label label = new Label(parent, SWT.NONE);
+		label.setText(Messages.ListAttributeInfoComposite_Values);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+
+		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		listViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		listViewer.setLabelProvider(new NamedItemLabelProvider());
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		listViewer.getControl().setEnabled(false);
 
-		Composite buttonsCmp = new Composite(container, SWT.NONE);
-		buttonsCmp.setLayout(new GridLayout(1, false));
-		buttonsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		new Label(parent, SWT.NONE);
 		
-		Button btnEnable = new Button(buttonsCmp, SWT.PUSH);
-		btnEnable.setText("Enable");
-		
-		Button btnRename = new Button(buttonsCmp, SWT.PUSH);
-		btnRename.setText("Rename");
+		Button btnEdit = new Button(parent, SWT.PUSH);
+		btnEdit.setText(Messages.ListAttributeInfoComposite_Button_Edit);
+		btnEdit.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Dialog dialog = new ListItemsConfigDialog(getSourceObject());
+				dialog.open();
+			}
+		});
 	}
 
 	private void updateListControl() {
