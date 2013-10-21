@@ -33,6 +33,10 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Button_Add;
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
+	public static String ListAttributeInfoComposite_Button_Edit;
+	public static String ListAttributeInfoComposite_Values;
+	public static String ListItemsConfigDialog_Message;
+	public static String ListItemsConfigDialog_Title;
 	public static String TranslatableNameComposite_Button_Translate;
 	static {
 		// initialize resource bundle
