@@ -18,6 +18,10 @@
             ca_property=".cmAttribute.node.model.conservationArea"
             class="org.wcs.smart.dataentry.model.CmAttributeOption">
       </class>
+      <class
+            ca_property=".configurableModel.conservationArea"
+            class="org.wcs.smart.dataentry.model.CmAttributeTreeNode">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.menus">

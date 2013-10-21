@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ui.properties;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelection;
@@ -71,6 +74,8 @@ public class TreeEditorField  {
 	protected Text txtText;
 	private Button btnDownArrow;
 	
+	private Collection<Listener> listeners = null; 
+	
 	private Listener focusListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
@@ -90,6 +95,7 @@ public class TreeEditorField  {
 	 * @param attribute
 	 */
 	public TreeEditorField(){
+		listeners = new ArrayList<Listener>();
 	}
 	
 	
@@ -102,6 +108,14 @@ public class TreeEditorField  {
 	}
 
 
+	/**
+	 * Adds a selection changed event
+	 * @param listener
+	 */
+	public void addSelectionChangedListener(Listener listener){
+		listeners.add(listener);
+	}
+	
 	/*
 	 * Updates the ui text field with the given selection.
 	 */
@@ -116,6 +130,12 @@ public class TreeEditorField  {
 		}
 		txtText.selectAll();
 		validate();
+		
+		//fire events
+		Event event = new Event();
+		for (Listener listener : listeners){
+			listener.handleEvent(event);
+		}
 	}
 	
 	/**
@@ -123,10 +143,6 @@ public class TreeEditorField  {
 	 */
 	public void createComposite(Composite parent) {
 		parent.getShell().getDisplay().addFilter(SWT.FocusIn, focusListener);
-		
-//		Label lbl = new Label(parent, SWT.NONE);
-//		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
-//		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dropDownComposite = new Composite(parent,  SWT.BORDER );
 		dropDownComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));

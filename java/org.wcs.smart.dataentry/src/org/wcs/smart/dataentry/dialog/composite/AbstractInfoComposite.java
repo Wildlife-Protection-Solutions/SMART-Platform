@@ -30,6 +30,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -75,6 +76,12 @@ public abstract class AbstractInfoComposite extends Composite {
 
 	public abstract Object getSourceObject();
 	
+	protected void setButtonLayoutData(Button button){
+		GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
+		Point minSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+		data.widthHint = Math.max(90, minSize.x);
+		button.setLayoutData(data);
+	}
 	protected void createAddButtons(Composite parent) {
 		Button btnAddGroup = new Button(parent, SWT.PUSH);
 		btnAddGroup.setText(Messages.AbstractInfoComposite_Button_AddGroup);
@@ -84,7 +91,8 @@ public abstract class AbstractInfoComposite extends Composite {
 				addSubGroup();
 			}
 		});
-
+		setButtonLayoutData (btnAddGroup);
+		
 		Button btnAddCategory = new Button(parent, SWT.PUSH);
 		btnAddCategory.setText(Messages.AbstractInfoComposite_Button_AddCategory);
 		btnAddCategory.addSelectionListener(new SelectionAdapter() {
@@ -93,6 +101,7 @@ public abstract class AbstractInfoComposite extends Composite {
 				addDatamodelCategory();
 			}
 		});
+		setButtonLayoutData (btnAddCategory);
 	}
 
 	protected Composite createContentContainer(Composite parent) {

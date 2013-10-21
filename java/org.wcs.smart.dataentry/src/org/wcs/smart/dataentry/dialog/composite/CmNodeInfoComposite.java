@@ -51,7 +51,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
 		super(parent, model, session);
-		this.setLayout(new GridLayout(1, false));
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginHeight = 0;
+		this.setLayout(layout);
+		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (isGroup)
 			createGroupControls();
@@ -60,8 +63,13 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	}
 	
 	private void createGroupControls() {
-		createAddButtons(this);
-		createDeleteButton();
+		Composite buttonPanel = new Composite(this, SWT.NONE);
+		GridLayout layout = new GridLayout(3, false);
+		layout.marginWidth = layout.marginHeight = 0;
+		layout.marginBottom = 10;
+		buttonPanel.setLayout(layout);
+		createAddButtons(buttonPanel);
+		createDeleteButton(buttonPanel);
 		
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
@@ -69,10 +77,14 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	}
 
 	private void createCategoryControls() {
-		createDeleteButton();
+		Composite buttonPanel = new Composite(this, SWT.NONE);
+		GridLayout layout = new GridLayout(3, false);
+		layout.marginWidth = layout.marginHeight = 0;
+		layout.marginBottom = 10;
+		buttonPanel.setLayout(layout);
+		createDeleteButton(buttonPanel);
 		
 		Composite container = createContentContainer(this);
-
 		createDisplayNameControls(container);
 		
 		Label label = new Label(container, SWT.NONE);
@@ -117,8 +129,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		});
 	}
 
-	private void createDeleteButton() {
-		Button btnDelete = new Button(this, SWT.PUSH);
+	private void createDeleteButton(Composite parent) {
+		Button btnDelete = new Button(parent, SWT.PUSH);
 		btnDelete.setText(Messages.CmNodeInfoComposite_Button_Delete);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -126,6 +138,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				handleDeleteNode();
 			}
 		});
+		setButtonLayoutData(btnDelete);
 	}
 
 	private void handleDeleteNode() {
