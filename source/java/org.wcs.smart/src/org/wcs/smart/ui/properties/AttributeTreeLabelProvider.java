@@ -37,7 +37,8 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
   * Label provided for attribute tree
   * @author Emily
   *
-  */public  class AttributeTreeLabelProvider extends LabelProvider implements IColorProvider {
+  */
+public  class AttributeTreeLabelProvider extends LabelProvider implements IColorProvider {
 		private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 		private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 

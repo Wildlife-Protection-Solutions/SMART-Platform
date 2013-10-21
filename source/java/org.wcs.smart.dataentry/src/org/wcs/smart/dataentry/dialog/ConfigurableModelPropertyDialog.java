@@ -125,6 +125,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		btnEdit = new Button(container, SWT.PUSH);
 		btnEdit.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		((GridData)btnEdit.getLayoutData()).widthHint = 90;
 		btnEdit.setEnabled(false);
 		btnEdit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -145,7 +146,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				modelListViewer.setInput(getModelsList().toArray());
 				updateTreeViewer();
 			}
-		});
+		});		
 		
 		setTitle(Messages.ConfigurableModelPropertyDialog_Title);
 		setMessage(Messages.ConfigurableModelPropertyDialog_Message);

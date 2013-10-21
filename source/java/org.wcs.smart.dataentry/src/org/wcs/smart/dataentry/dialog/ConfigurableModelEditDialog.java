@@ -119,6 +119,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 				return ok;
 			}
 		});
+		modelTreeViewer.expandToLevel(2);
 		
 
 		Composite rightPanel = new Composite(container, SWT.NONE);

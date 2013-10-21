@@ -45,10 +45,19 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 	}
 	
 	private void createControls() {
-		this.setLayout(new GridLayout(1, false));
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginHeight = 0;
+		this.setLayout(layout);
+		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		createAddButtons(this);
+		Composite buttonPanel = new Composite(this, SWT.NONE);
+		layout = new GridLayout(2, false);
+		layout.marginWidth = layout.marginHeight = 0;
+		layout.marginBottom = 10;
+		buttonPanel.setLayout(layout);
+		createAddButtons(buttonPanel);
+
 		
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
