@@ -55,6 +55,9 @@ public class CyberTrackerProperties extends UuidItem {
 	
 	public static final double SIGHTING_ACCURACY_MIN_VALUE = 0.01;
 	public static final double SIGHTING_ACCURACY_MAX_VALUE = 49;
+	
+	public static final double TRACK_ACCURACY_MIN_VALUE = 1;
+	public static final double TRACK_ACCURACY_MAX_VALUE = 49;
 
 	public static final int SIGHTING_FIX_COUNT_MIN_VALUE = 1;
 	public static final int SIGHTING_FIX_COUNT_MAX_VALUE = 60;
@@ -117,8 +120,29 @@ public class CyberTrackerProperties extends UuidItem {
 	private Integer waypointTimer = 0; //Track Timer 
 	private Integer gpsTimeZone = 0; //GMT/UTC time offset
     private Integer skipButtonTimeout = 3;
-
-	//this value is not CT application parameter but it will be applied to all radio screens while generating application
+    
+	private boolean useTitleBar = false;
+	private boolean useLargeTitles = false;
+	private boolean useLargeTabs = false;
+	
+	private boolean disableEditing = false;
+	private boolean useSdCard = false;
+	private boolean testTime = true;
+	private boolean resetOnSync = false;
+	private boolean resetOnNext = true;
+	
+	private int trackAccuracy = 49;
+	private int trackTimer = 0;
+	
+	private boolean useGpsTime = false;
+	private boolean manualGps = false;
+	private boolean allowSkipManualGps = true;
+	
+	private String fieldMapFilename = ""; //$NON-NLS-1$
+	private boolean lock100 = false;
+	private boolean useMapOnSkip = true;
+	
+   
 	private boolean autoNext = true;
 	
 	private int storageTime = STORAGE_TIME_DEFAULT_VALUE; //indicates how many days ctx files will be stored in SMART storage
@@ -220,6 +244,135 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setExitPin(int exitPin) {
 		this.exitPin = exitPin;
+	}
+	
+	@Column(name="use_title_bar")
+	public boolean isUseTitleBar() {
+		return useTitleBar;
+	}
+	public void setUseTitleBar(boolean useTitleBar) {
+		this.useTitleBar = useTitleBar;
+	}
+	
+	@Column(name="large_tabs")
+	public boolean isUseLargeTabs() {
+		return useLargeTabs;
+	}
+	public void setUseLargeTabs(boolean useLargeTabs) {
+		this.useLargeTabs = useLargeTabs;
+	}
+	
+
+	@Column(name="large_titles")
+	public boolean isUseLargeTitles() {
+		return useLargeTitles;
+	}
+	public void setUseLargeTitles(boolean useLargeTitles) {
+		this.useLargeTitles = useLargeTitles;
+	}
+	
+	@Column(name="disable_editing")
+	public boolean isDisableEditing() {
+		return disableEditing;
+	}
+	public void setDisableEditing(boolean disableEditing) {
+		this.disableEditing = disableEditing;
+	}
+	
+	@Column(name="sd_card")
+	public boolean isUseSdCard() {
+		return useSdCard;
+	}
+	public void setUseSdCard(boolean useSdCard) {
+		this.useSdCard = useSdCard;
+	}
+	
+	@Column(name="test_time")
+	public boolean isTestTime() {
+		return testTime;
+	}
+	public void setTestTime(boolean testTime) {
+		this.testTime = testTime;
+	}
+	
+	@Column(name="reset_on_sync")
+	public boolean isResetOnSync() {
+		return resetOnSync;
+	}
+	public void setResetOnSync(boolean resetOnSync) {
+		this.resetOnSync = resetOnSync;
+	}
+	
+	@Column(name="reset_on_next")
+	public boolean isResetOnNext() {
+		return resetOnNext;
+	}
+	public void setResetOnNext(boolean resetOnNext) {
+		this.resetOnNext = resetOnNext;
+	}
+	
+	@Column(name="track_accuracy")
+	public int getTrackAccuracy() {
+		return trackAccuracy;
+	}
+	public void setTrackAccuracy(int trackAccuracy) {
+		this.trackAccuracy = trackAccuracy;
+	}
+	
+	@Column(name="track_timer")
+	public int getTrackTimer() {
+		return trackTimer;
+	}
+	public void setTrackTimer(int trackTimer) {
+		this.trackTimer = trackTimer;
+	}
+	
+	@Column(name="use_gps_time")
+	public boolean isUseGpsTime() {
+		return useGpsTime;
+	}
+	public void setUseGpsTime(boolean useGpsTime) {
+		this.useGpsTime = useGpsTime;
+	}
+	
+	@Column(name="manual_gps")
+	public boolean isManualGps() {
+		return manualGps;
+	}
+	public void setManualGps(boolean manualGps) {
+		this.manualGps = manualGps;
+	}
+	
+	@Column(name="allow_skip_manual")
+	public boolean isAllowSkipManualGps() {
+		return allowSkipManualGps;
+	}
+	public void setAllowSkipManualGps(boolean allowSkipManualGps) {
+		this.allowSkipManualGps = allowSkipManualGps;
+	}
+	
+	@Column(name="field_map_filename")
+	public String getFieldMapFilename() {
+		return fieldMapFilename;
+	}
+	public void setFieldMapFilename(String fieldMapFilename) {
+		this.fieldMapFilename = fieldMapFilename;
+	}
+	
+	@Column(name="lock_100")
+	public boolean isLock100() {
+		return lock100;
+	}
+	public void setLock100(boolean lock100) {
+		this.lock100 = lock100;
+	}
+	
+	@Column(name="use_map_on_skip")
+	public boolean isUseMapOnSkip() {
+		return useMapOnSkip;
+	}
+	public void setUseMapOnSkip(boolean useMapOnSkip) {
+		this.useMapOnSkip = useMapOnSkip;
 	}
 	
 }

@@ -133,6 +133,22 @@ public class CyberTrackerStartupJob extends Job {
 								"waypoint_timer INTEGER, "+ //$NON-NLS-1$
 								"gps_time_zone INTEGER, "+ //$NON-NLS-1$
 								"skip_button_timeout INTEGER, "+ //$NON-NLS-1$
+								"use_title_bar BOOLEAN, "+ //$NON-NLS-1$
+								"large_titles BOOLEAN, "+ //$NON-NLS-1$
+								"large_tabs BOOLEAN, "+ //$NON-NLS-1$
+								"disable_editing BOOLEAN, "+ //$NON-NLS-1$
+								"sd_card BOOLEAN, "+ //$NON-NLS-1$
+								"test_time BOOLEAN, "+ //$NON-NLS-1$
+								"reset_on_sync BOOLEAN, "+ //$NON-NLS-1$
+								"reset_on_next BOOLEAN, "+ //$NON-NLS-1$
+								"track_accuracy int, "+ //$NON-NLS-1$
+								"track_timer int, "+ //$NON-NLS-1$
+								"use_gps_time BOOLEAN, "+ //$NON-NLS-1$
+								"manual_gps BOOLEAN, "+ //$NON-NLS-1$
+								"allow_skip_manual BOOLEAN, "+ //$NON-NLS-1$
+								"field_map_filename VARCHAR(16384), "+ //$NON-NLS-1$
+								"lock_100 BOOLEAN, "+ //$NON-NLS-1$
+								"use_map_on_skip BOOLEAN, "+ //$NON-NLS-1$
 								"PRIMARY KEY (UUID))"; //$NON-NLS-1$
 
 						String alterSql = "ALTER TABLE smart.cybertracker_properties "+ //$NON-NLS-1$
