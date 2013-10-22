@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -43,9 +44,11 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  */
 public class CmListItemLabelProvider extends NamedItemLabelProvider implements IColorProvider{
 	private Session session = null;
+	private ConfigurableModel model;
 	
-	public CmListItemLabelProvider(Session currentSession){
+	public CmListItemLabelProvider(Session currentSession, ConfigurableModel model) {
 		this.session = currentSession;
+		this.model = model;
 	}
 	
 	
@@ -64,8 +67,9 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 
 	private CmAttributeListItem getListItem(Object element){
 		if (element instanceof AttributeListItem){
-			@SuppressWarnings("rawtypes")
-			List items = session.createCriteria(CmAttributeListItem.class).add(Restrictions.eq("listItem", ((AttributeListItem) element))).list(); //$NON-NLS-1$
+			List<?> items = session.createCriteria(CmAttributeListItem.class)
+					.add(Restrictions.eq("listItem", ((AttributeListItem) element)))  //$NON-NLS-1$
+					.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
 			if (items.size() > 0){
 				CmAttributeListItem node = (CmAttributeListItem) items.get(0);
 				return node;

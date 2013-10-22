@@ -68,7 +68,7 @@ public class RenameListDialog extends AbstractRenameDialog {
 		final TableViewer tree = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		
 		tree.setContentProvider(ArrayContentProvider.getInstance());
-		tree.setLabelProvider(new CmListItemLabelProvider(currentSession));
+		tree.setLabelProvider(new CmListItemLabelProvider(currentSession, editModel));
 		tree.setInput(attribute.getActiveListItems());
 
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {

@@ -130,7 +130,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getSession()));
+		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getSession(), getModel()));
 		attributeTreeViewer.setContentProvider(new AttributeTreeContentProvider(true, false));
 	}
 	
@@ -146,7 +146,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (!MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage)){
 					return;
 				}
-				RenameTreeDialog dialog = new RenameTreeDialog(getShell(),getSourceObject().getAttribute(),getSourceObject().getNode().getModel(),getSession());
+				RenameTreeDialog dialog = new RenameTreeDialog(getShell(),getSourceObject().getAttribute(),getModel(),getSession());
 				dialog.open();
 				
 				attributeTreeViewer.refresh();
