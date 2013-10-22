@@ -117,12 +117,12 @@ public class CyberTrackerProperties extends UuidItem {
 	
 	private Double sightingAccuracy = 49.0;
 	private Integer sightingFixCount = 1;
-	private Integer waypointTimer = 0; //Track Timer 
+	private Integer waypointTimer = 0; //aka Track Timer 
 	private Integer gpsTimeZone = 0; //GMT/UTC time offset
     private Integer skipButtonTimeout = 3;
     
 	private boolean useTitleBar = false;
-	private boolean useLargeTitles = false;
+	private boolean useLargeTitles = true;
 	private boolean useLargeTabs = false;
 	
 	private boolean disableEditing = false;
@@ -132,7 +132,6 @@ public class CyberTrackerProperties extends UuidItem {
 	private boolean resetOnNext = true;
 	
 	private int trackAccuracy = 49;
-	private int trackTimer = 0;
 	
 	private boolean useGpsTime = false;
 	private boolean manualGps = false;
@@ -317,14 +316,6 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setTrackAccuracy(int trackAccuracy) {
 		this.trackAccuracy = trackAccuracy;
-	}
-	
-	@Column(name="track_timer")
-	public int getTrackTimer() {
-		return trackTimer;
-	}
-	public void setTrackTimer(int trackTimer) {
-		this.trackTimer = trackTimer;
 	}
 	
 	@Column(name="use_gps_time")
