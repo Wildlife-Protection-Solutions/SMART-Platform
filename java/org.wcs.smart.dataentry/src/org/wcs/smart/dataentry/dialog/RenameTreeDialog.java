@@ -60,7 +60,7 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 		final TreeViewer tree = new TreeViewer(parent, SWT.MULTI | SWT.BORDER);
 		tree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tree.setContentProvider(new AttributeTreeContentProvider(true, false));
-		tree.setLabelProvider(new CmTreeLabelProvider(currentSession));
+		tree.setLabelProvider(new CmTreeLabelProvider(currentSession, editModel));
 		tree.setInput(attribute.getTree());
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			

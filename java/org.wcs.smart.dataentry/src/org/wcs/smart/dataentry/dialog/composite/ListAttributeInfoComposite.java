@@ -162,7 +162,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		listViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession()));
+		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession(), getModel()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	//	listViewer.getControl().setEnabled(false);
@@ -180,7 +180,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 					return;
 				}
 				
-				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject().getAttribute(), getSourceObject().getNode().getModel(),getSession());
+				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject().getAttribute(), getModel(), getSession());
 				dialog.open();
 						
 				updateListControl();

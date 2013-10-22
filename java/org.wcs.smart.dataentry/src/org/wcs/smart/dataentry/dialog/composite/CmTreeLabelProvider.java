@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
@@ -43,9 +44,11 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 
 	private Session session = null;
+	private ConfigurableModel model;
 	
-	public CmTreeLabelProvider(Session currentSession){
+	public CmTreeLabelProvider(Session currentSession, ConfigurableModel model) {
 		this.session = currentSession;
+		this.model = model;
 	}
 	
 	
@@ -64,8 +67,9 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 
 	private CmAttributeTreeNode getTreeNode(Object element){
 		if (element instanceof AttributeTreeNode){
-			@SuppressWarnings("rawtypes")
-			List items = session.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element))).list(); //$NON-NLS-1$
+			List<?> items = session.createCriteria(CmAttributeTreeNode.class)
+					.add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element)))  //$NON-NLS-1$
+					.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
 			if (items.size() > 0){
 				CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
 				return node;
