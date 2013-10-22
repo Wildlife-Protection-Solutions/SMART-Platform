@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -47,7 +51,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
 public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDialog {
 
 	private DataModel datamodel;
-	private Category category;
+	private List<Category> selectedCategories = new ArrayList<Category>();
 
 	private TreeViewer dmTreeViewer;
 	
@@ -61,7 +65,7 @@ public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDia
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 
-		dmTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
+		dmTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = 400;
 		dmTreeViewer.getControl().setLayoutData(gd);
@@ -72,13 +76,17 @@ public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDia
 		dmTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				category = null;
+				selectedCategories.clear();
+				
 				IStructuredSelection selection = (IStructuredSelection) dmTreeViewer.getSelection();
-				Object obj = selection.getFirstElement();
-				if (obj instanceof Category) {
-					category = (Category) obj;
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					if (type instanceof Category){
+						selectedCategories.add((Category)type);
+					}
 				}
-				getButton(IDialogConstants.OK_ID).setEnabled(category != null);
+				
+				getButton(IDialogConstants.OK_ID).setEnabled(selectedCategories.size() > 0);
 
 			}
 		});
@@ -112,7 +120,7 @@ public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDia
 		return true;
 	}
 
-	public Category getCategory() {
-		return category;
+	public List<Category> getCategories() {
+		return selectedCategories;
 	}
 }
