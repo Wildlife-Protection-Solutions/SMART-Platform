@@ -23,6 +23,10 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.util.List;
 
+import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -37,7 +41,7 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  * @author Emily
  *
  */
-public class CmListItemLabelProvider extends NamedItemLabelProvider {
+public class CmListItemLabelProvider extends NamedItemLabelProvider implements IColorProvider{
 	private Session session = null;
 	
 	public CmListItemLabelProvider(Session currentSession){
@@ -47,17 +51,43 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider {
 	
 	@Override
 	public String getText(Object element) {
+		CmAttributeListItem node = getListItem(element);
+		if (node != null){
+			String label = node.findNameNull(SmartDB.getCurrentLanguage());
+			if (label != null){
+				return label;
+			}
+		}
+		return super.getText(element);
+	}
+
+
+	private CmAttributeListItem getListItem(Object element){
 		if (element instanceof AttributeListItem){
 			@SuppressWarnings("rawtypes")
 			List items = session.createCriteria(CmAttributeListItem.class).add(Restrictions.eq("listItem", ((AttributeListItem) element))).list(); //$NON-NLS-1$
 			if (items.size() > 0){
 				CmAttributeListItem node = (CmAttributeListItem) items.get(0);
-				String label = node.findNameNull(SmartDB.getCurrentLanguage());
-				if (label != null){
-					return label;
-				}
+				return node;
 			}
 		}
-		return super.getText(element);
+		return null;
+	}
+	
+	@Override
+	public Color getForeground(Object element) {
+		CmAttributeListItem node = getListItem(element);
+		if (node != null){
+			if (!node.getIsActive()){
+				return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			}
+		}
+		return null;
+	}
+
+
+	@Override
+	public Color getBackground(Object element) {
+		return null;
 	}
 }

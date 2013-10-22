@@ -21,14 +21,12 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 
 /**
@@ -39,21 +37,10 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
  */
 @Entity
 @Table(name = "smart.cm_attribute_list")
-public class CmAttributeListItem extends NamedItem {
+public class CmAttributeListItem extends CmAttributeItem {
 
 	private AttributeListItem listItem;
-	private ConfigurableModel configurableModel;
-	private boolean isActive;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
-	public ConfigurableModel getConfigurableModel() {
-		return configurableModel;
-	}
-	public void setConfigurableModel(ConfigurableModel configurableModel) {
-		this.configurableModel = configurableModel;
-	}
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="list_element_uuid", referencedColumnName="uuid")
 	public AttributeListItem getListItem() {
@@ -63,12 +50,6 @@ public class CmAttributeListItem extends NamedItem {
 		this.listItem = listItem;
 	}
 	
-	@Column(name="is_active")
-	public boolean getIsActive() {
-		return isActive;
-	}
-	public void setIsActive(boolean isActive) {
-		this.isActive = isActive;
-	}
+	
 	
 }

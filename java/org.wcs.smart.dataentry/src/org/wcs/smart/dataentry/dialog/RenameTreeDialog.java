@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -39,6 +40,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
@@ -55,7 +57,7 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 	}
 
 	protected Viewer createItemViewer(Composite parent) {
-		final TreeViewer tree = new TreeViewer(parent);
+		final TreeViewer tree = new TreeViewer(parent, SWT.MULTI | SWT.BORDER);
 		tree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tree.setContentProvider(new AttributeTreeContentProvider(true, false));
 		tree.setLabelProvider(new CmTreeLabelProvider(currentSession));
@@ -69,25 +71,34 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 				CmAttributeTreeNode currentCmNode = null;
 				if (x instanceof AttributeTreeNode){
 					currentNode = (AttributeTreeNode) x;
-					@SuppressWarnings("rawtypes")
-					List items = currentSession.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", currentNode)).list(); //$NON-NLS-1$
-					if (items.size() > 0){
-						currentCmNode = (CmAttributeTreeNode) items.get(0);
-					}
+					currentCmNode = getConfiguredNode(x);
 				}
-				RenameTreeDialog.this.setCurrentSelection(currentNode,  currentCmNode);
+				RenameTreeDialog.this.setCurrentSelection(currentNode, currentCmNode);
 			}
 		});
+		tree.expandToLevel(2);
 		return tree;
 	}
 	
-
+	private CmAttributeTreeNode getConfiguredNode(Object x){
+		if (x instanceof AttributeTreeNode) {
+			AttributeTreeNode tmp = (AttributeTreeNode) x;
+			@SuppressWarnings("rawtypes")
+			List items = currentSession.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", tmp)).list(); //$NON-NLS-1$
+			if (items.size() > 0){
+				return  (CmAttributeTreeNode) items.get(0);
+			}
+		}
+		return null;
+	}
+	
 
 	@Override
-	protected NamedItem createNewAlaisItem() {
+	protected CmAttributeItem createNewAlaisItem(NamedItem dmItem) {
 		CmAttributeTreeNode currentCmNode = new CmAttributeTreeNode();
 		currentCmNode.setConfigurableModel(editModel);
-		currentCmNode.setDmTreeNode((AttributeTreeNode) getCurrentDataModelSelection());
+		currentCmNode.setDmTreeNode((AttributeTreeNode) dmItem);
+		currentCmNode.setIsActive(true);
 		return currentCmNode;
 		
 	}
@@ -95,5 +106,39 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 	@Override
 	protected String getDialogMessage() {
 		return Messages.RenameTreeDialog_DialogMessage;
+	}
+	
+	private void processItem(NamedItem dmNode, boolean enable){
+		CmAttributeTreeNode item = getConfiguredNode(dmNode);
+		if (item == null){
+			item = (CmAttributeTreeNode) createNewAlaisItem(dmNode);
+		}
+		item.setIsActive(enable);
+		currentSession.saveOrUpdate(item);
+	}
+	
+	@Override
+	protected void enableItem(NamedItem dmNode, boolean enable){
+		processItem(dmNode, enable);
+		
+		if (!enable){
+			//process all children
+			AttributeTreeNode node = (AttributeTreeNode) dmNode;
+			ArrayList<AttributeTreeNode> itemsToProcess = new ArrayList<AttributeTreeNode>();
+			itemsToProcess.addAll(node.getActiveChildren());
+			while(itemsToProcess.size() > 0){
+				AttributeTreeNode kid = itemsToProcess.remove(0);
+				processItem(kid, enable);
+				itemsToProcess.addAll(kid.getActiveChildren());
+			}
+		
+		}else{
+			//need to enable all parents
+			AttributeTreeNode parent = ((AttributeTreeNode)dmNode).getParent();
+			while(parent != null){
+				processItem(parent, enable);
+				parent = parent.getParent();
+			}
+		}
 	}
 }

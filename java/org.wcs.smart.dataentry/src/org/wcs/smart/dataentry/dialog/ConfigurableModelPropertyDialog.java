@@ -108,7 +108,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				try {
 					ConfigurableModel cm = new ConfigurableModel();
 					cm.setConservationArea(SmartDB.getCurrentConservationArea());
-					cm.setName("New Configurable Model");
+					cm.setName(Messages.ConfigurableModelPropertyDialog_ConfigurableModelDeafultName);
 					cm.updateName(SmartDB.getCurrentLanguage(), cm.getName());
 					Dialog dialog = new ConfigurableModelEditDialog(cm);
 					dialog.open();

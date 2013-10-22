@@ -7,6 +7,7 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_Button_AddCategory;
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_DisplayName;
+	public static String AbstractInfoComposite_NewGroupDefaultName;
 	public static String AbstractRenameDialog_ConfiguredName;
 	public static String AbstractRenameDialog_DataModelColumnName;
 	public static String AbstractRenameDialog_LanguageColumnName;
@@ -29,6 +30,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditDialog_Title;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
+	public static String ConfigurableModelPropertyDialog_ConfigurableModelDeafultName;
 	public static String ConfigurableModelPropertyDialog_LoadModelsListError;
 	public static String ConfigurableModelPropertyDialog_Message;
 	public static String ConfigurableModelPropertyDialog_Title;

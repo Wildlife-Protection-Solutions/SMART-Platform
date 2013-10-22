@@ -23,6 +23,9 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -37,9 +40,10 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
  * @author Emily
  *
  */
-public class CmTreeLabelProvider extends AttributeTreeLabelProvider{
+public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 
 	private Session session = null;
+	
 	public CmTreeLabelProvider(Session currentSession){
 		this.session = currentSession;
 	}
@@ -47,17 +51,43 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider{
 	
 	@Override
 	public String getText(Object element) {
+		CmAttributeTreeNode node = getTreeNode(element);
+		if (node != null){
+			String label = node.findNameNull(SmartDB.getCurrentLanguage());
+			if (label != null){
+				return label;
+			}
+		}
+		return super.getText(element);
+	}
+	
+
+	private CmAttributeTreeNode getTreeNode(Object element){
 		if (element instanceof AttributeTreeNode){
 			@SuppressWarnings("rawtypes")
 			List items = session.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element))).list(); //$NON-NLS-1$
 			if (items.size() > 0){
 				CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
-				String label = node.findNameNull(SmartDB.getCurrentLanguage());
-				if (label != null){
-					return label;
-				}
+				return node;
 			}
 		}
-		return super.getText(element);
+		return null;
+	}
+	
+	@Override
+	public Color getForeground(Object element) {
+		CmAttributeTreeNode node = getTreeNode(element);
+		if (node != null){
+			if (!node.getIsActive()){
+				return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			}
+		}
+		return null;
+	}
+
+
+	@Override
+	public Color getBackground(Object element) {
+		return null;
 	}
 }
