@@ -165,13 +165,14 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		listViewer.getControl().setEnabled(false);
+	//	listViewer.getControl().setEnabled(false);
 
 		new Label(parent, SWT.NONE);
 		
 		Button btnEdit = new Button(parent, SWT.PUSH);
 		btnEdit.setText(Messages.ListAttributeInfoComposite_Button_Edit);
-		btnEdit.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
+		setButtonLayoutData(btnEdit);
+		((GridData)btnEdit.getLayoutData()).horizontalAlignment = SWT.RIGHT;
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -182,6 +183,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject().getAttribute(), getSourceObject().getNode().getModel(),getSession());
 				dialog.open();
 						
+				updateListControl();
 				listViewer.refresh();
 				fireModelChanged();
 			}

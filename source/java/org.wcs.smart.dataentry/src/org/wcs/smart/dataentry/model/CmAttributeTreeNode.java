@@ -21,14 +21,12 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
 /**
@@ -40,11 +38,9 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
  */
 @Entity
 @Table(name = "smart.cm_attribute_tree_node")
-public class CmAttributeTreeNode extends NamedItem {
+public class CmAttributeTreeNode extends CmAttributeItem {
 	
 	private AttributeTreeNode dmTreeNode;
-	private ConfigurableModel configurableModel;
-	private boolean isActive;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="dm_tree_node_uuid", referencedColumnName="uuid")
@@ -54,26 +50,4 @@ public class CmAttributeTreeNode extends NamedItem {
 	public void setDmTreeNode(AttributeTreeNode dmTreeNode) {
 		this.dmTreeNode = dmTreeNode;
 	}
-	
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
-	public ConfigurableModel getConfigurableModel() {
-		return configurableModel;
-	}
-	
-	public void setConfigurableModel(ConfigurableModel configurableModel) {
-		this.configurableModel = configurableModel;
-	}
-	
-	
-	@Column(name="is_active")
-	public boolean getIsActive() {
-		return isActive;
-	}
-	public void setIsActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-	
-	
 }

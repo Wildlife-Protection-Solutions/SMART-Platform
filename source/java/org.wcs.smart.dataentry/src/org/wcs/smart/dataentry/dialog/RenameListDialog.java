@@ -23,16 +23,19 @@ package org.wcs.smart.dataentry.dialog;
 
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.NamedItem;
@@ -40,6 +43,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -58,9 +62,11 @@ public class RenameListDialog extends AbstractRenameDialog {
 	}
 
 	protected Viewer createItemViewer(Composite parent) {
-		final ListViewer tree = new ListViewer(parent);
-		tree.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite tableComp = new Composite(parent, SWT.NONE);
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		final TableViewer tree = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		
 		tree.setContentProvider(ArrayContentProvider.getInstance());
 		tree.setLabelProvider(new CmListItemLabelProvider(currentSession));
 		tree.setInput(attribute.getActiveListItems());
@@ -74,27 +80,26 @@ public class RenameListDialog extends AbstractRenameDialog {
 				CmAttributeListItem currentCmNode = null;
 				if (x instanceof AttributeListItem) {
 					currentNode = (AttributeListItem) x;
-					@SuppressWarnings("rawtypes")
-					List items = currentSession
-							.createCriteria(CmAttributeListItem.class)
-							.add(Restrictions.eq("listItem", currentNode)).list(); //$NON-NLS-1$
-					if (items.size() > 0) {
-						currentCmNode = (CmAttributeListItem) items.get(0);
-					}
+					currentCmNode = getConfiguredNode(x);
 				}
 				RenameListDialog.this.setCurrentSelection(currentNode,
 						currentCmNode);
 			}
 		});
+		
+		TableColumnLayout ll = new TableColumnLayout();
+		ll.setColumnData(new TableColumn(tree.getTable(),SWT.NONE), new ColumnWeightData(100));
+		tableComp.setLayout(ll);
+		
 		return tree;
 	}
 
 	@Override
-	protected NamedItem createNewAlaisItem() {
+	protected CmAttributeItem createNewAlaisItem(NamedItem dmItem) {
 		CmAttributeListItem currentCmNode = new CmAttributeListItem();
 		currentCmNode.setConfigurableModel(editModel);
-		currentCmNode
-				.setListItem((AttributeListItem) getCurrentDataModelSelection());
+		currentCmNode.setListItem((AttributeListItem) dmItem);
+		currentCmNode.setIsActive(true);
 		return currentCmNode;
 
 	}
@@ -102,5 +107,27 @@ public class RenameListDialog extends AbstractRenameDialog {
 	@Override
 	protected String getDialogMessage() {
 		return Messages.RenameListDialog_DialogMessage;
+	}
+	
+	private CmAttributeListItem getConfiguredNode(Object x){
+		if (x instanceof AttributeListItem) {
+			AttributeListItem tmp = (AttributeListItem) x;
+			@SuppressWarnings("rawtypes")
+			List items = currentSession.createCriteria(CmAttributeListItem.class).add(Restrictions.eq("listItem", tmp)).list(); //$NON-NLS-1$
+			if (items.size() > 0) {
+				return (CmAttributeListItem) items.get(0);
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	protected void enableItem(NamedItem dmNode, boolean enable){
+		CmAttributeListItem item = getConfiguredNode(dmNode);
+		if (item == null){
+			item = (CmAttributeListItem) createNewAlaisItem(dmNode);
+		}
+		item.setIsActive(enable);
+		currentSession.saveOrUpdate(item);
 	}
 }

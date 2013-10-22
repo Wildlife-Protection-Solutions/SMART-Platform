@@ -137,7 +137,9 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createRenameButton(Composite container) {
 		Button btnRename = new Button(container, SWT.PUSH);
 		btnRename.setText(Messages.TreeAttributeInfoComposite_RenameButton);
-		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+		setButtonLayoutData(btnRename);
+		((GridData)btnRename.getLayoutData()).horizontalAlignment = SWT.RIGHT;
+		((GridData)btnRename.getLayoutData()).horizontalSpan = 2;
 		btnRename.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

@@ -29,15 +29,20 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -48,8 +53,10 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Rename dialog for providing aliases for configurable model tree and list attribute items 
@@ -66,7 +73,9 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	private TableViewer nameTable ;
 	
 	private NamedItem dmNode;
-	private NamedItem cmNode;
+	private CmAttributeItem cmNode;
+	
+	private Button btnEnable;
 	
 	public AbstractRenameDialog(Shell parentShell, Attribute attribute, ConfigurableModel editModel, Session currentSession) {
 		super(parentShell);
@@ -84,10 +93,55 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 		SashForm comp = new SashForm(parent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
-		itemViewer = createItemViewer(comp);
+		Composite left = new Composite(comp, SWT.NONE);
+		GridLayout gl = new GridLayout();
+		gl.marginHeight = gl.marginWidth = 0;
+		left.setLayout(gl);
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		itemViewer = createItemViewer(left);
+		
+		Composite btnPanel = new Composite(left, SWT.NONE);
+		GridLayout gla = new GridLayout();
+		gla.marginHeight = gla.marginWidth = 0;
+		btnPanel.setLayout(gla);
+		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,false, false));
+		
+		btnEnable = new Button(btnPanel, SWT.PUSH);
+		GridData gd = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
+		gd.verticalIndent = 2;
+		gd.horizontalIndent = 2;
+		btnEnable.setLayoutData(gd);
+		btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		btnEnable.setEnabled(false);
+		btnEnable.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean enable = true;
+				if (btnEnable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
+					enable = false;
+				}
+				IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					Object type = iterator.next();
+					if (type instanceof NamedItem){
+						enableItem((NamedItem)type, enable);
+					}
+					
+				}
+				currentSession.flush();
+				
+				itemViewer.refresh();
+				updateEnableButtonText();
+			}
+		});
+		super.setButtonLayoutData(btnEnable);
+		
 		createNameTable(comp);
 		
-		comp.setWeights(new int[]{40,60});
+		comp.setWeights(new int[]{35,65});
+		itemViewer.refresh();
+		
 		
 		return parent;
 	}
@@ -169,7 +223,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 				}else if(!dmNode.findName(lang).equals(newValue)){
 					
 					if (cmNode == null){
-						cmNode = createNewAlaisItem();
+						cmNode = createNewAlaisItem(dmNode);
 					}
 					cmNode.updateName(((Language)element), (String)value);
 				}
@@ -224,8 +278,6 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 			}
 		});
 		
-		
-		
 		nameTable.setInput(SmartDB.getCurrentConservationArea().getLanguages());
 		nameTable.getTable().setEnabled(false);
 	}
@@ -262,20 +314,23 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	 * @param dmNode
 	 * @param cmNode
 	 */
-	public void setCurrentSelection(NamedItem dmNode, NamedItem cmNode){
+	public void setCurrentSelection(NamedItem dmNode, CmAttributeItem cmNode){
 		this.dmNode = dmNode;
 		this.cmNode = cmNode;
 		nameTable.refresh();
 		
 		nameTable.getTable().setEnabled(dmNode != null);
+		btnEnable.setEnabled(dmNode != null);
+		updateEnableButtonText();
 	}
 	
-	/**
-	 * The current selected data model item.
-	 * @return
-	 */
-	public NamedItem getCurrentDataModelSelection(){
-		return this.dmNode;
+	private void updateEnableButtonText(){
+
+		if (this.cmNode == null || this.cmNode.getIsActive()){
+			btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		}else{
+			btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		}
 	}
 	
 	/**
@@ -287,13 +342,23 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	
 	/**
 	 * Creates a new alias database object
+	 * @param the current selected data model item
 	 * @return
 	 */
-	protected abstract NamedItem createNewAlaisItem();
+	protected abstract CmAttributeItem createNewAlaisItem(NamedItem dmItem);
 	
 	/**
 	 * The dialog message
 	 * @return
 	 */
 	protected abstract String getDialogMessage();
+	
+	/**
+	 * Enable or disable the configured node associated with the given data model node.
+	 * 
+	 * @param dmNode
+	 * @param enable
+	 */
+	protected abstract void enableItem(NamedItem dmNode, boolean enable);
+	
 }

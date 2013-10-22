@@ -144,7 +144,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	protected void addSubGroup() {
 		CmNode node = new CmNode();
 		node.setModel(getModel());
-		node.setName("New SubGroup");
+		node.setName(Messages.AbstractInfoComposite_NewGroupDefaultName);
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
 		addToParent(node);
 	}
