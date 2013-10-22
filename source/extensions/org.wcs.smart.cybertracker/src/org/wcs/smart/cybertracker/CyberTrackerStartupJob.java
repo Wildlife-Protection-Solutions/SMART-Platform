@@ -142,7 +142,6 @@ public class CyberTrackerStartupJob extends Job {
 								"reset_on_sync BOOLEAN, "+ //$NON-NLS-1$
 								"reset_on_next BOOLEAN, "+ //$NON-NLS-1$
 								"track_accuracy int, "+ //$NON-NLS-1$
-								"track_timer int, "+ //$NON-NLS-1$
 								"use_gps_time BOOLEAN, "+ //$NON-NLS-1$
 								"manual_gps BOOLEAN, "+ //$NON-NLS-1$
 								"allow_skip_manual BOOLEAN, "+ //$NON-NLS-1$

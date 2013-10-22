@@ -915,7 +915,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		ctProperties.setResetOnSync(btnResetOnSync.getSelection());
 		ctProperties.setResetOnNext(btnResetOnNext.getSelection());
 		ctProperties.setTrackAccuracy( Integer.valueOf(txtTrackAccuracy.getText()) );
-		ctProperties.setTrackTimer( Integer.valueOf(txtTrackTimer.getText()) );
 		ctProperties.setUseGpsTime(btnUseGpsTime.getSelection());
 		ctProperties.setManualGps(btnManualGPS.getSelection());
 		ctProperties.setAllowSkipManualGps(btnAllowSkipManual.getSelection());
