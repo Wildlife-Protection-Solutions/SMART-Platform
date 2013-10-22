@@ -7,6 +7,9 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_Button_AddCategory;
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_DisplayName;
+	public static String AbstractRenameDialog_ConfiguredName;
+	public static String AbstractRenameDialog_DataModelColumnName;
+	public static String AbstractRenameDialog_LanguageColumnName;
 	public static String CmAttributeInfoComposite_Attribute;
 	public static String CmAttributeInfoComposite_Key;
 	public static String CmAttributeInfoComposite_Option_DefaultValue;
@@ -35,9 +38,15 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Title;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_Values;
-	public static String ListItemsConfigDialog_Message;
-	public static String ListItemsConfigDialog_Title;
+	public static String ListAttributeInfoComposite_WarnDialogMessage;
+	public static String ListAttributeInfoComposite_WarnDialogTitle;
+	public static String RenameListDialog_DialogMessage;
+	public static String RenameTreeDialog_DialogMessage;
 	public static String TranslatableNameComposite_Button_Translate;
+	public static String TreeAttributeInfoComposite_RenameButton;
+	public static String TreeAttributeInfoComposite_valueLabel;
+	public static String TreeAttributeInfoComposite_WarnMessage;
+	public static String TreeAttributeInfoComposite_WarnTitle;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

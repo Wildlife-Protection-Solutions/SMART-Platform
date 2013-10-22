@@ -25,33 +25,33 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
- * Label provider for configurable model trees which looks for
+ * Label provider for configurable model list item which looks for
  * alias first, then displays the default tree name.
  * 
  * @author Emily
  *
  */
-public class CmTreeLabelProvider extends AttributeTreeLabelProvider{
-
+public class CmListItemLabelProvider extends NamedItemLabelProvider {
 	private Session session = null;
-	public CmTreeLabelProvider(Session currentSession){
+	
+	public CmListItemLabelProvider(Session currentSession){
 		this.session = currentSession;
 	}
 	
 	
 	@Override
 	public String getText(Object element) {
-		if (element instanceof AttributeTreeNode){
+		if (element instanceof AttributeListItem){
 			@SuppressWarnings("rawtypes")
-			List items = session.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element))).list(); //$NON-NLS-1$
+			List items = session.createCriteria(CmAttributeListItem.class).add(Restrictions.eq("listItem", ((AttributeListItem) element))).list(); //$NON-NLS-1$
 			if (items.size() > 0){
-				CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
+				CmAttributeListItem node = (CmAttributeListItem) items.get(0);
 				String label = node.findNameNull(SmartDB.getCurrentLanguage());
 				if (label != null){
 					return label;

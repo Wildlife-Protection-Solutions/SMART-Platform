@@ -42,7 +42,6 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
@@ -125,6 +124,10 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	}
 
 	private void createTreeControl(Composite container) {
+		Label lblValues = new Label(container, SWT.NONE);
+		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		lblValues.setText(Messages.TreeAttributeInfoComposite_valueLabel);
+		
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getSession()));
@@ -133,12 +136,12 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	
 	private void createRenameButton(Composite container) {
 		Button btnRename = new Button(container, SWT.PUSH);
-		btnRename.setText("Rename Tree Nodes");
-		btnRename.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnRename.setText(Messages.TreeAttributeInfoComposite_RenameButton);
+		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
 		btnRename.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!MessageDialog.openConfirm(getShell(), "Edit Tree", "Modifying the names of nodes in this tree attribute will modify the nodes names for all places where this tree attribute is used in the configured data model.")){
+				if (!MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage)){
 					return;
 				}
 				RenameTreeDialog dialog = new RenameTreeDialog(getShell(),getSourceObject().getAttribute(),getSourceObject().getNode().getModel(),getSession());

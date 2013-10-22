@@ -23,10 +23,11 @@ package org.wcs.smart.dataentry.dialog;
 
 import java.util.List;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -36,64 +37,70 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 
 /**
- * Rename dialog for providing aliases for configurable model tree attribute nodes 
+ * Rename dialog for providing aliases for configurable model list attribute
+ * items
+ * 
  * @author Emily
- *
+ * 
  */
-public class RenameTreeDialog extends AbstractRenameDialog{
+public class RenameListDialog extends AbstractRenameDialog {
 
-	public RenameTreeDialog(Shell parentShell, Attribute attribute, ConfigurableModel editModel, Session currentSession) {
+	public RenameListDialog(Shell parentShell, Attribute attribute,
+			ConfigurableModel editModel, Session currentSession) {
 		super(parentShell, attribute, editModel, currentSession);
 	}
 
 	protected Viewer createItemViewer(Composite parent) {
-		final TreeViewer tree = new TreeViewer(parent);
-		tree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tree.setContentProvider(new AttributeTreeContentProvider(true, false));
-		tree.setLabelProvider(new CmTreeLabelProvider(currentSession));
-		tree.setInput(attribute.getTree());
+		final ListViewer tree = new ListViewer(parent);
+		tree.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.FILL, true, true));
+		tree.setContentProvider(ArrayContentProvider.getInstance());
+		tree.setLabelProvider(new CmListItemLabelProvider(currentSession));
+		tree.setInput(attribute.getActiveListItems());
+
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((StructuredSelection)tree.getSelection()).getFirstElement();
-				AttributeTreeNode currentNode = null;
-				CmAttributeTreeNode currentCmNode = null;
-				if (x instanceof AttributeTreeNode){
-					currentNode = (AttributeTreeNode) x;
+				Object x = ((StructuredSelection) tree.getSelection())
+						.getFirstElement();
+				AttributeListItem currentNode = null;
+				CmAttributeListItem currentCmNode = null;
+				if (x instanceof AttributeListItem) {
+					currentNode = (AttributeListItem) x;
 					@SuppressWarnings("rawtypes")
-					List items = currentSession.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", currentNode)).list(); //$NON-NLS-1$
-					if (items.size() > 0){
-						currentCmNode = (CmAttributeTreeNode) items.get(0);
+					List items = currentSession
+							.createCriteria(CmAttributeListItem.class)
+							.add(Restrictions.eq("listItem", currentNode)).list(); //$NON-NLS-1$
+					if (items.size() > 0) {
+						currentCmNode = (CmAttributeListItem) items.get(0);
 					}
 				}
-				RenameTreeDialog.this.setCurrentSelection(currentNode,  currentCmNode);
+				RenameListDialog.this.setCurrentSelection(currentNode,
+						currentCmNode);
 			}
 		});
 		return tree;
 	}
-	
-
 
 	@Override
 	protected NamedItem createNewAlaisItem() {
-		CmAttributeTreeNode currentCmNode = new CmAttributeTreeNode();
+		CmAttributeListItem currentCmNode = new CmAttributeListItem();
 		currentCmNode.setConfigurableModel(editModel);
-		currentCmNode.setDmTreeNode((AttributeTreeNode) getCurrentDataModelSelection());
+		currentCmNode
+				.setListItem((AttributeListItem) getCurrentDataModelSelection());
 		return currentCmNode;
-		
+
 	}
 
 	@Override
 	protected String getDialogMessage() {
-		return Messages.RenameTreeDialog_DialogMessage;
+		return Messages.RenameListDialog_DialogMessage;
 	}
 }

@@ -24,7 +24,6 @@ package org.wcs.smart.dataentry.dialog.composite;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -43,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.dialog.RenameListDialog;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -162,7 +162,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		listViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		listViewer.setLabelProvider(new NamedItemLabelProvider());
+		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		listViewer.getControl().setEnabled(false);
@@ -175,12 +175,13 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!MessageDialog.openConfirm(getShell(), "Edit List Attribute Values", "Modifying the names of items in this list attribute will modify the items names for all places where this list attribute is used in the configured data model.")){
+				if (!MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
 					return;
 				}
-				Dialog dialog = new ListItemsConfigDialog(getSourceObject().getAttribute(), getSourceObject().getNode().getModel(), getSession());
-				dialog.open();
 				
+				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject().getAttribute(), getSourceObject().getNode().getModel(),getSession());
+				dialog.open();
+						
 				listViewer.refresh();
 				fireModelChanged();
 			}
