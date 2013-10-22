@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -174,8 +175,14 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Dialog dialog = new ListItemsConfigDialog(getSourceObject());
+				if (!MessageDialog.openConfirm(getShell(), "Edit List Attribute Values", "Modifying the names of items in this list attribute will modify the items names for all places where this list attribute is used in the configured data model.")){
+					return;
+				}
+				Dialog dialog = new ListItemsConfigDialog(getSourceObject().getAttribute(), getSourceObject().getNode().getModel(), getSession());
 				dialog.open();
+				
+				listViewer.refresh();
+				fireModelChanged();
 			}
 		});
 	}
