@@ -44,14 +44,14 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  * @author elitvin
  * @since 2.0.0
  */
-public class DatamodelCatecorySelectorDialog  extends AbstractPropertyJHeaderDialog {
+public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDialog {
 
 	private DataModel datamodel;
 	private Category category;
 
 	private TreeViewer dmTreeViewer;
 	
-	public DatamodelCatecorySelectorDialog(DataModel datamodel) {
+	public DatamodelCategorySelectorDialog(DataModel datamodel) {
 		super(Display.getDefault().getActiveShell(), Messages.DatamodelCatecorySelectorDialog_Title);
 		this.datamodel = datamodel;
 	}

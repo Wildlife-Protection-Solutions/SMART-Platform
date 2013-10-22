@@ -44,7 +44,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
-import org.wcs.smart.dataentry.dialog.DatamodelCatecorySelectorDialog;
+import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -148,7 +148,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	protected void addDatamodelCategory() {
 		try {
 			DataModel dm = getDataModel();
-			DatamodelCatecorySelectorDialog dialog = new DatamodelCatecorySelectorDialog(dm);
+			DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm);
 			if (dialog.open() == IDialogConstants.OK_ID) {
 				Category category = dialog.getCategory();
 				CmNode node = new CmNode();
