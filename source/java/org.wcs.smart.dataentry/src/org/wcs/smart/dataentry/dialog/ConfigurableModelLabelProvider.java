@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -36,7 +40,7 @@ import org.wcs.smart.dataentry.model.CmNode;
  * 
  * @author elitvin
  */
-public class ConfigurableModelLabelProvider extends LabelProvider {
+public class ConfigurableModelLabelProvider extends LabelProvider implements IColorProvider {
 
 	@Override
 	public String getText(Object element) {
@@ -76,6 +80,21 @@ public class ConfigurableModelLabelProvider extends LabelProvider {
 		}else if (att.getType()== Attribute.AttributeType.TREE){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
 		}
+		return null;
+	}
+
+	@Override
+	public Color getForeground(Object element) {
+		if (element instanceof CmAttribute){
+			if (!((CmAttribute)element).isVisible()){
+				return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element) {
 		return null;
 	}
 	

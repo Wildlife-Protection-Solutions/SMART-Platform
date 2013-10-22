@@ -150,33 +150,38 @@ public abstract class AbstractInfoComposite extends Composite {
 			DataModel dm = getDataModel();
 			DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm);
 			if (dialog.open() == IDialogConstants.OK_ID) {
-				Category category = dialog.getCategory();
-				CmNode node = new CmNode();
-				node.setModel(getModel());
-				node.setCategory(category);
-				node.setName(category.getName());
-				for (org.wcs.smart.ca.Label label : category.getNames()) { //we need a copy, not the same instance of set
-					node.updateName(label.getLanguage(), label.getValue());
+				for (Category c : dialog.getCategories()){
+					addCategory(c);
 				}
-				List<Attribute> attrList = new ArrayList<Attribute>();
-				category.getAllAttribute(attrList, true);
-				for (Attribute a : attrList) {
-					CmAttribute cma = new CmAttribute();
-					cma.setNode(node);
-					cma.setAttribute(a);
-					cma.setName(a.getName());
-					for (org.wcs.smart.ca.Label label : a.getNames()) { //we need a copy, not the same instance of set
-						cma.updateName(label.getLanguage(), label.getValue());
-					}
-					cma.setOrder(node.getCmAttributes().size());
-					cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
-					node.getCmAttributes().add(cma);
-				}
-				addToParent(node);
 			}
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
 		}
+	}
+	
+	private void addCategory(Category category){
+		CmNode node = new CmNode();
+		node.setModel(getModel());
+		node.setCategory(category);
+		node.setName(category.getName());
+		for (org.wcs.smart.ca.Label label : category.getNames()) { //we need a copy, not the same instance of set
+			node.updateName(label.getLanguage(), label.getValue());
+		}
+		List<Attribute> attrList = new ArrayList<Attribute>();
+		category.getAllAttribute(attrList, true);
+		for (Attribute a : attrList) {
+			CmAttribute cma = new CmAttribute();
+			cma.setNode(node);
+			cma.setAttribute(a);
+			cma.setName(a.getName());
+			for (org.wcs.smart.ca.Label label : a.getNames()) { //we need a copy, not the same instance of set
+				cma.updateName(label.getLanguage(), label.getValue());
+			}
+			cma.setOrder(node.getCmAttributes().size());
+			cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
+			node.getCmAttributes().add(cma);
+		}
+		addToParent(node);
 	}
 
 	private DataModel getDataModel() {
