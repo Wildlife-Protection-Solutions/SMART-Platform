@@ -30,6 +30,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -48,12 +50,14 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Label lblKey;
 
 	private Button btnPhoto;
+	private boolean isGroup;
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
 		super(parent, model, session);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
+		this.isGroup = isGroup;
 		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (isGroup)
@@ -62,28 +66,26 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			createCategoryControls();
 	}
 	
+	public boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button){
+		if (isGroup){
+			//groups enable all buttons
+			return true;
+		}else{
+			//categories can only be deleted
+			if (button == ControlButton.DELETE){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	private void createGroupControls() {
-		Composite buttonPanel = new Composite(this, SWT.NONE);
-		GridLayout layout = new GridLayout(3, false);
-		layout.marginWidth = layout.marginHeight = 0;
-		layout.marginBottom = 10;
-		buttonPanel.setLayout(layout);
-		createAddButtons(buttonPanel);
-		createDeleteButton(buttonPanel);
-		
 		Composite container = createContentContainer(this);
-		createDisplayNameControls(container);
-		
+		createDisplayNameControls(container);		
 	}
 
 	private void createCategoryControls() {
-		Composite buttonPanel = new Composite(this, SWT.NONE);
-		GridLayout layout = new GridLayout(3, false);
-		layout.marginWidth = layout.marginHeight = 0;
-		layout.marginBottom = 10;
-		buttonPanel.setLayout(layout);
-		createDeleteButton(buttonPanel);
-		
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
 		
@@ -129,19 +131,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		});
 	}
 
-	private void createDeleteButton(Composite parent) {
-		Button btnDelete = new Button(parent, SWT.PUSH);
-		btnDelete.setText(Messages.CmNodeInfoComposite_Button_Delete);
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				handleDeleteNode();
-			}
-		});
-		setButtonLayoutData(btnDelete);
-	}
-
-	private void handleDeleteNode() {
+	@Override
+	protected void handleDeleteNode() {
 		CmNode node = getSourceObject();
 		CmNode parentNode = node.getParent();
 		if (parentNode == null) {

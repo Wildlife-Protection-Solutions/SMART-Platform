@@ -165,14 +165,13 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession(), getModel()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	//	listViewer.getControl().setEnabled(false);
 
 		new Label(parent, SWT.NONE);
 		
 		Button btnEdit = new Button(parent, SWT.PUSH);
 		btnEdit.setText(Messages.ListAttributeInfoComposite_Button_Edit);
-		setButtonLayoutData(btnEdit);
-		((GridData)btnEdit.getLayoutData()).horizontalAlignment = SWT.RIGHT;
+		btnEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

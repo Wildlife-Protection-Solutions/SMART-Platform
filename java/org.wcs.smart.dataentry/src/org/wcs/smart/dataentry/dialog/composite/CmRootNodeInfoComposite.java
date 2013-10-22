@@ -26,6 +26,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -47,22 +49,20 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 	private void createControls() {
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
-		this.setLayout(layout);
-		
+		this.setLayout(layout);		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite buttonPanel = new Composite(this, SWT.NONE);
-		layout = new GridLayout(2, false);
-		layout.marginWidth = layout.marginHeight = 0;
-		layout.marginBottom = 10;
-		buttonPanel.setLayout(layout);
-		createAddButtons(buttonPanel);
-
-		
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
 	}
 
+	public boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button){
+		if (button == ControlButton.DELETE){
+			return false;
+		}
+		return true;
+	}
+	
 	@Override
 	public CmRootNode getSourceObject() {
 		return rootNode;

@@ -22,7 +22,9 @@
 package org.wcs.smart.dataentry.dialog;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -31,18 +33,25 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
+import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
 import org.wcs.smart.dataentry.dialog.composite.BooleanAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmAttributeInfoComposite;
@@ -66,6 +75,18 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	
+	public static enum ControlButton{
+		ADD_GROUP(Messages.AbstractInfoComposite_Button_AddGroup),
+		ADD_CATEGORY(Messages.AbstractInfoComposite_Button_AddCategory), 
+		DELETE(Messages.CmNodeInfoComposite_Button_Delete);
+		
+		public String name;
+		
+		ControlButton(String name){
+			this.name = name;
+		}
+	};
+	
 	private static final int DIALOG_WIDTH = 680;
 	private static final int DIALOG_HEIGHT = 680;
 
@@ -80,6 +101,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private CmNodeInfoComposite categoryNodeComposite;
 	private Map<AttributeType, CmAttributeInfoComposite> attributeComposites;
 	
+	private HashMap<ControlButton, Button> controlButtons = new HashMap<ControlButton, Button>();
+	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
 		super(Display.getDefault().getActiveShell(), Messages.ConfigurableModelEditDialog_Title);
 		this.model = model;
@@ -92,8 +115,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	
 	@Override
 	protected Composite createContent(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, true));
+		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
+//		container.setLayout(new GridLayout(2, true));
 
 		modelTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
@@ -126,8 +149,35 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		rightPanel.setLayout(new GridLayout(1, false));
 		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		infoInnerPanel = new Composite(rightPanel, SWT.NONE);
-		infoInnerPanel.setLayout(new StackLayout());
+		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
+		buttonPanel.setLayout(new GridLayout(3, false));
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
+		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		for (final ControlButton cbtn : ControlButton.values()){
+			Button btn = new Button(buttonPanel, SWT.PUSH);
+			btn.setText(cbtn.name);
+			btn.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Control currentPanel = ((StackLayout)infoInnerPanel.getLayout()).topControl;
+					if (currentPanel instanceof AbstractInfoComposite){
+						((AbstractInfoComposite)currentPanel).processButton(cbtn);
+					}
+				}
+			});
+			btn.setEnabled(false);
+			setButtonLayoutData (btn);
+			controlButtons.put(cbtn,btn);
+		}		
+		
+		infoInnerPanel = new Group(rightPanel, SWT.NONE);
+		((Group)infoInnerPanel).setText(Messages.ConfigurableModelEditDialog_PropertiesLabel);
+		
+		StackLayout layout = new StackLayout();
+		layout.marginHeight = 2;
+		infoInnerPanel.setLayout(layout);
 		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
@@ -141,6 +191,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			}
 		};
 
+		
+		
 		 //NOTE: session is already opened and should not be closed until dialog is closed
 		Session session = getSession();
 		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, session);
@@ -180,6 +232,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 		setChangesMade(isNewModel());
 
+		container.setWeights(new int[]{35,65});
 		return container;
 	}
 
@@ -228,6 +281,19 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 		}
 		infoInnerPanel.layout();
+		
+		//update buttons
+		Control control = ((StackLayout)infoInnerPanel.getLayout()).topControl;
+		if (control instanceof AbstractInfoComposite){
+			for (Iterator<Entry<ControlButton, Button>> iterator = controlButtons.entrySet().iterator(); iterator.hasNext();) {
+				Entry<ControlButton, Button> type = (Entry<ControlButton, Button>) iterator.next();
+				type.getValue().setEnabled( ((AbstractInfoComposite)control).isButtonValid(type.getKey()));
+			}
+		}else{
+			for (Button btn : controlButtons.values()){
+				btn.setEnabled(false);
+			}
+		}
 	}
 	
 }
