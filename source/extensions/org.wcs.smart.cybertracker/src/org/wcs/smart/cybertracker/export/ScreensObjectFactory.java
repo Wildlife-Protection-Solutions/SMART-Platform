@@ -102,16 +102,31 @@ public class ScreensObjectFactory {
 			a1Node.setData(a1Data);
 			a1Data.setDownloadTargetKey(PdaUtil.getRegistryKey(SmartDB.getCurrentConservationArea()));
 			a1Data.setName(properties.getApplicationName());
-			a1Data.setTestTime("True"); //$NON-NLS-1$
-			a1Data.setBigTitle("True"); //$NON-NLS-1$
-			a1Data.setKioskMode(properties.isKioskMode() ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
-			a1Data.setBigScroller(properties.isLargeScrollBars() ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+			a1Data.setForceTitleBar(ctBooleanValue(properties.isUseTitleBar()));
+			a1Data.setBigTitle(ctBooleanValue(properties.isUseLargeTitles()));
+			a1Data.setBigScroller(ctBooleanValue(properties.isLargeScrollBars()));
+			a1Data.setBigTab(ctBooleanValue(properties.isUseLargeTabs()));
+
+			a1Data.setKioskMode(ctBooleanValue(properties.isKioskMode()));
+			a1Data.setDisableEditing(ctBooleanValue(properties.isDisableEditing()));
+			a1Data.setUseSD(ctBooleanValue(properties.isUseSdCard()));
+			a1Data.setTestTime(ctBooleanValue(properties.isTestTime()));
+			a1Data.setResetStateOnSync(ctBooleanValue(properties.isResetOnSync()));
+			a1Data.setClearOnNext(ctBooleanValue(properties.isResetOnNext()));
 			
 			a1Data.setSightingAccuracy(properties.getSightingAccuracy());
 			a1Data.setSightingFixCount(properties.getSightingFixCount());
+			a1Data.setWaypointAccuracy(properties.getTrackAccuracy());
 			a1Data.setWaypointTimer(properties.getWaypointTimer());
+			a1Data.setGpsTimeSync(ctBooleanValue(properties.isUseGpsTime()));
 			a1Data.setGpsTimeZone(properties.getGpsTimeZone());
 			a1Data.setGpsSkipTimeout(properties.getSkipButtonTimeout());
+			a1Data.setManualOnSkip(ctBooleanValue(properties.isManualGps()));
+			a1Data.setManualAllowSkip(ctBooleanValue(properties.isAllowSkipManualGps()));
+
+			a1Data.setMovingMapFileName(properties.getFieldMapFilename());
+			a1Data.setMovingMapLock100(ctBooleanValue(properties.isLock100()));
+			a1Data.setMovingMapOnSkip(ctBooleanValue(properties.isUseMapOnSkip()));
 		}
 		if (screenNodes != null) {
 			a1Node.getNode().addAll(screenNodes);
@@ -119,6 +134,10 @@ public class ScreensObjectFactory {
 		appsNode.getNode().add(a1Node);
 		
 		return screens;
+	}
+	
+	private String ctBooleanValue(boolean value) {
+		return value ? ICyberTrackerConstants.STR_TRUE : ICyberTrackerConstants.STR_FALSE;
 	}
 
 	/**

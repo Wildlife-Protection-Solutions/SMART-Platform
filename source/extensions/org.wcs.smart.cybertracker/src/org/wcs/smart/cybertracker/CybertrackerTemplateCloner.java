@@ -51,18 +51,37 @@ public class CybertrackerTemplateCloner implements
 			CyberTrackerProperties templateProperties = list.get(0);
 			
 			CyberTrackerProperties newProperties = new CyberTrackerProperties();
-			newProperties.setApplicationName(templateProperties.getApplicationName());
-			newProperties.setAutoNext(templateProperties.isAutoNext());
 			newProperties.setConservationArea(engine.getNewCa());
-			newProperties.setExitPin(templateProperties.getExitPin());
-			newProperties.setGpsTimeZone(templateProperties.getGpsTimeZone());
-			newProperties.setKioskMode(templateProperties.isKioskMode());
+			newProperties.setApplicationName(templateProperties.getApplicationName());
+			newProperties.setUseTitleBar(templateProperties.isUseTitleBar());
+			newProperties.setUseLargeTitles(templateProperties.isUseLargeTitles());
 			newProperties.setLargeScrollBars(templateProperties.isLargeScrollBars());
+			newProperties.setUseLargeTabs(templateProperties.isUseLargeTabs());
+			newProperties.setAutoNext(templateProperties.isAutoNext());
+
+			newProperties.setKioskMode(templateProperties.isKioskMode());
+			newProperties.setDisableEditing(templateProperties.isDisableEditing());
+			newProperties.setUseSdCard(templateProperties.isUseSdCard());
+			newProperties.setTestTime(templateProperties.isTestTime());
+			newProperties.setResetOnSync(templateProperties.isResetOnSync());
+			newProperties.setResetOnNext(templateProperties.isResetOnNext());
+			newProperties.setExitPin(templateProperties.getExitPin());
+			newProperties.setStorageTime(templateProperties.getStorageTime());
+			
 			newProperties.setSightingAccuracy(templateProperties.getSightingAccuracy());
 			newProperties.setSightingFixCount(templateProperties.getSightingFixCount());
-			newProperties.setSkipButtonTimeout(templateProperties.getSkipButtonTimeout());
-			newProperties.setStorageTime(templateProperties.getStorageTime());
+			newProperties.setTrackAccuracy(templateProperties.getTrackAccuracy());
 			newProperties.setWaypointTimer(templateProperties.getWaypointTimer());
+			newProperties.setUseGpsTime(templateProperties.isUseGpsTime());
+			newProperties.setGpsTimeZone(templateProperties.getGpsTimeZone());
+			newProperties.setSkipButtonTimeout(templateProperties.getSkipButtonTimeout());
+			newProperties.setManualGps(templateProperties.isManualGps());
+			newProperties.setAllowSkipManualGps(templateProperties.isAllowSkipManualGps());
+
+			newProperties.setFieldMapFilename(templateProperties.getFieldMapFilename());
+			newProperties.setLock100(templateProperties.isLock100());
+			newProperties.setUseMapOnSkip(templateProperties.isUseMapOnSkip());
+			
 			
 			engine.getSession().save(newProperties);
 			engine.getSession().flush();
