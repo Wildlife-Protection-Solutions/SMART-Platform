@@ -28,9 +28,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -44,6 +41,8 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.DatamodelCatecorySelectorDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -76,33 +75,18 @@ public abstract class AbstractInfoComposite extends Composite {
 
 	public abstract Object getSourceObject();
 	
-	protected void setButtonLayoutData(Button button){
-		GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
-		Point minSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		data.widthHint = Math.max(90, minSize.x);
-		button.setLayoutData(data);
+	public abstract boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button);
+	
+	public void processButton(ConfigurableModelEditDialog.ControlButton button){
+		if (button == ControlButton.ADD_CATEGORY){
+			addDatamodelCategory();
+		}else if (button == ControlButton.ADD_GROUP){
+			addSubGroup();
+		}else if (button == ControlButton.DELETE){
+			handleDeleteNode();
+		}		
 	}
-	protected void createAddButtons(Composite parent) {
-		Button btnAddGroup = new Button(parent, SWT.PUSH);
-		btnAddGroup.setText(Messages.AbstractInfoComposite_Button_AddGroup);
-		btnAddGroup.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addSubGroup();
-			}
-		});
-		setButtonLayoutData (btnAddGroup);
-		
-		Button btnAddCategory = new Button(parent, SWT.PUSH);
-		btnAddCategory.setText(Messages.AbstractInfoComposite_Button_AddCategory);
-		btnAddCategory.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addDatamodelCategory();
-			}
-		});
-		setButtonLayoutData (btnAddCategory);
-	}
+
 
 	protected Composite createContentContainer(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
@@ -141,6 +125,15 @@ public abstract class AbstractInfoComposite extends Composite {
 		fireModelChanged();
 	}
 	
+	/**
+	 * Handles delete button
+	 */
+	protected void handleDeleteNode(){
+	}
+	
+	/**
+	 * Handles the add subgroup button
+	 */
 	protected void addSubGroup() {
 		CmNode node = new CmNode();
 		node.setModel(getModel());
@@ -149,6 +142,9 @@ public abstract class AbstractInfoComposite extends Composite {
 		addToParent(node);
 	}
 	
+	/**
+	 * Handles the add datamodel category
+	 */
 	protected void addDatamodelCategory() {
 		try {
 			DataModel dm = getDataModel();

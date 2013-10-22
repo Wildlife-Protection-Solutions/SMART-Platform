@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -51,6 +52,13 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, model, session);
 		createControls();
+	}
+	
+	/**
+	 * attribute composites have no controls
+	 */
+	public boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button){
+		return false;
 	}
 	
 	private void createControls() {
