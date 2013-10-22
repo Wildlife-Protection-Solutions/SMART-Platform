@@ -1,0 +1,299 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.dataentry.dialog;
+
+import java.util.Iterator;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.SmartDB;
+
+/**
+ * Rename dialog for providing aliases for configurable model tree and list attribute items 
+ * @author Emily
+ *
+ */
+public abstract class AbstractRenameDialog extends TitleAreaDialog{
+
+	protected Attribute attribute;
+	protected ConfigurableModel editModel;
+	protected Session currentSession;
+	
+	private Viewer itemViewer;
+	private TableViewer nameTable ;
+	
+	private NamedItem dmNode;
+	private NamedItem cmNode;
+	
+	public AbstractRenameDialog(Shell parentShell, Attribute attribute, ConfigurableModel editModel, Session currentSession) {
+		super(parentShell);
+		this.attribute = attribute;
+		this.currentSession = currentSession;
+		this.editModel = editModel;
+	}
+
+	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
+		setTitle(attribute.getName());
+		setMessage(getDialogMessage());
+		
+		SashForm comp = new SashForm(parent, SWT.HORIZONTAL);
+		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
+		
+		itemViewer = createItemViewer(comp);
+		createNameTable(comp);
+		
+		comp.setWeights(new int[]{40,60});
+		
+		return parent;
+	}
+	
+	/**
+	 * Creates a table with one row for each language.
+	 * 
+	 * @param parent
+	 */
+	private void createNameTable(Composite parent) {
+		nameTable = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER);
+		nameTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		nameTable.setContentProvider(ArrayContentProvider.getInstance());
+		nameTable.getTable().setHeaderVisible(true);
+		nameTable.getTable().setLinesVisible(true);
+		
+		TableViewerColumn colLang = new TableViewerColumn(nameTable, SWT.NONE);
+		colLang.getColumn().setWidth(100);
+		colLang.getColumn().setText(Messages.AbstractRenameDialog_LanguageColumnName);
+		colLang.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof Language){
+					return ((Language) element).getDisplayName();
+				}
+			  	return super.getText(element);
+			}
+
+		});
+		
+		TableViewerColumn colName = new TableViewerColumn(nameTable, SWT.NONE);
+		colName.getColumn().setWidth(150);
+		colName.getColumn().setText(Messages.AbstractRenameDialog_ConfiguredName);
+		colName.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof Language){
+					if (cmNode != null){
+						String label = cmNode.findNameNull((Language) element);
+						if (label != null){
+							return label;
+						}
+					}
+					if (dmNode != null){
+						return dmNode.findName((Language) element);
+					}
+					return ""; //$NON-NLS-1$
+				}
+			  	return super.getText(element);
+			}
+			
+			@Override
+			public Color getForeground(Object element) {
+				if (cmNode == null || cmNode.findNameNull((Language)element) == null){
+					return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+				}
+				return null;
+			}
+		});
+		
+		colName.setEditingSupport(new EditingSupport(nameTable) {
+			private TextCellEditor editor =  new TextCellEditor(nameTable.getTable());
+		
+			@Override
+			protected void setValue(Object element, Object value) {
+				Language lang = (Language)element;
+				String newValue = (String)value;
+				
+				if (newValue.trim().length() == 0){
+					
+					if (cmNode != null){
+						for (Iterator<Label> iterator = cmNode.getNames().iterator(); iterator.hasNext();) {
+							Label l = iterator.next();
+							if (l.getLanguage().equals(lang)){
+								iterator.remove();
+							}
+						}
+					}
+				}else if(!dmNode.findName(lang).equals(newValue)){
+					
+					if (cmNode == null){
+						cmNode = createNewAlaisItem();
+					}
+					cmNode.updateName(((Language)element), (String)value);
+				}
+				if (cmNode != null){
+					currentSession.saveOrUpdate(cmNode);
+					currentSession.flush();
+				}
+				
+				nameTable.refresh();
+				itemViewer.refresh();
+			}
+			
+			@Override
+			protected Object getValue(Object element) {
+				if (cmNode != null){
+					String label = cmNode.findNameNull(((Language)element));
+					if (label != null){
+						return label;
+					}
+				}
+				if (dmNode != null){
+					return dmNode.findName(((Language)element));
+				}
+				return ""; //$NON-NLS-1$
+			}
+			
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				return editor;
+			}
+			
+			@Override
+			protected boolean canEdit(Object element) {
+				return true;
+			}
+		});
+		
+		TableViewerColumn dmName = new TableViewerColumn(nameTable, SWT.NONE);
+		dmName.getColumn().setWidth(150);
+		dmName.getColumn().setText(Messages.AbstractRenameDialog_DataModelColumnName);
+		dmName.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof Language){
+					if (dmNode != null){
+						return dmNode.findName((Language) element);
+					}else{
+						return ""; //$NON-NLS-1$
+					}
+				}
+			  	return super.getText(element);
+			}
+		});
+		
+		
+		
+		nameTable.setInput(SmartDB.getCurrentConservationArea().getLanguages());
+		nameTable.getTable().setEnabled(false);
+	}
+	
+	
+	
+
+	@Override
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		p.y = Math.max(p.y, 450);
+		return p;
+	}
+	
+	/**
+	 * only have a ok button here; cannot cancel
+	 */
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
+				true);
+	}
+	
+	@Override
+	public boolean isResizable(){
+		return true;
+	}
+	
+	/**
+	 * Sets the current selection from the item viewer.  If null
+	 * the name table will be disabled.
+	 * 
+	 * @param dmNode
+	 * @param cmNode
+	 */
+	public void setCurrentSelection(NamedItem dmNode, NamedItem cmNode){
+		this.dmNode = dmNode;
+		this.cmNode = cmNode;
+		nameTable.refresh();
+		
+		nameTable.getTable().setEnabled(dmNode != null);
+	}
+	
+	/**
+	 * The current selected data model item.
+	 * @return
+	 */
+	public NamedItem getCurrentDataModelSelection(){
+		return this.dmNode;
+	}
+	
+	/**
+	 * Creates the viewer for the tree or list.
+	 * @param parent
+	 * @return
+	 */
+	protected abstract Viewer createItemViewer(Composite parent);
+	
+	/**
+	 * Creates a new alias database object
+	 * @return
+	 */
+	protected abstract NamedItem createNewAlaisItem();
+	
+	/**
+	 * The dialog message
+	 * @return
+	 */
+	protected abstract String getDialogMessage();
+}
