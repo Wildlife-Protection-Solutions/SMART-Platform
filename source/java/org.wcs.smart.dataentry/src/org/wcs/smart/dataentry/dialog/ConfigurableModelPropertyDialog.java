@@ -79,6 +79,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	private Button btnEdit;
 	private Button btnDelete;
 
+	private LoadCmModelJob loadCmModelJob = new LoadCmModelJob();
+	
 	public ConfigurableModelPropertyDialog(Shell parent) {
 		super(parent, Messages.ConfigurableModelPropertyDialog_Title);
 	}
@@ -261,11 +263,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			loadCmModelJob.schedule();
 		}
 	}
-	
-	
-	private LoadCmModelJob loadCmModelJob = new LoadCmModelJob();
 
-	
 	class LoadCmModelJob extends Job{
 		public ConfigurableModel modelToLoad;
 		
@@ -281,7 +279,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					modelTreeViewer.setInput(lcm);
+					if (!modelTreeViewer.getControl().isDisposed()){
+						modelTreeViewer.setInput(lcm);
+					}
 				}});
 			return Status.OK_STATUS;
 		}

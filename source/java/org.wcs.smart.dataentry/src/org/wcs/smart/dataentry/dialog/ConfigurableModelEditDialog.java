@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
@@ -65,6 +64,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -125,6 +125,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(true));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)modelTreeViewer.getControl().getLayoutData()).widthHint = 100;
+		((GridData)modelTreeViewer.getControl().getLayoutData()).heightHint = 100;
 		modelTreeViewer.setInput(model);
 		modelTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -193,10 +194,11 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			}
 		};
 
-		
+		setChangesMade(model.getUuid() == null);
 		
 		 //NOTE: session is already opened and should not be closed until dialog is closed
 		Session session = getSession();
+		
 		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, session);
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
@@ -232,25 +234,36 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
 
-		setChangesMade(isNewModel());
-
 		container.setWeights(new int[]{40,60});
+		
+		//initialize the session with the model being editted and 
+		//begin the translation
+		session.beginTransaction();
+		session.saveOrUpdate(model); 
+		session.flush();
+		
 		return container;
 	}
 
-	private boolean isNewModel() {
-		return model.getUuid() == null;
-	}
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
-		getButton(IDialogConstants.OK_ID).setEnabled(isNewModel()); //this will enable "Save" button when new model is just created
+		getButton(IDialogConstants.OK_ID).setEnabled(this.changesMade); //this will enable "Save" button when new model is just created
 	}
 	
 	@Override
 	protected boolean performSave() {
-		DataentryHibernateManager.saveConfigurableModel(model, session);
+
+		//commit transaction
+		if (model.getName() != null) {
+			model.updateName(SmartDB.getCurrentLanguage(), model.getName());
+		}
+		session.saveOrUpdate(model);
+		session.getTransaction().commit();
+		
+		//start a new transaction
+		session.getTransaction().begin();
 		setChangesMade(false);
 		return true;
 	}
