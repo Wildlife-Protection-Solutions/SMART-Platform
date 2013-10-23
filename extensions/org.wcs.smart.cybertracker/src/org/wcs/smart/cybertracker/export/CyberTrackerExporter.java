@@ -384,7 +384,7 @@ public class CyberTrackerExporter {
 		List<AttributeTreeNode> activeTreeNodes = new ArrayList<AttributeTreeNode>();
 		activeTreeNodes.addAll(treeAttribute.getActiveTreeNodes());
 		
-		Map<AttributeTreeNode, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
+		Map<AttributeTreeNode, CyberTrackerId> map = buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
 		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null);
 		if (!treeAttribute.getIsRequired()) {
@@ -493,6 +493,25 @@ public class CyberTrackerExporter {
 			catLevel2resultId.put(level, id);
 		}
 		return id;
+	}
+
+	
+	//moved from ctUtil as ct util was adopted to use proxy class
+	public Map<AttributeTreeNode, CyberTrackerId> buildTreeNodeMap(List<AttributeTreeNode> treeNodes) {
+		Map<AttributeTreeNode, CyberTrackerId> map = new HashMap<AttributeTreeNode, CyberTrackerId>();
+		mapTreeNodes(treeNodes, map);
+		return map;
+	}
+
+	private void mapTreeNodes(List<AttributeTreeNode> treeNodes, Map<AttributeTreeNode, CyberTrackerId> map) {
+		if (treeNodes == null)
+			return;
+		for (AttributeTreeNode attrTreeNode : treeNodes) {
+			map.put(attrTreeNode, new CyberTrackerId());
+			if (attrTreeNode.getActiveChildren() != null && !attrTreeNode.getActiveChildren().isEmpty()) {
+				mapTreeNodes(attrTreeNode.getActiveChildren(), map);
+			}
+		}
 	}
 
 }

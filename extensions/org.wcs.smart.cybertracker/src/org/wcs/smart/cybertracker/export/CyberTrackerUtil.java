@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
+import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -103,11 +103,6 @@ public class CyberTrackerUtil {
 		fakeRoot.setName("Data Model"); //$NON-NLS-1$
 		fakeRoot.setActiveChildren(dataModel.getActiveCategories());
 		return fakeRoot;
-		//TODO: switch back to original full datamodel
-//		List<Category> cats = new ArrayList<Category>();
-//		cats.add(dataModel.getActiveCategories().get(0));
-//		fakeRoot.setActiveChildren(cats);
-//		return fakeRoot;
 	}
 
 	public Map<Category, CyberTrackerId> buildMap(Category category) {
@@ -126,19 +121,19 @@ public class CyberTrackerUtil {
 		}
 	}
 
-	public Map<AttributeTreeNode, CyberTrackerId> buildTreeNodeMap(List<AttributeTreeNode> treeNodes) {
-		Map<AttributeTreeNode, CyberTrackerId> map = new HashMap<AttributeTreeNode, CyberTrackerId>();
+	public Map<IAttributeTreeNodeProxy, CyberTrackerId> buildTreeNodeMap(List<IAttributeTreeNodeProxy> treeNodes) {
+		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = new HashMap<IAttributeTreeNodeProxy, CyberTrackerId>();
 		mapTreeNodes(treeNodes, map);
 		return map;
 	}
 
-	private void mapTreeNodes(List<AttributeTreeNode> treeNodes, Map<AttributeTreeNode, CyberTrackerId> map) {
+	private void mapTreeNodes(List<IAttributeTreeNodeProxy> treeNodes, Map<IAttributeTreeNodeProxy, CyberTrackerId> map) {
 		if (treeNodes == null)
 			return;
-		for (AttributeTreeNode attrTreeNode : treeNodes) {
+		for (IAttributeTreeNodeProxy attrTreeNode : treeNodes) {
 			map.put(attrTreeNode, new CyberTrackerId());
 			if (attrTreeNode.getActiveChildren() != null && !attrTreeNode.getActiveChildren().isEmpty()) {
-				mapTreeNodes(attrTreeNode.getChildren(), map);
+				mapTreeNodes(attrTreeNode.getActiveChildren(), map);
 			}
 		}
 	}

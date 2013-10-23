@@ -49,7 +49,9 @@ import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
+import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
+import org.wcs.smart.cybertracker.export.data.TreeNodeDataProvider;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -87,6 +89,7 @@ public class CyberTrackerConfExporter {
 	private Map<Attribute, Map<Integer, CyberTrackerId>> attr2resultId = new HashMap<Attribute, Map<Integer, CyberTrackerId>>();
 	private Map<Integer, CyberTrackerId> nodeLevel2resultId = new HashMap<Integer, CyberTrackerId>();
 	private Map<Attribute, ListItemsDataProvider> listAttr2ItemData = new HashMap<Attribute, ListItemsDataProvider>();
+	private Map<Attribute, TreeNodeDataProvider> treeAttr2ItemData = new HashMap<Attribute, TreeNodeDataProvider>();
 
 	private CyberTrackerId newWpResultId;
 	private List<CyberTrackerId> newWpElementsIds;
@@ -117,6 +120,7 @@ public class CyberTrackerConfExporter {
 			attr2resultId.clear();
 			nodeLevel2resultId.clear();
 			listAttr2ItemData.clear();
+			treeAttr2ItemData.clear();
 			session.getTransaction().rollback();
 			session.close();
 			session = null;
@@ -477,15 +481,15 @@ public class CyberTrackerConfExporter {
 	
 	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr) {
 		Attribute attribute = cmAttr.getAttribute();
-		List<AttributeTreeNode> activeTreeNodes = attribute.getActiveTreeNodes();
+		List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attribute);
 		if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
 			throw new IllegalArgumentException("Cannot add a flat tree screen without any items to display"); //$NON-NLS-1$
 		}
-		List<AttributeTreeNode> finalTreeNodes = listFinalTreeNodes(activeTreeNodes);
+		List<IAttributeTreeNodeProxy> finalTreeNodes = listFinalTreeNodes(activeTreeNodes);
 		
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
-		for (AttributeTreeNode treeNode : finalTreeNodes) {
+		for (IAttributeTreeNodeProxy treeNode : finalTreeNodes) {
 			String name = treeNode.getName();
 			String tag0 = SmartUtils.encodeHex(treeNode.getUuid());
 			CyberTrackerId id = new CyberTrackerId();
@@ -495,10 +499,10 @@ public class CyberTrackerConfExporter {
 		return ids;
 	}
 
-	private List<AttributeTreeNode> listFinalTreeNodes(List<AttributeTreeNode> activeTreeNodes) {
-		List<AttributeTreeNode> result = new ArrayList<AttributeTreeNode>();
-		for (AttributeTreeNode treeNode : activeTreeNodes) {
-			List<AttributeTreeNode> activeChildren = treeNode.getActiveChildren();
+	private List<IAttributeTreeNodeProxy> listFinalTreeNodes(List<IAttributeTreeNodeProxy> activeTreeNodes) {
+		List<IAttributeTreeNodeProxy> result = new ArrayList<IAttributeTreeNodeProxy>();
+		for (IAttributeTreeNodeProxy treeNode : activeTreeNodes) {
+			List<IAttributeTreeNodeProxy> activeChildren = treeNode.getActiveChildren();
 			if (activeChildren == null || activeChildren.isEmpty()) {
 				result.add(treeNode);
 			} else {
@@ -655,10 +659,10 @@ public class CyberTrackerConfExporter {
 	 */
 	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label) {
 		List<Node> result = new ArrayList<Node>();
-		List<AttributeTreeNode> activeTreeNodes = new ArrayList<AttributeTreeNode>();
-		activeTreeNodes.addAll(treeAttribute.getActiveTreeNodes());
+		List<IAttributeTreeNodeProxy> activeTreeNodes = new ArrayList<IAttributeTreeNodeProxy>();
+		activeTreeNodes.addAll(getActiveTreeNodes(treeAttribute));
 		
-		Map<AttributeTreeNode, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
+		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
 		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName() + label, childIds, null);
 		if (!treeAttribute.getIsRequired() && navId != null) {
@@ -666,14 +670,19 @@ public class CyberTrackerConfExporter {
 			navControl.setTranslateSkipScreenId(navId.getNodeId());
 		}
 		result.add(treeRootNode);
-		for (AttributeTreeNode treeNode : activeTreeNodes) {
+		for (IAttributeTreeNodeProxy treeNode : activeTreeNodes) {
 			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, label));
 		}
-		ElementsUtil.addElements(elements, map);
+		
+		//below is same as ElementsUtil.addElements(elements, map);
+		for (IAttributeTreeNodeProxy dmObject : map.keySet()) {
+			ElementsUtil.addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), SmartUtils.encodeHex(dmObject.getUuid()));
+		}
+
 		return result;
 	}
 	
-	private List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, String label) {
+	private List<Node> buildAttributeTreeNodes(IAttributeTreeNodeProxy treeNode, Map<IAttributeTreeNodeProxy, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, String label) {
 		List<Node> result = new ArrayList<Node>();
 		if (treeNode == null)
 			return result;
@@ -695,7 +704,7 @@ public class CyberTrackerConfExporter {
 
 		boolean isEndScreen = true;
 		//NOTE: there might be issues if at the save depth level leaf and non-leaf elements are present
-		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
+		for (IAttributeTreeNodeProxy child : treeNode.getActiveChildren()) {
 			if (child.getActiveChildren() != null && !child.getActiveChildren().isEmpty()) {
 				isEndScreen = false;
 				break;
@@ -717,7 +726,7 @@ public class CyberTrackerConfExporter {
 		//this is NOT an end screen, proceed recursively till the end
 		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, null));
 		
-		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
+		for (IAttributeTreeNodeProxy child : treeNode.getActiveChildren()) {
 			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, label));
 		}		
 		return result;
@@ -772,7 +781,7 @@ public class CyberTrackerConfExporter {
 				}
 				case TREE:
 				{
-					List<AttributeTreeNode> activeTreeNodes = attribute.getActiveTreeNodes();
+					List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attribute);
 					if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 						//skip invalid attribute (attribute without any possible value)
 						continue;
@@ -800,4 +809,15 @@ public class CyberTrackerConfExporter {
 		return dataProvider.getActiveListItems();
 	}
 
+	private List<IAttributeTreeNodeProxy> getActiveTreeNodes(Attribute attribute) {
+		if (attribute.getType() != AttributeType.TREE)
+			return null;
+		TreeNodeDataProvider dataProvider = treeAttr2ItemData.get(attribute);
+		if (dataProvider == null) {
+			dataProvider = new TreeNodeDataProvider(attribute, configurableModel, session);
+			treeAttr2ItemData.put(attribute, dataProvider);
+		}
+		return dataProvider.getActiveTreeNodes();
+	}
+	
 }
