@@ -66,6 +66,7 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for editing Configurable Models.
@@ -78,7 +79,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	public static enum ControlButton{
 		ADD_GROUP(Messages.AbstractInfoComposite_Button_AddGroup),
 		ADD_CATEGORY(Messages.AbstractInfoComposite_Button_AddCategory), 
-		DELETE(Messages.CmNodeInfoComposite_Button_Delete);
+		DELETE(DialogConstants.DELETE_BUTTON_TEXT);
 		
 		public String name;
 		
@@ -116,12 +117,14 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected Composite createContent(Composite parent) {
 		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
-//		container.setLayout(new GridLayout(2, true));
-
-		modelTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
+		
+		Composite innerLeft = new Composite(container, SWT.NONE);
+		innerLeft.setLayout(new GridLayout());
+		modelTreeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(true));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)modelTreeViewer.getControl().getLayoutData()).widthHint = 100;
 		modelTreeViewer.setInput(model);
 		modelTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -147,7 +150,6 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
-		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(3, false));
@@ -232,7 +234,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 		setChangesMade(isNewModel());
 
-		container.setWeights(new int[]{35,65});
+		container.setWeights(new int[]{40,60});
 		return container;
 	}
 

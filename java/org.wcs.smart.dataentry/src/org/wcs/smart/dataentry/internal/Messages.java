@@ -32,8 +32,14 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_ConfigurableModelDeafultName;
+	public static String ConfigurableModelPropertyDialog_ConfirmDelete;
+	public static String ConfigurableModelPropertyDialog_DeleteDialogTitle;
+	public static String ConfigurableModelPropertyDialog_ErrorDelete;
+	public static String ConfigurableModelPropertyDialog_ErrorDialogTitle;
+	public static String ConfigurableModelPropertyDialog_LoadJobName;
 	public static String ConfigurableModelPropertyDialog_LoadModelsListError;
 	public static String ConfigurableModelPropertyDialog_Message;
+	public static String ConfigurableModelPropertyDialog_ProgressDelete;
 	public static String ConfigurableModelPropertyDialog_Title;
 	public static String DataentryHibernateManager_ConfigurableModel_Save_Error;
 	public static String DatamodelCatecorySelectorDialog_Button_Add;

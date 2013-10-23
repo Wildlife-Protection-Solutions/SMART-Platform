@@ -21,10 +21,19 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -32,6 +41,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -49,6 +59,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for viewing Configurable Models.
@@ -66,6 +77,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	
 	private Button btnNew;
 	private Button btnEdit;
+	private Button btnDelete;
 
 	public ConfigurableModelPropertyDialog(Shell parent) {
 		super(parent, Messages.ConfigurableModelPropertyDialog_Title);
@@ -78,10 +90,15 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	
 	@Override
 	protected Composite createContent(Composite parent) {
+		
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, true));
-
-		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
+		container.setLayout(new GridLayout());
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		SashForm form = new SashForm(container, SWT.HORIZONTAL);
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		modelListViewer = new TableViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(getModelsList().toArray());
@@ -91,16 +108,24 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateTreeViewer();
 				btnEdit.setEnabled(!modelListViewer.getSelection().isEmpty());
+				btnDelete.setEnabled(!modelListViewer.getSelection().isEmpty());
 			}
 		});
 		
-		modelTreeViewer = new TreeViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
+		modelTreeViewer = new TreeViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(false));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		btnNew = new Button(container, SWT.PUSH);
+		form.setWeights(new int[]{40,60});
+		
+		Composite buttonComposite = new Composite(container, SWT.NONE);
+		buttonComposite.setLayout(new GridLayout(3, false));
+		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
+		
+		btnNew = new Button(buttonComposite, SWT.PUSH);
 		btnNew.setText(Messages.ConfigurableModelPropertyDialog_Button_Create);
+		setButtonLayoutData(btnNew);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -123,10 +148,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			}
 		});
 		
-		btnEdit = new Button(container, SWT.PUSH);
-		btnEdit.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
-		((GridData)btnEdit.getLayoutData()).widthHint = 90;
+		btnEdit = new Button(buttonComposite, SWT.PUSH);
 		btnEdit.setEnabled(false);
+		setButtonLayoutData(btnEdit);
 		btnEdit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -143,6 +167,54 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						session.close();
 					}
 				}
+				modelListViewer.setInput(getModelsList().toArray());
+				updateTreeViewer();
+			}
+		});		
+		
+		btnDelete = new Button(buttonComposite, SWT.PUSH);
+		btnDelete.setEnabled(false);
+		setButtonLayoutData(btnDelete);
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				final ConfigurableModel cm = (ConfigurableModel) modelTreeViewer.getInput();
+				if (cm == null){
+					return;
+				}
+				if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete, new Object[]{cm.getName()}))){
+					return;
+				}
+
+
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+				try{
+				pmd.run(true, false, new IRunnableWithProgress() {
+					
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_ProgressDelete, 1);
+						Session session = getSession();
+						session.beginTransaction();
+						try {
+							session.delete(cm);
+							session.getTransaction().commit();
+						}catch (Exception ex){
+							session.getTransaction().rollback();
+							SmartPlugIn.log("Error deleting configurable model", ex); //$NON-NLS-1$
+							throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + ex.getLocalizedMessage()));
+						} finally {
+							session.close();
+							monitor.done();
+						}
+					}
+				});
+				}catch (Exception ex){
+					MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getMessage());
+				}
+				
 				modelListViewer.setInput(getModelsList().toArray());
 				updateTreeViewer();
 			}
@@ -178,9 +250,36 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		if (!selection.isEmpty()) {
 			ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();
-			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid());
-			modelTreeViewer.setInput(cm);
+			modelTreeViewer.setInput(null);
+			loadCmModelJob.cancel();
+			loadCmModelJob.modelToLoad = cm;
+			loadCmModelJob.schedule();
 		}
 	}
 	
+	
+	private LoadCmModelJob loadCmModelJob = new LoadCmModelJob();
+
+	
+	class LoadCmModelJob extends Job{
+		public ConfigurableModel modelToLoad;
+		
+		public LoadCmModelJob() {
+			super(Messages.ConfigurableModelPropertyDialog_LoadJobName);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			ConfigurableModel cm = modelToLoad;
+			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid());
+			final ConfigurableModel lcm = cm;
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					modelTreeViewer.setInput(lcm);
+				}});
+			return Status.OK_STATUS;
+		}
+		
+	}
 }
