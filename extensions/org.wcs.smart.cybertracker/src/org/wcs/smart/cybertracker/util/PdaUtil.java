@@ -110,5 +110,13 @@ public class PdaUtil {
 			CyberTrackerPlugIn.log(e.getMessage(), e);
 		}
 	}	
+
+	public static int uploadPda(File file) throws Exception {
+		String appPath = getCTAppPath();
+		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
+		Process proc = Runtime.getRuntime().exec(uploadCommands);
+		int code = proc.waitFor();
+		return code;
+	}
 	
 }
