@@ -25,9 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -52,6 +55,7 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 /**
  * Info composite containing some common logic and building blocks for {@link CmRootNode},  {@link CmNode},  {@link CmAttribute}
@@ -310,6 +314,19 @@ public abstract class AbstractInfoComposite extends Composite {
 			
 			button = new Button(this, SWT.PUSH);
 			button.setText(Messages.TranslatableNameComposite_Button_Translate);
+			button.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (item != null){
+						TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), item);
+						if (translateDialog.open() == Window.OK){
+							text.setText(item.getName());
+							fireModelChanged();
+						}
+						
+					}
+				}
+			});
 		}
 		
 		public Text getText() {
