@@ -162,9 +162,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				ConfigurableModel cm = (ConfigurableModel) ((IStructuredSelection) modelListViewer.getSelection()).getFirstElement();
+				if (cm == null){
+					return;
+				}
+				
 				Session session = getSession();
 				try {
-					ConfigurableModel cm = (ConfigurableModel) modelTreeViewer.getInput();
 					cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
 					Dialog dialog = new ConfigurableModelEditDialog(cm);
 					dialog.open();
@@ -257,7 +261,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		if (!selection.isEmpty()) {
 			ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();
-			modelTreeViewer.setInput(null);
+			modelTreeViewer.setInput(Messages.ConfigurableModelPropertyDialog_LoadingText);
 			loadCmModelJob.cancel();
 			loadCmModelJob.modelToLoad = cm;
 			loadCmModelJob.schedule();

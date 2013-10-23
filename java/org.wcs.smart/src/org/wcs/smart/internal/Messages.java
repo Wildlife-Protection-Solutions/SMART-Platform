@@ -149,6 +149,11 @@ public class Messages extends NLS {
 	public static String AttributeTreeLabelProvider_RootNode_Label;
 	public static String AttributeTreeNodeDMAdvisor_Error_NotTreeNode;
 	public static String AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;
+	public static String AttributeValidator_InvalidAttributeValue;
+	public static String AttributeValidator_RegexMatchFailed;
+	public static String AttributeValidator_ValueRequired;
+	public static String AttributeValidator_ValueToBig;
+	public static String AttributeValidator_ValueToSmall;
 	public static String AutoBackupDialog_BackupEveryXDays_1;
 	public static String AutoBackupDialog_BackupEveryXDays_2;
 	public static String AutoBackupDialog_BackupLocationLabel;

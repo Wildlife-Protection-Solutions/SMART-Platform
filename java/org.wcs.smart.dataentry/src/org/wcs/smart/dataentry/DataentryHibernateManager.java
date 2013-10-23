@@ -68,6 +68,7 @@ public class DataentryHibernateManager extends HibernateManager {
 		if (uuid == null)
 			return null;
 		Session session = SmartHibernateManager.openSession();
+		session.beginTransaction();
 		try {
 			Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
 			ConfigurableModel model = (ConfigurableModel) query.uniqueResult();
@@ -75,6 +76,7 @@ public class DataentryHibernateManager extends HibernateManager {
 			fetchNodesData(model.getNodes());
 			return model;
 		} finally {
+			session.getTransaction().commit();
 			session.close();
 		}
 	}

@@ -31,6 +31,10 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
  * Content provided for configurable data model tree.
+ * <p>Also provides ability to display a single string
+ * as a single tree node by setting the input to a string. Useful
+ * if you want to disply "loading..." while loading data model in 
+ * background.</p>
  * 
  * @author elitvin
  * @since 2.0.0
@@ -39,7 +43,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 
 	private CmRootNode rootNode = new CmRootNode();
 	private boolean showRoot = false;
-	
+	private String message = null;
 	
 	public ConfigurableModelTreeContentProvider(boolean showRoot) {
 		super();
@@ -48,13 +52,21 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		rootNode.model = (ConfigurableModel) newInput;
+		rootNode.model = null;
+		message = null;
+		if (newInput instanceof ConfigurableModel){
+			rootNode.model = (ConfigurableModel) newInput;
+		}else if (newInput instanceof String){
+			message = (String) newInput;
+		}
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof ConfigurableModel) {
 			return showRoot ? new Object[]{rootNode} : getChildren(inputElement);
+		}else if (inputElement instanceof String){
+			return new String[]{message};
 		}
 		return new Object[]{};
 	}

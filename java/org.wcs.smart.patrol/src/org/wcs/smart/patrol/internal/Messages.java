@@ -34,11 +34,6 @@ public class Messages extends NLS {
 	public static String AttributeListItemDMAdvisor_InvalidObjectType;
 	public static String AttributeTreeNodeDMAdvisor_DeleteError;
 	public static String AttributeTreeNodeDMAdvisor_InvalidObjectType;
-	public static String AttributeValidator_InvalidAttributeValue;
-	public static String AttributeValidator_RegexMatchFailed;
-	public static String AttributeValidator_ValueRequired;
-	public static String AttributeValidator_ValueToBig;
-	public static String AttributeValidator_ValueToSmall;
 	public static String AttributeWizardPage_AddObservation_Button;
 	public static String AttributeWizardPage_CannotCreateObservationError_DialogMessage;
 	public static String AttributeWizardPage_CategoryObservations_Label;

@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -35,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -244,6 +247,14 @@ public abstract class AbstractInfoComposite extends Composite {
 
 	protected void removeSourceObjectChangedListener(ISourceObjectChangedListener listener) {
 		sourceListeners.remove(listener);
+	}
+	
+	protected ControlDecoration createControlDecoration(Control widget){
+		ControlDecoration cd = new ControlDecoration(widget, SWT.LEFT | SWT.TOP);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
 	}
 	
 	/**

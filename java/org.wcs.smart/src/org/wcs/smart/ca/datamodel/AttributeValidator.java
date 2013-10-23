@@ -1,12 +1,10 @@
-package org.wcs.smart.patrol.model;
+package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
 
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.internal.Messages;
+
 
 public class AttributeValidator {
 
@@ -43,6 +41,13 @@ public class AttributeValidator {
 	}
 	
 	public static String validateNumeric(Attribute attribute, Object value){
+		if (value instanceof String){
+			try{
+				value = Double.parseDouble((String)value);
+			}catch (Exception ex){
+				return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+			}
+		}
 		if (value != null && !(value instanceof Double)){
 			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
