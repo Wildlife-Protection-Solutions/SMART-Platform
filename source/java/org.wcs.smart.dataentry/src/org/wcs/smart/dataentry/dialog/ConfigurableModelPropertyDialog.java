@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -57,7 +58,6 @@ import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -129,22 +129,27 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Session session = getSession();
-				try {
-					ConfigurableModel cm = new ConfigurableModel();
-					cm.setConservationArea(SmartDB.getCurrentConservationArea());
-					cm.setName(Messages.ConfigurableModelPropertyDialog_ConfigurableModelDeafultName);
-					cm.updateName(SmartDB.getCurrentLanguage(), cm.getName());
-					Dialog dialog = new ConfigurableModelEditDialog(cm);
-					dialog.open();
-				} finally {
-					//most likely session will be closed here as AbstractPropertyJHeaderDialog closes session when dialog is closed
-					if (session.isOpen()){
-						session.close();
+				CreateNewOpDialog opDialog = new CreateNewOpDialog(getShell(), getSession());
+				if (opDialog.open() == Window.OK){
+					ConfigurableModel initModel  = null;
+				
+					try{
+						initModel = opDialog.getDefaultConfigurableModel();
+					}catch (Exception ex){
+						SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_CreateCmModelErrorMessage + ex.getLocalizedMessage(), ex);
+						return;
 					}
+					if (initModel == null){
+						//cancelled or invalid model
+						return;
+					}
+					Dialog dialog = new ConfigurableModelEditDialog(initModel);
+					dialog.open();
+					
+					//refresh list
+					modelListViewer.setInput(getModelsList().toArray());
+					updateTreeViewer();
 				}
-				modelListViewer.setInput(getModelsList().toArray());
-				updateTreeViewer();
 			}
 		});
 		
