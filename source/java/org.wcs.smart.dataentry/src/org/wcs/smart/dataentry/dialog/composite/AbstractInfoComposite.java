@@ -21,14 +21,18 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -84,6 +88,13 @@ public abstract class AbstractInfoComposite extends Composite {
 	
 	public abstract boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button);
 	
+	/**
+	 * Process a button action.
+	 * 
+	 * @param button
+	 * @return the resulting item to select from the model viewer or null if nothing
+	 * to select
+	 */
 	public void processButton(ConfigurableModelEditDialog.ControlButton button){
 		if (button == ControlButton.ADD_CATEGORY){
 			addDatamodelCategory();
@@ -91,7 +102,8 @@ public abstract class AbstractInfoComposite extends Composite {
 			addSubGroup();
 		}else if (button == ControlButton.DELETE){
 			handleDeleteNode();
-		}		
+		}	
+		
 	}
 
 
@@ -147,6 +159,8 @@ public abstract class AbstractInfoComposite extends Composite {
 		node.setName(Messages.AbstractInfoComposite_NewGroupDefaultName);
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
 		addToParent(node);
+		
+		session.saveOrUpdate(node);
 	}
 	
 	/**
@@ -154,6 +168,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	 */
 	protected void addDatamodelCategory() {
 		try {
+			
 			DataModel dm = getDataModel();
 			DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm);
 			if (dialog.open() == IDialogConstants.OK_ID) {
@@ -189,28 +204,12 @@ public abstract class AbstractInfoComposite extends Composite {
 			node.getCmAttributes().add(cma);
 		}
 		addToParent(node);
+		session.saveOrUpdate(node);
 	}
 
 	private DataModel getDataModel() {
 		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), getSession());
-		//load into memory; no-lazy loading here.
-		for (Category cat: dataModel.getCategories()){
-			visitCategory(cat);
-		}
-		for (Attribute att: dataModel.getAttributes()){
-			att.getAggregations().size();
-		}
 		return dataModel;
-	}
-	
-	private void visitCategory(Category cat){
-		for (Category child : cat.getActiveChildren()){
-			visitCategory(child);
-			child.getName();
-		}
-//		for (CategoryAttribute ca: cat.getAttributes()){
-//			ca.getAttribute().getName();
-//		}	
 	}
 
 	public ConfigurableModel getModel() {
@@ -312,13 +311,43 @@ public abstract class AbstractInfoComposite extends Composite {
 
 			text = new Text(this, SWT.BORDER);
 			text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			
+			final ControlDecoration cd = createControlDecoration(text);
+			cd.hide();
+			
+			text.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (internalChange && item != null) {
+						if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
+							MessageDialog.openError(getShell(), Messages.AbstractInfoComposite_ErrorDialogTitle, MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
+							text.setText(item.getName());
+						}else{
+							item.setName(text.getText());
+							item.updateName(SmartDB.getCurrentLanguage(), item.getName());
+							
+						}
+						fireModelChanged();
+					}
+					
+				}
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+				}
+			});
 			text.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
 					if (internalChange && item != null) {
-						item.setName(text.getText());
-						item.updateName(SmartDB.getCurrentLanguage(), item.getName());
+						if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
+							cd.setDescriptionText(MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
+							cd.show();
+						}else{
+							cd.hide();
+						}
 						fireModelChanged();
+						
 					}
 				}
 			});

@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_Button_AddCategory;
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_DisplayName;
+	public static String AbstractInfoComposite_ErrorDialogTitle;
+	public static String AbstractInfoComposite_InvalidNameMessage;
 	public static String AbstractInfoComposite_NewGroupDefaultName;
 	public static String AbstractRenameDialog_ConfiguredName;
 	public static String AbstractRenameDialog_DataModelColumnName;
@@ -28,6 +30,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_PhotoAllowed;
 	public static String ConfigurableModelEditDialog_Message;
 	public static String ConfigurableModelEditDialog_PropertiesLabel;
+	public static String ConfigurableModelEditDialog_SaveError;
 	public static String ConfigurableModelEditDialog_Title;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProgressMessage;

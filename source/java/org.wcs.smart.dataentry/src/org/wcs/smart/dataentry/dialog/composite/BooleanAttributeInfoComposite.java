@@ -21,9 +21,22 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -34,6 +47,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 
+	private ComboViewer defaultViewer ;
 	/**
 	 * @param parent
 	 * @param model
@@ -49,7 +63,59 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 	@Override
 	protected void createTypeSpecificControls(Composite container) {
 		createIsVisibleControl(container);
-		//TODO: boolean default value might vary depending on required flag -> true/false or true/false/null 
+		createDefaultControl(container);
+		//TODO: boolean default value might vary depending on required flag -> true/false or true/false/null
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			
+			@Override
+			public void sourceObjectChanged(Object newObject) {
+				CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+				if (op.getBooleanValue() != null){
+					defaultViewer.setSelection(new StructuredSelection(op.getBooleanValue()));
+				}else{
+					defaultViewer.setSelection(new StructuredSelection("")); //$NON-NLS-1$
+				}
+			}
+		});
+	}
+	
+	private void createDefaultControl(Composite container) {
+		Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
+		
+		defaultViewer = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+		defaultViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		defaultViewer.setContentProvider(ArrayContentProvider.getInstance());
+		defaultViewer.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				if (element instanceof Boolean){
+					if ((Boolean)element){
+						return Attribute.BOOLEAN_TRUE_LABEL;
+					}else{
+						return Attribute.BOOLEAN_FALSE_LABEL;
+					}
+				}
+				return ""; //$NON-NLS-1$
+			}
+		});
+		defaultViewer.setInput(new Object[]{"", Boolean.TRUE, Boolean.FALSE}); //$NON-NLS-1$
+		
+		defaultViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)defaultViewer.getSelection()).getFirstElement();
+				CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+				if (x != null && x instanceof Boolean){
+					op.setBooleanValue((Boolean)x);
+				}else{
+					op.setBooleanValue(null);
+				}
+				fireModelChanged();
+			}
+		});
+		
+		
 	}
 
 }

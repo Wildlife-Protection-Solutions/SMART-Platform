@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -88,6 +90,22 @@ public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDia
 				
 				getButton(IDialogConstants.OK_ID).setEnabled(selectedCategories.size() > 0);
 
+			}
+		});
+		
+		
+		dmTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				selectedCategories.clear();
+				IStructuredSelection selection = (IStructuredSelection) dmTreeViewer.getSelection();
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					if (type instanceof Category){
+						selectedCategories.add((Category)type);
+					}
+				}
+				okPressed();
 			}
 		});
 		
