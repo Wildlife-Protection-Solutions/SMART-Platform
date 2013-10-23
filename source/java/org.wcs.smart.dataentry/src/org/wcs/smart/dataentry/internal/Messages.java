@@ -40,6 +40,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_DeleteDialogTitle;
 	public static String ConfigurableModelPropertyDialog_ErrorDelete;
 	public static String ConfigurableModelPropertyDialog_ErrorDialogTitle;
+	public static String ConfigurableModelPropertyDialog_LoadingText;
 	public static String ConfigurableModelPropertyDialog_LoadJobName;
 	public static String ConfigurableModelPropertyDialog_LoadModelsListError;
 	public static String ConfigurableModelPropertyDialog_Message;
@@ -61,6 +62,7 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_Values;
 	public static String ListAttributeInfoComposite_WarnDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
+	public static String NumericAttributeInfoComposite_ErrorDialogTitle;
 	public static String RenameListDialog_DialogMessage;
 	public static String RenameTreeDialog_DialogMessage;
 	public static String TranslatableNameComposite_Button_Translate;

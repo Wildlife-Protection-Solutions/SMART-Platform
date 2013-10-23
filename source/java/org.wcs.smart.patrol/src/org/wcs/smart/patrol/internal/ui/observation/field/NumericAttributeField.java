@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.AttributeValidator;
 
 
 /**

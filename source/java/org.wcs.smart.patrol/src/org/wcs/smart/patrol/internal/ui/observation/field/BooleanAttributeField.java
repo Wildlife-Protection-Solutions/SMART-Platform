@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.AttributeValidator;
 
 /**
  * Attribute field for modifying boolean observation

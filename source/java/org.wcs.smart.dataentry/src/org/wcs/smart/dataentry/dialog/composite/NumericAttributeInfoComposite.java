@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -62,13 +68,60 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 		final Text text = new Text(parent, SWT.BORDER);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
+		
+		final ControlDecoration cd = createControlDecoration(text);
+		cd.hide();
+		
+		//create a temporary attribute for validation purpose; we don't want
+		//to validate the is required so this attribute is never required.
+		final Attribute validationAttribute = new Attribute();
+		validationAttribute.setIsRequired(false);
+		
+		
+		text.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				validationAttribute.setMaxValue(getSourceObject().getAttribute().getMaxValue());
+				validationAttribute.setMinValue(getSourceObject().getAttribute().getMinValue());
+				validationAttribute.setName(getSourceObject().getName());
+				
+				String error = AttributeValidator.validateNumeric(validationAttribute, text.getText());
+				if (error != null){
+					//display error
+					MessageDialog.openError(getShell(), Messages.NumericAttributeInfoComposite_ErrorDialogTitle, error);
+					//reset to original value
+					Double defaultv = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE).getDoubleValue();
+					text.setText(defaultv == null ? "" : defaultv.toString()); //$NON-NLS-1$
+				}else{
+					Double value = text.getText() == null || text.getText().isEmpty() ? null : Double.valueOf(text.getText());
+					getSourceObject().getCmAttributeOptions().get(optionId).setDoubleValue(value);
+					fireModelChanged();
+				}
+				cd.hide();
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				
+			}
+		});
 		text.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (internalChange[0])
 					return;
-				Double value = text.getText() == null || text.getText().isEmpty() ? null : Double.valueOf(text.getText());
-				getSourceObject().getCmAttributeOptions().get(optionId).setDoubleValue(value);
+				validationAttribute.setMaxValue(getSourceObject().getAttribute().getMaxValue());
+				validationAttribute.setMinValue(getSourceObject().getAttribute().getMinValue());
+				validationAttribute.setName(getSourceObject().getName());
+				
+				String error = AttributeValidator.validateNumeric(validationAttribute, text.getText());
+				if (error != null){
+					//display error
+					cd.setDescriptionText(error);
+					cd.show();
+				}else{
+					cd.hide();
+				}
 				fireModelChanged();
 			}
 		});

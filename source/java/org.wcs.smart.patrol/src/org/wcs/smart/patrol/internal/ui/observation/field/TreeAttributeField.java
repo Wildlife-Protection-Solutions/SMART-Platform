@@ -29,8 +29,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.AttributeValidator;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
