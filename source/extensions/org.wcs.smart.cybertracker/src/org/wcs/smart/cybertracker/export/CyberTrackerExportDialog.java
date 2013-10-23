@@ -308,7 +308,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 						if (toDevice) {
 							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
 							try {
-								final int code = exporter.uploadPda(generated);
+								final int code = PdaUtil.uploadPda(generated);
 								if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
 									String codeMeaning = getCyberTrackerCodeMeaning(code);
 									CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ErrDialog_UploadFailed, code, codeMeaning), null);

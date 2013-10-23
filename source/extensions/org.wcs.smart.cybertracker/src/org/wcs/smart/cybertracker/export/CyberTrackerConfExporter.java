@@ -48,6 +48,8 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
+import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
+import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -84,14 +86,18 @@ public class CyberTrackerConfExporter {
 	private Elements elements;
 	private Map<Attribute, Map<Integer, CyberTrackerId>> attr2resultId = new HashMap<Attribute, Map<Integer, CyberTrackerId>>();
 	private Map<Integer, CyberTrackerId> nodeLevel2resultId = new HashMap<Integer, CyberTrackerId>();
+	private Map<Attribute, ListItemsDataProvider> listAttr2ItemData = new HashMap<Attribute, ListItemsDataProvider>();
 
 	private CyberTrackerId newWpResultId;
 	private List<CyberTrackerId> newWpElementsIds;
 	
 	private CyberTrackerId defaultAttrValuesResultId;
+	
+	private Session session;
+	private ConfigurableModel configurableModel;
 
 	public File export(File destFolder, ConfigurableModel model, IProgressMonitor monitor) {
-		Session session = HibernateManager.openSession();
+		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			elements = ElementsUtil.buildEmptyElements();
@@ -102,6 +108,7 @@ public class CyberTrackerConfExporter {
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			return performExport(destFolder, model, monitor, session);
 		} finally {
+			configurableModel = null;
 			defaultAttrValuesResultId = null;
 			newWpResultId = null;
 			newWpElementsIds = null;
@@ -109,8 +116,10 @@ public class CyberTrackerConfExporter {
 			rootId = null;
 			attr2resultId.clear();
 			nodeLevel2resultId.clear();
+			listAttr2ItemData.clear();
 			session.getTransaction().rollback();
 			session.close();
+			session = null;
 		}
 	}
 
@@ -120,11 +129,11 @@ public class CyberTrackerConfExporter {
 		screensFactory = new ScreensObjectFactory(ctProperties);
 		ctUtil = new CyberTrackerUtil(screensFactory);
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
-		model = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
+		configurableModel = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
-		CmNode root = ctUtil.buildRoot(model);
+		CmNode root = ctUtil.buildRoot(configurableModel);
 		Map<CmNode, CyberTrackerId> keyMap = ctUtil.buildMap(root);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
@@ -266,7 +275,7 @@ public class CyberTrackerConfExporter {
 					if (numAttr != null)
 						toShow.remove(1);
 					toShow.remove(0); //as we just added a node for it
-					List<AttributeListItem> activeItems = attribute.getActiveListItems();
+					List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
 					for (int i = 0; i < multiIds.size(); i++) {
 						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhotoAllowed(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
 					}
@@ -291,14 +300,14 @@ public class CyberTrackerConfExporter {
 			throw new IllegalArgumentException("This operation can be performed only on lists"); //$NON-NLS-1$
 		}
 		
-		List<AttributeListItem> activeItems = attribute.getActiveListItems();
+		List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
 		if (activeItems == null || activeItems.isEmpty()) {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
 			throw new IllegalArgumentException("Cannot add a screen without any items to display"); //$NON-NLS-1$
 		}
 		List<String> itemNames = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
-		for (AttributeListItem listItem : activeItems) {
+		for (IAttributeListItemProxy listItem : activeItems) {
 			itemNames.add(listItem.getName());
 			tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
 			
@@ -313,7 +322,7 @@ public class CyberTrackerConfExporter {
 		String tag3 = isMulti ? getAttributeResultElementId(attribute, 0).getItemId() : null;
 		String tag4 = numAttr != null ? getAttributeResultElementId(numAttr.getAttribute(), 0).getItemId() : null;
 		for (int i = 0; i < activeItems.size(); i++) {
-			AttributeListItem listItem = activeItems.get(i);
+			IAttributeListItemProxy listItem = activeItems.get(i);
 			String name = listItem.getName();
 			String tag0 = SmartUtils.encodeHex(listItem.getUuid());
 			String tag2 = isMulti ? String.valueOf(i) : null;
@@ -524,7 +533,7 @@ public class CyberTrackerConfExporter {
 			byte[] uuidValue = defaultValueOption.getUuidValue();
 			if (uuidValue != null) {
 				AttributeListItem def = null;
-				for (AttributeListItem item : attribute.getActiveListItems()) {
+				for (AttributeListItem item : attribute.getAttributeList()) { //check all including disabled
 					if (Arrays.equals(uuidValue, item.getUuid())) {
 						def = item; 
 						break;
@@ -545,7 +554,7 @@ public class CyberTrackerConfExporter {
 			byte[] uuidValue = defaultValueOption.getUuidValue();
 			if (uuidValue != null) {
 				AttributeTreeNode def = null;
-				for (AttributeTreeNode item : attribute.getActiveTreeNodes()) {
+				for (AttributeTreeNode item : attribute.getActiveTreeNodes()) { //check dm items
 					if (Arrays.equals(uuidValue, item.getUuid())) {
 						def = item; 
 						break;
@@ -748,14 +757,6 @@ public class CyberTrackerConfExporter {
 		return nodeList;
 	}
 	
-	public int uploadPda(File file) throws Exception {
-		String appPath = PdaUtil.getCTAppPath();
-		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
-		Process proc = Runtime.getRuntime().exec(uploadCommands);
-		int code = proc.waitFor();
-		return code;
-	}
-
 	private void split(List<CmAttribute> fullList, List<CmAttribute> toShow, List<CmAttribute> invisibleList) {
 		for (CmAttribute attr : fullList) {
 			if (attr.isVisible()) {
@@ -763,7 +764,7 @@ public class CyberTrackerConfExporter {
 				switch (attribute.getType()) {
 				case LIST:
 				{
-					List<AttributeListItem> activeItems = attribute.getActiveListItems();
+					List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
 					if (activeItems == null || activeItems.isEmpty()) {
 						continue;
 					}
@@ -787,5 +788,16 @@ public class CyberTrackerConfExporter {
 			}
 		}
 	}
-	
+
+	private List<IAttributeListItemProxy> getActiveListItems(Attribute attribute) {
+		if (attribute.getType() != AttributeType.LIST)
+			return null;
+		ListItemsDataProvider dataProvider = listAttr2ItemData.get(attribute);
+		if (dataProvider == null) {
+			dataProvider = new ListItemsDataProvider(attribute, configurableModel, session);
+			listAttr2ItemData.put(attribute, dataProvider);
+		}
+		return dataProvider.getActiveListItems();
+	}
+
 }
