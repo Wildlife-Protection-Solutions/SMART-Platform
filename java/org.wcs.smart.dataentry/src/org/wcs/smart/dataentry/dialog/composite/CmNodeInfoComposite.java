@@ -143,7 +143,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			parentNode.getChildren().remove(node);
 		}
 		node.setParent(null);
-		node.setModel(null);
+		//node.setModel(null);
+		getSession().flush();
 		
 		fireModelChanged();
 	}

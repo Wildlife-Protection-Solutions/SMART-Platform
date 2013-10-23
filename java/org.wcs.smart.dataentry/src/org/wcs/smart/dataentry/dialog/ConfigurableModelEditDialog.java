@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
@@ -255,12 +256,16 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 
-		//commit transaction
-		if (model.getName() != null) {
-			model.updateName(SmartDB.getCurrentLanguage(), model.getName());
+		try{
+			//commit transaction
+			if (model.getName() != null) {
+				model.updateName(SmartDB.getCurrentLanguage(), model.getName());
+			}
+			session.saveOrUpdate(model);
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
 		}
-		session.saveOrUpdate(model);
-		session.getTransaction().commit();
 		
 		//start a new transaction
 		session.getTransaction().begin();
