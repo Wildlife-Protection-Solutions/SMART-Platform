@@ -131,7 +131,11 @@ public class TreeNodeDataProvider {
 
 		@Override
 		public String getName() {
-			return item.getName();
+			String name = item.getName();
+			if (name == null || name.isEmpty()) {
+				return item.getDmTreeNode().getName();
+			}
+			return name;
 		}
 
 		@Override
