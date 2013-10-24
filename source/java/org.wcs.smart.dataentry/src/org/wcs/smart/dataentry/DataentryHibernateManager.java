@@ -51,7 +51,17 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @return all ConfigurableModels
 	 */
 	public static List<ConfigurableModel> getConfigurableModels(Session session) {
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		return getConfigurableModels(SmartDB.getCurrentConservationArea(), session);
+	}
+	
+	/**
+	 * Returns all ConfigurableModels for a given conservation area
+	 * 
+	 * @param ca the conservation are to load from
+	 * @param session
+	 * @return all ConfigurableModels
+	 */
+	public static List<ConfigurableModel> getConfigurableModels(ConservationArea ca, Session session) {
 		Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<ConfigurableModel> list = query.list();

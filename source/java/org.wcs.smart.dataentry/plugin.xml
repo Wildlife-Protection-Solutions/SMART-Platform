@@ -53,5 +53,15 @@
             commandId="org.wcs.smart.dataentry.showConfigurableModel">
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.dataentry.CmTemplateCloner"
+            id="org.wcs.smart.dataentry.cmTemplateCloner">
+         <require
+               id="org.wcs.smart.conservationAreaCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>
