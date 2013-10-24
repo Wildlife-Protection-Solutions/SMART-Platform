@@ -56,7 +56,12 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 	public String getText(Object element) {
 		CmAttributeListItem node = getListItem(element);
 		if (node != null){
-			String label = node.findNameNull(SmartDB.getCurrentLanguage());
+			String label =null;
+			if (currentLanguage == null){
+				label = node.findNameNull(SmartDB.getCurrentLanguage());
+			}else{
+				label = node.findNameNull(currentLanguage);
+			}
 			if (label != null){
 				return label;
 			}

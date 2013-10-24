@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.dialog.RenameListDialog;
@@ -63,6 +64,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private ComboViewer defaultViewer;
 	
 	private TableViewer listViewer;
+	private Language currentLanguage;
 	
 	/**
 	 * @param parent
@@ -82,7 +84,8 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
+				currentLanguage = language;
 				updateMultiselectControl();
 				updateDefaultControl();
 				updateListControl();
@@ -142,6 +145,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	}
 	
 	private void updateDefaultControl() {
+		((NamedItemLabelProvider)defaultViewer.getLabelProvider()).setLanguage(currentLanguage);
 		List<AttributeListItem> input = getSourceObject().getAttribute().getActiveListItems();
 		defaultViewer.setInput(input);
 		CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
@@ -190,6 +194,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	}
 
 	private void updateListControl() {
+		((CmListItemLabelProvider)listViewer.getLabelProvider()).setLanguage(currentLanguage);
 		listViewer.setInput(getSourceObject().getAttribute().getActiveListItems());
 	}	
 }

@@ -28,6 +28,7 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
@@ -47,9 +48,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * An attribute tree field editor that displays the
@@ -124,7 +125,7 @@ public class TreeEditorField  {
 			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);
 		}else{
-			txtText.setText(SmartUtils.formatStringForLabel(selection.getName()));
+			txtText.setText(((LabelProvider)tree.getTreeViewer().getLabelProvider()).getText(selection));
 			txtText.setData(selection);
 			lastValidSelection = selection;
 		}
@@ -136,6 +137,14 @@ public class TreeEditorField  {
 		for (Listener listener : listeners){
 			listener.handleEvent(event);
 		}
+	}
+	
+	/**
+	 * Sets the drop down language
+	 * @param language
+	 */
+	public void setLanguage(Language language){
+		((AttributeTreeLabelProvider)tree.getTreeViewer().getLabelProvider()).setLanguage(language);
 	}
 	
 	/**
@@ -330,7 +339,7 @@ public class TreeEditorField  {
 	 */
 	public void setValue(Object x) {
 		if (x instanceof AttributeTreeNode){
-			txtText.setText(((AttributeTreeNode) x).getName());
+			txtText.setText(((LabelProvider)tree.getTreeViewer().getLabelProvider()).getText(x));
 			txtText.setData(x);
 			this.originalValue = (AttributeTreeNode)x;
 		}else{

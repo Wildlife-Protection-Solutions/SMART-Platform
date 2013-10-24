@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -115,12 +116,12 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				CmNode n = getSourceObject();
 				boolean isGroup = n.isGroup();
 				if (!isGroup) {
 					if (lblCategory != null)
-						lblCategory.setText(n.getCategory().getFullCategoryName());
+						lblCategory.setText(n.getCategory().getFullCategoryName(language));
 					if (lblKey != null)
 						lblKey.setText(n.getCategory().getKeyId());
 					if (btnPhoto != null)
@@ -154,8 +155,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		return node;
 	}
 
-	public void setSourceObject(CmNode node) {
+	public void setSourceObject(CmNode node, Language currentLanguage) {
 		this.node = node;
-		fireSourceObjectChanged(node);
+		fireSourceObjectChanged(node, currentLanguage);
 	}
 }
