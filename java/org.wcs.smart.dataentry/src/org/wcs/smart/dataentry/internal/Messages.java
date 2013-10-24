@@ -28,6 +28,12 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_Category;
 	public static String CmNodeInfoComposite_Key;
 	public static String CmNodeInfoComposite_PhotoAllowed;
+	public static String CmTemplateCloner_AttributeNotFoundError;
+	public static String CmTemplateCloner_CategoryNotFoundErrpr;
+	public static String CmTemplateCloner_CopyConfigModelName;
+	public static String CmTemplateCloner_CopyProgress;
+	public static String CmTemplateCloner_ListItemNotFoundError;
+	public static String CmTemplateCloner_TreeNodeNotFoundError;
 	public static String ConfigurableModelEditDialog_Message;
 	public static String ConfigurableModelEditDialog_PropertiesLabel;
 	public static String ConfigurableModelEditDialog_SaveError;
