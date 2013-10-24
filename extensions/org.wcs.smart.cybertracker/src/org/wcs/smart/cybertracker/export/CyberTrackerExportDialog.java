@@ -62,14 +62,16 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -87,7 +89,6 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.cybertracker.export"); //$NON-NLS-1$
 	
-//	private CyberTrackerExporter exporter = new CyberTrackerExporter();
 	private CyberTrackerConfExporter exporter = new CyberTrackerConfExporter();
 	
 	private Button btnToDevice;
@@ -99,7 +100,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	private Button btnLaunchCT;
 	
 	private File selectedFile;
-	private ConfigurableModel selectedModel;
+	private Object selectedModel;
 
     private ComboViewer modelViewer;
 	
@@ -125,12 +126,20 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		modelViewer = new ComboViewer(modelSelector, SWT.READ_ONLY);
 		modelViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		modelViewer.setContentProvider(ArrayContentProvider.getInstance());
-		modelViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		modelViewer.setLabelProvider(new ConfigurableModelLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof DataModelWrapper) {
+					return Messages.DataModelWrapper_Dropdown_Label;
+				}
+				return super.getText(element);
+			}
+		});
 		modelViewer.setInput(getModelsList().toArray());
 		modelViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				selectedModel = (ConfigurableModel) ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
+				selectedModel = ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		});
@@ -290,7 +299,6 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
 					File tempDir;
 					try {
 						tempDir = PdaUtil.createTempDirectory();
@@ -301,7 +309,6 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 					try {
 						File generated = exporter.export(tempDir, selectedModel, monitor);
-//						File generated = exporter.export(tempDir, monitor);
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}
@@ -341,7 +348,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 			});
 		} catch (Exception e) {
-			CyberTrackerPlugIn.log(e.getMessage(), e);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_ExportError, e);
 		}
 	}
 
@@ -386,17 +393,23 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		return "true".equals(name); //$NON-NLS-1$
 	}
 
-	private List<ConfigurableModel> getModelsList() {
-		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
+	private List<?> getModelsList() {
+		List<Object> modelList = new ArrayList<Object>();
+		DataModel dataModel = null;
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try {
-			modelList = DataentryHibernateManager.getConfigurableModels(s);
+			modelList.addAll(DataentryHibernateManager.getConfigurableModels(s));
+			dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CyberTrackerExportDialog_LoadConfModels_Error, ex);
 		} finally {
 			s.getTransaction().rollback();
 			s.close();
+		}
+		
+		if (dataModel != null) {
+			modelList.add(new DataModelWrapper());
 		}
 		return modelList;
 	}

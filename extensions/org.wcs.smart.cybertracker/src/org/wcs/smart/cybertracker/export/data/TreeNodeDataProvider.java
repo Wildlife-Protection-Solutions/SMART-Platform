@@ -78,6 +78,8 @@ public class TreeNodeDataProvider {
 	}
 	
 	private CmAttributeTreeNode getCmTreeNode(Session session, AttributeTreeNode element, ConfigurableModel configurableModel) {
+		if (configurableModel.getUuid() == null)
+			return null;
 		List<?> items = session.createCriteria(CmAttributeTreeNode.class)
 				.add(Restrictions.eq("dmTreeNode", element))  //$NON-NLS-1$
 				.add(Restrictions.eq("configurableModel", configurableModel)).list();  //$NON-NLS-1$

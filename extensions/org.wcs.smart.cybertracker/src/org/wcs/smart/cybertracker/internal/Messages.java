@@ -79,6 +79,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_ErrDialog_UploadFailed;
 	public static String CyberTrackerExportDialog_Error_CopyFailed;
 	public static String CyberTrackerExportDialog_Error_CT_NotFound;
+	public static String CyberTrackerExportDialog_Error_ExportError;
 	public static String CyberTrackerExportDialog_Error_LaunchCT;
 	public static String CyberTrackerExportDialog_Error_UploadFailed;
 	public static String CyberTrackerExportDialog_ExportToDevice;
@@ -93,6 +94,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Task_Upload;
 	public static String CyberTrackerExportDialog_Title;
 	public static String CyberTrackerExporter_Error_GenerateCtxFail;
+	public static String CyberTrackerExporter_Error_InvalidSource;
 	public static String CyberTrackerExporter_Error_WriteXMmlFail;
 	public static String CyberTrackerExporter_NoAttributesNode_Message;
 	public static String CyberTrackerExporter_NoAttributesNode_Title;
@@ -213,6 +215,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_TrackTimer;
 	public static String CyberTrackerPropertiesDialog_TrackTimer_Tooltip;
 	public static String CyberTrackerPropertiesDialog_TrackTimerInvalid;
+	public static String DataModelWrapper_Dropdown_Label;
+	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
 	public static String EmployeeSelectorDialog_DialogTitle;
