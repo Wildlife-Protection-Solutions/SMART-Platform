@@ -48,6 +48,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
+import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
@@ -99,17 +100,30 @@ public class CyberTrackerConfExporter {
 	private Session session;
 	private ConfigurableModel configurableModel;
 
-	public File export(File destFolder, ConfigurableModel model, IProgressMonitor monitor) {
+	public File export(File destFolder, Object source, IProgressMonitor monitor) {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
+			if (source instanceof ConfigurableModel) {
+				monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
+				ConfigurableModel model = (ConfigurableModel) source;
+				configurableModel = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
+			} else if (source instanceof DataModelWrapper) {
+				configurableModel = ((DataModelWrapper) source).buildConfigurableModel(session, monitor);
+			} else {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
+				return null;
+			}
+			
+			monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
+			
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
 			newWpElementsIds = createNewWpElementsIds(elements);
 			defaultAttrValuesResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
-			return performExport(destFolder, model, monitor, session);
+			return performExport(destFolder, monitor);
 		} finally {
 			configurableModel = null;
 			defaultAttrValuesResultId = null;
@@ -127,13 +141,11 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
-	private File performExport(File file, ConfigurableModel model, IProgressMonitor monitor, Session session) {
+	private File performExport(File file, IProgressMonitor monitor) {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
 		screensFactory = new ScreensObjectFactory(ctProperties);
 		ctUtil = new CyberTrackerUtil(screensFactory);
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
-		configurableModel = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
@@ -144,6 +156,7 @@ public class CyberTrackerConfExporter {
 		ParolFilledDataContainer patrolScreensData = ctUtil.buildPatrolNodes(elements, keyMap.get(root), session);
 		if (patrolScreensData == null) {
 			//failed to generate patrol data
+			//error message is expected to be displayed be PatrolScreensUtil
 			return null;
 		}
 		List<Node> screenNodes = new ArrayList<Node>();

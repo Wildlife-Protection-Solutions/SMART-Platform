@@ -56,6 +56,8 @@ public class ListItemsDataProvider {
 	}
 	
 	private CmAttributeListItem getCmListItem(Session session, AttributeListItem element, ConfigurableModel configurableModel) {
+		if (configurableModel.getUuid() == null)
+			return null;
 		List<?> items = session.createCriteria(CmAttributeListItem.class)
 				.add(Restrictions.eq("listItem", element))  //$NON-NLS-1$
 				.add(Restrictions.eq("configurableModel", configurableModel)).list();  //$NON-NLS-1$
