@@ -96,7 +96,11 @@ public class ListItemsDataProvider {
 
 		@Override
 		public String getName() {
-			return item.getName();
+			String name = item.getName();
+			if (name == null || name.isEmpty()) {
+				return item.getListItem().getName();
+			}
+			return name;
 		}
 
 		@Override
