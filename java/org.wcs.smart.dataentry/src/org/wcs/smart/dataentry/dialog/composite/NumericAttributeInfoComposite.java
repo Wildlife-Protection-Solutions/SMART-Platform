@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -91,11 +92,28 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 					//display error
 					MessageDialog.openError(getShell(), Messages.NumericAttributeInfoComposite_ErrorDialogTitle, error);
 					//reset to original value
-					Double defaultv = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE).getDoubleValue();
+					CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+					Double defaultv = null;
+					if (op != null){
+						defaultv = op.getDoubleValue();
+					}
 					text.setText(defaultv == null ? "" : defaultv.toString()); //$NON-NLS-1$
 				}else{
 					Double value = text.getText() == null || text.getText().isEmpty() ? null : Double.valueOf(text.getText());
-					getSourceObject().getCmAttributeOptions().get(optionId).setDoubleValue(value);
+					CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(optionId);
+					if (value == null ){
+						if (op != null){
+							//remove 
+							getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
+							op.setCmAttribute(null);
+						}
+					}else{
+						if (op == null){
+							op = CmAttributeOptionFactory.createDefaultValueOption(getSourceObject());
+							getSourceObject().getCmAttributeOptions().put(op.getOptionId(), op);
+						}
+						op.setDoubleValue(value);
+					}
 					fireModelChanged();
 				}
 				cd.hide();
@@ -130,8 +148,8 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
-				text.setVisible(option != null);
-				label.setVisible(option != null);
+//				text.setVisible(option != null);
+//				label.setVisible(option != null);
 				if (option != null) {
 					Double value = option.getDoubleValue();
 					internalChange[0] = true;

@@ -105,27 +105,11 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 		}else if (element instanceof CategoryAttribute){
 			CategoryAttribute ca = (CategoryAttribute)element;
-			return getAttributeImage(ca.getAttribute());
+			return ca.getAttribute().getType().getImage();
 		}else if (element instanceof Attribute){
-			return getAttributeImage((Attribute)element);
-			
+			return ((Attribute)element).getType().getImage();
 		}else if (element instanceof DataModelContentProvider.RootNode){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
-		}
-		return null;
-	}
-	
-	private Image getAttributeImage(Attribute att){
-		if (att.getType()== Attribute.AttributeType.BOOLEAN){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
-		}else if (att.getType() == Attribute.AttributeType.TEXT){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
-		}else if (att.getType()== Attribute.AttributeType.LIST){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
-		}else if (att.getType()== Attribute.AttributeType.NUMERIC){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
-		}else if (att.getType()== Attribute.AttributeType.TREE){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
 		}
 		return null;
 	}

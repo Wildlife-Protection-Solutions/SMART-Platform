@@ -400,6 +400,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 							try{
 								boolean delete = DataModelManager.getInstance().validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
 								if (delete){
+									DataModelManager.getInstance().fireDeleteListener(AttributeInfoPanel.this.currentSession, it);
 									it.setAttribute(null);
 									
 									Display.getDefault().asyncExec(new Runnable(){

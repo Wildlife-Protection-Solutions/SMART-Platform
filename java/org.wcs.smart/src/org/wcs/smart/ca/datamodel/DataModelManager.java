@@ -57,6 +57,7 @@ public class DataModelManager {
 	 * Registered change listeners
 	 */
 	private List<IDataModelListener> changeListeners = new ArrayList<IDataModelListener>();
+	private List<IDataModelDeleteListener> deleteListeners = new ArrayList<IDataModelDeleteListener>();
 
 	
 	/**
@@ -65,7 +66,6 @@ public class DataModelManager {
 	private DataModelManager(){
 		
 	}
-	
 	
 	/**
 	 * These listeners are fired when the data model
@@ -86,6 +86,39 @@ public class DataModelManager {
 	public void removeChangeListener(IDataModelListener listener){
 		changeListeners.remove(listener);
 	}
+	
+	/**
+	 * Fires delete listeners
+	 * 
+	 * @param currentSession
+	 * @param deleteItem
+	 * @throws Exception
+	 */
+	public void fireDeleteListener(Session currentSession, Object deleteItem) throws Exception{
+		for (IDataModelDeleteListener listener : deleteListeners){
+			listener.deleteItem(currentSession, deleteItem);
+		}
+	}
+	/**
+	 * These listeners are fired after an item has be validated
+	 * for delete but before it is removed from the database.
+	 * These listeners may change the state of the database.
+	 * 
+	 * @param listener
+	 */
+	public void addDeleteListener(IDataModelDeleteListener listener){
+		deleteListeners.add(listener);
+	}
+	
+	/**
+	 * Remove delete listsner
+	 * 
+	 * @param listener
+	 */
+	public void removeDeleteListener(IDataModelDeleteListener listener){
+		deleteListeners.remove(listener);
+	}
+	
 	
 	/**
 	 * Fire when the data model is saved to the database.

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -72,7 +73,7 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
-				if (op.getBooleanValue() != null){
+				if (op != null && op.getBooleanValue() != null){
 					defaultViewer.setSelection(new StructuredSelection(op.getBooleanValue()));
 				}else{
 					defaultViewer.setSelection(new StructuredSelection("")); //$NON-NLS-1$
@@ -107,9 +108,14 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)defaultViewer.getSelection()).getFirstElement();
 				CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+				if (op == null){
+					op = CmAttributeOptionFactory.createDefaultValueOption(getSourceObject());
+					getSourceObject().getCmAttributeOptions().put(op.getOptionId(),op);
+				}
 				if (x != null && x instanceof Boolean){
 					op.setBooleanValue((Boolean)x);
 				}else{
+					getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
 					op.setBooleanValue(null);
 				}
 				fireModelChanged();

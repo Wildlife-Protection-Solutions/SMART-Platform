@@ -41,11 +41,17 @@ public class AttributeValidator {
 	}
 	
 	public static String validateNumeric(Attribute attribute, Object value){
-		if (value instanceof String){
-			try{
-				value = Double.parseDouble((String)value);
-			}catch (Exception ex){
-				return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+		if (value instanceof String ){
+			//convert to double
+			if (((String) value).trim().length() == 0){
+				//empty string is null value
+				value = null;
+			}else{
+				try{
+					value = Double.parseDouble((String)value);
+				}catch (Exception ex){
+					return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+				}
 			}
 		}
 		if (value != null && !(value instanceof Double)){

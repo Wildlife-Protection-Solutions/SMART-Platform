@@ -39,7 +39,6 @@ public class CmAttributeOptionFactory {
 	public static Map<String, CmAttributeOption> buildDefaultOptions(CmAttribute attribute, AttributeType type) {
 		Map<String, CmAttributeOption> result = new HashMap<String, CmAttributeOption>();
 		result.put(CmAttributeOption.ID_IS_VISIBLE, createIsVisibleOption(attribute));
-		result.put(CmAttributeOption.ID_DEFAULT_VALUE, createDefaultValueOption(attribute));
 		switch (type) {
 		case NUMERIC:
 			result.put(CmAttributeOption.ID_NUMERIC, createNumericOption(attribute));
@@ -64,7 +63,7 @@ public class CmAttributeOptionFactory {
 		return option;
 	}
 	
-	private static CmAttributeOption createDefaultValueOption(CmAttribute attribute) {
+	public static CmAttributeOption createDefaultValueOption(CmAttribute attribute) {
 		CmAttributeOption option = new CmAttributeOption();
 		option.setCmAttribute(attribute);
 		option.setOptionId(CmAttributeOption.ID_DEFAULT_VALUE);
