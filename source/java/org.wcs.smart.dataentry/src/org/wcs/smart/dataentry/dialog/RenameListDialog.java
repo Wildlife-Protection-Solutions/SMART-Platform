@@ -74,16 +74,14 @@ public class RenameListDialog extends AbstractRenameDialog {
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((StructuredSelection) tree.getSelection())
-						.getFirstElement();
+				Object x = ((StructuredSelection) tree.getSelection()).getFirstElement();
 				AttributeListItem currentNode = null;
 				CmAttributeListItem currentCmNode = null;
 				if (x instanceof AttributeListItem) {
 					currentNode = (AttributeListItem) x;
 					currentCmNode = getConfiguredNode(x);
 				}
-				RenameListDialog.this.setCurrentSelection(currentNode,
-						currentCmNode);
+				RenameListDialog.this.setCurrentSelection(currentNode, currentCmNode);
 			}
 		});
 		
@@ -112,8 +110,9 @@ public class RenameListDialog extends AbstractRenameDialog {
 	private CmAttributeListItem getConfiguredNode(Object x){
 		if (x instanceof AttributeListItem) {
 			AttributeListItem tmp = (AttributeListItem) x;
-			@SuppressWarnings("rawtypes")
-			List items = currentSession.createCriteria(CmAttributeListItem.class).add(Restrictions.eq("listItem", tmp)).list(); //$NON-NLS-1$
+			List<?> items = currentSession.createCriteria(CmAttributeListItem.class)
+				.add(Restrictions.eq("listItem", tmp))  //$NON-NLS-1$
+				.add(Restrictions.eq("configurableModel", editModel)).list(); //$NON-NLS-1$
 			if (items.size() > 0) {
 				return (CmAttributeListItem) items.get(0);
 			}

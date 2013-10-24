@@ -83,8 +83,9 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 	private CmAttributeTreeNode getConfiguredNode(Object x){
 		if (x instanceof AttributeTreeNode) {
 			AttributeTreeNode tmp = (AttributeTreeNode) x;
-			@SuppressWarnings("rawtypes")
-			List items = currentSession.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("dmTreeNode", tmp)).list(); //$NON-NLS-1$
+			List<?> items = currentSession.createCriteria(CmAttributeTreeNode.class)
+				.add(Restrictions.eq("dmTreeNode", tmp)) //$NON-NLS-1$
+				.add(Restrictions.eq("configurableModel", editModel)).list(); //$NON-NLS-1$
 			if (items.size() > 0){
 				return  (CmAttributeTreeNode) items.get(0);
 			}
