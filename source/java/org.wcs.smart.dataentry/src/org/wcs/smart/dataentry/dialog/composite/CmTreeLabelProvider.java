@@ -61,7 +61,7 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 			}else{
 				label = node.findNameNull(getLanguage());
 				if (label == null){
-					label = node.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+					label = node.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 				}
 			}
 			if (label != null){
