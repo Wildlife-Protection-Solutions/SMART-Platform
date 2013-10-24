@@ -554,6 +554,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					try{
 						delete = DataModelManager.getInstance().validateDelete(cat, monitor, getSession());
 					
+						DataModelManager.getInstance().fireDeleteListener(getSession(), cat);
+						
 						if (delete){
 							if (cat.getParent() != null){
 								cat.getParent().getChildren().remove(cat);
@@ -596,6 +598,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					try{
 						boolean delete = DataModelManager.getInstance().validateDelete(catAtt, monitor, getSession());
 						if (delete){
+							DataModelManager.getInstance().fireDeleteListener(getSession(), catAtt);
+							
 							catAtt.getCategory().getAttributes().remove(catAtt);
 							if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
 								getSession().evict(catAtt);
@@ -632,6 +636,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								if (ret[0] == 0){  //YES
 									delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
 									if (delete){
+										DataModelManager.getInstance().fireDeleteListener(getSession(), catAtt.getAttribute());
+										
 										dataModel.getAttributes().remove(catAtt.getAttribute());
 										if (catAtt.getAttribute().getUuid() != null){
 											getSession().delete(catAtt.getAttribute());

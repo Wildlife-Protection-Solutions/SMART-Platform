@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -79,28 +78,13 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 			CmNode node = (CmNode) element;
 			return node.isGroup() ? DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.GROUP_ICON) : SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 		} else if (element instanceof CmAttribute){
-			return getAttributeImage(((CmAttribute)element).getAttribute());
-			
+			return (((CmAttribute)element).getAttribute()).getType().getImage();
 		} else if (element instanceof CmRootNode){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
 		}
 		return null;
 	}
 
-	private Image getAttributeImage(Attribute att){
-		if (att.getType()== Attribute.AttributeType.BOOLEAN){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
-		}else if (att.getType() == Attribute.AttributeType.TEXT){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
-		}else if (att.getType()== Attribute.AttributeType.LIST){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
-		}else if (att.getType()== Attribute.AttributeType.NUMERIC){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
-		}else if (att.getType()== Attribute.AttributeType.TREE){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
-		}
-		return null;
-	}
 
 	@Override
 	public Color getForeground(Object element) {

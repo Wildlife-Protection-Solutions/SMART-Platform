@@ -416,6 +416,8 @@ public class AttributeTree {
 					try{
 						delete = DataModelManager.getInstance().validateDelete(node, new NullProgressMonitor(), AttributeTree.this.currentSession);
 						if (delete){
+							DataModelManager.getInstance().fireDeleteListener(AttributeTree.this.currentSession, node);
+							
 							if (node.getParent() != null){
 								if (node.getParent().getActiveChildren() != null){
 									node.getParent().getActiveChildren().remove(node);

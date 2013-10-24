@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.dialog.RenameListDialog;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -58,6 +60,7 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  */
 public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 
+	private final static String NO_OPTION = ""; //$NON-NLS-1$
 	private Label lblMulti;
 	private Button btnMulti;
 	
@@ -137,24 +140,39 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (obj instanceof UuidItem) {
 					UuidItem i = (UuidItem) obj;
 					CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+					if (option == null){
+						option = CmAttributeOptionFactory.createDefaultValueOption(getSourceObject());
+						getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
+					}
 					option.setUuidValue(i.getUuid());
-					fireModelChanged();
+					
+				}else{
+					CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+					if (option != null){
+						getSourceObject().getCmAttributeOptions().remove(option.getOptionId());
+						option.setCmAttribute(null);
+					}
 				}
+				fireModelChanged();
 			}
 		});
 	}
 	
 	private void updateDefaultControl() {
 		((NamedItemLabelProvider)defaultViewer.getLabelProvider()).setLanguage(currentLanguage);
-		List<AttributeListItem> input = getSourceObject().getAttribute().getActiveListItems();
+		List<Object> input = new ArrayList<Object>();
+		input.add(NO_OPTION);
+		input.addAll(getSourceObject().getAttribute().getActiveListItems());
 		defaultViewer.setInput(input);
 		CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
-		if (option.getUuidValue() != null) {
-			for (AttributeListItem item : input) {
-				if (Arrays.equals(item.getUuid(), option.getUuidValue())) {
+		if (option != null && option.getUuidValue() != null) {
+			for (Object item : input) {
+				if (item instanceof AttributeListItem && (Arrays.equals(((AttributeListItem)item).getUuid(), option.getUuidValue()))) {
 					defaultViewer.setSelection(new StructuredSelection(item));
 				}
 			}
+		}else{
+			defaultViewer.setSelection(new StructuredSelection(NO_OPTION));
 		}
 	}	
 	

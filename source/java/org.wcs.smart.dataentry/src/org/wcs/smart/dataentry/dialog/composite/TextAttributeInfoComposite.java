@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -94,10 +95,26 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 					//display error
 					MessageDialog.openError(getShell(), Messages.NumericAttributeInfoComposite_ErrorDialogTitle, error);
 					//reset to original value
-					String defaultv = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE).getStringValue();
+					String defaultv = null;
+					CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+					if (op != null){
+						defaultv = op.getStringValue();
+					}
 					text.setText(defaultv == null ? "" : defaultv.toString()); //$NON-NLS-1$
 				}else{
-					getSourceObject().getCmAttributeOptions().get(optionId).setStringValue(text.getText());
+					CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(optionId);
+					if (text.getText().trim().length() == 0){
+						if (op != null){
+							getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
+							op.setCmAttribute(null);
+						}
+					}else{
+						if (op == null){
+							op = CmAttributeOptionFactory.createDefaultValueOption(getSourceObject());
+							getSourceObject().getCmAttributeOptions().put(op.getOptionId(), op);
+						}
+						op.setStringValue(text.getText());
+					}
 					fireModelChanged();
 				}
 				cd.hide();
@@ -129,8 +146,8 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
-				text.setVisible(option != null);
-				label.setVisible(option != null);
+//				text.setVisible(option != null);
+//				label.setVisible(option != null);
 				if (option != null) {
 					internalChange[0] = true;
 					text.setText(option.getStringValue() != null ? option.getStringValue() : ""); //$NON-NLS-1$

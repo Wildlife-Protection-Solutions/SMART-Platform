@@ -39,10 +39,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.internal.Messages;
 
@@ -105,6 +107,21 @@ public class Attribute extends DmObject{
 	
 		private AttributeType(String typeKey){
 			this.typeKey = typeKey;
+		}
+		
+		public Image getImage(){
+			if (this == Attribute.AttributeType.BOOLEAN){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
+			}else if (this == Attribute.AttributeType.TEXT){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
+			}else if (this == Attribute.AttributeType.LIST){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
+			}else if (this == Attribute.AttributeType.NUMERIC){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
+			}else if (this == Attribute.AttributeType.TREE){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
+			}
+			return null;
 		}
 	}
 	

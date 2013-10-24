@@ -35,14 +35,15 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -239,28 +240,32 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(compAddExisting,
 				SWT.BORDER | SWT.FULL_SELECTION);
 		Table tblAttributes = checkboxTableViewer.getTable();
+		tblAttributes.setHeaderVisible(false);
+		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		gd.heightHint = 300;
 		gd.widthHint = 300;
 		tblAttributes.setLayoutData(gd);
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 
-		checkboxTableViewer.setLabelProvider(new LabelProvider() {
-			/**
-			 * The <code>LabelProvider</code> implementation of this
-			 * <code>ILabelProvider</code> method returns the element's
-			 * <code>toString</code> string. Subclasses may override.
-			 */
+		checkboxTableViewer.setLabelProvider(new ColumnLabelProvider(){
+			@Override
 			public String getText(Object element) {
 				if (element instanceof Attribute) {
 					Attribute att = (Attribute) element;
 					return findName(att, lang) + " [" + att.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-					
 				}
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof Attribute){
+					return ((Attribute) element).getType().getImage();
+				}
+				return null;
+			}
 		});
-
 		checkboxTableViewer.setInput(new String[]{Messages.AddAttributeDialog1_LoadingAttributesText});
 		
 		/* load attributes */

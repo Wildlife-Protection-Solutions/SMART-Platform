@@ -26,6 +26,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -38,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.RenameTreeDialog;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -84,7 +87,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				defaultValueTreeField.clear();
 				defaultValueTreeField.setLanguage(language);
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
-				if (option.getUuidValue() != null){
+				if (option != null && option.getUuidValue() != null){
 					AttributeTreeNode defaultNode = (AttributeTreeNode) getSession().load(AttributeTreeNode.class, option.getUuidValue());
 					defaultValueTreeField.setValue(defaultNode);
 				}
@@ -106,7 +109,22 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
 		
 		
-		defaultValueTreeField = new TreeEditorField();
+		defaultValueTreeField = new TreeEditorField(){
+			public void createComposite(Composite parent) {
+				super.createComposite(parent);
+				
+				txtText.addFocusListener(new FocusListener() {
+					@Override
+					public void focusLost(FocusEvent e) {
+						defaultTreeFieldChanged();
+					}
+					@Override
+					public void focusGained(FocusEvent e) {
+					}
+				});
+			}
+		};
+		
 		defaultValueTreeField.createComposite(container);
 		
 		getShell().addDisposeListener(new DisposeListener() {
@@ -119,16 +137,29 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		defaultValueTreeField.addSelectionChangedListener(new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				AttributeTreeNode node = defaultValueTreeField.getValue();
-				if (node != null){
-					CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
-					option.setUuidValue(node.getUuid());
-					fireModelChanged();
-				}
+				defaultTreeFieldChanged();
 			}
 		});
 	}
 
+	private void defaultTreeFieldChanged(){
+		AttributeTreeNode node = defaultValueTreeField.getValue();
+		CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+		if (node != null){
+			if (option == null){
+				option = CmAttributeOptionFactory.createDefaultValueOption(getSourceObject());
+				getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
+			}
+			option.setUuidValue(node.getUuid());
+		}else{
+			if (option != null){
+				getSourceObject().getCmAttributeOptions().remove(option.getOptionId());
+				option.setCmAttribute(null);
+			}
+			defaultValueTreeField.setValue(null);
+		}
+		fireModelChanged();
+	}
 	private void createTreeControl(Composite container) {
 		Label lblValues = new Label(container, SWT.NONE);
 		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

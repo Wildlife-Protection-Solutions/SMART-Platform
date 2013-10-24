@@ -190,7 +190,6 @@ public class TreeEditorField  {
 		txtText.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				
 				validate();
 			}
 			
