@@ -125,6 +125,7 @@ public class RenameListDialog extends AbstractRenameDialog {
 		CmAttributeListItem item = getConfiguredNode(dmNode);
 		if (item == null){
 			item = (CmAttributeListItem) createNewAlaisItem(dmNode);
+			setCurrentSelection(dmNode, item); //we need this in order to update cmNode from parent class
 		}
 		item.setIsActive(enable);
 		currentSession.saveOrUpdate(item);

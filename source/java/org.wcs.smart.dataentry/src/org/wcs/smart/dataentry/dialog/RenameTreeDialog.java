@@ -109,10 +109,13 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 		return Messages.RenameTreeDialog_DialogMessage;
 	}
 	
-	private void processItem(NamedItem dmNode, boolean enable){
+	private void processItem(NamedItem dmNode, boolean enable, boolean updateSelection){
 		CmAttributeTreeNode item = getConfiguredNode(dmNode);
 		if (item == null){
 			item = (CmAttributeTreeNode) createNewAlaisItem(dmNode);
+			if (updateSelection) {
+				setCurrentSelection(dmNode, item);
+			}
 		}
 		item.setIsActive(enable);
 		currentSession.saveOrUpdate(item);
@@ -120,7 +123,7 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 	
 	@Override
 	protected void enableItem(NamedItem dmNode, boolean enable){
-		processItem(dmNode, enable);
+		processItem(dmNode, enable, true);
 		
 		if (!enable){
 			//process all children
@@ -129,7 +132,7 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 			itemsToProcess.addAll(node.getActiveChildren());
 			while(itemsToProcess.size() > 0){
 				AttributeTreeNode kid = itemsToProcess.remove(0);
-				processItem(kid, enable);
+				processItem(kid, enable, false);
 				itemsToProcess.addAll(kid.getActiveChildren());
 			}
 		
@@ -137,7 +140,7 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 			//need to enable all parents
 			AttributeTreeNode parent = ((AttributeTreeNode)dmNode).getParent();
 			while(parent != null){
-				processItem(parent, enable);
+				processItem(parent, enable, false);
 				parent = parent.getParent();
 			}
 		}
