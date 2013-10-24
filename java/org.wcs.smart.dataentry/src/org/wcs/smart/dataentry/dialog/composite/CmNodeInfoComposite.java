@@ -139,14 +139,23 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		if (parentNode == null) {
 			//this is the root node
 			getModel().getNodes().remove(node);
+			//re-order nodes
+			int i = 0;
+			for (CmNode n : getModel().getNodes()){
+				n.setNodeOrder(i++);
+			}
 		} else {
 			//not a root node
 			parentNode.getChildren().remove(node);
+			
+			//re-order nodes
+			int i = 0;
+			for (CmNode n : parentNode.getChildren()){
+				n.setNodeOrder(i++);
+			}
 		}
 		node.setParent(null);
-		//node.setModel(null);
 		getSession().flush();
-		
 		fireModelChanged();
 	}
 	
