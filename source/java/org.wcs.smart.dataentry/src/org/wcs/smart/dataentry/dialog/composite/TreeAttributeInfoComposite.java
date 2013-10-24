@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.RenameTreeDialog;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -77,19 +78,24 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				//default value field
 				defaultValueTreeField.setAttribute(getSourceObject().getAttribute());
 				defaultValueTreeField.clear();
+				defaultValueTreeField.setLanguage(language);
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (option.getUuidValue() != null){
 					AttributeTreeNode defaultNode = (AttributeTreeNode) getSession().load(AttributeTreeNode.class, option.getUuidValue());
 					defaultValueTreeField.setValue(defaultNode);
 				}
 				
+				
 				//tree viewer
+				((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
 				attributeTreeViewer.setInput(getSourceObject().getAttribute());
 				attributeTreeViewer.expandToLevel(2);
+				attributeTreeViewer.refresh();
+				
 				
 			}
 		});

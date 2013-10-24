@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -69,7 +70,7 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (op.getBooleanValue() != null){
 					defaultViewer.setSelection(new StructuredSelection(op.getBooleanValue()));

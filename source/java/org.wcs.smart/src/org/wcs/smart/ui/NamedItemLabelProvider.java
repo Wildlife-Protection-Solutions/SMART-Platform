@@ -22,7 +22,9 @@
 package org.wcs.smart.ui;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * LabelProvider for {@link NamedItem}
@@ -32,11 +34,24 @@ import org.wcs.smart.ca.NamedItem;
  */
 public class NamedItemLabelProvider extends LabelProvider {
 
+	protected Language currentLanguage = null;
+	
+	public void setLanguage(Language language){
+		this.currentLanguage = language;
+	}
 	@Override
 	public String getText(Object element) {
 		if (element instanceof NamedItem) {
 			NamedItem i = (NamedItem) element;
-			return i.getName();
+			if (currentLanguage == null){
+				return i.getName();
+			}else{
+				String x = i.findNameNull(currentLanguage);
+				if (x == null){
+					x = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				}
+				return x;
+			}
 		}
 		return super.getText(element);
 	}

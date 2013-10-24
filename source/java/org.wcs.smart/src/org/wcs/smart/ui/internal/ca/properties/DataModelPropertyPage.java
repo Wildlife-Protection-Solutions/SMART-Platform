@@ -581,7 +581,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 		}else if (o instanceof CategoryAttribute){
 			final CategoryAttribute catAtt  = (CategoryAttribute)o;
-			boolean ret = MessageDialog.openConfirm(getShell(), DELETE_DIALOG_TITLE, MessageFormat.format(Messages.DataModelPropertyPage_ConfirmDeleteCatAtt_DialogMessage, new Object[]{catAtt.getCategory().getFullCategoryName(getLanguage()), catAtt.getAttribute().findName(getLanguage()) }));
+			String attributeName = catAtt.getAttribute().findNameNull(getLanguage());
+			if (attributeName == null){
+				attributeName = catAtt.getAttribute().findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+			boolean ret = MessageDialog.openConfirm(getShell(), DELETE_DIALOG_TITLE, MessageFormat.format(Messages.DataModelPropertyPage_ConfirmDeleteCatAtt_DialogMessage, new Object[]{catAtt.getCategory().getFullCategoryName(getLanguage()), attributeName}));
 			if (!ret){
 				return;
 			}

@@ -419,10 +419,14 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@Transient
 	public String getFullCategoryName(Language lang){
+		String l = findNameNull(lang);
+		if (l == null){
+			l = findName(ca.getDefaultLanguage());
+		}
 		if (parent == null){
-			return findName(lang);
+			return l;
 		}else{
-			return findName(lang) + FULL_NAME_SEPARATOR + parent.getFullCategoryName(lang);
+			return l + FULL_NAME_SEPARATOR + parent.getFullCategoryName(lang);
 		}
 	}
 	

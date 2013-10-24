@@ -50,13 +50,20 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 		this.session = currentSession;
 		this.model = model;
 	}
-	
-	
+		
 	@Override
 	public String getText(Object element) {
 		CmAttributeTreeNode node = getTreeNode(element);
 		if (node != null){
-			String label = node.findNameNull(SmartDB.getCurrentLanguage());
+			String label =null;
+			if (getLanguage() == null){
+				label = node.findNameNull(SmartDB.getCurrentLanguage());
+			}else{
+				label = node.findNameNull(getLanguage());
+				if (label == null){
+					label = node.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				}
+			}
 			if (label != null){
 				return label;
 			}

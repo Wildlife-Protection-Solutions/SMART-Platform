@@ -28,12 +28,14 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Label provider for {@link NamedItem} objects.
@@ -42,11 +44,28 @@ import org.wcs.smart.dataentry.model.CmNode;
  */
 public class ConfigurableModelLabelProvider extends LabelProvider implements IColorProvider {
 
+	private Language currentLanguage;
+	
+	public ConfigurableModelLabelProvider(){
+		currentLanguage = null;
+	}
+	
+	public void setLanguage(Language currentLanguage){
+		this.currentLanguage = currentLanguage;
+	}
+	
 	@Override
 	public String getText(Object element) {
 		if (element instanceof NamedItem) {
 			NamedItem i = (NamedItem)element;
-			return i.getName();
+			if (currentLanguage == null){
+				return i.getName();
+			}
+			String l = i.findNameNull(currentLanguage);
+			if (l == null){
+				l = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+			return l;
 		}
 		if (element instanceof CmRootNode) {
 			return getText(((CmRootNode)element).model);

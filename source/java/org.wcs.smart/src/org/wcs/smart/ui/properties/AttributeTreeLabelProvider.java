@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
 
@@ -39,82 +40,84 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
   *
   */
 public  class AttributeTreeLabelProvider extends LabelProvider implements IColorProvider {
-		private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
-		private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
-		private Language currentLang = null;
-		
-		/**
-		 * Creates new data model provided
-		 * @param lang the working language; if null default is used
-		 */
-		public AttributeTreeLabelProvider(Language lang){
-			this.currentLang = lang;
-		}
-		
-		public AttributeTreeLabelProvider(){
-			this(null);
-		}
-		
-		/**
-		 * Update the display language
-		 * 
-		 * @param lang the new display language
-		 */
-		public void setLanguage(Language lang){
-			this.currentLang = lang;
-		}
-		
-		/**
-		 * 
-		 * @return the current display language
-		 */
-		public Language getLanguage(){
-			return this.currentLang;
-		}
-		
-		@Override
-		public String getText(Object element) {
-			if (element instanceof RootNode){
-				return Messages.AttributeTreeLabelProvider_RootNode_Label;
-			}
-			if (element instanceof AttributeTreeNode){
-				element = ((AttributeTreeNode)element);
-			}
-			
-			if (element instanceof DmObject){
-				DmObject obj = (DmObject)element;
-				if (currentLang != null){
-					return obj.findName(currentLang) + "  [" + obj.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-				}else{
-					return obj.getName();
-				}
-			}
-			return ""; //$NON-NLS-1$
-		}
+	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
-		@Override
-		public Image getImage(Object element) {
-			return null;
-		}
+	private Language currentLang = null;
 		
-		@Override
-		public Color getForeground(Object element) {
-			boolean active = true;
-			if (element instanceof AttributeTreeNode){
-				active = ((AttributeTreeNode)element).getIsActive();
-			}
-			
-			if (active){
-				return BLACK;
-			}else{
-				return GRAY;
-			}
-		}
-		
-		@Override
-		public Color getBackground(Object element) {
-			return null;
-		}
-
+	/**
+	 * Creates new data model provided
+	 * @param lang the working language; if null default is used
+	 */
+	public AttributeTreeLabelProvider(Language lang){
+		this.currentLang = lang;
 	}
+		
+	public AttributeTreeLabelProvider(){
+		this(null);
+	}
+		
+	/**
+	 * Update the display language
+	 * 
+	 * @param lang the new display language
+	 */
+	public void setLanguage(Language lang){
+		this.currentLang = lang;
+	}
+		
+	/**
+	 * 
+	 * @return the current display language
+	 */
+	public Language getLanguage(){
+		return this.currentLang;
+	}
+		
+	@Override
+	public String getText(Object element) {
+		if (element instanceof RootNode){
+			return Messages.AttributeTreeLabelProvider_RootNode_Label;
+		}
+		
+		if (element instanceof DmObject){
+			DmObject obj = (DmObject)element;
+			if (currentLang != null){
+				String l = obj.findNameNull(currentLang);
+				if (l == null){
+					l = obj.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				}
+				return l + "  [" + obj.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				return obj.getName();
+			}
+		}
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public Image getImage(Object element) {
+		return null;
+	}
+		
+	@Override
+	public Color getForeground(Object element) {
+		boolean active = true;
+		if (element instanceof AttributeTreeNode){
+			active = ((AttributeTreeNode)element).getIsActive();
+		}
+		
+		if (active){
+			return BLACK;
+		}else{
+			return GRAY;
+		}
+	}
+		
+	@Override
+	public Color getBackground(Object element) {
+		return null;
+	}
+
+}

@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -234,9 +235,9 @@ public abstract class AbstractInfoComposite extends Composite {
 		modelListeners.remove(listener);
 	}
 
-	protected void fireSourceObjectChanged(Object newObject) {
+	protected void fireSourceObjectChanged(Object newObject, Language language) {
 		for (ISourceObjectChangedListener listener : sourceListeners) {
-			listener.sourceObjectChanged(newObject);
+			listener.sourceObjectChanged(newObject, language);
 		}
 	}
 	
@@ -275,7 +276,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	 * @since 2.0.0
 	 */
 	protected interface ISourceObjectChangedListener {
-		public void sourceObjectChanged(Object newObject);
+		public void sourceObjectChanged(Object newObject, Language language);
 	}
 	
 	/**
@@ -292,6 +293,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		
 		private NamedItem item;
 		private boolean internalChange = false; //indicate if text was changed by user or by calling setter
+		private Language currentLanguage = null;
 		
 		public TranslatableNameComposite(Composite parent) {
 			super(parent, SWT.NONE);
@@ -324,7 +326,7 @@ public abstract class AbstractInfoComposite extends Composite {
 							text.setText(item.getName());
 						}else{
 							item.setName(text.getText());
-							item.updateName(SmartDB.getCurrentLanguage(), item.getName());
+							item.updateName(currentLanguage, item.getName());
 							
 						}
 						fireModelChanged();
@@ -360,7 +362,7 @@ public abstract class AbstractInfoComposite extends Composite {
 					if (item != null){
 						TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), item);
 						if (translateDialog.open() == Window.OK){
-							text.setText(item.getName());
+							updateText(item);
 							fireModelChanged();
 						}
 						
@@ -377,16 +379,24 @@ public abstract class AbstractInfoComposite extends Composite {
 			return button;
 		}
 
+		private void updateText(NamedItem item){
+			String l = item.findNameNull(currentLanguage);
+			if (l == null){
+				l = item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+			text.setText(l);
+		}
 		@Override
-		public void sourceObjectChanged(Object newObject) {
+		public void sourceObjectChanged(Object newObject, Language language) {
+			currentLanguage = language;
 			if (newObject instanceof NamedItem) {
 				item = (NamedItem) newObject;
 				internalChange = false;
-				text.setText(item.getName());
+				updateText(item);
 				internalChange = true;
 			} else if (newObject instanceof CmRootNode) {
 				CmRootNode root = (CmRootNode) newObject;
-				sourceObjectChanged(root.model);
+				sourceObjectChanged(root.model, language);
 			}
 		}
 	}

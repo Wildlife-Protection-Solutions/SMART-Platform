@@ -30,11 +30,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Info composite for {@link CmAttribute}
@@ -86,12 +88,15 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttribute attr = getSourceObject();
 				if (attr != null) {
 					if (lblAttribute != null) {
-						String text = attr.getAttribute().getName();
-						text += " (" + attr.getNode().getCategory().getFullCategoryName() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+						String text = attr.getAttribute().findNameNull(language);
+						if (text == null){
+							text = attr.getAttribute().findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+						}
+						text += " (" + attr.getNode().getCategory().getFullCategoryName(language) + ")";  //$NON-NLS-1$//$NON-NLS-2$
 						lblAttribute.setText(text);
 					}
 					if (lblKey != null)
@@ -124,7 +129,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		});
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
 				btnBool.setVisible(option != null);
 				label.setVisible(option != null);
@@ -141,9 +146,9 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		return attribute;
 	}
 	
-	public void setSourceObject(CmAttribute attribute) {
+	public void setSourceObject(CmAttribute attribute, Language language) {
 		this.attribute = attribute;
-		fireSourceObjectChanged(attribute);
+		fireSourceObjectChanged(attribute, language);
 	}
 
 }

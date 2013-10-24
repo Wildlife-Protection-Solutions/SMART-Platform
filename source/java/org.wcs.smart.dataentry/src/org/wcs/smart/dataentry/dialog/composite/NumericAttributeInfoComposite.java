@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -127,7 +128,7 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
 				text.setVisible(option != null);
 				label.setVisible(option != null);
@@ -156,7 +157,7 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
-			public void sourceObjectChanged(Object newObject) {
+			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttribute cmAttr = getSourceObject();
 				boolean isEnabled = false;
 				if (cmAttr.getOrder() == 1) {

@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
@@ -68,9 +69,9 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		return rootNode;
 	}
 	
-	public void setSourceObject(CmRootNode rootNode) {
+	public void setSourceObject(CmRootNode rootNode, Language language) {
 		this.rootNode = rootNode;
-		fireSourceObjectChanged(rootNode);
+		fireSourceObjectChanged(rootNode, language);
 	}
 	
 }

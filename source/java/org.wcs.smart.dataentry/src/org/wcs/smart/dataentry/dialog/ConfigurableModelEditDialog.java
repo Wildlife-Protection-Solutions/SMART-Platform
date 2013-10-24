@@ -68,6 +68,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.LanguageViewer;
 
 /**
  * Dialog for editing Configurable Models.
@@ -94,6 +95,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 	private ConfigurableModel model;
 	
+	private LanguageViewer languageViewer;
 	private TreeViewer modelTreeViewer;
 
 	private Composite infoInnerPanel;
@@ -121,6 +123,10 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		
 		Composite innerLeft = new Composite(container, SWT.NONE);
 		innerLeft.setLayout(new GridLayout());
+		
+		languageViewer = new LanguageViewer(innerLeft, SWT.DROP_DOWN | SWT.READ_ONLY, SmartDB.getCurrentConservationArea());
+		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		modelTreeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(true));
@@ -149,6 +155,14 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		});
 		modelTreeViewer.expandToLevel(2);
 		
+		languageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				((ConfigurableModelLabelProvider)modelTreeViewer.getLabelProvider()).setLanguage(languageViewer.getCurrentSelection());
+				modelTreeViewer.refresh();
+				updateRightPanelState();
+			}
+		});
 
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
@@ -258,9 +272,6 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 		try{
 			//commit transaction
-			if (model.getName() != null) {
-				model.updateName(SmartDB.getCurrentLanguage(), model.getName());
-			}
 			session.saveOrUpdate(model);
 			session.getTransaction().commit();
 		}catch (Exception ex){
@@ -280,21 +291,21 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		if (obj instanceof CmNode) {
 			CmNode node = (CmNode) obj;
 			CmNodeInfoComposite cmp = node.isGroup() ? groupNodeComposite : categoryNodeComposite;
-			cmp.setSourceObject(node);
+			cmp.setSourceObject(node, languageViewer.getCurrentSelection());
 			((StackLayout)infoInnerPanel.getLayout()).topControl = cmp;
 			
 		} else if (obj instanceof CmAttribute) {
 			CmAttribute attr = (CmAttribute)obj;
 			CmAttributeInfoComposite attrComposite = attributeComposites.get(attr.getAttribute().getType());
 			if (attrComposite != null) {
-				attrComposite.setSourceObject((CmAttribute)obj);
+				attrComposite.setSourceObject((CmAttribute)obj, languageViewer.getCurrentSelection());
 				((StackLayout)infoInnerPanel.getLayout()).topControl = attrComposite;
 			} else {
 				((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 			}
 
 		} else if (obj instanceof CmRootNode) {
-			rootNodeComposite.setSourceObject((CmRootNode)obj);
+			rootNodeComposite.setSourceObject((CmRootNode)obj, languageViewer.getCurrentSelection());
 			((StackLayout)infoInnerPanel.getLayout()).topControl = rootNodeComposite;
 			
 		} else {
