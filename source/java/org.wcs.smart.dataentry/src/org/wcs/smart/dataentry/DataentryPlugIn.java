@@ -42,7 +42,8 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static DataentryPlugIn plugin;
 	
-	private DataModelDeleteListener deleteListener = new DataModelDeleteListener();
+	private DataModelItemListener deleteListener = new DataModelItemListener();
+	private DataModelListener dmListener = new DataModelListener();
 	/**
 	 * The constructor
 	 */
@@ -57,7 +58,8 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		DataModelManager.getInstance().addDeleteListener(deleteListener);
+		DataModelManager.getInstance().addItemChangeListener(deleteListener);
+		DataModelManager.getInstance().addChangeListener(dmListener);
 	}
 
 	/*
@@ -65,8 +67,8 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		DataModelManager.getInstance().removeDeleteListener(deleteListener);
-		
+		DataModelManager.getInstance().removeItemChangeListener(deleteListener);
+		DataModelManager.getInstance().removeChangeListener(dmListener);
 		plugin = null;
 		super.stop(context);
 	}

@@ -92,14 +92,11 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 					defaultValueTreeField.setValue(defaultNode);
 				}
 				
-				
 				//tree viewer
 				((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
 				attributeTreeViewer.setInput(getSourceObject().getAttribute());
 				attributeTreeViewer.expandToLevel(2);
 				attributeTreeViewer.refresh();
-				
-				
 			}
 		});
 	}
