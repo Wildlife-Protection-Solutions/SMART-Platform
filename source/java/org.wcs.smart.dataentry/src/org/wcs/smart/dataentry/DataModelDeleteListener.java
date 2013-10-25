@@ -52,6 +52,9 @@ import org.wcs.smart.dataentry.model.CmNode;
 @SuppressWarnings("unchecked")
 public class DataModelDeleteListener implements IDataModelDeleteListener {
 
+	/**
+	 * Called when item is removed from the data model.
+	 */
 	@Override
 	public void deleteItem(Session currentSession, Object itemToDelete)
 			throws Exception {
@@ -70,6 +73,11 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 		
 	}
 	
+	/**
+	 * remove any nodes that reference the category
+	 * @param currentSession
+	 * @param c
+	 */
 	private void categoryDelete(Session currentSession, Category c){
 		List<CmNode> nodes = currentSession.createCriteria(CmNode.class).add(Restrictions.eq("category", c)).list(); //$NON-NLS-1$
 		for (CmNode n : nodes){
@@ -83,7 +91,12 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 		}
 	}
 	
-	
+	/**
+	 * remove any attributes whose owner nodes
+	 * represents the given category
+	 * @param currentSession
+	 * @param ca
+	 */
 	private void attributeDelete(Session currentSession, CategoryAttribute ca){
 		Query q = currentSession.createQuery(
 				"FROM CmAttribute a WHERE a.attribute = :attribute and a.node.category = :category"); //$NON-NLS-1$
@@ -96,6 +109,11 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 		}
 	}
 	
+	/**
+	 * remove list item configurations
+	 * @param currentSession
+	 * @param li
+	 */
 	private void listItemDelete(Session currentSession, AttributeListItem li){
 		List<CmAttributeListItem> items = currentSession.createCriteria(CmAttributeListItem.class)
 			.add(Restrictions.eq("listItem", li)).list(); //$NON-NLS-1$
@@ -105,6 +123,11 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 		deleteAttributeOption(currentSession, li.getUuid());
 	}
 
+	/**
+	 * remove tree node configurations
+	 * @param currentSession
+	 * @param node
+	 */
 	private void treeNodeDelete(Session currentSession, AttributeTreeNode node){
 		List<CmAttributeTreeNode> nodes = currentSession.createCriteria(CmAttributeTreeNode.class)
 			.add(Restrictions.eq("dmTreeNode", node)).list(); //$NON-NLS-1$
@@ -114,6 +137,11 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 		deleteAttributeOption(currentSession, node.getUuid());
 	}
 	
+	/**
+	 * remove attribute option
+	 * @param currentSession
+	 * @param uuidValue
+	 */
 	private void deleteAttributeOption(Session currentSession, byte[] uuidValue){
 		Query q = currentSession.createQuery("From CmAttributeOption WHERE uuidValue = :uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", uuidValue); //$NON-NLS-1$

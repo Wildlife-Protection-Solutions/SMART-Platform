@@ -67,6 +67,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -124,6 +126,23 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 	}
 	
+	public boolean close(){
+		
+		//evict all items from cache to ensure they are correctly loaded next time
+		getSession().getSessionFactory().getCache().evictEntityRegion(Category.class);
+		getSession().getSessionFactory().getCache().evictEntityRegion(Attribute.class);
+		getSession().getSessionFactory().getCache().evictEntityRegion(AttributeTreeNode.class);
+		getSession().getSessionFactory().getCache().evictEntityRegion(AttributeListItem.class);
+		getSession().getSessionFactory().getCache().evictEntityRegion(CategoryAttribute.class);
+		
+		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.attributeList"); //$NON-NLS-1$
+		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.activeTreeNodes"); //$NON-NLS-1$
+		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.tree"); //$NON-NLS-1$
+		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.children"); //$NON-NLS-1$
+		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.activeChildren"); //$NON-NLS-1$
+		
+		return super.close();
+	}
 	
 	/**
 	 * Sets the data model
@@ -473,6 +492,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					try {
 						currentTransaction.commit();
 						DataModelManager.getInstance().fireChangeListeners();
+						
 						currentTransaction = session.beginTransaction();
 						setChangesMade(false);
 					}catch (Exception ex){
