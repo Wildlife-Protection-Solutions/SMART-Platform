@@ -79,7 +79,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
