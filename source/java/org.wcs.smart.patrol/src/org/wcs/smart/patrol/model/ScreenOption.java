@@ -37,6 +37,7 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.patrol.internal.Messages;
 
 
 /**
@@ -52,17 +53,17 @@ public class ScreenOption extends UuidItem {
 	public enum ScreenOptionMeta {
 //		START_DATE("Start Date"),
 //		END_DATE("End Date"),
-		TYPE("Patrol Type"),
-		TRANSPORT("Transport Type"),
-		ARMED("Armed"),
-		STATION("Station"),
-		TEAM("Team"),
-		MANDATE("Patrol Mandate"),
-		OBJECTIVE("Patrol Objective"),
-		COMMENT("Patrol Comment"),
-		MEMBERS("Patrol Members"),
-		LEADER("Patrol Leader"),
-		PILOT("Patrol Pilot");
+		TYPE(Messages.ScreenOption_PatrolType),
+		TRANSPORT(Messages.ScreenOption_TransportType),
+		ARMED(Messages.ScreenOption_Armed),
+		STATION(Messages.ScreenOption_Station),
+		TEAM(Messages.ScreenOption_Team),
+		MANDATE(Messages.ScreenOption_Mandate),
+		OBJECTIVE(Messages.ScreenOption_Objective),
+		COMMENT(Messages.ScreenOption_Comment),
+		MEMBERS(Messages.ScreenOption_Members),
+		LEADER(Messages.ScreenOption_Leader),
+		PILOT(Messages.ScreenOption_Pilot);
 		
 		private String guiLabel;
 		
