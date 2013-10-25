@@ -12,9 +12,7 @@ public class Messages extends NLS {
 	public static String CTPatrolTableColumn_Comment;
 	public static String CTPatrolTableColumn_EndDate;
 	public static String CTPatrolTableColumn_Leader;
-	public static String CTPatrolTableColumn_Mandate;
 	public static String CTPatrolTableColumn_Members;
-	public static String CTPatrolTableColumn_Objective;
 	public static String CTPatrolTableColumn_Pilot;
 	public static String CTPatrolTableColumn_SightCount;
 	public static String CTPatrolTableColumn_StartDate;
@@ -114,7 +112,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerExporter_Waypoint_AddToLast;
 	public static String CyberTrackerExporter_Waypoint_SaveAsNew;
 	public static String CyberTrackerExporter_Waypoint_ScreenTitle;
-	public static String CyberTrackerExportHandler_ErrDialog_Message;
 	public static String CyberTrackerExportHandler_ErrDialog_Title;
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
 	public static String CyberTrackerExportHandler_InfoDialog_Title;
