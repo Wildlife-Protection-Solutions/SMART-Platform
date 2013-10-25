@@ -271,7 +271,6 @@ public class Attribute extends DmObject{
 	 * 
 	 * @return the set of aggregations that are valid for the attribute
 	 */
-	//@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name="smart.dm_att_agg_map", 
 	 joinColumns = {@JoinColumn(name="attribute_uuid")},
@@ -331,7 +330,6 @@ public class Attribute extends DmObject{
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null")
 	@OrderBy(clause = "node_order")
-	//@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;

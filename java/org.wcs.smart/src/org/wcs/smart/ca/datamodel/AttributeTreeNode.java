@@ -133,8 +133,6 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 * @return children nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
-//	@Cascade({CascadeType.SAVE_UPDATE})
-//	@JoinColumn(name="parent_uuid")
 	@OrderBy(clause = "node_order")
 	@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
