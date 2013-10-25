@@ -645,6 +645,17 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_Title;
 	public static String PatrolUtils_Edit_Link_Label;
 	public static String SavePatrolPartJob_Name;
+	public static String ScreenOption_Armed;
+	public static String ScreenOption_Comment;
+	public static String ScreenOption_Leader;
+	public static String ScreenOption_Mandate;
+	public static String ScreenOption_Members;
+	public static String ScreenOption_Objective;
+	public static String ScreenOption_PatrolType;
+	public static String ScreenOption_Pilot;
+	public static String ScreenOption_Station;
+	public static String ScreenOption_Team;
+	public static String ScreenOption_TransportType;
 	public static String ScreenOptionComposite_DefaultValue;
 	public static String ScreenOptionComposite_DisplayPage;
 	public static String ScreenOptionComposite_Dropdown_NoValue;
