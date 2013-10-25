@@ -236,7 +236,7 @@ public class DataModel {
 			ca.setIsActive(true);
 			ca.setOrder(cat.getAttributes().size());
 			cat.getAttributes().add(ca);
-
+			
 			return ca;
 		}
 		return null;
