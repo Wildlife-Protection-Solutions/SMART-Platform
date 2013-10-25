@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Rectangle;
@@ -46,7 +47,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -151,15 +151,15 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		Composite generalContainer = new Composite(tabFolder, SWT.None);
 		generalContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
-		generalContainer.setLayout(new GridLayout(2, true));
+		generalContainer.setLayout(new GridLayout(2, false));
 		
 		Composite gpsContainer = new Composite(tabFolder, SWT.None);
 		gpsContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
-		gpsContainer.setLayout(new GridLayout(2, true));
+		gpsContainer.setLayout(new GridLayout(2, false));
 		
 		Composite fieldmapContainer = new Composite(tabFolder, SWT.None);
 		fieldmapContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
-		fieldmapContainer.setLayout(new GridLayout(2, true));
+		fieldmapContainer.setLayout(new GridLayout(2, false));
 		
 		
 		generalTab.setControl(generalContainer);
@@ -171,7 +171,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		Label lblAppName = new Label(generalContainer, SWT.NONE);
 		lblAppName.setText(Messages.CyberTrackerPropertiesDialog_AppName);
 		lblAppName.setToolTipText(Messages.CyberTrackerPropertiesDialog_AppName_Tooltip);
-		lblAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		lblAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtAppName = new Text(generalContainer, SWT.BORDER);
 		txtAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -611,8 +611,9 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
 		timeOffset.setLabelProvider(new CyberTrackerGTMLabelProvider());
  		timeOffset.setInput(CyberTrackerProperties.GTM_VALUES);
-		if (ctProperties.getGpsTimeZone() != null)
+		if (ctProperties.getGpsTimeZone() != null){
 			timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
+		}
 		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -695,11 +696,9 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	    Composite fileContainer = new Composite(fieldmapContainer, SWT.NONE);
 	    fileContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
 	    fileContainer.setLayout(new GridLayout(2, false));
-	    
-		final Shell shell = parent.getShell();
-			    
+	    		    
 	    txtFileName = new Text(fileContainer, SWT.BORDER);
-	    txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	    txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 	    txtFileName.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
 		txtFileName.setText(ctProperties.getFieldMapFilename());
 		
@@ -726,25 +725,22 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	    
 	    
 	    Button open = new Button(fileContainer, SWT.PUSH);
-		open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,1,1));
+		open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
+		((GridData)open.getLayoutData()).heightHint = 10;
 	    open.setText(Messages.CyberTrackerPropertiesDialog_42);
-	    open.addSelectionListener(new SelectionListener() {
-		@Override
-		public void widgetDefaultSelected(SelectionEvent e) {
-			
-		}
-
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			FileDialog dlg = new FileDialog(shell, SWT.OPEN);
-	        dlg.setFilterNames(new String[] {Messages.CyberTrackerPropertiesDialog_43});
-	        dlg.setFilterExtensions(new String[] {Messages.CyberTrackerPropertiesDialog_44});
-	        String fn = dlg.open();
-	        if (fn != null) {
-	          txtFileName.setText(fn);
-	        }
-	        setChangesMade(true);
-		}
+	    open.addSelectionListener(new SelectionAdapter() {
+		
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+	    		dlg.setFilterNames(new String[] {Messages.CyberTrackerPropertiesDialog_43});
+	    		dlg.setFilterExtensions(new String[] {Messages.CyberTrackerPropertiesDialog_44});
+	    		String fn = dlg.open();
+	    		if (fn != null) {
+	    			txtFileName.setText(fn);
+	    		}
+	    		setChangesMade(true);
+	    	}
 	    });
 
 		
