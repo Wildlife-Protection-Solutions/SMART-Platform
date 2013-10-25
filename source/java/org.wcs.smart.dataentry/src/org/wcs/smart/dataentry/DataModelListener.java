@@ -27,6 +27,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -52,11 +53,23 @@ public class DataModelListener implements IDataModelListener {
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		//delete default attribute option
+		q = session.createQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeListItem it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		//delete all disabled tree items
 		q = session.createQuery("DELETE CmAttributeTreeNode a WHERE a IN (SELECT cm FROM CmAttributeTreeNode cm WHERE cm.dmTreeNode.attribute.conservationArea = :ca AND cm.dmTreeNode.isActive = 'false')"); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		//delete default attribute option
+		q = session.createQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeTreeNode it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.executeUpdate();
+				
+				
+				
 		//delete all nodes that reference in-active categories
 		q = session.createQuery("FROM CmNode n WHERE n.category.conservationArea = :ca AND n.category.isActive = 'false')"); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
