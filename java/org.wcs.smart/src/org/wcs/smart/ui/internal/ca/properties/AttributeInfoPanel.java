@@ -885,7 +885,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 						try{
 							DataModelManager.getInstance().fireDeleteListener(session, oldItem);
 						}catch (Exception ex){
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Error saving attribute list modifications.  Please close and data model editor and reopen it. " + ex.getMessage(), ex);
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.AttributeInfoPanel_ListModificationError + ex.getMessage(), ex); 
 							return;
 						}
 						oldItem.setAttribute(null);
