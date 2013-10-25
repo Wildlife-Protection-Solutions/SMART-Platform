@@ -57,7 +57,7 @@ public class DataModelManager {
 	 * Registered change listeners
 	 */
 	private List<IDataModelListener> changeListeners = new ArrayList<IDataModelListener>();
-	private List<IDataModelDeleteListener> deleteListeners = new ArrayList<IDataModelDeleteListener>();
+	private List<IDataModelItemListener> deleteListeners = new ArrayList<IDataModelItemListener>();
 
 	
 	/**
@@ -95,10 +95,35 @@ public class DataModelManager {
 	 * @throws Exception
 	 */
 	public void fireDeleteListener(Session currentSession, Object deleteItem) throws Exception{
-		for (IDataModelDeleteListener listener : deleteListeners){
+		for (IDataModelItemListener listener : deleteListeners){
 			listener.deleteItem(currentSession, deleteItem);
 		}
 	}
+	
+	
+	/**
+	 * Fires delete listeners
+	 * 
+	 * @param currentSession
+	 * @param deleteItem
+	 */
+	public void fireAddListener(Session currentSession, Object addItem){
+		for (IDataModelItemListener listener : deleteListeners){
+			listener.addItem(currentSession, addItem);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param currentSession
+	 * @param enabledItem
+	 */
+	public void fireEnabledStateListener(Session currentSession, Object enabledItem){
+		for (IDataModelItemListener listener : deleteListeners){
+			listener.itemEnabledStateChanged(currentSession, enabledItem);
+		}
+	}
+	
 	/**
 	 * These listeners are fired after an item has be validated
 	 * for delete but before it is removed from the database.
@@ -106,7 +131,7 @@ public class DataModelManager {
 	 * 
 	 * @param listener
 	 */
-	public void addDeleteListener(IDataModelDeleteListener listener){
+	public void addItemChangeListener(IDataModelItemListener listener){
 		deleteListeners.add(listener);
 	}
 	
@@ -115,7 +140,7 @@ public class DataModelManager {
 	 * 
 	 * @param listener
 	 */
-	public void removeDeleteListener(IDataModelDeleteListener listener){
+	public void removeItemChangeListener(IDataModelItemListener listener){
 		deleteListeners.remove(listener);
 	}
 	

@@ -522,9 +522,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private void disableElement(){
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
-			((DataModel)viewer.getInput()).disableCategory((Category)o, !((Category)o).getIsActive());			
+			((DataModel)viewer.getInput()).disableCategory((Category)o, !((Category)o).getIsActive());
+			DataModelManager.getInstance().fireEnabledStateListener(getSession(), o);
 		}else if (o instanceof CategoryAttribute){
 			((DataModel)viewer.getInput()).disableAttribute((CategoryAttribute)o, !((CategoryAttribute)o).getIsActive());
+			DataModelManager.getInstance().fireEnabledStateListener(getSession(), o);
 		}
 		updateInfoPanel();
 		refreshTree();
@@ -752,10 +754,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			newCat.setParent(parentCat);
 			newCat.setCategoryOrder(parentCat.getChildren().size());
 			parentCat.getChildren().add(newCat);
-			viewer.setExpandedState(parentCat, true);
 		}
 		newCat.updateHkey();
+		DataModelManager.getInstance().fireAddListener(getSession(), newCat);
+		session.flush();
 		
+		if (newCat.getParent() != null){
+			viewer.setExpandedState(newCat.getParent(), true);
+		}
 		refreshTree();
 		setChangesMade(true);
 	}
@@ -830,9 +836,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		
 		//show dialog
+		List<CategoryAttribute> newAttributes = new ArrayList<CategoryAttribute>();
 		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), getLanguage());
 		int ret = d1.open();
-		if (ret == AddAttributeDialog1.FINISH){
+		if (ret == AddAttributeDialog1.CANCEL){
+			return;
+		}else if (ret == AddAttributeDialog1.FINISH){
+			newAttributes.addAll(d1.getAddedAttributes());
 			refreshTree();
 		}else if (ret == AddAttributeDialog1.NEXT){
 			Attribute att = new Attribute();
@@ -850,7 +860,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			DataModel dm = (DataModel)viewer.getInput();
 			try{
-				dm.addNewAttribute(att, parent);
+				newAttributes.add( dm.addNewAttribute(att, parent) );
+				//added a new attribute
+				DataModelManager.getInstance().fireAddListener(session, att);
 				session.saveOrUpdate(att);
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(getShell(), ex.getMessage(), ex);
@@ -858,8 +870,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			viewer.setExpandedState(parent, true);
 			refreshTree();
 		}
-		setChangesMade(true);
 		
+		for (CategoryAttribute newAttribute: newAttributes){
+			//added category/attribute links
+			DataModelManager.getInstance().fireAddListener(session, newAttribute);
+		}
+		session.flush();
+		setChangesMade(true);
 	}
 	
 	/*

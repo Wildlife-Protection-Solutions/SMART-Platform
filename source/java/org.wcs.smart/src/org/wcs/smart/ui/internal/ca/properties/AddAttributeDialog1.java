@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,6 +58,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -92,6 +94,9 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	private Category category; // category attribute being added to
 	private DataModel dm; // data model being updated
 
+	/* items added */
+	List<CategoryAttribute> addedElements;
+	
 	private Job loadAttributesJob = new Job("Loading Attributes"){ //$NON-NLS-1$
 
 		@Override
@@ -345,18 +350,20 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	 * adds all selected attributes to the given category 
 	 * 
 	 */
-	private void addAttributes(Category cat, DataModel dm) {
+	private List<CategoryAttribute> addAttributes(Category cat, DataModel dm) {
 		Object[] checked = checkboxTableViewer.getCheckedElements();
+		addedElements = new ArrayList<CategoryAttribute>();
 		for (int i = 0; i < checked.length; i++) {
 			Object x = checked[i];
 			if (x instanceof Attribute){
 				try{
-					dm.addExistingAttribute((Attribute) checked[i], cat);
+					addedElements.add(dm.addExistingAttribute((Attribute) checked[i], cat));
 				}catch (Exception ex){
 					SmartPlugIn.displayLog(getShell(), ex.getMessage(), ex);
 				}
 			}
 		}
+		return addedElements;
 	}
 
 	@Override
@@ -370,5 +377,13 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 			setReturnCode(CANCEL);
 		}
 		close();
+	}
+	
+	/**
+	 * 
+	 * @return the list of attributes added on the first page if any
+	 */
+	public List<CategoryAttribute> getAddedAttributes(){
+		return this.addedElements;
 	}
 }

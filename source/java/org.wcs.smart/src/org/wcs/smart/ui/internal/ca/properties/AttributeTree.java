@@ -84,6 +84,8 @@ public class AttributeTree {
 	private Session currentSession = null;
 	
 	private Attribute attribute;
+	
+	private List<AttributeTreeNode> deletedNodes = new ArrayList<AttributeTreeNode>();
 	/**
 	 * Sets the listener fired when modifications occur.  
 	 * @param listener
@@ -416,8 +418,6 @@ public class AttributeTree {
 					try{
 						delete = DataModelManager.getInstance().validateDelete(node, new NullProgressMonitor(), AttributeTree.this.currentSession);
 						if (delete){
-							DataModelManager.getInstance().fireDeleteListener(AttributeTree.this.currentSession, node);
-							
 							if (node.getParent() != null){
 								if (node.getParent().getActiveChildren() != null){
 									node.getParent().getActiveChildren().remove(node);
@@ -429,6 +429,7 @@ public class AttributeTree {
 								getRootNodes().remove(node);
 								node.setAttribute(null);
 							}
+							deletedNodes.add(node);
 						}
 					}catch (final Exception ex){
 						shell.syncExec(new Runnable(){
@@ -436,13 +437,10 @@ public class AttributeTree {
 							public void run() {
 								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, ex.getLocalizedMessage());
 							}
-						});
-						
-					}
-					
+						});	
+					}	
 					monitor.worked(1);
 				}
-				currentSession.flush();
 				shell.syncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -455,6 +453,12 @@ public class AttributeTree {
 		});
 	}
 	
+	public List<AttributeTreeNode> getDeletedNodes(){
+		return this.deletedNodes;
+	}
+	public void clearDeletedNodes(){
+		this.deletedNodes.clear();
+	}
 	/*
 	 * Run a taks in a progress monitor
 	 * @param runnable

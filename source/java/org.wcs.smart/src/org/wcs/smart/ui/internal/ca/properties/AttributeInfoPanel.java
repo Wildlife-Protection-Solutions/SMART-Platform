@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
@@ -78,6 +79,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -400,9 +402,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 							try{
 								boolean delete = DataModelManager.getInstance().validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
 								if (delete){
-									DataModelManager.getInstance().fireDeleteListener(AttributeInfoPanel.this.currentSession, it);
 									it.setAttribute(null);
-									
 									Display.getDefault().asyncExec(new Runnable(){
 										@Override
 										public void run() {
@@ -810,10 +810,11 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	/**
 	 * Updates the given attribute with the contents of the 
 	 * gui components.
+	 * @param <T>
 	 * 
 	 * @param att attribute to update
 	 */
-	public void updateAttribute(Attribute att, final Session session){
+	public <T> void updateAttribute(Attribute att, final Session session){
 		updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
@@ -872,10 +873,28 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			att.setMinValue(null);
 			att.setRegex(null);
 			clearAttributeTree(att);
+			
 			if (att.getAttributeList() == null){
 				att.setAttributeList(new ArrayList<AttributeListItem>());
 			}else{
-				att.getAttributeList().clear();
+				for (Iterator<AttributeListItem> iterator = att.getAttributeList().iterator(); iterator.hasNext();) {
+					AttributeListItem oldItem = (AttributeListItem) iterator.next();
+					
+					if (!attributeList.contains(oldItem)){
+						
+						//item deleted
+						try{
+							DataModelManager.getInstance().fireDeleteListener(session, oldItem);
+						}catch (Exception ex){
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Error saving attribute list modifications.  Please close and data model editor and reopen it. " + ex.getMessage(), ex);
+							return;
+						}
+						oldItem.setAttribute(null);
+						iterator.remove();
+					}
+				}
+				
+				
 			}
 			for (int i = 0; i < attributeList.size(); i ++){
 				AttributeListItem item = (AttributeListItem) attributeList.get(i);
@@ -885,14 +904,24 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				
 				if (item.getUuid() != null){
 					item = (AttributeListItem) session.merge(item);	
+				}else{
+					//new item
+					DataModelManager.getInstance().fireAddListener(session, item);
+					att.getAttributeList().add(item);
 				}
 				for ( org.wcs.smart.ca.Label l : item.getNames()){
 					l.setElement(item);
 				}
-				att.getAttributeList().add(item);
-				session.flush();
 			}
+			Collections.sort(att.getAttributeList(), new Comparator<AttributeListItem>() {
+
+				@Override
+				public int compare(AttributeListItem o1, AttributeListItem o2) {
+					return ((Integer)o1.getListOrder()).compareTo(o2.getListOrder());
+				}
+			});
 			
+			session.flush();
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
 			att.setAggregations(null);
 			att.setMaxValue(null);
@@ -909,6 +938,16 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
 							monitor.setTaskName(Messages.AttributeInfoPanel_SavingProgressMessage);
+							
+							for(AttributeTreeNode toDelete : attTree.getDeletedNodes()){
+								try{
+									DataModelManager.getInstance().fireDeleteListener(currentSession, toDelete);
+								}catch (Exception ex){
+									throw new InvocationTargetException(ex);
+								}
+							}
+							attTree.clearDeletedNodes();
+							
 							if (thisAttribute.getTree() == null){
 								thisAttribute.setTree(new ArrayList<AttributeTreeNode>());
 							}else{
@@ -947,12 +986,15 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		if (node.getUuid() != null){
 			node = (AttributeTreeNode) session.merge(node);
 		}else{
+			//newNode
+			DataModelManager.getInstance().fireAddListener(currentSession, node);
 			session.saveOrUpdate(node);
 		}
 		
 		for ( org.wcs.smart.ca.Label l : node.getNames()){
 			l.setElement(node);
 		}
+		
 		node.getChildren().clear();
 		node.getChildren().addAll(kids);
 		
