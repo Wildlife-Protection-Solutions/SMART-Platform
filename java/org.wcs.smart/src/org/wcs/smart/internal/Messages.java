@@ -120,6 +120,7 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Error_Message;
 	public static String AttributeInfoPanel_Error_OneListItemRequired;
 	public static String AttributeInfoPanel_Error_OneTreeNodeRequired;
+	public static String AttributeInfoPanel_ListModificationError;
 	public static String AttributeInfoPanel_Max_Label;
 	public static String AttributeInfoPanel_Min_Label;
 	public static String AttributeInfoPanel_Regex_Label;
