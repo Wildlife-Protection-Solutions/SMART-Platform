@@ -21,16 +21,19 @@
  */
 package org.wcs.smart.dataentry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.ca.datamodel.IDataModelDeleteListener;
+import org.wcs.smart.ca.datamodel.IDataModelItemListener;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -50,7 +53,7 @@ import org.wcs.smart.dataentry.model.CmNode;
  *
  */
 @SuppressWarnings("unchecked")
-public class DataModelDeleteListener implements IDataModelDeleteListener {
+public class DataModelItemListener implements IDataModelItemListener {
 
 	/**
 	 * Called when item is removed from the data model.
@@ -93,19 +96,37 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 	
 	/**
 	 * remove any attributes whose owner nodes
-	 * represents the given category
+	 * represents the given category or any child of the given
+	 * category.
 	 * @param currentSession
 	 * @param ca
 	 */
 	private void attributeDelete(Session currentSession, CategoryAttribute ca){
+		deleteAttribute(currentSession, ca.getCategory(), ca.getAttribute());
+		List<Category> kids = new ArrayList<Category>();
+		kids.addAll(ca.getCategory().getChildren());
+		while(kids.size() > 0){
+			Category kid = kids.remove(0);
+			deleteAttribute(currentSession, kid, ca.getAttribute());
+			kids.addAll(kid.getChildren());
+		}
+	}
+	
+	private void deleteAttribute(Session currentSession, Category category, Attribute attribute){
 		Query q = currentSession.createQuery(
 				"FROM CmAttribute a WHERE a.attribute = :attribute and a.node.category = :category"); //$NON-NLS-1$
-		q.setParameter("attribute", ca.getAttribute()); //$NON-NLS-1$
-		q.setParameter("category", ca.getCategory()); //$NON-NLS-1$
+		q.setParameter("attribute", attribute); //$NON-NLS-1$
+		q.setParameter("category", category); //$NON-NLS-1$
 		
 		List<CmAttribute> attributes = q.list();
 		for (CmAttribute a : attributes){
-			currentSession.delete(a);
+			a.setAttribute(null);
+			a.getNode().getCmAttributes().remove(a);
+			
+			//update the order of other attribute
+			for (int i = 0; i < a.getNode().getCmAttributes().size(); i ++){
+				a.getNode().getCmAttributes().get(i).setOrder(i);
+			}
 		}
 	}
 	
@@ -150,6 +171,71 @@ public class DataModelDeleteListener implements IDataModelDeleteListener {
 			o.getCmAttribute().getCmAttributeOptions().remove(o.getOptionId());
 			o.setCmAttribute(null);
 		}
+		
+	}
+
+	@Override
+	public void addItem(Session currentSession, Object itemToAdd) {
+		if (itemToAdd instanceof CategoryAttribute){
+			//for each node the links to the category we need to add a new attribute node
+			CategoryAttribute ca = (CategoryAttribute)itemToAdd;
+			if (!ca.getIsActive()){
+				return;
+			}
+			addAttributeToCategory(currentSession, ca.getCategory(), ca.getAttribute());
+			List<Category> kids = new ArrayList<Category>();
+			kids.addAll(ca.getCategory().getChildren());
+			while(kids.size() > 0){
+				Category c = kids.remove(0);
+				addAttributeToCategory(currentSession, c, ca.getAttribute());
+				kids.addAll(c.getChildren());
+			}
+		}
+	}
+	private void addAttributeToCategory(Session currentSession, Category category, Attribute attribute){
+		List<CmNode> nodes = currentSession.createCriteria(CmNode.class).add(Restrictions.eq("category", category)).list(); //$NON-NLS-1$
+		for (CmNode node : nodes){
+			//ensure attribute doesn't already exist
+			boolean add = true;
+			for (CmAttribute cmAttribute : node.getCmAttributes()){
+				if (cmAttribute.getAttribute().equals(attribute)){
+					add = false; //already exists
+				}
+			}
+			if (add){
+				CmAttribute newAttribute = new CmAttribute();
+				newAttribute.setAttribute(attribute);
+				for (org.wcs.smart.ca.Label label : attribute.getNames()) { //we need a copy, not the same instance of set
+					newAttribute.updateName(label.getLanguage(), label.getValue());
+				}
+				newAttribute.setNode(node);
+				newAttribute.setOrder(node.getCmAttributes().size());
+				newAttribute.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(newAttribute, attribute.getType()));
+				node.getCmAttributes().add(newAttribute);
+				
+				currentSession.saveOrUpdate(newAttribute);
+			}
+		}
+	}
+
+	/**
+	 * Here we only care if an attribute was enabled as it must be added.
+	 * Disabled attributes are dealt with when save is called in
+	 * the DataModelListener.
+	 * 
+	 */
+	@Override
+	public void itemEnabledStateChanged(Session currentSession, Object itemToAdd) {
+		
+		if (itemToAdd instanceof CategoryAttribute){
+			CategoryAttribute ca = (CategoryAttribute)itemToAdd;
+			if (ca.getIsActive()){
+				//enabled; add to category
+				addItem(currentSession, ca);
+			}
+
+		}
+
 		
 	}
 }

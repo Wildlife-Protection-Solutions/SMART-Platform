@@ -48,9 +48,9 @@ public class CmAttribute extends NamedItem {
 
 	private CmNode node;
 	private Attribute attribute;
-//	private List<CmAttributeOption> cmAttributeOptions;
 	private Map<String, CmAttributeOption> cmAttributeOptions;
 	private int order;
+	
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
@@ -70,14 +70,6 @@ public class CmAttribute extends NamedItem {
 		this.attribute = attribute;
 	}
 	
-//	@OneToMany(fetch = FetchType.EAGER, mappedBy="cmAttribute", cascade={CascadeType.ALL}, orphanRemoval = true)
-//	public List<CmAttributeOption> getCmAttributeOptions() {
-//		return cmAttributeOptions;
-//	}
-//	public void setCmAttributeOptions(List<CmAttributeOption> cmAttributeOptions) {
-//		this.cmAttributeOptions = cmAttributeOptions;
-//	}
-
 	@OneToMany(fetch = FetchType.EAGER, mappedBy="cmAttribute", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@MapKey(name="optionId")
 	public Map<String, CmAttributeOption> getCmAttributeOptions() {
