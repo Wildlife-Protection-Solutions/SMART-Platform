@@ -99,7 +99,7 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.cybertracker.model.CyberTrackerProperties">
+            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption">
       </class>
    </extension>
    <extension

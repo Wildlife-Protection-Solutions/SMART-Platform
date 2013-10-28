@@ -29,6 +29,8 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
@@ -41,18 +43,18 @@ import org.wcs.smart.util.SmartUtils;
 public class CyberTrackerHibernateManager {
 
 	/**
-	 * Returns all {@link CyberTrackerProperties}
+	 * Returns all {@link CyberTrackerPropertiesOption}
 	 * 
 	 * @param session
-	 * @return  {@link List} of {@link CyberTrackerProperties}
+	 * @return  {@link List} of {@link CyberTrackerPropertiesOption}
 	 */
-	public static List<CyberTrackerProperties> getAllProperties(Session session) {
-		Criteria query = session.createCriteria(CyberTrackerProperties.class);
+	public static List<CyberTrackerPropertiesOption> getAllStorageOptions(Session session) {
+		Criteria query = session.createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("optionId", OptionID.STORAGE_TIME)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
-		List<CyberTrackerProperties> list = query.list();
+		List<CyberTrackerPropertiesOption> list = query.list();
 		return list;
 	}
-	
+
 	/**
 	 * Fetches {@link CyberTrackerProperties} for current conservation area
 	 * 
@@ -61,9 +63,15 @@ public class CyberTrackerHibernateManager {
 	 */
 	public static CyberTrackerProperties getProperties(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(CyberTrackerProperties.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		CyberTrackerProperties properties = (CyberTrackerProperties) query.uniqueResult();
-		return properties != null ? properties : new CyberTrackerProperties();
+		Criteria query = session.createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<CyberTrackerPropertiesOption> options = query.list();
+		CyberTrackerProperties properties = new CyberTrackerProperties();
+		for (Object object : options) {
+			CyberTrackerPropertiesOption o = (CyberTrackerPropertiesOption) object;
+			properties.getOptions().put(o.getOptionId(), o);
+		}
+		return properties;
 	}
 	
 	/**
@@ -74,10 +82,13 @@ public class CyberTrackerHibernateManager {
 	 * @return <code>true</code> if saved successfully, <code>false</code> if error
 	 */
 	public static boolean saveProperties(CyberTrackerProperties properties, Session session) {
-		properties.setConservationArea(SmartDB.getCurrentConservationArea());
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		session.beginTransaction();
 		try {
-			session.saveOrUpdate(properties);
+			for (CyberTrackerPropertiesOption option : properties.getOptions().values()) {
+				option.setConservationArea(ca);
+				session.saveOrUpdate(option);
+			}
 			session.getTransaction().commit();
 			return true;
 		} catch (Exception ex) {

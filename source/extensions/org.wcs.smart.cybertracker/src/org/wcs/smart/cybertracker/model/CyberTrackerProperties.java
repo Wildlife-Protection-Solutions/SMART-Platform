@@ -21,15 +21,11 @@
  */
 package org.wcs.smart.cybertracker.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 
 /**
  * Class responsible for representing CyberTracker Properties
@@ -37,8 +33,6 @@ import org.wcs.smart.ca.UuidItem;
  * @author elitvin
  * @since 1.0.0
  */
-@Entity
-@Table(name = "smart.cybertracker_properties")
 public class CyberTrackerProperties extends UuidItem {
 
 	public static final int STORAGE_TIME_MIN_VALUE = 0;
@@ -56,7 +50,7 @@ public class CyberTrackerProperties extends UuidItem {
 	public static final double SIGHTING_ACCURACY_MIN_VALUE = 0.01;
 	public static final double SIGHTING_ACCURACY_MAX_VALUE = 49;
 	
-	public static final double TRACK_ACCURACY_MIN_VALUE = 1;
+	public static final double TRACK_ACCURACY_MIN_VALUE = 0.01;
 	public static final double TRACK_ACCURACY_MAX_VALUE = 49;
 
 	public static final int SIGHTING_FIX_COUNT_MIN_VALUE = 1;
@@ -106,264 +100,300 @@ public class CyberTrackerProperties extends UuidItem {
 	public static final int SKIP_BUTTON_TIMEOUT_MIN_VALUE = 0;
 	public static final int SKIP_BUTTON_TIMEOUT_MAX_VALUE = Integer.MAX_VALUE;
 	
-	private ConservationArea conservationArea;
-	
 	//default properties
-	private String  applicationName = "SMART"; //$NON-NLS-1$
+	private static final String  applicationName = "SMART"; //$NON-NLS-1$
 	
-	private boolean largeScrollBars = false;
-	private boolean kioskMode = false;
-	private int exitPin = 1234;
+	private static final boolean largeScrollBars = false;
+	private static final boolean kioskMode = false;
+	private static final int exitPin = 1234;
 	
-	private Double sightingAccuracy = 49.0;
-	private Integer sightingFixCount = 1;
-	private Integer waypointTimer = 0; //aka Track Timer 
-	private Integer gpsTimeZone = 0; //GMT/UTC time offset
-    private Integer skipButtonTimeout = 3;
+	private static final double sightingAccuracy = 49.0;
+	private static final int sightingFixCount = 1;
+	private static final int waypointTimer = 0; //aka Track Timer 
+	private static final int gpsTimeZone = 0; //GMT/UTC time offset
+    private static final int skipButtonTimeout = 3;
     
-	private boolean useTitleBar = false;
-	private boolean useLargeTitles = true;
-	private boolean useLargeTabs = false;
+	private static final boolean useTitleBar = false;
+	private static final boolean useLargeTitles = true;
+	private static final boolean useLargeTabs = false;
 	
-	private boolean disableEditing = false;
-	private boolean useSdCard = false;
-	private boolean testTime = true;
-	private boolean resetOnSync = false;
-	private boolean resetOnNext = true;
+	private static final boolean disableEditing = false;
+	private static final boolean useSdCard = false;
+	private static final boolean testTime = true;
+	private static final boolean resetOnSync = false;
+	private static final boolean resetOnNext = true;
 	
-	private int trackAccuracy = 49;
+	private static final double trackAccuracy = 49.0;
 	
-	private boolean useGpsTime = false;
-	private boolean manualGps = false;
-	private boolean allowSkipManualGps = true;
+	private static final boolean useGpsTime = false;
+	private static final boolean manualGps = false;
+	private static final boolean allowSkipManualGps = true;
 	
-	private String fieldMapFilename = ""; //$NON-NLS-1$
-	private boolean lock100 = false;
-	private boolean useMapOnSkip = true;
+	private static final String fieldMapFilename = ""; //$NON-NLS-1$
+	private static final boolean lock100 = false;
+	private static final boolean useMapOnSkip = true;
 	
-   
-	private boolean autoNext = true;
+	private static final boolean autoNext = true;
 	
-	private int storageTime = STORAGE_TIME_DEFAULT_VALUE; //indicates how many days ctx files will be stored in SMART storage
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getConservationArea() {
-		return conservationArea;
+	private Map<OptionID, CyberTrackerPropertiesOption> options;
+	
+	public Map<OptionID, CyberTrackerPropertiesOption> getOptions() {
+		if (options == null)
+			options = new HashMap<OptionID, CyberTrackerPropertiesOption>();
+		return options;
 	}
-	public void setConservationArea(ConservationArea conservationArea) {
-		this.conservationArea = conservationArea;
+	public void setCmAttributeOptions(Map<OptionID, CyberTrackerPropertiesOption> options) {
+		this.options = options;
 	}
 	
-	@Column(name="kiosk_mode")
+	
+	private CyberTrackerPropertiesOption getOption(OptionID optionId) {
+		Map<OptionID, CyberTrackerPropertiesOption> map = getOptions();
+		CyberTrackerPropertiesOption option = map.get(optionId);
+		if (option == null) {
+			option = new CyberTrackerPropertiesOption();
+			option.setOptionId(optionId);
+			map.put(optionId, option);
+		}
+		return option;
+	}
+
+	
+	private boolean getBooleanValue(OptionID optionId, boolean defaultValue) {
+		Map<OptionID, CyberTrackerPropertiesOption> map = getOptions();
+		CyberTrackerPropertiesOption option = map.get(optionId);
+		return (option != null) ? option.getBooleanValue() : defaultValue;
+	}
+
+	
+	private double getDoubleValue(OptionID optionId, double defaultValue) {
+		Map<OptionID, CyberTrackerPropertiesOption> map = getOptions();
+		CyberTrackerPropertiesOption option = map.get(optionId);
+		return (option != null) ? option.getDoubleValue() : defaultValue;
+	}
+
+	
+	private int getIntValue(OptionID optionId, int defaultValue) {
+		Map<OptionID, CyberTrackerPropertiesOption> map = getOptions();
+		CyberTrackerPropertiesOption option = map.get(optionId);
+		return (option != null) ? option.getIntegerValue() : defaultValue;
+	}
+	
+	
+	private String getStringValue(OptionID optionId, String defaultValue) {
+		Map<OptionID, CyberTrackerPropertiesOption> map = getOptions();
+		CyberTrackerPropertiesOption option = map.get(optionId);
+		return (option != null) ? option.getStringValue() : defaultValue;
+	}
+	
+	
+	
 	public boolean isKioskMode() {
-		return kioskMode;
+		return getBooleanValue(OptionID.KIOSK_MODE, kioskMode);
 	}
 	public void setKioskMode(boolean kioskMode) {
-		this.kioskMode = kioskMode;
+		getOption(OptionID.KIOSK_MODE).setBooleanValue(kioskMode);
 	}
 	
-	@Column(name="large_scroll_bars")
+	
 	public boolean isLargeScrollBars() {
-		return largeScrollBars;
+		return getBooleanValue(OptionID.LARGE_SCROLL_BARS, largeScrollBars);
 	}
 	public void setLargeScrollBars(boolean largeScrollBars) {
-		this.largeScrollBars = largeScrollBars;
+		getOption(OptionID.LARGE_SCROLL_BARS).setBooleanValue(largeScrollBars);
 	}
 
-	@Column(name="sighting_accuracy")
-	public Double getSightingAccuracy() {
-		return sightingAccuracy;
+	
+	public double getSightingAccuracy() {
+		return getDoubleValue(OptionID.SIGHTING_ACCURACY, sightingAccuracy);
 	}
-	public void setSightingAccuracy(Double sightingAccuracy) {
-		this.sightingAccuracy = sightingAccuracy;
+	public void setSightingAccuracy(double sightingAccuracy) {
+		getOption(OptionID.SIGHTING_ACCURACY).setDoubleValue(sightingAccuracy);
 	}
 	
-	@Column(name="sighting_fix_count")
-	public Integer getSightingFixCount() {
-		return sightingFixCount;
+	
+	public int getSightingFixCount() {
+		return getIntValue(OptionID.SIGHTING_FIX_COUNT, sightingFixCount);
 	}
-	public void setSightingFixCount(Integer sightingFixCount) {
-		this.sightingFixCount = sightingFixCount;
+	public void setSightingFixCount(int sightingFixCount) {
+		getOption(OptionID.SIGHTING_FIX_COUNT).setIntegerValue(sightingFixCount);
 	}
 	
-	@Column(name="waypoint_timer")
-	public Integer getWaypointTimer() {
-		return waypointTimer;
+	
+	public int getWaypointTimer() {
+		return getIntValue(OptionID.WAYPOINT_TIMER, waypointTimer);
 	}
-	public void setWaypointTimer(Integer waypointTimer) {
-		this.waypointTimer = waypointTimer;
+	public void setWaypointTimer(int waypointTimer) {
+		getOption(OptionID.WAYPOINT_TIMER).setIntegerValue(waypointTimer);
 	}
 	
-	@Column(name="gps_time_zone")
-	public Integer getGpsTimeZone() {
-		return gpsTimeZone;
+	
+	public int getGpsTimeZone() {
+		return getIntValue(OptionID.GPS_TIME_ZONE, gpsTimeZone);
 	}
-	public void setGpsTimeZone(Integer gpsTimeZone) {
-		this.gpsTimeZone = gpsTimeZone;
+	public void setGpsTimeZone(int gpsTimeZone) {
+		getOption(OptionID.GPS_TIME_ZONE).setIntegerValue(gpsTimeZone);
 	}
 
-	@Column(name="skip_button_timeout")
-	public Integer getSkipButtonTimeout() {
-		return skipButtonTimeout;
+	
+	public int getSkipButtonTimeout() {
+		return getIntValue(OptionID.SKIP_BUTTON_TIMEOUT, skipButtonTimeout);
 	}
-	public void setSkipButtonTimeout(Integer skipButtonTimeout) {
-		this.skipButtonTimeout = skipButtonTimeout;
+	public void setSkipButtonTimeout(int skipButtonTimeout) {
+		getOption(OptionID.SKIP_BUTTON_TIMEOUT).setIntegerValue(skipButtonTimeout);
 	}
 	
-	@Column(name="application_name")
+	
 	public String getApplicationName() {
-		return applicationName;
+		return getStringValue(OptionID.APP_NAME, applicationName);
 	}
 	public void setApplicationName(String applicationName) {
-		this.applicationName = applicationName;
+		getOption(OptionID.APP_NAME).setStringValue(applicationName);
 	}
 	
-	@Column(name="auto_next")
+	
 	public boolean isAutoNext() {
-		return autoNext;
+		return getBooleanValue(OptionID.AUTO_NEXT, autoNext);
 	}
-	
 	public void setAutoNext(boolean autoNext) {
-		this.autoNext = autoNext;
+		getOption(OptionID.AUTO_NEXT).setBooleanValue(autoNext);
 	}
 	
-	@Column(name="storage_time")
+	
 	public int getStorageTime() {
-		return storageTime;
+		return getIntValue(OptionID.STORAGE_TIME, STORAGE_TIME_DEFAULT_VALUE);
 	}
-	
 	public void setStorageTime(int storageTime) {
-		this.storageTime = storageTime;
+		getOption(OptionID.STORAGE_TIME).setIntegerValue(storageTime);
 	}
 
-	@Column(name="exit_pin")
+	
 	public int getExitPin() {
-		return exitPin;
+		return getIntValue(OptionID.EXIT_PIN, exitPin);
 	}
 	public void setExitPin(int exitPin) {
-		this.exitPin = exitPin;
+		getOption(OptionID.EXIT_PIN).setIntegerValue(exitPin);
 	}
 	
-	@Column(name="use_title_bar")
+	
 	public boolean isUseTitleBar() {
-		return useTitleBar;
+		return getBooleanValue(OptionID.USE_TITLE_BAR, useTitleBar);
 	}
 	public void setUseTitleBar(boolean useTitleBar) {
-		this.useTitleBar = useTitleBar;
+		getOption(OptionID.USE_TITLE_BAR).setBooleanValue(useTitleBar);
 	}
 	
-	@Column(name="large_tabs")
+	
 	public boolean isUseLargeTabs() {
-		return useLargeTabs;
+		return getBooleanValue(OptionID.USE_LARGE_TABS, useLargeTabs);
 	}
 	public void setUseLargeTabs(boolean useLargeTabs) {
-		this.useLargeTabs = useLargeTabs;
+		getOption(OptionID.USE_LARGE_TABS).setBooleanValue(useLargeTabs);
 	}
 	
-
-	@Column(name="large_titles")
+	
 	public boolean isUseLargeTitles() {
-		return useLargeTitles;
+		return getBooleanValue(OptionID.USE_LARGE_TITLES, useLargeTitles);
 	}
 	public void setUseLargeTitles(boolean useLargeTitles) {
-		this.useLargeTitles = useLargeTitles;
+		getOption(OptionID.USE_LARGE_TITLES).setBooleanValue(useLargeTitles);
 	}
 	
-	@Column(name="disable_editing")
+	
 	public boolean isDisableEditing() {
-		return disableEditing;
+		return getBooleanValue(OptionID.DISABLE_EDITING, disableEditing);
 	}
 	public void setDisableEditing(boolean disableEditing) {
-		this.disableEditing = disableEditing;
+		getOption(OptionID.DISABLE_EDITING).setBooleanValue(disableEditing);
 	}
 	
-	@Column(name="sd_card")
+	
 	public boolean isUseSdCard() {
-		return useSdCard;
+		return getBooleanValue(OptionID.USE_SD_CARD, useSdCard);
 	}
 	public void setUseSdCard(boolean useSdCard) {
-		this.useSdCard = useSdCard;
+		getOption(OptionID.USE_SD_CARD).setBooleanValue(useSdCard);
 	}
 	
-	@Column(name="test_time")
+	
 	public boolean isTestTime() {
-		return testTime;
+		return getBooleanValue(OptionID.TEST_TIME, testTime);
 	}
 	public void setTestTime(boolean testTime) {
-		this.testTime = testTime;
+		getOption(OptionID.TEST_TIME).setBooleanValue(testTime);
 	}
 	
-	@Column(name="reset_on_sync")
+	
 	public boolean isResetOnSync() {
-		return resetOnSync;
+		return getBooleanValue(OptionID.RESET_ON_SYNC, resetOnSync);
 	}
 	public void setResetOnSync(boolean resetOnSync) {
-		this.resetOnSync = resetOnSync;
+		getOption(OptionID.RESET_ON_SYNC).setBooleanValue(resetOnSync);
 	}
 	
-	@Column(name="reset_on_next")
+	
 	public boolean isResetOnNext() {
-		return resetOnNext;
+		return getBooleanValue(OptionID.RESET_ON_NEXT, resetOnNext);
 	}
 	public void setResetOnNext(boolean resetOnNext) {
-		this.resetOnNext = resetOnNext;
+		getOption(OptionID.RESET_ON_NEXT).setBooleanValue(resetOnNext);
 	}
 	
-	@Column(name="track_accuracy")
-	public int getTrackAccuracy() {
-		return trackAccuracy;
+	
+	public double getTrackAccuracy() {
+		return getDoubleValue(OptionID.TRACK_ACCURACY, trackAccuracy);
 	}
-	public void setTrackAccuracy(int trackAccuracy) {
-		this.trackAccuracy = trackAccuracy;
+	public void setTrackAccuracy(double trackAccuracy) {
+		getOption(OptionID.TRACK_ACCURACY).setDoubleValue(trackAccuracy);
 	}
 	
-	@Column(name="use_gps_time")
+	
 	public boolean isUseGpsTime() {
-		return useGpsTime;
+		return getBooleanValue(OptionID.USE_GPS_TIME, useGpsTime);
 	}
 	public void setUseGpsTime(boolean useGpsTime) {
-		this.useGpsTime = useGpsTime;
+		getOption(OptionID.USE_GPS_TIME).setBooleanValue(useGpsTime);
 	}
 	
-	@Column(name="manual_gps")
+	
 	public boolean isManualGps() {
-		return manualGps;
+		return getBooleanValue(OptionID.MANUAL_GPS, manualGps);
 	}
 	public void setManualGps(boolean manualGps) {
-		this.manualGps = manualGps;
+		getOption(OptionID.MANUAL_GPS).setBooleanValue(manualGps);
 	}
 	
-	@Column(name="allow_skip_manual")
+	
 	public boolean isAllowSkipManualGps() {
-		return allowSkipManualGps;
+		return getBooleanValue(OptionID.ALLOW_SKIP_MANUAL_GPS, allowSkipManualGps);
 	}
 	public void setAllowSkipManualGps(boolean allowSkipManualGps) {
-		this.allowSkipManualGps = allowSkipManualGps;
+		getOption(OptionID.ALLOW_SKIP_MANUAL_GPS).setBooleanValue(allowSkipManualGps);
 	}
 	
-	@Column(name="field_map_filename")
+	
 	public String getFieldMapFilename() {
-		return fieldMapFilename;
+		return getStringValue(OptionID.FIELD_MAP_FILENAME, fieldMapFilename);
 	}
 	public void setFieldMapFilename(String fieldMapFilename) {
-		this.fieldMapFilename = fieldMapFilename;
+		getOption(OptionID.FIELD_MAP_FILENAME).setStringValue(fieldMapFilename);
 	}
 	
-	@Column(name="lock_100")
+	
 	public boolean isLock100() {
-		return lock100;
+		return getBooleanValue(OptionID.LOCK100, lock100);
 	}
 	public void setLock100(boolean lock100) {
-		this.lock100 = lock100;
+		getOption(OptionID.LOCK100).setBooleanValue(lock100);
 	}
 	
-	@Column(name="use_map_on_skip")
+	
 	public boolean isUseMapOnSkip() {
-		return useMapOnSkip;
+		return getBooleanValue(OptionID.USE_MAP_ON_SKIP, useMapOnSkip);
 	}
 	public void setUseMapOnSkip(boolean useMapOnSkip) {
-		this.useMapOnSkip = useMapOnSkip;
+		getOption(OptionID.USE_MAP_ON_SKIP).setBooleanValue(useMapOnSkip);
 	}
 	
 }

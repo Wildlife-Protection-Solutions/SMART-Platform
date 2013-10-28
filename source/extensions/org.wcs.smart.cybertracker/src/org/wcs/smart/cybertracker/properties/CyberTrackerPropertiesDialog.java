@@ -472,8 +472,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtSightingAccuracy = new Text(gpsContainer, SWT.BORDER);
 		txtSightingAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtSightingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
-		if (ctProperties.getSightingAccuracy() != null)
-			txtSightingAccuracy.setText(String.valueOf(ctProperties.getSightingAccuracy()));
+		txtSightingAccuracy.setText(String.valueOf(ctProperties.getSightingAccuracy()));
 		txtSightingAccuracy.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -501,8 +500,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtSightingFixCount = new Text(gpsContainer, SWT.BORDER);
 		txtSightingFixCount.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtSightingFixCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingFixCount_Tooltip);
-		if (ctProperties.getSightingFixCount() != null)
-			txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
+		txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
 		txtSightingFixCount.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -557,8 +555,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtTrackTimer = new Text(gpsContainer, SWT.BORDER);
 		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
-		if (ctProperties.getWaypointTimer() != null)
-			txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimer()));
+		txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimer()));
 		txtTrackTimer.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -611,9 +608,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
 		timeOffset.setLabelProvider(new CyberTrackerGTMLabelProvider());
  		timeOffset.setInput(CyberTrackerProperties.GTM_VALUES);
-		if (ctProperties.getGpsTimeZone() != null){
-			timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
-		}
+		timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
 		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -629,8 +624,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtSkipButtonTimeout = new Text(gpsContainer, SWT.BORDER);
 		txtSkipButtonTimeout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtSkipButtonTimeout.setToolTipText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip);
-		if (ctProperties.getSkipButtonTimeout() != null)
-			txtSkipButtonTimeout.setText(String.valueOf(ctProperties.getSkipButtonTimeout()));
+		txtSkipButtonTimeout.setText(String.valueOf(ctProperties.getSkipButtonTimeout()));
 		txtSkipButtonTimeout.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -802,7 +796,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		if (txtTrackAccuracy == null || txtTrackAccuracy.getText() == null || txtTrackAccuracy.getText().isEmpty())
 			return false;
 		try {
-			Integer result = Integer.valueOf(txtTrackAccuracy.getText() );
+			Double result = Double.valueOf(txtTrackAccuracy.getText());
 			return result >= CyberTrackerProperties.TRACK_ACCURACY_MIN_VALUE && result <= CyberTrackerProperties.TRACK_ACCURACY_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
@@ -910,7 +904,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		ctProperties.setTestTime(btnTestTime.getSelection());
 		ctProperties.setResetOnSync(btnResetOnSync.getSelection());
 		ctProperties.setResetOnNext(btnResetOnNext.getSelection());
-		ctProperties.setTrackAccuracy( Integer.valueOf(txtTrackAccuracy.getText()) );
+		ctProperties.setTrackAccuracy(Double.valueOf(txtTrackAccuracy.getText()) );
 		ctProperties.setUseGpsTime(btnUseGpsTime.getSelection());
 		ctProperties.setManualGps(btnManualGPS.getSelection());
 		ctProperties.setAllowSkipManualGps(btnAllowSkipManual.getSelection());
