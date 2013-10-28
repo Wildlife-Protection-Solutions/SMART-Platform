@@ -68,6 +68,8 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	
 	private TableViewer listViewer;
 	private Language currentLanguage;
+
+	private boolean initializingControl = false;
 	
 	/**
 	 * @param parent
@@ -153,26 +155,32 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 						option.setCmAttribute(null);
 					}
 				}
-				fireModelChanged();
+				if (!initializingControl) fireModelChanged();
 			}
 		});
 	}
 	
 	private void updateDefaultControl() {
-		((NamedItemLabelProvider)defaultViewer.getLabelProvider()).setLanguage(currentLanguage);
-		List<Object> input = new ArrayList<Object>();
-		input.add(NO_OPTION);
-		input.addAll(getSourceObject().getAttribute().getActiveListItems());
-		defaultViewer.setInput(input);
-		CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
-		if (option != null && option.getUuidValue() != null) {
-			for (Object item : input) {
-				if (item instanceof AttributeListItem && (Arrays.equals(((AttributeListItem)item).getUuid(), option.getUuidValue()))) {
-					defaultViewer.setSelection(new StructuredSelection(item));
+		initializingControl = true;
+		try {
+			((NamedItemLabelProvider) defaultViewer.getLabelProvider()).setLanguage(currentLanguage);
+			List<Object> input = new ArrayList<Object>();
+			input.add(NO_OPTION);
+			input.addAll(getSourceObject().getAttribute().getActiveListItems());
+			defaultViewer.setInput(input);
+			CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+			if (option != null && option.getUuidValue() != null) {
+				for (Object item : input) {
+					if (item instanceof AttributeListItem
+							&& (Arrays.equals(((AttributeListItem) item).getUuid(),option.getUuidValue()))) {
+						defaultViewer.setSelection(new StructuredSelection(item));
+					}
 				}
+			} else {
+				defaultViewer.setSelection(new StructuredSelection(NO_OPTION));
 			}
-		}else{
-			defaultViewer.setSelection(new StructuredSelection(NO_OPTION));
+		} finally {
+			initializingControl = false;
 		}
 	}	
 	
