@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp.csv;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -136,7 +137,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		lblX = new Label(main, SWT.NONE);
 		lblX.setText(Messages.ImportCSVDetailsComposite_1);
 		lblX.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
+		lblX.setToolTipText(Messages.ImportCSVDetailsComposite_XYTooltip);
 		ISelectionChangedListener validateListener = new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -152,6 +153,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		lblY = new Label(main, SWT.NONE);
 		lblY.setText(Messages.ImportCSVDetailsComposite_2);
 		lblY.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		lblY.setToolTipText(Messages.ImportCSVDetailsComposite_XYTooltip);
 		
 		cmbColumnSelectorY = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorY.getCombo().setLayoutData(gd0);
@@ -162,17 +164,18 @@ public class ImportCSVDetailsComposite extends Composite{
 		lblDate = new Label(main, SWT.NONE);
 		lblDate.setText(Messages.ImportCSVDetailsComposite_3);
 		lblDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		lblDate.setToolTipText(Messages.ImportCSVDetailsComposite_DateTooltip);
 		
 		cmbColumnSelectorDate = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorDate.getCombo().setLayoutData(gd0);
 		cmbColumnSelectorDate.setContentProvider(ArrayContentProvider.getInstance());
 		cmbColumnSelectorDate.addSelectionChangedListener(validateListener);
 		
-
 		lblTime = new Label(main, SWT.NONE);
 		lblTime.setText(Messages.ImportCSVDetailsComposite_4);
 		lblTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
+		lblTime.setToolTipText(Messages.ImportCSVDetailsComposite_TimeFormatToolTip);
+				
 		cmbColumnSelectorTime = new ComboViewer(main, SWT.READ_ONLY | SWT.BORDER);
 		cmbColumnSelectorTime.getCombo().setLayoutData(gd0);
 		cmbColumnSelectorTime.setContentProvider(ArrayContentProvider.getInstance());
@@ -234,11 +237,13 @@ public class ImportCSVDetailsComposite extends Composite{
 		Label lblD = new Label(additional, SWT.NONE);
 		lblD.setText(Messages.ImportCSVDetailsComposite_10);
 		lblD.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
+		lblD.setToolTipText(Messages.ImportCSVDetailsComposite_DateFormatTooltip);
+		
 		cmbColumnSelectorDateFormat = new ComboViewer(additional, SWT.DROP_DOWN );
 		cmbColumnSelectorDateFormat.getCombo().setLayoutData(gd);
 		cmbColumnSelectorDateFormat.setContentProvider(ArrayContentProvider.getInstance());
 		cmbColumnSelectorDateFormat.setInput(dateFormats);
+		cmbColumnSelectorDateFormat.getCombo().setText(Messages.ImportCSVDetailsComposite_DateDefaultOption);
 		cmbColumnSelectorDateFormat.addSelectionChangedListener(validateListener);
 		cmbColumnSelectorDateFormat.getCombo().addListener(SWT.Modify, new Listener() {
 			@Override
@@ -246,7 +251,6 @@ public class ImportCSVDetailsComposite extends Composite{
 				validate();	
 			}
 		});
-
 		
 		skipHeaders = new Button(additional, SWT.CHECK);
 		skipHeaders.setText(Messages.ImportCSVDetailsComposite_11);
@@ -261,7 +265,8 @@ public class ImportCSVDetailsComposite extends Composite{
 		cdDate = createDecoration(cmbColumnSelectorDate.getControl());
 		cdTime = createDecoration(cmbColumnSelectorTime.getControl());
 		cdDateFormat = createDecoration(cmbColumnSelectorDateFormat.getControl());
-		
+	
+		validate();
 	}
 
 	public void setColumnNames(CsvHeader[] columnNames){
@@ -339,7 +344,15 @@ public class ImportCSVDetailsComposite extends Composite{
 				cdDateFormat.setDescriptionText(Messages.ImportCSVDetailsComposite_16);
 				valid = false;
 			}else{
-				cdDateFormat.hide();
+				try{
+					new SimpleDateFormat(format);
+					cdDateFormat.hide();
+				}catch(Exception ex){
+					cdDateFormat.setDescriptionText(Messages.ImportCSVDetailsComposite_InvalidDateFormat + ex.getLocalizedMessage());
+					cdDateFormat.show();
+					valid = false;
+				}
+				
 			}
 		}else{
 			cdDateFormat.hide();
@@ -415,9 +428,7 @@ public class ImportCSVDetailsComposite extends Composite{
 		cd.setShowHover(true);
 		return cd;
 	}
-	
-	
-	
+
 }
 
 

@@ -184,6 +184,12 @@ public class Messages extends NLS {
 	public static String ImportCSVDetailsComposite_7;
 	public static String ImportCSVDetailsComposite_8;
 	public static String ImportCSVDetailsComposite_9;
+	public static String ImportCSVDetailsComposite_DateDefaultOption;
+	public static String ImportCSVDetailsComposite_DateFormatTooltip;
+	public static String ImportCSVDetailsComposite_DateTooltip;
+	public static String ImportCSVDetailsComposite_InvalidDateFormat;
+	public static String ImportCSVDetailsComposite_TimeFormatToolTip;
+	public static String ImportCSVDetailsComposite_XYTooltip;
 	public static String ImportFromWaypointWizardPage_OpGenerateAllTracks;
 	public static String ImportFromWaypointWizardPage_OpGenerateDayTracks1;
 	public static String ImportFromWaypointWizardPage_PageMessage;
