@@ -50,6 +50,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private ComboViewer defaultViewer ;
+	private boolean initializingControl = false;
+	
 	/**
 	 * @param parent
 	 * @param model
@@ -66,17 +68,20 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 	protected void createTypeSpecificControls(Composite container) {
 		createIsVisibleControl(container);
 		createDefaultControl(container);
-		//TODO: boolean default value might vary depending on required flag -> true/false or true/false/null
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
-			
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
-				CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
-				if (op != null && op.getBooleanValue() != null){
-					defaultViewer.setSelection(new StructuredSelection(op.getBooleanValue()));
-				}else{
-					defaultViewer.setSelection(new StructuredSelection("")); //$NON-NLS-1$
+				initializingControl = true;
+				try{
+					CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
+					if (op != null && op.getBooleanValue() != null){
+						defaultViewer.setSelection(new StructuredSelection(op.getBooleanValue()));
+					}else{
+						defaultViewer.setSelection(new StructuredSelection("")); //$NON-NLS-1$
+					}
+				}finally{
+					initializingControl = false;
 				}
 			}
 		});
@@ -118,7 +123,7 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 					getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
 					op.setBooleanValue(null);
 				}
-				fireModelChanged();
+				if (!initializingControl) fireModelChanged();
 			}
 		});
 		

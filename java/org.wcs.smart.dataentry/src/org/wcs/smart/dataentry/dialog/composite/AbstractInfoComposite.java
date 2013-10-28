@@ -329,7 +329,10 @@ public abstract class AbstractInfoComposite extends Composite {
 							item.updateName(currentLanguage, item.getName());
 							
 						}
-						fireModelChanged();
+						if (!item.getName().equals(text.getText())){
+							//only fire if name actually changed
+							fireModelChanged();
+						}
 					}
 					
 				}
