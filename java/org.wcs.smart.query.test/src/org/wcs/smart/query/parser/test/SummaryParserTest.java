@@ -64,8 +64,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertEquals(test.getValueFilter().asString(), valueFilter);
-		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
+		Assert.assertEquals(test.getValueFilter().asString(), "observation|" + valueFilter);
+		Assert.assertEquals(test.getRateFilter().asString(), "observation|" + rateFilter);
 	}
 	
 	@Test
@@ -108,7 +108,7 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
-		Assert.assertEquals(test.getValueFilter().asString(), queryPart);
+		Assert.assertEquals(test.getValueFilter().asString(), "observation|" + queryPart);
 		Assert.assertNull(test.getRateFilter());
 		
 		
@@ -723,7 +723,7 @@ public class SummaryParserTest {
 		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "attribute:n:sum:age";
-		queryFilter = "patrol:station equals \"station1\"";
+		queryFilter = "observation|patrol:station equals \"station1\"";
 		rateFilter = "";
 		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		test = parseGridQuery(query);
@@ -732,8 +732,8 @@ public class SummaryParserTest {
 		Assert.assertNull(test.getRateFilter());
 		
 		valuePart = "attribute:n:sum:age";
-		queryFilter = "patrol:station equals \"station1\"";
-		rateFilter =  "patrol:station equals \"station4\"";
+		queryFilter = "waypoint|patrol:station equals \"station1\"";
+		rateFilter =  "waypoint|patrol:station equals \"station4\"";
 		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
@@ -741,8 +741,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
 		
 		valuePart = "category:sum:wp:";
-		queryFilter = "patrol:station equals \"station1\"";
-		rateFilter =  "patrol:station equals \"station4\"";
+		queryFilter = "observation|patrol:station equals \"station1\"";
+		rateFilter =  "observation|patrol:station equals \"station4\"";
 		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
@@ -750,8 +750,8 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
 		
 		valuePart = "category:sum:obs:";
-		queryFilter = "patrol:station equals \"station1\"";
-		rateFilter =  "patrol:station equals \"station4\"";
+		queryFilter = "observation|patrol:station equals \"station1\"";
+		rateFilter =  "observation|patrol:station equals \"station4\"";
 		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
