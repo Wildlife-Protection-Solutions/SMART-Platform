@@ -392,17 +392,17 @@ public class ParserTest {
 	
 	@Test
 	public void testFilterType() throws Exception{
-		String query="waypoint|";
+//		String query="";
+//		QueryFilter test = parseAllQuery(query);
+//		Assert.assertEquals(test.asString(), query);
+		
+		String query = "waypoint|patrol:team equals \"b83514b938ae40e9a9118d17c5706234\"";
 		QueryFilter test = parseAllQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
-		query = "waypoint|patrol:team equals \"b83514b938ae40e9a9118d17c5706234\"";
-		test = parseAllQuery(query);
-		Assert.assertEquals(test.asString(), query);
-		
-		query="observation|";
-		test = parseAllQuery(query);
-		Assert.assertEquals(test.asString(), query);
+//		query="";
+//		test = parseAllQuery(query);
+//		Assert.assertEquals(test.asString(), query);
 		
 		query = "observation|patrol:team equals \"b83514b938ae40e9a9118d17c5706234\"";
 		test = parseAllQuery(query);
