@@ -31,9 +31,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -92,15 +90,11 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
-import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.util.SmartUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Composite for editing patrol leg days data.  This includes modifying
@@ -111,10 +105,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class PatrolLegDayInputComposite {
 
-	private static final String IMPORT_OK_DIALOG_TITLE = Messages.PatrolLegDayInputComposite_ImportSuccessful_DialogTitle;
 	private static final String LOAD_WIZARD_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_LoadingImportWizard;
 	private static final String SHOW_WIZARD_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_DisplayingImportWizard;
-	private static final String IMPORT_DATA_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_ImportingData;
 	
 	private DateTime dtStartTime;
 	private DateTime dtEndTime;
@@ -122,7 +114,6 @@ public class PatrolLegDayInputComposite {
 	private Label lblTotalHours;
 
 	private TableViewer observationTable;
-	//private WritableList inputList;
 	
 	private WizardDialog dialog = null;
 	private PatrolDayEditor editor;
