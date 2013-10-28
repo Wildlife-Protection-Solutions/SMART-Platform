@@ -68,6 +68,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
+@Deprecated
 public class CyberTrackerExporter {
 	
 	private static final String CATEGORY_RESULT_PREFIX = Messages.CyberTrackerExporter_Report_Column_Category;
