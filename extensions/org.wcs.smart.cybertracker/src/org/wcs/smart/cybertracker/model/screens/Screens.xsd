@@ -39,7 +39,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="TestTime" />
 						<xs:element type="xs:string" name="ResetStateOnSync" />
 						<xs:element type="xs:string" name="ClearOnNext" />
-						<xs:element type="xs:int" name="WaypointAccuracy" minOccurs="0" />
+						<xs:element type="xs:double" name="WaypointAccuracy" minOccurs="0" />
 						<xs:element type="xs:string" name="GpsTimeSync" />
 						<xs:element type="xs:string" name="ManualOnSkip" />
 						<xs:element type="xs:string" name="ManualAllowSkip" />

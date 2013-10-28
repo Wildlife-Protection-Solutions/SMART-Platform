@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 /**
  * Clones the cybertracker properties when creating
  * a new conservation area from a template.
@@ -42,50 +42,21 @@ public class CybertrackerTemplateCloner implements
 	}
 
 	@Override
-	public void cloneTemplateData(ConservationAreaClonerEngine engine,
-			IProgressMonitor monitor) throws Exception {
-	
+	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
+
 		@SuppressWarnings("unchecked")
-		List<CyberTrackerProperties> list = engine.getSession().createCriteria(CyberTrackerProperties.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		if (list.size() > 0){
-			CyberTrackerProperties templateProperties = list.get(0);
-			
-			CyberTrackerProperties newProperties = new CyberTrackerProperties();
-			newProperties.setConservationArea(engine.getNewCa());
-			newProperties.setApplicationName(templateProperties.getApplicationName());
-			newProperties.setUseTitleBar(templateProperties.isUseTitleBar());
-			newProperties.setUseLargeTitles(templateProperties.isUseLargeTitles());
-			newProperties.setLargeScrollBars(templateProperties.isLargeScrollBars());
-			newProperties.setUseLargeTabs(templateProperties.isUseLargeTabs());
-			newProperties.setAutoNext(templateProperties.isAutoNext());
+		List<CyberTrackerPropertiesOption> list = engine.getSession().createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		for (CyberTrackerPropertiesOption templateOption : list) {
+			CyberTrackerPropertiesOption newOption = new CyberTrackerPropertiesOption();
+			newOption.setConservationArea(engine.getNewCa());
+			newOption.setOptionId(templateOption.getOptionId());
+			newOption.setDoubleValue(templateOption.getDoubleValue());
+			newOption.setIntegerValue(templateOption.getIntegerValue());
+			newOption.setStringValue(templateOption.getStringValue());
 
-			newProperties.setKioskMode(templateProperties.isKioskMode());
-			newProperties.setDisableEditing(templateProperties.isDisableEditing());
-			newProperties.setUseSdCard(templateProperties.isUseSdCard());
-			newProperties.setTestTime(templateProperties.isTestTime());
-			newProperties.setResetOnSync(templateProperties.isResetOnSync());
-			newProperties.setResetOnNext(templateProperties.isResetOnNext());
-			newProperties.setExitPin(templateProperties.getExitPin());
-			newProperties.setStorageTime(templateProperties.getStorageTime());
-			
-			newProperties.setSightingAccuracy(templateProperties.getSightingAccuracy());
-			newProperties.setSightingFixCount(templateProperties.getSightingFixCount());
-			newProperties.setTrackAccuracy(templateProperties.getTrackAccuracy());
-			newProperties.setWaypointTimer(templateProperties.getWaypointTimer());
-			newProperties.setUseGpsTime(templateProperties.isUseGpsTime());
-			newProperties.setGpsTimeZone(templateProperties.getGpsTimeZone());
-			newProperties.setSkipButtonTimeout(templateProperties.getSkipButtonTimeout());
-			newProperties.setManualGps(templateProperties.isManualGps());
-			newProperties.setAllowSkipManualGps(templateProperties.isAllowSkipManualGps());
-
-			newProperties.setFieldMapFilename(templateProperties.getFieldMapFilename());
-			newProperties.setLock100(templateProperties.isLock100());
-			newProperties.setUseMapOnSkip(templateProperties.isUseMapOnSkip());
-			
-			
-			engine.getSession().save(newProperties);
+			engine.getSession().save(newOption);
 			engine.getSession().flush();
 		}
 	}
-
+	
 }

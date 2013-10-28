@@ -40,6 +40,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
@@ -65,11 +66,11 @@ public class CyberTrackerStartupJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		buildTables();
 		List<ConservationArea> caList = null;
-		List<CyberTrackerProperties> propList = null;
+		List<CyberTrackerPropertiesOption> propList = null;
 		Session session = HibernateManager.openSession();
 		try {
 			caList = HibernateManager.getConservationAreas(session);
-			propList = CyberTrackerHibernateManager.getAllProperties(session);
+			propList = CyberTrackerHibernateManager.getAllStorageOptions(session);
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to select CA list and CyberTracker properties.", e)); //$NON-NLS-1$
 		} finally {
@@ -84,7 +85,7 @@ public class CyberTrackerStartupJob extends Job {
 	 * Ensures that required tables are present in database and add them is case they are not present
 	 */
 	private void buildTables() {
-		final boolean tables[] = {false}; //properties table
+		final boolean tables[] = {false, false}; //properties table
 		Session session = HibernateManager.openSession();
 		//check is required table exists
 		try {
@@ -94,12 +95,12 @@ public class CyberTrackerStartupJob extends Job {
 			Integer result = (Integer) q.uniqueResult();
 			tables[0] = result > 0;
 			
-//			sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'CT_PATROL_OPTION'"; //$NON-NLS-1$
-//			q = session.createSQLQuery(sql);
-//			result = (Integer) q.uniqueResult();
-//			tables[1] = result > 0;
+			sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'CT_PROPERTIES_OPTION'"; //$NON-NLS-1$
+			q = session.createSQLQuery(sql);
+			result = (Integer) q.uniqueResult();
+			tables[1] = result > 0;
 			
-			if (tables[0])
+			if (!tables[0] && tables[1])
 				return; //required table exists
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to obtain information about CyberTracker plugin tables.", e)); //$NON-NLS-1$
@@ -118,40 +119,24 @@ public class CyberTrackerStartupJob extends Job {
 			session.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
-					if (!tables[0]) {
-						String createSql = "CREATE TABLE smart.cybertracker_properties ("+ //$NON-NLS-1$
+					if (tables[0]) {
+						//old table present, need to drop it
+						String dropSql = "DROP TABLE smart.cybertracker_properties"; //$NON-NLS-1$
+						c.createStatement().execute(dropSql);
+					}
+					
+					if (!tables[1]) {
+						String createSql = "CREATE TABLE smart.ct_properties_option ("+ //$NON-NLS-1$
 								"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
 								"ca_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
-								"storage_time INTEGER, "+ //$NON-NLS-1$
-								"large_scroll_bars BOOLEAN, "+ //$NON-NLS-1$
-								"auto_next BOOLEAN, "+ //$NON-NLS-1$
-								"application_name VARCHAR(256), "+ //$NON-NLS-1$
-								"kiosk_mode BOOLEAN, "+ //$NON-NLS-1$
-								"exit_pin INTEGER, "+ //$NON-NLS-1$
-								"sighting_accuracy DOUBLE, "+ //$NON-NLS-1$
-								"sighting_fix_count INTEGER, "+ //$NON-NLS-1$
-								"waypoint_timer INTEGER, "+ //$NON-NLS-1$
-								"gps_time_zone INTEGER, "+ //$NON-NLS-1$
-								"skip_button_timeout INTEGER, "+ //$NON-NLS-1$
-								"use_title_bar BOOLEAN, "+ //$NON-NLS-1$
-								"large_titles BOOLEAN, "+ //$NON-NLS-1$
-								"large_tabs BOOLEAN, "+ //$NON-NLS-1$
-								"disable_editing BOOLEAN, "+ //$NON-NLS-1$
-								"sd_card BOOLEAN, "+ //$NON-NLS-1$
-								"test_time BOOLEAN, "+ //$NON-NLS-1$
-								"reset_on_sync BOOLEAN, "+ //$NON-NLS-1$
-								"reset_on_next BOOLEAN, "+ //$NON-NLS-1$
-								"track_accuracy int, "+ //$NON-NLS-1$
-								"use_gps_time BOOLEAN, "+ //$NON-NLS-1$
-								"manual_gps BOOLEAN, "+ //$NON-NLS-1$
-								"allow_skip_manual BOOLEAN, "+ //$NON-NLS-1$
-								"field_map_filename VARCHAR(16384), "+ //$NON-NLS-1$
-								"lock_100 BOOLEAN, "+ //$NON-NLS-1$
-								"use_map_on_skip BOOLEAN, "+ //$NON-NLS-1$
+								"OPTION_ID VARCHAR(32) NOT NULL, "+ //$NON-NLS-1$
+								"DOUBLE_VALUE DOUBLE, "+ //$NON-NLS-1$
+								"INTEGER_VALUE INTEGER, "+ //$NON-NLS-1$
+								"STRING_VALUE VARCHAR(1024), "+ //$NON-NLS-1$
 								"PRIMARY KEY (UUID))"; //$NON-NLS-1$
 
-						String alterSql = "ALTER TABLE smart.cybertracker_properties "+ //$NON-NLS-1$
-								"ADD CONSTRAINT cybertracker_properties_ca_uuid_fk FOREIGN KEY (CA_UUID) "+ //$NON-NLS-1$
+						String alterSql = "ALTER TABLE smart.ct_properties_option "+ //$NON-NLS-1$
+								"ADD CONSTRAINT ct_properties_option_ca_uuid_fk FOREIGN KEY (CA_UUID) "+ //$NON-NLS-1$
 								"REFERENCES smart.conservation_area(UUID) "+ //$NON-NLS-1$
 								"ON UPDATE RESTRICT "+ //$NON-NLS-1$
 								"ON DELETE CASCADE"; //$NON-NLS-1$
@@ -159,37 +144,11 @@ public class CyberTrackerStartupJob extends Job {
 						c.createStatement().execute(createSql);
 						c.createStatement().execute(alterSql);
 						
-						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.cybertracker_properties to data_entry"); //$NON-NLS-1$
-						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.cybertracker_properties to manager"); //$NON-NLS-1$
-						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.cybertracker_properties to analyst"); //$NON-NLS-1$
-						c.createStatement().execute("GRANT SELECT ON smart.cybertracker_properties to login"); //$NON-NLS-1$
+						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry"); //$NON-NLS-1$
+						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager"); //$NON-NLS-1$
+						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst"); //$NON-NLS-1$
+						c.createStatement().execute("GRANT SELECT ON smart.ct_properties_option to login"); //$NON-NLS-1$
 					}
-
-//					if (!tables[1]) {
-//						String createSql = "CREATE TABLE smart.ct_patrol_option ("+ //$NON-NLS-1$
-//								"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
-//								"properties_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
-//								"type VARCHAR(10), "+ //$NON-NLS-1$
-//								"is_visible BOOLEAN, "+ //$NON-NLS-1$
-//								"string_value VARCHAR(8192), "+ //same as patrol.comment //$NON-NLS-1$
-//								"boolean_value BOOLEAN, "+ //$NON-NLS-1$
-//								"uuid_value CHAR(16) for bit data, "+ //$NON-NLS-1$
-//								"PRIMARY KEY (UUID))"; //$NON-NLS-1$
-//
-//						String alterSql = "ALTER TABLE smart.ct_patrol_option "+ //$NON-NLS-1$
-//								"ADD CONSTRAINT cybertracker_ct_patrol_option_properties_uuid_fk FOREIGN KEY (PROPERTIES_UUID) "+ //$NON-NLS-1$
-//								"REFERENCES smart.cybertracker_properties(UUID) "+ //$NON-NLS-1$
-//								"ON UPDATE RESTRICT "+ //$NON-NLS-1$
-//								"ON DELETE CASCADE"; //$NON-NLS-1$
-//
-//						c.createStatement().execute(createSql);
-//						c.createStatement().execute(alterSql);
-//						
-//						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to data_entry"); //$NON-NLS-1$
-//						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to manager"); //$NON-NLS-1$
-//						c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.ct_patrol_option to analyst"); //$NON-NLS-1$
-//						c.createStatement().execute("GRANT SELECT ON smart.ct_patrol_option to login"); //$NON-NLS-1$
-//					}					
 				}
 			});
 			session.getTransaction().commit();
@@ -219,18 +178,18 @@ public class CyberTrackerStartupJob extends Job {
 		}
 	}
 
-	private void cleanStorage(List<ConservationArea> caList, List<CyberTrackerProperties> propList) {
-		if (caList == null || propList == null)
+	private void cleanStorage(List<ConservationArea> caList, List<CyberTrackerPropertiesOption> storageOptionList) {
+		if (caList == null || storageOptionList == null)
 			return;
-		Map<byte[], CyberTrackerProperties> propMap = new HashMap<byte[], CyberTrackerProperties>();
-		for (CyberTrackerProperties ctp : propList) {
+		Map<byte[], CyberTrackerPropertiesOption> propMap = new HashMap<byte[], CyberTrackerPropertiesOption>();
+		for (CyberTrackerPropertiesOption ctp : storageOptionList) {
 			propMap.put(ctp.getConservationArea().getUuid(), ctp);
 		}
 		
 		for (ConservationArea ca : caList) {
-			CyberTrackerProperties ctp = propMap.get(ca.getUuid());
+			CyberTrackerPropertiesOption ctp = propMap.get(ca.getUuid());
 			File storageDir = PdaUtil.getStorageFolder(ca);
-			int dayLimit = (ctp != null) ? ctp.getStorageTime() : CyberTrackerProperties.STORAGE_TIME_DEFAULT_VALUE;
+			int dayLimit = (ctp != null) ? ctp.getIntegerValue() : CyberTrackerProperties.STORAGE_TIME_DEFAULT_VALUE;
 			cleanStorage(storageDir, dayLimit);
 		}
 	}
