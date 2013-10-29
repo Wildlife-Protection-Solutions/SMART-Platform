@@ -82,6 +82,12 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		leaderGroup = new EmployeeDropOptionGroup(this, leaderOption);
 		pilotGroup = new EmployeeDropOptionGroup(this, pilotOption);
 		
+		leaderGroup.setVisibleEnabled(false);
+		pilotGroup.setVisibleEnabled(false);
+		
+		leaderGroup.setDefaultEnabled(!membersOption.isVisible());
+		pilotGroup.setDefaultEnabled(!membersOption.isVisible() && isPilotAllowed());
+		
 	}
 
 	private void updateEmployeeDropOptionGroup(EmployeeDropOptionGroup optionGroup) {
@@ -105,9 +111,9 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		}
 	}
 
-//	private boolean isPilotAllowed() {
-//		return true;
-//	}
+	private boolean isPilotAllowed() {
+		return true;
+	}
 	
 	private class MemberOptionGroup extends ScreenOptionGroup {
 
@@ -167,8 +173,9 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			membersOption.setVisible(display);
 			membersViewer.getControl().setEnabled(!display);
 			
+			leaderGroup.setDefaultEnabled(!display);
 			//leaderGroup.setVisible(!display);
-			//pilotGroup.setVisible(!display && isPilotAllowed());
+			pilotGroup.setDefaultEnabled(!display && isPilotAllowed());
 
 			fireScreenOptionListeners();
 		}
@@ -231,6 +238,12 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		
 		protected Viewer getViewer() {
 			return viewer;
+		}
+		
+		@Override
+		public void setDefaultEnabled(boolean enabled){
+			super.setDefaultEnabled(enabled);
+			viewer.getControl().setEnabled(enabled);
 		}
 	}
 	

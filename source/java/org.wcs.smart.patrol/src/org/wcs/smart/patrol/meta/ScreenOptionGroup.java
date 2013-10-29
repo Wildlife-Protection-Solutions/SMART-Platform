@@ -95,8 +95,13 @@ public abstract class ScreenOptionGroup extends Composite {
 		label2.setEnabled(enabled);
 	}
 	
+	public void setVisibleEnabled(boolean enabled){
+		label1.setEnabled(enabled);
+		btnDisplayPage.setEnabled(enabled);
+	}
+	
 	public void setEnabled(boolean enabled){
-		group.setEnabled(enabled);
+//		group.setEnabled(enabled);
 		label1.setEnabled(enabled);
 		label2.setEnabled(enabled);
 		btnDisplayPage.setEnabled(enabled);
