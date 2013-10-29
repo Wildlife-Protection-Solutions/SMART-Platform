@@ -428,6 +428,10 @@ public class CyberTrackerConfExporter {
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
 				Node node = screensFactory.createNodeRadio(id.getNodeId(), attribute.getName() + label, values, trElements, trLinks, resultElementId.getItemId());
+				if (!attribute.getIsRequired()) {
+					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
+				}
 				result.add(node);
 				break;
 			}
@@ -439,6 +443,10 @@ public class CyberTrackerConfExporter {
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
 					Node node = screensFactory.createNodeRadio(id.getNodeId(), attribute.getName() + label, values, trElements, trLinks, resultElementId.getItemId());
+					if (!attribute.getIsRequired()) {
+						Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+						control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
+					}
 					result.add(node);
 				} else {
 					String nodeId = id.getNodeId();
@@ -465,7 +473,7 @@ public class CyberTrackerConfExporter {
 				//handle only cases for non-tree attributes, as all the have single ending screen
 				if (!result.isEmpty()) {
 					Node lastNode = result.get(result.size()-1);
-					id = linkToNext(lastNode, !attribute.getIsRequired()); //this id will be used for next screen
+					id = linkToNext(lastNode); //this id will be used for next screen
 				} else {
 					id = new CyberTrackerId(); //this id will be used for next screen
 				}
@@ -480,15 +488,11 @@ public class CyberTrackerConfExporter {
 	/**
 	 * @return id for next screen(node)
 	 */
-	private CyberTrackerId linkToNext(Node node, boolean showSkip) {
+	private CyberTrackerId linkToNext(Node node) {
 		CyberTrackerId id = new CyberTrackerId(); //this id will be used for next screen
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		//reference to "Next" screen
 		control2.setTranslateNextScreenId(id.getNodeId());
-		if (showSkip) {
-			//skip button
-			control2.setTranslateSkipScreenId(id.getNodeId());
-		}
 		return id;
 	}
 	
@@ -680,7 +684,9 @@ public class CyberTrackerConfExporter {
 		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName() + label, childIds, null);
 		if (!treeAttribute.getIsRequired() && navId != null) {
 			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
-			navControl.setTranslateSkipScreenId(navId.getNodeId());
+			navControl.setTranslateNextScreenId(navId.getNodeId());
+			Control control7 = ScreensObjectFactory.getRadioMainControl(treeRootNode);
+			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
 		}
 		result.add(treeRootNode);
 		for (IAttributeTreeNodeProxy treeNode : activeTreeNodes) {
@@ -754,9 +760,9 @@ public class CyberTrackerConfExporter {
 	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto) {
 		List<Node> nodeList = new ArrayList<Node>();
 		if (addPhoto) {
-			Node photeNode = screensFactory.createPhoto(id.getNodeId(), Messages.CyberTrackerExporter_ScreenTitle_Photo);
-			id = linkToNext(photeNode, true);
-			nodeList.add(photeNode);
+			Node photoNode = screensFactory.createPhoto(id.getNodeId(), Messages.CyberTrackerExporter_ScreenTitle_Photo);
+			id = linkToNext(photoNode);
+			nodeList.add(photoNode);
 		}
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 //		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
