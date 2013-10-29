@@ -46,6 +46,9 @@ public abstract class ScreenOptionGroup extends Composite {
 	private ScreenOption model;
 
 	private Button btnDisplayPage;
+	private Label label1;
+	private Label label2;
+	private Group group;
 	
 	/**
 	 * @param parent
@@ -65,13 +68,14 @@ public abstract class ScreenOptionGroup extends Composite {
 		this.setLayout(gd);
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Group group = new Group(this,  SWT.NONE);
+		group = new Group(this,  SWT.NONE);
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		group.setLayout(new GridLayout(2, false));
 		group.setText(model.getType().getGuiLabel());
 
-		Label label = new Label(group, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DisplayPage);
+		label1 = new Label(group, SWT.NONE);
+		label1.setText(Messages.ScreenOptionComposite_DisplayPage);
+		
 		btnDisplayPage = new Button(group, SWT.CHECK);
 		btnDisplayPage.setSelection(model.isVisible());
 		btnDisplayPage.addSelectionListener(new SelectionAdapter() {
@@ -81,10 +85,21 @@ public abstract class ScreenOptionGroup extends Composite {
 			}
 		});
 		
-		label = new Label(group, SWT.NONE);
-		label.setText(Messages.ScreenOptionComposite_DefaultValue);
+		label2 = new Label(group, SWT.NONE);
+		label2.setText(Messages.ScreenOptionComposite_DefaultValue);
 		
 		createDefaultControl(group);
+	}
+	
+	public void setDefaultEnabled(boolean enabled){
+		label2.setEnabled(enabled);
+	}
+	
+	public void setEnabled(boolean enabled){
+		group.setEnabled(enabled);
+		label1.setEnabled(enabled);
+		label2.setEnabled(enabled);
+		btnDisplayPage.setEnabled(enabled);
 	}
 
 	protected abstract void createDefaultControl(Group group);

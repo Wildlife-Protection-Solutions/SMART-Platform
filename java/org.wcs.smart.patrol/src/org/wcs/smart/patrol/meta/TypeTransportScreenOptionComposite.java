@@ -60,7 +60,6 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 	private ComboViewer transportViewer;
 
 	private TransportOptionGroup transportGroup;
-//	private Label transportLabel;
 	
 	public TypeTransportScreenOptionComposite(Composite parent, ScreenOption typeOption, ScreenOption transportOption, List<PatrolType> patrolTypes) {
 		super(parent);
@@ -71,12 +70,15 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		new TypeOptionGroup(this, this.typeOption);
 		
 		transportGroup = new TransportOptionGroup(this, this.transportOption);
-		transportGroup.setVisible(!typeOption.isVisible());
+		transportGroup.setEnabled(typeOption.isVisible());
 		
-//		transportLabel = new Label(this, SWT.NONE);
-//		transportLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-//		transportLabel.setText("* Transport configuration becomes available only\nif Type page is not displayed.");
-//		transportLabel.setVisible(!transportGroup.isVisible());
+		if (typeOption.isVisible()){
+			transportViewer.getControl().setEnabled(!transportGroup.getBtnDisplayPage().getSelection());
+		}else{
+			//if not visible then we need a deafult value
+			transportViewer.getControl().setEnabled(true);
+			transportGroup.setDefaultEnabled(true);
+		}
 	}
 
 	private PatrolType.Type getPatrolType(ScreenOption option) {
@@ -165,9 +167,18 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		protected void onBtnDisplayPageClick() {
 			boolean display = getBtnDisplayPage().getSelection();
 			typeOption.setVisible(display);
+			
 			typeViewer.getControl().setEnabled(!display);
-			transportGroup.setVisible(!display);
-//			transportLabel.setVisible(display);
+			
+			transportGroup.setEnabled(display);
+			if (display){
+				transportViewer.getControl().setEnabled(!transportGroup.getBtnDisplayPage().getSelection());
+			}else{
+				//if not visible then we need a deafult value
+				transportViewer.getControl().setEnabled(true);
+				transportGroup.setDefaultEnabled(true);
+			}
+
 			TypeTransportScreenOptionComposite.this.layout(true, true);
 			fireScreenOptionListeners();
 		}

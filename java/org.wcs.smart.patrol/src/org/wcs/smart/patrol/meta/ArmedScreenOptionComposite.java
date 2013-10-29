@@ -27,6 +27,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.ScreenOption;
 
 /**
@@ -53,7 +54,7 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 		@Override
 		protected void createDefaultControl(Group group) {
 			btnArmed = new Button(group, SWT.CHECK);
-			btnArmed.setText("Armed?");
+			btnArmed.setText(Messages.ArmedScreenOptionComposite_ArmedOption);
 			btnArmed.setEnabled(!getModel().isVisible());
 			btnArmed.setSelection(Boolean.TRUE.equals(getModel().getBooleanValue()));
 			btnArmed.addSelectionListener(new SelectionAdapter() {

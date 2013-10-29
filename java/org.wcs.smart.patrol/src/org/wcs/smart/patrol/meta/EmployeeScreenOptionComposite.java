@@ -105,9 +105,9 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		}
 	}
 
-	private boolean isPilotAllowed() {
-		return true;
-	}
+//	private boolean isPilotAllowed() {
+//		return true;
+//	}
 	
 	private class MemberOptionGroup extends ScreenOptionGroup {
 
@@ -166,8 +166,9 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			boolean display = getBtnDisplayPage().getSelection();
 			membersOption.setVisible(display);
 			membersViewer.getControl().setEnabled(!display);
-			leaderGroup.setVisible(!display);
-			pilotGroup.setVisible(!display && isPilotAllowed());
+			
+			//leaderGroup.setVisible(!display);
+			//pilotGroup.setVisible(!display && isPilotAllowed());
 
 			fireScreenOptionListeners();
 		}

@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -47,6 +48,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.ScreenOption;
@@ -76,7 +78,6 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 			ScreenOptionMeta.LEADER,
 			ScreenOptionMeta.PILOT };
 
-//	private ConservationArea ca;
 	private Map<ScreenOptionMeta, ScreenOption> options;
 	
 	private List<PatrolType> patrolTypes;
@@ -84,7 +85,6 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private List<Station> stations;
 	private List<PatrolMandate> mandates;
 	private List<Employee> members;
-	
 	
 	private TableViewer modelListViewer;
 
@@ -94,7 +94,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private Map<ScreenOptionMeta, Composite> screenComposites;
 	
 	public PatrolMetaConfigDialog() {
-		super(Display.getDefault().getActiveShell(), "Patrol Metadata Data Collection Configuration");
+		super(Display.getDefault().getActiveShell(), Messages.PatrolMetaConfigDialog_ShellTitle);
 		initData();
 	}
 
@@ -131,10 +131,10 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected Composite createContent(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, true));
+		
+		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
 
-		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL);
+		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setLabelProvider(new PatrolMetaScreenLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(optionsToShow);
@@ -201,6 +201,10 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		screenComposites.put(ScreenOptionMeta.LEADER, soc);
 		screenComposites.put(ScreenOptionMeta.PILOT, soc);
 		
+		container.setWeights(new int[]{40,60});
+		
+		setTitle(Messages.PatrolMetaConfigDialog_DialogTitle);
+		setMessage(Messages.PatrolMetaConfigDialog_DialogMessage);
 		return container;
 	}
 
@@ -230,7 +234,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 			return true;
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog("Failed to save screen options" + "\n"+ ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolMetaConfigDialog_ErrorMessage + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return false;
 		}
 	}
