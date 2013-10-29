@@ -50,7 +50,7 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteCTProperties(ConservationArea ca, Session session) {
-		Query q = session.createQuery("delete from CyberTrackerProperties where conservationArea = :ca"); //$NON-NLS-1$
+		Query q = session.createQuery("delete from CyberTrackerPropertiesOption where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
