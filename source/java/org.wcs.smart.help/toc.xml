@@ -18,6 +18,8 @@
    </topic>
    <topic href="html/AdministrativeTasks.html" label="Administrator Tasks">
       <topic href="html/AdministrativeTasks.html#createca" label="Creating a Conservation Area">
+         <topic href="html/AdministrativeTasks.html#catemplate" label="Conservation Area Templates">
+         </topic>
          <topic href="html/AdministrativeTasks.html#caproperties" label="Conservation Area Properties">
          </topic>
          <topic href="html/AdministrativeTasks.html#caadminuser" label="Defining an Administrative User">
@@ -98,7 +100,9 @@
       <topic href="html/ComponentsOfSMART.html#Query" label="Query Perspective">
          <topic href="html/ComponentsOfSMART.html#QueryType" label="Types of Queries">
          </topic>
-         <topic href="html/ComponentsOfSMART.html#PatrolObservationQuery" label="Patrol and Observation Queries">
+         <topic href="html/ComponentsOfSMART.html#PatrolObservationQuery" label="Patrol, Incident, and Observation Queries">
+            <topic href="html/ComponentsOfSMART.html#ObservationIncidentFilter" label="Observation vs Incident Filters">
+            </topic>
          </topic>
          <topic href="html/ComponentsOfSMART.html#SummaryQuery" label="Summary Query">
          </topic>
@@ -141,6 +145,10 @@
       </topic>
       <topic href="html/ComponentsOfSMART.html#CrossCa" label="Cross Conservation Area Analysis">
          <topic href="html/ComponentsOfSMART.html#ccalogin" label="Login Requirements">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ccaaoverview" label="Overview">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ccaabasemaps" label="Basemaps">
          </topic>
          <topic href="html/ComponentsOfSMART.html#ccaqueries" label="Queries">
          </topic>
