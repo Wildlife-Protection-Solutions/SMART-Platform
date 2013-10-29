@@ -361,7 +361,9 @@ public class PatrolScreensUtil {
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		control2.setTranslateNextScreenId(nextId.getNodeId());
 		if (canSkip) {
-			control2.setTranslateSkipScreenId(nextId.getNodeId());
+			//we should be here only for radio nodes if we want to allow user press "Next" without selecting anything
+			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
 		}
 		return nextId;
 	}
@@ -400,7 +402,7 @@ public class PatrolScreensUtil {
 		
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
-		return toNextScreen(node, true);
+		return toNextScreen(node);
 	}
 
 	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
