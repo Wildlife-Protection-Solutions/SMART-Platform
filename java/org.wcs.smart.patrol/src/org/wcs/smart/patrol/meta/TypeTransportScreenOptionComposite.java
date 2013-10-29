@@ -70,12 +70,13 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		new TypeOptionGroup(this, this.typeOption);
 		
 		transportGroup = new TransportOptionGroup(this, this.transportOption);
-		transportGroup.setEnabled(typeOption.isVisible());
 		
+		transportGroup.setVisibleEnabled(false);
 		if (typeOption.isVisible()){
-			transportViewer.getControl().setEnabled(!transportGroup.getBtnDisplayPage().getSelection());
+			transportGroup.setDefaultEnabled(false);
+			transportViewer.getControl().setEnabled(false);
 		}else{
-			//if not visible then we need a deafult value
+			//if not visible then we need a default value
 			transportViewer.getControl().setEnabled(true);
 			transportGroup.setDefaultEnabled(true);
 		}
@@ -169,12 +170,12 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 			typeOption.setVisible(display);
 			
 			typeViewer.getControl().setEnabled(!display);
-			
-			transportGroup.setEnabled(display);
+			transportGroup.setVisibleEnabled(false);
 			if (display){
-				transportViewer.getControl().setEnabled(!transportGroup.getBtnDisplayPage().getSelection());
+				transportGroup.setDefaultEnabled(false);
+				transportViewer.getControl().setEnabled(false);
 			}else{
-				//if not visible then we need a deafult value
+				//if not visible then we need a default value
 				transportViewer.getControl().setEnabled(true);
 				transportGroup.setDefaultEnabled(true);
 			}
