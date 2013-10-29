@@ -135,6 +135,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:int" name="MaxLength" minOccurs="0"/>
 						<xs:element type="xs:string" name="Value" />
 						<xs:element type="xs:string" name="NumberChecks" />
+						<xs:element type="xs:string" name="RadioBlockNext" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
