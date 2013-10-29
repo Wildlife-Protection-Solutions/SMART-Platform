@@ -204,7 +204,8 @@
                </visibleWhen>
             </command>
             <separator
-                  name="org.wcs.smart.file.separator1">
+                  name="org.wcs.smart.file.separator1"
+                  visible="true">
             </separator>
             <command
                   commandId="org.wcs.smart.logout"
