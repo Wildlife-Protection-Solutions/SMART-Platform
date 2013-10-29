@@ -34,7 +34,7 @@
             locationURI="menu:org.wcs.smart.menu.ca?after=org.wcs.smart.ca.showDataModel">
          <command
                commandId="org.wcs.smart.dataentry.showConfigurableModel"
-               label="Configurable Model ..."
+               label="%cm.command.label"
                style="push">
          </command>
       </menuContribution>
@@ -43,7 +43,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.dataentry.showConfigurableModel"
-            name="ShowConfigurableModel">
+            name="%cm.command.name">
       </command>
    </extension>
    <extension
