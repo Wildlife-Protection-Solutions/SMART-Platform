@@ -82,6 +82,7 @@ public class DropdownScreenOptionComposite extends ScreenOptionComposite {
 		protected void createDefaultControl(Group group) {
 			viewer = new ComboViewer(group, SWT.READ_ONLY);
 			viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			((GridData)viewer.getControl().getLayoutData()).widthHint = 100;
 			viewer.getControl().setEnabled(!getModel().isVisible());
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setLabelProvider(new NamedItemLabelProvider());

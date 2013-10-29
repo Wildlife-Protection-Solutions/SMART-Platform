@@ -24,6 +24,7 @@ public class Messages extends NLS {
 	public static String ArmedComposite_OpNo;
 	public static String ArmedComposite_OpYes;
 	public static String ArmedComposite_Title;
+	public static String ArmedScreenOptionComposite_ArmedOption;
 	public static String AttachmentCellEditor_NoAttachment_Label;
 	public static String AttachmentCellEditor_TableCell_Label;
 	public static String AttachmentDialog_DialogMessage;
@@ -535,6 +536,10 @@ public class Messages extends NLS {
 	public static String PatrolMemberWizardPage_PageMessage;
 	public static String PatrolMemberWizardPage_SelectEmployees_Label;
 	public static String PatrolMemberWizardPage_Title;
+	public static String PatrolMetaConfigDialog_DialogMessage;
+	public static String PatrolMetaConfigDialog_DialogTitle;
+	public static String PatrolMetaConfigDialog_ErrorMessage;
+	public static String PatrolMetaConfigDialog_ShellTitle;
 	public static String PatrolObjectiveWizardPage_PageMessage;
 	public static String PatrolObjectiveWizardPage_Title;
 	public static String PatrolOptionsPropertyPage_DialogMessage;
