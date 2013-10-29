@@ -86,6 +86,7 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 		opBlank = new Button(panel, SWT.RADIO);
 		opBlank.setText(Messages.CreateNewOpDialog_BlankCmOp);
 		opBlank.setToolTipText(Messages.CreateNewOpDialog_BlankCmToolTip);
+		opBlank.setSelection(true);
 		
 		new Label(panel, SWT.NONE);
 		

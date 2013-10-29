@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -134,7 +137,14 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	@Override
 	protected void handleDeleteNode() {
+		
 		CmNode node = getSourceObject();
+		
+		if (!MessageDialog.openConfirm(getShell(), Messages.CmNodeInfoComposite_DeleteDialogTitle, 
+				MessageFormat.format(Messages.CmNodeInfoComposite_DeleteConfirmation, new Object[]{node.getName()}))){
+			return;
+		}
+		
 		CmNode parentNode = node.getParent();
 		if (parentNode == null) {
 			//this is the root node
