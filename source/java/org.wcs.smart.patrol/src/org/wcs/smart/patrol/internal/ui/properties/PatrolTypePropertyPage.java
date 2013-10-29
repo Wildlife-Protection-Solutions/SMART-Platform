@@ -660,6 +660,27 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 		List<PatrolTransportType> siblings = getAllTransportTypes();
+		
+		//validate keys
+		try{
+			for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
+				PatrolType type = (PatrolType) iterator.next();
+				if (type.getTransportTypes() != null){
+					for (PatrolTransportType tt : type.getTransportTypes()){
+						siblings.remove(tt);
+						String error = NamedKeyItem.validateKey(tt.getKeyId(), siblings);
+						siblings.add(tt);
+						if (error != null){
+							throw new Exception(error);
+						}
+					}
+				}
+			}
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			return false;
+		}
+		
 		Session s = getSession();
 		s.beginTransaction();
 		try{
@@ -672,12 +693,6 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				s.saveOrUpdate(type);
 				if (type.getTransportTypes() != null){
 					for (PatrolTransportType tt : type.getTransportTypes()){
-						siblings.remove(tt);
-						String error = NamedKeyItem.validateKey(tt.getKeyId(), siblings);
-						siblings.add(tt);
-						if (error != null){
-							throw new Exception(error);
-						}
 						s.saveOrUpdate(tt);
 					}
 				}
