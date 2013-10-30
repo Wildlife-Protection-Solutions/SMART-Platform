@@ -31,6 +31,7 @@ import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -182,6 +183,10 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 					Control currentPanel = ((StackLayout)infoInnerPanel.getLayout()).topControl;
 					if (currentPanel instanceof AbstractInfoComposite){
 						((AbstractInfoComposite)currentPanel).processButton(cbtn);
+						
+						//we we add or remove something make sure the current selection is expanded
+						Object x = ((StructuredSelection)modelTreeViewer.getSelection()).getFirstElement();
+						if (x != null) modelTreeViewer.setExpandedState(x, true);
 					}
 				}
 			});

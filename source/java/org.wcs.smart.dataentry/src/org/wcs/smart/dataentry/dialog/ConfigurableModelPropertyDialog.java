@@ -227,6 +227,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				}
 				
 				modelListViewer.setInput(getModelsList().toArray());
+				modelTreeViewer.setInput(null);
 				updateTreeViewer();
 			}
 		});		
