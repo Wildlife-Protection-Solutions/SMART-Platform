@@ -522,34 +522,6 @@ public class PatrolScreensUtil {
 			}
 			
 		}
-//		
-//		
-//		
-//		
-//		List<String> types = new ArrayList<String>();
-//		List<String> tag0Types = new ArrayList<String>();
-//		for (PatrolType patrolType : pTypes) {
-//			types.add(patrolType.getType().getGuiName());
-//			tag0Types.add(patrolType.getType().name());
-//		}
-//		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
-//		String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
-//		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
-//		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
-//		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
-//		container.screenNodes.add(node);
-//		container.resultElements.add(new IdNamePair(resultTypeElemId, RESULT_PATROL_TYPE));
-//		CyberTrackerId nextId = new CyberTrackerId();
-//		String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
-//		container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
-//		for (int i = 0; i < pTypes.size(); i++) {
-//			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)));
-//			node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
-//			container.screenNodes.add(node);
-//			Control control2 = ScreensObjectFactory.getNavigationControl(node);
-//			control2.setTranslateNextScreenId(nextId.getNodeId());
-//		}
-//		return nextId;
 	}
 
 	private CyberTrackerId addMembersNode(CyberTrackerId id, ParolFilledDataContainer container, List<CyberTrackerId> memberIds) {
@@ -599,6 +571,16 @@ public class PatrolScreensUtil {
 			Control defaultAttr = screensFactory.createAttrubuteControl14(defId.getItemId(), false, defaultValues);
 			ScreensObjectFactory.addControlToNode(node, defaultAttr);
 		}
+		
+		CyberTrackerProperties properties = ctUtil.getCtProperties();
+		control2 = ScreensObjectFactory.getNavigationControl(node);
+		if (properties.isShowEdit()) {
+			control2.setShowEdit("True"); //$NON-NLS-1$
+		}
+		if (properties.isShowGPS()) {
+			control2.setShowGPS("True"); //$NON-NLS-1$
+		}
+		
 		addGpsConfiguration(node, timer);
 		container.screenNodes.add(node);
 		container.screenNodes.add(resumeNode);

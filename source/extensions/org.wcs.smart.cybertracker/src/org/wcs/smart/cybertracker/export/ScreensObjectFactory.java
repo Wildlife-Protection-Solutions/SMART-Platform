@@ -449,6 +449,8 @@ public class ScreensObjectFactory {
 		control.setHeight(24);
 		control.setButtonWidth(25);
 		control.setButtonBorderWidth(0);
+		control.setShowEdit("False"); //$NON-NLS-1$
+		control.setShowGPS("False"); //$NON-NLS-1$
 		return control;
 	}
 

@@ -31,6 +31,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -82,18 +83,25 @@ public class CyberTrackerUtil {
 		}
 	}
 
+	private CyberTrackerProperties ctProperties;
+	
 	private ScreensObjectFactory screensFactory;
 	private PatrolScreensUtil screensUtil;
 	
-	public CyberTrackerUtil(ScreensObjectFactory screensFactory) {
-		this.screensFactory = screensFactory;
+	public CyberTrackerUtil(CyberTrackerProperties properties) {
+		ctProperties = properties;
+		this.screensFactory = new ScreensObjectFactory(properties);
 		this.screensUtil = new PatrolScreensUtil(this);
 	}
 	
-	protected ScreensObjectFactory getScreensFactory() {
+	public ScreensObjectFactory getScreensFactory() {
 		return screensFactory;
 	}
 
+	public CyberTrackerProperties getCtProperties() {
+		return ctProperties;
+	}
+	
 	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 		return screensUtil.buildPatrolNodes(elements, dmRootId, session);
 	}

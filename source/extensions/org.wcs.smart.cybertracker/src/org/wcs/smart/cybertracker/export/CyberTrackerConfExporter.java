@@ -125,6 +125,8 @@ public class CyberTrackerConfExporter {
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			return performExport(destFolder, monitor);
 		} finally {
+			screensFactory = null;
+			ctUtil = null;
 			configurableModel = null;
 			defaultAttrValuesResultId = null;
 			newWpResultId = null;
@@ -144,8 +146,8 @@ public class CyberTrackerConfExporter {
 	private File performExport(File file, IProgressMonitor monitor) {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
-		screensFactory = new ScreensObjectFactory(ctProperties);
-		ctUtil = new CyberTrackerUtil(screensFactory);
+		ctUtil = new CyberTrackerUtil(ctProperties);
+		screensFactory = ctUtil.getScreensFactory();
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
