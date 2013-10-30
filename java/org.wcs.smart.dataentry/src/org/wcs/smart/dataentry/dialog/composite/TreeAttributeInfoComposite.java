@@ -59,6 +59,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	private TreeEditorField defaultValueTreeField;
 	private TreeViewer attributeTreeViewer;
 	
+	private Object lastSelection;
 	/**
 	 * @param parent
 	 * @param model
@@ -92,11 +93,14 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 					defaultValueTreeField.setValue(defaultNode);
 				}
 				
-				//tree viewer
-				((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
-				attributeTreeViewer.setInput(getSourceObject().getAttribute());
-				attributeTreeViewer.expandToLevel(2);
-				attributeTreeViewer.refresh();
+				if (getSourceObject() != lastSelection){
+					//tree viewer
+					((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
+					attributeTreeViewer.setInput(getSourceObject().getAttribute());
+					attributeTreeViewer.expandToLevel(2);
+					attributeTreeViewer.refresh();
+				}
+				lastSelection = getSourceObject();
 			}
 		});
 	}
