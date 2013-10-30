@@ -43,7 +43,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.patrolScreens"
-                  label="Patrol Screens Configuration ..."
+                  label="%cybertracker.patrol.screens.config.command.label"
                   style="push">
             </command>
             <visibleWhen
