@@ -168,6 +168,7 @@ public class Messages extends NLS {
 	public static String CSVImportConfiguration_12;
 	public static String CSVImportConfiguration_2;
 	public static String CSVImportConfiguration_9;
+	public static String CsvImportEngine_SaveProgressMessage;
 	public static String ImportCSVDetailsComposite_0;
 	public static String ImportCSVDetailsComposite_1;
 	public static String ImportCSVDetailsComposite_10;

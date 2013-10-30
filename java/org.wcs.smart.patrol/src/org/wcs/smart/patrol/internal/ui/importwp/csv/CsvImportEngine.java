@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp.csv;
 
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -118,7 +119,7 @@ public class CsvImportEngine implements IImportEngine {
 					max++;
 				}
 			}
-			
+			monitor.setTaskName(MessageFormat.format(Messages.CsvImportEngine_SaveProgressMessage, new Object[]{waypoints.size()}));
 			return GPSDataImport.saveWaypoints(option, patrol, currentLeg, waypoints);
 		}
 		return null;
