@@ -330,7 +330,7 @@ public class PatrolScreensUtil {
 		} else if (Type.GROUND.name().equals(type_so.getStringValue())) {
 			return id;
 		} else {
-			return addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, false);
+			return addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
 		}
 	}
 	
