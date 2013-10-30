@@ -194,6 +194,10 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_Message;
 	public static String CyberTrackerPropertiesDialog_NameInvalid;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
+	public static String CyberTrackerPropertiesDialog_ShowEdit;
+	public static String CyberTrackerPropertiesDialog_ShowEdit_Tooltip;
+	public static String CyberTrackerPropertiesDialog_ShowGPS;
+	public static String CyberTrackerPropertiesDialog_ShowGPS_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SightingAccuracy;
 	public static String CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SightingAccuracyIvalid;

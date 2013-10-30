@@ -85,6 +85,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private Button btnResetOnSync;
 	private Button btnResetOnNext;
 	
+	private Button btnShowEdit;
+	private Button btnShowGPS;
 	private Button btnKioskMode;
 	private Text txtExitPin;
 
@@ -293,6 +295,43 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});
 
+		
+		Label lblShowEdit = new Label(generalContainer, SWT.NONE);
+		lblShowEdit.setText(Messages.CyberTrackerPropertiesDialog_ShowEdit);
+		lblShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
+
+		btnShowEdit = new Button(generalContainer, SWT.CHECK);
+		btnShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
+		btnShowEdit.setSelection(ctProperties.isShowEdit());
+		btnShowEdit.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+
+		Label lblShowGPS = new Label(generalContainer, SWT.NONE);
+		lblShowGPS.setText(Messages.CyberTrackerPropertiesDialog_ShowGPS);
+		lblShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
+
+		btnShowGPS = new Button(generalContainer, SWT.CHECK);
+		btnShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
+		btnShowGPS.setSelection(ctProperties.isShowGPS());
+		btnShowGPS.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		
 		
 		Label lblKioskMode = new Label(generalContainer, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
@@ -894,6 +933,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		ctProperties.setGpsTimeZone((Integer)selection.getFirstElement());
 		ctProperties.setSkipButtonTimeout(Integer.valueOf(txtSkipButtonTimeout.getText()));
 		
+		ctProperties.setShowEdit(btnShowEdit.getSelection());
+		ctProperties.setShowGPS(btnShowGPS.getSelection());
 		ctProperties.setStorageTime(Integer.valueOf(txtStorageTime.getText()));
 		
 		ctProperties.setUseTitleBar(btnUseTitleBar.getSelection());
