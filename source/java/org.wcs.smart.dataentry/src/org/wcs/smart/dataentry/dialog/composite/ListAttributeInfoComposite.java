@@ -70,7 +70,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private Language currentLanguage;
 
 	private boolean initializingControl = false;
-	
+	private Object lastSelection = null;
 	/**
 	 * @param parent
 	 * @param model
@@ -93,7 +93,10 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				currentLanguage = language;
 				updateMultiselectControl();
 				updateDefaultControl();
-				updateListControl();
+				if (getSourceObject() != lastSelection){
+					updateListControl();
+				}
+				lastSelection = getSourceObject();
 			}
 		});
 	}
