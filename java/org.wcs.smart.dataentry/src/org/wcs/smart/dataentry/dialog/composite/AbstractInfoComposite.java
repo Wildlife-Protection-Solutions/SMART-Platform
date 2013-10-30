@@ -321,15 +321,17 @@ public abstract class AbstractInfoComposite extends Composite {
 				@Override
 				public void focusLost(FocusEvent e) {
 					if (internalChange && item != null) {
+						boolean changed = false;
 						if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
 							MessageDialog.openError(getShell(), Messages.AbstractInfoComposite_ErrorDialogTitle, MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
 							text.setText(item.getName());
 						}else{
+							changed = !item.getName().equals(text.getText());
 							item.setName(text.getText());
 							item.updateName(currentLanguage, item.getName());
 							
 						}
-						if (!item.getName().equals(text.getText())){
+						if (changed){
 							//only fire if name actually changed
 							fireModelChanged();
 						}
