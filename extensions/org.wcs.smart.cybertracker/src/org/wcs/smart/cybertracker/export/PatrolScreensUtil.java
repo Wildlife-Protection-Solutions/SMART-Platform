@@ -426,7 +426,8 @@ public class PatrolScreensUtil {
 	private String validatePatrolTypes(List<PatrolType> pTypes) {
 		if (pTypes == null || pTypes.isEmpty())
 			return Messages.PatrolScreensUtil_Error_TypesNotSet;
-		for (PatrolType patrolType : pTypes) {
+		for (Iterator<PatrolType> i = pTypes.iterator(); i.hasNext();) {
+			PatrolType patrolType = i.next();
 			boolean invalid = true;
 			if (patrolType.getTransportTypes() != null) {
 				for (PatrolTransportType transportType : patrolType.getTransportTypes()) {
@@ -439,9 +440,13 @@ public class PatrolScreensUtil {
 			}
 			
 			if (invalid) {
-				return MessageFormat.format(Messages.PatrolScreensUtil_Error_TransportNotSet, patrolType.getType().getGuiName());
+				i.remove();
 			}
 		}
+		
+		if (pTypes.isEmpty())
+			return Messages.PatrolScreensUtil_Error_TransportNotSet;
+		
 		return null;
 	}
 
