@@ -134,6 +134,8 @@ public class CyberTrackerProperties extends UuidItem {
 	private static final boolean useMapOnSkip = true;
 	
 	private static final boolean autoNext = true;
+	private static final boolean showEdit = true;
+	private static final boolean showGPS = true;
 	
 
 	private Map<OptionID, CyberTrackerPropertiesOption> options;
@@ -394,6 +396,20 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setUseMapOnSkip(boolean useMapOnSkip) {
 		getOption(OptionID.USE_MAP_ON_SKIP).setBooleanValue(useMapOnSkip);
+	}
+	
+	public boolean isShowEdit() {
+		return getBooleanValue(OptionID.SHOW_EDIT, showEdit);
+	}
+	public void setShowEdit(boolean showEdit) {
+		getOption(OptionID.SHOW_EDIT).setBooleanValue(showEdit);
+	}
+
+	public boolean isShowGPS() {
+		return getBooleanValue(OptionID.SHOW_GPS, showGPS);
+	}
+	public void setShowGPS(boolean showGPS) {
+		getOption(OptionID.SHOW_GPS).setBooleanValue(showGPS);
 	}
 	
 }
