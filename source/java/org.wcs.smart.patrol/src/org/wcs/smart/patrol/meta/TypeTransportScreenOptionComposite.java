@@ -71,14 +71,10 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		
 		transportGroup = new TransportOptionGroup(this, this.transportOption);
 		
-		transportGroup.setVisibleEnabled(false);
-		if (typeOption.isVisible()){
-			transportGroup.setDefaultEnabled(false);
+		if (typeOption.isVisible()) {
+			transportGroup.setEnabled(false);
+			transportGroup.getBtnDisplayPage().setSelection(true);
 			transportViewer.getControl().setEnabled(false);
-		}else{
-			//if not visible then we need a default value
-			transportViewer.getControl().setEnabled(true);
-			transportGroup.setDefaultEnabled(true);
 		}
 	}
 
@@ -170,15 +166,10 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 			typeOption.setVisible(display);
 			
 			typeViewer.getControl().setEnabled(!display);
-			transportGroup.setVisibleEnabled(false);
-			if (display){
-				transportGroup.setDefaultEnabled(false);
-				transportViewer.getControl().setEnabled(false);
-			}else{
-				//if not visible then we need a default value
-				transportViewer.getControl().setEnabled(true);
-				transportGroup.setDefaultEnabled(true);
-			}
+			
+			transportGroup.setEnabled(!display);
+			transportViewer.getControl().setEnabled(!display && !transportOption.isVisible());
+			transportGroup.getBtnDisplayPage().setSelection(display || transportOption.isVisible()); //always true if type is visible
 
 			TypeTransportScreenOptionComposite.this.layout(true, true);
 			fireScreenOptionListeners();

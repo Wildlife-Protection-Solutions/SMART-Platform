@@ -81,13 +81,16 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		new MemberOptionGroup(this, membersOption);
 		leaderGroup = new EmployeeDropOptionGroup(this, leaderOption);
 		pilotGroup = new EmployeeDropOptionGroup(this, pilotOption);
-		
-		leaderGroup.setVisibleEnabled(false);
-		pilotGroup.setVisibleEnabled(false);
-		
-		leaderGroup.setDefaultEnabled(!membersOption.isVisible());
-		pilotGroup.setDefaultEnabled(!membersOption.isVisible() && isPilotAllowed());
-		
+
+		if (membersOption.isVisible()) {
+			leaderGroup.setEnabled(false);
+			leaderGroup.getBtnDisplayPage().setSelection(true);
+			leaderGroup.getViewer().getControl().setEnabled(false);
+			
+			pilotGroup.setEnabled(false);
+			pilotGroup.getBtnDisplayPage().setSelection(isPilotAllowed());
+			pilotGroup.getViewer().getControl().setEnabled(false);
+		}
 	}
 
 	private void updateEmployeeDropOptionGroup(EmployeeDropOptionGroup optionGroup) {
@@ -173,10 +176,14 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			membersOption.setVisible(display);
 			membersViewer.getControl().setEnabled(!display);
 			
-			leaderGroup.setDefaultEnabled(!display);
-			//leaderGroup.setVisible(!display);
-			pilotGroup.setDefaultEnabled(!display && isPilotAllowed());
-
+			leaderGroup.setEnabled(!display);
+			leaderGroup.getViewer().getControl().setEnabled(!display && !leaderOption.isVisible());
+			leaderGroup.getBtnDisplayPage().setSelection(display || leaderOption.isVisible()); //always true if members is visible
+			
+			pilotGroup.setEnabled(!display);
+			pilotGroup.getViewer().getControl().setEnabled(!display && !pilotOption.isVisible() && isPilotAllowed());
+			pilotGroup.getBtnDisplayPage().setSelection((display || pilotOption.isVisible()) && isPilotAllowed()); //always true if members is visible
+			
 			fireScreenOptionListeners();
 		}
 	}
