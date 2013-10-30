@@ -283,7 +283,6 @@
             </command>
             <command
                   commandId="org.wcs.smart.showBasemaps"
-                  icon="images/icons/etool16/map.png"
                   label="%basemaps.command.label"
                   mnemonic="%basemaps.command.mnemonic"
                   style="push">
@@ -1090,6 +1089,13 @@
             class="org.wcs.smart.internal.ca.export.ConservationAreaTemplateCloner"
             id="org.wcs.smart.conservationAreaCloner">
       </templateCloner>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.showBasemaps"
+            icon="images/icons/etool16/map.png">
+      </image>
    </extension>
 
 </plugin>
