@@ -83,6 +83,9 @@ public class CaWizard_UserDef extends CaWizardPage{
 		
 		compEmployee.updateEmploye(admin);
 		admin.setSmartUserLevel(Employee.SmartUserLevel.ADMIN);
+
+		//remove any previous users
+		ca.getEmployees().clear(); 
 		ca.getEmployees().add(admin);
 	}
 	
