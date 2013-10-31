@@ -21,14 +21,14 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.CSVImportConfiguration;
@@ -82,12 +82,12 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 				
 		ops = new ImportCSVDetailsComposite(center);
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-		ops.addColumnsListener(new ISelectionChangedListener(){
-
+		ops.addChangeListener(new Listener() {
 			@Override
-			public void selectionChanged(SelectionChangedEvent event){
+			public void handleEvent(Event event) {
 				updateComplete();
-			}});
+			}
+		});
 		
 		
 		if (((CsvImportEngine)wizard.getImportEngine()).getConfiguration().getAvailableColumns() != null){
