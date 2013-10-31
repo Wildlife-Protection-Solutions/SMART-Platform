@@ -54,43 +54,16 @@
                      commandId="org.wcs.smart.plan.revertTemplate"
                      style="push"
                      tooltip="%reverttemplate.command.tooltip">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.plan.PlanReportPerspective">
-                        </equals>
-                     </with>
-                  </visibleWhen>
                </command>
                <command
                      commandId="org.wcs.smart.plan.exportTemplate"
                      style="push"
                      tooltip="%exporttemplate.command.tooltip">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.plan.PlanReportPerspective">
-                        </equals>
-                     </with>
-                  </visibleWhen>
                </command>
                <command
                      commandId="org.wcs.smart.plan.importTemplate"
                      style="push"
                      tooltip="%importtemplate.command.tooltip">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.plan.PlanReportPerspective">
-                        </equals>
-                     </with>
-                  </visibleWhen>
                </command>
                <visibleWhen
                      checkEnabled="false">
@@ -410,6 +383,14 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.wcs.smart.plan.PlanReportPerspective">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.plan.ui.handlers.EditPlanTemplate"
@@ -468,6 +449,14 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.wcs.smart.plan.PlanReportPerspective">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.plan.ui.handlers.ImportTemplateHandler"
@@ -478,6 +467,14 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.wcs.smart.plan.PlanReportPerspective">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
