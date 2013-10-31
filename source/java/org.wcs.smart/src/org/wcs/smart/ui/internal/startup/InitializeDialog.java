@@ -50,6 +50,8 @@ import org.wcs.smart.ui.internal.backup.RestoreHandler;
  */
 public abstract class InitializeDialog  extends Dialog {
 
+	public static int RESTART = -2;
+	
 	private Button opCreateNew;
 	private Button opRestore;
 	private Button opImport;
@@ -161,10 +163,15 @@ public abstract class InitializeDialog  extends Dialog {
 	 * Starts the process for restoring a database
 	 */
 	private void restoreBackup(){
+		boolean restart = false;
 		RestoreHandler handler = new RestoreHandler();
 		try{
-			handler.execute(getShell());
-			super.setReturnCode(OK);
+			restart = handler.execute(getShell());
+			if (restart){
+				super.setReturnCode(RESTART);
+			}else{
+				super.setReturnCode(OK);
+			}
 			close();
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(getShell(), Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
