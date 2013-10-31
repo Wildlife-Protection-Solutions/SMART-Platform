@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.importwp.csv;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -89,7 +90,7 @@ public class ImportCSVDetailsComposite extends Composite{
 	private ControlDecoration cdDate;
 	private ControlDecoration cdTime;
 	private ControlDecoration cdDateFormat;
-	
+	private List<Listener> changeListeners = new ArrayList<Listener>();
 		
 	public ImportCSVDetailsComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -278,12 +279,13 @@ public class ImportCSVDetailsComposite extends Composite{
 		cmbColumnSelectorComments.setInput(columnNames);
 	}
 	
-	public void addColumnsListener(ISelectionChangedListener listener) {
-		cmbColumnSelectorX.addSelectionChangedListener(listener);
-		cmbColumnSelectorY.addSelectionChangedListener(listener);
-		cmbColumnSelectorDate.addSelectionChangedListener(listener);
-		cmbColumnSelectorTime.addSelectionChangedListener(listener);
-		cmbColumnSelectorDateFormat.addSelectionChangedListener(listener);
+	/**
+	 * fired when any field is changed; after the data
+	 * is validated so isValid field will be correct
+	 * @param listener
+	 */
+	public void addChangeListener(Listener listener){
+		changeListeners.add(listener);
 	}
 	
 		
@@ -358,6 +360,10 @@ public class ImportCSVDetailsComposite extends Composite{
 			cdDateFormat.hide();
 		}
 		
+		
+		for (Listener l : changeListeners){
+			l.handleEvent(null);
+		}
 	}
 
 	public boolean isValid() {
