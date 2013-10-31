@@ -104,10 +104,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerExporter_Progress_Generate_Reports;
 	public static String CyberTrackerExporter_Progress_Generate_Screens;
 	public static String CyberTrackerExporter_Progress_GenerateCTX;
-	public static String CyberTrackerExporter_Report_Column_Category;
 	public static String CyberTrackerExporter_Report_Column_Date;
 	public static String CyberTrackerExporter_Report_Column_Time;
-	public static String CyberTrackerExporter_SaveButtonsInfo;
 	public static String CyberTrackerExporter_ScreenTitle_Photo;
 	public static String CyberTrackerExporter_Waypoint_AddToLast;
 	public static String CyberTrackerExporter_Waypoint_SaveAsNew;
