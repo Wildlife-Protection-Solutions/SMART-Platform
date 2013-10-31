@@ -406,7 +406,6 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_Error_StartTimeError_Tooltip;
 	public static String PatrolLegDayInputComposite_ErrorImportTracksWizard;
 	public static String PatrolLegDayInputComposite_ErrorImportWaypointWizard;
-	public static String PatrolLegDayInputComposite_ImportSuccessful_DialogTitle;
 	public static String PatrolLegDayInputComposite_ImportTrackError_DialogMessage;
 	public static String PatrolLegDayInputComposite_ImportWaypointsLabel;
 	public static String PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage;
@@ -419,7 +418,6 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_Observation_ColumnHeader;
 	public static String PatrolLegDayInputComposite_ObservationsWaypointsLabel;
 	public static String PatrolLegDayInputComposite_Progress_DisplayingImportWizard;
-	public static String PatrolLegDayInputComposite_Progress_ImportingData;
 	public static String PatrolLegDayInputComposite_Progress_LoadingImportWizard;
 	public static String PatrolLegDayInputComposite_RestMinutesLabel;
 	public static String PatrolLegDayInputComposite_SetTrackDialog_Message;
