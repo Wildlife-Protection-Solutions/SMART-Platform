@@ -39,6 +39,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -68,6 +70,7 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.cybertracker.util.WinRegistry;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -118,6 +121,22 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		String warnMessage = validateCyberTrackerVersion();
+		if (warnMessage != null) {
+			Label warnLabel = new Label(main, SWT.NONE);
+			GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+			layoutData.horizontalIndent = 15;
+			warnLabel.setLayoutData(layoutData);
+			warnLabel.setText(warnMessage);
+
+			ControlDecoration warnDecoration = new ControlDecoration(warnLabel, SWT.LEFT);
+			warnDecoration.setImage(FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+			warnDecoration.setMarginWidth(4);
+			warnDecoration.show();
+		}
+		
+		
 		Composite modelSelector = new Composite(main, SWT.NONE);
 		modelSelector.setLayout(new GridLayout(2, false));
 		modelSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -358,6 +377,30 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	protected String validateCyberTrackerVersion() {
+		String version = null;
+		try {
+			version = WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+					ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_VERSION);
+		} catch (Exception e) {
+			String message = MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, message, e);
+			return message;
+		}
+		String[] parts = version.split("\\."); //$NON-NLS-1$
+		String[] reqParts = ICyberTrackerConstants.MIN_VERSION.split("\\."); //$NON-NLS-1$
+		if (parts.length > reqParts.length)
+			return MessageFormat.format(Messages.CyberTrackerExportDialog_Warn_CT_Version, version, ICyberTrackerConstants.MIN_VERSION);
+		for (int i = 0; i < reqParts.length; i++) {
+			Integer val = Integer.valueOf(parts[i]);
+			Integer reqVal = Integer.valueOf(reqParts[i]);
+			if (val < reqVal) {
+				return MessageFormat.format(Messages.CyberTrackerExportDialog_Warn_CT_Version, version, ICyberTrackerConstants.MIN_VERSION);
+			}
+		}
+		return null;
 	}
 	
 	private String getCyberTrackerCodeMeaning(int code) {

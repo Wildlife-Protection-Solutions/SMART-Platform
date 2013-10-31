@@ -29,7 +29,7 @@ package org.wcs.smart.cybertracker.model;
  */
 public interface ICyberTrackerConstants {
 
-	public static final String MIN_VERSION = "3.307"; //$NON-NLS-1$
+	public static final String MIN_VERSION = "3.00.0317"; //$NON-NLS-1$
 	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
@@ -43,6 +43,7 @@ public interface ICyberTrackerConstants {
 	public static final String REG_KEY_NAME = "Path"; //$NON-NLS-1$
 	public static final String REG_KEY_SMART = "SMART"; //$NON-NLS-1$
 	public static final String REG_KEY_EXPORT_MEDIA = "ExportMedia"; //$NON-NLS-1$
+	public static final String REG_KEY_VERSION = "Version"; //$NON-NLS-1$
 
 	public static final String COMMAND_CREATE = "/createctx"; //$NON-NLS-1$
 	public static final String COMMAND_UPLOAD = "/uploadpda"; //$NON-NLS-1$
