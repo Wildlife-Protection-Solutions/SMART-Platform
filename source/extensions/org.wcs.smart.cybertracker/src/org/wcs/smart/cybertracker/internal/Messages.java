@@ -91,6 +91,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Task_Copy;
 	public static String CyberTrackerExportDialog_Task_Upload;
 	public static String CyberTrackerExportDialog_Title;
+	public static String CyberTrackerExportDialog_Warn_CT_Version;
 	public static String CyberTrackerExporter_Error_GenerateCtxFail;
 	public static String CyberTrackerExporter_Error_InvalidSource;
 	public static String CyberTrackerExporter_Error_WriteXMmlFail;
