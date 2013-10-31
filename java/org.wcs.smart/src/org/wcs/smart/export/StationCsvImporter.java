@@ -141,6 +141,7 @@ public class StationCsvImporter implements ICsvDataImporter {
 				}
 			}
 		}
+		station.setName(station.findName(SmartDB.getCurrentLanguage()));
 		return station;
 	}
 

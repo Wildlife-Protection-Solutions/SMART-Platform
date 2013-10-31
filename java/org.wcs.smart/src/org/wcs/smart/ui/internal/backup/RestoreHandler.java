@@ -25,7 +25,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.equinox.app.IApplication;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -49,14 +48,14 @@ public class RestoreHandler {
 	 * @param shell the current shell
 	 * 
 	 */
-	public void execute(final Shell shell) {
+	public boolean execute(final Shell shell) {
 
 		if (!MessageDialog.openConfirm(shell, Messages.RestoreHandler_ConfirmRestore_DialogTitle, Messages.RestoreHandler_ConfirmRestore_DialogMessage )){
-			return;
+			return false;
 		}
 		
 		if (!DerbyRestoreEngine.validateUserRestore(shell)){
-			return;
+			return false;
 		}
 		
 		MessageDialog confirm = new MessageDialog(
@@ -78,10 +77,10 @@ public class RestoreHandler {
 			}
 			
 		}else if (ret == 1){
-			//no - continue without preforming backup
+			//no - continue without performing backup
 		}else if (ret == 2){
 			//cancel
-			return;
+			return false;
 		}
 			
 		final RestoreDialog dialog = new RestoreDialog(shell,
@@ -90,8 +89,9 @@ public class RestoreHandler {
 				Messages.RestoreHandler_DialogShellTitle, Messages.RestoreHandler_RestoreButton);
 
 		if (dialog.open() != IDialogConstants.OK_ID) {
-			return ;
+			return false;
 		}
+		final boolean[] ok = new boolean[]{false};
 		try {
 			final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
 			pmdDialog.run(true, false, new IRunnableWithProgress() {
@@ -108,10 +108,8 @@ public class RestoreHandler {
 							public void run() {
 								MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage1);
 								
-							}});
-						
-						//restart
-						System.exit(IApplication.EXIT_RESTART);						
+							}});		
+						ok[0] = true;
 					}catch (final Exception ex){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
@@ -125,8 +123,9 @@ public class RestoreHandler {
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
 					Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
+			return false;
 		}
-		return;
+		return ok[0];
 	}
 
 }

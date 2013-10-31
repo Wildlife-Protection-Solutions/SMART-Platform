@@ -147,6 +147,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 				}
 			}
 		}
+		type.setName(type.findName(SmartDB.getCurrentLanguage()));
 		return type;
 	}
 

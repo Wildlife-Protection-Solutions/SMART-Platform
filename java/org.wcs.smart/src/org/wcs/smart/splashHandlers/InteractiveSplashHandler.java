@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.DisplayAccess;
 import org.eclipse.ui.splash.AbstractSplashHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -268,7 +269,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void handleButtonAdvancedSelected(){
 		StartUpAdvancedDialog dialog = new StartUpAdvancedDialog(getSplash());
-		if (dialog.open() != InitializeDialog.CANCEL){
+		int returnCode = dialog.open();
+		if (returnCode == InitializeDialog.RESTART){
+			//restart
+			PlatformUI.getWorkbench().restart();
+		}else if (returnCode != InitializeDialog.CANCEL){
 			//on close refresh startup screen
 			startup();
 		}
