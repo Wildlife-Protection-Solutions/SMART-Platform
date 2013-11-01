@@ -75,8 +75,10 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		lbl.setText(Messages.PatrolTransportComposite_TransportType_Lable);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		patrolTypeViewer = new ComboViewer(center, SWT.READ_ONLY);
+		patrolTypeViewer = new ComboViewer(center, SWT.READ_ONLY | SWT.DROP_DOWN);
 		patrolTypeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)patrolTypeViewer.getControl().getLayoutData()).widthHint = 100;
+		
 		patrolTypeViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolTypeViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
