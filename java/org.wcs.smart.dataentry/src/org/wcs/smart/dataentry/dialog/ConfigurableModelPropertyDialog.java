@@ -99,12 +99,12 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		SashForm form = new SashForm(container, SWT.HORIZONTAL);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)form.getLayoutData()).widthHint = 100;
 		
 		modelListViewer = new TableViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(getModelsList().toArray());
-		modelListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -117,7 +117,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelTreeViewer = new TreeViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(false));
-		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		form.setWeights(new int[]{40,60});
 		
