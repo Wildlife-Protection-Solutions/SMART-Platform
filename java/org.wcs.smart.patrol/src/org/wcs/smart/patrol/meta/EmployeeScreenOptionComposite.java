@@ -131,7 +131,7 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			membersViewer = new CheckboxTableViewer(table);
 //			membersViewer = new CheckboxTableViewer(group, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-//			gd.widthHint = 150;
+			gd.widthHint = 150;
 			gd.heightHint = 120;
 			membersViewer.getControl().setLayoutData(gd);
 			membersViewer.getControl().setEnabled(!membersOption.isVisible());
@@ -200,6 +200,7 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 		protected void createDefaultControl(Group group) {
 			viewer = new ComboViewer(group, SWT.READ_ONLY);
 			viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			((GridData)viewer.getControl().getLayoutData()).widthHint = 100;
 			viewer.getControl().setEnabled(!getModel().isVisible());
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setLabelProvider(new EmployeeLabelProvider());
