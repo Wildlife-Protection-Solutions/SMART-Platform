@@ -67,10 +67,16 @@
                </command>
                <visibleWhen
                      checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
                </visibleWhen>
             </menu>
             <separator
