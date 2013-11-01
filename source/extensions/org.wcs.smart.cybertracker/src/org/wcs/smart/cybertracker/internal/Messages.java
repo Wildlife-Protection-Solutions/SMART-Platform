@@ -80,6 +80,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Error_ExportError;
 	public static String CyberTrackerExportDialog_Error_LaunchCT;
 	public static String CyberTrackerExportDialog_Error_UploadFailed;
+	public static String CyberTrackerExportDialog_ExportOptionsLabel;
 	public static String CyberTrackerExportDialog_ExportToDevice;
 	public static String CyberTrackerExportDialog_ExportToFile;
 	public static String CyberTrackerExportDialog_FailCreateTempFolder;
