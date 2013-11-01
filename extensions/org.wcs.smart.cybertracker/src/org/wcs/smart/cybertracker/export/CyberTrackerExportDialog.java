@@ -48,10 +48,14 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -102,6 +106,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 	private Button btnLaunchCT;
 	
+	private Label lblFile;
 	private File selectedFile;
 	private Object selectedModel;
 
@@ -129,11 +134,28 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			warnLabel.setLayoutData(layoutData);
 			warnLabel.setText(warnMessage);
 
+			FontData fd = warnLabel.getFont().getFontData()[0];
+			fd.setStyle(SWT.BOLD);
+			final Font boldFont = new Font(Display.getCurrent(), fd);
+			warnLabel.setFont(boldFont);
+			warnLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_RED));
+			warnLabel.addDisposeListener(new DisposeListener() {
+				
+				@Override
+				public void widgetDisposed(DisposeEvent e) {
+					boldFont.dispose();
+				}
+			});
+			
 			ControlDecoration warnDecoration = new ControlDecoration(warnLabel, SWT.LEFT);
 			warnDecoration.setImage(FieldDecorationRegistry.getDefault()
 					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 			warnDecoration.setMarginWidth(4);
 			warnDecoration.show();
+			
+			Label lbl = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
 		}
 		
 		
@@ -144,6 +166,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		modelLabel.setText(Messages.CyberTrackerExportDialog_ConfigurableModel);
 		modelViewer = new ComboViewer(modelSelector, SWT.READ_ONLY);
 		modelViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)modelViewer.getControl().getLayoutData()).widthHint = 100;
 		modelViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelViewer.setLabelProvider(new ConfigurableModelLabelProvider() {
 			@Override
@@ -163,8 +186,15 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			}
 		});
 		
+		Label lblOp = new Label(modelSelector, SWT.NONE);
+		lblOp.setText(Messages.CyberTrackerExportDialog_ExportOptionsLabel);
+		lblOp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		
-		btnToDevice = new Button(main, SWT.RADIO);
+		btnToDevice = new Button(modelSelector, SWT.RADIO);
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER,true, false, 2, 1);
+		gd.horizontalIndent = 10;
+		btnToDevice.setLayoutData(gd);
+		
 		btnToDevice.setSelection(true);
 		btnToDevice.setText(Messages.CyberTrackerExportDialog_ExportToDevice);
 		btnToDevice.addSelectionListener(new SelectionAdapter() {
@@ -174,8 +204,11 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			}
 		});
 		
-		btnToFile = new Button(main, SWT.RADIO);
+		btnToFile = new Button(modelSelector, SWT.RADIO);
 		btnToFile.setSelection(false);
+		gd = new GridData(SWT.FILL, SWT.CENTER,true, false, 2, 1);
+		gd.horizontalIndent = 10;
+		btnToFile.setLayoutData(gd);
 		btnToFile.setText(Messages.CyberTrackerExportDialog_ExportToFile);
 		btnToFile.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -184,19 +217,19 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			}
 		});
 
-		Composite toFileCmp = new Composite(main, SWT.NONE);
+		Composite toFileCmp = new Composite(modelSelector, SWT.NONE);
 		GridLayout fileCmpLayout = new GridLayout(1, false);
-		fileCmpLayout.marginLeft = 5;
+		fileCmpLayout.marginLeft = 15;
 		toFileCmp.setLayout(fileCmpLayout);
-		toFileCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toFileCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite fileCmp = new Composite(toFileCmp, SWT.NONE);
 		fileCmp.setLayout(new GridLayout(3, false));
 		fileCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label lbl = new Label(fileCmp, SWT.NONE);
-		lbl.setText(Messages.CyberTrackerExportDialog_Label_File);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		lblFile = new Label(fileCmp, SWT.NONE);
+		lblFile.setText(Messages.CyberTrackerExportDialog_Label_File);
+		lblFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		txtFile = new Text(fileCmp, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -248,6 +281,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	}
 	
 	private void exportOptionChanged() {
+		lblFile.setEnabled(btnToFile.getSelection());
 		txtFile.setEnabled(btnToFile.getSelection());
 		btnBrowse.setEnabled(btnToFile.getSelection());
 		btnLaunchCT.setEnabled(btnToFile.getSelection());
