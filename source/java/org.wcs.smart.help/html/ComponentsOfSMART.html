@@ -599,9 +599,9 @@ mass storage device.</p>
 
 <p><strong>CSV File - </strong>Select this method if your data is stored in a
 CSV file.</p>
+<br />
+<br />
 
-<br />
-<br />
 
 <p><strong><u>GPS Import Options</u></strong></p>
 
@@ -626,7 +626,6 @@ height="488" /></p>
 
 <p>Selection of the waypoints can be done individually or through the
 <em>Select All</em> option.</p>
-
 <br />
 <br />
 
@@ -647,7 +646,6 @@ only the waypoints for the selected date.</p>
 
 <p><strong>Select which waypoints to import for &lt;date&gt; -</strong> The
 SMART user will select and assign waypoints to the selected date.</p>
-
 <br />
 <br />
 
@@ -725,8 +723,9 @@ if it does not match one of the listed formats. </p>
 
 <p><strong>Skip first row...</strong> - Check this box if you have a header row
 at the top of your data.</p>
+<br />
+<br />
 
-<br/><br/>
 
 <p><strong><u>Manual Entry of Waypoints</u></strong></p>
 
@@ -738,8 +737,10 @@ at the top of your data.</p>
 
 <p><strong>Move Waypoint(s)</strong> - Reassigns the selected waypoint(s) to
 another day.</p>
+<br />
+<br />
 
-<br/><br/>
+
 <p><strong><u>Special Notes on Importing GPS Waypoints for Multi-Leg
 Patrols</u></strong></p>
 <ul>
@@ -1149,7 +1150,8 @@ tables or on a map. These are commonly referered to as heat-maps.</p>
 
 <p></p>
 
-<h4><a id="PatrolObservationQuery">Patrol, Incident, and Observation Queries</a></h4>
+<h4><a id="PatrolObservationQuery">Patrol, Incident, and Observation
+Queries</a></h4>
 
 <p></p>
 
@@ -1400,7 +1402,8 @@ to allow SMART users to be able to build more complex queries.</p>
 
 <p></p>
 
-<p><strong><a id="ObservationIncidentFilter">Observation and Incident Filters</a></strong></p>
+<p><strong><a id="ObservationIncidentFilter">Observation and Incident
+Filters</a></strong></p>
 
 <p>After the basic filters (see above) have been constructed the user has a
 secondary filter option to further the results of the query.</p>
@@ -2412,6 +2415,151 @@ starts with an alpha character.</p>
 <p><em><strong><span style="color:#ff0000">Note: It is highly recommended to
 leave the keys unedited unless you fully understand what could happen if the
 keys are edited.</span></strong></em></p>
+
+<p></p>
+
+<h4><strong><a id="configurablemodel">Configuring a Data Model for
+CyberTracker</a></strong></h4>
+
+<p><strong>Motivation</strong></p>
+
+<p>The current data model is designed for data analysis flexibility and not
+field user data entry efficiency. For example, the default data model has a
+variety of higher level categories (Animals, Features, People) that the field
+data entry users don&rsquo;t necessarily want to select each time they make an
+observation. In order to improve data entry efficiency this document provides a
+collection of options to allows users to configure data entry aiming to make it
+more it more efficient.</p>
+
+<p>The options below are critical for the success of the SMART CyberTracker
+integration as they will allow the SMART data model to be quickly and easily
+deployed with CyberTracker in a way that leverages the richness and ease of use
+CyberTracker users already expect.</p>
+
+<p>The initial scope of work is to only update the SMART CyberTracker plugin to
+use the new features outlined below. There will be no changes to the existing
+SMART data entry UI. However, as additional work, the SMART data entry UI could
+be updated to make use of the new features.</p>
+
+<p></p>
+
+<p><strong>Configurable &lsquo;Data Collection&rsquo; Data Model</strong></p>
+
+<p>This application extension would allow users to create a custom &ldquo;data
+collection&rdquo; data model. This data model would be similar to the main data
+model however it would allow users to re-group categories in a form that makes
+more sense for data entry users and potentially provide additional properties
+to use in the data entry UI.</p>
+
+<p></p>
+
+<p><strong>Description</strong></p>
+
+<p>Each category &amp; all its associated attributes (including inherited
+attributes) in the main data model would be considered a data entry component.
+Users will be able to build a custom tree structure, adding these data-entry
+components to the tree. Users cannot add new data entry components, nor add new
+attributes. These functions would have to be done on the main data model.</p>
+
+<p>Any data entry component can be renamed. This means that categories and
+attributes can be renamed for the configured data model. In the cybertracker,
+example a category with a long name might need to be shorter to display
+correctly on the screen.</p>
+
+<p>List and tree attributes can have their list items or tree nodes renamed.</p>
+
+<p></p>
+
+<p><strong>Data Model Attributes - Disable / Default Values</strong></p>
+
+<p>This extension would allow users to disable data model attributes for data
+entry purposes only and/or provide a default value to use for all observations
+of the associated category.</p>
+
+<p>Attributes would have two additional properties:</p>
+<ul>
+  <li>Show Attribute - If true the data-entry user will be prompted for the
+    attribute value. If false, no option for entering a value is displayed.</li>
+  <li>Default Value - The default value to use on the data entry screen or, if
+    the attribute is not visible (show attribute = false), the value to apply
+    to all observations. If the attribute is a required attribute and attribute
+    is false then users will be required to enter a default value. Otherwise
+    this can be left blank.</li>
+</ul>
+
+<p><em>Note: Modifications would probably have to be made by the CT to support
+default values. However, show attribute property could still be applied. In
+case where default values are not uses only non-required attributes would have
+&lsquo;show attribute&rsquo; property.</em></p>
+
+<p></p>
+
+<p>These properties would apply to the given category/attribute combination. So
+if an attribute is used in multiple categories, the attribute can have
+different settings for each category. For example consider the following core
+data model:</p>
+
+<p><img alt="config dm1" src="images/config_dm1.png" width="178" height="128"
+/></p>
+
+<p></p>
+
+<p>The Threat and Infraction attributes are inherited by the categories People,
+Human Sign, Shelter or Camp and Weapons &amp; Equipment. In the core data model
+disabling the Threat attribute disables it for all categories. However, in the
+configured data model users would be able to set the &lsquo;show
+attribute&rsquo; property to different values for each of these subcategories
+as shown in the sample configured model below:</p>
+
+<p><img alt="config dm2" src="images/config_dm2.png" width="206" height="273"
+/></p>
+
+<p><em>Note: the in addition to disabling specific attributes, attributes can
+also be ordered differently in different categories.</em></p>
+
+<p></p>
+
+<p><strong>Collapsible Tree Attributes</strong></p>
+
+<p>This extension would allow users to specify if a tree attribute should be
+collapsed or not collapsed. Collapsing a tree attribute would convert the tree
+into a single list by including all the leaf nodes of the tree. In this case
+data entry users will not be able to select intermediate nodes as attribute
+values. Non-collapsed trees would remain as tree structures.</p>
+
+<p>This is specified on a category/attribute level so if an attribute is
+re-used under multiple categories each category can have custom settings for
+the attribute. For one category they may choose to collapse the tree in another
+category they may choose not to.</p>
+
+<p></p>
+
+<p><strong>Multi-Select Lists</strong></p>
+
+<p>Multi select lists would allow the user to define a single list attribute as
+a multi-select list for each category. Multi-select lists must be displayed to
+the data entry user in a way that allows the data entry user to select multiple
+items. Prompts then must be made for each additional attribute associated with
+the category for each item selected in the multi-select list.</p>
+
+<p>Only a single attribute per category can be selected as a multi-select
+list.</p>
+
+<p>The multi-select list attribute must be the first attribute in the list of
+attributes associated with the category. So users must first select all the
+possible list item values, then they can enter additional attributes about the
+list item.</p>
+
+<p></p>
+
+<p>Example:</p>
+
+<p>Consider the following category/attribute combination.</p>
+
+<p><img alt="config dm3" src="images/config_dm3.png" width="280" height="77"
+/></p>
+
+<p></p>
 
 <p></p>
 

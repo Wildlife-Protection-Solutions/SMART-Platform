@@ -142,6 +142,8 @@
          </topic>
          <topic href="html/ComponentsOfSMART.html#dmkeys" label="Data Model Keys">
          </topic>
+         <topic href="html/ComponentsOfSMART.html#configurablemodel" label="Configuring a Data Model for CyberTracker">
+         </topic>
       </topic>
       <topic href="html/ComponentsOfSMART.html#CrossCa" label="Cross Conservation Area Analysis">
          <topic href="html/ComponentsOfSMART.html#ccalogin" label="Login Requirements">
