@@ -732,7 +732,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	    		    
 	    txtFileName = new Text(fileContainer, SWT.BORDER);
 	    txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	    txtFileName.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
+	    txtFileName.setToolTipText(Messages.CyberTrackerPropertiesDialog_41);
 		txtFileName.setText(ctProperties.getFieldMapFilename());
 		
 		txtFileName.addModifyListener(new ModifyListener() {
