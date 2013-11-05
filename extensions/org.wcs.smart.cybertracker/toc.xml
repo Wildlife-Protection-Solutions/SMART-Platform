@@ -2,8 +2,16 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="SMART Cybertracker Help">
-   <topic href="html/Cybertracker.html" label="Cybertracker">
-      <topic href="html/Cybertracker.html#header" label="Header">
+   <topic href="html/Cybertracker.html" label="Cybertracker Plugin">
+      <topic href="html/Cybertracker.html#install" label="Installing the SMART-Cybertracker Plugin">
+      </topic>
+      <topic href="html/Cybertracker.html#properties" label="Configuration Properties">
+      </topic>
+      <topic href="html/Cybertracker.html#patrol_screens" label="Patrol Screen Configuration">
+      </topic>
+      <topic href="html/Cybertracker.html#exporting" label="Exporting a Data Model to a Mobile Device">
+      </topic>
+      <topic href="html/Cybertracker.html#importing" label="Importing Data from a Mobile Device">
       </topic>
    </topic>
 </toc>
