@@ -10,9 +10,116 @@
 </head>
 
 <body>
-<h2>Cybertracker</h2>
+<h1>SMART-Cybertracker Plug-In</h1>
 
-<h4><a id="header">Header</a></h4>
+<h2><a id="header">Installing the SMART-Cybertracker Plug-in</a></h2>
 
+<p><strong>Software Requirements:</strong></p>
+
+<p>You must have the Cybertracker Desktop application installed on your
+computer for the plug-in to function correctly, Cybertracker requires at least
+version 3.319.</p>
+
+<p></p>
+
+<p>To install the SMART-Cybertracker Plug-in simply:</p>
+
+<p>1) Unzip the Cybertracker zip file after downloading it from the SMART
+website.</p>
+
+<p>2) Copy the "plugins" folder that from that zip file and paste it into your
+SMART install directory(where your smart.exe file is) so that the two "plugins"
+are merged.</p>
+
+<p>3) When you run smart the next time, you will see a "Cyber Tracker" menu to
+confirm plug-in is installed correctly.</p>
+
+<p></p>
+
+<h2>Properties</h2>
+
+<p>Selecting the "Cybertracker" -&gt; "Properties" menu option will show you a
+number of properties that can be configured to modify the behavior of the
+exported mobile application. The "Application Name" is what the application
+will be called on the mobile device and it should be noted that exporting an
+application with the same name more than once will overwrite any existing CT
+data collection applications already on the device with the same name. </p>
+
+<p>Hover your mouse over any property name or field to get a more detailed
+description of how it will affect the output application.</p>
+
+<p><img alt="Properties" src="images/Properties.png"
+style="display: block; text-align: center; margin-left: auto; margin-right: auto"
+width="525" height="571" /></p>
+
+<p></p>
+
+<h2>Patrol Screens Configuration</h2>
+
+<p>Selecting the "Cybertracker" -&gt; "Patrol Screens Configuration" menu
+option will allow you to customize the metadata collections screens that are
+shown on the mobile application at the beggining of each Patrol. The 11
+meta-data collection screens are shown at the left, select which one you would
+like to edit and find the relevant details on the right-hand side.</p>
+
+<p>Un-check "Page Visible" to disable the page from showing to the data
+collection users for any pages you wish to exclude. You can also select a value
+to set that option to for all patrols if you wish. For example on "Patrol Type"
+you can un-check "Page Visible" and then select "Ground". Once that application
+is exported, data is collected and uploaded back to the database, all the
+patrols from that device will have the patrol type set to "Ground".</p>
+
+<p><img alt="Patrol Screen Configuration"
+src="images/Patrol_metadata_screens.png"
+style="display: block; text-align: center; margin-left: auto; margin-right: auto"
+width="525" height="575" /></p>
+
+<p></p>
+
+<h2>Exporting the data Collection Model to a Mobile Device</h2>
+
+<p>To export your data collection application to a mobile device:</p>
+<ol>
+  <li>Select the "Cybertracker" -&gt; "Export ..." button. <img
+    alt="Export Options" src="images/Export_options.png"
+    style="display: block; text-align: center; margin-left: auto; margin-right: auto"
+    width="525" height="325" /></li>
+  <li>Select one of your custom configured data models or "&lt;original data
+    model&gt;" to choose which data model you wish your data collection team to
+    use for this application.</li>
+  <li>Press "Export".</li>
+  <li>If this is the first time you are exporting to a particular device you
+    may get on-screen instructions of how to confirm the application install on
+    your mobile device (Android requires this), follow these instructions then
+    return to step #1 and repeat the process.</li>
+  <li>Press "OK" on the "Export Completed Successfully" dialoge box.</li>
+  <li>Unplug your device from your computer and test that you see a new CT data
+    collection application with the "Application Name" you selected on the
+    properties page (the default name is "SMART").</li>
+</ol>
+
+<p></p>
+
+<h2>Importing Data After Data Collection is Complete</h2>
+
+<p>To import data back into your database from a mobile device, plug the device
+into your computer and then do the following:</p>
+<ol>
+  <li>Select the "Cybertracker" -&gt; "Import ..." button. <img
+    alt="Import Options" src="images/Import.png"
+    style="display: block; text-align: center; margin-left: auto; margin-right: auto"
+    width="904" height="558" /></li>
+  <li>Press the "Import From Device" button.</li>
+  <li>The system will load all patrols from the mobile device into a temporary
+    table on the screen.</li>
+  <li>Select one or more (use ctrl or shift to select multiple lines at once)
+    patrols and hit the "Add As New Patrol" button.</li>
+  <li>&lt;optional&gt;Should you wish to combine patrols with existing ones,
+    use the "Add As New Leg" button and select the patrol you wish to combine
+    them with. This is not usually necessary unless you team split into
+    multiple groups with more than a single mobile collection device.</li>
+</ol>
+
+<p></p>
 </body>
 </html>
