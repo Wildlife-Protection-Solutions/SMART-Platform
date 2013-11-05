@@ -25,6 +25,10 @@ package org.wcs.smart.splashHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -414,10 +418,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		try {
 			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
 			
-			Runnable r = new Runnable(){
-
+			Job job = new Job(Messages.InteractiveSplashHandler_Progress_LoadingCa) {
+				
 				@Override
-				public void run() {
+				protected IStatus run(IProgressMonitor monitor) {
 					DisplayAccess.accessDisplayDuringStartup();
 					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 						@Override
@@ -455,18 +459,15 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 							}
 							
 						}});
-					
-				}};
-				Thread t = new Thread(r);
-				t.setContextClassLoader(Thread.currentThread().getContextClassLoader());
-				t.start();
+					return Status.OK_STATUS;
+				}
+			};
 			
-
+			job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+			job.schedule();
+		
 		} catch (Exception ex) {
-			SmartPlugIn
-					.displayLogExit(
-							Messages.InteractiveSplashHandler_Error_Initialization,
-							ex);
+			SmartPlugIn.displayLogExit(Messages.InteractiveSplashHandler_Error_Initialization, ex);
 		}
 	}
 	
