@@ -55,14 +55,16 @@ public class PatrolImporter extends SmartImporter {
 		for (String warning : ctPatrol.getWarnings()) {
 			addWarning(warning);
 		}
+		
+		if (ctPatrol.getPatrolTransportType() == null) {
+			if(!fixTransportError(ctPatrol))
+				return null;
+		}
+		
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			session.beginTransaction();
 			Patrol patrol = buildPatrol(ctPatrol);
-			if (patrol.getFirstLeg().getType() == null) {
-				if(!fixTransportError(patrol.getFirstLeg(), ctPatrol, session))
-					return null;
-			}
 			
 			//check if duplicate of existing patrol
 			if (!checkDuplicate(ctPatrol, patrol, session)){

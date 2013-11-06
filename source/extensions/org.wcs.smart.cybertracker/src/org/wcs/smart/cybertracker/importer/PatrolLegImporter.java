@@ -62,6 +62,12 @@ public class PatrolLegImporter extends SmartImporter {
 
 	public boolean importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
 		clearWarning();
+
+		if (ctPatrol.getPatrolTransportType() == null) {
+			if(!fixTransportError(ctPatrol))
+				return false;
+		}
+		
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
@@ -93,10 +99,6 @@ public class PatrolLegImporter extends SmartImporter {
 			
 			PatrolLeg leg = patrol.addLeg();
 			initLegData(leg, ctPatrol);
-			if (leg.getType() == null) {
-				if(!fixTransportError(leg, ctPatrol, session))
-					return false;
-			}
 		
 			if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
 				if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))
