@@ -120,6 +120,8 @@
          </topic>
          <topic href="html/ComponentsOfSMART.html#validatePlan" label="Validating Plans">
          </topic>
+         <topic href="html/ComponentsOfSMART.html#printPlan" label="Printing Plans">
+         </topic>
       </topic>
       <topic href="html/ComponentsOfSMART.html#Intelligence" label="Intelligence Perspective">
          <topic href="html/ComponentsOfSMART.html#CreateIntel" label="Creating Intelligence Records">
@@ -174,6 +176,8 @@
          </topic>
          <topic href="html/SMART_TipsTricks.html#FilterSearching" label="Data Model &amp; Filter Searching">
          </topic>
+         <topic href="html/SMART_TipsTricks.html#ImportSpecies" label="Importing Species">
+         </topic>
       </topic>
       <topic href="html/SMART_TipsTricks.html#FAQ" label="FAQ">
          <topic href="html/SMART_TipsTricks.html#Q1" label="Graticule Errors">
@@ -217,6 +221,10 @@
          <topic href="html/SMART_TipsTricks.html#Q20" label="Adding Trendline to Report Chart">
          </topic>
          <topic href="html/SMART_TipsTricks.html#Q22" label="Report Date Ranges and Internationalization">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q23" label="Error Screen After Restore">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q24" label="Grid To Large Query Error">
          </topic>
       </topic>
    </topic>
