@@ -10,39 +10,38 @@
 </head>
 
 <body>
-<h1>SMART-Cybertracker Plug-In</h1>
+<h1>SMART-CyberTracker Plug-In</h1>
 
-<h4><a id="install">Installing the SMART-Cybertracker Plug-in</a></h4>
+<h4><a id="install">Installing the SMART-CyberTracker Plug-in</a></h4>
 
 <p><strong>Software Requirements:</strong></p>
 
-<p>You must have the Cybertracker Desktop application installed on your
-computer for the plug-in to function correctly, Cybertracker requires at least
-version 3.319.</p>
+<p>You must have the CyberTracker Desktop application installed on your
+computer for the plug-in to function correctly. CyberTracker version 3.319 or higher is required.</p>
 
 <p></p>
 
-<p>To install the SMART-Cybertracker Plug-in simply:</p>
+<p>To install the SMART-CyberTracker Plug-in, simply:</p>
 
-<p>1) Unzip the Cybertracker zip file after downloading it from the SMART
+<p>1) Unzip the CyberTracker zip file after downloading it from the SMART
 website.</p>
 
-<p>2) Copy the "plugins" folder that from that zip file and paste it into your
-SMART install directory(where your smart.exe file is) so that the two "plugins"
+<p>2) Copy the "plugins" folder from that zip file and paste it into your
+SMART install directory (where your smart.exe file is) so that the two "plugins"
 are merged.</p>
 
-<p>3) When you run smart the next time, you will see a "Cyber Tracker" menu to
-confirm plug-in is installed correctly.</p>
+<p>3) When you run SMART the next time, you will see a "CyberTracker" menu to
+confirm that the plug-in is installed correctly.</p>
 
 <p></p>
 
 <h4><a id="properties">Properties</a></h4>
 
-<p>Selecting the "Cybertracker" -&gt; "Properties" menu option will show you a
+<p>Selecting the "CyberTracker" -&gt; "Properties" menu option will show you a
 number of properties that can be configured to modify the behavior of the
 exported mobile application. The "Application Name" is what the application
-will be called on the mobile device and it should be noted that exporting an
-application with the same name more than once will overwrite any existing CT
+will be called on the mobile device. It should be noted that exporting an
+application with the same name more than once will overwrite any existing CyberTracker
 data collection applications already on the device with the same name. </p>
 
 <p>Hover your mouse over any property name or field to get a more detailed
@@ -56,17 +55,17 @@ width="525" height="571" /></p>
 
 <h4><a id="patrol_screens">Patrol Screens Configuration</a></h4>
 
-<p>Selecting the "Cybertracker" -&gt; "Patrol Screens Configuration" menu
-option will allow you to customize the metadata collections screens that are
+<p>Selecting the "CyberTracker" -&gt; "Patrol Screens Configuration" menu
+option will allow you to customize the meta data collections screens that are
 shown on the mobile application at the beggining of each Patrol. The 11
-meta-data collection screens are shown at the left, select which one you would
+meta-data collection screens are shown at the left of the screen; select which one you would
 like to edit and find the relevant details on the right-hand side.</p>
 
-<p>Un-check "Page Visible" to disable the page from showing to the data
-collection users for any pages you wish to exclude. You can also select a value
-to set that option to for all patrols if you wish. For example on "Patrol Type"
-you can un-check "Page Visible" and then select "Ground". Once that application
-is exported, data is collected and uploaded back to the database, all the
+<p>Uncheck "Page Visible" to disable the page from showing to the data
+collection users for any pages that you wish to exclude. You can also select a default value
+to set that option for all patrols if you wish. For example, on "Patrol Type"
+you can uncheck "Page Visible" and then select "Ground". Once that application
+is exported, and data is collected and uploaded back to the database, all the
 patrols from that device will have the patrol type set to "Ground".</p>
 
 <p><img alt="Patrol Screen Configuration"
@@ -80,7 +79,7 @@ width="525" height="575" /></p>
 
 <p>To export your data collection application to a mobile device:</p>
 <ol>
-  <li>Select the "Cybertracker" -&gt; "Export ..." button. <img
+  <li>Select the "CyberTracker" -&gt; "Export ..." menu option. <img
     alt="Export Options" src="images/Export_options.png"
     style="display: block; text-align: center; margin-left: auto; margin-right: auto"
     width="525" height="325" /></li>
@@ -90,11 +89,11 @@ width="525" height="575" /></p>
   <li>Press "Export".</li>
   <li>If this is the first time you are exporting to a particular device you
     may get on-screen instructions of how to confirm the application install on
-    your mobile device (Android requires this), follow these instructions then
+    your mobile device (Android requires this). Follow these instructions then
     return to step #1 and repeat the process.</li>
-  <li>Press "OK" on the "Export Completed Successfully" dialoge box.</li>
-  <li>Unplug your device from your computer and test that you see a new CT data
-    collection application with the "Application Name" you selected on the
+  <li>Press "OK" on the "Export Completed Successfully" message box.</li>
+  <li>Unplug your mobile device from your computer and test that you see a new CyberTracker data
+    collection application with the "Application Name" you specified on the
     properties page (the default name is "SMART").</li>
 </ol>
 
@@ -102,10 +101,10 @@ width="525" height="575" /></p>
 
 <h4><a id="importing">Importing Data from a Mobile Device</a></h4>
 
-<p>To import data back into your database from a mobile device, plug the device
-into your computer and then do the following:</p>
+<p>To import data back into your database from a mobile device run SMART, plug the mobile device
+into your computer, log into your CA and then do the following:</p>
 <ol>
-  <li>Select the "Cybertracker" -&gt; "Import ..." button. <img
+  <li>Select the "CyberTracker" -&gt; "Import ..." menu option. <img
     alt="Import Options" src="images/Import.png"
     style="display: block; text-align: center; margin-left: auto; margin-right: auto"
     width="904" height="558" /></li>
@@ -115,8 +114,8 @@ into your computer and then do the following:</p>
   <li>Select one or more (use ctrl or shift to select multiple lines at once)
     patrols and hit the "Add As New Patrol" button.</li>
   <li>&lt;optional&gt;Should you wish to combine patrols with existing ones,
-    use the "Add As New Leg" button and select the patrol you wish to combine
-    them with. This is not usually necessary unless you team split into
+    use the "Add As New Leg" button and select the patrol that you wish to combine
+    them with. This is not usually necessary unless your team split into
     multiple groups with more than a single mobile collection device.</li>
 </ol>
 
