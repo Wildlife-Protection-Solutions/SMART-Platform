@@ -279,6 +279,7 @@ public class Messages extends NLS {
 	public static String SmartImporter_PilotTitle;
 	public static String SmartImporter_SelectLeaderMessage;
 	public static String SmartImporter_SelectPilotTitle;
+	public static String SmartImporter_Transport_Load_Error;
 	public static String SmartImporter_Warn_AddToWaypointTimeframe;
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
 	public static String SmartImporter_Warn_CategoryTag0_Missing;

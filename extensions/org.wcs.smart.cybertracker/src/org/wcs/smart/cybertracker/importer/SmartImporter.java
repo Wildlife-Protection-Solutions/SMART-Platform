@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -57,6 +58,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
@@ -143,23 +145,39 @@ public class SmartImporter {
         return low-1;  // key not found
     }
 	
-	protected boolean fixTransportError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session) {
+	protected boolean fixTransportError(final CyberTrackerPatrol ctPatrol) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session, ctPatrol.getPatrolType());
-				List<ImportError> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
-				String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0).getMessage() : null;
-				TransportSelectorDialog selectorDialog = new TransportSelectorDialog(Display.getDefault().getActiveShell(), types, message);
-				if (selectorDialog.open() != IDialogConstants.OK_ID) {
-					return;
+				Session session = HibernateManager.openSession();
+				try {
+					List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session, ctPatrol.getPatrolType());
+					List<ImportError> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
+					String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0).getMessage() : null;
+					TransportSelectorDialog selectorDialog = new TransportSelectorDialog(Display.getDefault().getActiveShell(), types, message);
+					if (selectorDialog.open() != IDialogConstants.OK_ID) {
+						return;
+					}
+					ctPatrol.setPatrolTransportType(selectorDialog.getSelectedTransportType());
+				} catch (final Exception e) {
+					session.getTransaction().rollback();
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.SmartImporter_Transport_Load_Error, e);
+						}
+					});
 				}
-				leg.setType(selectorDialog.getSelectedTransportType());
+				finally {
+					if (session.getTransaction().isActive()){
+						session.getTransaction().rollback();
+					}
+					session.close();
+				}
 			}
 		});
-		return leg.getType() != null;
+		return ctPatrol.getPatrolTransportType() != null;
 	}
-	
 	
 	protected String getPatrolIdentifier(CyberTrackerPatrol ctPatrol){
 		return DateFormat.getDateTimeInstance().format(ctPatrol.getStartDate()) + "  [" + ctPatrol.getCtTransport() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
