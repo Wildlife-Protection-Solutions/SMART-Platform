@@ -64,6 +64,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.Team;
 
@@ -273,6 +274,12 @@ public class CyberTrackerImporter {
 			}
 		}
 		ctPatrol.setEndDate(SmartImporter.combine(date, time));
+		
+		//it is possible that pilot is configured as default value, but pilot doesn't make sense for ground patrols
+		if (PatrolType.Type.GROUND.equals(ctPatrol.getPatrolType())) {
+			ctPatrol.setCtPilot(null);
+			ctPatrol.setPilot(null);
+		}
 	}
 
 	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) {
