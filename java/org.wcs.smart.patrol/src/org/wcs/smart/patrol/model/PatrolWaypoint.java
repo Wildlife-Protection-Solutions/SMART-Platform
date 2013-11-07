@@ -1,0 +1,98 @@
+package org.wcs.smart.patrol.model;
+
+import java.io.Serializable;
+
+import javax.persistence.AssociationOverride;
+import javax.persistence.AssociationOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.eclipse.core.runtime.PlatformObject;
+import org.wcs.smart.observation.model.Waypoint;
+
+
+@Entity
+@Table(name="smart.patrol_waypoint")
+@AssociationOverrides({
+	@AssociationOverride(name = "id.waypoint", 
+		joinColumns = @JoinColumn(name = "wp_uuid")),
+	@AssociationOverride(name = "id.patrolLegDay", 
+		joinColumns = @JoinColumn(name = "leg_day_uuid")) })
+public class PatrolWaypoint extends PlatformObject {
+	
+	private PatrolWaypointPk id = new PatrolWaypointPk();
+
+	
+	@EmbeddedId
+	public PatrolWaypointPk getId(){
+		return this.id;
+	}
+	public void setId(PatrolWaypointPk id){
+		this.id = id;
+	}
+	
+	@Transient
+	public Waypoint getWaypoint(){
+		return this.getId().getWaypoint();
+	}
+	
+	public void setWaypoint(Waypoint wp){
+		this.getId().setWaypoint(wp);
+	}
+	
+	@Transient
+	public PatrolLegDay getPatrolLegDay(){
+		return this.getId().getPatrolLegDay();
+	}
+	public void setPatrolLegDay(PatrolLegDay pld){
+		this.getId().setPatrolLegDay(pld);
+	}
+	
+	@Override
+	@Transient
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(Waypoint.class)){
+			return getWaypoint();
+		}
+		return super.getAdapter(adapter);
+	}
+	
+	@Embeddable
+	private static class PatrolWaypointPk implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private PatrolLegDay pld;
+		private Waypoint wp;
+		
+		public PatrolWaypointPk(){
+		}
+		
+		@ManyToOne(fetch = FetchType.LAZY)
+		@JoinColumn(name="leg_day_uuid", referencedColumnName="uuid")
+		public PatrolLegDay getPatrolLegDay(){
+			return this.pld;
+		}
+		public void setPatrolLegDay(PatrolLegDay pld){
+			this.pld = pld;
+		}
+		
+		@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+		@JoinColumn(name="wp_uuid", referencedColumnName="uuid")
+		public Waypoint getWaypoint(){
+			return this.wp;
+		}
+		public void setWaypoint(Waypoint wp){
+			this.wp  = wp;
+		}
+	}
+}
