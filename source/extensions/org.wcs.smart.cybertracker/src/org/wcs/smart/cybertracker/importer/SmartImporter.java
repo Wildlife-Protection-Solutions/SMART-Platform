@@ -60,17 +60,19 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointAttachment;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -519,20 +521,21 @@ public class SmartImporter {
 
 	protected Waypoint findOrAddWaypoint(PatrolLegDay pld, S s, Map<String, E> eMap) {
 		if (pld.getWaypoints() == null)
-			pld.setWaypoints(new ArrayList<Waypoint>());
+			pld.setWaypoints(new ArrayList<PatrolWaypoint>());
 
 		boolean newWp = true;
 
+		PatrolWaypoint pwp = new PatrolWaypoint();
 		Waypoint wp = new Waypoint();
 		wp.setObservations(new ArrayList<WaypointObservation>());
-		wp.setPatrolLegDay(pld);
 		wp.setId(pld.getWaypoints().size()+1);
 		wp.setX(0);
 		wp.setY(0);
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.TIME.equals(i)) {
-				wp.setTime(Time.valueOf(a.getV()));
+				Time t = Time.valueOf(a.getV());
+				wp.setDateTime(SmartUtils.combineDateTime(pld.getDate(), t));
 			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
 				wp.setY(Double.valueOf(a.getV()));
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
@@ -543,28 +546,32 @@ public class SmartImporter {
 			}
 		}
 
+		pwp.setWaypoint(wp);
+		pwp.setPatrolLegDay(pld);
 		if (newWp) {
-			pld.getWaypoints().add(wp);
+			pld.getWaypoints().add(pwp);
 			return wp;
 		}
 		
 		//below is "Add To Last Waypoint" case
 		if (pld.getWaypoints().isEmpty()) {
 			addWarning(Messages.SmartImporter_Warn_WrongFirstWaypoint);
-			pld.getWaypoints().add(wp);
+			pld.getWaypoints().add(pwp);
 			return wp;
 		}
 		
-		Waypoint lastWp = pld.getWaypoints().get(pld.getWaypoints().size()-1);
-		if (wp.getTime() != null) {
-			if (lastWp.getTime() == null)
-				lastWp.setTime(wp.getTime());
-			long delta = Math.abs(wp.getTime().getTime() - lastWp.getTime().getTime());
+		//TODO: test these changes
+		PatrolWaypoint lastWp = pld.getWaypoints().get(pld.getWaypoints().size()-1);
+		if (wp.getDateTime() != null) {
+			if (lastWp.getWaypoint().getDateTime() == null)
+				lastWp.getWaypoint().setDateTime(wp.getDateTime());
+			
+			long delta = Math.abs(wp.getDateTime().getTime() - lastWp.getWaypoint().getDateTime().getTime());
 			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
 				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
 			}
 		}
-		return lastWp;
+		return lastWp.getWaypoint();
 	}
 	
 	protected Date toDate(String strDate) {
