@@ -37,6 +37,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
@@ -44,7 +45,6 @@ import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOp
 import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvImportEngine;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Waypoint;
 
 /**
  * Wizard for importing data from GPS Device

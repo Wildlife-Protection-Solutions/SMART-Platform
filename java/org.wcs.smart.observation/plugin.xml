@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.wcs.smart.observation.ObservationSource" name="Observation Source" schema="schema/org.wcs.smart.observation.ObservationSource.exsd"/>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.observation.internal.advisor.AttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Attribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.observation.internal.advisor.AttributeListItemDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeListItem">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.observation.internal.advisor.AttributeTreeNodeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.observation.internal.advisor.CategoryDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Category">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.observation.internal.advisor.CategoryAttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.CategoryAttribute">
+      </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.observation.ui.WaypointInfoView"
+            icon="images/icons/view16/waypoint_info.png"
+            id="org.wcs.smart.observation.waypointInfo"
+            name="Waypoint Information"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.observation.model.Waypoint">
+      </class>
+      <class
+            ca_property=".waypoint.conservationArea"
+            class="org.wcs.smart.observation.model.WaypointObservation">
+      </class>
+      <class
+            ca_property=".observation.waypoint.conservationArea"
+            class="org.wcs.smart.observation.model.WaypointObservationAttribute">
+      </class>
+      <class
+            ca_property=".observation.waypoint.conservationArea"
+            class="org.wcs.smart.observation.model.ObservationAttachment">
+      </class>
+      <class
+            ca_property=".waypoint.conservationArea"
+            class="org.wcs.smart.observation.model.WaypointAttachment">
+      </class>
+   </extension>
+
+</plugin>

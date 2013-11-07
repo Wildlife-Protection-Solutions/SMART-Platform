@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 
 /**
  * Event manager for managing patrol events.
@@ -137,15 +138,17 @@ public class PatrolEventManager {
 	 * Fires a waypoint modified event.
 	 * @param waypoint
 	 */
-	public void waypointModified(Waypoint waypoint){
+	public void waypointModified(PatrolWaypoint waypoint){
 		fireListeners(EventType.WAYPOINT_MODIFIED, WAYPOINT, waypoint);
+		WaypointEventManager.getInstance().waypointModified(waypoint.getWaypoint());
 	}
 	/**
 	 * Fires a waypoint deleted event.
 	 * @param waypoint
 	 */
-	public void waypointDeleted(Waypoint waypoint){
+	public void waypointDeleted(PatrolWaypoint waypoint){
 		fireListeners(EventType.WAYPOINT_DELETED, WAYPOINT, waypoint);
+		WaypointEventManager.getInstance().waypointDeleted(waypoint.getWaypoint());
 	}
 	
 	

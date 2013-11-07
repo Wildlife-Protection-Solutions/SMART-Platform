@@ -62,7 +62,7 @@ import org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.util.SmartUtils;
 
@@ -357,12 +357,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * 
 	 * @param waypoints
 	 */
-	public void save(Collection<Waypoint> waypoints) {
+	public void save(Collection<PatrolWaypoint> waypoints) {
 		saveWaypointJob.setWaypoints(waypoints);
 		saveWaypointJob.schedule();
 	}
 	
-	public void delete(final Collection<Waypoint> waypoints) {
+	public void delete(final Collection<PatrolWaypoint> waypoints) {
 		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -370,7 +370,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						.openSession(new WaypointAttachmentInterceptor());
 				try{
 					saveSession.beginTransaction();
-					for (Waypoint wp : waypoints) {
+					for (PatrolWaypoint wp : waypoints) {
 						saveSession.delete(wp);
 					}
 					saveSession.getTransaction().commit();
@@ -382,7 +382,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}finally{
 					saveSession.close();
 				}
-				for (Waypoint wp : waypoints){
+				for (PatrolWaypoint wp : waypoints){
 					try{
 						PatrolEventManager.getInstance().waypointDeleted(wp);
 					}catch (Exception ex){

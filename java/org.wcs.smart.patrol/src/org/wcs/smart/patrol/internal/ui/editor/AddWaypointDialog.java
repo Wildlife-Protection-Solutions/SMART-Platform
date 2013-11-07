@@ -47,7 +47,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -71,7 +72,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private int waypointId;
 	private Projection[] projections;
 	
-	private Waypoint newWaypoint;
+	private PatrolWaypoint newWaypoint;
 	
 	public AddWaypointDialog(Shell parentShell, Projection[] projections) {
 		super(parentShell);
@@ -89,22 +90,24 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		this.waypointId = waypointId;
 	}
 	
-	public Waypoint getWaypoint(){
+	public PatrolWaypoint getWaypoint(){
 		return newWaypoint;
 	}
 	
 	@Override
 	protected void okPressed() {
-		newWaypoint = new Waypoint();
-		newWaypoint.setId(Integer.parseInt(txtWaypointId.getText()));
+		newWaypoint = new PatrolWaypoint();
+		newWaypoint.getWaypoint().setId(Integer.parseInt(txtWaypointId.getText()));
+		newWaypoint.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+		newWaypoint.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 		try{
 			//reproject
 			CoordinateReferenceSystem sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
 			Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 
-			newWaypoint.setX(p.getX());
-			newWaypoint.setY(p.getY());
+			newWaypoint.getWaypoint().setX(p.getX());
+			newWaypoint.getWaypoint().setY(p.getY());
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(getShell(), Messages.AddWaypointDialog_Error_SavingWaypoint + ex.getLocalizedMessage(), ex);
 			return;

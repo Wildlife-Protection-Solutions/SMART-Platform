@@ -27,8 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -57,7 +56,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public abstract class AttachmentComposite<T extends ISmartAttachment> extends Composite {
 
 	private TableViewer tblAttachments;
-	private WritableList attachments = new WritableList();
+	private ArrayList<T> attachments = new ArrayList<T>();
 	private Button btnRemove;
 	private Button btnOpen;
 
@@ -80,7 +79,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		tblAttachments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblAttachments.getTable().getLayoutData()).heightHint = 100;
 		((GridData)tblAttachments.getTable().getLayoutData()).widthHint = 200;
-		tblAttachments.setContentProvider(new ObservableListContentProvider());
+		tblAttachments.setContentProvider(ArrayContentProvider.getInstance());
 		tblAttachments.setLabelProvider(new SmartAttachmentLabelProvider());
 		tblAttachments.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -116,7 +115,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 					ISmartAttachment wpa = createNewAttachement();
 					wpa.setCopyFromLocation(f);
 					wpa.setFilename(f.getName());
-					attachments.add(wpa);
+					attachments.add((T)wpa);
 				}
 				fireAttachmentsChangeListeners();
 				tblAttachments.refresh();
@@ -159,12 +158,15 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		tblAttachments.refresh();
 	}
 	
-	protected abstract ISmartAttachment createNewAttachement();
+	protected abstract T createNewAttachement();
 	
+	public void initAttachments(List<T> init){
+		this.attachments.addAll(init);
+		tblAttachments.refresh();
+	}
 	/**
 	 * @return all attachments selected by the user
 	 */
-	@SuppressWarnings("unchecked")
 	public List<T> getAttchments() {
 		return this.attachments;
 	}

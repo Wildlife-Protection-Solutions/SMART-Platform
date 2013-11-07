@@ -43,10 +43,10 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.patrol.model.Waypoint;
 
 
 /**
@@ -427,7 +427,7 @@ public class PatrolHibernateManager extends HibernateManager{
 					if (pl.getPatrolLegDays() != null) {
 						for (PatrolLegDay pld : pl.getPatrolLegDays()) {
 							if (pld.getWaypoints() != null) {
-								for (Waypoint wp: pld.getWaypoints()){
+								for (PatrolWaypoint wp: pld.getWaypoints()){
 									session.saveOrUpdate(wp);
 								}
 							}

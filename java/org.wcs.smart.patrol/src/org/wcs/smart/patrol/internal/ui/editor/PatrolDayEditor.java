@@ -53,7 +53,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.util.SmartUtils;
 
@@ -144,8 +144,9 @@ public class PatrolDayEditor extends EditorPart {
 					//load waypoints and attach to session; for performance reasons
 					//waypoints are not cascaded (otherwise saves are cascaded too)
 					if (day.getWaypoints() != null){
-						for (Waypoint wp : day.getWaypoints()) {
-							session.update(wp);
+						for (PatrolWaypoint wp : day.getWaypoints()) {
+							session.update(wp.getWaypoint());
+							wp.getWaypoint().getObservations().size();
 						}
 					}
 				}

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 package org.wcs.smart.query.parser.filter;
-
+        
 import org.wcs.smart.query.internal.Messages;
 
 /**

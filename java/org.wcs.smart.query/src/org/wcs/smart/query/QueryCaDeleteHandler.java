@@ -39,7 +39,7 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 	/**
 	 * To be executed before the conservation area is deleted
 	 */
-	public static final int EXECUTE_ORDER = 1;
+	public static final int EXECUTE_ORDER = 2;
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ca.ICaDeleteListener#beforeDelete(org.wcs.smart.ca.ConservationArea, org.hibernate.Session)

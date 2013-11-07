@@ -83,6 +83,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.ui.AttachmentCellEditor;
+import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -91,8 +95,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointObservation;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.util.SmartUtils;
 
@@ -215,9 +218,9 @@ public class PatrolLegDayInputComposite {
 		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
 
 		if (data.getWaypoints() == null){
-			data.setWaypoints(new ArrayList<Waypoint>());
+			data.setWaypoints(new ArrayList<PatrolWaypoint>());
 		}
-		WritableList inputList = new WritableList(data.getWaypoints(), Waypoint.class);
+		WritableList inputList = new WritableList(data.getWaypoints(), PatrolWaypoint.class);
 		observationTable.setInput(inputList);
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -525,26 +528,34 @@ public class PatrolLegDayInputComposite {
 		if (dialog.open() != Window.OK ){
 			return ;
 		}
-		ArrayList<Waypoint> deleted = new ArrayList<Waypoint>();
-		ArrayList<Waypoint> added = new ArrayList<Waypoint>();
+		ArrayList<PatrolWaypoint> deleted = new ArrayList<PatrolWaypoint>();
+		ArrayList<PatrolWaypoint> added = new ArrayList<PatrolWaypoint>();
 		
 		PatrolLegDay moveTo = dialog.getMoveToPosition();
 		Session session = HibernateManager.openSession();
 		try {
 			IStructuredSelection selection = ((IStructuredSelection) observationTable.getSelection());
 			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-				Waypoint w = (Waypoint) iterator.next();
-				Waypoint toClone = w;
-				if (toClone.getUuid() != null) {
-					toClone = (Waypoint) session.merge(toClone);
-				}
-				Waypoint cloned = toClone.clone();
+				PatrolWaypoint w = (PatrolWaypoint) iterator.next();
+				PatrolWaypoint toClone = w;
+			
+				//TODO: review if this is still necessary
+//				if (toClone.getUuid() != null) {
+//					toClone = (PatrolWaypoint) session.merge(toClone);
+//				}
+				
+				Waypoint cloned = toClone.getWaypoint().clone();
+				
 				if (patrolLegDate.getWaypoints().remove(w)) {
 					w.setPatrolLegDay(null);
-					cloned.setPatrolLegDay(moveTo);
-					moveTo.getWaypoints().add(cloned);
+					
+					PatrolWaypoint pw = new PatrolWaypoint();
+					pw.setWaypoint(cloned);
+					pw.setPatrolLegDay(moveTo);
+					moveTo.getWaypoints().add(pw);
+					
 					deleted.add(w);
-					added.add(cloned);
+					added.add(pw);
 				}
 				
 				//ensure minimum is loaded for the patrol mapping service which assumes
@@ -576,10 +587,10 @@ public class PatrolLegDayInputComposite {
 			return;
 		}
 		IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
-		ArrayList<Waypoint> deleted = new ArrayList<Waypoint>();
+		ArrayList<PatrolWaypoint> deleted = new ArrayList<PatrolWaypoint>();
 		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-			Waypoint w = (Waypoint) iterator.next();
+			PatrolWaypoint w = (PatrolWaypoint) iterator.next();
 			if (patrolLegDate.getWaypoints().remove(w)){
 				w.setPatrolLegDay(null);
 				deleted.add(w);
@@ -625,8 +636,8 @@ public class PatrolLegDayInputComposite {
 		int width = 0;
 		Point extent = gc.textExtent(column.guiName);
 		width = extent.x;
-		for (Iterator<Waypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
-			Waypoint e = iterator.next();
+		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
+			PatrolWaypoint e = iterator.next();
 			String str = getWaypointValueAsString(e, column);
 			
 			if (str != null){
@@ -917,41 +928,42 @@ public class PatrolLegDayInputComposite {
 		
 	}
 
-	private void setWaypointValue(Waypoint element, OtColumn column, Object value){
+	private void setWaypointValue(Object element, OtColumn column, Object value){		
+		Waypoint waypoint = ((PatrolWaypoint)element).getWaypoint();
 		boolean needSave = false;
 		if (column == OtColumn.ID) {
-			element.setId((Integer)value);
+			waypoint.setId((Integer)value);
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
-			element.setX((Double)value);
+			waypoint.setX((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.NORTH) {
-			element.setY((Double)value);
+			waypoint.setY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){ 
-				element.setTime(new Time( ((Date)value).getTime()) );
+				waypoint.setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(((Date)value).getTime())));
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
 			needSave = true;
 			if (value == null){
-				element.setDirection(null);
+				waypoint.setDirection(null);
 			}else{
-				element.setDirection(( (Double)value).floatValue());
+				waypoint.setDirection(( (Double)value).floatValue());
 			}
 		} else if (column == OtColumn.DISTANCE) {
 			if (value == null){
-				element.setDistance(null);
+				waypoint.setDistance(null);
 			}else{
-				element.setDistance( ( (Double)value).floatValue());
+				waypoint.setDistance( ( (Double)value).floatValue());
 			}
 			needSave = true;
 		} else if (column == OtColumn.OBSERVATION) {
 			//updated in cell editor
 			needSave = false;
 		} else if (column == OtColumn.COMMENT) {
-			element.setComment((String)value);
+			waypoint.setComment((String)value);
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
 			if (value != null){
@@ -960,15 +972,15 @@ public class PatrolLegDayInputComposite {
 			//updated in cell editor
 		}
 		if (needSave){
-			editor.getPatrolEditor().save(Collections.singleton(element));
+			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element));
 		}
-		observationTable.refresh(element);
+		observationTable.refresh();
 		
 	}
 	
-	private Object getWaypointValue(Waypoint element, OtColumn column) {
+	private Object getWaypointValue(PatrolWaypoint element, OtColumn column) {
 
-		Waypoint wp = (Waypoint) element;
+		Waypoint wp = ((PatrolWaypoint) element).getWaypoint();
 		if (column == OtColumn.ID) {
 			return wp.getId();
 		} else if (column == OtColumn.EAST) {
@@ -976,7 +988,7 @@ public class PatrolLegDayInputComposite {
 		} else if (column == OtColumn.NORTH) {
 			return wp.getY();
 		} else if (column == OtColumn.TIME) {
-			return wp.getTime();
+			return wp.getDateTime();
 		} else if (column == OtColumn.DIRECTION) {
 			return wp.getDirection();
 		} else if (column == OtColumn.DISTANCE) {
@@ -995,9 +1007,9 @@ public class PatrolLegDayInputComposite {
 		return ""; //$NON-NLS-1$
 	}
 	
-	private String getWaypointValueAsString(Waypoint element, OtColumn column) {
+	private String getWaypointValueAsString(PatrolWaypoint element, OtColumn column) {
 
-		Waypoint wp = (Waypoint) element;
+		Waypoint wp = ((PatrolWaypoint) element).getWaypoint();
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
@@ -1005,11 +1017,8 @@ public class PatrolLegDayInputComposite {
 		} else if (column == OtColumn.NORTH) {
 			return String.valueOf(wp.getY());
 		} else if (column == OtColumn.TIME) {
-			if (wp.getTime() != null) {
-				Calendar ca = Calendar.getInstance();
-				ca.setTime(wp.getTime());
-				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(
-						ca.getTime());
+			if (wp.getDateTime() != null) {
+				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
 			}
 			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.DIRECTION) {
@@ -1079,8 +1088,8 @@ public class PatrolLegDayInputComposite {
 		double y = 0, x = 0;
 		int id = -1;
 		Time last = null;
-		for (Iterator<Waypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
-			Waypoint e = (Waypoint) iterator.next();
+		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
+			PatrolWaypoint e = (PatrolWaypoint) iterator.next();
 			Time t = (Time)getWaypointValue(e, OtColumn.TIME);
 			
 			if(last == null || t.after(last) || t.equals(last)  ){
@@ -1098,15 +1107,11 @@ public class PatrolLegDayInputComposite {
 			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1, editor.getPatrolEditor().getAvailableProjections());
 		}
 		if (add.open() == Window.OK){
-			Waypoint wp = add.getWaypoint();
+			PatrolWaypoint wp = add.getWaypoint();
 			wp.setPatrolLegDay(patrolLegDate);
 			
-			Calendar cal = Calendar.getInstance();
-			cal.set(Calendar.MILLISECOND,0);
-			cal.set(Calendar.SECOND,0);
-			cal.set(Calendar.HOUR_OF_DAY,0);
-			cal.set(Calendar.MINUTE,0);
-			wp.setTime(new Time(cal.getTime().getTime()));
+			wp.getWaypoint().setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(0)));
+			
 			patrolLegDate.getWaypoints().add(wp);
 			
 			editor.getPatrolEditor().save(Collections.singleton(wp));
@@ -1123,8 +1128,8 @@ public class PatrolLegDayInputComposite {
 		}
 
 		public String getText(Object element) {
-			if (element instanceof Waypoint) {
-				Waypoint wp = (Waypoint) element;
+			if (element instanceof PatrolWaypoint) {
+				PatrolWaypoint wp = (PatrolWaypoint) element;
 				return getWaypointValueAsString(wp, column);
 			}
 			return super.getText(element);
@@ -1183,7 +1188,7 @@ public class PatrolLegDayInputComposite {
 		 */
 		@Override
 		protected Object getValue(Object element) {
-			return getWaypointValue((Waypoint)element, column);
+			return getWaypointValue((PatrolWaypoint)element, column);
 		}
 
 		/* (non-Javadoc)
@@ -1191,7 +1196,7 @@ public class PatrolLegDayInputComposite {
 		 */
 		@Override
 		protected void setValue(Object element, Object value) {
-			setWaypointValue((Waypoint)element, column, value);
+			setWaypointValue((PatrolWaypoint)element, column, value);
 		}
 	}
 }

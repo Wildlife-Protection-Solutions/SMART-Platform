@@ -39,7 +39,7 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 	/**
 	 * To be executed before the conservation area and patrol is deleted
 	 */
-	public static final int EXECUTE_ORDER = 2;
+	public static final int EXECUTE_ORDER = 32;
 	
 	public CaDeleteHandler() {}
 

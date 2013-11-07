@@ -31,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.common.attachment.AttachmentComposite;
 import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceAttachment;
@@ -61,7 +60,7 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite impl
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         attachmentComposite = new AttachmentComposite<IntelligenceAttachment>(this, SWT.NONE) {
 			@Override
-			protected ISmartAttachment createNewAttachement() {
+			protected IntelligenceAttachment createNewAttachement() {
 				return new IntelligenceAttachment();
 			}
 		};

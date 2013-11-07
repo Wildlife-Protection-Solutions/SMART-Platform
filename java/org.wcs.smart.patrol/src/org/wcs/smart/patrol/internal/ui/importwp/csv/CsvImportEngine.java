@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
@@ -37,7 +38,7 @@ import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOp
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 /**
  * Import engine for importing waypoints from a CSV File.
  * 
@@ -101,15 +102,16 @@ public class CsvImportEngine implements IImportEngine {
 
 		if(type == ImportType.WAYPOINT){
 
-			//if no ID was given, get the largest ID from the patrol so far and reset the id's of the points about to be saved. 
+			//if no ID was given, get the largest ID from the patrol 
+			//so far and reset the id's of the points about to be saved. 
 			if (configuration.getIdColumn() == -1){
 				int max = 0;
 				Patrol p = currentLeg.getPatrolLeg().getPatrol();
 				for( PatrolLeg pl : p.getLegs() ){
 					for(PatrolLegDay pld : pl.getPatrolLegDays()){
-						for(Waypoint wp : pld.getWaypoints()){
-							if (wp.getId() > max){
-								max = wp.getId();
+						for(PatrolWaypoint wp : pld.getWaypoints()){
+							if (wp.getWaypoint().getId() > max){
+								max = wp.getWaypoint().getId();
 							}
 						}
 					}

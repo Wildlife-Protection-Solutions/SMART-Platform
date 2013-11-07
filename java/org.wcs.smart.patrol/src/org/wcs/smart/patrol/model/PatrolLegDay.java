@@ -61,7 +61,7 @@ public class PatrolLegDay {
 	private byte[] uuid;
 	private Date date;
 
-	private List<Waypoint> waypoints;
+	private List<PatrolWaypoint> waypoints;
 	private PatrolLeg patrolLeg;
 	
 	private Time startTime;
@@ -104,12 +104,12 @@ public class PatrolLegDay {
 	
 	
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay", orphanRemoval = true, cascade={CascadeType.ALL})
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrolLegDay")
 	@BatchSize(size=200)
-	public List<Waypoint> getWaypoints(){
+	public List<PatrolWaypoint> getWaypoints(){
 		return this.waypoints;
 	}
-	public void setWaypoints(List<Waypoint> waypoints){
+	public void setWaypoints(List<PatrolWaypoint> waypoints){
 		this.waypoints = waypoints;
 	}
 

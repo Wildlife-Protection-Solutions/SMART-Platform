@@ -45,9 +45,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Waypoint;
 
 /**
  * Wizard page to select the waypoints or track points to import.
@@ -93,13 +93,9 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 						value.append (" (" + wp.getComment() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					value.append(" ["); //$NON-NLS-1$
-					if(wp.getImportedDate() != null){
-						String dateFormatted = DateFormat.getDateInstance().format(wp.getImportedDate());
-						value.append(dateFormatted); 
-					}
-					if (wp.getTime() != null){
+					if (wp.getDateTime() != null){
 						value.append(" "); //$NON-NLS-1$
-						String dateFormatted = DateFormat.getTimeInstance().format(wp.getTime());
+						String dateFormatted = DateFormat.getDateTimeInstance().format(wp.getDateTime());
 						value.append(dateFormatted); 
 					}
 					value.append("]"); //$NON-NLS-1$

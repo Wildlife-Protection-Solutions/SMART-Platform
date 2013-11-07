@@ -26,6 +26,8 @@ import java.io.Serializable;
 import org.hibernate.type.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
  * An extension of the default attachment interceptor
@@ -61,10 +63,19 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 		 */
 		if (entity instanceof PatrolLegDay){
 			if (((PatrolLegDay) entity).getWaypoints() != null){
-				for (Waypoint wp : ((PatrolLegDay) entity).getWaypoints()){
-					if (wp.getAttachments() != null){
-						for (ISmartAttachment att : wp.getAttachments()){
+				for (PatrolWaypoint wp : ((PatrolLegDay) entity).getWaypoints()){
+					if (wp.getWaypoint().getAttachments() != null){
+						for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
 							att.getFullFile().delete();
+						}
+					}
+					if (wp.getWaypoint().getObservations() != null){
+						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+							if (wo.getAttachments()!= null){
+								for (ObservationAttachment att : wo.getAttachments()){
+									att.getFullFile().delete();
+								}
+							}
 						}
 					}
 				}

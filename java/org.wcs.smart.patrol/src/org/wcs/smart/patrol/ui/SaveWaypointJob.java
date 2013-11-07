@@ -31,13 +31,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
  * Job fo saving a set of waypoints to the database.
@@ -46,13 +46,13 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  *
  */
 public class SaveWaypointJob extends Job {
-	private Collection<Waypoint> waypoints;
+	private Collection<PatrolWaypoint> waypoints;
 
 	public SaveWaypointJob() {
 		super(Messages.PatrolEditor_SaveWaypoints_JobName);
 	}
 
-	public void setWaypoints(Collection<Waypoint> points) {
+	public void setWaypoints(Collection<PatrolWaypoint> points) {
 		synchronized (this) {
 			this.waypoints = points;
 		}
@@ -61,7 +61,7 @@ public class SaveWaypointJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		ArrayList<Waypoint> pnts = new ArrayList<Waypoint>();
+		ArrayList<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
 		synchronized (this) {
 			pnts.addAll(waypoints);
 		}
@@ -69,12 +69,13 @@ public class SaveWaypointJob extends Job {
 				.openSession(new WaypointAttachmentInterceptor());
 		try {
 			saveSession.beginTransaction();
-			for (Waypoint wp : pnts) {
+			for (PatrolWaypoint wp : pnts) {
 				saveSession.saveOrUpdate(wp);
+				saveSession.saveOrUpdate(wp.getWaypoint());
 				saveSession.flush();
 				// remove observations with no data
-				if (wp.getObservations() != null) {
-					for (WaypointObservation wo : wp.getObservations()) {
+				if (wp.getWaypoint().getObservations() != null) {
+					for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
 						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
 						for (WaypointObservationAttribute att : wo
 								.getAttributes()) {
@@ -98,7 +99,7 @@ public class SaveWaypointJob extends Job {
 		} finally {
 			saveSession.close();
 		}
-		for (Waypoint wp : waypoints){
+		for (PatrolWaypoint wp : waypoints){
 			try{
 				PatrolEventManager.getInstance().waypointModified(wp);
 			}catch (Exception ex){

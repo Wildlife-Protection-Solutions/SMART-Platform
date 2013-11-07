@@ -632,22 +632,6 @@
       </class>
       <class
             ca_property=".patrolLegDay.patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.Waypoint">
-      </class>
-      <class
-            ca_property=".waypoint.patrolLegDay.patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.WaypointAttachment">
-      </class>
-      <class
-            ca_property=".waypoint.patrolLegDay.patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.WaypointObservation">
-      </class>
-      <class
-            ca_property=".id.observation.waypoint.patrolLegDay.patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.WaypointObservationAttribute">
-      </class>
-      <class
-            ca_property=".patrolLegDay.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.Track">
       </class>
       <class
@@ -656,6 +640,10 @@
       <class
             ca_property=".screenOption.conservationArea"
             class="org.wcs.smart.patrol.model.ScreenOptionUuid">
+      </class>
+      <class
+            ca_property=".id.waypoint.conservationArea"
+            class="org.wcs.smart.patrol.model.PatrolWaypoint">
       </class>
    </extension>
    <extension
@@ -667,14 +655,6 @@
             id="org.wcs.smart.patrol.ui.PatrolListView"
             name="%patrollist.view.name"
             restorable="false">
-      </view>
-      <view
-            allowMultiple="false"
-            class="org.wcs.smart.patrol.ui.views.WaypointInfoView"
-            icon="images/icons/view16/waypoint_info.png"
-            id="org.wcs.smart.patrol.waypointInfo"
-            name="%waypointinfo.view.name"
-            restorable="true">
       </view>
    </extension>
    <extension
@@ -730,26 +710,6 @@
             class="org.wcs.smart.patrol.model.PatrolTransportType">
       </DeleteAdvisor>
       <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.internal.advisors.CategoryDMAdvisor"
-            class="org.wcs.smart.ca.datamodel.Category">
-      </DeleteAdvisor>
-      <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.internal.advisors.AttributeDMAdvisor"
-            class="org.wcs.smart.ca.datamodel.Attribute">
-      </DeleteAdvisor>
-      <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.internal.advisors.CategoryAttributeDMAdvisor"
-            class="org.wcs.smart.ca.datamodel.CategoryAttribute">
-      </DeleteAdvisor>
-      <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.internal.advisors.AttributeTreeNodeDMAdvisor"
-            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
-      </DeleteAdvisor>
-      <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.internal.advisors.AttributeListItemDMAdvisor"
-            class="org.wcs.smart.ca.datamodel.AttributeListItem">
-      </DeleteAdvisor>
-      <DeleteAdvisor
             advisor="org.wcs.smart.patrol.internal.advisors.EmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
@@ -760,7 +720,7 @@
             adaptableType="net.refractions.udig.project.AdaptableFeature"
             class="org.wcs.smart.patrol.geotools.WaypointFeatureAdapterFactory">
          <adapter
-               type="org.wcs.smart.patrol.model.Waypoint">
+               type="org.wcs.smart.observation.model.Waypoint">
          </adapter>
       </factory>
    </extension>
@@ -828,6 +788,12 @@
                id="org.wcs.smart.conservationAreaCloner">
          </require>
       </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.observation.ObservationSource">
+      <ObservationSource
+            class="org.wcs.smart.patrol.model.PatrolWaypointSource">
+      </ObservationSource>
    </extension>
 
 </plugin>

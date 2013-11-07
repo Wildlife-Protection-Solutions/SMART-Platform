@@ -31,7 +31,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
