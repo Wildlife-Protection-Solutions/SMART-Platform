@@ -270,7 +270,7 @@ public class SmartImporter {
 	}
 	
 	protected void addObservations(PatrolLeg leg, S s, Map<String, E> eMap, Session session) {
-		PatrolLegDay legDay = findOrAddLegDay(leg, s);
+		PatrolLegDay legDay = findLegDay(leg, s);
 		if (legDay == null)
 			return;
 		
@@ -492,42 +492,29 @@ public class SmartImporter {
 		return category;
 	}
 
-	private PatrolLegDay findOrAddLegDay(PatrolLeg leg, S s) {
+	/**
+	 * All leg days must create at this point.
+	 * They must be created as part of initLegData(...) logic
+	 */
+	private PatrolLegDay findLegDay(PatrolLeg leg, S s) {
 		Date date = null;
-		Time time = null;
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				date = toDate(a.getV());
-			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				time = Time.valueOf(a.getV());
+				break;
 			}
 		}
 		
-		if (date == null || time == null)
+		if (date == null)
 			return null;
 		
 		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
 			if (pld.getDate().equals(date)) {
-				applyPatrolLegDayTime(pld, time);
 				return pld;
 			}
 		}
-
-		PatrolLegDay pld = new PatrolLegDay();
-		pld.setPatrolLeg(leg);
-		pld.setDate(date);
-		applyPatrolLegDayTime(pld, time);
-		
-		leg.getPatrolLegDays().add(pld);
-		return pld;
-	}
-
-	private void applyPatrolLegDayTime(PatrolLegDay pld, Time time) {
-		if (pld.getStartTime() == null || pld.getStartTime().getTime() > time.getTime())
-			pld.setStartTime(time);
-		if (pld.getEndTime() == null || pld.getEndTime().getTime() < time.getTime())
-			pld.setEndTime(time);
+		return null;
 	}
 
 	protected Waypoint findOrAddWaypoint(PatrolLegDay pld, S s, Map<String, E> eMap) {
