@@ -1,17 +1,23 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 public class DataModelMatcher {
 
 	  public static void main(String[] args) {
-	        //Schedule a job for the event-dispatching thread:
-	        //creating and showing this application's GUI.
-	        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-	            public void run() {
-	            	
-	            	DataModelMatcherDialog dialog = new DataModelMatcherDialog();
-	            	dialog.pack();
-	            	dialog.setVisible(true);
-	            }
-	        });
+			Display display = new Display();
+			Shell shell = new Shell(display);
+			
+			shell.setText("Data Model Matcher");
+			
+			DataModelMatcherDialog main = new DataModelMatcherDialog(shell);
+
+			shell.pack();
+			shell.open();
+			while (!shell.isDisposed ()) {
+				if (!display.readAndDispatch ()) display.sleep ();
+			}
+			display.dispose ();
 	    }
 }
