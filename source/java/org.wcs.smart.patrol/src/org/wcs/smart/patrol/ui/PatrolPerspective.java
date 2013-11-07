@@ -24,8 +24,8 @@ package org.wcs.smart.patrol.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.wcs.smart.observation.ui.WaypointInfoView;
 import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
-import org.wcs.smart.patrol.ui.views.WaypointInfoView;
 /**
  * The parol perspective.
  * 

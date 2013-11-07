@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.observation;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.observation.model.IWaypointSource;
+/**
+ * Manager for dealing with waypoint
+ * sources.
+ * 
+ * @author Emily
+ *
+ */
+public class WaypointSourceEngine {
+
+	private static String SOURCE_EXTENSION_ID = "org.wcs.smart.observation.ObservationSource";
+	
+	private static WaypointSourceEngine instance;
+	
+	/**
+	 * 
+	 * @return the static engine
+	 */
+	public synchronized static WaypointSourceEngine getInstance(){
+		if (instance == null){
+			instance = new WaypointSourceEngine();
+		}
+		return instance;
+	}
+	
+	/**
+	 * Cached sources
+	 */
+	private Map<String,IWaypointSource> supportedSources = null;
+	
+	private WaypointSourceEngine(){
+		
+	}
+	
+	/**
+	 * Get the waypoint source for the given key
+	 * @param sourceKey
+	 * @return
+	 */
+	public IWaypointSource getSource(String sourceKey){
+		if (supportedSources == null){
+			loadWaypointSources();
+		}
+		return supportedSources.get(sourceKey);
+	}
+	
+	/*
+	 * Load source extension points
+	 */
+	private void loadWaypointSources() {
+		supportedSources = new HashMap<String, IWaypointSource>();
+		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(SOURCE_EXTENSION_ID);
+		for (IConfigurationElement element : elements){
+			try{
+				IWaypointSource source = (IWaypointSource) element.createExecutableExtension("class");
+				supportedSources.put(source.getKey(), source);
+			}catch (Exception ex){
+				ObservationPlugIn.log("Error loading all waypoint sources", ex);
+			}
+		}
+	}
+	
+	
+}

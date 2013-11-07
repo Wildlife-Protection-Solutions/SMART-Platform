@@ -10,14 +10,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointAttachment;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.xml.model.LabelType;
 import org.wcs.smart.patrol.xml.model.ObjectiveType;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
@@ -146,27 +146,27 @@ public class PatrolToXmlConverter {
 			xml.setTrack(track);
 		}
 		
-		for (Waypoint wp  : legDay.getWaypoints()){
+		for (PatrolWaypoint wp  : legDay.getWaypoints()){
 			xml.getWaypoints().add(convertWaypoint(wp));
 		}
 		return xml;
 	}
 	
-	private static WaypointType convertWaypoint(Waypoint wp) throws DatatypeConfigurationException{
+	private static WaypointType convertWaypoint(PatrolWaypoint wp) throws DatatypeConfigurationException{
 		WaypointType xml = new WaypointType();
-		xml.setComment(wp.getComment());
-		xml.setDirection(wp.getDirection());
-		xml.setDistance(wp.getDistance());
-		xml.setId(wp.getId());
-		xml.setTime( toXmlTime(wp.getTime()));
-		xml.setX(wp.getX());
-		xml.setY(wp.getY());
+		xml.setComment(wp.getWaypoint().getComment());
+		xml.setDirection(wp.getWaypoint().getDirection());
+		xml.setDistance(wp.getWaypoint().getDistance());
+		xml.setId(wp.getWaypoint().getId());
+		xml.setTime( toXmlTime(wp.getWaypoint().getDateTime()));
+		xml.setX(wp.getWaypoint().getX());
+		xml.setY(wp.getWaypoint().getY());
 		
-		for (WaypointAttachment attach : wp.getAttachments()){
+		for (WaypointAttachment attach : wp.getWaypoint().getAttachments()){
 			xml.getAttachments().add(attach.getFilename());
 		}
 		
-		for (WaypointObservation ob : wp.getObservations()){
+		for (WaypointObservation ob : wp.getWaypoint().getObservations()){
 			xml.getObservations().add(convertObservation(ob));
 		}
 		return xml;

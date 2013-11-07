@@ -71,6 +71,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	
 	private Job addLayerJob = new Job(Messages.PatrolMapPageEditor_AddLayersJobName) {
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			patrolService = new PatrolService(parentEditor.getPatrol());

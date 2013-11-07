@@ -37,9 +37,9 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -146,7 +146,6 @@ public class CSVImportConfiguration {
 					}
 				 	curWP.setX(p.getX());
 				 	curWP.setY(p.getY());
-				 	curWP.setImportedDate(ptDate);
 
 				 	try {
 				 		String strTime = row[timeColumn].replaceAll("\\s+",""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -173,7 +172,7 @@ public class CSVImportConfiguration {
 					 	dateTime.setTime(ptDate.getTime());
 					 	dateTime = format.parse( row[dateColumn].replaceAll("\\s+","") + " " + strTime ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					 	Time time = new Time(dateTime.getTime());
-					 	curWP.setTime( time);
+					 	curWP.setDateTime(SmartUtils.combineDateTime(ptDate, time));
 				 	} catch (ParseException e) {
 				 		throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_9, new Object[]{counter, row[timeColumn]}), e);
 				 	}

@@ -26,8 +26,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolLegDayInputComposite.OtColumn;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 
 /**
  * Comparator for waypoint table that sorts waypoints
@@ -80,9 +81,9 @@ public class WaypointSorter extends ViewerComparator{
 			return 0;
 		}
 		if (direction == SWT.UP){
-			return -compareValue((Waypoint)object1, (Waypoint)object2);
+			return -compareValue(((PatrolWaypoint)object1).getWaypoint(), ((PatrolWaypoint)object2).getWaypoint());
 		}else{
-			return compareValue((Waypoint)object1, (Waypoint)object2);
+			return compareValue(((PatrolWaypoint)object1).getWaypoint(), ((PatrolWaypoint)object2).getWaypoint());
 		}
 
 	}
@@ -91,7 +92,7 @@ public class WaypointSorter extends ViewerComparator{
 		if (sortColumn == OtColumn.ID){
 			return ((Integer)wp1.getId()).compareTo(((Integer)wp2.getId()));
 		}else if (sortColumn == OtColumn.TIME){
-			return wp1.getTime().compareTo(wp2.getTime());
+			return wp1.getDateTime().compareTo(wp2.getDateTime());
 			//return ((Integer)wp1.getTime()).compareTo(((Integer)wp2.getTime()));
 		}else{
 			//we don't support sorting on other columns at the moment

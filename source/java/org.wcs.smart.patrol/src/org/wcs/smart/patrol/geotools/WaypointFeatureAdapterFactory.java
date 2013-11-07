@@ -25,8 +25,9 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -41,7 +42,6 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == Waypoint.class) {
-			
 			if (adaptableObject instanceof SimpleFeature){
 				SimpleFeature sf = (SimpleFeature)adaptableObject;
 				if (sf.getFeatureType().getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)){

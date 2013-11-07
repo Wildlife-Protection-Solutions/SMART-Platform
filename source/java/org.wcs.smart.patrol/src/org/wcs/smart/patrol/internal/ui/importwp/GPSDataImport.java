@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
-import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -47,6 +46,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.GpxType;
@@ -59,8 +59,8 @@ import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.ui.SavePatrolPartJob;
 import org.wcs.smart.patrol.ui.SaveWaypointJob;
 import org.wcs.smart.util.SmartUtils;
@@ -157,36 +157,42 @@ public class GPSDataImport {
 	public static String saveWaypoints(ImportOption op, Patrol patrol, final PatrolLegDay currentLeg, List<Waypoint> waypoints) throws InterruptedException{
 		String message = null;
 		final Set<PatrolLegDay> modified = new HashSet<PatrolLegDay>();
-		
+		final List<PatrolWaypoint> addedWaypoints = new ArrayList<PatrolWaypoint>();
 		if (op == ImportOption.ALL){
 			//assign waypoints to days
 			modified.addAll(GPSDataImport.assignWaypoints(waypoints, patrol.getLegs()));
 
-			//remove unassigned waypoints
-			for (Iterator<Waypoint> iterator = waypoints.iterator(); iterator.hasNext();) {
-				Waypoint wpnt = (Waypoint) iterator.next();
-				if (wpnt.getPatrolLegDay() == null){
-					iterator.remove();
-				}
+			for(PatrolLegDay pld : modified){
+				addedWaypoints.addAll(pld.getWaypoints());
 			}
+			//TODO: ensure this is tested
+//			//remove unassigned waypoints
+//			for (Iterator<Waypoint> iterator = waypoints.iterator(); iterator.hasNext();) {
+//				Waypoint wpnt = (Waypoint) iterator.next();
+//				if (wpnt.getPatrolLegDay() == null){
+//					iterator.remove();
+//				}
+//			}
 			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{waypoints.size(), modified.size()});
 	
 		}else{
 			modified.add(currentLeg);
 			
 			for (Waypoint w : waypoints){
-				w.setPatrolLegDay(currentLeg);
-				if (w.getTime() == null){
-					w.setTime(new Time(SmartUtils.getMidnight().getTime()));
-				}
+				
+				PatrolWaypoint pwp = new PatrolWaypoint();
+				pwp.setPatrolLegDay(currentLeg);
+				pwp.setWaypoint(w);				
+				
+				currentLeg.getWaypoints().add(pwp);
+				addedWaypoints.add(pwp);
 			}
-			currentLeg.getWaypoints().addAll(waypoints);
 			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImportedCurrentDay, new Object[]{waypoints.size()});
 		}
 		
 		//start up a save job
 		SaveWaypointJob saveJob = new SaveWaypointJob();
-		saveJob.setWaypoints(waypoints);
+		saveJob.setWaypoints(addedWaypoints);
 		saveJob.schedule();
 		saveJob.join();
 		
@@ -302,16 +308,16 @@ public class GPSDataImport {
 			return null;
 		}
 		List<Waypoint> coords = new ArrayList<Waypoint>();
-		for (Waypoint wp : day.getWaypoints()){
-			Date d = SmartUtils.combineDateTime(wp.getPatrolLegDay().getDate(), wp.getTime());
+		for (PatrolWaypoint wp : day.getWaypoints()){
+			Date d = wp.getWaypoint().getDateTime();
 			
 			Waypoint tmp = new Waypoint();
-			tmp.setX(wp.getX());
-			tmp.setY(wp.getY());
-			tmp.setTime(new Time(d.getTime()));
+			tmp.setX(wp.getWaypoint().getX());
+			tmp.setY(wp.getWaypoint().getY());
+			tmp.setDateTime(d);
 			coords.add(tmp);
 		}
-		Track newTrack = convertToTrack(coords, day.getDate());
+		Track newTrack = convertToTrack(coords);
 		return newTrack;
 	}
 	
@@ -329,12 +335,12 @@ public class GPSDataImport {
 		HashMap<PatrolLegDay, List<Waypoint>> tracks = new HashMap<PatrolLegDay, List<Waypoint>>();
 		
 		for (Waypoint point : trackpoints){
-			if (point.getTime() == null){
+			if (point.getDateTime() == null){
 				continue;
 			}
 			
 			boolean found = false;
-			Date wpdt = SmartUtils.combineDateTime(point.getImportedDate(), point.getTime());
+			Date wpdt = point.getDateTime();
 			for(PatrolLeg leg : patrolLegs){
 				if (betweenDates(SmartUtils.getDatePart(wpdt, false), 
 						SmartUtils.getDatePart(leg.getStartDate(), false),
@@ -390,7 +396,7 @@ public class GPSDataImport {
 		//convert to tracks
 		for (Iterator<Entry<PatrolLegDay, List<Waypoint>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
 			Entry<PatrolLegDay, List<Waypoint>> value = (Entry<PatrolLegDay, List<Waypoint>>) iterator.next();
-			Track newTrack = convertToTrack(value.getValue(), value.getKey().getDate());
+			Track newTrack = convertToTrack(value.getValue());
 			if (newTrack != null){
 				output.put(value.getKey(), newTrack);
 			}
@@ -414,7 +420,7 @@ public class GPSDataImport {
 		for (Waypoint point : waypoints){
 			
 			boolean found = false;
-			Date wpdt = point.getImportedDate();
+			Date wpdt = point.getDateTime();
 			if (wpdt == null){
 				continue;
 			}
@@ -428,11 +434,13 @@ public class GPSDataImport {
 						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
 						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
-							legday.getWaypoints().add(point);
-							point.setPatrolLegDay(legday);
-							if (point.getTime() == null){
-								point.setTime(new Time(SmartUtils.getMidnight().getTime()));
-							}
+							
+							PatrolWaypoint pwp = new PatrolWaypoint();
+							pwp.setPatrolLegDay(legday);
+							pwp.setWaypoint(point);
+							
+							legday.getWaypoints().add(pwp);
+							
 							modified.add(legday);
 							found = true;
 							break;
@@ -451,12 +459,13 @@ public class GPSDataImport {
 					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
 						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
 						if (SmartUtils.getDatePart(wpdt, false).equals(SmartUtils.getDatePart(legday.getDate(),false))) {
-							legday.getWaypoints().add(point);
+							
+							PatrolWaypoint pwp = new PatrolWaypoint();
+							pwp.setPatrolLegDay(legday);
+							pwp.setWaypoint(point);
+							
+							legday.getWaypoints().add(pwp);
 							modified.add(legday);
-							point.setPatrolLegDay(legday);
-							if (point.getTime() == null) {
-								point.setTime(new Time(SmartUtils.getMidnight().getTime()));
-							}
 							found = true;
 							break;
 						}
@@ -655,8 +664,7 @@ public class GPSDataImport {
 
 		Waypoint waypoint = new Waypoint();
 		if (wpdt != null){
-			waypoint.setTime( new Time(wpdt.getTime()) );
-			waypoint.setImportedDate(wpdt);
+			waypoint.setDateTime(wpdt);
 		}
 		waypoint.setX(wptType.getLon().doubleValue());
 		waypoint.setY(wptType.getLat().doubleValue());
@@ -708,11 +716,10 @@ public class GPSDataImport {
 					if (plddt == null) {
 						// import all waypoints regardless of date
 						newwaypoints.add(newwp);
-					} else if (newwp.getImportedDate() != null) {
+					} else  {
 						// only import waypoints whose imported date match the
 						// given date
-						if (SmartUtils.getDatePart(newwp.getImportedDate(),
-								false).equals(plddt)) {
+						if (SmartUtils.getDatePart(newwp.getDateTime(), false).equals(plddt)) {
 							newwaypoints.add(newwp);
 						}
 					}
@@ -744,12 +751,8 @@ public class GPSDataImport {
 							}catch (Exception ex){}
 							c.setX(x);
 							c.setY(y);
-							c.setImportedDate(datetime);
-							if (datetime != null){
-								c.setTime(new Time(datetime.getTime()));
-							}
+							c.setDateTime(datetime);
 							c.setComment((trk.getName() == null ? "" : trk.getName()) + (pnt.getName() == null ? "" :  " - " + pnt.getName())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							
 							if (plddt == null) {
 								// include all
 								trackCoords.add(c);
@@ -784,7 +787,7 @@ public class GPSDataImport {
 	 * @param coordinates set of coordinates
 	 * @return track
 	 */
-	public static Track convertToTrack(List<Waypoint> coordinates, Date date){
+	public static Track convertToTrack(List<Waypoint> coordinates){
 		if (coordinates.size() < 2) {
 			return null;
 		}
@@ -792,15 +795,14 @@ public class GPSDataImport {
 		Collections.sort(coordinates, new Comparator<Waypoint>() {
 			@Override
 			public int compare(Waypoint o1, Waypoint o2) {
-				return o1.getTime().compareTo(o2.getTime());
+				return o1.getDateTime().compareTo(o2.getDateTime());
 			}
 		});
 
 		List<Coordinate> cs = new ArrayList<Coordinate>();
 		for (Waypoint w : coordinates) {
 			Calendar c1 = Calendar.getInstance();
-			c1.setTimeInMillis(SmartUtils.combineDateTime(date, w.getTime())
-					.getTime());
+			c1.setTimeInMillis(w.getDateTime().getTime());
 			Calendar c2 = Calendar.getInstance();
 			c2.setTimeZone(Track.ZTIMEZONE);
 			c2.setTimeInMillis(0);

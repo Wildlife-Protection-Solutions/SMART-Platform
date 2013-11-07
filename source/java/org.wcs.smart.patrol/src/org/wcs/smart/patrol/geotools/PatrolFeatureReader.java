@@ -32,11 +32,12 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -62,7 +63,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 		this.thisType = type;
 	
 		if (type.equals(PatrolDataSource.WAYPOINT_TYPE)){
-			List<Waypoint> pnts = new ArrayList<Waypoint>();
+			List<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
 			for (PatrolLeg l : patrol.getLegs()){
 				for (PatrolLegDay d : l.getPatrolLegDays()){
 					if (d.getWaypoints() != null){
@@ -120,7 +121,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
 		if (thisType.equals(PatrolDataSource.WAYPOINT_TYPE)){
-			return getWaypointAsFeature((Waypoint)this.fIterator.next());
+			return getWaypointAsFeature((PatrolWaypoint)this.fIterator.next());
 		}else if (thisType.equals(PatrolDataSource.TRACK_TYPE)){
 			return getTrackAsFeature((Track)this.fIterator.next());
 		}
@@ -128,20 +129,20 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	}
 	
 	
-	private SimpleFeature getWaypointAsFeature(Waypoint waypoint){
+	private SimpleFeature getWaypointAsFeature(PatrolWaypoint waypoint){
 		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
 		Object data[] = new Object[7];
-		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
-		data[1] = waypoint.getId();
+		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[1] = waypoint.getWaypoint().getId();
 		data[2] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
-		data[3] = waypoint.getTime();
-		if (waypoint.getObservations() == null || waypoint.getObservations().size() == 0){
+		data[3] = waypoint.getWaypoint().getDateTime();
+		if (waypoint.getWaypoint().getObservations() == null || waypoint.getWaypoint().getObservations().size() == 0){
 			data[4] = ""; //$NON-NLS-1$
 		}else{ 
-			data[4] = waypoint.getObservationsAsString();
+			data[4] = waypoint.getWaypoint().getObservationsAsString();
 		}
-		data[5] = waypoint.getComment();
-		data[6] = gf.createPoint(new Coordinate(waypoint.getX(), waypoint.getY()));
+		data[5] = waypoint.getWaypoint().getComment();
+		data[6] = gf.createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
 	}
 	

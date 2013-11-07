@@ -44,6 +44,10 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -52,12 +56,10 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointAttachment;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
 import org.wcs.smart.patrol.xml.model.PatrolLegType;
 import org.wcs.smart.patrol.xml.model.PatrolMemberType;
@@ -306,10 +308,12 @@ public class XmlToPatrolConverter {
 			track.setPatrolLegDay(legday);
 			legday.setTrack(track);
 		}
-		legday.setWaypoints(new ArrayList<Waypoint>());
+		legday.setWaypoints(new ArrayList<PatrolWaypoint>());
 		for(WaypointType wtype : xml.getWaypoints()){
-			Waypoint wp = convertWaypoint(wtype, legday);
-			legday.getWaypoints().add(wp);
+			PatrolWaypoint pwp = new PatrolWaypoint();
+			pwp.setPatrolLegDay(legday);
+			pwp.setWaypoint(convertWaypoint(wtype, legday));
+			legday.getWaypoints().add(pwp);
 		}
 		
 		return legday;
@@ -321,8 +325,9 @@ public class XmlToPatrolConverter {
 		wp.setDirection(xml.getDirection());
 		wp.setDistance(xml.getDistance());
 		wp.setId(xml.getId());
-		wp.setPatrolLegDay(parent);
-		wp.setTime(new Time(xml.getTime().toGregorianCalendar().getTime().getTime()));
+		wp.setConservationArea(parent.getPatrolLeg().getPatrol().getConservationArea());
+		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+		wp.setDateTime(xml.getTime().toGregorianCalendar().getTime());
 		wp.setX(xml.getX());
 		wp.setY(xml.getY());
 		if (attachmentLocation != null){
@@ -364,7 +369,7 @@ public class XmlToPatrolConverter {
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_CategoryNotFound,
-					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()) }) //$NON-NLS-1$
+					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateTimeInstance().format(parent.getDateTime())  }) //$NON-NLS-1$
 					);
 			return null;
 		}else{
@@ -386,13 +391,13 @@ public class XmlToPatrolConverter {
 					}else{
 						warnings.add(
 								MessageFormat.format(Messages.XmlToPatrolConverter_DuplicateAttributesError,
-										new Object[]{parent.getId(), DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()), attribute.getAttribute().getKeyId()})); //$NON-NLS-1$
+										new Object[]{parent.getId(), DateFormat.getDateTimeInstance().format(parent.getDateTime()), attribute.getAttribute().getKeyId()})); //$NON-NLS-1$
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XmlToPatrolConverter_Warning_NotAllDataImported, new Object[]{
-							parent.getId(),DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime())}) //$NON-NLS-1$
+							parent.getId(),DateFormat.getDateTimeInstance().format(parent.getDateTime()) }) //$NON-NLS-1$
 					);
 					
 				}

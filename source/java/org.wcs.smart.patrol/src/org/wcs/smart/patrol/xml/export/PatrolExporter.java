@@ -33,13 +33,13 @@ import java.util.zip.ZipOutputStream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointAttachment;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.xml.PatrolToXmlConverter;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
@@ -163,8 +163,8 @@ public class PatrolExporter {
 			/* add all attachments */
 			for (PatrolLeg leg : patrol.getLegs()) {
 				for (PatrolLegDay legday : leg.getPatrolLegDays()) {
-					for (Waypoint wp : legday.getWaypoints()) {
-						for (WaypointAttachment att : wp.getAttachments()) {
+					for (PatrolWaypoint wp : legday.getWaypoints()) {
+						for (WaypointAttachment att : wp.getWaypoint().getAttachments()) {
 							File attFile = att.getFullFile();
 							zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 
