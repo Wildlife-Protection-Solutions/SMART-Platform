@@ -22,14 +22,16 @@ public class DataModelMatcherDialog extends Composite {
 	Text startSessionTxtFileName;
 	Text mergeSessionTxtFileName;
 	
+	
 	public DataModelMatcherDialog(Shell shell) {
-		super(shell, SWT.BORDER_SOLID);
+		super(shell, SWT.BORDER);
+		
 		GridLayout shellLayout = new GridLayout(1, false);
 	    shell.setLayout(shellLayout);
 	    
 		
 	    //main composite and layout
-		Composite main = new Composite(shell, SWT.None);
+		Composite main = new Composite(shell, SWT.BORDER);
 		GridLayout layout = new GridLayout(1, true);
 	    main.setLayout(layout);
 	    
@@ -44,7 +46,7 @@ public class DataModelMatcherDialog extends Composite {
 	    label_r.setText("Restore Existing Session");
 	    
 	    //restore composite and layout etc
-	    Composite restore = new Composite(main, SWT.None);
+	    Composite restore = new Composite(main, SWT.BORDER);
 		GridLayout restoreLayout = new GridLayout(3, false);
 	    restore.setLayout(restoreLayout);
 	    
@@ -85,7 +87,7 @@ public class DataModelMatcherDialog extends Composite {
 	    label_n.setText("Start New Session");
 	    
 	    //restore composite and layout etc
-	    Composite start = new Composite(main, SWT.None);
+	    Composite start = new Composite(main, SWT.BORDER);
 		GridLayout startLayout = new GridLayout(3, false);
 		start.setLayout(startLayout);
 	    
@@ -99,7 +101,9 @@ public class DataModelMatcherDialog extends Composite {
 	    label_s1.setText("MIST Database File:");
 	    
 	    startMistTxtFileName = new Text(start, SWT.BORDER);
-	    startMistTxtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    GridData gd1 = new GridData(SWT.FILL, SWT.CENTER, true, false);
+	    gd1.widthHint = 200;
+	    startMistTxtFileName.setLayoutData(gd1);
 	    startMistTxtFileName.setToolTipText("The location of your source MIST Database file.");
 
 	    Button s_open = new Button(start, SWT.PUSH);
@@ -122,11 +126,11 @@ public class DataModelMatcherDialog extends Composite {
 
 		//restore line 2
 	    Label label_s2 = new Label(start, SWT.NONE);
-	    label_s2.setText("SMART XML Data Model File:");
+	    label_s2.setText("SMART Data Model:");
 	    
 	    startSessionTxtFileName = new Text(start, SWT.BORDER);
 	    startSessionTxtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	    startSessionTxtFileName.setToolTipText("location of your SMART XML data model file.");
+	    startSessionTxtFileName.setToolTipText("Location of your SMART data model XML export file.");
 
 	    Button s2_open = new Button(start, SWT.PUSH);
 		s2_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
@@ -151,6 +155,67 @@ public class DataModelMatcherDialog extends Composite {
 	    Label label_m = new Label(main, SWT.NONE);
 	    label_m.setText("Merge MIST Data Model with Existing Session");
 		
+	    //merge composite and layout etc
+	    Composite merge = new Composite(main, SWT.BORDER);
+		GridLayout mergeLayout = new GridLayout(3, false);
+		merge.setLayout(mergeLayout);
+	    
+	    GridData mergeGridData = new GridData(SWT.FILL,SWT.CENTER, true, false);
+	    mergeGridData.horizontalIndent = 25;
+	    merge.setLayoutData(mergeGridData);
+	    
+		//Line 1 Merge files
+	    Label label_m1 = new Label(merge, SWT.NONE);
+	    label_m1.setText("Existing Session File:");
+	    
+	    mergeSessionTxtFileName = new Text(merge, SWT.BORDER);
+	    mergeSessionTxtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    mergeSessionTxtFileName.setToolTipText("The location of your existing session file to load.");
+
+	    Button mopen = new Button(merge, SWT.PUSH);
+		mopen.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
+		((GridData)mopen.getLayoutData()).heightHint = 10;
+	    mopen.setText("...");
+	    mopen.addSelectionListener(new SelectionAdapter() {
+		
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+	    		dlg.setFilterNames(new String[] {"(CSV)"});
+	    		dlg.setFilterExtensions(new String[] {"*.csv"});
+	    		String fn = dlg.open();
+	    		if (fn != null) {
+	    			mergeSessionTxtFileName.setText(fn);
+	    		}
+	    	}
+	    });
+	    
+	    //Line 2 of merge, database file
+	    Label label_m2 = new Label(merge, SWT.NONE);
+	    label_m2.setText("MIST Database File:");
+	    
+	    mergeMistTxtFileName = new Text(merge, SWT.BORDER);
+	    mergeMistTxtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    mergeMistTxtFileName.setToolTipText("The location of your source MIST Database file.");
+
+	    Button m2open = new Button(merge, SWT.PUSH);
+		m2open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
+		((GridData)open.getLayoutData()).heightHint = 10;
+		m2open.setText("...");
+		m2open.addSelectionListener(new SelectionAdapter() {
+		
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+	    		dlg.setFilterNames(new String[] {"(FDB)"});
+	    		dlg.setFilterExtensions(new String[] {"*.fdb"});
+	    		String fn = dlg.open();
+	    		if (fn != null) {
+	    			mergeMistTxtFileName.setText(fn);
+	    		}
+	    	}
+	    });
+	    
 		
 	}
 	
