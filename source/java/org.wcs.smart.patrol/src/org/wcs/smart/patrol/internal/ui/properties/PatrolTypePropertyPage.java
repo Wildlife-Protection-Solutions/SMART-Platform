@@ -413,7 +413,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private List<PatrolTransportType> getAllTransportTypes(){
 		List<PatrolTransportType> siblings = new ArrayList<PatrolTransportType>();
 		for (PatrolType l : patrolTypes){
-			siblings.addAll(l.getTransportTypes());
+			if (l.getTransportTypes() != null) {
+				siblings.addAll(l.getTransportTypes());
+			}
 		}
 		return siblings;
 	}
