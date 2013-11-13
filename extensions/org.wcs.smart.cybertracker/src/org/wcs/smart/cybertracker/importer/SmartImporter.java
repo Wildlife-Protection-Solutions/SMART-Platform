@@ -71,6 +71,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.util.SmartUtils;
 
@@ -529,6 +530,8 @@ public class SmartImporter {
 		Waypoint wp = new Waypoint();
 		wp.setObservations(new ArrayList<WaypointObservation>());
 		wp.setId(pld.getWaypoints().size()+1);
+		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+		wp.setConservationArea(SmartDB.getCurrentConservationArea());
 		wp.setX(0);
 		wp.setY(0);
 		for (A a : s.getA()) {
