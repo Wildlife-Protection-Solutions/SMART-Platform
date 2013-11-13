@@ -168,7 +168,7 @@ public class PatrolScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, team.getName(), elId, SmartUtils.encodeHex(team.getUuid()));
+			ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, SmartUtils.encodeHex(team.getUuid()));
 			result.defaultValues.add(createDefaultResultElement(RESULT_TEAM, elements, elId));
 		}
 
@@ -184,7 +184,7 @@ public class PatrolScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, station.getName(), elId, SmartUtils.encodeHex(station.getUuid()));
+			ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, SmartUtils.encodeHex(station.getUuid()));
 			result.defaultValues.add(createDefaultResultElement(RESULT_STATION, elements, elId));
 		}
 
@@ -201,7 +201,7 @@ public class PatrolScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, mandate.getName(), elId, SmartUtils.encodeHex(mandate.getUuid()));
+			ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, SmartUtils.encodeHex(mandate.getUuid()));
 			result.defaultValues.add(createDefaultResultElement(RESULT_MANDATE, elements, elId));
 		}
 
@@ -516,7 +516,7 @@ public class PatrolScreensUtil {
 					return null;
 				}
 				String trElId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, transport.getName(), trElId, SmartUtils.encodeHex(transport.getUuid()));
+				ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, SmartUtils.encodeHex(transport.getUuid()));
 				container.defaultValues.add(createDefaultResultElement(RESULT_TRANSPORT, elements, trElId));
 				return id;
 			}
@@ -587,11 +587,11 @@ public class PatrolScreensUtil {
 		container.screenNodes.add(confirmNode);
 	}
 
-	public static List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends NamedItem> items) {
+	public List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends NamedItem> items) {
 		List<String> labelValues = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
 		for (NamedItem i : items) {
-			labelValues.add(i.getName());
+			labelValues.add(ctUtil.getName(i));
 			tag0Values.add(SmartUtils.encodeHex(i.getUuid()));
 		}
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);

@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
@@ -34,6 +36,7 @@ import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -87,9 +90,11 @@ public class CyberTrackerUtil {
 	
 	private ScreensObjectFactory screensFactory;
 	private PatrolScreensUtil screensUtil;
+	private Language currentLanguage;
 	
-	public CyberTrackerUtil(CyberTrackerProperties properties) {
+	public CyberTrackerUtil(CyberTrackerProperties properties, Language language) {
 		ctProperties = properties;
+		currentLanguage = language;
 		this.screensFactory = new ScreensObjectFactory(properties);
 		this.screensUtil = new PatrolScreensUtil(this);
 	}
@@ -146,16 +151,6 @@ public class CyberTrackerUtil {
 		}
 	}
 	
-	public Node createRadioNode(Category category, Map<Category, CyberTrackerId> keyMap, String resultElementId) {
-		String id = keyMap.get(category).getNodeId();
-		String name = category.getName();
-		List<CyberTrackerId> childIds = getChildrenIds(category.getActiveChildren(), keyMap);
-		List<String> values = listItemIds(childIds);
-		String trElements = translateElements(childIds);
-		String trLinks = translateLinks(childIds, true);
-		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
-	}
-
 	/**
 	 * Creates radio node with options from childIds.
 	 * NOTE: If resultElement is not null this will be treated as final radio list (not as part of navigation in some tree)
@@ -243,7 +238,7 @@ public class CyberTrackerUtil {
 	
 	public Node createRadioNode(CmNode node, Map<CmNode, CyberTrackerId> keyMap, String resultElementId) {
 		String id = keyMap.get(node).getNodeId();
-		String name = node.getName();
+		String name = getName(node);
 		List<CyberTrackerId> childIds = getChildrenIds(node.getChildren(), keyMap);
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
@@ -251,4 +246,7 @@ public class CyberTrackerUtil {
 		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
 	}
 	
+	public String getName(NamedItem i) {
+		return LanguageUtil.getName(i, currentLanguage);
+	}
 }

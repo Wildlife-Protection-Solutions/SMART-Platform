@@ -79,6 +79,7 @@ import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -111,6 +112,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	private Object selectedModel;
 
     private ComboViewer modelViewer;
+    private LanguageViewer languageViewer;
 	
 	public CyberTrackerExportDialog(Shell parentShell) {
 		super(parentShell);
@@ -185,6 +187,11 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		});
+
+		Label languageLabel = new Label(modelSelector, SWT.NONE);
+		languageLabel.setText(Messages.CyberTrackerExportDialog_Language);
+		languageViewer = new LanguageViewer(modelSelector, SWT.DROP_DOWN | SWT.READ_ONLY, SmartDB.getCurrentConservationArea());
+		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblOp = new Label(modelSelector, SWT.NONE);
 		lblOp.setText(Messages.CyberTrackerExportDialog_ExportOptionsLabel);
@@ -346,6 +353,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			return;
 		}
 		final boolean launch = !toDevice && btnLaunchCT.getSelection();
+		exporter.setCurrentLanguage(languageViewer.getCurrentSelection());
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
