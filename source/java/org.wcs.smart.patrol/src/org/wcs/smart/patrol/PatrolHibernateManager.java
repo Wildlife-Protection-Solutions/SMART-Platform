@@ -428,6 +428,7 @@ public class PatrolHibernateManager extends HibernateManager{
 						for (PatrolLegDay pld : pl.getPatrolLegDays()) {
 							if (pld.getWaypoints() != null) {
 								for (PatrolWaypoint wp: pld.getWaypoints()){
+									session.saveOrUpdate(wp.getWaypoint());
 									session.saveOrUpdate(wp);
 								}
 							}
