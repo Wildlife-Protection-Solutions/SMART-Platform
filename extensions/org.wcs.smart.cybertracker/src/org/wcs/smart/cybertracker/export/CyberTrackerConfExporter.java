@@ -589,6 +589,11 @@ public class CyberTrackerConfExporter {
 					if (Arrays.equals(uuidValue, item.getUuid())) {
 						def = item; 
 						break;
+					} else {
+						def = findTreeNode(item, uuidValue);
+						if (def != null) {
+							break;
+						}
 					}
 				}
 				if (def == null) {
@@ -609,6 +614,23 @@ public class CyberTrackerConfExporter {
 		return null;
 	}
 
+	private AttributeTreeNode findTreeNode(AttributeTreeNode node, byte[] uuidValue) {
+		if (node.getActiveChildren() == null)
+			return null;
+
+		AttributeTreeNode result = null;
+		for (AttributeTreeNode item : node.getActiveChildren()) {
+			if (Arrays.equals(uuidValue, item.getUuid())) {
+				return item;
+			}
+			result = findTreeNode(item, uuidValue);
+			if (result != null) {
+				return result;
+			}
+		}
+		return result;
+	}
+	
 	private String recordDefaultValue(Attribute attribute, String defaultValue) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
