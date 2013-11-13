@@ -39,6 +39,7 @@ import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -62,6 +63,7 @@ import org.wcs.smart.cybertracker.model.reports.Reports;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
+import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -99,6 +101,12 @@ public class CyberTrackerConfExporter {
 	
 	private Session session;
 	private ConfigurableModel configurableModel;
+	
+	private Language currentLanguage;
+	
+	public void setCurrentLanguage(Language currentLanguage) {
+		this.currentLanguage = currentLanguage;
+	}
 
 	public File export(File destFolder, Object source, IProgressMonitor monitor) {
 		session = HibernateManager.openSession();
@@ -146,7 +154,7 @@ public class CyberTrackerConfExporter {
 	private File performExport(File file, IProgressMonitor monitor) {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
-		ctUtil = new CyberTrackerUtil(ctProperties);
+		ctUtil = new CyberTrackerUtil(ctProperties, currentLanguage);
 		screensFactory = ctUtil.getScreensFactory();
 		monitor.worked(10);
 		
@@ -185,7 +193,7 @@ public class CyberTrackerConfExporter {
 			
 			//----------------creating Elements.xml----------------
 			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
-			ElementsUtil.addNodeElements(elements, keyMap);
+			ElementsUtil.addNodeElements(elements, keyMap, currentLanguage);
 			BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_ELEMENTS)); //$NON-NLS-1$
 			try {
 				writeDataModel(elements, outE, Elements.class);
@@ -204,7 +212,7 @@ public class CyberTrackerConfExporter {
 			for (Attribute attribute : attr2resultId.keySet()) {
 				Map<Integer, CyberTrackerId> map = attr2resultId.get(attribute);
 				for (Integer i : map.keySet()) {
-					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), attribute.getName() + "#" + i)); //$NON-NLS-1$
+					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), LanguageUtil.getName(attribute, currentLanguage) + "#" + i)); //$NON-NLS-1$
 				}
 			}
 			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
@@ -359,7 +367,7 @@ public class CyberTrackerConfExporter {
 		List<String> values = ctUtil.listItemIds(childIds);
 		String trElements = ctUtil.translateElements(childIds);
 		String trLinks = ctUtil.translateLinks(childIds, true);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), cmAttr.getName(), values, trElements, trLinks, 1, withNumbers);
+		Node node = screensFactory.createNodeMultiList(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage), values, trElements, trLinks, 1, withNumbers);
 		//NOTE: next screen is not set here
 		return node;
 	}
@@ -404,7 +412,7 @@ public class CyberTrackerConfExporter {
 			switch (attribute.getType()) {
 			case NUMERIC:
 			{
-				Node numberNode = screensFactory.createNodeNumber(id.getNodeId(), attribute.getName() + label, resultElementId.getItemId());
+				Node numberNode = screensFactory.createNodeNumber(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, resultElementId.getItemId());
 				if (attribute.getIsRequired()) {
 					Control numControl = ScreensObjectFactory.getNumberMainControl(numberNode);
 					numControl.setRequireSetValue(ICyberTrackerConstants.STR_TRUE);
@@ -414,7 +422,7 @@ public class CyberTrackerConfExporter {
 			}
 			case TEXT:
 			{
-				Node textNode = screensFactory.createNodeNote(id.getNodeId(), attribute.getName() + label, resultElementId.getItemId());
+				Node textNode = screensFactory.createNodeNote(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, resultElementId.getItemId());
 				Control textControl = ScreensObjectFactory.getNoteMainControl(textNode);
 				if (attribute.getIsRequired()) {
 					textControl.setRequired(ICyberTrackerConstants.STR_TRUE);
@@ -429,7 +437,7 @@ public class CyberTrackerConfExporter {
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
-				Node node = screensFactory.createNodeRadio(id.getNodeId(), attribute.getName() + label, values, trElements, trLinks, resultElementId.getItemId());
+				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, values, trElements, trLinks, resultElementId.getItemId());
 				if (!attribute.getIsRequired()) {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -444,7 +452,7 @@ public class CyberTrackerConfExporter {
 					List<String> values = ctUtil.listItemIds(ids);
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
-					Node node = screensFactory.createNodeRadio(id.getNodeId(), attribute.getName() + label, values, trElements, trLinks, resultElementId.getItemId());
+					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, values, trElements, trLinks, resultElementId.getItemId());
 					if (!attribute.getIsRequired()) {
 						Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 						control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -463,7 +471,7 @@ public class CyberTrackerConfExporter {
 				if (boolRqAttrElementIDs == null) {
 					boolRqAttrElementIDs = ElementsUtil.buildBooleanElements(elements);
 				}
-				result.add(ctUtil.createRadioNode(id.getNodeId(), attribute.getName() + label, boolRqAttrElementIDs, resultElementId.getItemId()));
+				result.add(ctUtil.createRadioNode(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, boolRqAttrElementIDs, resultElementId.getItemId()));
 				break;
 			}
 			default:
@@ -567,7 +575,7 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, def.getName(), elId, SmartUtils.encodeHex(def.getUuid()));
+				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, SmartUtils.encodeHex(def.getUuid()));
 				return recordDefaultValue(attribute, elId);
 			}
 			break;
@@ -588,7 +596,7 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, def.getName(), elId, SmartUtils.encodeHex(def.getUuid()));
+				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, SmartUtils.encodeHex(def.getUuid()));
 				return recordDefaultValue(attribute, elId);
 			}
 			break;
@@ -604,7 +612,7 @@ public class CyberTrackerConfExporter {
 	private String recordDefaultValue(Attribute attribute, String defaultValue) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
-		ElementsUtil.addElementsItem(elements, attribute.getName(), ctid, SmartUtils.encodeHex(attribute.getUuid()), null, defaultValue);
+		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, SmartUtils.encodeHex(attribute.getUuid()), null, defaultValue);
 		return ctid;
 	}
 	
@@ -683,7 +691,7 @@ public class CyberTrackerConfExporter {
 		
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		Node treeRootNode = ctUtil.createRadioNode(nodeId, treeAttribute.getName() + label, childIds, null);
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeAttribute, currentLanguage) + label, childIds, null);
 		if (!treeAttribute.getIsRequired() && navId != null) {
 			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
 			navControl.setTranslateNextScreenId(navId.getNodeId());
@@ -824,7 +832,7 @@ public class CyberTrackerConfExporter {
 			return null;
 		ListItemsDataProvider dataProvider = listAttr2ItemData.get(attribute);
 		if (dataProvider == null) {
-			dataProvider = new ListItemsDataProvider(attribute, configurableModel, session);
+			dataProvider = new ListItemsDataProvider(attribute, configurableModel, currentLanguage, session);
 			listAttr2ItemData.put(attribute, dataProvider);
 		}
 		return dataProvider.getActiveListItems();
@@ -835,7 +843,7 @@ public class CyberTrackerConfExporter {
 			return null;
 		TreeNodeDataProvider dataProvider = treeAttr2ItemData.get(attribute);
 		if (dataProvider == null) {
-			dataProvider = new TreeNodeDataProvider(attribute, configurableModel, session);
+			dataProvider = new TreeNodeDataProvider(attribute, configurableModel, currentLanguage, session);
 			treeAttr2ItemData.put(attribute, dataProvider);
 		}
 		return dataProvider.getActiveTreeNodes();

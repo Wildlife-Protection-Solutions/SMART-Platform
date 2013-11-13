@@ -26,8 +26,10 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -39,9 +41,11 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class ListItemsDataProvider {
 	
-	List<IAttributeListItemProxy> data;	
+	private List<IAttributeListItemProxy> data;
+	private Language language;
 	
-	public ListItemsDataProvider(Attribute attribute, ConfigurableModel configurableModel, Session session) {
+	public ListItemsDataProvider(Attribute attribute, ConfigurableModel configurableModel, Language language, Session session) {
+		this.language = language;
 		data = new ArrayList<IAttributeListItemProxy>();
 		for (AttributeListItem dmItem : attribute.getActiveListItems()) {
 			CmAttributeListItem cmItem = getCmListItem(session, dmItem, configurableModel);
@@ -80,7 +84,7 @@ public class ListItemsDataProvider {
 
 		@Override
 		public String getName() {
-			return item.getName();
+			return LanguageUtil.getName(item, language);
 		}
 
 		@Override
@@ -98,9 +102,9 @@ public class ListItemsDataProvider {
 
 		@Override
 		public String getName() {
-			String name = item.getName();
+			String name = LanguageUtil.getName(item, language);
 			if (name == null || name.isEmpty()) {
-				return item.getListItem().getName();
+				return LanguageUtil.getName(item.getListItem(), language);
 			}
 			return name;
 		}

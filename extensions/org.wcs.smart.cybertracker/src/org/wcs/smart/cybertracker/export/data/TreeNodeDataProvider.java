@@ -26,8 +26,10 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -40,8 +42,10 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class TreeNodeDataProvider {
 	
 	List<IAttributeTreeNodeProxy> data;	
+	private Language language;
 	
-	public TreeNodeDataProvider(Attribute attribute, ConfigurableModel configurableModel, Session session) {
+	public TreeNodeDataProvider(Attribute attribute, ConfigurableModel configurableModel, Language language, Session session) {
+		this.language = language;
 		List<AttributeTreeNode> activeTreeNodes = attribute.getActiveTreeNodes();
 		if (activeTreeNodes != null) {
 			data = wrapTreeNodes(session, activeTreeNodes, configurableModel);
@@ -115,7 +119,7 @@ public class TreeNodeDataProvider {
 
 		@Override
 		public String getName() {
-			return item.getName();
+			return LanguageUtil.getName(item, language);
 		}
 
 		@Override
@@ -133,9 +137,9 @@ public class TreeNodeDataProvider {
 
 		@Override
 		public String getName() {
-			String name = item.getName();
+			String name = LanguageUtil.getName(item, language);
 			if (name == null || name.isEmpty()) {
-				return item.getDmTreeNode().getName();
+				return LanguageUtil.getName(item.getDmTreeNode(), language);
 			}
 			return name;
 		}

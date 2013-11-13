@@ -26,10 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.util.SmartUtils;
 
@@ -59,18 +60,6 @@ public class ElementsUtil {
 		Elements.List.Items items = new Elements.List.Items();
 		list.setItems(items);
 		return elements;
-	}
-	
-	/**
-	 * Simply add all from the map to elements
-	 * @param elements
-	 * @param map
-	 */
-	public static void addElements(Elements elements, Map<? extends NamedItem, CyberTrackerId> map) {
-		Set<? extends NamedItem> keys = map.keySet();
-		for (NamedItem dmObject : keys) {
-			addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), SmartUtils.encodeHex(dmObject.getUuid()));
-		}
 	}
 	
 	public static List<CyberTrackerId> addCustomElements(Elements elements, String... labels) {
@@ -153,12 +142,12 @@ public class ElementsUtil {
 	}
 	
 	//-------------------------------------------------------
-	public static void addNodeElements(Elements elements, Map<CmNode, CyberTrackerId> map) {
+	public static void addNodeElements(Elements elements, Map<CmNode, CyberTrackerId> map, Language language) {
 		Set<CmNode> keys = map.keySet();
 		for (CmNode node : keys) {
 			//no need for tag0 in case of group cause we should not relay on any uuids from configurable model
 			String tag0 = node.isGroup() ? null : SmartUtils.encodeHex(node.getCategory().getUuid());
-			addElementsItem(elements, node.getName(), map.get(node).getItemId(), tag0);
+			addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0);
 		}
 	}
 	

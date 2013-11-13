@@ -86,6 +86,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_FailCreateTempFolder;
 	public static String CyberTrackerExportDialog_Job_LaunchCT;
 	public static String CyberTrackerExportDialog_Label_File;
+	public static String CyberTrackerExportDialog_Language;
 	public static String CyberTrackerExportDialog_LaunchInCyberTracker;
 	public static String CyberTrackerExportDialog_LoadConfModels_Error;
 	public static String CyberTrackerExportDialog_Message;
