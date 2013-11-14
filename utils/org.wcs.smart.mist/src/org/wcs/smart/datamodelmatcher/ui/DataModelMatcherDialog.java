@@ -1,5 +1,10 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -9,8 +14,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.mist.dataReader.MistDatabase;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 
 public class DataModelMatcherDialog extends Composite {
@@ -19,23 +28,23 @@ public class DataModelMatcherDialog extends Composite {
 	Text startMistTxtFileName;
 	Text mergeMistTxtFileName;
 	
-	Text startSessionTxtFileName;
+	Text startXMLFileName;
 	Text mergeSessionTxtFileName;
 	
 	
-	public DataModelMatcherDialog(Shell shell) {
-		super(shell, SWT.BORDER);
+	public DataModelMatcherDialog(Composite c) {
+		super(c, SWT.None);
 		
 		GridLayout shellLayout = new GridLayout(1, false);
-	    shell.setLayout(shellLayout);
+	    this.setLayout(shellLayout);
 	    
 		
 	    //main composite and layout
-		Composite main = new Composite(shell, SWT.BORDER);
+		Composite main = new Composite(this, SWT.None);
 		GridLayout layout = new GridLayout(1, true);
 	    main.setLayout(layout);
 	    
-	    GridData mainGridData = new GridData(SWT.FILL,SWT.CENTER, true, false);
+	    GridData mainGridData = new GridData(SWT.FILL,SWT.FILL, true, false);
 	    main.setLayoutData(mainGridData);
 	    
 	    
@@ -86,7 +95,7 @@ public class DataModelMatcherDialog extends Composite {
 	    Label label_n = new Label(main, SWT.NONE);
 	    label_n.setText("Start New Session");
 	    
-	    //restore composite and layout etc
+	    //start composite and layout etc
 	    Composite start = new Composite(main, SWT.BORDER);
 		GridLayout startLayout = new GridLayout(3, false);
 		start.setLayout(startLayout);
@@ -95,7 +104,7 @@ public class DataModelMatcherDialog extends Composite {
 	    startGridData.horizontalIndent = 25;
 	    start.setLayoutData(startGridData);
 	    
-	    //restore area labels and file selector
+	    //start area labels and file selector
 	    //line1
 	    Label label_s1 = new Label(start, SWT.NONE);
 	    label_s1.setText("MIST Database File:");
@@ -115,8 +124,8 @@ public class DataModelMatcherDialog extends Composite {
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
 	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
-	    		dlg.setFilterNames(new String[] {"(FDB)"});
-	    		dlg.setFilterExtensions(new String[] {"*.fdb"});
+	    		dlg.setFilterNames(new String[] {"FDB", "GDB"});
+	    		dlg.setFilterExtensions(new String[] {"*.fdb", "*.gdb"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
 	    			startMistTxtFileName.setText(fn);
@@ -124,13 +133,13 @@ public class DataModelMatcherDialog extends Composite {
 	    	}
 	    });
 
-		//restore line 2
+		//start new line 2
 	    Label label_s2 = new Label(start, SWT.NONE);
 	    label_s2.setText("SMART Data Model:");
 	    
-	    startSessionTxtFileName = new Text(start, SWT.BORDER);
-	    startSessionTxtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	    startSessionTxtFileName.setToolTipText("Location of your SMART data model XML export file.");
+	    startXMLFileName = new Text(start, SWT.BORDER);
+	    startXMLFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    startXMLFileName.setToolTipText("Location of your SMART data model XML export file.");
 
 	    Button s2_open = new Button(start, SWT.PUSH);
 		s2_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
@@ -145,8 +154,78 @@ public class DataModelMatcherDialog extends Composite {
 	    		dlg.setFilterExtensions(new String[] {"*.xml"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
-	    			startSessionTxtFileName.setText(fn);
+	    			startXMLFileName.setText(fn);
 	    		}
+	    	}
+	    });
+		
+		//start new line 3
+	  
+	    Button s3_open = new Button(start, SWT.PUSH);
+		s3_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,3,0));
+		((GridData)open.getLayoutData()).heightHint = 10;
+		s3_open.setText("Start New Session");
+		s3_open.addSelectionListener(new SelectionAdapter() {
+		
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		File dbFile = new File(startMistTxtFileName.getText());
+	    		File xmlFile = new File(startXMLFileName.getText());
+	    		if (!dbFile.exists()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage("MIST database file not found: '" + dbFile.toString() + "'" );
+	    			messageBox.open();
+	    		}
+	    		if (!xmlFile.exists()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage("SMART XML data model file not found: '" + xmlFile.toString() + "'" );
+	    			messageBox.open();
+	    		}
+
+	    		/*get this working off a real jaybird DB eventually.
+	    		try{
+	    			Connection c = MistDatabase.getConnection(dbFile.getAbsolutePath());
+	    		}catch(Exception exception){
+	    			 MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			  messageBox.setMessage("MIST database connection could not be established." + exception);
+	    			  int result = messageBox.open();
+	    		}
+	    		*/
+	    		
+	    		
+	    		
+	    		MatchSession ms = new MatchSession();
+	    		
+	    		//get a save location and confirm file overwrite etc, probably do this later.
+	    		//ms.setSaveLocation(sessionFile);
+	    		//String sessionFile = CreateNewSession(txtFileName.getText());
+	    		
+	    		
+	    		ms.setMistLocation(startMistTxtFileName.getText());
+	    		ms.setSmartXmlLocation(startXMLFileName.getText());
+	    		
+	    		/*
+	    		try{
+	    		 
+	    			ResultSet rs = c
+	    				.createStatement()
+	    				.executeQuery(
+	    						"SELECT distinct D.DEPARTMENT_NAME, DU.UNIT_NAME FROM DEPARTMENT_UNITS DU LEFT JOIN DEPARTMENTS D ON D.DEPARTMENT_ID = DU.DEPARTMENT_ID "); //$NON-NLS-1$
+	    			while (rs.next()) {
+	    			    String[] entries = {rs.getString(1), rs.getString(2)};
+	    			    ms.addRow()...
+	    			}
+	    		}finally{
+	    			
+	    		}
+	    		*/
+	    		
+	    		//Save to start, probably remove this eventually
+	    		//ms.save();
+
+	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
+	    		
+	    		matchSession.open();
 	    	}
 	    });
 
@@ -207,8 +286,8 @@ public class DataModelMatcherDialog extends Composite {
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
 	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
-	    		dlg.setFilterNames(new String[] {"(FDB)"});
-	    		dlg.setFilterExtensions(new String[] {"*.fdb"});
+	    		dlg.setFilterNames(new String[] {"FDB", "GDB"});
+	    		dlg.setFilterExtensions(new String[] {"*.fdb", "*.gdb"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
 	    			mergeMistTxtFileName.setText(fn);
@@ -217,6 +296,36 @@ public class DataModelMatcherDialog extends Composite {
 	    });
 	    
 		
+	}
+
+/*
+ * parameter1 - location: If you already have a session file, confirm overwriting it or selecting a new file
+ * 
+ */
+	protected String CreateNewSession(String location) {
+		int response = -999;
+		File existing = new File(location);
+		if(existing.exists()){
+			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+		    messageBox.setMessage("Do you want to overwrite your existing file, " + location + "?");
+		    messageBox.setText("Confirm Overwrite");
+		    response = messageBox.open();
+		}
+		if (response == SWT.NO || location.isEmpty()){
+			//ask for save location
+			FileDialog dialog = new FileDialog (getShell(), SWT.SAVE);
+			String [] filterNames = new String [] {"Session File"};
+			String [] filterExtensions = new String [] {"*.csv"};
+			String filterPath = "/";
+			dialog.setFilterNames (filterNames);
+			dialog.setFilterExtensions (filterExtensions);
+			dialog.setFilterPath (filterPath);
+			dialog.setFileName ("SessionName");
+			dialog.setText("Save Session As:");
+			location = dialog.open();
+		}
+		
+		return location;
 	}
 	
     
