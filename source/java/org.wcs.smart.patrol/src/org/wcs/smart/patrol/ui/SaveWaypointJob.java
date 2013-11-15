@@ -31,12 +31,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 
 /**
@@ -70,8 +72,10 @@ public class SaveWaypointJob extends Job {
 		try {
 			saveSession.beginTransaction();
 			for (PatrolWaypoint wp : pnts) {
-				saveSession.saveOrUpdate(wp);
+				wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+				wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 				saveSession.saveOrUpdate(wp.getWaypoint());
+				saveSession.saveOrUpdate(wp);
 				saveSession.flush();
 				// remove observations with no data
 				if (wp.getWaypoint().getObservations() != null) {
