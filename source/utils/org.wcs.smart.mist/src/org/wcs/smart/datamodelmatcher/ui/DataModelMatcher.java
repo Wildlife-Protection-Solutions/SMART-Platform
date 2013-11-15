@@ -18,7 +18,7 @@ public class DataModelMatcher {
 		    shell.setLayoutData(gridData);
 			
 			shell.setText("Data Model Matcher");
-			DataModelMatcherDialog main = new DataModelMatcherDialog(shell);
+			new DataModelMatcherDialog(shell);
 
 			shell.pack();
 			shell.open();
