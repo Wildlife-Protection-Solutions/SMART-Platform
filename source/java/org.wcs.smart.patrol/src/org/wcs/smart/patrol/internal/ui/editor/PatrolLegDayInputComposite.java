@@ -35,6 +35,10 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -531,20 +535,19 @@ public class PatrolLegDayInputComposite {
 		ArrayList<PatrolWaypoint> deleted = new ArrayList<PatrolWaypoint>();
 		ArrayList<PatrolWaypoint> added = new ArrayList<PatrolWaypoint>();
 		
-		PatrolLegDay moveTo = dialog.getMoveToPosition();
+		final PatrolLegDay moveTo = dialog.getMoveToPosition();
 		Session session = HibernateManager.openSession();
 		try {
 			IStructuredSelection selection = ((IStructuredSelection) observationTable.getSelection());
 			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 				PatrolWaypoint w = (PatrolWaypoint) iterator.next();
-				PatrolWaypoint toClone = w;
-			
-				//TODO: review if this is still necessary
-//				if (toClone.getUuid() != null) {
-//					toClone = (PatrolWaypoint) session.merge(toClone);
-//				}
 				
-				Waypoint cloned = toClone.getWaypoint().clone();
+				Waypoint toClone = w.getWaypoint();
+				if (toClone.getUuid() != null){
+					toClone = (Waypoint)session.merge(toClone);
+				}
+				
+				Waypoint cloned = toClone.clone();
 				
 				if (patrolLegDate.getWaypoints().remove(w)) {
 					w.setPatrolLegDay(null);
@@ -570,13 +573,24 @@ public class PatrolLegDayInputComposite {
 		} finally {
 			session.close();
 		}
-//		this.editor.setDirty(true);
-//		editor.getPatrolEditor().doSave(null);
-		editor.getPatrolEditor().save(added);
-		editor.getPatrolEditor().delete(deleted);
 		
-		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, moveTo);
-		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+		Job j = editor.getPatrolEditor().moveWaypoints(added, deleted);
+		j.addJobChangeListener(new JobChangeAdapter() {
+			
+			@Override
+			public void done(IJobChangeEvent event) {
+				Display.getDefault().syncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, moveTo);
+						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+					}});
+			}
+
+		});
+		
+		
 		
 	}
 	
@@ -596,9 +610,23 @@ public class PatrolLegDayInputComposite {
 				deleted.add(w);
 			}	
 		}
+		
 		//delete waypoints
-		editor.getPatrolEditor().delete(deleted);
-		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+		Job j = editor.getPatrolEditor().delete(deleted);
+		j.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				//once the job is completed we can fire this event
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);			}
+				});
+			}
+		});
+		
+		
 	}
 	
 	private void resize(){

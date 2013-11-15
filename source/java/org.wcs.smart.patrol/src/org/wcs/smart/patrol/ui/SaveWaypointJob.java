@@ -76,7 +76,7 @@ public class SaveWaypointJob extends Job {
 				wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 				saveSession.saveOrUpdate(wp.getWaypoint());
 				saveSession.saveOrUpdate(wp);
-				saveSession.flush();
+				
 				// remove observations with no data
 				if (wp.getWaypoint().getObservations() != null) {
 					for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
