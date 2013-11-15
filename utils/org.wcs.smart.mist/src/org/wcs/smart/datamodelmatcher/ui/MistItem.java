@@ -16,11 +16,17 @@ public class MistItem {
 		this.category = category;
 	}
 	
+	public MistItem() {
+		category = new String();
+	}
+
 	public String getText() {
 		return category;
 		//cat1.concat(".").concat(cat2).concat(".").concat(cat3).concat(".").concat(cat4).concat(".").concat(cat5).concat(".").concat(cat6).concat(".").concat(cat7).concat(".").concat(value);
 	}
 	
-	
+	public void setCategory(String category){
+		this.category = category;
+	}
 	
 }

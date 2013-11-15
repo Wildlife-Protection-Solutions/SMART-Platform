@@ -3,9 +3,21 @@ package org.wcs.smart.datamodelmatcher.ui;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IElementComparer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -18,9 +30,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Image;
 
 
 
@@ -32,6 +41,7 @@ public class MatchSessionDialog extends Dialog {
 	//private static final Image CHECKED = Activator.getImageDescriptor("icons/checked.gif").createImage(); 
 	//private static final Image UNCHECKED = Activator.getImageDescriptor("icons/unchecked.gif").createImage();
 
+	private Text totalMatched;
 	  
 	private Text mistText1;
 	private Text mistText2;
@@ -40,17 +50,20 @@ public class MatchSessionDialog extends Dialog {
 	private Combo smartCombo1;
 	private Combo smartCombo2;
 	private Combo smartCombo3;
+	public final Shell shell;
 	
+	private Button save;
+	private Button next;
 	
 	public MatchSessionDialog(Shell parentShell, MatchSession ms) {
 	    super(parentShell);
+        shell = new Shell(parentShell, SWT.SHELL_TRIM);
+        shell.setText("Match Session");
 	    this.ms = ms;
 	  }
 
 	  public int open() {
-          Shell parent = getParent();
-          Shell shell = new Shell(parent, SWT.SHELL_TRIM);
-          shell.setText("Match Session");
+
           
           GridLayout layout = new GridLayout(1, false);
 		  shell.setLayout(layout);
@@ -70,7 +83,7 @@ public class MatchSessionDialog extends Dialog {
 
   	      //left
   	      Composite left = new Composite(main, SWT.None);
-		  GridLayout llayout = new GridLayout(1, false);
+		  GridLayout llayout = new GridLayout(2, false);
 	      left.setLayout(llayout);
 	    
 	      GridData leftGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
@@ -79,7 +92,7 @@ public class MatchSessionDialog extends Dialog {
   	    
 	      //left - content
 	      // define the TableViewer---------------------------------------------------------------------------------
-	      viewer = new TableViewer(left, SWT.MULTI | SWT.H_SCROLL
+	      viewer = new TableViewer(left, SWT.CHECK | SWT.MULTI | SWT.H_SCROLL
 	            | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
 	      // create the columns 
@@ -91,20 +104,53 @@ public class MatchSessionDialog extends Dialog {
 	      table.setLinesVisible(true); 
 	      
 	      viewer.setContentProvider(new ArrayContentProvider());
-	      viewer.setInput(MatchTableProvider.INSTANCE.getRows());
+	      viewer.setInput(ms.getRows());
+	      viewer.setComparator(new TableColumnSorter(viewer));
 	      
 	   // define layout for the viewer
-	      GridData tgridData = new GridData(SWT.FILL,SWT.FILL, true, true);
+	      GridData tgridData = new GridData(SWT.FILL,SWT.FILL, true, true,2,0);
 	      //tgridData.widthHint = 510;
+	      tgridData.heightHint = 500;
 	      viewer.getControl().setLayoutData(tgridData);
 	      
+	      viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent arg0) {
+				
+				ISelection selection = viewer.getSelection();
+	    		if (!selection.isEmpty()) {
+	    		   IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+	    		   MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
+	    		   
+	    		   mistText1.setText(selected.getMistItem().getText());
+	    		   mistText2.setText(selected.getMistItem().getText());
+	    		   mistText3.setText(selected.getMistItem().getText());
+
+	    		}
+			}
+	      });
+	      
+
 	   // end Viewer---------------------------------------------------------------------------------
 	      
 
-	      Text totalMatched = new Text(left, SWT.NONE);
+	      totalMatched = new Text(left, SWT.NONE);
 	      totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );
 	      
+	      save = new Button(left, SWT.NONE);
+	      save.setText("   Save Session   ");
+	      GridData saveGridData = new GridData(SWT.RIGHT,SWT.FILL, true, true);
+	      save.setLayoutData(saveGridData);
 	      
+	      save.addSelectionListener(new SelectionAdapter() {	
+		    	@Override
+		    	public void widgetSelected(SelectionEvent e) {
+		    		ms.save();
+		    		shell.setText("Match Session - " + ms.getSaveLocation());
+		    		save.setEnabled(false);
+		    	}
+		    });
 	      
 	      //------------------------------------------------------------------------------------------
 	      //Right side components
@@ -139,7 +185,9 @@ public class MatchSessionDialog extends Dialog {
 	      mistLabel1.setText("Observation Group:" );
 	      
 	      mistText1 = new Text(topRight, SWT.NONE);
-	      mistText1.setText("value1");
+	      GridData m1 = new GridData(SWT.FILL,SWT.CENTER, true, false);
+	      m1.widthHint = 250;
+	      mistText1.setLayoutData(m1);
 	      
 	      
 	      
@@ -147,15 +195,14 @@ public class MatchSessionDialog extends Dialog {
 	      mistLabel2.setText("Observation:" );
 	      
 	      mistText2 = new Text(topRight, SWT.NONE);
-	      mistText2.setText("value2");
-	      
+	      mistText2.setLayoutData(m1);
 	      
 	      
 	      Label mistLabel3 = new Label(topRight, SWT.NONE);
 	      mistLabel3.setText("Remark:" );
 	      
 	      mistText3 = new Text(topRight, SWT.NONE);
-	      mistText3.setText("value3");
+	      mistText3.setLayoutData(m1);
 	      //end of Top Right elements--------------------------------------
 	      
 	      
@@ -172,7 +219,7 @@ public class MatchSessionDialog extends Dialog {
 	      Label smartLabel = new Label(bottomRight, SWT.NONE);
 	      smartLabel.setText("MIST Observation:" );
 	      FontData sfontData = smartLabel.getFont().getFontData()[0];
-	      Font sfont = new Font(getParent().getDisplay(), new FontData(fontData.getName(), fontData
+	      Font sfont = new Font(getParent().getDisplay(), new FontData(sfontData.getName(), sfontData
 	    		    .getHeight(), SWT.BOLD));
 	      smartLabel.setFont(sfont);
 	      GridData smartLabelData = new GridData(SWT.FILL,SWT.CENTER, true, false,2,1);
@@ -183,7 +230,15 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      smartCombo1 =  new Combo (bottomRight, SWT.READ_ONLY);
 	  	  smartCombo1.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
-	      
+	  	  smartCombo1.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				save.setEnabled(true);
+			}
+	  	  });
+
+
 	      
 	      Label smartLabel2 = new Label(bottomRight, SWT.NONE);
 	      smartLabel2.setText("Attribute1:" );
@@ -207,30 +262,61 @@ public class MatchSessionDialog extends Dialog {
 	    
 	      GridData buttonsData = new GridData(SWT.RIGHT,SWT.BOTTOM, true, false,2,0);
 	      buttons.setLayoutData(buttonsData);
-		
-	      Button save = new Button(buttons, SWT.NONE);
-	      save.setText("Save Session");
-	      Button next = new Button(buttons, SWT.NONE);
-	      next.setText("Save and Next");
+
+
+	      next = new Button(buttons, SWT.NONE);
+	      next.setText("Next");
+	      next.addSelectionListener(new SelectionAdapter() {	
+		    	@Override
+		    	public void widgetSelected(SelectionEvent e) {
+		    		saveCurrentMatch();
+		    		totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );
+		    		
+		    		Table t = viewer.getTable();
+		    		int currentSelection = t.getSelectionIndex();
+		    		if(currentSelection != -1){
+		    			t.getItem(currentSelection).setChecked(true);
+		    		}
+		    		t.deselect(currentSelection);
+		    		t.select(currentSelection + 1);
+		    		
+		    		
+		    	}
+		    });
 	      
-	      
+
 	      
   	      shell.pack();
           shell.open();
-          Display display = parent.getDisplay();
+          Display display = shell.getDisplay();
+          
+          
+	      
           while (!shell.isDisposed()) {
                   if (!display.readAndDispatch()) display.sleep();
           }
+
           return 1;
 	  }
 
+	  public void saveCurrentMatch(){
+		  	ISelection selection = viewer.getSelection();
+  			if (!selection.isEmpty()) {
+  				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+  				MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
+  				selected.setSmartItem(smartCombo1.getText());
+  			}
+  			viewer.refresh();
+	  }
+	  
+	  
 	  public TableViewer getViewer() {
 		  return viewer;
 	  }
 	  
 	// create the columns for the table
 	  private void createColumns(final Composite parent, final TableViewer viewer) {
-	    String[] titles = { "Matched", "MIST Item", "SMART Item"};
+	    String[] titles = { "", "MIST Item", "SMART Item"};
 	    int[] bounds = { 30, 240, 240};
 
 	    // first column is for the checkbox
@@ -238,9 +324,13 @@ public class MatchSessionDialog extends Dialog {
 	    col.setLabelProvider(new ColumnLabelProvider() {
 	      @Override
 	      public String getText(Object element) {
-	        //Matched p = (Person) element;
-	        //return p.getFirstName();
-	    	  return "checked";
+	    	  MatchRow row = (MatchRow) element;
+	    	  //TODO check the boxes for ones that are matched when opening a file, I think it should be here somehow.
+	    	  if(row.getMatched()){
+	    		  return "";
+	    	  }else{
+	    		  return "";
+	    	  }
 	      }
 	    });
 

@@ -1,9 +1,6 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.sql.Connection;
-import java.sql.ResultSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -15,16 +12,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.mist.dataReader.MistDatabase;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 
 public class DataModelMatcherDialog extends Composite {
 
-	Text txtFileName;
+	Text restoreFileName;
 	Text startMistTxtFileName;
 	Text mergeMistTxtFileName;
 	
@@ -67,9 +60,9 @@ public class DataModelMatcherDialog extends Composite {
 	    Label label_r1 = new Label(restore, SWT.NONE);
 	    label_r1.setText("Session File:");
 	    
-	    txtFileName = new Text(restore, SWT.BORDER);
-	    txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	    txtFileName.setToolTipText("The location of your session file to load.");
+	    restoreFileName = new Text(restore, SWT.BORDER);
+	    restoreFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    restoreFileName.setToolTipText("The location of your session file to load.");
 
 	    Button open = new Button(restore, SWT.PUSH);
 		open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
@@ -84,8 +77,50 @@ public class DataModelMatcherDialog extends Composite {
 	    		dlg.setFilterExtensions(new String[] {"*.csv"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
-	    			txtFileName.setText(fn);
+	    			restoreFileName.setText(fn);
 	    		}
+	    	}
+	    });
+	    
+	  //Existing go button
+		  
+	    Button r_open = new Button(restore, SWT.PUSH);
+		r_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,3,0));
+		((GridData)open.getLayoutData()).heightHint = 10;
+		r_open.setText("Restore Session");
+		r_open.addSelectionListener(new SelectionAdapter() {
+		
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		File existingSessionFile = new File(restoreFileName.getText());
+	    		if (!existingSessionFile.exists()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage("Match Session File not found: '" + existingSessionFile.toString() + "'" );
+	    			messageBox.open();
+	    			return;
+	    		}
+	    		
+	    		
+	    		MatchSession ms = new MatchSession(getShell());
+	    		ms.setSaveLocation(restoreFileName.getText());
+	    		String result = ms.loadSessionFromFile();
+	    		if(result != null){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage(result);
+	    			messageBox.open();
+	    			return;
+	    		}
+	    		
+	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
+	    		
+	    		matchSession.open();
+	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION
+	                    | SWT.YES | SWT.NO);
+	                messageBox.setMessage("Do you want to save your changes?");
+	                messageBox.setText("Exiting Application");
+	                int response = messageBox.open();
+	                if (response == SWT.YES)
+	              	  ms.save();
 	    	}
 	    });
 
@@ -180,52 +215,26 @@ public class DataModelMatcherDialog extends Composite {
 	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
 	    			messageBox.setMessage("SMART XML data model file not found: '" + xmlFile.toString() + "'" );
 	    			messageBox.open();
-	    		}
-
-	    		/*get this working off a real jaybird DB eventually.
-	    		try{
-	    			Connection c = MistDatabase.getConnection(dbFile.getAbsolutePath());
-	    		}catch(Exception exception){
-	    			 MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
-	    			  messageBox.setMessage("MIST database connection could not be established." + exception);
-	    			  int result = messageBox.open();
-	    		}
-	    		*/
+	    		}	    		
 	    		
 	    		
-	    		
-	    		MatchSession ms = new MatchSession();
-	    		
-	    		//get a save location and confirm file overwrite etc, probably do this later.
-	    		//ms.setSaveLocation(sessionFile);
-	    		//String sessionFile = CreateNewSession(txtFileName.getText());
-	    		
+	    		MatchSession ms = new MatchSession(getShell());
 	    		
 	    		ms.setMistLocation(startMistTxtFileName.getText());
 	    		ms.setSmartXmlLocation(startXMLFileName.getText());
 	    		
-	    		/*
-	    		try{
-	    		 
-	    			ResultSet rs = c
-	    				.createStatement()
-	    				.executeQuery(
-	    						"SELECT distinct D.DEPARTMENT_NAME, DU.UNIT_NAME FROM DEPARTMENT_UNITS DU LEFT JOIN DEPARTMENTS D ON D.DEPARTMENT_ID = DU.DEPARTMENT_ID "); //$NON-NLS-1$
-	    			while (rs.next()) {
-	    			    String[] entries = {rs.getString(1), rs.getString(2)};
-	    			    ms.addRow()...
-	    			}
-	    		}finally{
-	    			
-	    		}
-	    		*/
+	    		ms.loadRows();
 	    		
-	    		//Save to start, probably remove this eventually
-	    		//ms.save();
-
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
+	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION
+	                    | SWT.YES | SWT.NO);
+	                messageBox.setMessage("Do you want to save your changes?");
+	                messageBox.setText("Exiting Application");
+	                int response = messageBox.open();
+	                if (response == SWT.YES)
+	              	  ms.save();
 	    	}
 	    });
 
@@ -298,35 +307,4 @@ public class DataModelMatcherDialog extends Composite {
 		
 	}
 
-/*
- * parameter1 - location: If you already have a session file, confirm overwriting it or selecting a new file
- * 
- */
-	protected String CreateNewSession(String location) {
-		int response = -999;
-		File existing = new File(location);
-		if(existing.exists()){
-			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		    messageBox.setMessage("Do you want to overwrite your existing file, " + location + "?");
-		    messageBox.setText("Confirm Overwrite");
-		    response = messageBox.open();
-		}
-		if (response == SWT.NO || location.isEmpty()){
-			//ask for save location
-			FileDialog dialog = new FileDialog (getShell(), SWT.SAVE);
-			String [] filterNames = new String [] {"Session File"};
-			String [] filterExtensions = new String [] {"*.csv"};
-			String filterPath = "/";
-			dialog.setFilterNames (filterNames);
-			dialog.setFilterExtensions (filterExtensions);
-			dialog.setFilterPath (filterPath);
-			dialog.setFileName ("SessionName");
-			dialog.setText("Save Session As:");
-			location = dialog.open();
-		}
-		
-		return location;
-	}
-	
-    
 }
