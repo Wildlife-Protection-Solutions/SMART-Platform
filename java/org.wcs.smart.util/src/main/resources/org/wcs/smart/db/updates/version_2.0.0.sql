@@ -137,4 +137,24 @@ ALTER TABLE smart.screen_option_uuid
 -- update cross conservation area analysis name & id
 update smart.conservation_area set name = 'Cross Conservation Area Analysis', id = 'CCAA' where uuid = x'00000000000000000000000000000000';
   
+--permissions for configurable data model tables
+GRANT SELECT ON smart.configurable_model to manager;
+GRANT SELECT ON smart.cm_node to manager;
+GRANT SELECT ON smart.cm_attribute to manager;
+GRANT SELECT ON smart.cm_attribute_option to manager;
+GRANT SELECT ON smart.cm_attribute_list to manager;
+GRANT SELECT ON smart.cm_attribute_tree_node to manager;
+
+GRANT SELECT ON smart.configurable_model to data_entry;
+GRANT SELECT ON smart.cm_node to data_entry;
+GRANT SELECT ON smart.cm_attribute to data_entry;
+GRANT SELECT ON smart.cm_attribute_option to data_entry;
+GRANT SELECT ON smart.cm_attribute_list to data_entry;
+GRANT SELECT ON smart.cm_attribute_tree_node to data_entry;
+
+GRANT ALL PRIVILEGES ON smart.screen_option to manager;
+GRANT ALL PRIVILEGES ON smart.screen_option_uuid to manager;
+GRANT ALL PRIVILEGES ON smart.screen_option to data_entry;
+GRANT ALL PRIVILEGES ON smart.screen_option_uuid to data_entry;
+
 update smart.db_version set version = '2.0.0';

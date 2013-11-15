@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -165,27 +167,28 @@ public class GPSDataImport {
 			for(PatrolLegDay pld : modified){
 				addedWaypoints.addAll(pld.getWaypoints());
 			}
-			//TODO: ensure this is tested
-//			//remove unassigned waypoints
-//			for (Iterator<Waypoint> iterator = waypoints.iterator(); iterator.hasNext();) {
-//				Waypoint wpnt = (Waypoint) iterator.next();
-//				if (wpnt.getPatrolLegDay() == null){
-//					iterator.remove();
-//				}
-//			}
-			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{waypoints.size(), modified.size()});
-	
+			if (addedWaypoints.size() == 0){
+				//nothing imported; not date matched
+				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
+			}else{
+				message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{addedWaypoints.size(), modified.size()});
+			}	
 		}else{
 			modified.add(currentLeg);
-			
 			for (Waypoint w : waypoints){
-				
 				PatrolWaypoint pwp = new PatrolWaypoint();
 				pwp.setPatrolLegDay(currentLeg);
 				pwp.setWaypoint(w);				
 				
 				currentLeg.getWaypoints().add(pwp);
 				addedWaypoints.add(pwp);
+				if (op == ImportOption.SELECT){
+					Date wpdt = currentLeg.getDate();
+					if (pwp.getWaypoint().getDateTime() != null){
+						wpdt = SmartUtils.combineDateTime(wpdt, new Time(pwp.getWaypoint().getDateTime().getTime()));
+					}
+					pwp.getWaypoint().setDateTime(wpdt);
+				}
 			}
 			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImportedCurrentDay, new Object[]{waypoints.size()});
 		}
@@ -598,20 +601,37 @@ public class GPSDataImport {
 			wpdt = wptType.getTime().toGregorianCalendar().getTime();
 		} else if (wptType.getCmt() != null) {
 			try {
-				// am-pm
+				// am-pm in system locale
 				SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy h:mm:ssa"); //$NON-NLS-1$
 				wpdt = sdf.parse(wptType.getCmt());
 			} catch (ParseException e) {
 			}
+			
 			if (wpdt == null) {
 				try {
 					// 24hr
-					SimpleDateFormat sdf = new SimpleDateFormat(
-							"dd-MMM-yy H:mm:ss"); //$NON-NLS-1$
+					SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy H:mm:ss"); //$NON-NLS-1$
 					wpdt = sdf.parse(wptType.getCmt());
 				} catch (ParseException e) {
 				}
 			}
+			
+			if (!Locale.getDefault().equals(Locale.ENGLISH)){
+				try {
+					// am-pm in english locale
+					SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy h:mm:ssa", Locale.ENGLISH); //$NON-NLS-1$
+					wpdt = sdf.parse(wptType.getCmt());
+				} catch (ParseException e) {
+				}
+				try {
+					// 24hr in english locale
+					SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy H:mm:ss", Locale.ENGLISH); //$NON-NLS-1$
+					wpdt = sdf.parse(wptType.getCmt());
+				} catch (ParseException e) {
+				}
+			}
+			
+			
 			if (wpdt == null) {
 				try {
 					// short
@@ -719,7 +739,7 @@ public class GPSDataImport {
 					} else  {
 						// only import waypoints whose imported date match the
 						// given date
-						if (SmartUtils.getDatePart(newwp.getDateTime(), false).equals(plddt)) {
+						if (newwp.getDateTime() != null && SmartUtils.getDatePart(newwp.getDateTime(), false).equals(plddt)) {
 							newwaypoints.add(newwp);
 						}
 					}
