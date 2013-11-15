@@ -46,6 +46,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -97,6 +98,11 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	@Override
 	protected void okPressed() {
 		newWaypoint = new PatrolWaypoint();
+		Waypoint wp = new Waypoint();
+		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+		wp.setConservationArea(SmartDB.getCurrentConservationArea());
+		newWaypoint.setWaypoint(wp);
+		
 		newWaypoint.getWaypoint().setId(Integer.parseInt(txtWaypointId.getText()));
 		newWaypoint.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 		newWaypoint.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());

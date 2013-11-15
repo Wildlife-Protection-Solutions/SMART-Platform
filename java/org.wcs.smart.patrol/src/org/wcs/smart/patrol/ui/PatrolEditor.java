@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.ui;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +47,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -63,6 +66,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.util.SmartUtils;
 
@@ -350,19 +354,93 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		savePatrolPart(patrolLegDay);
 	}
 	
-	private SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
 	
+	public Job moveWaypoints(final Collection<PatrolWaypoint> toSave, final Collection<PatrolWaypoint> toDelete){
+		Job moveJob = new Job(SAVE_PATROL_JOB_NAME) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session saveSession = HibernateManager
+						.openSession(new WaypointAttachmentInterceptor());
+				try{
+					saveSession.beginTransaction();
+					
+					/* delete waypoints */
+					for (PatrolWaypoint wp : toDelete) {
+						saveSession.delete(wp);
+						saveSession.delete(wp.getWaypoint());					
+					}
+					/* save waypoints */
+					for (PatrolWaypoint wp : toSave) {
+						wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+						wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
+						saveSession.saveOrUpdate(wp.getWaypoint());
+						saveSession.saveOrUpdate(wp);
+						
+						// remove observations with no data
+						if (wp.getWaypoint().getObservations() != null) {
+							for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
+								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+								for (WaypointObservationAttribute att : wo.getAttributes()) {
+									if (!att.hasValue()) {
+										toDelete.add(att);
+									}
+								}
+								wo.getAttributes().removeAll(toDelete);
+							}
+						}
+					}
+					
+					saveSession.getTransaction().commit();
+				}catch (Exception ex){
+					if (saveSession.getTransaction().isActive()){
+						saveSession.getTransaction().rollback();
+					}
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
+				}finally{
+					saveSession.close();
+				}
+				
+				/* fire events */
+				for (PatrolWaypoint wp : toDelete){
+					try{
+						PatrolEventManager.getInstance().waypointDeleted(wp);
+					}catch (Exception ex){
+						SmartPatrolPlugIn.log("Error firing event after waypoint delete.", ex); //$NON-NLS-1$
+					}
+				}
+				for (PatrolWaypoint wp : toSave){
+					try{
+						PatrolEventManager.getInstance().waypointModified(wp);
+					}catch (Exception ex){
+						SmartPatrolPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		moveJob.schedule();
+		return moveJob;
+		
+	}
 	/**
 	 * Saves the collection of waypoints.
 	 * 
 	 * @param waypoints
 	 */
-	public void save(Collection<PatrolWaypoint> waypoints) {
+	public Job save(Collection<PatrolWaypoint> waypoints) {
+		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
 		saveWaypointJob.setWaypoints(waypoints);
 		saveWaypointJob.schedule();
+		return saveWaypointJob;
 	}
 	
-	public void delete(final Collection<PatrolWaypoint> waypoints) {
+	/**
+	 * Deletes the collection of waypoints in a separate thread.
+	 * 
+	 * @param waypoints
+	 * @return the job responsible for deleting waypoints
+	 */
+	public Job delete(final Collection<PatrolWaypoint> waypoints) {
 		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -372,6 +450,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					saveSession.beginTransaction();
 					for (PatrolWaypoint wp : waypoints) {
 						saveSession.delete(wp);
+						saveSession.delete(wp.getWaypoint());					
 					}
 					saveSession.getTransaction().commit();
 				}catch (Exception ex){
@@ -394,6 +473,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}
 		};
 		saveJob.schedule();
+		return saveJob;
 	}
 	
 	private void savePatrolPart(final Object object){
