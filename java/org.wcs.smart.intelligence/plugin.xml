@@ -82,6 +82,15 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.intelligence.EditIntelligenceSources"
+                  label="%sourceedit.command.label"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.intelligence.separator2"
+                  visible="true">
+            </separator>
+            <command
                   commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
                   label="%view.command.label"
                   style="push"
@@ -285,6 +294,10 @@
             id="org.wcs.smart.intelligence.import"
             name="%import.command.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.EditIntelligenceSources"
+            name="%sourceedit.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -339,6 +352,10 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ImportIntelligenceHandler"
             commandId="org.wcs.smart.intelligence.import">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.EditIntelligenceSourceHandler"
+            commandId="org.wcs.smart.intelligence.EditIntelligenceSources">
       </handler>
    </extension>
    <extension
