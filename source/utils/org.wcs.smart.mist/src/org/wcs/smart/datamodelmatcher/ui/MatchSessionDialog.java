@@ -3,14 +3,12 @@ package org.wcs.smart.datamodelmatcher.ui;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -18,6 +16,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 
 
@@ -41,7 +42,7 @@ public class MatchSessionDialog extends Dialog {
 	//private static final Image CHECKED = Activator.getImageDescriptor("icons/checked.gif").createImage(); 
 	//private static final Image UNCHECKED = Activator.getImageDescriptor("icons/unchecked.gif").createImage();
 
-	private Text totalMatched;
+	private Label totalMatched;
 	  
 	private Text mistText1;
 	private Text mistText2;
@@ -54,14 +55,19 @@ public class MatchSessionDialog extends Dialog {
 	
 	private Button save;
 	private Button next;
+	private Button done;
 	
 	public MatchSessionDialog(Shell parentShell, MatchSession ms) {
 	    super(parentShell);
         shell = new Shell(parentShell, SWT.SHELL_TRIM);
-        shell.setText("Match Session");
+        Point size = shell.computeSize(-1, -1);
+        Rectangle screen = shell.getDisplay().getMonitors()[0].getBounds();
+        shell.setBounds(50, 50, size.x, size.y);    
+        shell.setText("Match Session - " + ms.getSaveLocation());
 	    this.ms = ms;
 	  }
-
+	
+	
 	  public int open() {
 
           
@@ -83,7 +89,7 @@ public class MatchSessionDialog extends Dialog {
 
   	      //left
   	      Composite left = new Composite(main, SWT.None);
-		  GridLayout llayout = new GridLayout(2, false);
+		  GridLayout llayout = new GridLayout(3, false);
 	      left.setLayout(llayout);
 	    
 	      GridData leftGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
@@ -105,10 +111,10 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      viewer.setContentProvider(new ArrayContentProvider());
 	      viewer.setInput(ms.getRows());
-	      viewer.setComparator(new TableColumnSorter(viewer));
+	      //viewer.setComparator(new TableColumnSorter(viewer));
 	      
 	   // define layout for the viewer
-	      GridData tgridData = new GridData(SWT.FILL,SWT.FILL, true, true,2,0);
+	      GridData tgridData = new GridData(SWT.FILL,SWT.FILL, true, true,3,0);
 	      //tgridData.widthHint = 510;
 	      tgridData.heightHint = 500;
 	      viewer.getControl().setLayoutData(tgridData);
@@ -116,18 +122,8 @@ public class MatchSessionDialog extends Dialog {
 	      viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
-			public void selectionChanged(SelectionChangedEvent arg0) {
-				
-				ISelection selection = viewer.getSelection();
-	    		if (!selection.isEmpty()) {
-	    		   IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
-	    		   MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
-	    		   
-	    		   mistText1.setText(selected.getMistItem().getText());
-	    		   mistText2.setText(selected.getMistItem().getText());
-	    		   mistText3.setText(selected.getMistItem().getText());
-
-	    		}
+			public void selectionChanged(SelectionChangedEvent arg0) {		
+				ViewerSelectionChanged();
 			}
 	      });
 	      
@@ -135,8 +131,25 @@ public class MatchSessionDialog extends Dialog {
 	   // end Viewer---------------------------------------------------------------------------------
 	      
 
-	      totalMatched = new Text(left, SWT.NONE);
+	      totalMatched = new Label(left, SWT.READ_ONLY);
 	      totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );
+	      GridData totalGridData = new GridData(SWT.FILL,SWT.FILL, false, false);
+	      totalGridData.widthHint = 115;
+	      totalMatched.setLayoutData(totalGridData);
+	      
+	      done = new Button(left, SWT.NONE);
+	      done.setText("Matching Complete - Exit");
+	      GridData doneGridData = new GridData(SWT.CENTER,SWT.FILL, false, false);
+	      done.setLayoutData(doneGridData);
+	      done.setVisible(false);
+	      done.addSelectionListener(new SelectionAdapter() {	
+		    	@Override
+		    	public void widgetSelected(SelectionEvent e) {
+		    		ms.save();
+		    		shell.dispose();
+		    	}
+		    });
+	      
 	      
 	      save = new Button(left, SWT.NONE);
 	      save.setText("   Save Session   ");
@@ -151,6 +164,7 @@ public class MatchSessionDialog extends Dialog {
 		    		save.setEnabled(false);
 		    	}
 		    });
+	      
 	      
 	      //------------------------------------------------------------------------------------------
 	      //Right side components
@@ -189,20 +203,21 @@ public class MatchSessionDialog extends Dialog {
 	      m1.widthHint = 250;
 	      mistText1.setLayoutData(m1);
 	      
-	      
+	      mistText1.setEnabled(false);
 	      
 	      Label mistLabel2 = new Label(topRight, SWT.NONE);
 	      mistLabel2.setText("Observation:" );
 	      
 	      mistText2 = new Text(topRight, SWT.NONE);
 	      mistText2.setLayoutData(m1);
-	      
+	      mistText2.setEnabled(false);
 	      
 	      Label mistLabel3 = new Label(topRight, SWT.NONE);
 	      mistLabel3.setText("Remark:" );
 	      
 	      mistText3 = new Text(topRight, SWT.NONE);
 	      mistText3.setLayoutData(m1);
+	      mistText3.setEnabled(false);
 	      //end of Top Right elements--------------------------------------
 	      
 	      
@@ -230,6 +245,7 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      smartCombo1 =  new Combo (bottomRight, SWT.READ_ONLY);
 	  	  smartCombo1.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
+	  	  smartCombo1.setEnabled(false);
 	  	  smartCombo1.addModifyListener(new ModifyListener() {
 			
 			@Override
@@ -245,6 +261,7 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      smartCombo2 =  new Combo (bottomRight, SWT.READ_ONLY);
 	  	  smartCombo2.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
+	  	smartCombo2.setEnabled(false);
 	      
 	      
 	      
@@ -253,6 +270,7 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      smartCombo3 =  new Combo (bottomRight, SWT.READ_ONLY);
 	  	  smartCombo3.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
+	  	smartCombo3.setEnabled(false);
 	      //end of bottom Right elements--------------------------------------
 	  	  
 	  	  //Bottom right Buttons
@@ -270,17 +288,10 @@ public class MatchSessionDialog extends Dialog {
 		    	@Override
 		    	public void widgetSelected(SelectionEvent e) {
 		    		saveCurrentMatch();
-		    		totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );
-		    		
-		    		Table t = viewer.getTable();
-		    		int currentSelection = t.getSelectionIndex();
-		    		if(currentSelection != -1){
-		    			t.getItem(currentSelection).setChecked(true);
+		    		totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );		
+		    		if( ms.getNumMatched() == ms.getNumTotal()){
+		    			done.setVisible(true);
 		    		}
-		    		t.deselect(currentSelection);
-		    		t.select(currentSelection + 1);
-		    		
-		    		
 		    	}
 		    });
 	      
@@ -299,13 +310,44 @@ public class MatchSessionDialog extends Dialog {
           return 1;
 	  }
 
-	  public void saveCurrentMatch(){
+	  protected void ViewerSelectionChanged() {
+		ISelection selection = viewer.getSelection();
+  		if (!selection.isEmpty()) {
+  			mistText1.setEnabled(true);
+  			mistText2.setEnabled(true);
+  			mistText3.setEnabled(true);
+  			smartCombo1.setEnabled(true);
+  			smartCombo2.setEnabled(true);
+  			smartCombo3.setEnabled(true);
+  		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+  		    MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
+  		   
+  		    mistText1.setText(selected.getMistItem().getText());
+  		    mistText2.setText(selected.getMistItem().getText());
+  		    mistText3.setText(selected.getMistItem().getText());
+  		}
+	}
+
+	public void saveCurrentMatch(){
+		    
 		  	ISelection selection = viewer.getSelection();
   			if (!selection.isEmpty()) {
   				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   				MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
-  				selected.setSmartItem(smartCombo1.getText());
+	    		selected.setSmartItem(smartCombo1.getText());
   			}
+  			viewer.refresh();
+  			
+  			Table t = viewer.getTable();
+    		int currentSelection = t.getSelectionIndex();
+    		if(currentSelection != -1){
+    			t.getItem(currentSelection).setChecked(true);
+    		}
+    		t.deselect(currentSelection);
+    		t.select(currentSelection + 1);
+    		
+    		
+    		ViewerSelectionChanged();
   			viewer.refresh();
 	  }
 	  
@@ -368,5 +410,11 @@ public class MatchSessionDialog extends Dialog {
 		    column.setMoveable(true);
 		    return viewerColumn;
 		  }
-
+	  
+	  
+	  public Point getCenterPoint() {
+			Shell parentShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			Rectangle shellBounds = parentShell.getBounds();
+			return new Point(shellBounds.x + shellBounds.width / 2, (shellBounds.y + shellBounds.height) / 2);
+		}
 }

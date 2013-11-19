@@ -210,11 +210,13 @@ public class DataModelMatcherDialog extends Composite {
 	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
 	    			messageBox.setMessage("MIST database file not found: '" + dbFile.toString() + "'" );
 	    			messageBox.open();
+	    			return;
 	    		}
 	    		if (!xmlFile.exists()){
 	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
 	    			messageBox.setMessage("SMART XML data model file not found: '" + xmlFile.toString() + "'" );
 	    			messageBox.open();
+	    			return;
 	    		}	    		
 	    		
 	    		
