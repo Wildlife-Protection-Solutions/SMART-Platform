@@ -47,7 +47,6 @@ import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFacto
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.BracketFilter;
@@ -59,6 +58,7 @@ import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -91,7 +91,7 @@ public class DerbyFilterToSqlGenerator {
 		}else if (filter instanceof CategoryFilter){
 			return asSql((CategoryFilter)filter, engine);
 		}else if (filter instanceof EmptyFilter){
-			return "";
+			return ""; //$NON-NLS-1$
 		}else if (filter instanceof NotExpression){
 			return asSql((NotExpression)filter, engine);
 		}else if (filter instanceof PatrolFilter){
@@ -104,7 +104,7 @@ public class DerbyFilterToSqlGenerator {
 			return asSql((IExtensionFilter)filter, engine);
 		}
 		
-		throw new SQLException("Filter type " + filter.getClass().getCanonicalName() + " not supported.");
+		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_FilterTypeNotSupported, new Object[]{filter.getClass().getCanonicalName()}));
 		
 	}
 	
@@ -180,14 +180,14 @@ public class DerbyFilterToSqlGenerator {
 	private static String asSql(BooleanExpression filter, DerbyQueryEngine2 engine) throws SQLException{
 		String part1 = toSql(filter.getFilter1(), engine);
 		String part2 = toSql(filter.getFilter2(), engine);
-		return part1 + " " + asSql(filter.getOperator()) + " " + part2;
+		return part1 + " " + asSql(filter.getOperator()) + " " + part2; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/*
 	 * bracket filter
 	 */
 	private static String asSql(BracketFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		return "( " + toSql(filter.getFilter(), engine) + " )";
+		return "( " + toSql(filter.getFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/*
@@ -199,7 +199,7 @@ public class DerbyFilterToSqlGenerator {
 			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
 		}
 		
-		String keyPart = filter.getCategoryKey(); //$NON-NLS-1$
+		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
 		if (prefix == null){
 			throw new IllegalStateException(Messages.CategoryFilter_InvalidPrefix);
@@ -337,23 +337,23 @@ public class DerbyFilterToSqlGenerator {
 	 * Date Filter
 	 */
 	private static String asSql(DateFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		String table = "";
-		String field = "";
+		String table = ""; //$NON-NLS-1$
+		String field = ""; //$NON-NLS-1$
 		
 		if (filter.getDateFieldOption() == PatrolEndDateField.INSTANCE){
 			table = engine.tablePrefix(Patrol.class);
-			field = "end_date";
+			field = "end_date"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == PatrolStartDateField.INSTANCE){
 			table = engine.tablePrefix(Patrol.class);
-			field = "start_date";
+			field = "start_date"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
 			table = engine.tablePrefix(PatrolLegDay.class);
-			field = "patrol_day";
+			field = "patrol_day"; //$NON-NLS-1$
 		}else{
-			throw new SQLException("Date filter " + filter.getDateFieldOption().getGuiName() + " not supported.");
+			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
 		}
 		
-		field = table + "." + field;
+		field = table + "." + field; //$NON-NLS-1$
 		
 		java.sql.Date[] bits = filter.getDateFilterOption().getDates(); 
 		String f = ""; //$NON-NLS-1$
@@ -380,30 +380,30 @@ public class DerbyFilterToSqlGenerator {
 	 */
 	public static String asSql(Operator op) throws SQLException{
 		if (op == Operator.EQUALS){
-			return "=";
+			return "="; //$NON-NLS-1$
 		}else if (op == Operator.LESSTHAN){
-			return "<";
+			return "<"; //$NON-NLS-1$
 		}else if (op == Operator.LESSTHANEQUALS){
-			return "<=";
+			return "<="; //$NON-NLS-1$
 		}else if (op == Operator.GREATERTHAN){
-			return ">";
+			return ">"; //$NON-NLS-1$
 		}else if (op == Operator.GREATERTHANEQUALS){
-			return ">=";
+			return ">="; //$NON-NLS-1$
 		}else if (op == Operator.NOTEQUALS){
-			return "<>";
+			return "<>"; //$NON-NLS-1$
 		}else if (op == Operator.STR_EQUALS){
-			return "=";
+			return "="; //$NON-NLS-1$
 		}else if (op == Operator.STR_CONTAINS){
-			return "like";
+			return "like"; //$NON-NLS-1$
 		}else if (op == Operator.STR_NOTCONTAINS){
-			return "not like";
+			return "not like"; //$NON-NLS-1$
 		}else if (op == Operator.AND){
-			return "and";
+			return "and"; //$NON-NLS-1$
 		}else if (op == Operator.OR){
-			return "or";
+			return "or"; //$NON-NLS-1$
 		}else if (op == Operator.NOT){
-			return "not";
+			return "not"; //$NON-NLS-1$
 		}
-		throw new SQLException("Operator " +op.getGuiValue() + " not supported.");
+		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_OperatorNotSupported, new Object[]{op.getGuiValue()}));
 	}
 }

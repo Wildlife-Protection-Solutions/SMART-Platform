@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.definition;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
@@ -29,6 +30,7 @@ import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -74,21 +76,21 @@ public class DefinitionPanelManager {
 	 * @return
 	 */
 	public IDefinitionPanel createDefinitionPanel(String panelId){
-		String isValidAttribute = "isSingleCa";
+		String isValidAttribute = "isSingleCa"; //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
-			isValidAttribute ="isMultiCa";
+			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
 		}
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IDefinitionPanel.PANEL_EXTENSION_ID);
 		for (IConfigurationElement e : config) {
-			String id = e.getAttribute("id");
+			String id = e.getAttribute("id"); //$NON-NLS-1$
 			Boolean isValid = Boolean.valueOf(e.getAttribute(isValidAttribute));
 			 			            
 			if (isValid && id.equals(panelId)){
 				try {
-					return (IDefinitionPanel)e.createExecutableExtension("panel");
+					return (IDefinitionPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
 				} catch (CoreException ex) {
-					QueryPlugIn.log("Error creating definition panel for id : " + panelId, ex);
+					QueryPlugIn.log(MessageFormat.format(Messages.DefinitionPanelManager_QueryEditingPanelError, new Object[]{panelId}), ex);
 				}
 			}
 		}
@@ -103,14 +105,14 @@ public class DefinitionPanelManager {
 	 * @return <code>true</code> if panel applicable, <code>false</code> otherwise
 	 */
 	public boolean isValid(String panelId){
-		String isValidAttribute = "isSingleCa";
+		String isValidAttribute = "isSingleCa"; //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
-			isValidAttribute ="isMultiCa";
+			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
 		}
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IDefinitionPanel.PANEL_EXTENSION_ID);
 		for (IConfigurationElement e : config) {
-			String id = e.getAttribute("id");
+			String id = e.getAttribute("id"); //$NON-NLS-1$
 			if (id.equals(panelId)){
 				return Boolean.valueOf(e.getAttribute(isValidAttribute));
 			}
@@ -145,12 +147,12 @@ public class DefinitionPanelManager {
 		
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IQueryItemPanel.EXTENSION_ID);
 		for (IConfigurationElement e : config) {
-			String id = e.getAttribute("id");
+			String id = e.getAttribute("id"); //$NON-NLS-1$
 			if (id.equals(panelId)){
 				try {
-					return (IQueryItemPanel)e.createExecutableExtension("panel");
+					return (IQueryItemPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
 				} catch (CoreException ex) {
-					QueryPlugIn.log("Error creating definition panel for id : " + panelId, ex);
+					QueryPlugIn.log(MessageFormat.format(Messages.DefinitionPanelManager_QueryItemPanelError, new Object[]{panelId}), ex);
 				}
 			}
 		}

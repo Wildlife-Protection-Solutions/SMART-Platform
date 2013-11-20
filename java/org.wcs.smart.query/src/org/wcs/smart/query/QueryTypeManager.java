@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 /**
@@ -41,6 +42,8 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 public class QueryTypeManager {
 
 	private static QueryTypeManager instance = null;
+	
+	private IQueryType[] allTypes;
 	private IQueryType[] supportedTypes;
 	private List<QueryTypeWrapper> types;
 	
@@ -65,7 +68,7 @@ public class QueryTypeManager {
 	 * @return
 	 */
 	public IQueryType findQueryType(String typeKey){
-		for (IQueryType type : getSupportedQueryTypes()){
+		for (IQueryType type : getAllQueryTypes()){
 			if (type.getKey().equals(typeKey)){
 				return type;
 			}
@@ -88,7 +91,7 @@ public class QueryTypeManager {
 			getSupportedQueryTypes();
 		}
 		for (QueryTypeWrapper q : types){
-			if (q.queryType.equals(qType)){
+			if (q.queryType.getKey().equals(qType.getKey())){
 				return q.itemPanels.get(definitionId);
 			}
 		}
@@ -105,7 +108,7 @@ public class QueryTypeManager {
 			getSupportedQueryTypes();
 		}
 		for (QueryTypeWrapper q : types){
-			if (q.queryType.equals(qType)){
+			if (q.queryType.getKey().equals(qType.getKey())){
 				return q.definitionPanels.toArray(new String[q.definitionPanels.size()]);
 			}
 		}
@@ -113,57 +116,103 @@ public class QueryTypeManager {
 	}
 	
 	/**
+	 * <p>This includes only the query types
+	 * that support the current system configuration.  If
+	 * the system is performing cross conservation area 
+	 * analysis this will only return query types that support
+	 * cross ca analysis.  The same is true for
+	 * single analysis.</p>
+	 * This function should only be called once you are logged
+	 * into a conservation area; otherwise it will
+	 * throw an exception
 	 * 
 	 * @return array of all supported query types
+	 * for the current system configuration
 	 */
 	public IQueryType[] getSupportedQueryTypes() {
-		if (this.supportedTypes != null){
-			return this.supportedTypes;
+		if (this.supportedTypes == null){
+			findSupportedType();
 		}
+		return this.supportedTypes;
+	}
 	
-		boolean isSingle = !SmartDB.isMultipleAnalysis();
+	/**
+	 * 
+	 * @return array of all supported query types
+	 * irregardless of system configuration
+	 */
+	public IQueryType[] getAllQueryTypes() {
+		if (this.allTypes == null){
+			readAllTypes();
+		}
+		return this.allTypes;
+	}
+	
+	/**
+	 * Reads the query type extension point
+	 * and loads all query types
+	 * 
+	 * @return
+	 */
+	private void readAllTypes() {
 		
-		List<IQueryType> sTypes = new ArrayList<IQueryType>();
-		types = new ArrayList<QueryTypeWrapper>();
-		
+		List<IQueryType> aTypes = new ArrayList<IQueryType>();
+		List<QueryTypeWrapper> ltypes = new ArrayList<QueryTypeWrapper>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
 		for (IConfigurationElement e : config) {
-			IQueryType qType;
 			try {
-				qType = (IQueryType) e.createExecutableExtension("class");
-								
-				boolean add = false;
-				if (!isSingle && qType.supportsCrossCaQueries()){
-					add = true;
-				}else if (isSingle && qType.supportsSingleCaQueries()){
-					add = true;
-				}
-				if (add){
-					QueryTypeWrapper wrapper = new QueryTypeWrapper(qType);
-					IConfigurationElement defs[] = e.getChildren("DefinitionPanel");
-					for (IConfigurationElement def : defs){
-						String id = def.getAttribute("id");
+				IQueryType qType = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
+				aTypes.add(qType);
+				
+				QueryTypeWrapper wrapper = new QueryTypeWrapper(qType);
+				IConfigurationElement defs[] = e.getChildren("DefinitionPanel"); //$NON-NLS-1$
+				for (IConfigurationElement def : defs){
+					String id = def.getAttribute("id"); //$NON-NLS-1$
 
-						if (DefinitionPanelManager.getInstance().isValid(id)){
-							wrapper.definitionPanels.add(id);
-						
-							String pid = def.getAttribute("itemPanelId");
-							wrapper.itemPanels.put(id, pid);
-						}
+					if (DefinitionPanelManager.getInstance().isValid(id)){
+						wrapper.definitionPanels.add(id);
+					
+						String pid = def.getAttribute("itemPanelId"); //$NON-NLS-1$
+						wrapper.itemPanels.put(id, pid);
 					}
-					sTypes.add(qType);
-					types.add(wrapper);
 				}
+				ltypes.add(wrapper);
 			} catch (CoreException e1) {
-				QueryPlugIn.log("Error reading query type extension points", e1);
+				QueryPlugIn.log(Messages.QueryTypeManager_QueryTypeError, e1);
 			}
-			
+		}
+		this.allTypes = aTypes.toArray(new IQueryType[aTypes.size()]);
+		this.types = ltypes;
+	}
+	
+	/*
+	 * Determines which query types
+	 * are allowed for the current configuration.
+	 * 
+	 */
+	private void findSupportedType(){
+		if (allTypes == null){
+			readAllTypes();
+		}
+		
+		boolean isSingle = !SmartDB.isMultipleAnalysis();
+		
+		List<IQueryType> sTypes = new ArrayList<IQueryType>();
+		for (IQueryType qType: allTypes){
+			boolean add = false;
+			if (!isSingle && qType.supportsCrossCaQueries()){
+				add = true;
+			}else if (isSingle && qType.supportsSingleCaQueries()){
+				add = true;
+			}
+			if (add){
+				sTypes.add(qType);
+			}
 		}
 		this.supportedTypes = sTypes.toArray(new IQueryType[sTypes.size()]);
-		return this.supportedTypes;
-
 	}
+
 
 	private class QueryTypeWrapper{
 		

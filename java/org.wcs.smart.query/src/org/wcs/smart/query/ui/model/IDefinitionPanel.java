@@ -31,7 +31,10 @@ import org.wcs.smart.query.model.QueryProxy;
  */
 public interface IDefinitionPanel {
 	
-	public static final String PANEL_EXTENSION_ID = "org.wcs.smart.query.queryDefinitionPanel";
+	/**
+	 * Query definition panel extension id
+	 */
+	public static final String PANEL_EXTENSION_ID = "org.wcs.smart.query.queryDefinitionPanel"; //$NON-NLS-1$
 	
 	/**
 	 * unique identifier for the panel

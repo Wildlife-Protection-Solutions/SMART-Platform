@@ -67,7 +67,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		
 		int id = 0;
 		for (IQueryType type : types){
-			Query a = session.createQuery("select max(id) from " + type.getHibernateClass().getSimpleName() + " where conservationArea = :ca"); //$NON-NLS-1$
+			Query a = session.createQuery("select max(id) from " + type.getHibernateClass().getSimpleName() + " where conservationArea = :ca"); //$NON-NLS-1$ //$NON-NLS-2$
 			a.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			List<?> dataa = a.list();
 			if( dataa != null && dataa.size() >= 1 && dataa.get(0) != null){

@@ -11,9 +11,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
+/**
+ * Key generator for generating keys for given tables from names.
+ * Tests on teams, mandates, and transport types.
+ * 
+ * @author Emily
+ *
+ */
 public class KeyGenerator {
-	private static final String INVALID_START_CHARS_KEY_PATTERN = "[^a-z]+"; //$NON-NLS-1$
-	private static final String VALID_DM_KEY_PATTERN = "[a-z]{1}[a-z0-9_]*"; //$NON-NLS-1$
+	private static final String INVALID_START_CHARS_KEY_PATTERN = "[^a-z]+"; 
 	
 	public void generateKeys(Connection c, String tableName) throws Exception{
 		

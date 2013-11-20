@@ -22,6 +22,8 @@
 
 package org.wcs.smart.query.model.filter.date;
 
+import org.wcs.smart.query.internal.Messages;
+
 /**
  * Waypoint date field filter
  * @author Emily
@@ -35,12 +37,12 @@ public class WaypointDateField implements IDateFieldFilter {
 	
 	@Override
 	public String getGuiName() {
-		return "Waypoint Date";
+		return Messages.WaypointDateField_WaypointDateFieldName;
 	}
 
 	@Override
 	public String getKey() {
-		return "waypointdate";
+		return "waypointdate"; //$NON-NLS-1$
 	}
 
 }

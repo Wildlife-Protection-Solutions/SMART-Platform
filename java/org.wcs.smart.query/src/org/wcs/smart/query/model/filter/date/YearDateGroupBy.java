@@ -50,12 +50,12 @@ public class YearDateGroupBy implements IDateGroupBy {
 	
 	@Override
 	public String getKey() {
-		return "year";
+		return "year"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getGuiName() {
-		return "Year";
+		return Messages.YearDateGroupBy_GroupByYearLabel;
 	}
 
 	@Override

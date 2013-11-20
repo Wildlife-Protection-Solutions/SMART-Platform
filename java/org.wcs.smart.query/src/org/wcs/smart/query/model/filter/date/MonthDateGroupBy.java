@@ -48,12 +48,12 @@ public class MonthDateGroupBy implements IDateGroupBy {
 	
 	@Override
 	public String getKey() {
-		return "month";
+		return "month"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getGuiName() {
-		return "Month";
+		return Messages.MonthDateGroupBy_MonthGroupByName;
 	}
 
 	@Override

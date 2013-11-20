@@ -44,7 +44,7 @@ import org.wcs.smart.query.ui.model.DropItem;
  */
 public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 
-	public static String ID = "org.wcs.smart.patrol.query.PatrolValueRateFilterPanel";
+	public static String ID = "org.wcs.smart.patrol.query.PatrolValueRateFilterPanel"; //$NON-NLS-1$
 	
 	public SimpleValueRateFilterPanel() {
 		super();
@@ -57,7 +57,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 	
 	@Override
 	protected FilterDefinitionPanel createFilterPanel(PanelType type) {
-		return new SimplePatrolFilterPanel(ID + "." + type.name());
+		return new SimplePatrolFilterPanel(ID + "." + type.name()); //$NON-NLS-1$
 	}
 	
 	

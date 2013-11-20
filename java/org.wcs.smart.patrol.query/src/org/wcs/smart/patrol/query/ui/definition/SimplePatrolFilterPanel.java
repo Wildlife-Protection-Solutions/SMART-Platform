@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.ui.definition;
 
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
 /**
  * Simple filter panel for patrol, observation and incident queries.
@@ -29,7 +30,7 @@ import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
  */
 public class SimplePatrolFilterPanel extends FilterDefinitionPanel {
 	
-	public static String ID  = "org.wcs.smart.patrol.query.SimplePatrolFilterPanel";
+	public static String ID  = "org.wcs.smart.patrol.query.SimplePatrolFilterPanel"; //$NON-NLS-1$
 	
 	private String id = ID;
 	
@@ -48,7 +49,7 @@ public class SimplePatrolFilterPanel extends FilterDefinitionPanel {
 
 	@Override
 	public String getGuiName() {
-		return "Filters";
+		return Messages.SimplePatrolFilterPanel_PanelTitle;
 	}
 
 	@Override

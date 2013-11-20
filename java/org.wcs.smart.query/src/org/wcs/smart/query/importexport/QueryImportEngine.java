@@ -76,7 +76,7 @@ public class QueryImportEngine {
 					return importer;
 				}
 			}catch (Exception ex){
-				QueryPlugIn.log("Error determining query importer.", ex);
+				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound, new Object[]{query.getGuiName()}),ex);
 			}
 		}
 		return null;

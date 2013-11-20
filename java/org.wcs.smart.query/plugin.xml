@@ -828,7 +828,7 @@
    <extension
          point="org.wcs.smart.ca.deleteAdvisor">
       <DeleteAdvisor
-            advisor="org.wcs.smart.internal.ca.advisors.EmployeeDeleteAdvisor"
+            advisor="org.wcs.smart.query.QueryEmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
    </extension>

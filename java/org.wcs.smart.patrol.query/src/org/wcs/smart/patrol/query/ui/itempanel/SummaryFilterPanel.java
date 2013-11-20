@@ -59,7 +59,7 @@ import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
  */
 public class SummaryFilterPanel extends AbstractQueryItemPanel{
 	
-	public static final String ID = "org.wcs.smart.query.patrol.summaryItemPanel";
+	public static final String ID = "org.wcs.smart.query.patrol.summaryItemPanel"; //$NON-NLS-1$
 	
 	private TreeViewer filterTreeViewer;
 	private Composite main;

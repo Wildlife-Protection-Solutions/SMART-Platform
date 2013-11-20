@@ -40,7 +40,7 @@ public class AllDatesFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "alldates";
+		return "alldates"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class AllDatesFilter implements IDateFilter {
 
 	@Override
 	public String getLabel() {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override

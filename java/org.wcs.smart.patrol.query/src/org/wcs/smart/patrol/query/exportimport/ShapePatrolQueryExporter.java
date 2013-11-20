@@ -123,6 +123,7 @@ public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQu
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor)
 			throws Exception {

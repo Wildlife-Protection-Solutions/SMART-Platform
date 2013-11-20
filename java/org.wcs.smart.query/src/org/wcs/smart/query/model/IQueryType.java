@@ -34,7 +34,11 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
  */
 public interface IQueryType {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.query.queryType";
+	/**
+	 * Query type extension point id.
+	 */
+	public static final String EXTENSION_ID = "org.wcs.smart.query.queryType"; //$NON-NLS-1$
+	
 	/**
 	 * 
 	 * @return the hibernate class that represents the 

@@ -13,7 +13,9 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
@@ -137,6 +139,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static final String GRID_ICON = "org.wcs.smart.query.grid"; //$NON-NLS-1$
 	
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
+	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
+
 	/**
 	 * Query property extension id
 	 */
@@ -160,6 +164,15 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		//add required listeners
+		ConservationAreaManager.getInstance().addDeleteHandler(new QueryCaDeleteHandler(),QueryCaDeleteHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
+		
+		QueryCleanUpJob cleanUp = new QueryCleanUpJob();
+		cleanUp.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		cleanUp.schedule();
+		
 	}
 
 	/*
@@ -169,6 +182,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		
+		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
 	}
 
 	/**

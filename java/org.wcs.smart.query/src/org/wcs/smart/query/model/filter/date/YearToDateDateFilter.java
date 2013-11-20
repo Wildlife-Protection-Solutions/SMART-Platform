@@ -44,7 +44,7 @@ public class YearToDateDateFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "currentyear";
+		return "currentyear"; //$NON-NLS-1$
 	}
 
 	@Override

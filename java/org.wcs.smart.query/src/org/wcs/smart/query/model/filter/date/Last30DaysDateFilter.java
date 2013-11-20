@@ -43,7 +43,7 @@ public class Last30DaysDateFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "last30days";
+		return "last30days"; //$NON-NLS-1$
 	}
 
 	@Override

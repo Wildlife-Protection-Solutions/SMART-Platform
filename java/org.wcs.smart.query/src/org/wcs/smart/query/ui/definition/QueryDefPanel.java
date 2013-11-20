@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.definition;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.QuerySourceProvider;
@@ -153,7 +155,7 @@ public class QueryDefPanel {
 		 if (panelIds == null || panelIds.length == 0){
 			 main.setLayout(new GridLayout(1, false));
 			 Label l = new Label(parent, SWT.NONE);
-			 l.setText("Query type " + queryType.getGuiName() + " not supported.");
+			 l.setText(MessageFormat.format(Messages.QueryDefPanel_QueryTypeNotSupported,new Object[]{queryType.getGuiName()}));
 		 }else if (panelIds.length == 1){
 			 IDefinitionPanel pnl = DefinitionPanelManager.getInstance().createDefinitionPanel(panelIds[0]);
 			 

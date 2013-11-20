@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.ObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
@@ -55,7 +56,7 @@ public class PatrolObservationQueryType implements IQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "patrolobservation";
+	public static final String KEY = "patrolobservation"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -77,7 +78,7 @@ public class PatrolObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Patrol Observation Query";
+		return Messages.PatrolObservationQueryType_PatrolObservationQueryTypeName;
 	}
 
 	/**
@@ -155,7 +156,7 @@ public class PatrolObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
-		String filters= "";
+		String filters= ""; //$NON-NLS-1$
 		
 		// validate each panel
 		for (IDefinitionPanel p : components){

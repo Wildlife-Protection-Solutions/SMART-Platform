@@ -44,12 +44,12 @@ public class DayDateGroupBy implements IDateGroupBy {
 	public static final DayDateGroupBy INSTANCE = new DayDateGroupBy();
 	@Override
 	public String getKey() {
-		return "day";
+		return "day"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getGuiName() {
-		return "Day";
+		return Messages.DayDateGroupBy_GroupByDayName;
 	}
 
 	@Override

@@ -48,6 +48,9 @@ public class Messages extends NLS {
 	public static String ConservationAreaFilterPanel_IncludeAllCaOp;
 	public static String DateGroupBy_GroupByNoSupported;
 	public static String DateGroupBy_InvalidFilter;
+	public static String DayDateGroupBy_GroupByDayName;
+	public static String DefinitionPanelManager_QueryEditingPanelError;
+	public static String DefinitionPanelManager_QueryItemPanelError;
 	public static String DeleteItemHandler_CannotDeleteItemWithKids;
 	public static String DeleteItemHandler_Confirm_DialogTitle;
 	public static String DeleteItemHandler_ConfirmMessage;
@@ -57,6 +60,9 @@ public class Messages extends NLS {
 	public static String DeleteItemHandler_ErrorDeletingQueryB;
 	public static String DeleteItemHandler_ErrorQueryNotFound;
 	public static String DropItem_deleteitemTooltip;
+	public static String EmployeeDeleteAdvisor_ErrorOwnsFolders;
+	public static String EmployeeDeleteAdvisor_ErrorOwnsQueries;
+	public static String EmployeeDeleteAdvisor_InvalidTypeError;
 	public static String ExportQueryLocationPage_AllFilesFilterName;
 	public static String ExportQueryLocationPage_BrowseButton;
 	public static String ExportQueryLocationPage_DialogMessage;
@@ -87,11 +93,6 @@ public class Messages extends NLS {
 	public static String FilterValidator_EmployeeDifferentName;
 	public static String FilterValidator_InvalidAreaFilter;
 	public static String FilterValidator_MultipleImportOptions;
-	public static String FilterValidator_PatrolFilter_EmployeeError;
-	public static String FilterValidator_PatrolFilter_UnqiueIdMatchingError;
-	public static String FilterValidator_PatrolFilter_ValueMatchingError;
-	public static String FilterValidator_PatrolFilterError;
-	public static String FilterValidator_PatrolFilterErrorB;
 	public static String GriddedFilterPanel_ClearLabel;
 	public static String GriddedFilterPanel_CopyLabel;
 	public static String GriddedFilterPanel_RateFilterLabel;
@@ -138,6 +139,7 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_CouldNotImportError;
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_Title;
+	public static String MonthDateGroupBy_MonthGroupByName;
 	public static String MultiCaDataModelManagerImpl_MergeError;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;
 	public static String NameCellEditor_CouldNotSaveQueryName;
@@ -167,11 +169,14 @@ public class Messages extends NLS {
 	public static String PatrolQueryOptions_DateOpYearToDate;
 	public static String ProgressAreaComposite_QueryCancelledMsg;
 	public static String ProgressAreaComposite_QueryCancelledStatus;
+	public static String QueryCaDeleteHandler_DeleteProgressMessage;
+	public static String QueryCaDeleteHandler_Progress_DeletingQueryFolders;
 	public static String QueryDateFilterComposite_AndLabel;
 	public static String QueryDateFilterComposite_BetweenLabel;
 	public static String QueryDateFilterComposite_BetweenLabel2;
 	public static String QueryDateFilterComposite_DateLabel;
 	public static String QueryDateFilterComposite_InvalidDate;
+	public static String QueryDefPanel_QueryTypeNotSupported;
 	public static String QueryDefView_CloseError;
 	public static String QueryEditorUtils_BlankNameError;
 	public static String QueryEditorUtils_CopyOfLabel;
@@ -199,6 +204,7 @@ public class Messages extends NLS {
 	public static String QueryHibernateManager_CaQueryFolderName;
 	public static String QueryHibernateManager_CouldNotSaveQueryError;
 	public static String QueryHibernateManager_MyQueryFolderName;
+	public static String QueryImportEngine_QueryImporterNotFound;
 	public static String QueryImporter_InvalidQueryType;
 	public static String QueryInput_EditorNameNoQuery;
 	public static String QueryInput_EditorNameQuery;
@@ -207,16 +213,20 @@ public class Messages extends NLS {
 	public static String QueryListView_LoadQueryJobName;
 	public static String QueryListViewContentProvider_LoadingLabel;
 	public static String QueryPlugIn_Error_DialogTitle;
+	public static String QueryPlugIn_QueryCleanUpJobName;
 	public static String QueryPropertiesDialog_CreatorLabel;
 	public static String QueryPropertiesDialog_DialogMessage;
 	public static String QueryPropertiesDialog_DialogTitle;
 	public static String QueryPropertiesDialog_QueryNameLabel;
 	public static String QueryPropertiesDialog_TranslateLink;
+	public static String QueryTemplateCloner_ProgressCopyFolders;
+	public static String QueryTemplateCloner_ProgressQuery;
 	public static String QueryTypeDialog_CreateButton;
 	public static String QueryTypeDialog_DialogText;
 	public static String QueryTypeDialog_Message;
 	public static String QueryTypeDialog_QueryTypeLabel;
 	public static String QueryTypeDialog_Title;
+	public static String QueryTypeManager_QueryTypeError;
 	public static String SavedQueryTree_CouldNotLoadQueries;
 	public static String SavedQueryTree_ErrorLoadingQueries;
 	public static String SavedQueryTree_LoadingJobName;
@@ -237,6 +247,9 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_ValuesSectionHeader;
 	public static String SummaryValueGroupByPanel_ValuesSectionTooltip;
 	public static String TranslateNamesHandler_LoadQueryError;
+	public static String ValueRateFilterDeifnitionPanel_PanelTitle;
+	public static String WaypointDateField_WaypointDateFieldName;
+	public static String YearDateGroupBy_GroupByYearLabel;
 
 	static {
 		// initialize resource bundle

@@ -34,52 +34,52 @@ public class Operator {
 	/**
 	 * Equals (=) operator 
 	 */
-	public static Operator EQUALS = new Operator(Messages.Operator_Equals, "="); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator EQUALS = new Operator(Messages.Operator_Equals, "="); //$NON-NLS-1$
 	/**
 	 * Less Than (<) operator 
 	 */
-	public static Operator LESSTHAN = new Operator(Messages.Operator_LessThan, "<"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator LESSTHAN = new Operator(Messages.Operator_LessThan, "<"); //$NON-NLS-1$
 	/**
 	 * Less Than Equals (<=) operator 
 	 */
-	public static Operator LESSTHANEQUALS = new Operator(Messages.Operator_LessThanEqual, "<="); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator LESSTHANEQUALS = new Operator(Messages.Operator_LessThanEqual, "<="); //$NON-NLS-1$
 	/**
 	 * Great Than (>) operator 
 	 */
-	public static Operator GREATERTHAN = new Operator(Messages.Operator_GreaterThan, ">"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator GREATERTHAN = new Operator(Messages.Operator_GreaterThan, ">"); //$NON-NLS-1$
 	/**
 	 * Great Than Equals (>=) operator 
 	 */
-	public static Operator GREATERTHANEQUALS = new Operator(Messages.Operator_GreaterThanEqual, ">="); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator GREATERTHANEQUALS = new Operator(Messages.Operator_GreaterThanEqual, ">="); //$NON-NLS-1$
 	/**
 	 * Not Equals (!=) operator 
 	 */
-	public static Operator NOTEQUALS = new Operator(Messages.Operator_NotEqual, "!="); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator NOTEQUALS = new Operator(Messages.Operator_NotEqual, "!="); //$NON-NLS-1$
 	/**
 	 * String like operator 
 	 */
-	public static Operator STR_EQUALS = new Operator(Messages.Operator_StrEquals, "equals"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator STR_EQUALS = new Operator(Messages.Operator_StrEquals, "equals"); //$NON-NLS-1$
 	/**
 	 * String contains operator 
 	 */
-	public static Operator STR_CONTAINS = new Operator(Messages.Operator_StrContains, "contains"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator STR_CONTAINS = new Operator(Messages.Operator_StrContains, "contains"); //$NON-NLS-1$
 	/**
 	 * String not contains operator
 	 */
-	public static Operator STR_NOTCONTAINS = new Operator(Messages.Operator_StrNotContains, "notcontains"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator STR_NOTCONTAINS = new Operator(Messages.Operator_StrNotContains, "notcontains"); //$NON-NLS-1$
 	
 	/**
 	 * Boolean and operator
 	 */
-	public static Operator AND = new Operator(Messages.Operator_AND, "and"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator AND = new Operator(Messages.Operator_AND, "and"); //$NON-NLS-1$
 	/**
 	 * Boolean or operator
 	 */
-	public static Operator OR = new Operator(Messages.Operator_OR, "or"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator OR = new Operator(Messages.Operator_OR, "or"); //$NON-NLS-1$
 	/**
 	 * Boolean not operator
 	 */
-	public static Operator NOT = new Operator(Messages.Operator_NOT, "not"); //$NON-NLS-2$ //$NON-NLS-1$
+	public static Operator NOT = new Operator(Messages.Operator_NOT, "not"); //$NON-NLS-1$
 
 	/**
 	 * Valid numeric operators

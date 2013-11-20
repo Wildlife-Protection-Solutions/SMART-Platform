@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.model;
 
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -38,12 +39,12 @@ public class PatrolStartDateField implements IDateFieldFilter {
 	
 	@Override
 	public String getGuiName() {
-		return "Patrol Start";
+		return Messages.PatrolStartDateField_PatrolStartDate;
 	}
 
 	@Override
 	public String getKey() {
-		return "patrolstart";
+		return "patrolstart"; //$NON-NLS-1$
 	}
 
 }

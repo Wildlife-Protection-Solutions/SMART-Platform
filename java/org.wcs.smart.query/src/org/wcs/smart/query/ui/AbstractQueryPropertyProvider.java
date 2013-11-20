@@ -83,7 +83,7 @@ public abstract class AbstractQueryPropertyProvider {
 	 * @return the query property for the given query
 	 */
 	public String getValue(Query query){
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public Composite createComposite(Composite parent, Query query){

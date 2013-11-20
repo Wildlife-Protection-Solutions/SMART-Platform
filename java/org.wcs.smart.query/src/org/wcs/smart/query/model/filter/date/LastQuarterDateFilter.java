@@ -42,7 +42,7 @@ public class LastQuarterDateFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "lastquarter";
+		return "lastquarter"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -55,7 +55,6 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
@@ -72,7 +71,7 @@ import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
  */
 public class QueryFilterPanel extends AbstractQueryItemPanel {
 	
-	public static final String ID = "org.wcs.smart.query.patrol.filterPanel";
+	public static final String ID = "org.wcs.smart.query.patrol.filterPanel"; //$NON-NLS-1$
 	
 	private Composite main = null;
 	private TreeViewer filterTreeViewer;

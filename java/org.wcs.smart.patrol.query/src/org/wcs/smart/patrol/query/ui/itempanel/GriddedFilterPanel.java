@@ -59,7 +59,7 @@ import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
  */
 public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 
-	public static final String ID ="org.wcs.smart.query.patrol.GridFilterItemPanel";
+	public static final String ID ="org.wcs.smart.query.patrol.GridFilterItemPanel"; //$NON-NLS-1$
 	
 	//filter panel
 	private TreeViewer filterTreeViewer;
