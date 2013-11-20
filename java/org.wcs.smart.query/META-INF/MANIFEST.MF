@@ -2,46 +2,31 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
-Bundle-Version: 2.0.0
+Bundle-Version: 0.4
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart;visibility:=reexport,
- org.wcs.smart.patrol;bundle-version="2.0.0",
- org.eclipse.jface.databinding;bundle-version="1.5.0",
- org.eclipse.core.databinding.observable;bundle-version="1.4.0",
- org.eclipse.ui.forms;bundle-version="3.5.100",
- net.refractions.udig.style.sld;bundle-version="1.2.0",
+ org.wcs.smart.hibernate.libs;bundle-version="2.0.0",
+ org.wcs.smart;bundle-version="2.0.0",
+ org.eclipse.ui.forms,
  net.refractions.udig.catalog.rasterings;bundle-version="1.2.0",
  org.wcs.smart.observation;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: .,
- org.wcs.smart.query,
- org.wcs.smart.query.engine,
- org.wcs.smart.query.export,
- org.wcs.smart.query.hibernate,
- org.wcs.smart.query.map.geotools,
- org.wcs.smart.query.map.udig,
+Export-Package: org.wcs.smart.query,
+ org.wcs.smart.query.event,
+ org.wcs.smart.query.importexport,
  org.wcs.smart.query.model,
- org.wcs.smart.query.model.observation,
- org.wcs.smart.query.parser,
- org.wcs.smart.query.parser.filter,
- org.wcs.smart.query.parser.internal.filter;x-friends:="org.wcs.smart.test",
- org.wcs.smart.query.parser.internal.parser;x-friends:="org.wcs.smart.test",
- org.wcs.smart.query.parser.internal.summary;x-friends:="org.wcs.smart.test,org.wcs.smart.report.birt.query",
- org.wcs.smart.query.qimport,
- org.wcs.smart.query.querylist,
+ org.wcs.smart.query.model.filter,
+ org.wcs.smart.query.model.filter.date,
+ org.wcs.smart.query.model.summary,
  org.wcs.smart.query.ui,
  org.wcs.smart.query.ui.definition,
- org.wcs.smart.query.ui.export,
- org.wcs.smart.query.ui.formulaDnd,
- org.wcs.smart.query.ui.qimport,
- org.wcs.smart.query.ui.queryfilter,
+ org.wcs.smart.query.ui.editor,
+ org.wcs.smart.query.ui.importexport,
+ org.wcs.smart.query.ui.itempanel,
+ org.wcs.smart.query.ui.model,
+ org.wcs.smart.query.ui.model.impl,
  org.wcs.smart.query.ui.querylist,
- org.wcs.smart.query.ui.querytable,
- org.wcs.smart.query.ui.summary,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
-Bundle-ClassPath: .
-Bundle-Vendor: org.wcs.smart

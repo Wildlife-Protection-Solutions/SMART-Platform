@@ -34,7 +34,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 
@@ -86,7 +86,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, ReportCaDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
-		QueryEventManager.getInstance().addQuerySaveListener(queryListener);
+		QueryEventManager.getInstance().addListener(queryListener);
 	}
 
 	public static void initReports() {
@@ -117,7 +117,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
-		QueryEventManager.getInstance().removeQuerySaveListener(queryListener);
+		QueryEventManager.getInstance().removeListener(queryListener);
 		plugin = null;
 		super.stop(context);
 	}

@@ -160,11 +160,5 @@
          </adapter>
       </adaptable>
    </extension>
-   <extension
-         point="org.wcs.smart.report.birt.maplayer">
-      <MapLayer
-            maplayer="org.wcs.smart.report.birt.map.QueryMapLayer">
-      </MapLayer>
-   </extension>
 
 </plugin>

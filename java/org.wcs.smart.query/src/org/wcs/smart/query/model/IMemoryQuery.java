@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.query.model;
 
-import java.util.Collection;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Interface for queries that store their results in memory
@@ -31,7 +28,5 @@ import org.eclipse.core.runtime.IProgressMonitor;
  *
  */
 public interface IMemoryQuery {
-	public Collection<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception;
-	
-	public Collection<QueryResultItem> getLastResults();
+
 }

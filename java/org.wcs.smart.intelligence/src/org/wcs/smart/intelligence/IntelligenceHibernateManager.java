@@ -40,7 +40,7 @@ import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**

@@ -28,7 +28,6 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.data.oda.smart.impl.query.SmartQuery;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.data.oda.smart.internal.Messages;
 

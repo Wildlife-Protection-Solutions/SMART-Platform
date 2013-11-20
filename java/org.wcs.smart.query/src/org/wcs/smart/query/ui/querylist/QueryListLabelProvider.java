@@ -24,9 +24,8 @@ package org.wcs.smart.query.ui.querylist;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Label provider for the query list view.
@@ -49,18 +48,8 @@ public class QueryListLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof QueryFolder){
 			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.FOLDER_ICON);
-		}else if (element instanceof QueryInput){
-			if (((QueryInput) element).getType() == QueryType.WAYPOINT){
-				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.WAYPOINT_QUERY_ICON);
-			}else if (((QueryInput) element).getType() == QueryType.OBSERVATION){
-					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.OBSERVATION_QUERY_ICON);
-			}else if (((QueryInput) element).getType() == QueryType.SUMMARY){
-				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.SUMMARY_QUERY_ICON);
-			}else if (((QueryInput) element).getType() == QueryType.PATROL){
-				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.PATROL_QUERY_ICON);
-			}else if (((QueryInput) element).getType() == QueryType.GRIDDED){
-				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.GRIDDED_SUMMARY_QUERY_ICON);
-			}
+		}else if (element instanceof QueryEditorInput){
+			return ((QueryEditorInput)element).getType().getImage();
 		}
 		return null;
 	}
@@ -73,8 +62,8 @@ public class QueryListLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof QueryFolder){
 			return ((QueryFolder) element).getName() ;
-		}else if (element instanceof QueryInput){
-			return ((QueryInput) element).getName() + " [" + ((QueryInput)element).getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}else if (element instanceof QueryEditorInput){
+			return ((QueryEditorInput) element).getName() + " [" + ((QueryEditorInput)element).getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.getText(element);
 	}

@@ -76,10 +76,8 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 		lbl.setText(Messages.PatrolMandateComposite_Mandate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		patrolMandateViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
+		patrolMandateViewer = new ComboViewer(center, SWT.READ_ONLY);
 		patrolMandateViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridData)patrolMandateViewer.getControl().getLayoutData()).widthHint = 100;
-		
 		patrolMandateViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolMandateViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {

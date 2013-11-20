@@ -33,7 +33,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
-import org.wcs.smart.data.oda.smart.impl.query.SmartParameterMetaData;
+import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 
 /**
  * ODA query for a SmartBirtTable

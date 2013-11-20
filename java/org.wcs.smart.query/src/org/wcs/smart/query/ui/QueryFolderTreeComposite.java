@@ -46,14 +46,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.event.IQueryListener;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.querylist.AddFolderHandler;
 import org.wcs.smart.query.ui.querylist.NameCellEditor;
+import org.wcs.smart.query.ui.querylist.QueryListContentProvider;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
-import org.wcs.smart.query.ui.querylist.QueryListViewContentProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
 
 /**
@@ -70,17 +71,17 @@ public class QueryFolderTreeComposite extends Composite{
 	private TreeViewer tblViewer;
 	private boolean includeSharedFolders;
 	
-	private IQueryFolderListener folderChanged = new IQueryFolderListener() {
-		
+	private IQueryListener folderChanged = new QueryListenerAdapter() {
+
 		@Override
-		public void folderChanged(int eventType, Object object) {
+		public void folderModified(int eventType, Object object) {
 			getShell().getDisplay().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					tblViewer.refresh();
 				}});
-			
 		}
+		
 	};
 	/**
 	 * 
@@ -107,11 +108,11 @@ public class QueryFolderTreeComposite extends Composite{
 		return (IStructuredSelection) tblViewer.getSelection();
 	}
 	private void createComposite(){
-		QueryEventManager.getInstance().addQueryFolderListener(folderChanged);
+		QueryEventManager.getInstance().addListener(folderChanged);
 		addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				QueryEventManager.getInstance().removeQueryFolderListener(folderChanged);
+				QueryEventManager.getInstance().removeListener(folderChanged);
 			}
 		});
 		setLayout(new GridLayout(1, false));
@@ -120,7 +121,7 @@ public class QueryFolderTreeComposite extends Composite{
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		gd.heightHint = 300;
 		tblViewer.getTree().setLayoutData(gd);
-		tblViewer.setContentProvider(new QueryListViewContentProvider(false));
+		tblViewer.setContentProvider(new QueryListContentProvider(false));
 		tblViewer.setLabelProvider(new QueryListLabelProvider());
 		tblViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -160,7 +161,7 @@ public class QueryFolderTreeComposite extends Composite{
 					QueryFolder selectedFolder = (QueryFolder) ((IStructuredSelection)tblViewer.getSelection()).getFirstElement();
 					QueryFolder newFolder = AddFolderHandler.addQueryFolder(selectedFolder);
 					if (newFolder != null){
-						QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_ADDED, newFolder);
+						QueryEventManager.getInstance().fireFolderAdded(newFolder);
 					}
 					tblViewer.refresh();
 					
@@ -171,7 +172,7 @@ public class QueryFolderTreeComposite extends Composite{
 		
 		HashMap<Integer, List<QueryFolder>> data = new HashMap<Integer, List<QueryFolder>> ();
 		if (includeSharedFolders){
-			data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
+			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
 		}else{
 			//remove shared folders
 			List<QueryFolder> folders = new ArrayList<QueryFolder>();
@@ -180,7 +181,7 @@ public class QueryFolderTreeComposite extends Composite{
 					folders.add(folder);
 				}
 			}
-			data.put(QueryListViewContentProvider.FOLDER_KEY, folders);
+			data.put(QueryListContentProvider.FOLDER_KEY, folders);
 		}
 		tblViewer.setInput(data);
 		

@@ -21,17 +21,15 @@
  */
 package org.wcs.smart.intelligence.query;
 
-import java.util.HashMap;
-
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.filter.EmptyFilter;
-import org.wcs.smart.query.parser.filter.IFilter;
-import org.wcs.smart.query.parser.filter.Operator;
-import org.wcs.smart.query.ui.formulaDnd.DropItem;
-import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
+import org.wcs.smart.patrol.query.parser.IExtensionFilter;
+import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -40,7 +38,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolIntelligenceQueryFilter extends EmptyFilter {
+public class PatrolIntelligenceQueryFilter implements IExtensionFilter {
 	
 	private IPatrolQueryOption option;
 	private Operator op;	
@@ -58,18 +56,8 @@ public class PatrolIntelligenceQueryFilter extends EmptyFilter {
 	}
 
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
-		String prefix = tableMapping.get(option.getPatrolAttributeClass());
-		String v = SmartUtils.stripQuotes((String)value);
-		//if v is empty this means that this is "Any Plan" case
-		String intelPart = !isAnyIntelligence(v) ? " AND p2i.intelligence_uuid = x'"+v+"'" : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = "+prefix+".uuid"+intelPart+")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		return sql;
-	}
-
-	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
-		DropItem it = DropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
+		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
 		String id = SmartUtils.stripQuotes((String)value);
 		ListItem listItem = isAnyIntelligence(id) ? 
 				IntelligencePatrolQueryOption.ANY_INTELLIGENCE_ITEM :
@@ -78,8 +66,18 @@ public class PatrolIntelligenceQueryFilter extends EmptyFilter {
 		return new DropItem[]{it};
 	}
 
-	private boolean isAnyIntelligence(String v) {
+	public boolean isAnyIntelligence(String v) {
 		return v == null || v.isEmpty();
+	}
+	
+	public Object getValue(){
+		return this.value;
+	}
+	
+
+	@Override
+	public void accept(IFilterVisitor visitor) {
+		visitor.visit(this);
 	}
 		
 }

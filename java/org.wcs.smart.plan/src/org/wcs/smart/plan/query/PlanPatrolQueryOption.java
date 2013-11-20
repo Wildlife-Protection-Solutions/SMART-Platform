@@ -31,13 +31,13 @@ import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.query.parser.AbstractEmptyPatrolQueryOption;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.AbstractEmptyPatrolQueryOption;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.query.ui.model.ListItem;
 
 /**
  * Plan option to contribute to Patrol Query Filter

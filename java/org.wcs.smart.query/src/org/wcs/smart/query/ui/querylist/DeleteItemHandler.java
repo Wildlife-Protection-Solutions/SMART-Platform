@@ -39,14 +39,13 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Command handler for deleting a folder
@@ -73,23 +72,23 @@ public class DeleteItemHandler extends AbstractHandler {
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();			
 			if (o instanceof QueryFolder){
-				QueryListViewContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
+				QueryListContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
 				deleteFolder((QueryFolder)o, contentProvider);
 			}else if (o instanceof Query){
 				deleteQuery((Query)o, event);
-			}else if (o instanceof QueryInput){
-				deleteQuery((QueryInput)o, event);
+			}else if (o instanceof QueryEditorInput){
+				deleteQuery((QueryEditorInput)o, event);
 			}	
 		}
 		return null;
 	}
 
 	private void deleteQuery(Query o, ExecutionEvent event) {
-		deleteQuery(new QueryInput(o), event);
+		deleteQuery(new QueryEditorInput(o), event);
 	}
 	
 	
-	private void deleteQuery(QueryInput o, ExecutionEvent event) {
+	private void deleteQuery(QueryEditorInput o, ExecutionEvent event) {
 		/**
 		 * Get the current window here for linux bug:
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=242246
@@ -109,11 +108,11 @@ public class DeleteItemHandler extends AbstractHandler {
 			Query query = QueryHibernateManager.getInstance().findQuery(s, o.getUuid(), o.getType());
 			if (query == null) throw new Exception(Messages.DeleteItemHandler_ErrorQueryNotFound);
 			
-			if (!QueryEventManager.getInstance().fireBeforeDeleteListeners(query, s)){
+			if (!QueryEventManager.getInstance().fireBeforeDelete(query, s)){
 				return;
 			}
 			
-			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getObjectName() + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getHibernateClass().getSimpleName() + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 			q.setParameter("uuid", o.getUuid()); //$NON-NLS-1$
 			int deleted = q.executeUpdate();
 			if (deleted != 1){
@@ -131,7 +130,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		}finally{
 			s.close();
 		}
-		QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_DELETED, o);
+		QueryEventManager.getInstance().fireQueryDeleted(o);
 		
 		// close the editor
 		try {
@@ -185,7 +184,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		}finally{
 			s.close();
 		}
-		QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_DELETED, folder);
+		QueryEventManager.getInstance().fireFolderDeleted(folder);
 	}
 
 }

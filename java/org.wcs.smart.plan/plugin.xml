@@ -625,7 +625,7 @@
       </image>
    </extension>
    <extension
-         point="org.wcs.smart.query.filter.patrol">
+         point="org.wcs.smart.patrol.query.filter.patrol">
       <contribution
             class="org.wcs.smart.plan.query.PlanQueryFilterPatrolContribution">
       </contribution>

@@ -24,8 +24,6 @@ package org.wcs.smart.query.model;
 import java.util.Iterator;
 import java.util.List;
 
-import org.wcs.smart.query.model.observation.QueryColumn;
-
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
@@ -61,7 +59,7 @@ public interface IPagedQueryResultSet {
 	 * @param pageSize
 	 * @return
 	 */
-	public List<QueryResultItem> getData(int offset, int pageSize);
+	public List<? extends IResultItem> getData(int offset, int pageSize);
 	
 	/**
 	 * This is only applicable to result sets that
@@ -81,7 +79,7 @@ public interface IPagedQueryResultSet {
 	 * @param pageSize
 	 * @return
 	 */
-	public Iterator<QueryResultItem> iterator(int pageSize);
+	public Iterator<? extends IResultItem> iterator(int pageSize);
 
 	/**
 	 * Sets the current sorting column.

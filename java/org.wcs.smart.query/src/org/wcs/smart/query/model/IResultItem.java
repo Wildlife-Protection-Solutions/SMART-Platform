@@ -23,16 +23,12 @@ package org.wcs.smart.query.model;
 
 
 /**
- * A class to hold the results of a Grid 
- * query.  
+ * A class to hold the a record in a result query.  
  * 
  * 
  * @author Jeffloun
  * @since 1.0.0
  */
-
-
-
 public interface IResultItem {
 
 }

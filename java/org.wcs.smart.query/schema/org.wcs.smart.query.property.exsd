@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.query" id="org.wcs.smart.query.property" name="Query Property"/>
       </appinfo>
       <documentation>
-         An extension that provides the ability to add query properties.  Query properties have a name (String) and value (String).
+         An extension that provides the ability to add query properties.  Query properties have a name (String) and can provide a simple String or more complex composite.
       </documentation>
    </annotation>
 
@@ -62,7 +62,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.IQueryPropertyProvider"/>
+                  <meta.attribute kind="java" basedOn="org.wcs.smart.query.ui.AbstractQueryPropertyProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

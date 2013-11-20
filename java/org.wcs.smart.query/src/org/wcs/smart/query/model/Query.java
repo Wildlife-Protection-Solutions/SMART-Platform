@@ -28,19 +28,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import org.eclipse.swt.graphics.Image;
-import org.hibernate.Session;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
-import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.ui.gridded.GriddedEditor;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.DateFilter;
 
 /**
  * Parent query class that contains fields
@@ -53,82 +46,16 @@ import org.wcs.smart.query.ui.summary.SummaryEditor;
 @Entity
 public abstract class Query extends NamedItem {
 	
-	//if you add another query type you must update
-	//the queryInput constructor
-	public enum QueryType{
-		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, Messages.Query_ObservationQueryName, ObservationQuery.class, QueryPlugIn.OBSERVATION_QUERY_ICON), //$NON-NLS-1$
-		WAYPOINT("WaypointQuery", QueryResultsEditor.ID, Messages.Query_IncidentQueryName, WaypointQuery.class, QueryPlugIn.WAYPOINT_QUERY_ICON), //$NON-NLS-1$
-		SUMMARY("SummaryQuery", SummaryEditor.ID, Messages.Query_SummaryQueryName, SummaryQuery.class, QueryPlugIn.SUMMARY_QUERY_ICON), //$NON-NLS-1$
-		GRIDDED("GriddedQuery", GriddedEditor.ID,  Messages.Query_GriddedQueryName, GriddedQuery.class, QueryPlugIn.GRID_ICON), //$NON-NLS-1$
-		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, Messages.Query_PatrolQueryName, PatrolQuery.class, QueryPlugIn.PATROL_QUERY_ICON); //$NON-NLS-1$
-		
-		private String objectName;
-		private String editorId;
-		private String uiName;
-		private String iconKey;
-		private Class<? extends Query> hibrnateClazz;
-		
-		private QueryType(String objectName, String editorId, 
-				String uiName, Class<? extends Query> hibrnateClazz,
-				String iconKey){
-			this.objectName = objectName;
-			this.editorId = editorId;
-			this.uiName = uiName;
-			this.hibrnateClazz = hibrnateClazz;
-			this.iconKey = iconKey;
-		}
-		
-		/**
-		 * 
-		 * @return the hibernate class that represents the 
-		 * query object.
-		 * 
-		 */
-		public Class<? extends Query> getHibernateClass(){
-			return this.hibrnateClazz;
-		}
-		
-		/**
-		 * @return the name displayed on the gui
-		 */
-		public String getUiName(){
-			return this.uiName;
-		}
-		/**
-		 * The name of the java object
-		 * that represents this query type.
-		 * @return
-		 */
-		public String getObjectName(){
-			return this.objectName;
-		}
-		
-		/**
-		 * 
-		 * @return the editor associated
-		 * with the give query type/
-		 */
-		public String getEditorId(){
-			return this.editorId;
-		}
-		
-		/**
-		 * 
-		 * @return the icon associated with the image type
-		 */
-		public Image getImage(){
-			return QueryPlugIn.getDefault().getImageRegistry().get(iconKey);
-		}
-	}
 	
 	private Employee owner = null;
 	private ConservationArea conservationArea = null;
 	private boolean isShared = false;
 	private String id;
 	private QueryFolder ownerFolder = null;
-	private boolean isValid = false;
-	
 	private ConservationAreaFilter caFilter;
+		
+	//cached results from running the query
+	private Object cachedResults;
 	
 	protected Query(){
 		
@@ -217,17 +144,7 @@ public abstract class Query extends NamedItem {
 	/**
 	 * @return the state of the query
 	 */
-	@Transient
-	public boolean isValid(){
-		return this.isValid;
-	}
-	/**
-	 * The state of the query.
-	 * @param isValid
-	 */
-	public void setIsValid(boolean isValid){
-		this.isValid = isValid;
-	}
+	
 	
 	/**
 	 * @return the conservation area filter
@@ -264,15 +181,7 @@ public abstract class Query extends NamedItem {
 	 * @return the type of query
 	 */
 	@Transient
-	public abstract QueryType getType();
-	
-	/**
-	 * Generates ui drop items for the given query
-	 * @param session
-	 * @throws Exception
-	 */
-	@Transient
-	public abstract void generateDropItems(Session session) throws Exception;
+	public abstract IQueryType getType();
 	
 	/**
 	 * 
@@ -292,7 +201,7 @@ public abstract class Query extends NamedItem {
 	 * @param copy the query to copy from 
 	 */
 	@Transient
-	public abstract void copyFrom(Query copy);
+	public abstract void copyQuery(Query copy);
 
 	/**
 	 * Creates a copy of the current query.
@@ -306,4 +215,34 @@ public abstract class Query extends NamedItem {
 	 * @param filter date filter
 	 */
 	public abstract void setDateFilter(DateFilter filter);
+	
+	/**
+	 * 
+	 * @return runs the query, caches the results and returns the results
+	 */
+	public Object executeQuery(IProgressMonitor monitor) throws Exception{
+		cachedResults = executeQueryInternal(monitor);
+		return cachedResults;
+	}
+	
+	/**
+	 * 
+	 * @return runs the query and returns the results;
+	 */
+	protected abstract Object executeQueryInternal(IProgressMonitor monitor)  throws Exception;
+	
+	
+	/**
+	 * If there are results cached it returns
+	 * the cached results otherwise it runs
+	 * the query, caches the results
+	 * and then returns them.
+	 * @return 
+	 */
+	public Object getCachedResults(IProgressMonitor monitor)  throws Exception{
+		if (cachedResults == null){
+			cachedResults = executeQuery(monitor);
+		}
+		return cachedResults;
+	}
 }

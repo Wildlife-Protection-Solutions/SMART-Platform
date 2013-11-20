@@ -23,23 +23,14 @@ package org.wcs.smart.query.ui;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,8 +40,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -58,12 +51,9 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 /**
@@ -75,10 +65,17 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
  */
 public class QueryPropertiesDialog extends TitleAreaDialog {
 
+	private List<AbstractQueryPropertyProvider> props;
 	private Query query;
-	private CheckboxTableViewer columnViewer;
 	private Text txtName;
 	private HashMap<Language, String> names;
+	
+	Listener changeListener = new Listener() {
+		@Override
+		public void handleEvent(Event event) {
+			setChangesMade(true);
+		}
+	};
 
 	/**
 	 * @param parent the parent shell
@@ -119,6 +116,15 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			}
 			this.names.put(SmartDB.getCurrentLanguage(), query.getName());
 		}
+	}
+	
+	@Override
+	public boolean close(){
+		boolean canClose = super.close();
+		for (AbstractQueryPropertyProvider p : props){
+			p.clearChangeListener();
+		}
+		return canClose;
 	}
 	
 	
@@ -238,69 +244,35 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(query.getOwner().getFullLabel());
 		
-		List<AbstractQueryPropertyProvider> props = QueryPlugIn.getPropertyProviders();
+
+		props = QueryPlugIn.getPropertyProviders();
 		for(AbstractQueryPropertyProvider prop: props){
 			if (prop.isValid(query.getType())){
-				Label lblProp = new Label(main, SWT.NONE);
-				lblProp.setText(prop.getName()+": "); //$NON-NLS-1$
-				lblProp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+				//prop.clearChangeListener();
+				prop.addChangeListener(changeListener);
+				if (prop.getName() != null){
+					Label lblProp = new Label(main, SWT.NONE);
+					lblProp.setText(prop.getName()+": "); //$NON-NLS-1$
+					lblProp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 				
-				Label lblText = new Label(main, SWT.WRAP);
-				lblText.setText(prop.getValue(query));
-				lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					Label lblText = new Label(main, SWT.WRAP);
+					lblText.setText(prop.getValue(query));
+					lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				}else{
+					Composite c = prop.createComposite(main, query);
+					c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+				}
 			}
-		}
-		
-		if (query instanceof SimpleQuery){
-			createObservationQueryOptions(main);
 		}
 		
 		scroll.setMinSize(150,main.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		scroll.setContent(main);
 
-		
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		return main;
+		return parent;
 	}
 
 
-	private void createObservationQueryOptions(Composite main) {
-		Label lblTableColumns = new Label(main, SWT.NONE);
-		lblTableColumns.setText(Messages.QueryPropertiesDialog_ColumnsLabel);
-		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		
-		createColumnTable(main);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-		gd.heightHint = 150;
-		columnViewer.getTable().setLayoutData(gd);
-		
-		Composite hyperlinkComposite = new Composite(main, SWT.NONE);
-		hyperlinkComposite.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1) );
-		hyperlinkComposite.setLayout(new GridLayout(3, false));
-		
-		Link selectAll = new Link(hyperlinkComposite, SWT.NONE);
-		selectAll.setText("<a>" + Messages.QueryPropertiesDialog_SelectAllLabel + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
-		selectAll.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				columnViewer.setAllChecked(true);
-				setChangesMade(true);
-			}
-		});
-		Label lbl = new Label(hyperlinkComposite, SWT.VERTICAL | SWT.SEPARATOR);
-		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
-		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		lbl.setLayoutData(gd);
-		Link deselectAll = new Link(hyperlinkComposite, SWT.NONE);
-		deselectAll.setText("<a>" + Messages.QueryPropertiesDialog_DeSelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-		deselectAll.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				columnViewer.setAllChecked(false);
-				setChangesMade(true);
-			}
-		});
-	}
 	
 	/**
 	 * Updates the query.
@@ -327,14 +299,16 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			query.getNames().remove(l);
 		}
 		
-		
-		if (query instanceof SimpleQuery){
-			List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
-			for (QueryColumn col : cols){
-				col.setVisible( columnViewer.getChecked(col) );
-			}
-			((SimpleQuery) query).updateVisibleColumns();
+		for (AbstractQueryPropertyProvider provider:props){
+			provider.save(query, null);
 		}
+//		if (query instanceof SimpleQuery){
+//			List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
+//			for (QueryColumn col : cols){
+//				col.setVisible( columnViewer.getChecked(col) );
+//			}
+//			((SimpleQuery) query).updateVisibleColumns();
+//		}
 		setChangesMade(false);
 		return true;
 	}
@@ -342,54 +316,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	/*
 	 * Creates checkbox table viewer for selecting columns
 	 */
-	private void createColumnTable(Composite parent){
-		columnViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-		
-		columnViewer.setContentProvider(ArrayContentProvider.getInstance());
-		columnViewer.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof QueryColumn){
-					return ((QueryColumn)element).getName();
-				}
-				return super.getText(element);
-			}
-		});
-		
-		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
-		columnViewer.setInput(cols.toArray());
-		columnViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				setChangesMade(true);
-			}
-		});
-		
-
-		
-		for (QueryColumn col : cols){
-			columnViewer.setChecked(col, col.isVisible());
-		}
-		
-		columnViewer.getTable().addKeyListener(new KeyListener(){
-			@SuppressWarnings("rawtypes")
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == SWT.SPACE){
-					boolean value = columnViewer.getChecked(   ((IStructuredSelection)columnViewer.getSelection()).getFirstElement() );
-					for (Iterator iterator = ((IStructuredSelection)columnViewer.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						columnViewer.setChecked(tp, !value);
-					}
-					e.doit = false;
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-		});
-		
-	}
+	
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()

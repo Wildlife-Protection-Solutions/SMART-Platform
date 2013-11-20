@@ -58,12 +58,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.data.oda.smart.impl.query.SmartQuery;
+import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.query.ui.querylist.QueryListContentProvider;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
-import org.wcs.smart.query.ui.querylist.QueryListViewContentProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
 import org.wcs.smart.report.birt.query.Activator;
 import org.wcs.smart.report.model.Report;
@@ -86,15 +86,15 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
-			data.put(QueryListViewContentProvider.QUERY_KEY, SavedQueryTree
+			data.put(QueryListContentProvider.QUERY_KEY, SavedQueryTree
 					.getInstance().getQueries());
-			data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree
+			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree
 					.getInstance().getFolders());
 
 			
 			if (hideUserQueries){
 				//shared report should only have shared queries
-				List<QueryFolder> folders = (List<QueryFolder>) data.get(QueryListViewContentProvider.FOLDER_KEY);
+				List<QueryFolder> folders = (List<QueryFolder>) data.get(QueryListContentProvider.FOLDER_KEY);
 				List<QueryFolder> folders2 = new ArrayList<QueryFolder>();
 				folders2.addAll(folders);
 				for (Iterator<QueryFolder> iterator = folders2.iterator(); iterator.hasNext();) {
@@ -104,7 +104,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 						iterator.remove();
 					}
 				}
-				data.put(QueryListViewContentProvider.FOLDER_KEY, folders2);
+				data.put(QueryListContentProvider.FOLDER_KEY, folders2);
 			}
 			
 			Display.getDefault().asyncExec(new Runnable() {
@@ -176,7 +176,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 
 		queryTree = new TreeViewer(composite, SWT.BORDER);
 		queryTree.setLabelProvider(new QueryListLabelProvider());
-		queryTree.setContentProvider(new QueryListViewContentProvider(true));
+		queryTree.setContentProvider(new QueryListContentProvider(true));
 		queryTree.setAutoExpandLevel(2);
 		queryTree.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -224,8 +224,8 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 * 
 	 * @return the user selected query
 	 */
-	public QueryInput getQuery() {
-		return (QueryInput) ((IStructuredSelection) queryTree.getSelection())
+	public QueryEditorInput getQuery() {
+		return (QueryEditorInput) ((IStructuredSelection) queryTree.getSelection())
 				.getFirstElement();
 	}
 
@@ -281,7 +281,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		} else {
 			Object selection = ((IStructuredSelection) queryTree.getSelection())
 					.getFirstElement();
-			if (!(selection instanceof QueryInput)) {
+			if (!(selection instanceof QueryEditorInput)) {
 				isValid = false;
 			}
 		}
@@ -311,7 +311,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 */
 	private boolean savePage(DataSetDesign dataSetDesign) {
 		// save user-defined query text
-		QueryInput query = getQuery();
+		QueryEditorInput query = getQuery();
 
 		// obtain query's current runtime metadata, and maps it to the
 		// dataSetDesign
@@ -348,11 +348,11 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 * metadata obtained from the ODA runtime connection.
 	 */
 	private void updateDesign(DataSetDesign dataSetDesign, IConnection conn,
-			QueryInput smartQuery) throws OdaException {
+			QueryEditorInput smartQuery) throws OdaException {
 
 		//create dataests
 		IQuery query = conn.newQuery(SmartQuery.SMART_DATASET_TYPE);
-		String queryText = getQuery().getType().name() + ":" + SmartUtils.encodeHex(getQuery().getUuid()); //$NON-NLS-1$
+		String queryText = getQuery().getType().getKey() + ":" + SmartUtils.encodeHex(getQuery().getUuid()); //$NON-NLS-1$
 		query.prepare(queryText);
 		dataSetDesign.setQueryText(queryText);
 

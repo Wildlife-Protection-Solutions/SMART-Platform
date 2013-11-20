@@ -51,13 +51,12 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
-import org.wcs.smart.query.QueryListenerAdapter;
+import org.wcs.smart.query.event.IQueryListener;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.IQueryEditor;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * View that displays saved queries to the user.
@@ -125,12 +124,12 @@ public class QueryListView extends ViewPart {
 		public void sourceChanged(int eventType, Object object) {
 			queryList.refresh();
 			
-			if (eventType == IQueryFolderListener.FOLDER_ADDED ||
-					eventType == IQueryFolderListener.QUERY_ADDED){
+			if (eventType == IQueryListener.FOLDER_ADDED ||
+					eventType == IQueryListener.QUERY_ADDED){
 				queryList.expandToLevel(object, 1);
 			}
 			
-			if (eventType == IQueryFolderListener.FOLDER_ADDED){
+			if (eventType == IQueryListener.FOLDER_ADDED){
 				editElement(object);
 			}
 		}
@@ -140,8 +139,8 @@ public class QueryListView extends ViewPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
-			data.put(QueryListViewContentProvider.QUERY_KEY, SavedQueryTree.getInstance().getQueries());
-			data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
+			data.put(QueryListContentProvider.QUERY_KEY, SavedQueryTree.getInstance().getQueries());
+			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
 			
 			getSite().getShell().getDisplay().asyncExec(new Runnable(){
 
@@ -162,8 +161,8 @@ public class QueryListView extends ViewPart {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
 	}
 	
-	public QueryListViewContentProvider getQueryListContentProvider(){
-		return (QueryListViewContentProvider) this.queryList.getContentProvider();
+	public QueryListContentProvider getQueryListContentProvider(){
+		return (QueryListContentProvider) this.queryList.getContentProvider();
 	}
 	
 	@Override
@@ -179,14 +178,14 @@ public class QueryListView extends ViewPart {
 		
 		queryList = new TreeViewer(main, SWT.MULTI );
 		queryList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		queryList.setContentProvider(new QueryListViewContentProvider(true));
+		queryList.setContentProvider(new QueryListContentProvider(true));
 		queryList.setLabelProvider(new QueryListLabelProvider());
 		queryList.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object x = ((IStructuredSelection)queryList.getSelection()).getFirstElement();
-				if (x != null && x instanceof QueryInput){
-					OpenQueryHandler.openQuery((QueryInput)x);
+				if (x != null && x instanceof QueryEditorInput){
+					OpenQueryHandler.openQuery((QueryEditorInput)x);
 				}
 			}
 		});
@@ -223,12 +222,17 @@ public class QueryListView extends ViewPart {
 		
 		loadQueriesJob.schedule();
 		
-		QueryEventManager.getInstance().addQueryChangedEvent(new QueryListenerAdapter() {
+		QueryEventManager.getInstance().addListener(new QueryListenerAdapter() {
 			@Override
-			public void queryNameUpdated(Query query) {
-				queryList.refresh();
+			public void queryModified(int eventType, Object object) {
+				if (eventType == QueryListenerAdapter.QUERY_NAME_MODIFIED){
+					queryList.refresh();
+				}
 			}
+			
+		
 		});
+		
 	}
 	
 	

@@ -107,7 +107,6 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		protected void createDefaultControl(Group group) {
 			typeViewer = new ComboViewer(group, SWT.READ_ONLY);
 			typeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			((GridData)typeViewer.getControl().getLayoutData()).widthHint = 100;
 			typeViewer.getControl().setEnabled(!typeOption.isVisible());
 			typeViewer.setContentProvider(ArrayContentProvider.getInstance());
 			typeViewer.setLabelProvider(new LabelProvider() {
@@ -187,7 +186,6 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		protected void createDefaultControl(Group group) {
 			transportViewer = new ComboViewer(group, SWT.READ_ONLY);
 			transportViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			((GridData)transportViewer.getControl().getLayoutData()).widthHint = 100;
 			transportViewer.getControl().setEnabled(!transportOption.isVisible());
 			transportViewer.setContentProvider(ArrayContentProvider.getInstance());
 			transportViewer.setLabelProvider(new NamedItemLabelProvider());

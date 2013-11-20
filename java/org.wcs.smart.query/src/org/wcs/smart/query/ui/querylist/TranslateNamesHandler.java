@@ -29,14 +29,13 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Extension of the handler for translating names; to fire events
@@ -58,8 +57,8 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 		final Object o = obj;
 		
 		NamedItem toUpdate = null;
-		if (o instanceof QueryInput){
-			QueryInput input = (QueryInput)o;
+		if (o instanceof QueryEditorInput){
+			QueryEditorInput input = (QueryEditorInput)o;
 			Session s = HibernateManager.openSession();
 			try{
 				s.getTransaction().begin();
@@ -82,10 +81,10 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 		super.translateItem(toUpdate, event);
 		
 		if (toUpdate instanceof Query){
-			((QueryInput)o).setQueryName(toUpdate.getName());
-			QueryEventManager.getInstance().fireQueryNameChangedListeners((Query)toUpdate);
+			((QueryEditorInput)o).setQueryName(toUpdate.getName());
+			QueryEventManager.getInstance().fireQueryNameModified((Query)toUpdate);
 		}else if (toUpdate instanceof QueryFolder){
-			QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_RENAMED, (QueryFolder)toUpdate);
+			QueryEventManager.getInstance().fireFolderRenamed((QueryFolder)toUpdate);
 		}
 		
 		return null;

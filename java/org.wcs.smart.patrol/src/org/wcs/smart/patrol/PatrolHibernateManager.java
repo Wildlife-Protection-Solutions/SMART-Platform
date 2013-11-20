@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;

@@ -73,12 +73,11 @@ import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.hibernate.IQueryHibernateManager;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.qimport.QueryImporter;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -245,15 +244,10 @@ public class ImportReportEngine {
 						@Override
 						public void run() {
 							for (org.wcs.smart.query.model.Query q : queriesAdded) {
-								QueryEventManager
-										.getInstance()
-										.fireFolderChangedListeners(
-												IQueryFolderListener.QUERY_ADDED,
-												q);
+								QueryEventManager.getInstance().fireQueryAdded(q);
 							}
 							for (org.wcs.smart.query.model.Query q : queriesModified) {
-								QueryEventManager.getInstance()
-										.fireQueryChangedListeners(q);
+								QueryEventManager.getInstance().fireQueryDefinitionModified(q);
 							}
 						}
 
@@ -569,7 +563,7 @@ public class ImportReportEngine {
 		final List<String> queryWarnings = new ArrayList<String>();
 		
 		
-		final QueryImporter qi = new QueryImporter();
+		final QueryImportEngine qi = new QueryImportEngine();
 		Job j = new Job(MessageFormat.format(Messages.ImportReportEngine_ImportQueryJobName, new Object[]{queryUuid})){
 			//run the query importer in a different thread so it 
 			//will use its own db connection
@@ -636,7 +630,7 @@ public class ImportReportEngine {
 		}
 		
 		//update report definition to point to correct query
-		String newQueryText = smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid());  //$NON-NLS-1$
+		String newQueryText = smartQuery.getType().getKey() + ":" + SmartUtils.encodeHex(smartQuery.getUuid());  //$NON-NLS-1$
 		oldToNewQueries.put(handle.getQueryText(), newQueryText);
 		handle.setQueryText( newQueryText );
 		return true;
@@ -732,14 +726,14 @@ public class ImportReportEngine {
 				if (op == ImportOption.USE_EXISTING){
 					return smartQuery;
 				}else if (op == ImportOption.OVERWRITE){
-					smartQuery.copyFrom(importedQuery);
+					smartQuery.copyQuery(importedQuery);
 					final org.wcs.smart.query.model.Query thisQuery = smartQuery;
 					final boolean[] ok = new boolean[]{false};
 					session.evict(smartQuery);
 					display.syncExec(new Runnable(){
 						@Override
 						public void run() {
-							ok[0] = QueryEventManager.getInstance().fireBeforeSaveListeners(thisQuery, session);
+							ok[0] = QueryEventManager.getInstance().fireBeforeSave(thisQuery, session);
 						}
 					});
 					if (!ok[0]){
@@ -800,14 +794,14 @@ public class ImportReportEngine {
 					return null;
 				}
 				
-				smartQuery.copyFrom(importedQuery);
+				smartQuery.copyQuery(importedQuery);
 				session.evict(smartQuery);
 				final boolean[] ok = new boolean[]{false};
 				final org.wcs.smart.query.model.Query thisQuery = smartQuery;
 				display.syncExec(new Runnable(){
 					@Override
 					public void run() {
-						ok[0] = QueryEventManager.getInstance().fireBeforeSaveListeners(thisQuery, session);
+						ok[0] = QueryEventManager.getInstance().fireBeforeSave(thisQuery, session);
 					}
 				});
 				if (!ok[0]){
