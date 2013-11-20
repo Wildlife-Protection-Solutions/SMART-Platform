@@ -35,7 +35,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
  */
 public class PatrolQueryPlugIn extends AbstractUIPlugin {
 
-	private static final boolean LOG_QUERY = true;
+	private static final boolean LOG_QUERY = false;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.patrol.query"; //$NON-NLS-1$

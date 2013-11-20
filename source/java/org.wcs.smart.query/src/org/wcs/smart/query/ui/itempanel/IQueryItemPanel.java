@@ -33,7 +33,10 @@ import org.eclipse.swt.widgets.Composite;
  */
 public interface IQueryItemPanel {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.query.queryItemPanel";
+	/**
+	 * Query Item Panel extension id
+	 */
+	public static final String EXTENSION_ID = "org.wcs.smart.query.queryItemPanel"; //$NON-NLS-1$
 	
 	/**
 	 * Unique id for item panel

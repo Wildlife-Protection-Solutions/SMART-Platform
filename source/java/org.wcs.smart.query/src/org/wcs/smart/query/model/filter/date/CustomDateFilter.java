@@ -44,7 +44,7 @@ public class CustomDateFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "custom";
+		return "custom"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class CustomDateFilter implements IDateFilter {
 //		Date[] bits = getDates();
 //		DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
 //		return( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override

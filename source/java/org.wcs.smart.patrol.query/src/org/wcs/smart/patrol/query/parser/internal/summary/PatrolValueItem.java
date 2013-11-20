@@ -114,27 +114,5 @@ public class PatrolValueItem implements IValueItem {
 	public void accept(IValueVisitor visitor){
 		visitor.visit(this);
 	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasCategory()
-//	 */
-//	public boolean hasCategory(){
-//		return false;
-//	}
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasAttribute()
-//	 */
-//	public boolean hasAttribute(){
-//		return false;
-//	}
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
-//	 */
-//	public void validateDatabase(Session session) throws Exception{
-//		
-//	}
-
 
 }

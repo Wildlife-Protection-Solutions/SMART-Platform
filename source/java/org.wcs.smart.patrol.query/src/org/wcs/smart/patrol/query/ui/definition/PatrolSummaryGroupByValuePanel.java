@@ -36,7 +36,7 @@ import org.wcs.smart.query.ui.model.DropItem;
  */
 public class PatrolSummaryGroupByValuePanel extends AbstractSummaryGroupByValuePanel{
 
-	public static final String ID = "org.wcs.smart.patrol.query.PatrolSummaryGroupByValuePanel";
+	public static final String ID = "org.wcs.smart.patrol.query.PatrolSummaryGroupByValuePanel"; //$NON-NLS-1$
 	
 	public PatrolSummaryGroupByValuePanel(){
 		super();
@@ -87,7 +87,7 @@ public class PatrolSummaryGroupByValuePanel extends AbstractSummaryGroupByValueP
 			public String validate() {
 				if (type == ListTargetType.VALUE){
 					if (super.items.size() == 0){
-						return "At least one value must be selected.";
+						return Messages.PatrolSummaryGroupByValuePanel_ValueError;
 					}
 				}
 				return null;
@@ -95,12 +95,12 @@ public class PatrolSummaryGroupByValuePanel extends AbstractSummaryGroupByValueP
 						
 			@Override
 			public String getId() {
-				return ID + "." + type.name();
+				return ID + "." + type.name(); //$NON-NLS-1$
 			}
 			
 			@Override
 			public String getGuiName() {
-				return "Group By " + type.name();
+				return Messages.PatrolSummaryGroupByValuePanel_GroupByPanelTitle + type.name();
 			}
 		};
 	}

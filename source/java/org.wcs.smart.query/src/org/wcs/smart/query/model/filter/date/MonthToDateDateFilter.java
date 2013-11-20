@@ -44,7 +44,7 @@ public class MonthToDateDateFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "currentmonth";
+		return "currentmonth"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -43,7 +43,7 @@ public class LastYearDateFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "lastyear";
+		return "lastyear"; //$NON-NLS-1$
 	}
 
 	@Override

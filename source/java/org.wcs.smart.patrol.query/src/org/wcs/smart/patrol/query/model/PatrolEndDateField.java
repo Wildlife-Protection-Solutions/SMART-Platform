@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.model;
 
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -36,12 +37,12 @@ public class PatrolEndDateField implements IDateFieldFilter {
 	
 	@Override
 	public String getGuiName() {
-		return "Patrol End";
+		return Messages.PatrolEndDateField_PatrolEndDatefilter;
 	}
 
 	@Override
 	public String getKey() {
-		return "patrolend";
+		return "patrolend"; //$NON-NLS-1$
 	}
 
 

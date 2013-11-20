@@ -54,8 +54,8 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
  */
 public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel{
 
-	public static final String ID ="org.wcs.smart.query.definition.RateValueFilter";
-	public static final String PANEL_TITLE = "Filters";
+	public static final String ID ="org.wcs.smart.query.definition.RateValueFilter"; //$NON-NLS-1$
+	public static final String PANEL_TITLE = Messages.ValueRateFilterDeifnitionPanel_PanelTitle;
 	
 	public enum PanelType{VALUE,RATE};
 	

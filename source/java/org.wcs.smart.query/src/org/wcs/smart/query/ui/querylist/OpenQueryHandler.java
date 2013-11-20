@@ -30,6 +30,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 /**
@@ -66,6 +68,11 @@ public class OpenQueryHandler extends AbstractHandler {
 	 */
 	public static void openQuery(QueryEditorInput input){
 		try {
+			if (SmartDB.isMultipleAnalysis()){
+				//ensure data model is loaded; otherwise end up with deallocking issues
+				QueryDataModelManager.getInstance().getDataModel();
+			}
+			 
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
 		} catch (Throwable t) {
 			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);

@@ -39,9 +39,9 @@ import org.wcs.smart.query.ui.model.DropItem;
 public class PatrolGriddedQueryDefinitionPanel extends
 		AbstractGridDefinitionPanel {
 
-	public static final String ID = "org.wcs.smart.patrol.query.PatrolGriddedQueryDefinitionPanel";
+	public static final String ID = "org.wcs.smart.patrol.query.PatrolGriddedQueryDefinitionPanel"; //$NON-NLS-1$
 	
-	public static final String VALUE_PANEL_ID = ID + ".values";
+	public static final String VALUE_PANEL_ID = ID + ".values"; //$NON-NLS-1$
 	
 	public PatrolGriddedQueryDefinitionPanel() {
 		super();
@@ -63,7 +63,7 @@ public class PatrolGriddedQueryDefinitionPanel extends
 			@Override
 			public String validate() {
 				if (items.size() != 1){
-					return "Grid queries must compute a single value.";
+					return Messages.PatrolGriddedQueryDefinitionPanel_ValueRequiredError;
 				}
 				return null;
 			}
@@ -74,7 +74,7 @@ public class PatrolGriddedQueryDefinitionPanel extends
 			
 			@Override
 			public String getGuiName() {
-				return "Grid value panel";
+				return Messages.PatrolGriddedQueryDefinitionPanel_ValuePanelTitle;
 			}
 		};
 	}
@@ -121,20 +121,20 @@ public class PatrolGriddedQueryDefinitionPanel extends
 		try{
 			double x = getGridSize();
 			if (x <= 0){
-				return "Invalid grid size.  Value must be greater than 0";
+				return Messages.PatrolGriddedQueryDefinitionPanel_GridSizeError1;
 			}
 		}catch (Exception ex){
-			return "Invalid grid size. " + ex.getMessage();
+			return Messages.PatrolGriddedQueryDefinitionPanel_GridSizeError2 + ex.getMessage();
 		}
 		if (getCrs() == null){
-			return "Coordinate reference system must be selected.";
+			return Messages.PatrolGriddedQueryDefinitionPanel_CRSError;
 		}
 		return null;
 	}
 
 	@Override
 	public String getQueryPart() {
-		return lstValues.getQueryPart() + "|" + getGridSize();
+		return lstValues.getQueryPart() + "|" + getGridSize(); //$NON-NLS-1$
 	}
 	
 	/**

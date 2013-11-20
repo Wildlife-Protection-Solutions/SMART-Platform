@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
@@ -56,7 +57,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class PatrolSummaryQueryType implements IQueryType {
 	
-	public static final String KEY = "patrolsummary";
+	public static final String KEY = "patrolsummary"; //$NON-NLS-1$
 	
 	private static IDropItemFactory dropItemFactory = null;
 	
@@ -81,7 +82,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Patrol Summary Query";
+		return Messages.PatrolSummaryQueryType_SummaryQueryTypeName;
 	}
 
 	/**
@@ -158,8 +159,8 @@ public class PatrolSummaryQueryType implements IQueryType {
 	
 		SummaryQuery summary = (SummaryQuery)query;
 		
-		String filters= "";
-		String definition = "";
+		String filters= ""; //$NON-NLS-1$
+		String definition = ""; //$NON-NLS-1$
 		
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
@@ -170,7 +171,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 				query.setConservationAreaFilter(p.getQueryPart());
 			}
 		}
-		summary.setQuery(definition + "|" + filters);
+		summary.setQuery(definition + "|" + filters); //$NON-NLS-1$
 	}
 	
 	/**
@@ -178,8 +179,8 @@ public class PatrolSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
-		String filters= "";
-		String definition = "";
+		String filters= ""; //$NON-NLS-1$
+		String definition = ""; //$NON-NLS-1$
 		
 		// validate each panel
 		for (IDefinitionPanel p : components){
@@ -197,7 +198,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 		}
 		
 		//validate query
-		String queryString = definition + "|" + filters;
+		String queryString = definition + "|" + filters; //$NON-NLS-1$
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
 			Parser parser = new Parser(is);

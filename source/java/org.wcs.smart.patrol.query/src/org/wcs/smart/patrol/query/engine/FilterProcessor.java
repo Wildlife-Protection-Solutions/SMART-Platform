@@ -278,7 +278,7 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(prefix(PatrolWaypoint.class));
 		sql.append(".leg_day_uuid "); //$NON-NLS-1$
 		
-		sql.append(" inner join ");
+		sql.append(" inner join "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(PatrolWaypoint.class));

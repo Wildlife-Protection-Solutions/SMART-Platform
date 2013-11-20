@@ -69,7 +69,7 @@ public class CategoryFilter implements IFilter {
 	}
 	
 	public String getCategoryKey(){
-		return categoryIdentifier.split(":")[1];
+		return categoryIdentifier.split(":")[1]; //$NON-NLS-1$
 	}
 
 	/**

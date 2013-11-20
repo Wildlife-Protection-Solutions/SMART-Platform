@@ -207,7 +207,7 @@ public class CategoryAttributeFilter implements IFilter{
 			}
 		
 			CategoryAttribute ca = new CategoryAttribute(c,  att);
-			AttributeDropItem it = (AttributeDropItem) BasicDropItemFactory.INSTANCE.createAttributeDropItem(ca);
+			DropItem it = BasicDropItemFactory.INSTANCE.createAttributeDropItem(ca);
 			attributeFilter.initDropItem(it, session);
 			return new DropItem[]{it};
 		}catch (Exception ex){

@@ -290,9 +290,9 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 						for (String key : groupBy.getItems()){
 							//look for key in database
 							Long cnt = (Long) session.createCriteria(groupBy.getOption().getSourceClass())
-									.add(Restrictions.eq("keyId", key))
-									.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas()))
-									.setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$ //$NON-NLS-2$
+									.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
+									.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
+									.setProjection(Projections.rowCount()).list().get(0); 
 								if (cnt == 0){
 									throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_KeyNotFoundError, new Object[]{groupBy.getOption().getGuiName(), key}));
 								}

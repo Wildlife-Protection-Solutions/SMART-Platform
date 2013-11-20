@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.GriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
@@ -57,7 +58,8 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
 public class PatrolGridQueryType implements IQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
-	public static final String KEY = "patrolgrid";
+	
+	public static final String KEY = "patrolgrid"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -79,7 +81,7 @@ public class PatrolGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Patrol Gridded Query";
+		return Messages.PatrolGridQueryType_PatrolGriddedQueryTypeName;
 	}
 
 	/**
@@ -153,8 +155,8 @@ public class PatrolGridQueryType implements IQueryType {
 	
 		GriddedQuery summary = (GriddedQuery)query;
 		
-		String filters= "";
-		String definition = "";
+		String filters= ""; //$NON-NLS-1$
+		String definition = ""; //$NON-NLS-1$
 		
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
@@ -168,7 +170,7 @@ public class PatrolGridQueryType implements IQueryType {
 				query.setConservationAreaFilter(p.getQueryPart());
 			}
 		}
-		summary.setQuery(definition + "|" + filters);
+		summary.setQuery(definition + "|" + filters); //$NON-NLS-1$
 	}
 	
 	
@@ -177,8 +179,8 @@ public class PatrolGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
-		String filters= "";
-		String definition = "";
+		String filters= ""; //$NON-NLS-1$
+		String definition = ""; //$NON-NLS-1$
 		
 		// validate each panel
 		for (IDefinitionPanel p : components){
@@ -196,7 +198,7 @@ public class PatrolGridQueryType implements IQueryType {
 		}
 		
 		//validate query
-		String queryString = definition + "|" + filters;
+		String queryString = definition + "|" + filters; //$NON-NLS-1$
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
 			Parser parser = new Parser(is);

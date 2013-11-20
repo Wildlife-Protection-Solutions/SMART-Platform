@@ -58,7 +58,10 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
  */
 public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionListener{
 	
-	public static final String ID = "org.wcs.smart.query.conservationAreaPanel";
+	/**
+	 * Panel Id
+	 */
+	public static final String ID = "org.wcs.smart.query.conservationAreaPanel"; //$NON-NLS-1$
 	
 	public static final String PANEL_TITLE = Messages.ConservationAreaFilterPanel_CaFilterPanelTitle;
 	

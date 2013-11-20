@@ -271,9 +271,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 		}
 		sql.append(namePrefix(PatrolWaypoint.class));
-		sql.append(" on ");
-		sql.append(prefix(PatrolWaypoint.class) + ".leg_day_uuid = ");
-		sql.append(prefix(PatrolLegDay.class) + ".uuid ");
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(PatrolWaypoint.class) + ".leg_day_uuid = "); //$NON-NLS-1$
+		sql.append(prefix(PatrolLegDay.class) + ".uuid "); //$NON-NLS-1$
 		
 		sql.append(" inner join "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));

@@ -43,7 +43,7 @@ public class LastMonthFilter implements IDateFilter {
 
 	@Override
 	public String getQueryKey() {
-		return "lastmonth";
+		return "lastmonth"; //$NON-NLS-1$
 	}
 
 	@Override

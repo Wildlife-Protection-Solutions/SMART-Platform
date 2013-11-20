@@ -31,8 +31,10 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 public class Mergei18n {
 
     public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java";
-
     public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\translations\\";
+    
+//    public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\extensions";
+//    public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\";
 
     public static final String LINE_SEP = "\n";
 
@@ -108,7 +110,7 @@ public class Mergei18n {
 
         List<File> filesList = new ArrayList<File>();
 
-        final String matchDir = pluginName + ".nl_ms";  /*ADD _XX if you want to search for a specific language */
+        final String matchDir = pluginName + ".nl";  /*ADD _XX if you want to search for a specific language */
         for (File flangDir : transDir.listFiles()){
 
 
@@ -157,7 +159,7 @@ public class Mergei18n {
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 System.out.println("add: " + e.getKey());
-                //target.put(e.getKey(), e.getValue());
+//                target.put(e.getKey(), e.getValue());
                 target.put(e.getKey(), "**NEW**" + e.getValue());
                 changes = true;
             }

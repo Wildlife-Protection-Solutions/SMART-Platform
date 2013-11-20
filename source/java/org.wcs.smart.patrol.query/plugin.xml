@@ -354,4 +354,14 @@
             class="org.wcs.smart.patrol.query.exportimport.GriddedQueryDefinitionImporter">
       </QueryImporter>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.patrol.query.PatrolQueryTemplateCloner"
+            id="org.wcs.smart.queryAreaCloner">
+         <require
+               id="org.wcs.smart.queryAreaCloner">
+         </require>
+      </templateCloner>
+   </extension>
 </plugin>
