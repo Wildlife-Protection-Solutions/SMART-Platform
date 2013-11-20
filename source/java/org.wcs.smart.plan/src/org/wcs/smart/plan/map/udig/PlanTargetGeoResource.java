@@ -42,10 +42,10 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.styling.Style;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.map.geotools.PlanTargetDataSource;
 import org.wcs.smart.plan.model.PlanTargetStatus;
-import org.wcs.smart.query.QueryPlugIn;
 
 /**
  * Georesource for a smart plan spatial targets.
@@ -256,7 +256,7 @@ public class PlanTargetGeoResource extends IGeoResource {
 			Style style = (Style)c.load(memento);
 			return style;
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog(Messages.PlanTargetGeoResource_ErrorGeneratingStyle, ex);
+			SmartPlanPlugIn.displayLog(Messages.PlanTargetGeoResource_ErrorGeneratingStyle, ex);
 			return null;
 		}
     }

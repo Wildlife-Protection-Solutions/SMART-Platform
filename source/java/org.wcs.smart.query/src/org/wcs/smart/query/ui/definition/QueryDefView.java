@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -41,19 +40,19 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
-import org.wcs.smart.query.IQueryListener;
-import org.wcs.smart.query.QueryEventManager;
-import org.wcs.smart.query.QueryListenerAdapter;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.event.IQueryListener;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.IQueryEditor;
-import org.wcs.smart.query.ui.QueryLayoutManager;
-import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
-import org.wcs.smart.query.ui.formulaDnd.DropItem;
-import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.ui.QuerySourceProvider;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.IDropItemFactory;
 
 /**
  * A view for building query definition.
@@ -68,15 +67,13 @@ public class QueryDefView extends ViewPart {
 	 */
 	public static final String ID = "org.wcs.smart.query.ui.QueryDefView"; //$NON-NLS-1$
 	
-	private Query current = null;	
-
-	private HashMap<Query.QueryType, QueryDefinitionComposite>
-		definitionComposites = new HashMap<Query.QueryType, QueryDefinitionComposite>();
+	private QueryProxy current = null;	
 
 	private Composite stackComp = null;
 	private Composite emptyComp = null;
-	
-	private QueryDefinitionComposite currentPanel;
+		
+	private QueryDefPanel currentPanel;
+	private HashMap<IQueryType, QueryDefPanel> definitionPanels = new HashMap<IQueryType, QueryDefPanel>();
 	
 	/* listener to update query definition when window changes */
 	private IPartListener2 editorListener = new IPartListener2() {
@@ -86,7 +83,7 @@ public class QueryDefView extends ViewPart {
 			IWorkbenchPart part = partRef.getPart(false);
 			if (part instanceof IQueryEditor){
 				((IQueryEditor) part).validate();
-				Query q =((IQueryEditor)part).getQuery();
+				QueryProxy q =((IQueryEditor)part).getQueryProxy();
 				if (q != current){
 					setQuery(q);
 				}
@@ -115,7 +112,7 @@ public class QueryDefView extends ViewPart {
 				IEditorReference[] editors = partRef.getPage().getEditorReferences();
 				boolean hasQueryEditor= false;
 				for (int i = 0; i < editors.length; i ++){
-					if (QueryInput.class.isAssignableFrom(editors[i].getEditorInput().getClass() )){
+					if (QueryEditorInput.class.isAssignableFrom(editors[i].getEditorInput().getClass() )){
 						hasQueryEditor = true;
 						break;
 					}
@@ -137,7 +134,7 @@ public class QueryDefView extends ViewPart {
 			IWorkbenchPart part = partRef.getPart(false);
 			if (part instanceof IQueryEditor){
 				((IQueryEditor) part).validate();
-				Query q =((IQueryEditor)part).getQuery();
+				QueryProxy q =((IQueryEditor)part).getQueryProxy();
 				if (q != current){
 					setQuery(q);
 				}
@@ -161,14 +158,25 @@ public class QueryDefView extends ViewPart {
 					}});
 				
 			}
-		}};
+		}
+		
+		@Override
+		public void queryModified(int eventType, Object object) {
+			if (eventType == IQueryListener.QUERY_DEFINITION_MODIFIED && object instanceof Query && ((Query)object).equals(current.getQuery())){
+				validate();
+			}
+		}
+	};
 
 	/**
 	 * Creates new query definition view.
 	 */
 	public QueryDefView() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
-		QueryEventManager.getInstance().addQueryChangedEvent(queryRefreshed);
+		QueryEventManager.getInstance().addListener(queryRefreshed);
+		
+		
+		
 	}
 	
 	/**
@@ -180,10 +188,10 @@ public class QueryDefView extends ViewPart {
 		if (editorListener != null){
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(editorListener);
 		}
-		for (QueryDefinitionComposite comp : definitionComposites.values()){
-			comp.dispose();
+		for (QueryDefPanel pnl : definitionPanels.values()){
+			pnl.dispose();
 		}
-		QueryEventManager.getInstance().removeQueryChangedEvent(queryRefreshed);
+		QueryEventManager.getInstance().removeListener(queryRefreshed);
 	}
 	
 	/**
@@ -191,8 +199,7 @@ public class QueryDefView extends ViewPart {
 	 */
 	public void clearQuery(){
 		currentPanel.clear();
-		validate();
-		QueryEventManager.getInstance().fireQueryChangedListeners(current);
+		QueryEventManager.getInstance().fireQueryDefinitionModified(current.getQuery());
 	}
 
 
@@ -200,15 +207,28 @@ public class QueryDefView extends ViewPart {
 	 * Validates the current query
 	 */
 	public void validate(){
-		if (currentPanel != null ) { currentPanel.validate(); }
+		if (currentPanel != null ) { 
+			//validate the individual panels
+			String error = current.getQuery().getType().validateQuery(currentPanel.getDefinitionPanels());
+			
+			//validate the entire query
+			current.setValid(error);
+			if (error != null){
+				getSourceProvider().setQueryValid(false, error);
+			}else{
+				//update the query
+				getSourceProvider().setQueryValid(true, null);
+				current.getQuery().getType().updateQueryDefinition(current.getQuery(), currentPanel.getDefinitionPanels());				
+			}
+		}
 	}
 	
 	/**
 	 * Runs the current query
 	 */
 	public void runQuery(){
-		currentPanel.validate();
-		QueryEventManager.getInstance().fireQueryRunListeners(current);
+		validate();
+		QueryEventManager.getInstance().fireRunQuery(current.getQuery());
 		
 	}
 	
@@ -232,15 +252,15 @@ public class QueryDefView extends ViewPart {
 		addSourceListener();
 	}
 	
+	private QuerySourceProvider getSourceProvider(){
+	
+		ISourceProviderService service = (ISourceProviderService) getSite().getService(ISourceProviderService.class);
+		return (QuerySourceProvider) service.getSourceProvider(QuerySourceProvider.DEFINITION_ITEMS);
+	}
 	private void addSourceListener() {
-		// add a listener for when items are added to the query
-		ISourceProviderService service = (ISourceProviderService) getSite()
-				.getService(ISourceProviderService.class);
-		final SourceProvider provider = (SourceProvider) service
-				.getSourceProvider(SourceProvider.SELECTED_FILTERS);
+	
 		
-		
-		provider.addSourceProviderListener(new ISourceProviderListener() {
+		getSourceProvider().addSourceProviderListener(new ISourceProviderListener() {
 
 			@SuppressWarnings("rawtypes")
 			@Override
@@ -249,24 +269,18 @@ public class QueryDefView extends ViewPart {
 				if (currentPanel == null)
 					return;
 				
-				
-				if (sourceName.equals(SourceProvider.SELECTED_FILTERS)) {
-					QueryPartPanelType dropType = (QueryPartPanelType)provider.getCurrentState().get(SourceProvider.QUERY_DROP_TYPE);
+				if (sourceName.equals(QuerySourceProvider.DEFINITION_ITEMS)) {
+					String srcPanelId = (String) getSourceProvider().getCurrentState().get(QuerySourceProvider.DEFINITION_ITEMS_SRC);
 					IStructuredSelection selection = (IStructuredSelection) sourceValue;
-					boolean fireEvent = false;
 					
+					boolean fireEvent = false;
 					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 						Object object = (Object) iterator.next();
-						DropItem[] items = getDropItemFactory().createDropItem(object, current.getType(), dropType);
+						DropItem[] items = getDropItemFactory().generateDropItem(object, srcPanelId);
 						if (items == null ) continue;
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] != null){
-								if (items[i].isAllowed()) {
-									currentPanel.addItem(items[i]);
-									fireEvent = true;
-								} else {
-									MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.QueryDefView_Warning_Title, items[i].getNotAllowedMessage());
-								}
+								currentPanel.addItem(items[i], srcPanelId);
 							}
 						}
 					}
@@ -288,19 +302,22 @@ public class QueryDefView extends ViewPart {
 	/**
 	 * @return the drop item factory for dropping items into the query
 	 */
-	public DropItemFactory getDropItemFactory(){
-		return DropItemFactory.INSTANCE;
+	public IDropItemFactory getDropItemFactory(){
+		if (current != null){
+			return current.getQuery().getType().getDropItemFactory();
+		}
+		return null;
 	}
 	
 	
 	/**
-	 * Refreshes the current panel by clearning
+	 * Refreshes the current panel by clearing
 	 * the content, re-initializing it, and re-validating it
 	 * @param query
 	 */
 	private void refreshQuery(){
 		currentPanel.clear();
-		currentPanel.init();
+		currentPanel.initItems(current);
 		showCurrentPanel();
 		validate();
 	}
@@ -310,29 +327,33 @@ public class QueryDefView extends ViewPart {
 	 * query definition panel as required 
 	 * @param query
 	 */
-	public void setQuery(Query query){
+	public void setQuery(QueryProxy query){
 		if (current != null){
-			currentPanel.saveItems();
+			currentPanel.saveItems(current);
 			current = null;	//necessary so that clean doesn't fire events that cause current to get updated
 			currentPanel.clear();
 		}
 		
 		current = query;
 		if (query != null){
-			currentPanel = definitionComposites.get(current.getType());
+			currentPanel = definitionPanels.get(query.getQuery().getType());
+			
 			if (currentPanel == null){
-				currentPanel = QueryLayoutManager.getInstance().createComposite(current.getType(), stackComp, this);
-				definitionComposites.put(current.getType(), currentPanel);
+				currentPanel = new QueryDefPanel(query.getQuery().getType(), this);
+				definitionPanels.put(query.getQuery().getType(), currentPanel);
 			}
+			
 			if (currentPanel != null){
-				currentPanel.init();
+				current.setQueryDefinitionPanel(currentPanel);
+				currentPanel.initItems(current);
 			}
 		}else{
 			currentPanel = null;
 		}
+		
 		showCurrentPanel();
 		if (currentPanel != null){
-			currentPanel.validate();
+			validate();
 		}
 	}
 	
@@ -340,15 +361,24 @@ public class QueryDefView extends ViewPart {
 		if (currentPanel == null){
 			((StackLayout)stackComp.getLayout()).topControl = emptyComp;
 		}else{
-			((StackLayout)stackComp.getLayout()).topControl = currentPanel;
+			Composite pnl = currentPanel.getComposite(stackComp);
+			((StackLayout)stackComp.getLayout()).topControl = pnl;
+			pnl.layout(true);
 		}
+		
+		
 		stackComp.layout();
 		if (currentPanel != null){
-			currentPanel.visible();
+			currentPanel.madeVisible();
 		}
+		
 	}
 	
 	public Query getQuery(){
+		return this.current.getQuery();
+	}
+
+	public QueryProxy getQueryProxy(){
 		return this.current;
 	}
 	
@@ -358,7 +388,7 @@ public class QueryDefView extends ViewPart {
 	}
 		
 	public void fireQueryModifiedListeners(){
-		QueryEventManager.getInstance().fireQueryChangedListeners(current);
+		QueryEventManager.getInstance().fireQueryDefinitionModified(current.getQuery());
 	}
 	
 }

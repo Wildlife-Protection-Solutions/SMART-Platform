@@ -29,11 +29,8 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.query.IQueryEventListener;
-import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportQuery;
 
@@ -46,71 +43,12 @@ import org.wcs.smart.report.model.ReportQuery;
  * @author egouge
  * @since 1.0.0
  */
-public class ReportQueryListener implements IQueryEventListener {
+public class ReportQueryListener extends QueryListenerAdapter {
 
 	private static final String WARNING_DIALOGTITLE = Messages.ReportQueryListener_Warning_DialogTitle;
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.IQuerySaveListener#beforeSave(org.wcs.smart.query.model.Query)
-	 */
-	@Override
-	public boolean beforeSave(Query query, Session session) {
-		if (query.getUuid() == null) return true;
-		try{
-			@SuppressWarnings("unchecked")
-			List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
-			if (queries.size() == 0) {
-				return true;
-			}else{
-				Query savedQuery = (Query) session.load(  Hibernate.getClass(query), query.getUuid());
-				boolean confirmSave = true;
-				if (savedQuery != null && savedQuery instanceof SimpleQuery){
-					//simple queries only cause problems with visible columns change
-					confirmSave = false;
-					String savedVisible = ((SimpleQuery)savedQuery).getVisibleColumns();
-					String origVisible = ((SimpleQuery)query).getVisibleColumns();
-					
-					if (!( (savedVisible == null && origVisible == null) || (savedVisible != null && savedVisible.equals(origVisible)))){					
-						confirmSave = true;
-					}
-				}else if (savedQuery != null && savedQuery instanceof SummaryQuery){
-					confirmSave = false;
-					if (!((SummaryQuery)savedQuery).getQuery().equals( ((SummaryQuery)query).getQuery() )){
-						confirmSave = true;
-					}
-				}else if (savedQuery instanceof GriddedQuery){
-					confirmSave = false;
-				}
-				if (confirmSave){
-					//	if the column definition 
-					StringBuilder sb = new StringBuilder();
-					for (ReportQuery rp : queries){
-						sb.append("   * "); //$NON-NLS-1$
-						sb.append(rp.getReport().getName());
-						sb.append(" ["); //$NON-NLS-1$
-						sb.append( rp.getReport().getId());
-						sb.append("] {" ); //$NON-NLS-1$
-						sb.append( rp.getReport().getOwner().getFullLabel());
-						sb.append("}"); //$NON-NLS-1$
-						sb.append("\n"); //$NON-NLS-1$
-					}
-					if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
-						WARNING_DIALOGTITLE, 
-						MessageFormat.format(Messages.ReportQueryListener_BeforeSave_QueryUsedWarning, new Object[]{query.getName(), sb.toString()}))){
-						return false;
-					}
-				}
-				
-				return true;
-			}
-		
-		}catch (Exception ex){
-			ReportPlugIn.displayLog(Messages.ReportQueryListener_QuerySaveError + ex.getLocalizedMessage(), ex);
-			return false;
-		}
-	}
-
-	/* (non-Javadoc)
+	/**
+	 * Removes query from query to report link
 	 * @see org.wcs.smart.query.IQueryEventListener#beforeDelete(org.wcs.smart.query.model.Query, org.hibernate.Session)
 	 */
 	@Override

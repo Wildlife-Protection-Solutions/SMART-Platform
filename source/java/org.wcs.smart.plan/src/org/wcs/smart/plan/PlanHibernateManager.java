@@ -58,7 +58,7 @@ import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
-import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**

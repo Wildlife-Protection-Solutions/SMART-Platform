@@ -5,7 +5,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.plan.menu">
+            locationURI="menu:org.eclipse.ui.main.menu">
          <menu
                id="org.wcs.smart.intelligence.menu"
                label="%menu.create.label">
@@ -443,7 +443,7 @@
       </image>
    </extension>
    <extension
-         point="org.wcs.smart.query.filter.patrol">
+         point="org.wcs.smart.patrol.query.filter.patrol">
       <contribution
             class="org.wcs.smart.intelligence.query.IntelligenceQueryFilterPatrolContribution">
       </contribution>

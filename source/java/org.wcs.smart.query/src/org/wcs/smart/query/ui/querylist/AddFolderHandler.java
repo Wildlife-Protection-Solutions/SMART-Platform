@@ -34,9 +34,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 
@@ -61,7 +60,7 @@ public class AddFolderHandler extends AbstractHandler {
 		if (o instanceof QueryFolder){
 			QueryFolder newFolder = addQueryFolder((QueryFolder)o);
 			if (newFolder != null){
-				QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_ADDED, newFolder);
+				QueryEventManager.getInstance().fireFolderAdded(newFolder);
 			}
 		}
 		

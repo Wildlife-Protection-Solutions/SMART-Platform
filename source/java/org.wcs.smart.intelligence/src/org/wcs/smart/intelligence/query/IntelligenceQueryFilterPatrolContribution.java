@@ -22,12 +22,15 @@
 package org.wcs.smart.intelligence.query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.filter.IFilter;
-import org.wcs.smart.query.parser.filter.Operator;
-import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
+import org.wcs.smart.patrol.query.parser.IExtensionFilter;
+import org.wcs.smart.patrol.query.parser.IExtensionOption;
+import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Intelligence contribution for the Patrol section of a "Query Filter" view.
@@ -37,27 +40,59 @@ import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
  */
 public class IntelligenceQueryFilterPatrolContribution implements IQueryFilterPatrolContribution {
 
-	private IPatrolQueryOption intelligenceOption = new IntelligencePatrolQueryOption();
+	private PatrolIntelligenceOption intelligenceOption = new PatrolIntelligenceOption(new IntelligencePatrolQueryOption());
 	
+	/**
+	 * @see org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution#getOptions()
+	 * @return single option for filtering on intelligence
+	 */
 	@Override
-	public List<IPatrolQueryOption> getOptions() {
-		List<IPatrolQueryOption> options = new ArrayList<IPatrolQueryOption>();
-		options.add(intelligenceOption);
-		return options;
+	public List<IExtensionOption> getOptions() {
+		List<IExtensionOption> ops = new ArrayList<IExtensionOption>();
+		ops.add(intelligenceOption);
+		return ops;
 	}
 
+	/**
+	 * This option does not support filter with key only.
+	 * 
+	 * @return null
+	 */
 	@Override
-	public IFilter createBooleanFilter(String key) {
+	public IExtensionFilter createFilter(String key) {
 		return null;
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution#createFilter(java.lang.String, org.wcs.smart.query.model.filter.Operator, java.lang.Object)
+	 * @return new PatrolIntelligenceQueryFilter
+	 */
 	@Override
-	public IFilter createStringFilter(String key, Operator op, Object value) {
-		String opKey = "patrol:" + intelligenceOption.getKey(); //$NON-NLS-1$
+	public IExtensionFilter createFilter(String key, Operator op, Object value) {
+		String opKey = "patrol:" + intelligenceOption.getOption().getKey(); //$NON-NLS-1$
 		if (opKey.equals(key)) {
-			return new PatrolIntelligenceQueryFilter(intelligenceOption, op, value);
+			return new PatrolIntelligenceQueryFilter(intelligenceOption.getOption(), op, value);
 		}
 		return null;
 	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution#asSql(java.util.HashMap, org.wcs.smart.query.model.filter.IFilter)
+	 */
+	@Override
+	public String asSql(HashMap<Class<?>, String> tableMapping, IFilter filter ){
+		if (!(filter instanceof PatrolIntelligenceQueryFilter)){
+			return null;
+		}
+		
+		PatrolIntelligenceQueryFilter qFilter = (PatrolIntelligenceQueryFilter)filter;
+		String prefix = tableMapping.get(intelligenceOption.getOption().getPatrolAttributeClass());
+		String v = SmartUtils.stripQuotes((String)qFilter.getValue());
+		//if v is empty this means that this is "Any Plan" case
+		String intelPart = !qFilter.isAnyIntelligence(v) ? " AND p2i.intelligence_uuid = x'" + v + "'" : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return sql;
+	}
+
 
 }

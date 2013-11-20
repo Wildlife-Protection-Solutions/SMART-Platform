@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.query.ui;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -46,10 +43,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
-import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.parser.filter.DateFilter.DATE_FIELD_OP;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.CustomDateFilter;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
+import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -72,28 +69,18 @@ public class QueryDateFilterComposite extends Composite {
 	
 	private ControlDecoration cdEndDate;
 	
-	/**
-	 * create new composite 
-	 */
-	public QueryDateFilterComposite(Composite parent) {
-		super(parent, SWT.NONE);
-		GridLayout layout = new GridLayout(4, false);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		layout.marginTop = 10;
-		layout.marginBottom = 10;
-		setLayout(layout);
-		
-		createComponent(QueryType.OBSERVATION);
-	}
+	private IDateFieldFilter[] fieldOps;
+	private IDateFilter[] filterOps;
 	
 	/**
 	 * create new composite 
 	 */
-	public QueryDateFilterComposite(Composite parent, QueryType type) {
+	public QueryDateFilterComposite(Composite parent, IDateFieldFilter[] fieldOps, IDateFilter[] filterOps) {
 		super(parent, SWT.NONE);
+		
+		this.fieldOps = fieldOps;
+		this.filterOps = filterOps;
+		
 		GridLayout layout = new GridLayout(4, false);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -103,7 +90,7 @@ public class QueryDateFilterComposite extends Composite {
 		layout.marginBottom = 10;
 		setLayout(layout);
 		
-		createComponent(type);
+		createComponent();
 	}
 	
 	/**
@@ -125,7 +112,8 @@ public class QueryDateFilterComposite extends Composite {
 		toolkit.adapt(this, false, true);
 	}
 	
-	private void createComponent(QueryType type){
+	
+	private void createComponent(){
 		main = new Composite(this, SWT.NONE);
 		
 		GridLayout layout = new GridLayout(7, false);
@@ -144,33 +132,29 @@ public class QueryDateFilterComposite extends Composite {
 		cmbDateField.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element) {
-				if (element instanceof DateFilter.DATE_FIELD_OP){
-					return ((DateFilter.DATE_FIELD_OP)element).guiName;
+				if (element instanceof IDateFieldFilter){
+					return ((IDateFieldFilter)element).getGuiName();
 				}
 				return super.getText(element);
 			}
 		});
-		if(type == QueryType.PATROL){
-			DATE_FIELD_OP[] pat_opt = new DATE_FIELD_OP[] {DATE_FIELD_OP.PATROL_START,DATE_FIELD_OP.PATROL_END}; 
-			cmbDateField.setInput(pat_opt);
-			cmbDateField.getCombo().select(0);
-		}else{
-			cmbDateField.setInput(DateFilter.DATE_FIELD_OP.values());
-			cmbDateField.getCombo().select(0);
-		}
+	
+		cmbDateField.setInput(fieldOps);
+		cmbDateField.getCombo().select(0);
+		
 		
 		cmbFilterOptions = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbFilterOptions.setContentProvider(ArrayContentProvider.getInstance());
 		cmbFilterOptions.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element) {
-				if (element instanceof DATE_FILTER_OP){
-					return ((DATE_FILTER_OP)element).guiName;
+				if (element instanceof IDateFilter){
+					return ((IDateFilter)element).getGuiName();
 				}
 				return super.getText(element);
 			}
 		});
-		cmbFilterOptions.setInput(DATE_FILTER_OP.values());
+		cmbFilterOptions.setInput(filterOps);
 	
 		cmbFilterOptions.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -179,26 +163,10 @@ public class QueryDateFilterComposite extends Composite {
 				
 				lbl1.setText(""); //$NON-NLS-1$
 				
-				DATE_FILTER_OP filter = (DATE_FILTER_OP) ((IStructuredSelection)cmbFilterOptions.getSelection()).getFirstElement();
-				setCustom(filter == DATE_FILTER_OP.CUSTOM);
-				java.sql.Date bits[] = filter.getDates();
-				if (bits != null){
-					if (filter == DATE_FILTER_OP.MONTH_TO_DATE || 
-							filter == DATE_FILTER_OP.LAST_MONTH){ 
-						DateFormat formatter = new SimpleDateFormat("MMM yyyy"); //$NON-NLS-1$
-						lbl1.setText( "[" + formatter.format( bits[0] ) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-					}else if (filter == DATE_FILTER_OP.YEAR_TO_DATE ||
-							filter == DATE_FILTER_OP.LAST_YEAR){
-						DateFormat formatter = new SimpleDateFormat("yyyy"); //$NON-NLS-1$
-						lbl1.setText( "[" + formatter.format( bits[0] ) + "]");  //$NON-NLS-1$//$NON-NLS-2$
-					}else if (bits.length == 1){
-						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
-						lbl1.setText( "[" + formatter.format( bits[0] ) + " - " + Messages.QueryDateFilterComposite_TodayLabel + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}else if (bits.length == 2){
-						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
-						lbl1.setText( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-				}
+				IDateFilter filter = (IDateFilter) ((IStructuredSelection)cmbFilterOptions.getSelection()).getFirstElement();
+				setCustom(filter instanceof CustomDateFilter);
+				lbl1.setText(filter.getLabel());
+			
 				main.layout();
 				
 				validate();
@@ -225,7 +193,7 @@ public class QueryDateFilterComposite extends Composite {
 		cdEndDate.setShowHover(true);
 		cdEndDate.hide();
 		
-		cmbFilterOptions.setSelection(new StructuredSelection(DATE_FILTER_OP.values()[0]));
+		cmbFilterOptions.setSelection(new StructuredSelection(filterOps[0]));
 	}
 
 	
@@ -248,13 +216,14 @@ public class QueryDateFilterComposite extends Composite {
 	 * @return a date filter comprised of the components
 	 */
 	public DateFilter getDateFilter(){
-		DATE_FILTER_OP filter = (DATE_FILTER_OP)  ((IStructuredSelection)cmbFilterOptions.getSelection()).iterator().next();
-		DATE_FIELD_OP field = (DATE_FIELD_OP) ((IStructuredSelection)cmbDateField.getSelection()).iterator().next();
+		IDateFilter filter = (IDateFilter)  ((IStructuredSelection)cmbFilterOptions.getSelection()).iterator().next();
+		IDateFieldFilter field = (IDateFieldFilter) ((IStructuredSelection)cmbDateField.getSelection()).iterator().next();
 		
-		if (filter == DATE_FILTER_OP.CUSTOM){
+		if (filter instanceof CustomDateFilter){
 			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());
 			java.sql.Date end = new java.sql.Date(SmartUtils.getDate(dtEnd).getTime());
-			return new DateFilter(field, filter, start, end );
+			((CustomDateFilter) filter).setDates(start, end);
+			return new DateFilter(field, filter);
 		}else{
 			return new DateFilter(field, filter);
 		}
@@ -262,22 +231,21 @@ public class QueryDateFilterComposite extends Composite {
 	
 	public void validate(){
 		String error = null;
-		DATE_FILTER_OP filter = (DATE_FILTER_OP)  ((IStructuredSelection)cmbFilterOptions.getSelection()).iterator().next();
-		if (filter == DATE_FILTER_OP.CUSTOM){
-			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());
-			java.sql.Date end = new java.sql.Date(SmartUtils.getDate(dtEnd).getTime());
-			if (start.after(end)){
-				error = Messages.QueryDateFilterComposite_InvalidDate;
-				cdEndDate.setDescriptionText(error);
-				cdEndDate.show();
-			}else{
-				cdEndDate.hide();
-			}
+		
+		DateFilter filter = getDateFilter();
+		error = filter.getDateFilterOption().validate();
+		if (error != null){
+			error = Messages.QueryDateFilterComposite_InvalidDate;
+			cdEndDate.setDescriptionText(error);
+			cdEndDate.show();
+		}else{
+			cdEndDate.hide();
 		}
+		
 		
 		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
 		if (part != null){
-			SourceProvider provider = (SourceProvider) ((ISourceProviderService)part.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_DATE_VALID);
+			QuerySourceProvider provider = (QuerySourceProvider) ((ISourceProviderService)part.getSite().getService(ISourceProviderService.class)).getSourceProvider(QuerySourceProvider.QUERY_DATE_VALID);
 			provider.setQueryDateValid(error == null, error);
 		}
 	}

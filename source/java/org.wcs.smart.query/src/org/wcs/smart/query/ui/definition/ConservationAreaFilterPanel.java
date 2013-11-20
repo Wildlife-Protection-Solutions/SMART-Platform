@@ -44,17 +44,21 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.IDefinitionPanel;
 
 /**
  * Conservation area filter panel.
  * @author Emily
  *
  */
-public class ConservationAreaFilterPanel extends Composite implements SelectionListener{
+public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionListener{
+	
+	public static final String ID = "org.wcs.smart.query.conservationAreaPanel";
 	
 	public static final String PANEL_TITLE = Messages.ConservationAreaFilterPanel_CaFilterPanelTitle;
 	
@@ -62,31 +66,35 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 	
 	private Button btnIncludeAll, btnFilter;
 	
+	private Composite main;
+	
 	private Composite caWarning;
 	private Composite content;
 	private ScrolledComposite scroll ;
-	private Query currentQuery;
+	
 	private Label lblWarn;
 	
 	private Composite caList = null;
 	private Color yellow = null;
-	
 	private List<byte[]> missingFilterUuids = new ArrayList<byte[]>();
 	
-
+	private QueryProxy currentQuery;
+	
 	@Override
 	public void dispose(){
-		super.dispose();
+		main.dispose();
 	}
 	
-	public ConservationAreaFilterPanel(Composite parent){
-		super(parent, SWT.NONE);
+	public ConservationAreaFilterPanel(){
+	}
+	
+	public Composite createComposite(Composite parent){
+		main = new Composite(parent, SWT.NONE);
+		main.setLayout(new FillLayout());
+		((FillLayout)main.getLayout()).marginHeight = 0;
+		((FillLayout)main.getLayout()).marginWidth = 0;
 		
-		setLayout(new FillLayout());
-		((FillLayout)getLayout()).marginHeight = 0;
-		((FillLayout)getLayout()).marginWidth = 0;
-		
-		scroll = new ScrolledComposite(this, SWT.NONE | SWT.H_SCROLL | SWT.V_SCROLL);
+		scroll = new ScrolledComposite(main, SWT.NONE | SWT.H_SCROLL | SWT.V_SCROLL);
 		scroll.setAlwaysShowScrollBars(false);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
@@ -99,7 +107,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		caWarning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		yellow = new Color(Display.getDefault(), new RGB(255, 255, 212));
-		addDisposeListener(new DisposeListener() {
+		main.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				if (yellow != null){
@@ -136,6 +144,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		content.pack();
 		scroll.setContent(content);
 		scroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		return main;
 	}
 	
 	
@@ -153,7 +162,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 			((GridData)caWarning.getLayoutData()).heightHint = 0;
 			
 			scroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-			getParent().getParent().getParent().layout(true, true);
+			main.getParent().getParent().getParent().layout(true, true);
 		}
 	}
 	
@@ -173,10 +182,12 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 	 * 
 	 * @param query
 	 */
-	public void initQuery(Query query){
-		query.getConservationAreaFilterAsFilter().refreshMissingList();
-		missingFilterUuids.clear();
+	@Override
+	public void initItems(QueryProxy query){
 		this.currentQuery = query;
+		query.getQuery().getConservationAreaFilterAsFilter().refreshMissingList();
+		missingFilterUuids.clear();
+		
 		for (Control c : caList.getChildren()){
 			c.dispose();
 		}
@@ -187,16 +198,16 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 			btnCa.setData(ca);
 			btnCa.setSelection(false);
 		
-			for (int i = 0; i < query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds().size(); i ++){
-				if (Arrays.equals(query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds().get(i), ca.getUuid())){
+			for (int i = 0; i < query.getQuery().getConservationAreaFilterAsFilter().getConservationAreaFilterIds().size(); i ++){
+				if (Arrays.equals(query.getQuery().getConservationAreaFilterAsFilter().getConservationAreaFilterIds().get(i), ca.getUuid())){
 					btnCa.setSelection(true);
 				}
 			}
 			btnCa.addSelectionListener(this);
 		}
 
-		if (query.getConservationAreaFilterAsFilter().getMissingCas() != null){
-			missingFilterUuids.addAll(query.getConservationAreaFilterAsFilter().getMissingCas());
+		if (query.getQuery().getConservationAreaFilterAsFilter().getMissingCas() != null){
+			missingFilterUuids.addAll(query.getQuery().getConservationAreaFilterAsFilter().getMissingCas());
 		}
 		
 		if (missingFilterUuids.size() > 0){
@@ -212,7 +223,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 			((GridData)caWarning.getLayoutData()).heightHint = 0;
 		}
 
-		boolean sel = query.getConservationAreaFilterAsFilter().includeAll();
+		boolean sel = query.getQuery().getConservationAreaFilterAsFilter().includeAll();
 		btnIncludeAll.setSelection(sel);
 		btnFilter.setSelection(!sel);
 		
@@ -221,7 +232,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		}
 		
 		scroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		getParent().getParent().getParent().layout(true, true);		
+		main.getParent().getParent().getParent().layout(true, true);		
 	}
 	
 	/**
@@ -230,7 +241,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 	 */
 	public ConservationAreaFilter getCaFilter(){
 		
-		if (isValid() != null) return null;
+		if (validate() != null) return null;
 		
 		ConservationAreaFilter filter = new ConservationAreaFilter();
 		if (btnIncludeAll.getSelection()){
@@ -252,7 +263,8 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 	 * 
 	 * @return <code>null</code> if filter is valid otherwise error message
 	 */
-	public String isValid(){
+	@Override
+	public String validate(){
 		if (btnIncludeAll.getSelection()){
 			return null;
 		}
@@ -273,12 +285,69 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		}
 		//fire the query changed event
 		if (currentQuery != null){
-			QueryEventManager.getInstance().fireQueryChangedListeners(currentQuery);
+			fireQueryChangedListeners();
 		}
 	}
 
 	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
+		
+	}
+
+	@Override
+	public String getId() {
+		return ID;
+	}
+
+	@Override
+	public String getGuiName() {
+		return PANEL_TITLE;
+	}
+
+	@Override
+	public void addItem(DropItem item) {
+		//do nothing does not support drag and drop
+	}
+
+	@Override
+	public void removeItem(DropItem item) {
+		//do nothing does not support drag and drop
+	}
+
+
+	@Override
+	public String getQueryPart() {
+		return getCaFilter().asString();
+	}
+
+	@Override
+	public void saveItems(QueryProxy q) {
+		
+	}
+
+
+	@Override
+	public void clear() {
+		//do nothing
+	}
+
+	@Override
+	public void finishDrag(DropItem item) {
+		//do nothing
+	}
+
+	@Override
+	public void fireQueryChangedListeners() {
+		QueryEventManager.getInstance().fireQueryDefinitionModified(currentQuery.getQuery());
+	}
+
+	@Override
+	public Composite getDropTargetComposite() {
+		return main;
+	}
+
+	@Override
+	public void redraw() {
 		
 	}
 }

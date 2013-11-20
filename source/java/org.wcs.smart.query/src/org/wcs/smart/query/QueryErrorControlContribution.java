@@ -34,7 +34,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.ui.SourceProvider;
+import org.wcs.smart.query.ui.QuerySourceProvider;
 
 /**
  * Contribution item for displaying query error reasons.
@@ -48,7 +48,7 @@ public class QueryErrorControlContribution extends
 	private Label lblErrorImage;
 	private Composite main;
 	
-	private SourceProvider provider = null;
+	private QuerySourceProvider provider = null;
 	
 	private ISourceProviderListener listener = new ISourceProviderListener() {
 
@@ -63,7 +63,7 @@ public class QueryErrorControlContribution extends
 			if (lblError == null || lblErrorImage == null){
 				return;
 			}
-			if (sourceName.equals(SourceProvider.QUERY_DATE_VALID) || sourceName.equals(SourceProvider.QUERY_VALID)){
+			if (sourceName.equals(QuerySourceProvider.QUERY_DATE_VALID) || sourceName.equals(QuerySourceProvider.QUERY_VALID)){
 				initValues();
 			}
 		}
@@ -88,7 +88,7 @@ public class QueryErrorControlContribution extends
     
     private void addListener(){
     	ISourceProviderService service = (ISourceProviderService)PlatformUI.getWorkbench().getService(ISourceProviderService.class);
-		provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_VALID);
+		provider = (QuerySourceProvider) service.getSourceProvider(QuerySourceProvider.QUERY_VALID);
 		provider.addSourceProviderListener(listener);	
     }
     
@@ -116,23 +116,18 @@ public class QueryErrorControlContribution extends
 		
 		String errorMessage = null;
 		//check query date valid
-		Object x = provider.getCurrentState().get(SourceProvider.QUERY_DATE_VALID);
+		Object x = provider.getCurrentState().get(QuerySourceProvider.QUERY_DATE_VALID);
 		if (x instanceof String && x != null){
 			errorMessage = (String)x;
 		}
 		
 		if (errorMessage == null){
-			x = provider.getCurrentState().get(SourceProvider.QUERY_VALID);
-			boolean isValid = true;
-			if (x instanceof Boolean){
-				isValid = (Boolean)x;
+			x = provider.getCurrentState().get(QuerySourceProvider.QUERY_VALID);
+			
+			if (x != null){
+				errorMessage = x.toString();
 			}
-			if (!isValid){
-				errorMessage = (String) provider.getCurrentState().get(SourceProvider.QUERY_ERROR_MESSAGE);
-				if (errorMessage == null){
-					errorMessage = Messages.QueryErrorControlContribution_QueryErrorText;
-				}
-			}
+			
 		}
 		
 		if (errorMessage != null) {

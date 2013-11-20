@@ -32,13 +32,15 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.hibernate.IQueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.QueryDefView;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
 
 /**
@@ -64,7 +66,7 @@ public class QueryEditorUtils {
 		if (!(editor instanceof IQueryEditor)){
 			throw new IllegalStateException("invalid editor"); //$NON-NLS-1$
 		}
-		Query query = ((IQueryEditor)editor).getQuery();
+		Query query = ((IQueryEditor)editor).getQueryProxy().getQuery();
 		Shell shell = editor.getSite().getShell();
 		
 		//validate if user can save the current query
@@ -77,7 +79,7 @@ public class QueryEditorUtils {
 		}
 				
 		//ensure query is valid
-		if (!query.isValid()){
+		if (!((IQueryEditor)editor).getQueryProxy().isValid()){
 			MessageDialog.openError(shell, SAVE_DIALOGTITLE, Messages.QueryEditorUtils_InvalidQueryError);
 			monitor.setCanceled(true);
 			return null;
@@ -138,7 +140,7 @@ public class QueryEditorUtils {
 				query.setConservationArea(SmartDB.getCurrentConservationArea());			
 		}
 				
-		if (!QueryHibernateManager.getInstance().saveQuery(query, false)){
+		if (!QueryHibernateManager.getInstance().saveQuery(query, null)){
 			monitor.setCanceled(true);
 			return null;
 		}
@@ -176,10 +178,10 @@ public class QueryEditorUtils {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					IQueryEditor editor = (IQueryEditor)ieditor;
-					Query query = editor.getQuery();
+					Query query = editor.getQueryProxy().getQuery();
 					
 					//ensure query is valid
-					if (!query.isValid()){
+					if (!editor.getQueryProxy().isValid()){
 						MessageDialog.openError(shell, SAVE_DIALOGTITLE, Messages.QueryEditorUtils_SaveasInvalidQueryError);
 						return;
 					}
@@ -227,7 +229,8 @@ public class QueryEditorUtils {
 					
 					monitor.subTask(Messages.QueryEditorUtils_Progress_SavingQuery);
 					
-					if (!QueryHibernateManager.getInstance().saveQuery(newQuery, true)){
+					QueryProxy newProxy = new QueryProxy(newQuery);
+					if (!QueryHibernateManager.getInstance().saveQuery(newQuery, newProxy)){
 						//not saved
 						return;
 					}
@@ -237,7 +240,7 @@ public class QueryEditorUtils {
 					//TODO: update the Query Def View; see if there is a better way to do this
 					if(view != null){
 						if (view.getQuery().equals(oldQuery)){
-							view.setQuery(newQuery);
+							view.setQuery(newProxy);
 						}
 					}
 				}

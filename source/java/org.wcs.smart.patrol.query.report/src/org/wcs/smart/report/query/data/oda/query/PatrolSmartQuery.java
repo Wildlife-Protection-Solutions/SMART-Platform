@@ -1,0 +1,156 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.report.query.data.oda.query;
+
+import java.sql.Date;
+import java.util.Calendar;
+import java.util.List;
+
+import org.eclipse.datatools.connectivity.oda.IResultSet;
+import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
+import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.ISmartQuery;
+import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
+import org.wcs.smart.data.oda.smart.impl.SmartQuery;
+import org.wcs.smart.patrol.query.model.GriddedQuery;
+import org.wcs.smart.patrol.query.model.SimpleQuery;
+import org.wcs.smart.patrol.query.model.SummaryQuery;
+import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.CustomDateFilter;
+import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.summary.DateGroupBy;
+import org.wcs.smart.query.model.summary.GroupByPart;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.report.query.internal.Messages;
+
+/**
+ * Implementation class of IQuery for the SMART ODA runtime driver. <br>
+ * This wraps around any smart query (ncluding summaries, patrol, waypoint
+ * queries).
+ */
+public class PatrolSmartQuery implements ISmartQuery {
+
+
+	/**
+	 * @see
+	 * org.eclipse.datatools.connectivity.oda.IQuery#prepare(java.lang.String)
+	 * <p>Here the queryText contains the hex encoded uuid
+	 * of the query.  The query is loaded from the database and
+	 * parsed to ensure it is valid.
+	 * </p>
+	 */
+	@Override
+	public void prepare(SmartQuery query) throws OdaException {
+		
+		// attempt to parse query
+		if (query.getQuery() instanceof SimpleQuery) {
+			((SimpleQuery) query.getQuery()).getFilter();
+		} else if (query.getQuery() instanceof SummaryQuery) {
+			SummaryQuery sumQuery = (SummaryQuery)query.getQuery();
+			
+			//date group by problem with reports 
+			GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
+			List<IGroupBy> headers = part.getGroupBys();
+			for (IGroupBy h : headers){
+				if (h instanceof DateGroupBy){
+					throw new OdaException(Messages.SmartQuery_Warning_SummaryGroupByDates);
+				}
+			}
+		} else if (query.getQuery() instanceof GriddedQuery){
+			((GriddedQuery)query.getQuery()).getQueryDefinition();
+		}
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IQuery#getMetaData()
+	 */
+	@Override
+	public IResultSetMetaData getMetaData(SmartQuery query) throws OdaException {
+		if (query.getQuery().getType().getKey().equals(PatrolObservationQueryType.KEY) ||
+				query.getQuery().getType().getKey().equals(PatrolWaypointQueryType.KEY) ||
+				query.getQuery().getType().getKey().equals(PatrolQueryType.KEY)){
+			return new SimpleQueryResultSetMetadata((SimpleQuery) query.getQuery());
+		} else if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)) {
+			return new SummaryQueryResultSetMetadata((SummaryQuery) query.getQuery());
+		} else if (query.getQuery().getType().getKey().equals(PatrolGridQueryType.KEY)){
+			return new SimpleQueryResultSetMetadata( (GriddedQuery) query.getQuery());
+		}
+		throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadMetadata);
+	}
+
+	@Override
+	public IResultSet executeQuery(SmartQuery query) throws OdaException {
+		IResultSet resultSet = null;
+
+		//create date filter
+		Date startDate = (Date) query.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE);
+		Date endDate = (Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
+		
+		if (startDate == null || endDate == null){
+			if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)){
+				//we choose to run summaries in order to get 
+				//all header information
+				Calendar cal = Calendar.getInstance();
+				cal.set(1900, Calendar.JANUARY, 1);
+				startDate = new Date( cal.getTimeInMillis() );
+				endDate = new Date(startDate.getTime());
+			}else{
+				//all others will just return an empty
+				return EmptyResultSet.INSTANCE;
+			}
+			
+		}
+		
+		CustomDateFilter cd = new CustomDateFilter();
+		cd.setDates(startDate, endDate);
+		DateFilter dateFilter = new DateFilter(
+				WaypointDateField.INSTANCE,cd);
+
+
+		//the result set
+		
+		if (query.getQuery().getType().getKey().equals(PatrolObservationQueryType.KEY) ||
+				query.getQuery().getType().getKey().equals(PatrolWaypointQueryType.KEY)){
+			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
+			resultSet = new PagedQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
+		}else if (query.getQuery().getType().getKey().equals(PatrolQueryType.KEY)){
+			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
+			resultSet = new MemoryQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
+		}else  if (query.getQuery().getType().getKey().equals(PatrolGridQueryType.KEY)){
+			((GriddedQuery) query.getQuery()).setDateFilter(dateFilter);
+			resultSet = new MemoryQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
+		} else if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)){
+			((SummaryQuery) query.getQuery()).setDateFilter(dateFilter);
+			resultSet = new SummaryQueryResultSet(
+					(SummaryQuery) query.getQuery(),
+					new SummaryQueryResultSetMetadata((SummaryQuery) query.getQuery()));
+		}
+		
+		return resultSet;
+	}
+
+}

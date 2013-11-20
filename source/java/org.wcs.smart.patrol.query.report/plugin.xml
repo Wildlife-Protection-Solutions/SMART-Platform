@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.report.birt.maplayer">
+      <MapLayer
+            maplayer="org.wcs.smart.report.query.map.QueryMapLayer">
+      </MapLayer>
+   </extension>
+   <extension
+         point="org.wcs.smart.report.birt.query.queryDataset">
+      <QueryTypeDataset
+            class="org.wcs.smart.report.query.data.oda.query.PatrolSmartQuery"
+            queryTypeKey="patrolgrid">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.report.query.data.oda.query.PatrolSmartQuery"
+            queryTypeKey="patrolobservation">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.report.query.data.oda.query.PatrolSmartQuery"
+            queryTypeKey="patrolquery">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.report.query.data.oda.query.PatrolSmartQuery"
+            queryTypeKey="patrolsummary">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.report.query.data.oda.query.PatrolSmartQuery"
+            queryTypeKey="patrolwaypoint">
+      </QueryTypeDataset>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.wcs.smart.report.query.DummyStartUp">
+      </startup>
+   </extension>
+
+</plugin>

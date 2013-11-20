@@ -22,9 +22,8 @@
 package org.wcs.smart.query;
 
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.hibernate.CaQueryHibernateManagerImpl;
-import org.wcs.smart.query.hibernate.IQueryHibernateManager;
-import org.wcs.smart.query.hibernate.MultiCaQueryHibernateManagerImpl;
+import org.wcs.smart.query.internal.hibernate.CaQueryHibernateManagerImpl;
+import org.wcs.smart.query.internal.hibernate.MultiCaQueryHibernateManagerImpl;
 
 /**
  * Query related database functions.

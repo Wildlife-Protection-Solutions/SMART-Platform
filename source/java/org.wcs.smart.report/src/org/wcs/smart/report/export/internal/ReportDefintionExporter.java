@@ -45,11 +45,11 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.export.DefinitionQueryExporter;
-import org.wcs.smart.query.export.IQueryExporter;
-import org.wcs.smart.query.export.QueryExportEngine;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.importexport.QueryExportEngine;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.internal.Messages;
@@ -163,7 +163,7 @@ public class ReportDefintionExporter implements IReportExporter {
 					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$
 					if (!processedQueries.contains(queryUuid)){
 						processedQueries.add(queryUuid);
-						QueryType qType = QueryType.valueOf(((OdaDataSetHandle) dataset).getQueryText().split(":")[0]); //$NON-NLS-1$
+						IQueryType qType = QueryTypeManager.getInstance().findQueryType((((OdaDataSetHandle) dataset).getQueryText().split(":")[0])); //$NON-NLS-1$
 						byte[] uuid = SmartUtils.decodeHex(queryUuid);
 						Session hsession = HibernateManager.openSession();
 						Query smartQuery = null;
@@ -196,7 +196,7 @@ public class ReportDefintionExporter implements IReportExporter {
 		List<IQueryExporter> queryExports = QueryExportEngine.getQueryExports(query);
 		IQueryExporter definitionExporter = null;
 		for (IQueryExporter exporter : queryExports){
-			if (exporter.getId().startsWith(DefinitionQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
+			if (exporter.getId().startsWith(IQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
 				definitionExporter = exporter;
 			}
 		}

@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.query.ui;
+
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
+import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.model.IQueryType;
+
+/**
+ * Handler for creating a new query that
+ * prompts the user for the type of query they want o created.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class CreateQueryHandler extends CreatePatrolQueryHandler {
+
+	/**
+	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	 */
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		super.execute(event);
+		
+		IQueryType qType = QueryTypeManager.getInstance().findQueryType(PatrolObservationQueryType.KEY);
+		if (event.getCommand().getId().equals("org.wcs.smart.query.createPatrolQuery")){ //$NON-NLS-1$
+			qType = QueryTypeManager.getInstance().findQueryType(PatrolQueryType.KEY);
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createSummary")){ //$NON-NLS-1$
+			qType = QueryTypeManager.getInstance().findQueryType(PatrolSummaryQueryType.KEY);
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createGriddedSummary")){ //$NON-NLS-1$
+			qType = QueryTypeManager.getInstance().findQueryType(PatrolGridQueryType.KEY);
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createWaypointQuery")){ //$NON-NLS-1$
+			qType = QueryTypeManager.getInstance().findQueryType(PatrolWaypointQueryType.KEY);
+		}else if (event.getCommand().getId().equals("org.wcs.smart.query.createQuery")){ //$NON-NLS-1$
+			qType = QueryTypeManager.getInstance().findQueryType(PatrolObservationQueryType.KEY);
+		}
+		super.createQuery(qType);
+		return null;
+	}
+
+}

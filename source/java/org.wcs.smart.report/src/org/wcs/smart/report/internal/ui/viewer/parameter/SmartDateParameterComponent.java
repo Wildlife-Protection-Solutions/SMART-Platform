@@ -46,7 +46,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
+import org.wcs.smart.query.model.filter.date.AllDatesFilter;
+import org.wcs.smart.query.model.filter.date.CustomDateFilter;
+import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.Messages;
@@ -96,8 +98,8 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		cmbDatesOps.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof DATE_FILTER_OP){
-					return ((DATE_FILTER_OP)element).guiName;
+				if (element instanceof IDateFilter){
+					return ((IDateFilter)element).getGuiName();
 				}
 				return super.getText(element);
 			}
@@ -131,12 +133,16 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 			}
 		}
 		
+		
+		cmbDatesOps.setInput(IDateFilter.DATE_FILTERS);
+		
+		
 		cmbDatesOps.getCombo().addListener(SWT.Modify, new Listener(){
 
 			@Override
 			public void handleEvent(Event event) {
-				DATE_FILTER_OP filterOp = (DATE_FILTER_OP) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement(); 
-				boolean enabled = (filterOp == DATE_FILTER_OP.CUSTOM);
+				IDateFilter filterOp = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement(); 
+				boolean enabled = (filterOp.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey()));
 				lblStart.setEnabled(enabled);
 				lblEnd.setEnabled(enabled);
 				startPicker.setEnabled(enabled);
@@ -157,14 +163,15 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				}
 		}});
 		
-		cmbDatesOps.setInput(DATE_FILTER_OP.values());
-		
 		x = settings.get("org.wcs.smart.report.parameter.dateOp"); //$NON-NLS-1$
-		if (x != null){
-			cmbDatesOps.setSelection(new StructuredSelection(DATE_FILTER_OP.valueOf(x)));
-		}else{
-			cmbDatesOps.setSelection(new StructuredSelection(DATE_FILTER_OP.values()[0]));
-		}
+		IDateFilter defaultSelection = IDateFilter.DATE_FILTERS[0];
+		for (int i = 0; i < IDateFilter.DATE_FILTERS.length; i++){
+			if (IDateFilter.DATE_FILTERS[i].getQueryKey().equals(x)){
+				defaultSelection = IDateFilter.DATE_FILTERS[i];
+				break;
+			}
+		}		
+		cmbDatesOps.setSelection(new StructuredSelection(defaultSelection));
 		return param;
 	}
 
@@ -177,14 +184,14 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		
-		DATE_FILTER_OP op = (DATE_FILTER_OP) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
+		IDateFilter op = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
 		
 		java.sql.Date dates[] = op.getDates();
 		if (dates == null){
-			if (op == DATE_FILTER_OP.CUSTOM){
+			if (op.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey())){
 				params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(SmartUtils.getDate(startPicker).getTime()));
 				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date(SmartUtils.getDate(endPicker).getTime()));	
-			}else if (op == DATE_FILTER_OP.ALL){
+			}else if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())){
 				params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(-2208998272375l));	//JAN 01 1900  
 				
 				Session session = HibernateManager.openSession();
@@ -212,7 +219,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				//today + one day
 				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
 			}else{
-				throw new UnsupportedOperationException(MessageFormat.format(Messages.SmartDateParameterComponent_DateFilterNotSupported, new Object[]{op.guiName}));
+				throw new UnsupportedOperationException(MessageFormat.format(Messages.SmartDateParameterComponent_DateFilterNotSupported, new Object[]{op.getGuiName()}));
 			}
 			
 		}else if (dates.length == 1){
@@ -222,7 +229,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
 			params.put(SmartReportParameters.PARAM_END_DATE_KEY, dates[1]);
 		}
-		params.put("org.wcs.smart.report.parameter.dateOp", op.toString()); //$NON-NLS-1$
+		params.put("org.wcs.smart.report.parameter.dateOp", op.getQueryKey()); //$NON-NLS-1$
 		return params;
 	}
 

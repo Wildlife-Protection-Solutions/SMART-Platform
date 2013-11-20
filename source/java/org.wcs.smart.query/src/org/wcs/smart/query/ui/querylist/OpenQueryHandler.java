@@ -31,7 +31,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 /**
  * Command handler for adding a new folder to 
  * the query list view.
@@ -50,8 +50,8 @@ public class OpenQueryHandler extends AbstractHandler {
 		}
 		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();
-			if (o instanceof QueryInput){
-				openQuery((QueryInput) o);
+			if (o instanceof QueryEditorInput){
+				openQuery((QueryEditorInput) o);
 			}	
 		}
 		return null;
@@ -64,7 +64,7 @@ public class OpenQueryHandler extends AbstractHandler {
 	 * 
 	 * @param input
 	 */
-	public static void openQuery(QueryInput input){
+	public static void openQuery(QueryEditorInput input){
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
 		} catch (Throwable t) {

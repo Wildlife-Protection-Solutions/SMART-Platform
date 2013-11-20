@@ -87,7 +87,6 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		
 		patrolLeaderViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
 		patrolLeaderViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridData)patrolLeaderViewer.getControl().getLayoutData()).widthHint = 100;
 		patrolLeaderViewer.setContentProvider(new ObservableListContentProvider());
 		patrolLeaderViewer.setLabelProvider(new EmployeeLabelProvider());
 		patrolLeaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -104,7 +103,6 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			
 		patrolPilotViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
 		patrolPilotViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridData)patrolPilotViewer.getControl().getLayoutData()).widthHint = 100;
 		patrolPilotViewer.setContentProvider(new ObservableListContentProvider());
 		patrolPilotViewer.setLabelProvider(new EmployeeLabelProvider());
 		patrolPilotViewer.addSelectionChangedListener(new ISelectionChangedListener() {

@@ -33,14 +33,13 @@ import org.eclipse.swt.widgets.Item;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryFolderEditablePropertyTester;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.querylist.QueryFolderEditablePropertyTester;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Cell editor for modifying a QueryFolder name in a
@@ -63,15 +62,15 @@ public class NameCellEditor implements ICellModifier {
 		element = ((Item) element).getData();
 		if (element instanceof QueryFolder) {
 			updateFolder((QueryFolder) element, value.toString());
-		}else if (element instanceof QueryInput){
-			updateQuery((QueryInput)element, value.toString());
+		}else if (element instanceof QueryEditorInput){
+			updateQuery((QueryEditorInput)element, value.toString());
 		}
 	}
 
 	@Override
 	public Object getValue(Object element, String property) {
-		if (element instanceof QueryInput){
-			return ((QueryInput) element).getName();
+		if (element instanceof QueryEditorInput){
+			return ((QueryEditorInput) element).getName();
 		}
 		return ((LabelProvider) viewer.getLabelProvider()).getText(element);
 	}
@@ -80,8 +79,8 @@ public class NameCellEditor implements ICellModifier {
 	public boolean canModify(Object element, String property) {
 		if (element instanceof QueryFolder) {
 			return QueryFolderEditablePropertyTester.canModify((QueryFolder)element, QueryFolderEditablePropertyTester.RENAME_OP);			
-		}else if (element instanceof QueryInput){
-			return QueryFolderEditablePropertyTester.canModify((QueryInput)element, QueryFolderEditablePropertyTester.RENAME_OP);
+		}else if (element instanceof QueryEditorInput){
+			return QueryFolderEditablePropertyTester.canModify((QueryEditorInput)element, QueryFolderEditablePropertyTester.RENAME_OP);
 		}
 		return false;
 	}
@@ -90,7 +89,7 @@ public class NameCellEditor implements ICellModifier {
 	/*
 	 * updates the report name in the database
 	 */
-	private void updateQuery(final QueryInput query, final String newName){
+	private void updateQuery(final QueryEditorInput query, final String newName){
 
 		if (newName.equals(query.getName())) {
 			// nothing to update
@@ -170,7 +169,7 @@ public class NameCellEditor implements ICellModifier {
 		viewer.getTree().getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				QueryEventManager.getInstance().fireQueryNameChangedListeners(query);
+				QueryEventManager.getInstance().fireQueryNameModified(query);
 			}});
 		
 	}
@@ -179,7 +178,7 @@ public class NameCellEditor implements ICellModifier {
 		viewer.getTree().getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_RENAMED, folder);
+				QueryEventManager.getInstance().fireFolderRenamed(folder);
 			}});
 		
 	}

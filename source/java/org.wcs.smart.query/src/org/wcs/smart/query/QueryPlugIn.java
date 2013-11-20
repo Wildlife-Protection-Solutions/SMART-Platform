@@ -1,24 +1,3 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.query;
 
 import java.io.File;
@@ -26,36 +5,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
-import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.internal.ui.MultiCaQueryPerspective;
-import org.wcs.smart.query.internal.ui.QueryPerspective;
+import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
+import org.wcs.smart.query.ui.MultiCaQueryPerspective;
+import org.wcs.smart.query.ui.QueryPerspective;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class QueryPlugIn extends AbstractUIPlugin {
-	
-	private static final boolean LOG_QUERY = false;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.query"; //$NON-NLS-1$
+
+	// The shared instance
+	private static QueryPlugIn plugin;
 
 	/**
 	 * Location for raster query files to be placed
@@ -76,32 +50,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * The query folder
 	 */
 	public static final String FOLDER_ICON = "org.wcs.smart.query.folder"; //$NON-NLS-1$
-	
-	/**
-	 * The waypoint query
-	 */
-	public static final String WAYPOINT_QUERY_ICON = "org.wcs.smart.query.waypointquery"; //$NON-NLS-1$
-	
-	/**
-	 * The observation query
-	 */
-	public static final String OBSERVATION_QUERY_ICON = "org.wcs.smart.query.observationquery"; //$NON-NLS-1$
-	
-	/**
-	 * The patrol query
-	 */
-	public static final String PATROL_QUERY_ICON = "org.wcs.smart.query.patrolquery"; //$NON-NLS-1$
-
-	/**
-	 * The summary query
-	 */
-	public static final String SUMMARY_QUERY_ICON = "org.wcs.smart.query.summaryquery"; //$NON-NLS-1$
-	
-
-	/**
-	 * The gridded query
-	 */
-	public static final String GRIDDED_SUMMARY_QUERY_ICON = "org.wcs.smart.query.griddedquery"; //$NON-NLS-1$
 	
 	/**
 	 * The calendar
@@ -149,10 +97,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static final String VALUE_NUM_DAYS_ICON = "org.wcs.smart.query.valuenumdays"; //$NON-NLS-1$
 	
 	/**
-	 * The value number of employees icon
-	 */
-	public static final String VALUE_NUM_EMPLOYEES_ICON = "org.wcs.smart.query.valuenumemployees"; //$NON-NLS-1$
-	/**
 	 * The value number of number of hours icon
 	 */
 	public static final String VALUE_NUM_HOURS_ICON = "org.wcs.smart.query.valuenumhours"; //$NON-NLS-1$
@@ -160,22 +104,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * The value number of nights icon
 	 */
 	public static final String VALUE_NUM_NIGHTS_ICON = "org.wcs.smart.query.valuenumnights"; //$NON-NLS-1$
-	
-	/**
-	 * The value number of patrols icon
-	 */
-	public static final String VALUE_NUM_PATROLS_ICON = "org.wcs.smart.query.valuenumpatrols"; //$NON-NLS-1$
-	
-	/**
-	 * Person days icons
-	 */
-	public static final String VALUE_PERSON_DAYS_ICON = "org.wcs.smart.query.valuepersondays"; //$NON-NLS-1$
-	
-	/**
-	 * Person hours icons
-	 */
-	public static final String VALUE_PERSON_HOURS_ICON = "org.wcs.smart.query.valuepersonhours"; //$NON-NLS-1$
-	
 	
 	/**
 	 * Exclamation
@@ -208,16 +136,12 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String GRID_ICON = "org.wcs.smart.query.grid"; //$NON-NLS-1$
 	
+	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
 	/**
 	 * Query property extension id
 	 */
 	private static final String QUERY_PROPERTY_EXTENSION_ID = "org.wcs.smart.query.property"; //$NON-NLS-1$
 
-	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
-	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
-	
-	// The shared instance
-	private static QueryPlugIn plugin;
 	
 	/**
 	 * The constructor
@@ -225,100 +149,25 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public QueryPlugIn() {
 	}
 
-	
 	public File getQueryTempDirectory(){
 		return new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE), QUERY_TEMP_FOLDER);		
 	}
 	
-	@Override
-	public void initializeImageRegistry(ImageRegistry reg){	
-		reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete.png")); //$NON-NLS-1$
-		reg.put(QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/querypatrol.gif"));//$NON-NLS-1$
-		reg.put(SUMMARY_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/summary_query.png"));//$NON-NLS-1$
-		reg.put(FOLDER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/folder.png"));//$NON-NLS-1$
-		reg.put(WAYPOINT_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/waypoint_query.png"));//$NON-NLS-1$
-		reg.put(OBSERVATION_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/observation_query.png"));//$NON-NLS-1$
-		reg.put(PATROL_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/patrol_query.png"));//$NON-NLS-1$
-		reg.put(GRIDDED_SUMMARY_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/gridded_query.png"));//$NON-NLS-1$
-		reg.put(GRID_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/grid.png"));//$NON-NLS-1$
-		reg.put(CALENDAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar.png")); //$NON-NLS-1$
-		reg.put(CALENDAR_DAY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_day.png"));//$NON-NLS-1$
-		reg.put(CALENDAR_WEEK_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_week.png"));//$NON-NLS-1$
-		reg.put(CALENDAR_MONTH_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_month.png"));//$NON-NLS-1$
-		reg.put(CALENDAR_YEAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_year.png"));//$NON-NLS-1$
-		reg.put(GROUPBY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/group_by.png"));//$NON-NLS-1$
-		reg.put(VALUE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/values.png"));//$NON-NLS-1$
-		reg.put(VALUE_DISTANCE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_distance.png"));//$NON-NLS-1$
-		reg.put(VALUE_NUM_DAYS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numDays.png"));//$NON-NLS-1$
-		reg.put(VALUE_NUM_EMPLOYEES_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numEmployees.png"));//$NON-NLS-1$
-		reg.put(VALUE_NUM_HOURS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numHours.png"));//$NON-NLS-1$
-		reg.put(VALUE_NUM_NIGHTS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numNights.png"));//$NON-NLS-1$
-		reg.put(VALUE_NUM_PATROLS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numPatrol.png"));//$NON-NLS-1$
-		reg.put(VALUE_PERSON_DAYS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_personDays.png"));//$NON-NLS-1$
-		reg.put(VALUE_PERSON_HOURS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_personHours.png"));//$NON-NLS-1$
-		reg.put(EXCLAMATION_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/exclamation.png"));//$NON-NLS-1$
-		reg.put(ROW_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/row_header.png"));//$NON-NLS-1$
-		reg.put(COLUMN_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/column_header.png"));//$NON-NLS-1$
-		reg.put(AREA_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_filter.png"));//$NON-NLS-1$
-		reg.put(AREA_POLYGON_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_polygon.png"));//$NON-NLS-1$
-	}
-	
-	/**
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
-		//add required listeners
-		ConservationAreaManager.getInstance().addDeleteHandler(new QueryCaDeleteHandler(),QueryCaDeleteHandler.EXECUTE_ORDER);
-		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
-
-		//empty query temp directory
-		Job j = new Job(Messages.QueryPlugIn_QueryCleanUpJobName){
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				//clean up queries directory
-				File dir = getQueryTempDirectory();
-				if (dir.exists() && dir.isDirectory()){
-					File[] toDel = dir.listFiles();
-					for (int i = 0; i < toDel.length; i ++){
-						toDel[i].delete();
-					}
-				}
-				
-				//cleanup query tables
-				
-				Session session = SmartHibernateManager.openSession();
-				try{
-					session.beginTransaction();
-					SQLQuery q = session.createSQLQuery("CALL smart.cleanUpTempData()"); //$NON-NLS-1$
-					q.executeUpdate();
-					session.getTransaction().commit();
-				}catch (Exception ex){
-					QueryPlugIn.log("Could not cleanup query temporary tables.", ex); //$NON-NLS-1$
-				}finally{
-					if (session.getTransaction().isActive()) {
-						session.getTransaction().rollback();
-					}
-					session.close();
-				}
-				return Status.OK_STATUS;
-			}
-			
-		};
-		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
-		j.schedule();
 	}
 
-	/**
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		
-		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
 		super.stop(context);
 	}
 
@@ -331,6 +180,33 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	@Override
+	public void initializeImageRegistry(ImageRegistry reg){	
+		reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete.png")); //$NON-NLS-1$
+		reg.put(QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/querypatrol.gif"));//$NON-NLS-1$
+		reg.put(FOLDER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/folder.png"));//$NON-NLS-1$
+		reg.put(GRID_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/grid.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar.png")); //$NON-NLS-1$
+		reg.put(CALENDAR_DAY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_day.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_WEEK_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_week.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_MONTH_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_month.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_YEAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_year.png"));//$NON-NLS-1$
+		reg.put(GROUPBY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/group_by.png"));//$NON-NLS-1$
+		reg.put(VALUE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/values.png"));//$NON-NLS-1$
+		reg.put(VALUE_DISTANCE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_distance.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_DAYS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numDays.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_HOURS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numHours.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_NIGHTS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numNights.png"));//$NON-NLS-1$
+		reg.put(EXCLAMATION_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/exclamation.png"));//$NON-NLS-1$
+		reg.put(ROW_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/row_header.png"));//$NON-NLS-1$
+		reg.put(COLUMN_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/column_header.png"));//$NON-NLS-1$
+		reg.put(AREA_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_filter.png"));//$NON-NLS-1$
+		reg.put(AREA_POLYGON_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_polygon.png"));//$NON-NLS-1$
+		super.initializeImageRegistry(reg);
+		
+	}
+	
+	
 	/**
 	 * Logs the given error to the error log.
 	 * 
@@ -340,18 +216,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static void log(String message, Throwable t){
 		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
-	}
-	
-	/**
-	 * Logs the given error to the error log.
-	 * 
-	 * @param message message 
-	 * @param t error
-	 */
-	public static void logSql(String sql){
-		if (!LOG_QUERY) return;
-		int status = IStatus.INFO;
-        getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, sql, null));
 	}
 	
 	/**
@@ -370,6 +234,17 @@ public class QueryPlugIn extends AbstractUIPlugin {
 			}});
 	}
 	
+	/**
+	 * 
+	 * @return the id of the query perspective to use
+	 */
+	public static String getActivePerspectiveId(){
+		if (SmartDB.isMultipleAnalysis()){
+			return MultiCaQueryPerspective.ID;
+		}else{
+			return QueryPerspective.ID;
+		}
+	}
 	
 	
 	/**
@@ -393,17 +268,5 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		}
 		return propertyProviders;
 		
-	}
-	
-	/**
-	 * 
-	 * @return the id of the query perspective to use
-	 */
-	public static String getActivePerspectiveId(){
-		if (SmartDB.isMultipleAnalysis()){
-			return MultiCaQueryPerspective.ID;
-		}else{
-			return QueryPerspective.ID;
-		}
 	}
 }

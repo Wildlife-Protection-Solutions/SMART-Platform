@@ -22,7 +22,7 @@
 package org.wcs.smart.query.ui.definition;
 
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.model.DropItem;
 
 /**
  * Abstract class for a query definition 
@@ -54,15 +54,7 @@ public abstract class QueryDefinitionComposite extends Composite{
 	 */
 	public abstract String validate();
 	
-	/**
-	 * Saves the current items in the definition
-	 */
-	public abstract void saveItems();
-	
-	/**
-	 * Initializes the query
-	 */
-	public abstract void init();
+
 	
 	/**
 	 * Add a drop item to the query

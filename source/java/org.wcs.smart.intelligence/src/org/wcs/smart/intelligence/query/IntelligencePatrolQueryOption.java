@@ -32,9 +32,9 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.AbstractEmptyPatrolQueryOption;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.parser.AbstractEmptyPatrolQueryOption;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.query.ui.model.ListItem;
 
 /**
  * Intelligence option to contribute to Patrol Query Filter

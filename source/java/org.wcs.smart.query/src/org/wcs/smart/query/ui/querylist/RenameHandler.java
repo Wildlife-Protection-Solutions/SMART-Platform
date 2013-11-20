@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Rename folder handler for the query list view
@@ -47,7 +47,7 @@ public class RenameHandler extends AbstractHandler{
 			return null;
 		}
 		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
-		if (o instanceof QueryFolder || o instanceof QueryInput){
+		if (o instanceof QueryFolder || o instanceof QueryEditorInput){
 			view.editElement(o);
 		}
 		return null;

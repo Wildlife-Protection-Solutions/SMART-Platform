@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.query.model;
 
-import javax.persistence.Transient;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Interface of queries whose results are available through
@@ -33,11 +30,5 @@ import org.eclipse.core.runtime.IProgressMonitor;
  *
  */
 public interface IPagedQuery {
-	
-	@Transient
-	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception;
-		
 
-	@Transient
-	public IPagedQueryResultSet getLastPagedResults();
 }

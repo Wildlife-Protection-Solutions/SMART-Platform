@@ -32,15 +32,16 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.hibernate.IQueryHibernateManager;
+import org.wcs.smart.query.event.IQueryListener;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * A tree that represents the list of saved 
@@ -54,7 +55,7 @@ public class SavedQueryTree {
 	private static SavedQueryTree instance = null;
 	
 	private List<QueryFolder> folders = null;
-	private HashMap<Integer, List<QueryInput>> queries = null;
+	private HashMap<Integer, List<QueryEditorInput>> queries = null;
 	
 	
 	private List<ISourceChangedListener> listeners = new ArrayList<ISourceChangedListener>();
@@ -83,34 +84,41 @@ public class SavedQueryTree {
 	 * then fires change events.
 	 * 
 	 */
-	private IQueryFolderListener listener = new IQueryFolderListener() {
+	private IQueryListener listener = new QueryListenerAdapter() {
 		
 		@Override
-		public void folderChanged(int eventType, Object object) {
-			if (eventType == IQueryFolderListener.FOLDER_DELETED){
+		public void folderModified(int eventType, Object object) {
+		
+			if (eventType == IQueryListener.FOLDER_DELETED){
 				QueryFolder folder = (QueryFolder)object;
 				if (folder.getParentFolder() == null){
 					for (QueryFolder f: folders){
 						f.getChildren().remove(folder);
 					}			
 				}
-			}else if (eventType == IQueryFolderListener.QUERY_DELETED){
-				QueryInput query = (QueryInput)object;
-				for (List<QueryInput> list : queries.values()){
+			}
+			fireListeners(eventType, object);
+		}
+		
+		@Override
+		public void queryModified(int eventType, Object object) {
+			if (eventType == IQueryListener.QUERY_DELETED){
+				QueryEditorInput query = (QueryEditorInput)object;
+				for (List<QueryEditorInput> list : queries.values()){
 					list.remove(query);
 				}
-			}else if (eventType == IQueryFolderListener.QUERY_SAVED){
+			}else if (eventType == IQueryListener.QUERY_SAVED){
 				//update the name
 				Query query = (Query)object;				
-				for (List<QueryInput> list : queries.values()){
-					for (QueryInput input : list){
+				for (List<QueryEditorInput> list : queries.values()){
+					for (QueryEditorInput input : list){
 						if ( Arrays.equals(input.getUuid(), query.getUuid()) ){
 							input.setQueryName(query.getName());
 							break;
 						}
 					}
 				}
-			}else if (eventType == IQueryFolderListener.QUERY_ADDED){
+			}else if (eventType == IQueryListener.QUERY_ADDED){
 				Query query = (Query)object;			
 				byte[] key = null;
 				if (query.getFolder() != null){
@@ -120,18 +128,18 @@ public class SavedQueryTree {
 				}else{
 					key = IQueryHibernateManager.USER_QUERY_KEY;
 				}
-				List<QueryInput> ins = queries.get(Arrays.hashCode(key));
+				List<QueryEditorInput> ins = queries.get(Arrays.hashCode(key));
 				if (ins == null){
-					ins = new ArrayList<QueryInput>();
+					ins = new ArrayList<QueryEditorInput>();
 					queries.put(Arrays.hashCode(key), ins);
 				}
-				object = new QueryInput(query);
-				ins.add((QueryInput)object);
+				object = new QueryEditorInput(query);
+				ins.add((QueryEditorInput)object);
 			}
 			fireListeners(eventType, object);
-			
-		}
+		}	
 	};
+
 	
 	/**
 	 * Fires all listeners
@@ -164,14 +172,14 @@ public class SavedQueryTree {
 	 * Creates a new query tree
 	 */
 	private SavedQueryTree(){
-		QueryEventManager.getInstance().addQueryFolderListener(listener);
+		QueryEventManager.getInstance().addListener(listener);
 	}
 	
 	/**
 	 * Disposed of the query tree
 	 */
 	public void dispose(){
-		QueryEventManager.getInstance().removeQueryFolderListener(listener);
+		QueryEventManager.getInstance().removeListener(listener);
 	}
 	
 	/**
@@ -211,7 +219,7 @@ public class SavedQueryTree {
 	/**
 	 * @return the saved queries 
 	 */
-	public HashMap<Integer, List<QueryInput>> getQueries(){
+	public HashMap<Integer, List<QueryEditorInput>> getQueries(){
 		if (queries == null){
 			loadData();
 		}
