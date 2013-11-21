@@ -90,10 +90,13 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		if (query.getUuid() != null){
 			//load translations from db
 			Session s = HibernateManager.openSession();
+			s.clear();
 			try{
 				s.beginTransaction();
-				s.saveOrUpdate(this.query);
-				this.query.getNames().size();
+				
+				/* load query names */
+				s.saveOrUpdate(query);
+				query.getNames().size();
 				
 				Query tmp = (Query) s.load(Query.class, this.query.getUuid());
 				this.names = new HashMap<Language, String>();
@@ -102,9 +105,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 				}
 				this.names.put(SmartDB.getCurrentLanguage(), tmp.getName());
 				
-				
-				
-				s.getTransaction().rollback();
+				s.getTransaction().rollback();				
 			}finally{
 				s.close();
 			}
@@ -302,13 +303,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		for (AbstractQueryPropertyProvider provider:props){
 			provider.save(query, null);
 		}
-//		if (query instanceof SimpleQuery){
-//			List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
-//			for (QueryColumn col : cols){
-//				col.setVisible( columnViewer.getChecked(col) );
-//			}
-//			((SimpleQuery) query).updateVisibleColumns();
-//		}
+
 		setChangesMade(false);
 		return true;
 	}

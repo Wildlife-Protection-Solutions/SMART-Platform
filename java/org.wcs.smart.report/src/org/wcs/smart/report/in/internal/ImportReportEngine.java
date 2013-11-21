@@ -238,34 +238,32 @@ public class ImportReportEngine {
 			
 			session.getTransaction().commit();
 			
-				try {
-					// fire query events
-					display.syncExec(new Runnable() {
-						@Override
-						public void run() {
-							for (org.wcs.smart.query.model.Query q : queriesAdded) {
-								QueryEventManager.getInstance().fireQueryAdded(q);
-							}
-							for (org.wcs.smart.query.model.Query q : queriesModified) {
-								QueryEventManager.getInstance().fireQueryDefinitionModified(q);
-							}
+			try {
+				// fire query events
+				display.syncExec(new Runnable() {
+					@Override
+					public void run() {
+						for (org.wcs.smart.query.model.Query q : queriesAdded) {
+							QueryEventManager.getInstance().fireQueryAdded(q);
 						}
-
-					});
-
-					// fire new/update event
-					if (isNew) {
-						ReportEventManager.getInstance().fireReportAdded(
-								importReport);
-					} else {
-						ReportEventManager.getInstance().fireReportUpdated(
-								importReport);
+						for (org.wcs.smart.query.model.Query q : queriesModified) {
+							QueryEventManager.getInstance().fireQueryDefinitionModified(q);
+						}
 					}
-				} catch (Throwable t) {
-					throw new Exception(
-							Messages.ImportReportEngine_EventImportError);
+				});
+				// fire new/update event
+				if (isNew) {
+					ReportEventManager.getInstance().fireReportAdded(
+							importReport);
+				} else {
+					ReportEventManager.getInstance().fireReportUpdated(
+							importReport);
 				}
-				return true;
+			} catch (Throwable t) {
+				throw new Exception(
+						Messages.ImportReportEngine_EventImportError);
+			}
+			return true;
 		}catch (Exception ex){
 			if (session.getTransaction().isActive()){
 				session.getTransaction().rollback();
@@ -729,7 +727,7 @@ public class ImportReportEngine {
 					smartQuery.copyQuery(importedQuery);
 					final org.wcs.smart.query.model.Query thisQuery = smartQuery;
 					final boolean[] ok = new boolean[]{false};
-					session.evict(smartQuery);
+					session.evict(smartQuery);					
 					display.syncExec(new Runnable(){
 						@Override
 						public void run() {

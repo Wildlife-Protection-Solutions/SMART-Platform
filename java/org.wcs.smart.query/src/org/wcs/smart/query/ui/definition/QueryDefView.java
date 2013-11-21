@@ -162,6 +162,7 @@ public class QueryDefView extends ViewPart {
 		
 		@Override
 		public void queryModified(int eventType, Object object) {
+			if (current == null) return;
 			if (eventType == IQueryListener.QUERY_DEFINITION_MODIFIED && object instanceof Query && ((Query)object).equals(current.getQuery())){
 				validate();
 			}
