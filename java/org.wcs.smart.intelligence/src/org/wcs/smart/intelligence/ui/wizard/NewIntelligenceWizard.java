@@ -55,6 +55,7 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
         setWindowTitle(Messages.IntelligenceWizard_Title);
         intelligence = new Intelligence();
         intelligence.setConservationArea(SmartDB.getCurrentConservationArea());
+        intelligence.setCreator(SmartDB.getCurrentEmployee());
         
     }
     

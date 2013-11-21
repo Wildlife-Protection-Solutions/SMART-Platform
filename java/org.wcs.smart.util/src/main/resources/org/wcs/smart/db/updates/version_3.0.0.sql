@@ -106,3 +106,11 @@ ALTER TABLE smart.observation_attachment
 	ON DELETE CASCADE
 ;
 
+
+ALTER TABLE smart.intelligence ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
+ALTER TABLE smart.intelligence 
+	ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid)
+	REFERENCES smart.employee (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
