@@ -26,16 +26,16 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
-import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
+import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
 /**
  * Sets of tests for the summary parser.
  * @author Emily
  *
  */
-@SuppressWarnings({"nls", "restriction"})
+@SuppressWarnings({"nls"})
 public class SummaryParserTest {
 
 	@Test

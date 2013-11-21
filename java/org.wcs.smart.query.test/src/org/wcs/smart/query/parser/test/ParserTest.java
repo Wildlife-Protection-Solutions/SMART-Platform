@@ -26,10 +26,10 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.query.parser.filter.IFilter;
-import org.wcs.smart.query.parser.filter.QueryFilter;
-import org.wcs.smart.query.parser.internal.parser.ParseException;
-import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.patrol.query.parser.internal.parser.ParseException;
+import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.QueryFilter;
 
 /**
  * Sets of test for testing query parser.
@@ -37,7 +37,7 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
  * @author Emily
  * @since 1.0.0
  */
-@SuppressWarnings({"nls", "restriction"})
+@SuppressWarnings({"nls"})
 public class ParserTest {
 
 	@Test
