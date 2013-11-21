@@ -195,7 +195,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 				query.append(" "); //$NON-NLS-1$
 			}
 		}
-		return query.toString();
+		return query.toString().trim();
 	}
 	
 	/**
