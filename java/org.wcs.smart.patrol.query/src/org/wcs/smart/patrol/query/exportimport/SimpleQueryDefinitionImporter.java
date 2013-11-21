@@ -85,6 +85,9 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 		String langCode = qt.getLanguage();
 		IQueryType qType = QueryTypeManager.getInstance().findQueryType(qt.getQueryType());
 		if (qType == null){
+			qType = QueryTypeManager.getInstance().findDeprecatedQueryType(qt.getQueryType());
+		}
+		if (qType == null){
 			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
 		}
 		wq = (SimpleQuery) PatrolQueryFactory.createQuery(qType);
