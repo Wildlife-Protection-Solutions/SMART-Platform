@@ -87,6 +87,8 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	private Text txtToDate;
 	private TableViewer pointsList;
 	private TableViewer attachmentsList;
+	private Label txtCreator;
+
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	private IntelligenceEditor parentEditor;
@@ -163,6 +165,10 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		txtDateReceived.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, content, PanelType.RECIEVED); 
 
+		toolkit.createLabel(content, Messages.Intelligence_Creator_Label);
+		txtCreator = toolkit.createLabel(content, "", SWT.NONE); //$NON-NLS-1$
+		txtCreator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
 		toolkit.createLabel(content, Messages.IntelligenceSource_IntelligenceSource_Label);
 		txtSource = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtSource.setEditable(false);
@@ -251,6 +257,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
 		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
+		txtCreator.setText(intel.getCreator() != null ? intel.getCreator().getFullLabel() : ""); //$NON-NLS-1$
 		txtSource.setText(intel.getSource() != null ? intel.getSource().getName() : ""); //$NON-NLS-1$
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		lnkPatrolID.setText(value);

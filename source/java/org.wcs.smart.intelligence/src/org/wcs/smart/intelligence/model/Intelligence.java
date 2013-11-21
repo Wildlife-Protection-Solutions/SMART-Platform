@@ -38,6 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
@@ -64,6 +65,8 @@ public class Intelligence extends NamedItem {
     private String description;
 	private List<IntelligencePoint> points;
 	private List<IntelligenceAttachment> attachments;
+	private Employee creator;
+
    
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -156,6 +159,16 @@ public class Intelligence extends NamedItem {
 		this.attachments = attachments;
 	}
 
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="creator_uuid", referencedColumnName="uuid")
+	public Employee getCreator(){
+		return creator;
+	}
+	
+	public void setCreator(Employee creator){
+		this.creator = creator;
+	}
+	
 	/**
 	 * 
 	 * <p>

@@ -96,6 +96,8 @@ public class Messages extends NLS {
 
 	public static String ImportIntelligenceHandler_ProcessingFile;
 
+	public static String Intelligence_Creator_Label;
+
 	public static String IntelligenceAttachments_Attachments_Label;
 
     public static String IntelligenceAttachments_Message;
