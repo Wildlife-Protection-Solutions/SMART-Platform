@@ -23,9 +23,17 @@ package org.wcs.smart.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.DesignConfig;
+import org.eclipse.birt.report.model.api.DesignEngine;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -34,9 +42,11 @@ import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Report template cloner that copies report information
@@ -154,19 +164,57 @@ public class ReportTemplateCloner implements
 			
 			FileUtils.copyFile(src, dest);
 	
-			engine.getSession().save(clone);
-			engine.addConservationItemMapping(r, clone);
+			boolean save = true;
+			try{
+				updateReportFile(clone, dest,  engine);	
+			}catch (Exception ex){
+				save = false;
+				ReportPlugIn.log(ex.getMessage(), ex);
+				dest.delete();
+			}
 			
-			@SuppressWarnings("unchecked")
-			List<ReportQuery> queries = engine.getSession().createCriteria(ReportQuery.class).add(Restrictions.eq("id.report", r)).list(); //$NON-NLS-1$
-			for (ReportQuery rq : queries){
-				UuidItem item = engine.getNewConservationItem(rq.getQueryUuid());
-				if (item != null){
-					ReportQuery rqclone = new ReportQuery(clone, item.getUuid());
-					engine.getSession().save(rqclone);
+			if (save){
+				engine.getSession().save(clone);
+				engine.addConservationItemMapping(r, clone);
+			
+				@SuppressWarnings("unchecked")
+				List<ReportQuery> queries = engine.getSession().createCriteria(ReportQuery.class).add(Restrictions.eq("id.report", r)).list(); //$NON-NLS-1$
+				for (ReportQuery rq : queries){
+					UuidItem item = engine.getNewConservationItem(rq.getQueryUuid());
+					if (item != null){
+						ReportQuery rqclone = new ReportQuery(clone, item.getUuid());
+						engine.getSession().save(rqclone);
+					}
 				}
 			}
 		}
 		engine.getSession().flush();
+	}
+	
+	private void updateReportFile(Report report, File dest, ConservationAreaClonerEngine engine) throws Exception{
+		SessionHandle session = new DesignEngine(new DesignConfig()).newSessionHandle(null);
+		ReportDesignHandle rdh = session.openDesign(dest.getAbsolutePath());
+		
+		List<?> datasets = rdh.getDataSets().getContents();
+		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+			DataSetHandle dataset = (DataSetHandle) iterator.next();
+			if (dataset instanceof OdaDataSetHandle){
+				if (((OdaDataSetHandle)dataset).getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
+					String bits[] = ((OdaDataSetHandle) dataset).getQueryText().split(":"); //$NON-NLS-1$
+					
+					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$
+					UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
+					if (newQueryReferences != null){
+						((OdaDataSetHandle) dataset).setQueryText(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid())); //$NON-NLS-1$
+					}else{
+						//new query reference cannot be found; 
+						throw new Exception(MessageFormat.format(Messages.ReportTemplateCloner_CloneError, new Object[]{report.getName()}));
+					}
+					
+				}
+			}
+		}
+		rdh.save();
+		rdh.close();
 	}
 }

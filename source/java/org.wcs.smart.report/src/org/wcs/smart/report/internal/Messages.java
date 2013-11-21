@@ -152,6 +152,7 @@ public class Messages extends NLS {
 	public static String ReportQueryListener_QuerySaveError;
 	public static String ReportQueryListener_Warning_DialogTitle;
 
+	public static String ReportTemplateCloner_CloneError;
 	public static String ReportTemplateCloner_Progress_copyLibrary;
 	public static String ReportTemplateCloner_Progress_CopyFolder;
 	public static String ReportTemplateCloner_Progress_CopyReport;
