@@ -105,3 +105,29 @@ ALTER TABLE smart.observation_attachment
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
 ;
+
+
+CREATE TABLE smart.intelligence_source
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	CA_UUID CHAR(16) for bit data NOT NULL,
+	KEYID varchar(128),
+	IS_ACTIVE BOOLEAN NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.intelligence_source
+	ADD CONSTRAINT intelligence_source_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+ALTER TABLE smart.intelligence ADD COLUMN source_uuid CHAR(16) FOR BIT DATA;
+
+ALTER TABLE smart.intelligence 
+	ADD CONSTRAINT intelligence_source_uuid_fk FOREIGN KEY (source_uuid)
+	REFERENCES smart.intelligence_source (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
