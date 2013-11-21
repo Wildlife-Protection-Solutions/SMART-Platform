@@ -870,5 +870,19 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+   <plugin
+         id="org.wcs.smart.patrol.query.nl_ms"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
 
+   <plugin
+         id="org.wcs.smart.patrol.query.report.nl_ms"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
 </feature>
