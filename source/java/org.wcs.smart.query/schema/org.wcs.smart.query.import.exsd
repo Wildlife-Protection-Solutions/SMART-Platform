@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.query" id="org.wcs.smart.query.import" name="Query Definition Importer"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         This extension point provides allows plugins to provide query definition importers for any query types they contribute.
       </documentation>
    </annotation>
 

@@ -6,7 +6,8 @@
          <meta.schema plugin="org.wcs.smart.query" id="org.wcs.smart.query.queryFilterPanel" name="Query Filter Panel"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         This extension points allow plugins to contribute query item panels.  Query items panels appears in the Query Item View and are used to provide a selection of items users can add to query definition panels.
+When definiting a new query type developers must also define the query definition panels and their associated item panels.  So different queries can have different definition panels which can in turn have different item panels.
       </documentation>
    </annotation>
 

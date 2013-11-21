@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.query" id="org.wcs.smart.query.queryType" name="Query Type"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         Extension point that allows plugins to contribute additional query types.
       </documentation>
    </annotation>
 
