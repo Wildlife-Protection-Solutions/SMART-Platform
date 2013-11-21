@@ -56,7 +56,9 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
@@ -65,7 +67,7 @@ import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligenceSourceType;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
@@ -231,7 +233,16 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
 			wb.showPerspective(IntelligencePerspective.ID, win);
 			NewIntelligenceWizard wizard = new NewIntelligenceWizard();
-			wizard.getIntelligence().setSource(IntelligenceSourceType.PATROL);
+			Session s = HibernateManager.openSession();
+			try {
+				IntelligenceSource source = IntelligenceHibernateManager.getPatrolSource(s);
+				wizard.getIntelligence().setSource(source);
+			} catch (Exception e) {
+				IntelligencePlugIn.displayLog("Intelligence source that associates intelligence with patrol was not found.", e);
+				return;
+			} finally {
+				s.close();
+			}
 			wizard.getIntelligence().setPatrol(patrol);
 			WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
 			dialog.open();

@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.ui.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.wcs.smart.intelligence.ui.source.SourceTypesPropertyDialog;
 
 /**
  * Handler to display editor to configure intelligence sources.
@@ -35,7 +36,8 @@ public class EditIntelligenceSourceHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		SourceTypesPropertyDialog dialog = new SourceTypesPropertyDialog();
+		dialog.open();
 		return null;
 	}
 

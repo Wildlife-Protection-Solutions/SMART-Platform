@@ -124,6 +124,9 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 				intelligence.getPatrol().getId();
 			}
 			intelligence.getNames().size();
+			if (intelligence.getSource() != null) {
+				intelligence.getSource().getNames().size();
+			}
 			intelligence.getPoints().size();
 			intelligence.getAttachments().size();
 			session.getTransaction().commit();

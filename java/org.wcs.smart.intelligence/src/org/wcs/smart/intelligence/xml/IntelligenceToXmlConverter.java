@@ -54,7 +54,7 @@ public class IntelligenceToXmlConverter {
 		xml.setToDate(SmartUtils.toXmlDate(i.getToDate()));
 
 		/* source */
-		xml.setSource(i.getSource().name());
+		xml.setSource(i.getSource().getKeyId());
 
 		/* description */
 		xml.setDescription(i.getDescription());

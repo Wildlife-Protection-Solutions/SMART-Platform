@@ -30,8 +30,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -59,7 +57,7 @@ public class Intelligence extends NamedItem {
 				
     private ConservationArea conservationArea;
     private Date receivedDate;
-    private IntelligenceSourceType source;
+    private IntelligenceSource source;
     private Patrol patrol;
     private Date fromDate;
     private Date toDate;
@@ -86,13 +84,13 @@ public class Intelligence extends NamedItem {
         this.receivedDate = receivedDate;
     }
 
-	@Column(name="source")
-	@Enumerated(EnumType.STRING)
-	public IntelligenceSourceType getSource() {
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="source_uuid", referencedColumnName="uuid")
+	public IntelligenceSource getSource() {
 		return source;
 	}
 
-	public void setSource(IntelligenceSourceType source) {
+	public void setSource(IntelligenceSource source) {
 		this.source = source;
 	}
 
