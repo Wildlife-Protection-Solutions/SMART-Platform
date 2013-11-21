@@ -33,11 +33,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceAttachment;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.intelligence.model.IntelligenceSourceType;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.xml.model.IntelligenceType;
 import org.wcs.smart.intelligence.xml.model.LabelType;
 import org.wcs.smart.intelligence.xml.model.PointType;
@@ -82,7 +83,11 @@ public class XmlToIntelligenceConverter {
 		}
 
 		/* source */
-		intelligence.setSource(IntelligenceSourceType.valueOf(xml.getSource().toUpperCase()));
+		IntelligenceSource source = IntelligenceHibernateManager.getSourceByKeyId(session, xml.getSource());
+		if (source == null) {
+			warnings.add(MessageFormat.format("Source type with keyId = \"{0}\" is not defined in this conservation area.", xml.getSource()));
+		}
+		intelligence.setSource(source);
 
 		/* description */
 		intelligence.setDescription(xml.getDescription());

@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.intelligence.ui.panel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -36,9 +39,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligenceSourceType;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 
@@ -56,6 +64,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	private static final int DECORATION_MARGIN = 2;
 	
     private ComboViewer sourceType;
+    private List<IntelligenceSource> sourceTypeList;
     
     private Label patrolLabel;
     private PatrolFilteredComboViewer patrolId;
@@ -68,6 +77,15 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceSourceComposite(Composite parent, int style) {
 		super(parent, style);
+		Session s = HibernateManager.openSession();
+		try {
+			sourceTypeList = IntelligenceHibernateManager.getActiveSourceTypes(SmartDB.getCurrentConservationArea(), s);
+		} catch (Exception e) {
+			IntelligencePlugIn.displayLog("Failed to load intelligence source types.", e);
+			sourceTypeList = new ArrayList<IntelligenceSource>();
+		} finally {
+			s.close();
+		}
 		setMessage(Messages.IntelligenceSource_Message);
 		createControls();
 		validate();
@@ -86,12 +104,13 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         sourceType.setContentProvider(ArrayContentProvider.getInstance());
         sourceType.setLabelProvider(new IntelligenceSourceLabelProvider());
  
-        sourceType.setInput(IntelligenceSourceType.values());
-        sourceType.setSelection(new StructuredSelection(IntelligenceSourceType.PATROL));
+        sourceType.setInput(sourceTypeList);
+        if (!sourceTypeList.isEmpty())
+        	sourceType.setSelection(new StructuredSelection(sourceTypeList.get(0)));
         sourceType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(getSelectedSourceType());
+				boolean isPatrolSelected = IntelligenceSource.isPatrolSource(getSelectedSourceType());
 				patrolLabel.setVisible(isPatrolSelected);
 				patrolId.setVisible(isPatrolSelected);
 				refreshPatrolDecoration();
@@ -133,8 +152,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	
     @Override
     protected void updateModelInternal(Intelligence intelligence) {
-    	IntelligenceSourceType source = getSelectedSourceType();
-    	Patrol patrol = IntelligenceSourceType.PATROL.equals(source) ? getSelectedPatrol() : null;
+    	IntelligenceSource source = getSelectedSourceType();
+    	Patrol patrol = IntelligenceSource.isPatrolSource(source) ? getSelectedPatrol() : null;
        	intelligence.setSource(source);
 		intelligence.setPatrol(patrol);
     }
@@ -151,22 +170,22 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     
     @Override
     protected void validate() {
-    	IntelligenceSourceType source = getSelectedSourceType();
+    	IntelligenceSource source = getSelectedSourceType();
 		if (source == null) {
 			setErrorMessage(ERROR_SOURCE_REQUIRED);
 			return;
 		}
-		if (IntelligenceSourceType.PATROL.equals(source) && getSelectedPatrol() == null) {
+		if (IntelligenceSource.isPatrolSource(source) && getSelectedPatrol() == null) {
 			setErrorMessage(ERROR_PATROL_ID_REQUIRED);
 			return;
 		}
 		setErrorMessage(null);
     } 
 
-    private IntelligenceSourceType getSelectedSourceType() {
+    private IntelligenceSource getSelectedSourceType() {
 		ISelection sourceSelection = sourceType.getSelection();
 		if (sourceSelection instanceof IStructuredSelection) {
-			return (IntelligenceSourceType)((IStructuredSelection)sourceSelection).getFirstElement();
+			return (IntelligenceSource)((IStructuredSelection)sourceSelection).getFirstElement();
 		}
 		return null;
     }
@@ -184,8 +203,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     private class IntelligenceSourceLabelProvider extends LabelProvider {
     	@Override
     	public String getText(Object element) {
-    		if (element instanceof IntelligenceSourceType) {
-    			return ((IntelligenceSourceType)element).getName();
+    		if (element instanceof IntelligenceSource) {
+    			return ((IntelligenceSource)element).getName();
     		}
     		return super.getText(element);
     	}

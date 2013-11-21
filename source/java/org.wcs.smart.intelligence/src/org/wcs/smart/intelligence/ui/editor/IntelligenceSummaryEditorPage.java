@@ -251,7 +251,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
 		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
-		txtSource.setText(intel.getSource().getName());
+		txtSource.setText(intel.getSource() != null ? intel.getSource().getName() : ""); //$NON-NLS-1$
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		lnkPatrolID.setText(value);
 		lnkPatrolID.setEnabled(intel.getPatrol() != null);

@@ -37,7 +37,7 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligenceSourceType;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.patrol.xml.model.ExtraDataDateKeyType;
@@ -174,7 +174,7 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 	}
 	
 	private boolean validateReportedIntelligence(Intelligence intelligence) {
-		if (IntelligenceSourceType.PATROL.equals(intelligence.getSource())) {
+		if (IntelligenceSource.isPatrolSource(intelligence.getSource())) {
 			if (intelligence.getPatrol() != null) {
 				warnings.add(MessageFormat.format(Messages.ConvertedIntelligenceExtraData_IntelligencePatrolIsSet, intelligence.getName(), DateFormat.getDateInstance(DateFormat.LONG).format(intelligence.getReceivedDate())));
 				return false;

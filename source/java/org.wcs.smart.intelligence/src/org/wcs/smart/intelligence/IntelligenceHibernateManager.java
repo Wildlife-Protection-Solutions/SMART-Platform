@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -297,4 +298,52 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
+	/**
+	 * Gets all intelligence source types (active and in-active) for
+	 * a given conservation area.
+	 * 
+	 * @param ca conservation area 
+	 * @param s active session 
+	 * @return list of intelligence source types
+	 */
+	public static List<IntelligenceSource> getSourceTypes(ConservationArea ca, Session s){
+		return getSourceTypes(ca, s, false);
+	}
+	/**
+	 * Gets only active intelligence source types for a given conservation area 
+	 * 
+	 * @param ca conservation area 
+	 * @param s active session
+	 * @return list of active intelligence source types
+	 */
+	public static List<IntelligenceSource> getActiveSourceTypes(ConservationArea ca, Session s){
+		return getSourceTypes(ca, s, true);
+	}
+	
+	/**
+	 * Loads intelligence source types from database 
+	 * @param ca conservation area 
+	 * @param s active session
+	 * @param onlyActive <code>true</code> if only active intelligence source types should be returned, <code>false</code> for all 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private static List<IntelligenceSource> getSourceTypes(ConservationArea ca, Session s, boolean onlyActive){
+		Criteria query = s.createCriteria(IntelligenceSource.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		if (onlyActive) {
+			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+		}
+		return query.list();
+	}
+
+	public static IntelligenceSource getPatrolSource(Session s) {
+		return getSourceByKeyId(s, IntelligenceSource.PATROL_KEY);
+	}
+
+	public static IntelligenceSource getSourceByKeyId(Session s, String keyId) {
+		Criteria query = s.createCriteria(IntelligenceSource.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", keyId)); //$NON-NLS-1$
+		return (IntelligenceSource) query.uniqueResult();
+	}	
 }
