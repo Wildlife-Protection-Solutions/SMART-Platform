@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.query" id="org.wcs.smart.query.queryDefinitionPanel" name="Query Definition Panel"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         This extension points allow plugins to contribute query definition panels.  Query definition panels appears in the Query Definition View and are used to define queries.  
       </documentation>
    </annotation>
 

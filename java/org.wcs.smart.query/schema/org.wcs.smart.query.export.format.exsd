@@ -6,7 +6,9 @@
          <meta.schema plugin="org.wcs.smart.query" id="org.wcs.smart.query.export.format" name="Query Export Format"/>
       </appinfo>
       <documentation>
-         This extension point allows users to write additional export formats for queries.
+         This extension point allows users to write additional export formats for queries.  
+Any exports which export query definitions should have an id that starts with IQueryExporter.QUERY_DEFINITION_EXPORTER_ID (org.wcs.smart.query.export.definition).  This allows the report plug-in to determine which exporter to use when exporting reports and associated queries.
+
       </documentation>
    </annotation>
 
