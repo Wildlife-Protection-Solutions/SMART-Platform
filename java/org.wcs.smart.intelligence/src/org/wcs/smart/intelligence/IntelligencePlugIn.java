@@ -23,11 +23,13 @@ package org.wcs.smart.intelligence;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.patrol.PatrolManager;
@@ -75,6 +77,11 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 		
 		PatrolManager.getInstance().addDeleteHandler(new PatrolDeleteHandler(), PatrolDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaDeleteHandler(), CaDeleteHandler.EXECUTE_ORDER);
+		
+		Job j = new IntelligenceStartupJob();
+		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		j.schedule();
+		
 	}
 
 	/*
