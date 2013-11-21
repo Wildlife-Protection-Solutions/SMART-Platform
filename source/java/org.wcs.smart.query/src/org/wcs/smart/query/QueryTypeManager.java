@@ -77,6 +77,27 @@ public class QueryTypeManager {
 	}
 		
 	/**
+	 * Provides support for deprecated query types from
+	 * pre 3.0.0 systems
+	 * 
+	 * @param depricatedTypeString
+	 * @return
+	 */
+	public IQueryType findDeprecatedQueryType(String deprecatedTypeString){
+		if (deprecatedTypeString.equals("OBSERVATION")){ //$NON-NLS-1$
+			return findQueryType("patrolobservation"); //$NON-NLS-1$
+		}else if (deprecatedTypeString.equals("PATROL")){ //$NON-NLS-1$
+			return findQueryType("patrolquery"); //$NON-NLS-1$
+		}else if (deprecatedTypeString.equals("GRIDDED")){ //$NON-NLS-1$
+			return findQueryType("patrolgrid"); //$NON-NLS-1$
+		}else if (deprecatedTypeString.equals("SUMMARY")){ //$NON-NLS-1$
+			return findQueryType("patrolsummary"); //$NON-NLS-1$
+		}else if (deprecatedTypeString.equals("WAYPOINT")){ //$NON-NLS-1$
+			return findQueryType("patrolwaypoint"); //$NON-NLS-1$
+		}
+		return null;
+	}
+	/**
 	 * Gets the query item panel that is associated with the given query
 	 * type and definition panel.  There should only be one item panel
 	 * for a given definition panel and query type.  This panel is the list

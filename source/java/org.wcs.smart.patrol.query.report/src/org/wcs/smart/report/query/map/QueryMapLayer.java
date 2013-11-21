@@ -75,23 +75,16 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
 		if (odaHandle.getExtensionID().equals(SMART_QUERY_ID)) {
 			String queryText = odaHandle.getQueryText();
-			String queryTypeKey = queryText.split(":")[0];
+			String queryTypeKey = queryText.split(":")[0]; //$NON-NLS-1$
 			if (queryTypeKey.equals(PatrolGridQueryType.KEY) ||
 					queryTypeKey.equals(PatrolQueryType.KEY) ||
 					queryTypeKey.equals(PatrolObservationQueryType.KEY) ||
 					queryTypeKey.equals(PatrolWaypointQueryType.KEY)){
 				return true;
 			}
-			
-			/* for historic support */
-			if (queryTypeKey.equals("OBSERVATION") ||
-					queryTypeKey.equals("PATROL") ||
-					queryTypeKey.equals("GRIDDED") || 
-					queryTypeKey.equals("SUMMARY") ||
-					queryTypeKey.equals("WAYPOINT")){
+			if (QueryTypeManager.getInstance().findDeprecatedQueryType(queryTypeKey)!= null){
 				return true;
 			}
-			
 		}
 		return false;
 	}
@@ -110,18 +103,7 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 		
 		/* for historic support */
 		if (qtype == null){
-			if (queryType.equals("OBSERVATION")){
-				queryType = "patrolobservation";
-			}else if (queryType.equals("PATROL")){
-				queryType = "patrolquery";
-			}else if (queryType.equals("GRIDDED")){
-				queryType = "patrolgrid";
-			}else if (queryType.equals("SUMMARY")){
-				queryType = "patrolsummary";
-			}else if (queryType.equals("WAYPOINT")){
-				queryType = "patrolwaypoint";
-			}
-			qtype = QueryTypeManager.getInstance().findQueryType(queryType);
+			qtype = QueryTypeManager.getInstance().findDeprecatedQueryType(queryType);
 		}
 		Query q = null;
 		Session session = HibernateManager.openSession();

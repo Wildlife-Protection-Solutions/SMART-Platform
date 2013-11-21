@@ -10,6 +10,8 @@ public class Messages extends NLS {
 	public static String SmartQuery_Error_CouldNoLoadMetadata;
 	public static String SmartQuery_Error_CouldNoLoadQuery;
 	public static String SmartQuery_LoadQuery_JobName;
+	public static String SmartQuery_QueryTypeNotSupported;
+	public static String SmartQuery_QueryTypeNotSupportedReports;
 	public static String SmartQuery_Warning_SummaryGroupByDates;
 	public static String SummaryQueryResultSetMetadata_ParseQueryJob;
 	static {

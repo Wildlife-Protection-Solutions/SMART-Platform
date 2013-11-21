@@ -128,27 +128,16 @@ public class SmartQuery implements IQuery {
 			
 			/* for historic support */
 			if (this.queryType == null){
-				if (bits[0].equals("OBSERVATION")){
-					bits[0] = "patrolobservation";
-				}else if (bits[0].equals("PATROL")){
-					bits[0] = "patrolquery";
-				}else if (bits[0].equals("GRIDDED")){
-					bits[0] = "patrolgrid";
-				}else if (bits[0].equals("SUMMARY")){
-					bits[0] = "patrolsummary";
-				}else if (bits[0].equals("WAYPOINT")){
-					bits[0] = "patrolwaypoint";
-				}
-				this.queryType = QueryTypeManager.getInstance().findQueryType(bits[0]);
+				this.queryType = QueryTypeManager.getInstance().findDeprecatedQueryType(bits[0]);
 			}
 			
 			if (this.queryType == null){
-				throw new Exception(MessageFormat.format("The query type {0} is not supported in SMART.", new Object[]{bits[0]}));
+				throw new Exception(MessageFormat.format(Messages.SmartQuery_QueryTypeNotSupported, new Object[]{bits[0]}));
 			}
 			this.uuid = SmartUtils.decodeHex(bits[1]);
 			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType.getKey());
 			if (this.wrapperObject == null){
-				throw new Exception(MessageFormat.format("The query type {0} is not supported in reports.", new Object[]{queryType}));
+				throw new Exception(MessageFormat.format(Messages.SmartQuery_QueryTypeNotSupportedReports, new Object[]{queryType}));
 			}
 			
 		} catch (Exception e1) {
