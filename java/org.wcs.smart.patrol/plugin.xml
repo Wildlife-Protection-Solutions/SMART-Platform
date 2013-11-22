@@ -8,8 +8,9 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
+            locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.fielddata.dataseparater">
          <menu
+               icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.patrol"
                label="%patrol.menu.label"
                mnemonic="%patrol.menu.mnemonic">
@@ -794,6 +795,23 @@
       <ObservationSource
             class="org.wcs.smart.patrol.model.PatrolWaypointSource">
       </ObservationSource>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.observation.FieldDataPerspective">
+         <view
+               closeable="false"
+               id="org.wcs.smart.patrol.ui.PatrolListView"
+               minimized="false"
+               moveable="true"
+               relationship="stack"
+               relative="org.wcs.smart.fielddata.datafolder"
+               showTitle="false"
+               standalone="true"
+               visible="true">
+         </view>
+      </perspectiveExtension>
    </extension>
 
 </plugin>

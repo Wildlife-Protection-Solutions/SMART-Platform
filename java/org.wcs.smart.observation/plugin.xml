@@ -34,6 +34,13 @@
             name="Waypoint Information"
             restorable="true">
       </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.observation.ui.IndIncidentListView"
+            id="org.wcs.smart.observation.ui.incidientView"
+            name="Independent Incidents"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">
@@ -56,6 +63,44 @@
             ca_property=".waypoint.conservationArea"
             class="org.wcs.smart.observation.model.WaypointAttachment">
       </class>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
+         <menu
+               id="org.wcs.smart.fielddata"
+               label="Field Data"
+               mnemonic="F"
+               tooltip="Data collection and configurations">
+            <separator
+                  name="org.wcs.smart.fielddata.dataseparater"
+                  visible="true">
+            </separator>
+            <separator
+                  name="org.wcs.smart.fielddata.dataseparater2">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.perspectives.showPerspective"
+                  label="View Field Data"
+                  mnemonic="v"
+                  style="push">
+               <parameter
+                     name="org.eclipse.ui.perspectives.showPerspective.perspectiveId"
+                     value="org.wcs.smart.observation.FieldDataPerspective">
+               </parameter>
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.observation.ui.FieldDataPerspective"
+            id="org.wcs.smart.observation.FieldDataPerspective"
+            name="Field Data">
+      </perspective>
    </extension>
 
 </plugin>

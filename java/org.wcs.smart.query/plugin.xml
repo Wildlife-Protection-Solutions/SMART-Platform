@@ -368,7 +368,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.patrol">
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.fielddata">
          <menu
                id="org.wcs.smart.menu.query"
                label="%menu.query.label"
