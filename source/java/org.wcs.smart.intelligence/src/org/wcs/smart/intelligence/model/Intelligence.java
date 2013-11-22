@@ -40,6 +40,7 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
@@ -181,7 +182,7 @@ public class Intelligence extends NamedItem {
 	 */
 	@Transient
 	public String getIntelligenceDatastorePath(){
-		return "intelligence" + File.separator + SmartUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
+		return IntelligencePlugIn.INTELLIGENCE_DIR + File.separator + SmartUtils.getDirectoryPath(getUuid());
 	}
 	
 	@Transient
