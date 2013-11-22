@@ -32,6 +32,11 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="org.wcs.smart.intelligence.exportPdf"
+                  label="%pdf.command.label"
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.intelligence.export"
                   label="%export.command.label"
                   style="push"
@@ -211,6 +216,15 @@
                visible="true">
          </separator>
          <command
+               commandId="org.wcs.smart.intelligence.exportPdf"
+               label="%pdf.list.command.label"
+               style="push">
+         </command>
+         <separator
+               name="org.wcs.smart.intelligence.separator2"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.intelligence.DeleteIntelligence"
                icon="images/etool16/delete.png"
                label="%delete.command.label"
@@ -248,6 +262,21 @@
                mnemonic="%exportmap.command.mnemonic"
                style="push"
                tooltip="%exportmap.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.intelligence.IntelligencePerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.intelligence.exportPdfEditor"
+               label="%pdf.toolbar.command.label"
+               style="push"
+               tooltip="%pdf.toolbar.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -297,6 +326,14 @@
       <command
             id="org.wcs.smart.intelligence.EditIntelligenceSources"
             name="%sourceedit.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.intelligence.exportPdf"
+            name="%pdf.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.intelligence.exportPdfEditor"
+            name="%pdf.editor.command.name">
       </command>
    </extension>
    <extension
@@ -356,6 +393,14 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.EditIntelligenceSourceHandler"
             commandId="org.wcs.smart.intelligence.EditIntelligenceSources">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf"
+            commandId="org.wcs.smart.intelligence.exportPdfEditor">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf"
+            commandId="org.wcs.smart.intelligence.exportPdf">
       </handler>
    </extension>
    <extension
@@ -443,6 +488,14 @@
       <image
             commandId="org.wcs.smart.intelligence.import"
             icon="images/etool16/export_intel.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.exportPdf"
+            icon="images/etool16/printpdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.exportPdfEditor"
+            icon="images/etool16/printpdf.png">
       </image>
    </extension>
    <extension
