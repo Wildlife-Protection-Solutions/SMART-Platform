@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.incident.ui.IndIncidentListView"
+            id="org.wcs.smart.observation.ui.incidientView"
+            name="Independent Incidents"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.observation.FieldDataPerspective">
+         <view
+               closeable="false"
+               id="org.wcs.smart.observation.ui.incidientView"
+               minimized="false"
+               moveable="true"
+               relationship="stack"
+               relative="org.wcs.smart.fielddata.datafolder"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+   </extension>
+
+</plugin>
