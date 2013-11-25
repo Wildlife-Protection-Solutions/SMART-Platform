@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.patrol.model;
 
 import java.io.File;
@@ -13,11 +34,19 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * 
+ * Patrol waypoint source.
+ * 
+ * @author Emily
+ *
+ */
 public class PatrolWaypointSource implements IWaypointSource {
 
-	public static String PATROL_WP_SOURCE_ID = "PATROL";
+	public static String PATROL_WP_SOURCE_ID = "PATROL"; //$NON-NLS-1$
 	
 	public PatrolWaypointSource() {
 	}
@@ -29,7 +58,7 @@ public class PatrolWaypointSource implements IWaypointSource {
 
 	@Override
 	public String getName() {
-		return "Patrol";
+		return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
 	}
 
 	@Override
@@ -39,17 +68,17 @@ public class PatrolWaypointSource implements IWaypointSource {
 		//with; do in a different thread so we can have our own database
 		//connection
 		final String[] patrolDir = new String[]{null};
-		Job j = new Job("get datastore location"){
+		Job j = new Job("get datastore location"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				try{
-					List<?> pws = s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list();
+					List<?> pws = s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list(); //$NON-NLS-1$
 					if (pws.size() > 0){
 						patrolDir[0] = SmartUtils.getDirectoryPath(((PatrolWaypoint)pws.get(0)).getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
 					}else{
-						SmartPatrolPlugIn.log("Patrol waypoint could not be found for waypoint " + SmartUtils.encodeHex(wp.getUuid()), null);
+						SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + SmartUtils.encodeHex(wp.getUuid()), null);
 					}
 				}finally{
 					s.close();
@@ -62,7 +91,7 @@ public class PatrolWaypointSource implements IWaypointSource {
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			SmartPatrolPlugIn.log("Patrol waypoint could not be found for waypoint " + SmartUtils.encodeHex(wp.getUuid()), null);
+			SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + SmartUtils.encodeHex(wp.getUuid()), null);
 		}
 			
 		StringBuilder sb = new StringBuilder();
