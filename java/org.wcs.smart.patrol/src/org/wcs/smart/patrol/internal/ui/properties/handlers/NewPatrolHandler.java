@@ -23,19 +23,17 @@ package org.wcs.smart.patrol.internal.ui.properties.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler;
 import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
-import org.wcs.smart.patrol.ui.PatrolPerspective;
 
 /**
  * Handler to display new patrol wizard.
@@ -43,24 +41,15 @@ import org.wcs.smart.patrol.ui.PatrolPerspective;
  * @author Emily
  *
  */
-public class NewPatrolHandler extends AbstractHandler {
+public class NewPatrolHandler extends ShowPatrolPersepctiveHandler {
 
 	private WizardDialog dialog = null;
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		//Open Patrol Perspective
-		try {
-			HandlerUtil
-					.getActiveWorkbenchWindow(event)
-					.getWorkbench()
-					.showPerspective(PatrolPerspective.ID,
-							HandlerUtil.getActiveWorkbenchWindow(event));
-		} catch (WorkbenchException e) {
-			SmartPatrolPlugIn
-					.displayLog(Messages.NewPatrolHandler_ErrorLoadingPerspective, e);
-		}
-
+		//open the correct perspective/view
+		super.execute(event);
+		
 		//Show Create Patrol Wizard
 		final CreatePatrolWizard wizard = new CreatePatrolWizard();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(

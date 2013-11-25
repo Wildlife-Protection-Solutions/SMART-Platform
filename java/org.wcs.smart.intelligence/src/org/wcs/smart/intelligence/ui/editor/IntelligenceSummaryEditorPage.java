@@ -42,8 +42,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -63,10 +61,10 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.patrol.ui.PatrolPerspective;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.util.SmartUtils;
@@ -329,11 +327,11 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 			if (p == null) {
 				return;
 			}
+			
+			FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
 			PatrolEditorInput input = new PatrolEditorInput(p.getUuid(), p.getId(), null, null, null);
-			IWorkbench workbench = PlatformUI.getWorkbench();
-			IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-			workbench.showPerspective(PatrolPerspective.ID, window);
-			window.getActivePage().openEditor(input, PatrolEditor.ID);
+			
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PatrolEditor.ID);
 		} catch (Exception e1) {
 			IntelligencePlugIn.displayLog(Messages.IntelligenceEditor_FailOpenPatrol_Error +SmartUtils.LINE_SEPARATOR + e1.getLocalizedMessage(), e1);
 		}

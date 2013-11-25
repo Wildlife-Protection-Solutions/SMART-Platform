@@ -5,7 +5,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu">
+            locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.menu.help">
          <menu
                id="org.wcs.smart.intelligence.menu"
                label="%menu.create.label">

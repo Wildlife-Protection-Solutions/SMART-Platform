@@ -31,14 +31,7 @@
             class="org.wcs.smart.observation.ui.WaypointInfoView"
             icon="images/icons/view16/waypoint_info.png"
             id="org.wcs.smart.observation.waypointInfo"
-            name="Waypoint Information"
-            restorable="true">
-      </view>
-      <view
-            allowMultiple="false"
-            class="org.wcs.smart.observation.ui.IndIncidentListView"
-            id="org.wcs.smart.observation.ui.incidientView"
-            name="Independent Incidents"
+            name="%waypointinfo.view.name"
             restorable="true">
       </view>
    </extension>
@@ -71,20 +64,22 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
          <menu
                id="org.wcs.smart.fielddata"
-               label="Field Data"
-               mnemonic="F"
-               tooltip="Data collection and configurations">
+               label="%fielddata.menu.label"
+               mnemonic="%fielddata.menu.mnemonic"
+               tooltip="%fielddata.menu.tooltip">
             <separator
                   name="org.wcs.smart.fielddata.dataseparater"
                   visible="true">
             </separator>
             <separator
-                  name="org.wcs.smart.fielddata.dataseparater2">
+                  name="org.wcs.smart.fielddata.dataseparater2"
+                  visible="true">
             </separator>
             <command
                   commandId="org.eclipse.ui.perspectives.showPerspective"
-                  label="View Field Data"
-                  mnemonic="v"
+                  icon="images/icons/view16/fielddata.png"
+                  label="%fielddata.perspective.command.label"
+                  mnemonic="%fielddata.perspective.command.mnemonic"
                   style="push">
                <parameter
                      name="org.eclipse.ui.perspectives.showPerspective.perspectiveId"
@@ -93,13 +88,37 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.ui.internal.ShowDefaultPerspective">
+         <command
+               commandId="org.eclipse.ui.perspectives.showPerspective"
+               icon="images/icons/view16/fielddata.png"
+               id="org.wcs.smart.fielddata.perspective"
+               label="%showfielddataperspective.command.label"
+               mnemonic="%showfielddataperspectivecommand.mnemonic"
+               style="push"
+               tooltip="%showfielddataperspectivecommand.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
+            <parameter
+                  name="org.eclipse.ui.perspectives.showPerspective.perspectiveId"
+                  value="org.wcs.smart.observation.FieldDataPerspective">
+            </parameter>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.observation.ui.FieldDataPerspective"
             id="org.wcs.smart.observation.FieldDataPerspective"
-            name="Field Data">
+            name="%fielddata.perspective.name">
       </perspective>
    </extension>
 

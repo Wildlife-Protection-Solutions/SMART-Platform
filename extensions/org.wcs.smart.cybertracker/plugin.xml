@@ -5,8 +5,9 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.menu.help">
+            locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.fielddata.dataseparater2">
          <menu
+               icon="images/etool16/cybertracker16.png"
                id="org.wcs.smart.cybertracker.menu"
                label="%cybertracker.menu.label">
             <command
