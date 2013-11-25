@@ -78,6 +78,10 @@ public class Messages extends NLS {
 
 	public static String ExportIntelligenceHandler_NothingSelected;
 
+	public static String ExportIntelligenceJob_ExportError;
+
+	public static String ExportIntelligenceJob_Title;
+
 	public static String ImportIntelligenceHandler_CancelInfoDialog_Message;
 
 	public static String ImportIntelligenceHandler_CancelInfoDialog_Title;

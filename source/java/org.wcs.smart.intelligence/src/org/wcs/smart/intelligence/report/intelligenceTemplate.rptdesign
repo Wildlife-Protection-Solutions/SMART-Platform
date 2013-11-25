@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.2.1.v201209101448 Build &lt;4.2.1.v20120912-1721></property>
+    <text-property name="title">New Report</text-property>
+    <parameters>
+        <scalar-parameter name="IntelligenceUUID" id="322">
+            <property name="valueType">static</property>
+            <property name="isRequired">true</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceName" id="15">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceDescription" id="16">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceSource" id="17">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligencePatrolID" id="18">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceReceivedDate" id="400">
+            <property name="valueType">static</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceFromDate" id="20">
+            <property name="valueType">static</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceToDate" id="21">
+            <property name="valueType">static</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="IntelligenceCreator" id="337">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <page-setup>
+        <simple-master-page name="NewSimpleMasterPage" id="12">
+            <property name="headerHeight">0in</property>
+            <property name="footerHeight">0.35in</property>
+            <page-footer>
+                <grid id="325">
+                    <property name="borderTopColor">#000000</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">1px</property>
+                    <column id="326"/>
+                    <column id="327"/>
+                    <row id="328">
+                        <cell id="329">
+                            <text-data id="331">
+                                <property name="fontFamily">sans-serif</property>
+                                <expression name="valueExpr">params["IntelligenceName"].value</expression>
+                                <property name="contentType">html</property>
+                            </text-data>
+                        </cell>
+                        <cell id="330">
+                            <text-data id="332">
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="textAlign">right</property>
+                                <expression name="valueExpr">new Date()</expression>
+                                <property name="contentType">html</property>
+                            </text-data>
+                        </cell>
+                    </row>
+                </grid>
+            </page-footer>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <text-data id="42">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">14pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="marginBottom">0pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">params["IntelligenceName"].value</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <label id="43">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingLeft">1pt</property>
+            <property name="paddingBottom">5pt</property>
+            <text-property name="text">Intelligence Summary</text-property>
+        </label>
+        <grid id="44">
+            <property name="fontFamily">sans-serif</property>
+            <property name="marginTop">5pt</property>
+            <property name="width">7.947916666666667in</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Creator</property>
+                    <text-property name="displayName">Creator</text-property>
+                    <expression name="expression" type="javascript">params["IntelligenceCreator"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ShortName</property>
+                    <text-property name="displayName">ShortName</text-property>
+                    <expression name="expression" type="javascript">params["IntelligenceName"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">IntelligenceSource</property>
+                    <text-property name="displayName">IntelligenceSource</text-property>
+                    <expression name="expression" type="javascript">params["IntelligenceSource"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">PatrolID</property>
+                    <text-property name="displayName">PatrolID</text-property>
+                    <expression name="expression" type="javascript">params["IntelligencePatrolID"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">FromDate</property>
+                    <text-property name="displayName">FromDate</text-property>
+                    <expression name="expression" type="javascript">(new Date(params["IntelligenceFromDate"].value.getTime())).toLocaleDateString()</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ToDate</property>
+                    <text-property name="displayName">ToDate</text-property>
+                    <expression name="expression" type="javascript">(new Date(params["IntelligenceToDate"].value.getTime())).toLocaleDateString()</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Description</property>
+                    <text-property name="displayName">Description</text-property>
+                    <expression name="expression" type="javascript">params["IntelligenceDescription"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">IntelligenceReceived</property>
+                    <text-property name="displayName">IntelligenceReceived</text-property>
+                    <expression name="expression" type="javascript">params["IntelligenceReceived"].value</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <column id="45">
+                <property name="width">1.6875in</property>
+            </column>
+            <column id="46">
+                <property name="width">2.1875in</property>
+            </column>
+            <column id="47">
+                <property name="width">1.7916666666666667in</property>
+            </column>
+            <column id="48">
+                <property name="width">2.28125in</property>
+            </column>
+            <row id="49">
+                <cell id="50">
+                    <label id="74">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">Received Date:</text-property>
+                    </label>
+                </cell>
+                <cell id="51">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
+                    <data id="401">
+                        <property name="resultSetColumn">IntelligenceReceived</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="54">
+                <cell id="55">
+                    <label id="76">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">Creator:</text-property>
+                    </label>
+                </cell>
+                <cell id="56">
+                    <data id="369">
+                        <property name="resultSetColumn">PatrolID</property>
+                    </data>
+                </cell>
+                <cell id="57"/>
+                <cell id="58"/>
+            </row>
+            <row id="59">
+                <cell id="60">
+                    <label id="109">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">IntelligenceSource:</text-property>
+                    </label>
+                </cell>
+                <cell id="61">
+                    <data id="395">
+                        <property name="resultSetColumn">IntelligenceSource</property>
+                    </data>
+                </cell>
+                <cell id="62"/>
+                <cell id="63"/>
+            </row>
+            <row id="64">
+                <cell id="65">
+                    <label id="81">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">Patrol ID:</text-property>
+                    </label>
+                </cell>
+                <cell id="66">
+                    <data id="396">
+                        <property name="resultSetColumn">PatrolID</property>
+                    </data>
+                </cell>
+                <cell id="67"/>
+                <cell id="68"/>
+            </row>
+            <row id="345">
+                <property name="height">15px</property>
+                <cell id="346"/>
+                <cell id="347"/>
+                <cell id="348"/>
+                <cell id="349"/>
+            </row>
+            <row id="69">
+                <cell id="70">
+                    <label id="77">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">From Date:</text-property>
+                    </label>
+                </cell>
+                <cell id="71">
+                    <data id="397">
+                        <property name="resultSetColumn">FromDate</property>
+                    </data>
+                </cell>
+                <cell id="72"/>
+                <cell id="73"/>
+            </row>
+            <row id="103">
+                <cell id="104">
+                    <label id="78">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">To Date:</text-property>
+                    </label>
+                </cell>
+                <cell id="105">
+                    <data id="398">
+                        <property name="resultSetColumn">ToDate</property>
+                    </data>
+                </cell>
+                <cell id="106"/>
+                <cell id="107"/>
+            </row>
+            <row id="364">
+                <property name="height">15px</property>
+                <cell id="365"/>
+                <cell id="366"/>
+                <cell id="367"/>
+                <cell id="368"/>
+            </row>
+            <row id="340">
+                <cell id="341">
+                    <label id="390">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">Short-Form Name:</text-property>
+                    </label>
+                </cell>
+                <cell id="342">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
+                    <data id="393">
+                        <property name="resultSetColumn">ShortName</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="370">
+                <cell id="371">
+                    <label id="355">
+                        <property name="fontWeight">bold</property>
+                        <text-property name="text">Description:</text-property>
+                    </label>
+                </cell>
+                <cell id="372">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
+                    <data id="399">
+                        <property name="resultSetColumn">Description</property>
+                    </data>
+                </cell>
+            </row>
+        </grid>
+        <label id="272"/>
+        <label id="323">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingLeft">1pt</property>
+            <property name="paddingBottom">5pt</property>
+            <property name="pageBreakBefore">always</property>
+            <text-property name="text">Location</text-property>
+        </label>
+    </body>
+    <list-property name="images">
+        <structure>
+            <property name="name">cross.png</property>
+            <property name="type">image/png</property>
+            <property name="data">
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29m
+                dHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0Jb
+                BiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC
+                184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FF
+                pSVENDe3OxDZu8apO5rROJDLo30+Nlvj5RnTlVNAKs1aCVFr7b4BPn6Cls21AWgEQlz2+Dl1h7IdA+i9
+                7A/geP65WhbmrnZZ0GIJpr6OqZqYAd5/gJpKox4Mg7pD2YoC2b0/54rJQuJZdm6Izcgma4TW1WZ0h+y8
+                BfbyJMwBmSxkjw+VObNanp5h/adwGhaTXF4NWbLj9gEONyCmUZmd10pGgf1/vwcgOT3tUQE0DdicwIod
+                2EmSbwsKE1P8QoDkcHPJ5YESjgBJkYQpIEZ2KEB51Y6y3ojvY+P8XEDN7uKS0w0ltA7QGCWHCxSWWpwy
+                aCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGt
+                Qd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf
+                3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==
+            </property>
+        </structure>
+        <structure>
+            <property name="name">tick.png</property>
+            <property name="type">image/png</property>
+            <property name="data">
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29m
+                dHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAGrSURBVDjLvZPZLkNhFIV75zjvYm7VGFNCqoZUJ+ro
+                KUUpjRuqp61Wq0NKDMelGGqOxBSUIBKXWtWGZxAvobr8lWjChRgSF//dv9be+9trCwAI/vIE/26gXmvi
+                W5bqnb8yUK028qZjPfoPWEj4Ku5HBspgAz941IXZeze8N1bottSo8BTZviVWrEh546EO03EXpuJOdG63
+                otJbjBKHkEp/Ml6yNYYzpuezWL4s5VMtT8acCMQcb5XL3eJE8VgBlR7BeMGW9Z4yT9y1CeyucuhdTGDx
+                fftaBO7G4L+zg91UocxVmCiy51NpiP3n2treUPujL8xhOjYOzZYsQWANyRYlU4Y9Br6oHd5bDh0bCpSO
+                ixJiWx71YY09J5pM/WEbzFcDmHvwwBu2wnikg+lEj4mwBe5bC5h1OUqcwpdC60dxegRmR06TyjCF9G9z
+                +qM2uCJmuMJmaNZaUrCSIi6X+jJIBBYtW5Cge7cd7sgoHDfDaAvKQGAlRZYc6ltJlMxX03UzlaRlBdQr
+                zSCwksLRbOpHUSb7pcsnxCCwngvM2Rm/ugUCi84fycr4l2t8Bb6iqTxSCgNIAAAAAElFTkSuQmCC
+            </property>
+        </structure>
+    </list-property>
+</report>
