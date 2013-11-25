@@ -27,6 +27,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.intelligence.report.ReportIntelligence;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 
 /**
@@ -52,7 +53,7 @@ public class ExportIntelligencePdf extends AbstractHandler {
 			}			
 		}
 		if (in != null){
-			//ReportPlan.exportPlan(in.getUuid());
+			ReportIntelligence.export(in.getUuid());
 		}
 		return null;
 	}
