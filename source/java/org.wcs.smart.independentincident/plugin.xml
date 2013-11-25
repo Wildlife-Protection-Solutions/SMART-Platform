@@ -6,6 +6,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.incident.ui.IndIncidentListView"
+            icon="images/icons/obj16/incident.png"
             id="org.wcs.smart.observation.ui.incidientView"
             name="Independent Incidents"
             restorable="true">
@@ -27,6 +28,12 @@
                visible="true">
          </view>
       </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.wcs.smart.observation.ObservationSource">
+      <ObservationSource
+            class="org.wcs.smart.incident.IndepedentIncidentSource">
+      </ObservationSource>
    </extension>
 
 </plugin>
