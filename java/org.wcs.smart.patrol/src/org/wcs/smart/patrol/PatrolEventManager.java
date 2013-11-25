@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.wcs.smart.observation.events.WaypointEventManager;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 

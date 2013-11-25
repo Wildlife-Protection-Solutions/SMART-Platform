@@ -369,7 +369,7 @@ public class XmlToPatrolConverter {
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_CategoryNotFound,
-					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateTimeInstance().format(parent.getDateTime())  }) //$NON-NLS-1$
+					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateTimeInstance().format(parent.getDateTime())  }) 
 					);
 			return null;
 		}else{
@@ -391,13 +391,13 @@ public class XmlToPatrolConverter {
 					}else{
 						warnings.add(
 								MessageFormat.format(Messages.XmlToPatrolConverter_DuplicateAttributesError,
-										new Object[]{parent.getId(), DateFormat.getDateTimeInstance().format(parent.getDateTime()), attribute.getAttribute().getKeyId()})); //$NON-NLS-1$
+										new Object[]{parent.getId(), DateFormat.getDateTimeInstance().format(parent.getDateTime()), attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XmlToPatrolConverter_Warning_NotAllDataImported, new Object[]{
-							parent.getId(),DateFormat.getDateTimeInstance().format(parent.getDateTime()) }) //$NON-NLS-1$
+							parent.getId(),DateFormat.getDateTimeInstance().format(parent.getDateTime()) }) 
 					);
 					
 				}
