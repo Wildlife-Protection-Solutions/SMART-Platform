@@ -100,7 +100,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.patrol.PatrolPerspective">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.fielddata.perspective">
          <command
                commandId="org.wcs.smart.query.QueryPerspective"
                icon="images/icons/view16/querypatrol.gif"

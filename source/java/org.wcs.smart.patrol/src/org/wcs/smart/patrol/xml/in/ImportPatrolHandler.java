@@ -43,13 +43,14 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.common.control.XmlImportDialog;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.patrol.ui.PatrolPerspective;
 
 /**
  * Command handler for importing patrol data from xml file.
@@ -175,11 +176,8 @@ public class ImportPatrolHandler extends AbstractHandler {
 							Display.getDefault().asyncExec(new Runnable() {
 								@Override
 								public void run() {
+									FieldDataPerspective.openPerspective(PatrolListView.ID);
 									try {
-										activeWorkbench.showPerspective(
-												PatrolPerspective.ID, activeWorkbench
-														.getActiveWorkbenchWindow());
-										
 										PlatformUI
 												.getWorkbench()
 												.getActiveWorkbenchWindow()

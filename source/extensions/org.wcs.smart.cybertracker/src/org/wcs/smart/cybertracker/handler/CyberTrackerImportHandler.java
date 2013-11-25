@@ -27,14 +27,11 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.cybertracker.importer.CyberTrackerImportEditor;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.ui.PatrolPerspective;
 
 /**
  * Handler for importing data from CyberTracker application.
@@ -46,12 +43,11 @@ public class CyberTrackerImportHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
+		
 		try {
-			IWorkbench wb = PlatformUI.getWorkbench();
-			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-			wb.showPerspective(PatrolPerspective.ID, win);
-			IWorkbenchPage page = win.getActivePage();
-			page.openEditor(new CTImportEditorInput(), CyberTrackerImportEditor.ID);						
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().openEditor(new CTImportEditorInput(), CyberTrackerImportEditor.ID);						
 		} catch (Throwable t) {
 			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}

@@ -48,12 +48,12 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.patrol.ui.PatrolPerspective;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
@@ -252,11 +252,11 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	}
 	
 	public void openPatrol(PatrolEditorInput p){
-		try {
-			PlatformUI.getWorkbench().showPerspective(PatrolPerspective.ID, 
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().openEditor(p, PatrolEditor.ID);
+		FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
+		try{
+			PatrolEditorInput input = new PatrolEditorInput(p.getUuid(), p.getPatrolId(), null, null, null);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PatrolEditor.ID);
+		
 		} catch (Exception e1) {
 			SmartPlanPlugIn.displayLog(
 					Messages.PlanEditor_CannotOpenFile_Error

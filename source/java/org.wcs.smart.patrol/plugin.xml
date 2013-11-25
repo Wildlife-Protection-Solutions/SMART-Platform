@@ -180,25 +180,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.ui.internal.ShowDefaultPerspective">
-         <command
-               commandId="org.wcs.smart.patrol.PatrolPerspective"
-               icon="images/icons/etool16/patrol.png"
-               label="%showpatrolperspective.command.label"
-               mnemonic="%showpatrolperspectivecommand.mnemonic"
-               style="push"
-               tooltip="%showpatrolperspectivecommand.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </visibleWhen>
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.logout">
          <separator
                name="org.wcs.smart.patrol.separator2"
@@ -659,15 +640,6 @@
       </view>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            class="org.wcs.smart.patrol.ui.PatrolPerspective"
-            icon="images/icons/view16/patrol.png"
-            id="org.wcs.smart.patrol.PatrolPerspective"
-            name="%patrol.perspective.name">
-      </perspective>
-   </extension>
-   <extension
          point="org.eclipse.ui.editors">
       <editor
             class="org.wcs.smart.patrol.ui.PatrolEditor"
@@ -805,9 +777,10 @@
                id="org.wcs.smart.patrol.ui.PatrolListView"
                minimized="false"
                moveable="true"
+               ratio="0.60"
                relationship="stack"
                relative="org.wcs.smart.fielddata.datafolder"
-               showTitle="false"
+               showTitle="true"
                standalone="true"
                visible="true">
          </view>

@@ -24,6 +24,11 @@ package org.wcs.smart.observation.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.observation.ObservationPlugIn;
 /**
  * Field data perspective.  
  * 
@@ -48,6 +53,21 @@ public class FieldDataPerspective implements IPerspectiveFactory {
 		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
 		folder1.addView(WaypointInfoView.ID); 
 		folder1.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
+		
 	}
 
+	
+	public static void openPerspective(String activeDataViewId){
+		try {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			wb.showPerspective(ID, win);
+			
+			IWorkbenchPage page = win.getActivePage();
+			
+			page.activate(page.findView(activeDataViewId));							
+		} catch (Throwable t) {
+			ObservationPlugIn.displayLog(t.getLocalizedMessage(), t);
+		}
+	}
 }
