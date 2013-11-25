@@ -1,27 +1,240 @@
 package org.wcs.smart.incident.ui;
 
-import org.eclipse.jface.viewers.ListViewer;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.IndepedentIncidentSource;
 
 public class IndIncidentListView extends ViewPart {
 
-	private ListViewer list;
+	private TableViewer incidentListViewer;
 	
+	private Object[] loadingInput = new Object[]{"Loading..."};
+	
+	
+	private IPartListener2 partListener = new IPartListener2() {
+		
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) {
+			if (partRef.getId().equals(IncidentEditor.ID)){
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part instanceof IncidentEditor){
+					incidentListViewer.setSelection(new StructuredSelection(  ((IncidentEditor) part).getEditorInput() ));
+				}
+			}
+			
+		}
+	};
+	
+	/*
+	 * Job that updates the patrol list based on the current filter
+	 */
+	private Job updateJob = new Job("Update Incident List View") {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			monitor.beginTask("Loading...", 1);
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					incidentListViewer.setInput(loadingInput);
+					incidentListViewer.refresh();
+				}
+			});
+			
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				Query query = s.createQuery("SELECT uuid, id, dateTime FROM Waypoint WHERE sourceId = :source");
+				query.setParameter("source", IndepedentIncidentSource.KEY);
+				List<?> results  = query.list();
+				final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
+				int i = 0;
+				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+					Object[] data = (Object[]) iterator.next();					
+					input[i++] = new IncidentEditorInput((byte[])data[0], (Integer)data[1], (Date)data[2]);
+				}
+				
+				monitor.internalWorked(0.5);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						incidentListViewer.setInput(input);
+						incidentListViewer.refresh();
+					}
+				});
+			}finally{
+				s.getTransaction().rollback();
+				s.close();
+			}
+			return Status.OK_STATUS;
+		}
+	};
+	
+	/**
+	 * Creates a new vies
+	 */
 	public IndIncidentListView() {
-		// TODO Auto-generated constructor stub
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
+
+	public void dispose() {		
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
+//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
+//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
+//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolListener);
+		super.dispose();
+	}
+
+//	/**
+//	 * 
+//	 * @return the current filter
+//	 */
+//	public PatrolViewFilter getFilter() {
+//		return this.filter;
+//	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		GridLayout layout = new GridLayout(1, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		main.setLayout(layout);
+		
+		incidentListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+		Table list = incidentListViewer.getTable();
+		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		list.setBounds(0, 0, 88, 68);
+		
+		incidentListViewer.setLabelProvider(new LabelProvider(){
+			
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IncidentEditorInput){
+					return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON);
+				}
+				return null;
+			}
+			@Override
+			public String getText(Object element) {
+				if (element instanceof IncidentEditorInput){
+					return ((IncidentEditorInput)element).getId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((IncidentEditorInput)element).getDateTime() + "]");
+				}
+				return super.getText(element);
+			}
+		});
+		incidentListViewer.setContentProvider(ArrayContentProvider.getInstance());
+		incidentListViewer.setInput(loadingInput);
+		incidentListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		updateContent();
+//		
+//		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
+//		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolListener);
+//		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolListener);
+		
+		incidentListViewer.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				Object selection = ((IStructuredSelection)incidentListViewer.getSelection()).getFirstElement();;
+				if (!(selection instanceof IncidentEditorInput)){
+					return;
+				}
+				IncidentEditorInput p = (IncidentEditorInput)selection;
+				if (p != null){
+					IWorkbenchPage page = null;
+					try {
+						page = getSite().getPage();
+						page.openEditor(p, IncidentEditor.ID);						
+					} catch (Throwable t) {
+						IncidentPlugIn.displayLog(t.getLocalizedMessage(), t);
+					}
+				}
+				
+			}
+		});
+		
+		/* add right click context menu */
+		MenuManager menuManager = new MenuManager();
+		Menu menu = menuManager.createContextMenu(incidentListViewer.getControl());
+		incidentListViewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuManager,  incidentListViewer);
+		getSite().setSelectionProvider(incidentListViewer);
 	}
 
+	/**
+	 * updates content immediately
+	 */
+	public void updateContent(){
+		updateContent(0);
+	}
+	/**
+	 * Refreshes the list of patrols after delay
+	 */
+	public void updateContent(int delay){
+		updateJob.cancel();
+		updateJob.schedule(delay);		
+	}
+	
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
+		incidentListViewer.getControl().setFocus();
 	}
-
 }
