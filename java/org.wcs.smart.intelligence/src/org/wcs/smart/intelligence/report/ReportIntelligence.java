@@ -23,9 +23,16 @@ package org.wcs.smart.intelligence.report;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 
 
@@ -87,6 +94,35 @@ public class ReportIntelligence {
 	public static void export(byte[] planUuid){
 		ExportIntelligenceJob job = new ExportIntelligenceJob(planUuid);
 		job.schedule();
+	}
+
+	/**
+	 * Edits the plan template
+	 * @param event
+	 */
+	public static void editTemplate(ExecutionEvent event){
+		try{
+			//copy the default template to the template location if 
+			//it doesn't already exist
+			if (getCustomTemplateLocation() == null){
+				File f = new File(IntelligencePlugIn.getDefault().getIntelligenceDirectory(), INTELLIGENCE_TEMPLATE);
+				InputStream in = getIntelligenceTemplate();
+				OutputStream out = new FileOutputStream(f);
+				try{
+					IOUtils.copy(in, out);
+				}finally{
+					in.close();
+					out.close();
+				}
+			}
+			
+			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench().showPerspective(IntelligenceReportPerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
+			ReportIntelligenceEditorInput input = new ReportIntelligenceEditorInput(getCustomTemplateLocation());
+			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
+		}catch (Exception ex){
+			IntelligencePlugIn.displayLog("Error opening template for editing." + "\n\n" + ex.getLocalizedMessage(), ex);
+			return;
+		}
 	}
 	
 }

@@ -36,6 +36,14 @@
                   label="%pdf.command.label"
                   style="push">
             </command>
+            <menu
+                  label="%template.menu.label">
+               <command
+                     commandId="org.wcs.smart.intelligence.editTemplate"
+                     style="push"
+                     tooltip="%template.command.tooltip">
+               </command>
+            </menu>
             <command
                   commandId="org.wcs.smart.intelligence.export"
                   label="%export.command.label"
@@ -335,6 +343,10 @@
             id="org.wcs.smart.intelligence.exportPdfEditor"
             name="%pdf.editor.command.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.editTemplate"
+            name="%template.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -402,6 +414,10 @@
             class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf"
             commandId="org.wcs.smart.intelligence.exportPdf">
       </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.EditIntelligenceTemplate"
+            commandId="org.wcs.smart.intelligence.editTemplate">
+      </handler>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">
@@ -431,6 +447,11 @@
             icon="images/etool16/intelligence.png"
             id="org.wcs.smart.intelligence.IntelligencePerspective"
             name="%perspective.name">
+      </perspective>
+      <perspective
+            class="org.wcs.smart.intelligence.report.IntelligenceReportPerspective"
+            id="org.wcs.smart.intelligence.report.IntelligenceReportPerspective"
+            name="%template.perspective.name">
       </perspective>
    </extension>
    <extension
