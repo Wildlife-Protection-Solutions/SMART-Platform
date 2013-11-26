@@ -544,5 +544,12 @@
             class="org.wcs.smart.intelligence.xml.patrol.PatrolXmlExtraDataContribution">
       </contribution>
    </extension>
+   <extension
+         point="org.wcs.smart.birt.reportEditorManager">
+      <EditorManager
+            EditorInput="org.wcs.smart.intelligence.report.ReportIntelligenceEditorInput"
+            EditorManager="org.wcs.smart.intelligence.report.ReportIntelligenceManager">
+      </EditorManager>
+   </extension>
 
 </plugin>
