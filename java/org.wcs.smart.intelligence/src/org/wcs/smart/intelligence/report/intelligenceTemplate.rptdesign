@@ -244,9 +244,10 @@
                 <cell id="51">
                     <property name="colSpan">3</property>
                     <property name="rowSpan">1</property>
-                    <data id="401">
-                        <property name="resultSetColumn">IntelligenceReceived</property>
-                    </data>
+                    <text-data id="403">
+                        <expression name="valueExpr">(new Date(params["IntelligenceReceivedDate"].value.getTime())).toLocaleDateString()</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
             </row>
             <row id="54">
@@ -257,9 +258,10 @@
                     </label>
                 </cell>
                 <cell id="56">
-                    <data id="369">
-                        <property name="resultSetColumn">PatrolID</property>
-                    </data>
+                    <text-data id="404">
+                        <expression name="valueExpr">params["IntelligenceCreator"].value</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
                 <cell id="57"/>
                 <cell id="58"/>
@@ -272,9 +274,10 @@
                     </label>
                 </cell>
                 <cell id="61">
-                    <data id="395">
-                        <property name="resultSetColumn">IntelligenceSource</property>
-                    </data>
+                    <text-data id="405">
+                        <expression name="valueExpr">params["IntelligenceSource"].value</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
                 <cell id="62"/>
                 <cell id="63"/>
@@ -287,9 +290,10 @@
                     </label>
                 </cell>
                 <cell id="66">
-                    <data id="396">
-                        <property name="resultSetColumn">PatrolID</property>
-                    </data>
+                    <text-data id="406">
+                        <expression name="valueExpr">params["IntelligencePatrolID"].value</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
                 <cell id="67"/>
                 <cell id="68"/>
@@ -309,12 +313,13 @@
                     </label>
                 </cell>
                 <cell id="71">
-                    <data id="397">
-                        <property name="resultSetColumn">FromDate</property>
-                    </data>
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
+                    <text-data id="407">
+                        <expression name="valueExpr">(new Date(params["IntelligenceFromDate"].value.getTime())).toLocaleDateString()</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
-                <cell id="72"/>
-                <cell id="73"/>
             </row>
             <row id="103">
                 <cell id="104">
@@ -324,12 +329,13 @@
                     </label>
                 </cell>
                 <cell id="105">
-                    <data id="398">
-                        <property name="resultSetColumn">ToDate</property>
-                    </data>
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
+                    <text-data id="408">
+                        <expression name="valueExpr">(new Date(params["IntelligenceToDate"].value.getTime())).toLocaleDateString()</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
-                <cell id="106"/>
-                <cell id="107"/>
             </row>
             <row id="364">
                 <property name="height">15px</property>
@@ -348,9 +354,10 @@
                 <cell id="342">
                     <property name="colSpan">3</property>
                     <property name="rowSpan">1</property>
-                    <data id="393">
-                        <property name="resultSetColumn">ShortName</property>
-                    </data>
+                    <text-data id="402">
+                        <expression name="valueExpr">params["IntelligenceName"].value</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
             </row>
             <row id="370">
@@ -363,9 +370,10 @@
                 <cell id="372">
                     <property name="colSpan">3</property>
                     <property name="rowSpan">1</property>
-                    <data id="399">
-                        <property name="resultSetColumn">Description</property>
-                    </data>
+                    <text-data id="409">
+                        <expression name="valueExpr">params["IntelligenceDescription"].value</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
             </row>
         </grid>
