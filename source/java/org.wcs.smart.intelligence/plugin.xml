@@ -295,6 +295,19 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.eclipse.ui.file.save"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.intelligence.report.IntelligenceReportPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
          <separator
                name="org.wcs.smart.intelligence.separator3"
                visible="true">
