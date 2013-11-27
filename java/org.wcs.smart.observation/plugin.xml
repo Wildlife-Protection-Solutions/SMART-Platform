@@ -97,7 +97,7 @@
                id="org.wcs.smart.fielddata.perspective"
                label="%showfielddataperspective.command.label"
                mnemonic="%showfielddataperspectivecommand.mnemonic"
-               style="push"
+               style="pulldown"
                tooltip="%showfielddataperspectivecommand.tooltip">
             <visibleWhen
                   checkEnabled="false">

@@ -188,41 +188,38 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar">
-         <toolbar
-               id="org.wcs.smart.patrol.patrolToolbar">
-            <command
-                  commandId="org.wcs.smart.patrol.newPatrol"
-                  icon="images/icons/etool16/patrol_add.png"
-                  label="%patroltoolbar.newpatrol.command.label"
-                  mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
-                  style="push"
-                  tooltip="%patroltoolbar.newpatrol.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <or>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="admin">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="dataentry">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="manager">
-                        </test>
-                     </or>
+            locationURI="toolbar:org.wcs.smart.toolbar.create">
+         <command
+               commandId="org.wcs.smart.patrol.newPatrol"
+               icon="images/icons/etool16/patrol_add.png"
+               label="%patroltoolbar.newpatrol.command.label"
+               mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
+               style="push"
+               tooltip="%patroltoolbar.newpatrol.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <or>
                      <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
                      </test>
-                  </and>
-               </visibleWhen>
-            </command>
-         </toolbar>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -322,6 +319,18 @@
                name="org.wcs.smart.query.separator3"
                visible="true">
          </separator>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.fielddata.perspective">
+         <command
+               commandId="org.wcs.smart.patrol.PatrolPerspective"
+               icon="images/icons/etool16/patrol.png"
+               label="%showpatrolperspective.command.label"
+               mnemonic="%showpatrolperspectivecommand.mnemonic"
+               style="push"
+               tooltip="%showpatrolperspectivecommand.tooltip">
+         </command>
       </menuContribution>
    </extension>
    <extension

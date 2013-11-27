@@ -449,6 +449,13 @@
                tooltip="%addlayer.command.tooltip">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.toolbar.create">
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          id="smartapp"

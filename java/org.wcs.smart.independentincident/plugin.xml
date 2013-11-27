@@ -67,7 +67,7 @@
                commandId="org.wcs.smart.incident.new"
                label="New Independent Incident"
                style="push"
-               tooltip="%command.create.tooltip">
+               tooltip="create a new un-associated incident ">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -127,7 +127,7 @@
                   icon="images/icons/obj16/incident.png"
                   mnemonic="p"
                   style="push"
-                  tooltip="%showpatrolperspectivecommand.tooltip">
+                  tooltip="shows the incident list">
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -162,6 +162,50 @@
                         value="manager">
                   </test>
                </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.fielddata.perspective">
+         <command
+               commandId="org.wcs.smart.incident.perspective"
+               icon="images/icons/obj16/incident.png"
+               mnemonic="p"
+               style="push"
+               tooltip="shows the incident list">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.toolbar.create">
+         <command
+               commandId="org.wcs.smart.incident.new"
+               label="New Independent Incident"
+               style="push"
+               tooltip="create a new un-associated incident ">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -262,26 +306,10 @@
             class="org.wcs.smart.incident.ui.ViewIncidentHandler"
             commandId="org.wcs.smart.incident.perspective">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
    </extension>

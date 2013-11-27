@@ -107,6 +107,15 @@ ALTER TABLE smart.observation_attachment
 ;
 
 
+GRANT ALL PRIVILEGES  ON  smart.WAYPOINT TO data_entry;
+GRANT ALL PRIVILEGES  ON  smart.WAYPOINT TO manager;
+GRANT SELECT ON  smart.WAYPOINT TO analyst;
+
+GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO data_entry;
+GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO manager;
+GRANT SELECT ON  smart.observation_attachment TO analyst;
+
+
 ALTER TABLE smart.intelligence ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
 ALTER TABLE smart.intelligence 
 	ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid)

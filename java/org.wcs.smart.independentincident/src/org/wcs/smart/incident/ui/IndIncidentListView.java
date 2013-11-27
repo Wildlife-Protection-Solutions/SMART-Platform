@@ -34,6 +34,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.event.IIncidentListener;
@@ -116,8 +117,9 @@ public class IndIncidentListView extends ViewPart {
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				Query query = s.createQuery("SELECT uuid, id, dateTime FROM Waypoint WHERE sourceId = :source ORDER by dateTime DESC");
+				Query query = s.createQuery("SELECT uuid, id, dateTime FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca ORDER by dateTime DESC");
 				query.setParameter("source", IndepedentIncidentSource.KEY);
+				query.setParameter("ca", SmartDB.getCurrentConservationArea());
 				List<?> results  = query.list();
 				final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
 				int i = 0;
