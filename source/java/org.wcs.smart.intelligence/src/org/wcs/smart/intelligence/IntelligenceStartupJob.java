@@ -36,6 +36,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 
 /**
@@ -47,7 +48,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 public class IntelligenceStartupJob extends Job {
 
 	public IntelligenceStartupJob() {
-		super("Intelligence Startup Job");
+		super(Messages.IntelligenceStartupJob_Title);
 	}
 
 	@Override

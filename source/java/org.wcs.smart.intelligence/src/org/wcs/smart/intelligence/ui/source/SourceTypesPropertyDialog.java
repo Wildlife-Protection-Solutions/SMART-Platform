@@ -77,6 +77,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -124,7 +125,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 	};
 	
 	public SourceTypesPropertyDialog() {
-		super(Display.getCurrent().getActiveShell(), "Intelligence Source Type");
+		super(Display.getCurrent().getActiveShell(), Messages.SourceTypesPropertyDialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
@@ -146,7 +147,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel.setText("Language:");
+		lblNewLabel.setText(Messages.SourceTypesPropertyDialog_Language);
 
 		cmbLanguage = new LanguageViewer(container, SWT.NONE, currentCa);
 		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -262,8 +263,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 				deleteSource();
 			}
 		});
-		setTitle("Intelligence Source Types");
-		setMessage("Manage the list of source types associated with an intelligence. Double click to edit.");
+		setTitle(Messages.SourceTypesPropertyDialog_Title);
+		setMessage(Messages.SourceTypesPropertyDialog_Message);
 		return container;
 	}
 
@@ -329,7 +330,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		IntelligenceSource mandate = new IntelligenceSource();
 		mandate.setConservationArea(currentCa);
 		mandate.setIsActive(true);
-		mandate.updateName(currentCa.getDefaultLanguage(), "New Intelligence Source");
+		mandate.updateName(currentCa.getDefaultLanguage(), Messages.SourceTypesPropertyDialog_DefaultName);
 		mandate.setName(mandate.findName(currentCa.getDefaultLanguage()));
 		sourceTypes.add(mandate);
 		setChangesMade(true);
@@ -343,7 +344,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		if (mandate == null){
 			return;
 		}
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete intelligence source {0}?  This action cannot be undone.", new Object[]{mandate.getName()}))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.SourceTypesPropertyDialog_Delete, MessageFormat.format(Messages.SourceTypesPropertyDialog_DeleteConfirmation, new Object[]{mandate.getName()}))){
 			return;
 		}
 		try{
@@ -359,7 +360,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
-					MessageFormat.format("Unable to delete intelligence source: {0}" + "\n\n" + ex.getLocalizedMessage(), new Object[]{mandate.getName()}), ex); //$NON-NLS-1$
+					MessageFormat.format(Messages.SourceTypesPropertyDialog_CannotDelete_Error + "\n\n" + ex.getLocalizedMessage(), new Object[]{mandate.getName()}), ex); //$NON-NLS-1$
 		}	
 		
 		tableViewer.refresh();
@@ -405,7 +406,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
 			}
-			SmartPatrolPlugIn.displayLog("Error saving intelligence source type " + ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.SourceTypesPropertyDialog_SaveError + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}
@@ -423,11 +424,11 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 					} 
 					if(matches > 0){
 						//invalid name, don't update it.
-						return "Invalid source type, it cannot be a duplicate.";
+						return Messages.SourceTypesPropertyDialog_SourceDuplicate;
 					}
 				}else{
 					//invalid value, show error
-					return 	MessageFormat.format("The name must not be blank, can only contain {0}, and contain fewer than {1, number, integer} characters.", new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, IntelligenceSource.MAX_NAME_LENGTH});
+					return 	MessageFormat.format(Messages.SourceTypesPropertyDialog_InvalidNameSize_Error, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, IntelligenceSource.MAX_NAME_LENGTH});
 				}
 				
 			}
@@ -469,7 +470,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 			if (!findLangValue(type, mnd).equals(newValue)){
 				String error = validate(type, mnd, newValue);
 				if (error != null){
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", error);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.SourceTypesPropertyDialog_InvalidName, error);
 				}else{
 					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
@@ -508,7 +509,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 				updateLangValue(column, (IntelligenceSource) element, (String) value);
 				viewer.refresh();
 			}else{
-				MessageDialog.openError(getShell(), "Invalid Name", error);
+				MessageDialog.openError(getShell(), Messages.SourceTypesPropertyDialog_InvalidName, error);
 			}
 		}
 

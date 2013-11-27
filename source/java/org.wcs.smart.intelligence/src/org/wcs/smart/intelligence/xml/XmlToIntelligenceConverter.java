@@ -85,7 +85,7 @@ public class XmlToIntelligenceConverter {
 		/* source */
 		IntelligenceSource source = IntelligenceHibernateManager.getSourceByKeyId(session, xml.getSource());
 		if (source == null) {
-			warnings.add(MessageFormat.format("Source type with keyId = \"{0}\" is not defined in this conservation area.", xml.getSource()));
+			warnings.add(MessageFormat.format(Messages.XmlToIntelligenceConverter_SourceNotFound, xml.getSource()));
 		}
 		intelligence.setSource(source);
 

@@ -65,7 +65,8 @@ public class IntelligenceEditorMapPage extends SmartMapEditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			intelService = new IntelligenceService(parentEditor.getIntelligence());
 	    	try {
-	    		List<IGeoResource> layers = (List<IGeoResource>) intelService.resources(monitor);
+	    		@SuppressWarnings("unchecked")
+				List<IGeoResource> layers = (List<IGeoResource>) intelService.resources(monitor);
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
 	    		getMap().sendCommandASync(command);
