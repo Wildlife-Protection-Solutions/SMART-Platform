@@ -559,6 +559,33 @@
             </control>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.toolbar.create">
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               label="%queryToolbar.createquery.command.label"
+               style="pulldown"
+               tooltip="%queryToolbar.createquery.command.toolbar">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">

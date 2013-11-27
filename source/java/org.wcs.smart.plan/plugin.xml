@@ -327,6 +327,41 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.toolbar.create">
+         <command
+               commandId="org.wcs.smart.plan.NewPlan"
+               icon="images/icons/view16/plan_add.png"
+               label="%plan.menu.command.label.newplan"
+               mnemonic="%plan.menu.command.mnemonic.newplan"
+               style="push"
+               tooltip="%plan.menu.command.tooltip.newplan">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
