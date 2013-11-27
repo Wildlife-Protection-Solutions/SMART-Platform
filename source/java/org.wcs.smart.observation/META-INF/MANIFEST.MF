@@ -13,4 +13,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation.events,
  org.wcs.smart.observation.model,
- org.wcs.smart.observation.ui
+ org.wcs.smart.observation.ui,
+ org.wcs.smart.observation.ui.input,
+ org.wcs.smart.observation.ui.input.field

@@ -55,6 +55,8 @@ import org.wcs.smart.observation.WaypointSourceEngine;
 @Table(name="smart.waypoint")
 public class Waypoint extends UuidItem {
 	
+	public static final int COMMENT_MAX_LENGTH = 4096;
+	
 	private ConservationArea ca;
 
 	private String sourceId;

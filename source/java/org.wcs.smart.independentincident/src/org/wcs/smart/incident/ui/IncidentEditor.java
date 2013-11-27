@@ -1,16 +1,15 @@
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.MultiPageEditorPart;
@@ -18,9 +17,15 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.event.IIncidentListener;
+import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.observation.events.IWaypointEventListener;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
 
-public class IncidentEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
+public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,IAdaptable{
 
 	public static final String ID = "org.wcs.smart.incident.ui.IncidentEditor"; //$NON-NLS-1$
 
@@ -29,27 +34,73 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart, IAda
 	private IncidentSummaryPage summaryEditor;
 	private IncidentMapPage mapPage;
 	
-	private Projection[] projections;
-	
-	//TODO:
-	private ISelectionProvider selectionProvider = null;
+	private IWaypointEventListener wlistener = new IWaypointEventListener() {
+		
+		@Override
+		public void handleEvent(Waypoint wp) {
+			if (wp.equals(incident)){
+				//reset
+				reloadIncident();
+			}
+		}
+	};
+	private IIncidentListener listener = new IIncidentListener() {
+		
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			// TODO Auto-generated method stub
+			if (eventType == IncidentEventManager.INCIDENT_MODIFIED){
+				if ((source instanceof Waypoint &&
+						((Waypoint)source).equals(source) ) ||
+						(source instanceof IncidentEditorInput &&
+								Arrays.equals(((IncidentEditorInput)source).getUuid(), incident.getUuid()))) {
+					
+					reloadIncident();
+					
+				}
+						
+			}else if (eventType == IncidentEventManager.INCIDENT_DELETED){
+				if ((source instanceof Waypoint &&
+						((Waypoint)source).equals(source) ) ||
+						(source instanceof IncidentEditorInput &&
+								Arrays.equals(((IncidentEditorInput)source).getUuid(), incident.getUuid()))) {
+					
+					//close this editor
+					getEditorSite().getShell().getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(IncidentEditor.this, false);					
+						}});
+				}
+			}
+		}
+	};
 	
 	public IncidentEditor() {
 		super();
 	}
 
-	public Projection[] getAvailableProjections(){
-		return this.projections;
-	}
-	
 	@Override
 	public void dispose() {
+		IncidentEventManager.getInstance().removeListener(listener);
+		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, wlistener);
 		super.dispose();
-	
-
 	}
 
 	
+	private void reloadIncident(){
+		//reload incident
+		incident = null;
+		getIncident();
+		
+		//update editor name
+		((IncidentEditorInput)getEditorInput()).setId(incident.getId());
+		((IncidentEditorInput)getEditorInput()).setDateTime(incident.getDateTime());
+		setPartName(((IncidentEditorInput)getEditorInput()).getName());
+		
+		summaryEditor.initData(incident);
+		//TODO: updatemappage
+	}
 	/**
 	 * 
 	 * @return null if the patrol can be editted, otherwise a string
@@ -69,8 +120,9 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart, IAda
 				//load patrol items so don't have lazy loading issues later.
 				session.beginTransaction();
 				this.incident = (Waypoint) session.load(Waypoint.class, uuid);
+			
 				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-				this.projections = tmp.toArray(new Projection[tmp.size()]);
+//				this.projections = tmp.toArray(new Projection[tmp.size()]);
 			
 				session.getTransaction().commit();
 			}finally{			
@@ -103,7 +155,11 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart, IAda
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, "Map");
 			
-			getSite().setSelectionProvider(selectionProvider);
+			
+			//-- event managers --
+			IncidentEventManager.getInstance().addListener(listener);
+			WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, wlistener);
+			
 		} catch (final Throwable t) {
 			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
@@ -127,16 +183,6 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart, IAda
 			showBusy(false);
 		}
 	}
-	
-	public ISelectionProvider getSelectionProvider(){
-		return this.selectionProvider;
-	}
-	
-//	public void updateSummaryPage(){
-//		//summaryEditor.refreshPatrolSummaryTable();
-//	}
-//	
-	
 	
 	@Override
 	public boolean isSaveAsAllowed() {
@@ -200,12 +246,12 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart, IAda
 		return mapPage.getStatusLineManager();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object getAdapter(Class adaptee) {
-		if (adaptee.isAssignableFrom(Map.class)) {
-			return getMap();
-		}
-		return super.getAdapter(adaptee);
-	}
+//	@SuppressWarnings({ "unchecked", "rawtypes" })
+//	public Object getAdapter(Class adaptee) {
+//		if (adaptee.isAssignableFrom(Map.class)) {
+//			return getMap();
+//		}
+//		return super.getAdapter(adaptee);
+//	}
 	
 }

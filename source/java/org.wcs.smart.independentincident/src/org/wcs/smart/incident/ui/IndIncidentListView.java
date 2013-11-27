@@ -36,9 +36,13 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.event.IIncidentListener;
+import org.wcs.smart.incident.event.IncidentEventManager;
 
 public class IndIncidentListView extends ViewPart {
 
+	public static final String ID = "org.wcs.smart.observation.ui.incidientView";
+	
 	private TableViewer incidentListViewer;
 	
 	private Object[] loadingInput = new Object[]{"Loading..."};
@@ -73,9 +77,24 @@ public class IndIncidentListView extends ViewPart {
 				IWorkbenchPart part = partRef.getPart(false);
 				if (part instanceof IncidentEditor){
 					incidentListViewer.setSelection(new StructuredSelection(  ((IncidentEditor) part).getEditorInput() ));
+					getSite().getPage().bringToTop(getSite().getPart());
 				}
 			}
 			
+		}
+	};
+	
+	private IIncidentListener ilistener = new IIncidentListener() {
+		
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			if (eventType == IncidentEventManager.INCIDENT_ADDED || 
+					eventType == IncidentEventManager.INCIDENT_DELETED){
+				updateContent(100);
+			}else if (eventType == IncidentEventManager.INCIDENT_MODIFIED){
+				//TODO: find a way to do this only if id or date updated
+				updateContent(1000);
+			}
 		}
 	};
 	
@@ -86,18 +105,18 @@ public class IndIncidentListView extends ViewPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask("Loading...", 1);
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					incidentListViewer.setInput(loadingInput);
-					incidentListViewer.refresh();
-				}
-			});
+//			Display.getDefault().syncExec(new Runnable() {
+//				@Override
+//				public void run() {
+//					incidentListViewer.setInput(loadingInput);
+//					incidentListViewer.refresh();
+//				}
+//			});
 			
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				Query query = s.createQuery("SELECT uuid, id, dateTime FROM Waypoint WHERE sourceId = :source");
+				Query query = s.createQuery("SELECT uuid, id, dateTime FROM Waypoint WHERE sourceId = :source ORDER by dateTime DESC");
 				query.setParameter("source", IndepedentIncidentSource.KEY);
 				List<?> results  = query.list();
 				final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
@@ -128,13 +147,13 @@ public class IndIncidentListView extends ViewPart {
 	 */
 	public IndIncidentListView() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+		
+		IncidentEventManager.getInstance().addListener(ilistener);
 	}
 
 	public void dispose() {		
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
-//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
-//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
-//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolListener);
+		IncidentEventManager.getInstance().removeListener(ilistener);
 		super.dispose();
 	}
 
@@ -175,7 +194,7 @@ public class IndIncidentListView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IncidentEditorInput){
-					return ((IncidentEditorInput)element).getId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((IncidentEditorInput)element).getDateTime() + "]");
+					return ((IncidentEditorInput)element).getId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((IncidentEditorInput)element).getDateTime()) + "]";
 				}
 				return super.getText(element);
 			}
@@ -202,7 +221,7 @@ public class IndIncidentListView extends ViewPart {
 					IWorkbenchPage page = null;
 					try {
 						page = getSite().getPage();
-						page.openEditor(p, IncidentEditor.ID);						
+						page.openEditor(p, IncidentEditor.ID);							
 					} catch (Throwable t) {
 						IncidentPlugIn.displayLog(t.getLocalizedMessage(), t);
 					}

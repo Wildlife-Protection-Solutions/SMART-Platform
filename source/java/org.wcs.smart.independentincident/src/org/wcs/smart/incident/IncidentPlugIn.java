@@ -14,7 +14,7 @@ import org.osgi.framework.BundleContext;
 public class IncidentPlugIn extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.wcs.smart.incident"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.wcs.smart.independentincident"; //$NON-NLS-1$
 
 	public static final String INCIDENT_ICON = "org.wcs.smart.incident.ICON"; //$NON-NLS-1$
 	

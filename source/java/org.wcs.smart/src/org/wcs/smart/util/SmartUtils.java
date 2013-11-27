@@ -220,14 +220,14 @@ public class SmartUtils {
 
 		return calendar.getTime();
 	}
-
+	
 	/**
 	 * Gets only the date part of a given date. Sets the time to 0.
 	 * 
 	 * @param dt
 	 * @return date only date
 	 */
-	public static Date combineDateTime(Date date, Time time) {
+	public static Date combineDateTime(Date date, Date time) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		Calendar calendar2 = Calendar.getInstance();
@@ -239,6 +239,16 @@ public class SmartUtils {
 		calendar.set(Calendar.MILLISECOND, calendar2.get(Calendar.MILLISECOND));
 
 		return calendar.getTime();
+	}
+
+	/**
+	 * Combines the date and time into a single object
+	 * 
+	 * @param dt
+	 * @return date only date
+	 */
+	public static Date combineDateTime(Date date, Time time) {
+		return combineDateTime(date, new Date(time.getTime()));
 	}
 
 	/**
