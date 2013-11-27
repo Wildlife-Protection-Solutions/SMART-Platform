@@ -30,6 +30,7 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.intelligence.internal.Messages;
 
 /**
  * Source types for intelligence.
@@ -41,10 +42,10 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name = "smart.intelligence_source")
 public class IntelligenceSource extends NamedKeyItem {
 	
-	public static final String PATROL_KEY = "patrol";
+	public static final String PATROL_KEY = "patrol"; //$NON-NLS-1$
 
-	public static final String NAME = "Intelligence Source";
-	public static final String KEY = "Key";
+	public static final String NAME = Messages.IntelligenceSource_Label;
+	public static final String KEY = Messages.IntelligenceSource_Key;
 
 	public static final Integer MAX_NAME_LENGTH = 64;
 	

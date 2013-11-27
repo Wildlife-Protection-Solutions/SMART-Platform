@@ -81,7 +81,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 		try {
 			sourceTypeList = IntelligenceHibernateManager.getActiveSourceTypes(SmartDB.getCurrentConservationArea(), s);
 		} catch (Exception e) {
-			IntelligencePlugIn.displayLog("Failed to load intelligence source types.", e);
+			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_SourceLoad_Error, e);
 			sourceTypeList = new ArrayList<IntelligenceSource>();
 		} finally {
 			s.close();

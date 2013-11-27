@@ -238,7 +238,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 				IntelligenceSource source = IntelligenceHibernateManager.getPatrolSource(s);
 				wizard.getIntelligence().setSource(source);
 			} catch (Exception e) {
-				IntelligencePlugIn.displayLog("Intelligence source that associates intelligence with patrol was not found.", e);
+				IntelligencePlugIn.displayLog(Messages.ReportedIntelligenceContribution_NoPatrolSource_Error, e);
 				return;
 			} finally {
 				s.close();

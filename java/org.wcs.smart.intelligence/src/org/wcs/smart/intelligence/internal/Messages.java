@@ -292,11 +292,19 @@ public class Messages extends NLS {
 
 	public static String IntelligenceSource_IntelligenceSource_Label;
 
+	public static String IntelligenceSource_Key;
+
+	public static String IntelligenceSource_Label;
+
     public static String IntelligenceSource_Message;
 
     public static String IntelligenceSource_PageTitle;
 
     public static String IntelligenceSource_PatrolId_Label;
+
+	public static String IntelligenceSourceComposite_SourceLoad_Error;
+
+	public static String IntelligenceStartupJob_Title;
 
     public static String IntelligenceViewFilter_NameFilterName;
 
@@ -354,17 +362,43 @@ public class Messages extends NLS {
 
 	public static String ReportedIntelligenceContribution_Name;
 
+	public static String ReportedIntelligenceContribution_NoPatrolSource_Error;
+
 	public static String ReportedIntelligenceContribution_NothingReported_Label;
 
 	public static String ReportedIntelligenceContribution_Open_Button;
 
 	public static String ShowIntelligencePersepctiveHandler_Error;
 
+	public static String SourceTypesPropertyDialog_CannotDelete_Error;
+
+	public static String SourceTypesPropertyDialog_DefaultName;
+
+	public static String SourceTypesPropertyDialog_Delete;
+
+	public static String SourceTypesPropertyDialog_DeleteConfirmation;
+
+	public static String SourceTypesPropertyDialog_InvalidName;
+
+	public static String SourceTypesPropertyDialog_InvalidNameSize_Error;
+
+	public static String SourceTypesPropertyDialog_Language;
+
+	public static String SourceTypesPropertyDialog_Message;
+
+	public static String SourceTypesPropertyDialog_SaveError;
+
+	public static String SourceTypesPropertyDialog_SourceDuplicate;
+
+	public static String SourceTypesPropertyDialog_Title;
+
 	public static String XmlToIntelligenceConverter_NoAttachmentFound_Warning;
 
 	public static String XmlToIntelligenceConverter_NoLangCodeFound_Warning;
 
 	public static String XmlToIntelligenceConverter_SeveralLangCodeFound_Warning;
+
+	public static String XmlToIntelligenceConverter_SourceNotFound;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
