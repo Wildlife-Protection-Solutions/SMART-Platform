@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -85,5 +86,21 @@ public class ReprojectUtils {
 		}
 		Coordinate transformed = JTS.transform(new Coordinate(x,y), null, t);
 		return transformed;
+	}
+	
+	/**
+	 * Re-projects a coordinate from the source to the destination 
+	 * crs.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param sourceCrs
+	 * @param targetCrs
+	 * @return
+	 * @throws Exception
+	 */
+	public static Coordinate reproject(double x, double y, CoordinateReferenceSystem sourceCrs, CoordinateReferenceSystem targetCrs) throws Exception{
+		MathTransform t = CRS.findMathTransform(sourceCrs, targetCrs);
+		return JTS.transform(new Coordinate(x,y), null, t);
 	}
 }

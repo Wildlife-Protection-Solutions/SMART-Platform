@@ -109,6 +109,7 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 				IWorkbenchPart part = partRef.getPart(false);
 				if (part instanceof PatrolEditor){
 					patrolListViewer.setSelection(new StructuredSelection(  ((PatrolEditor) part).getEditorInput() ));
+					getSite().getPage().bringToTop(getSite().getPart());
 				}
 			}
 			

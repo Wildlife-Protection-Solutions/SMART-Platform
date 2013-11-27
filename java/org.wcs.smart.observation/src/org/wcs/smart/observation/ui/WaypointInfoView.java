@@ -466,6 +466,9 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		if (o instanceof Waypoint) {
 			update = true;
 			updateContents((Waypoint) o);
+		}else if (o instanceof WaypointObservation){
+			update = true;
+			updateContents(((WaypointObservation) o).getWaypoint());
 		}else if (o instanceof IAdaptable){
 			Waypoint wp = (Waypoint) ((IAdaptable)o).getAdapter(Waypoint.class);
 			if (wp != null){

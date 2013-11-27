@@ -1,6 +1,7 @@
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -20,6 +21,21 @@ public class IncidentEditorInput implements IEditorInput {
 		this.dateTime = dateTime;
 	}
 	
+	/**
+	 * update id value
+	 * @param id
+	 */
+	public void setId(int id){
+		this.id = id;
+	}
+	
+	/**
+	 * update date time value
+	 * @param dateTime
+	 */
+	public void setDateTime(Date dateTime){
+		this.dateTime = dateTime;
+	}
 	/**
 	 * 
 	 * @return datetime of incident
@@ -67,7 +83,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
-		return MessageFormat.format("Independent Incident {0}", new Object[]{id});
+		return MessageFormat.format("Independent Incident {0}", new Object[]{String.valueOf(id)});
 	}
 
 	/**
@@ -86,4 +102,14 @@ public class IncidentEditorInput implements IEditorInput {
 		return MessageFormat.format("edit incident data for id {0}", new Object[]{ id});
 	}
 
+	public int hashCode() {
+		return Arrays.hashCode(uuid);
+	}
+
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof IncidentEditorInput){
+			return Arrays.equals(this.uuid, ((IncidentEditorInput)obj).uuid);
+		}
+		return false;
+	}
 }
