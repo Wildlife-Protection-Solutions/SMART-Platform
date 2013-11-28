@@ -583,5 +583,25 @@
             EditorManager="org.wcs.smart.intelligence.report.ReportIntelligenceManager">
       </EditorManager>
    </extension>
+   <extension
+         point="org.eclipse.datatools.connectivity.oda.dataSource">
+      <dataSource
+            defaultDisplayName="SMART Intelligence Data Source"
+            driverClass="org.wcs.smart.intelligence.report.oda.SmartIntelligenceDriver"
+            id="org.wcs.smart.intelligence.report.oda.SmartIntelligenceDriver"
+            odaVersion="3.0"
+            overrideExplorerFiltering="false"
+            setThreadContextClassLoader="false">
+      </dataSource>
+      <dataSet
+            defaultDisplayName="SMART Intelligence Location Points"
+            id="org.wcs.smart.intelligence.report.oda.SmartIntelligencePoints">
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+      </dataSet>
+   </extension>
 
 </plugin>
