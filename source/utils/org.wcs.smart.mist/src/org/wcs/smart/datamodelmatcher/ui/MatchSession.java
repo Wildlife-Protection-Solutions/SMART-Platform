@@ -1,18 +1,28 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
+import org.wcs.smart.mist.dataReader.MistDatabase;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-
 
 
 public class MatchSession {
@@ -22,6 +32,8 @@ public class MatchSession {
 	private String saveLocation;
 	private String mistLocation;
 	private String smartXmlLocation;
+	
+	private DataModel smartDataModel;
 	
 	private List<MatchRow> rows;
 	
@@ -38,39 +50,22 @@ public class MatchSession {
 		return this.saveLocation;
 	}
 	
-	public void loadRows(){
+	public void loadRows() throws Exception{
 		rows = new ArrayList<MatchRow>();
-	    rows.add(new MatchRow(false, new MistItem("humanactivities.land.cleared.peopleconfronted.localpeople."), new SmartItem("") ));
-	    rows.add(new MatchRow(false, new MistItem("blah.land.cleared.flah.foobar."), new SmartItem("Blah.Land.Bar") ));
-	    
-		//TODO load from the database query
-		/*
-	    		try{
-	    			Connection c = MistDatabase.getConnection(dbFile.getAbsolutePath());
-	    		}catch(Exception exception){
-	    			 MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
-	    			  messageBox.setMessage("MIST database connection could not be established." + exception);
-	    			  int result = messageBox.open();
-	    		}
 
-		try{
-		 
-			ResultSet rs = c
+	    File mistFile = new File(mistLocation);
+	    Connection c = MistDatabase.getConnection(mistFile.getAbsolutePath());
+		ResultSet rs = c
 				.createStatement()
 				.executeQuery(
-						"SELECT distinct D.DEPARTMENT_NAME, DU.UNIT_NAME FROM DEPARTMENT_UNITS DU LEFT JOIN DEPARTMENTS D ON D.DEPARTMENT_ID = DU.DEPARTMENT_ID "); //$NON-NLS-1$
-			while (rs.next()) {
-			    String[] entries = {rs.getString(1), rs.getString(2)};
-			    ms.addRow()...
-			}
-		}finally{
-			
+						"SELECT DISTINCT LO.OBSERVATION_GROUP, GPO.OBSERVATION, GPO.OBSERVATION_CODE, LRC.ITEM, LRC1.ITEM AS SUBCODE1, LRC2.ITEM AS SUBCODE2, LRC3.ITEM AS SUBCODE3, LRC4.ITEM AS SUBCODE4, LRC5.ITEM AS SUBCODE5 FROM GROUND_PATROL_OBSERVATIONS GPO LEFT JOIN OBSERVATION_REMARKS OBR ON OBR.OBS_REMARKS_RELATION = GPO.OBS_REMARKS_RELATION LEFT JOIN LK_REMARKS_CURRENT LRC ON LRC.OBSERVATION_RELATION = GPO.OBSERVATION_RELATION LEFT JOIN LK_REMARKS_CURRENT LRC1 ON LRC1.OBS_REMARKS = LRC.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC2 ON LRC2.OBS_REMARKS = LRC1.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC3 ON LRC3.OBS_REMARKS = LRC2.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC4 ON LRC4.OBS_REMARKS = LRC3.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC5 ON LRC5.OBS_REMARKS = LRC4.PARENT_ITEM LEFT JOIN LK_OBS_CODES LOC ON GPO.OBSERVATION_RELATION = LOC.OBSERVATION_RELATION LEFT JOIN LK_OBSERVATIONS LO ON LO.OBS_CODE_RELATION = LOC.OBS_CODE_RELATION WHERE  (LRC.OBS_REMARKS = OBR.OBS_REMARKS OR (LRC.OBS_REMARKS IS NULL AND OBR.OBS_REMARKS IS NULL)) ");
+		while (rs.next()) {
+			rows.add(new MatchRow(false, new MistItem(rs.getString(1) , rs.getString(2) , rs.getString(3) , rs.getString(4) , rs.getString(5) , rs.getString(6) , rs.getString(7) , rs.getString(8) , rs.getString(9)), new SmartItem("") ) );
 		}
-		*/
-		
-		
-		
+
 	}
+	
+	
 	public List<MatchRow> getRows(){
 		return rows;
 	}
@@ -93,7 +88,7 @@ public class MatchSession {
 			
 			//write out all the row-matching data
 			for(MatchRow row: rows){
-				String[] rowStrings = { row.getMistItem().getText(), row.getSmartItem().getText()};
+				String[] rowStrings = { row.getMistItem().getText(), row.getSmartItem().getText(), row.getMistItem().getCat1() , row.getMistItem().getCat2() , row.getMistItem().getCat3() , row.getMistItem().getCat4() , row.getMistItem().getCat5() , row.getMistItem().getCat6() , row.getMistItem().getCat7() , row.getMistItem().getCat8() , row.getMistItem().getCat9()};
 				sessionWriter.writeNext(rowStrings);
 			}
 			sessionWriter.close();
@@ -153,14 +148,25 @@ public class MatchSession {
 	
 	public String loadSessionFromFile(){
 		try{
-			CSVReader reader = new CSVReader(new FileReader(saveLocation),','); //$NON-NLS-1$
+			CSVReader reader = new CSVReader(new FileReader(saveLocation),','); 
 		
 			String[] header = reader.readNext();
 			smartXmlLocation = header[0];
 			String[] line = reader.readNext();
+		
 			while ( line != null){
 				MatchRow matchRow = new MatchRow();
 				matchRow.setMistItem(line[0]);
+				matchRow.getMistItem().setCat1(line[2]);
+				matchRow.getMistItem().setCat2(line[3]);
+				matchRow.getMistItem().setCat3(line[4]);
+				matchRow.getMistItem().setCat4(line[5]);
+				matchRow.getMistItem().setCat5(line[6]);
+				matchRow.getMistItem().setCat6(line[7]);
+				matchRow.getMistItem().setCat7(line[8]);
+				matchRow.getMistItem().setCat8(line[9]);
+				matchRow.getMistItem().setCat9(line[10]);
+				
 				if(!line[1].equals("") ){
 					matchRow.setSmartItem(line[1]);
 				}
@@ -173,5 +179,15 @@ public class MatchSession {
 		}
 		return null;
 	}
-	    
+	
+	
+	public void loadSmartDataModel() throws JAXBException, ParseException, IOException{
+		File xmlFile = new File(smartXmlLocation);
+		FileInputStream is = new FileInputStream(xmlFile);
+		this.smartDataModel = XmlSmartDataModelManager.readDataModel(is);
+	}
+	
+	public DataModel getXmlDataModel(){
+		return smartDataModel;
+	}
 }

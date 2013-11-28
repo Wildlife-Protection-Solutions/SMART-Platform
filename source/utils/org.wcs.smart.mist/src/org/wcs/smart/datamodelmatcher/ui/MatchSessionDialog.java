@@ -1,6 +1,9 @@
 
 package org.wcs.smart.datamodelmatcher.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -30,7 +33,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryTypeList;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
+
 
 
 
@@ -47,8 +57,18 @@ public class MatchSessionDialog extends Dialog {
 	private Text mistText1;
 	private Text mistText2;
 	private Text mistText3;
+	private Text mistText4;
+	private Text mistText5;
+	private Text mistText6;
+	private Text mistText7;
+	private Text mistText8;
+	private Text mistText9;
 	
-	private Combo smartCombo1;
+	private Tree tree;
+	private Combo langSelector;
+	
+	private List<CategoryType> rootCategory;
+	
 	private Combo smartCombo2;
 	private Combo smartCombo3;
 	public final Shell shell;
@@ -111,8 +131,9 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      viewer.setContentProvider(new ArrayContentProvider());
 	      viewer.setInput(ms.getRows());
-	      //viewer.setComparator(new TableColumnSorter(viewer));
-	      
+	      TableColumnSorter sorter = new TableColumnSorter(viewer);
+	      viewer.setComparator(sorter);
+	
 	   // define layout for the viewer
 	      GridData tgridData = new GridData(SWT.FILL,SWT.FILL, true, true,3,0);
 	      //tgridData.widthHint = 510;
@@ -153,7 +174,8 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      save = new Button(left, SWT.NONE);
 	      save.setText("   Save Session   ");
-	      GridData saveGridData = new GridData(SWT.RIGHT,SWT.FILL, true, true);
+	      GridData saveGridData = new GridData(SWT.RIGHT,SWT.FILL, false, false);
+	      saveGridData.heightHint = 20;
 	      save.setLayoutData(saveGridData);
 	      
 	      save.addSelectionListener(new SelectionAdapter() {	
@@ -174,7 +196,7 @@ public class MatchSessionDialog extends Dialog {
 		  GridLayout rlayout = new GridLayout(1, false);
 	      right.setLayout(rlayout);
 	    
-	      GridData rightGridData = new GridData(SWT.FILL,SWT.CENTER, true, false);
+	      GridData rightGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      right.setLayoutData(rightGridData);
 	      
 	      //Top Right composite
@@ -194,6 +216,8 @@ public class MatchSessionDialog extends Dialog {
 	      mistLabel.setFont(font);
 	      GridData mistItemLabel = new GridData(SWT.FILL,SWT.CENTER, true, false,2,1);
 	      mistLabel.setLayoutData(mistItemLabel);
+
+ 
 	      
 	      Label mistLabel1 = new Label(topRight, SWT.NONE);
 	      mistLabel1.setText("Observation Group:" );
@@ -213,13 +237,55 @@ public class MatchSessionDialog extends Dialog {
 	      mistText2.setEnabled(false);
 	      
 	      Label mistLabel3 = new Label(topRight, SWT.NONE);
-	      mistLabel3.setText("Remark:" );
+	      mistLabel3.setText("Observation Code:" );
 	      
 	      mistText3 = new Text(topRight, SWT.NONE);
 	      mistText3.setLayoutData(m1);
 	      mistText3.setEnabled(false);
-	      //end of Top Right elements--------------------------------------
 	      
+	      Label mistLabel4 = new Label(topRight, SWT.NONE);
+	      mistLabel4.setText("Item:" );
+	      
+	      mistText4 = new Text(topRight, SWT.NONE);
+	      mistText4.setLayoutData(m1);
+	      mistText4.setEnabled(false);
+	      
+	      Label mistLabel5 = new Label(topRight, SWT.NONE);
+	      mistLabel5.setText("Subcode 1:" );
+	      
+	      mistText5 = new Text(topRight, SWT.NONE);
+	      mistText5.setLayoutData(m1);
+	      mistText5.setEnabled(false);
+	      
+	      Label mistLabel6 = new Label(topRight, SWT.NONE);
+	      mistLabel6.setText("Subcode 2:" );
+	      
+	      mistText6 = new Text(topRight, SWT.NONE);
+	      mistText6.setLayoutData(m1);
+	      mistText6.setEnabled(false);
+	      
+	      Label mistLabel7 = new Label(topRight, SWT.NONE);
+	      mistLabel7.setText("Subcode 3:" );
+	      
+	      mistText7 = new Text(topRight, SWT.NONE);
+	      mistText7.setLayoutData(m1);
+	      mistText7.setEnabled(false);
+	      
+	      Label mistLabel8 = new Label(topRight, SWT.NONE);
+	      mistLabel8.setText("Subcode 4:" );
+	      
+	      mistText8 = new Text(topRight, SWT.NONE);
+	      mistText8.setLayoutData(m1);
+	      mistText8.setEnabled(false);
+	      
+	      Label mistLabel9 = new Label(topRight, SWT.NONE);
+	      mistLabel9.setText("Subcode 5:" );
+	      
+	      mistText9 = new Text(topRight, SWT.NONE);
+	      mistText9.setLayoutData(m1);
+	      mistText9.setEnabled(false);
+	      //end of Top Right elements--------------------------------------
+	      	      
 	      
 	      
 	      //bottom Right composite
@@ -227,32 +293,75 @@ public class MatchSessionDialog extends Dialog {
 		  GridLayout brlayout = new GridLayout(2, false);
 		  bottomRight.setLayout(brlayout);
 	    
-	      GridData bottomRightGridData = new GridData(SWT.FILL,SWT.CENTER, true, false);
+	      GridData bottomRightGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      bottomRight.setLayoutData(bottomRightGridData);
 	      
+
 	      //Bottom Right elements---------------------------------------------
-	      Label smartLabel = new Label(bottomRight, SWT.NONE);
-	      smartLabel.setText("MIST Observation:" );
+	      //top line spacing, label and language drop down
+	      Composite bottomRightFirstLine = new Composite(bottomRight, SWT.NONE);
+		  GridLayout brfllayout = new GridLayout(3, false);
+		  bottomRightFirstLine.setLayout(brfllayout);
+		  bottomRightFirstLine.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true,2,1));
+	      
+	      Label smartLabel = new Label(bottomRightFirstLine, SWT.NONE);
+	      smartLabel.setText("SMART Observation Definition" );
 	      FontData sfontData = smartLabel.getFont().getFontData()[0];
 	      Font sfont = new Font(getParent().getDisplay(), new FontData(sfontData.getName(), sfontData
 	    		    .getHeight(), SWT.BOLD));
 	      smartLabel.setFont(sfont);
-	      GridData smartLabelData = new GridData(SWT.FILL,SWT.CENTER, true, false,2,1);
+	      GridData smartLabelData = new GridData(SWT.FILL,SWT.LEFT, true, true,1,1);
 	      smartLabel.setLayoutData(smartLabelData);
+	      
+	      //Read the XML file
+	      DataModel smartDM = ms.getXmlDataModel();
+	      
+	      //Make the language selector
+	      Label languageLabel = new Label(bottomRightFirstLine, SWT.NONE);
+	      languageLabel .setText("Language:" );
+	      GridData langLabelData = new GridData(SWT.FILL,SWT.RIGHT, false, false);
+	      languageLabel.setLayoutData(langLabelData);
+	      
+	      
+	      List<LanguageType> langs = smartDM.getLanguages().getLanguages();
+	      final String[] codes = new String[langs.size()];
+	      for (int i=0; i < langs.size(); i++){
+	    	  codes[i] = langs.get(i).getCode();
+	      }
+	      langSelector =  new Combo (bottomRightFirstLine, SWT.READ_ONLY);
+	      langSelector.setItems(codes);
+	      langSelector.setLayoutData(new GridData(SWT.FILL,SWT.RIGHT, false, false));
+
+	      langSelector.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				int selection = langSelector.getSelectionIndex();
+	  			if (selection < codes.length ) {
+	  				String lang = (String) codes[selection];
+					regenerateSmartTree(lang);
+	  			}
+
+			}
+	      });
+
 	      
 	      Label smartLabel1 = new Label(bottomRight, SWT.NONE);
 	      smartLabel1.setText("Category:" );
 	      
-	      smartCombo1 =  new Combo (bottomRight, SWT.READ_ONLY);
-	  	  smartCombo1.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
-	  	  smartCombo1.setEnabled(false);
-	  	  smartCombo1.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent arg0) {
-				save.setEnabled(true);
-			}
-	  	  });
+	  	  
+	      //Make the category Tree
+	      rootCategory = smartDM.getCategories().getCategories();
+	      
+	      tree = new Tree (bottomRight, SWT.BORDER);
+	      TreeItem iItem = new TreeItem (tree, 0);
+		  iItem.setText("Data Model");
+	      addCategoriesToTree(iItem, rootCategory, "en");
+
+	      GridData treeData = new GridData(SWT.FILL,SWT.FILL, true, true);
+	      treeData.heightHint = 200;
+	      tree.setLayoutData(treeData);
+
 
 
 	      
@@ -260,8 +369,8 @@ public class MatchSessionDialog extends Dialog {
 	      smartLabel2.setText("Attribute1:" );
 	      
 	      smartCombo2 =  new Combo (bottomRight, SWT.READ_ONLY);
-	  	  smartCombo2.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
-	  	smartCombo2.setEnabled(false);
+	  	  smartCombo2.setItems (new String [] {});
+	  	  smartCombo2.setEnabled(false);
 	      
 	      
 	      
@@ -269,8 +378,8 @@ public class MatchSessionDialog extends Dialog {
 	      smartLabel3.setText("Remark:" );
 	      
 	      smartCombo3 =  new Combo (bottomRight, SWT.READ_ONLY);
-	  	  smartCombo3.setItems (new String [] {"Alpha", "Bravo", "Charlie"});
-	  	smartCombo3.setEnabled(false);
+	  	  smartCombo3.setItems (new String [] {});
+	  	  smartCombo3.setEnabled(false);
 	      //end of bottom Right elements--------------------------------------
 	  	  
 	  	  //Bottom right Buttons
@@ -287,7 +396,7 @@ public class MatchSessionDialog extends Dialog {
 	      next.addSelectionListener(new SelectionAdapter() {	
 		    	@Override
 		    	public void widgetSelected(SelectionEvent e) {
-		    		saveCurrentMatch();
+		    		saveCurrentMatch(e);
 		    		totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );		
 		    		if( ms.getNumMatched() == ms.getNumTotal()){
 		    			done.setVisible(true);
@@ -310,31 +419,89 @@ public class MatchSessionDialog extends Dialog {
           return 1;
 	  }
 
-	  protected void ViewerSelectionChanged() {
+	  
+	  protected void regenerateSmartTree(String lang) {
+		  //tree.clearAll(true);
+		  tree.removeAll();
+	      TreeItem iItem = new TreeItem (tree, 0);
+		  iItem.setText("Data Model");
+	      addCategoriesToTree(iItem, rootCategory, lang);
+		
+	  }
+
+
+	private void addCategoriesToTree(TreeItem tree, List<CategoryType> cat, String languageCode) {
+		  int i=0;
+		  while(i < cat.size()){
+			  String name = cat.get(i).getNames().get(0).getValue();
+			  //String key = cat.get(i).getKey();
+			  TreeItem iItem = new TreeItem (tree, 0);
+			  for(int x=0; x < cat.get(i).getNames().size(); x++){
+				  if(cat.get(i).getNames().get(x).getLanguageCode().equals(languageCode)){
+					  name = cat.get(i).getNames().get(x).getValue();
+					 //key = cat.get(i).getKey();
+				  }
+			  }
+			  iItem.setText(name);
+			  iItem.setData(cat.get(i));
+			  addCategoriesToTree(iItem, cat.get(i).getCategories(), languageCode);
+			  i++;
+		  }
+  		  
+		
+	}
+
+
+	protected void ViewerSelectionChanged() {
 		ISelection selection = viewer.getSelection();
   		if (!selection.isEmpty()) {
   			mistText1.setEnabled(true);
   			mistText2.setEnabled(true);
   			mistText3.setEnabled(true);
-  			smartCombo1.setEnabled(true);
+  			mistText4.setEnabled(true);
+  			mistText5.setEnabled(true);
+  			mistText6.setEnabled(true);
+  			mistText7.setEnabled(true);
+  			mistText8.setEnabled(true);
+  			mistText9.setEnabled(true);
+  			
+  			tree.setEnabled(true);
   			smartCombo2.setEnabled(true);
   			smartCombo3.setEnabled(true);
   		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   		    MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
   		   
-  		    mistText1.setText(selected.getMistItem().getText());
-  		    mistText2.setText(selected.getMistItem().getText());
-  		    mistText3.setText(selected.getMistItem().getText());
+  		    mistText1.setText(selected.getMistItem().getCat1());
+  		    mistText2.setText(selected.getMistItem().getCat2());
+  		    mistText3.setText(selected.getMistItem().getCat3());
+  		    mistText4.setText(selected.getMistItem().getCat4());
+  		    mistText5.setText(selected.getMistItem().getCat5());
+  		    mistText6.setText(selected.getMistItem().getCat6());
+  		    mistText7.setText(selected.getMistItem().getCat7());
+  		    mistText8.setText(selected.getMistItem().getCat8());
+  		    mistText9.setText(selected.getMistItem().getCat9());
   		}
 	}
 
-	public void saveCurrentMatch(){
+	public void saveCurrentMatch(SelectionEvent e){
 		    
 		  	ISelection selection = viewer.getSelection();
   			if (!selection.isEmpty()) {
   				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   				MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
-	    		selected.setSmartItem(smartCombo1.getText());
+  				
+  				TreeItem selectedTreeItem = tree.getSelection()[0];
+  				CategoryType cat = (CategoryType)selectedTreeItem.getData();
+  				String fullKey = cat.getKey();
+  				while(selectedTreeItem.getParentItem() != null){
+  					selectedTreeItem = selectedTreeItem.getParentItem();
+  					if(selectedTreeItem.getData() != null){
+  						fullKey = ((CategoryType)selectedTreeItem.getData()).getKey() + "." + fullKey;
+  					}else{
+  						break;
+  					}
+  				}
+  				selected.setSmartItem(fullKey);
   			}
   			viewer.refresh();
   			
@@ -368,6 +535,7 @@ public class MatchSessionDialog extends Dialog {
 	      public String getText(Object element) {
 	    	  MatchRow row = (MatchRow) element;
 	    	  //TODO check the boxes for ones that are matched when opening a file, I think it should be here somehow.
+	    	  //also if we re-order by sorting hopefully this could be run again to reset the boxes?
 	    	  if(row.getMatched()){
 	    		  return "";
 	    	  }else{
@@ -413,7 +581,7 @@ public class MatchSessionDialog extends Dialog {
 	  
 	  
 	  public Point getCenterPoint() {
-			Shell parentShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			Shell parentShell = getParent();//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			Rectangle shellBounds = parentShell.getBounds();
 			return new Point(shellBounds.x + shellBounds.width / 2, (shellBounds.y + shellBounds.height) / 2);
 		}
