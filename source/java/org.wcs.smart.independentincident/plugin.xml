@@ -86,6 +86,10 @@
                </or>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.independentincident.filter"
+               style="push">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -119,7 +123,57 @@
                </visibleWhen>
             </command>
             <separator
-                  name="org.wcs.smart.patrol.separator1"
+                  name="org.wcs.smart.independentincident.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.independentincident.import"
+                  mnemonic="m"
+                  style="push"
+                  tooltip="import incidents from xml file">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.independentincident.export"
+                  mnemonic="x"
+                  style="push"
+                  tooltip="ex">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
+            <separator
+                  name="org.wcs.smart.independentincident.separator2"
                   visible="true">
             </separator>
             <command
@@ -224,6 +278,18 @@
             id="org.wcs.smart.incident.perspective"
             name="View Incidents">
       </command>
+      <command
+            id="org.wcs.smart.independentincident.filter"
+            name="Filter Independent Incidents">
+      </command>
+      <command
+            id="org.wcs.smart.independentincident.export"
+            name="Export Incidents ...">
+      </command>
+      <command
+            id="org.wcs.smart.independentincident.import"
+            name="Import Incidents ...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -234,6 +300,10 @@
       <image
             commandId="org.wcs.smart.incident.delete"
             icon="images/icons/etool16/delete_incident.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.independentincident.filter"
+            icon="images/icons/etool16/filter_incident.png">
       </image>
    </extension>
    <extension
@@ -310,6 +380,68 @@
                   forcePluginActivation="true"
                   property="org.wcs.smart.caSingle">
             </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.ui.ShowIncidentFilterHandler"
+            commandId="org.wcs.smart.independentincident.filter">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.ui.ImportIncidentHandler"
+            commandId="org.wcs.smart.independentincident.import">
+         <activeWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.ui.ExportIncidentHandler"
+            commandId="org.wcs.smart.independentincident.export">
+         <activeWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
          </activeWhen>
       </handler>
    </extension>

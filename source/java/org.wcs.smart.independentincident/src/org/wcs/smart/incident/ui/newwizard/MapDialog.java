@@ -1,108 +1,65 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-package org.wcs.smart.intelligence.ui.panel;
+package org.wcs.smart.incident.ui.newwizard;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.ui.map.location.ILocationPointsChangeListener;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ui.map.location.ISmartPoint;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
-/**
- * Composite for collecting the intelligence location(s) information
- * 
- * @author elitvin
- * @since 1.0.0
- */
-public class IntelligenceLocationComposite extends IntelligenceComposite implements ILocationPointsChangeListener {
+public class MapDialog extends Dialog {
 
-	private LocationSelectComposite<IntelligencePoint> locationSelect;
-
-	/**
-	 * @param parent
-	 * @param style
-	 */
-	public IntelligenceLocationComposite(Composite parent, int style) {
-		super(parent, style);
-		setMessage(Messages.IntelligenceLocation_Message);
-		createControls();
-	}
-
-	private void createControls() {
-        this.setLayout(new GridLayout(1, false));
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		this.setLayoutData(layoutData);
-        
-        locationSelect = new LocationSelectComposite<IntelligencePoint>(this, SWT.NONE, getLayerStyle()) {
-			@Override
-			protected IntelligencePoint createNewPoint() {
-				return new IntelligencePoint();
-			}
-        };
-        locationSelect.addLocationPointsChangeListener(this);
+	private TmpPoint point;
+	private LocationSelectComposite<TmpPoint> locationComp;
+	protected MapDialog(Shell parentShell) {
+		super(parentShell);
 	}
 	
 	@Override
-	protected void updateModelInternal(Intelligence intelligence) {
-		//create a copy of points array from composite (we don't want to remove from original array as this will effect gui)
-		List<IntelligencePoint> points = new ArrayList<IntelligencePoint>(locationSelect.getPoints());
-		//Update the points
-		if (intelligence.getPoints() == null) {
-			intelligence.setPoints(new ArrayList<IntelligencePoint>());
+	protected void okPressed(){
+		point = null;
+		List<TmpPoint> pnts = locationComp.getPoints();
+		if (pnts.size() > 0){
+			point = pnts.get(0);
 		}
+		super.okPressed();
+	}
+	
+	public TmpPoint getPoint(){
+		return point;
+	}
+	@Override
+	protected Point getInitialSize() {
+		return new Point(450, 400);
+	}
+	
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		
-		for (Iterator<IntelligencePoint> iterator = intelligence.getPoints().iterator(); iterator.hasNext();) {
-			IntelligencePoint pt = iterator.next();
-			if (!points.remove(pt)){
-				iterator.remove();
+		locationComp = new LocationSelectComposite<TmpPoint>(parent, SWT.SINGLE, getLayerStyle()) {
+			@Override
+			protected TmpPoint createNewPoint() {
+				return new TmpPoint();
 			}
-		}
+		};
+
 		
-		//add remaining; these should all be new points
-		for (Iterator<IntelligencePoint> iterator = points.iterator(); iterator.hasNext();) {
-			IntelligencePoint pt = iterator.next();
-			pt.setIntelligence(intelligence);
-			intelligence.getPoints().add(pt);
-		}
+		getShell().setText("Select Point");
+		return parent;
 	}
-
+	
+	
 	@Override
-	public void initFromModel(Intelligence intelligence) {
-		locationSelect.setPoints(intelligence.getPoints());
+	public boolean isResizable(){
+		return true;
 	}
-
-	@Override
-	public void locationPointsChanged() {
-		fireInputChangeListeners();
-	}
-
+	
+	
 	private String getLayerStyle(){
 		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
 				"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
@@ -165,4 +122,32 @@ public class IntelligenceLocationComposite extends IntelligenceComposite impleme
 				"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
 				"</styleEntry>"; //$NON-NLS-1$
 	}
+	
+	class TmpPoint implements ISmartPoint{
+
+		private double x;
+		private double y;
+		
+		@Override
+		public double getX() {
+			return x;
+		}
+
+		@Override
+		public void setX(double x) {
+			this.x = x;
+		}
+
+		@Override
+		public double getY() {
+			return this.y;
+		}
+
+		@Override
+		public void setY(double y) {
+			this.y = y;
+		}
+		
+	}
+
 }

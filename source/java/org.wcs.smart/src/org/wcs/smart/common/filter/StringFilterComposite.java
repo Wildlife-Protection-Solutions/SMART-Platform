@@ -53,6 +53,7 @@ public class StringFilterComposite extends Composite {
 	private Text txtFilter;
 	
 	private TextField[] searchFields;
+	private StringComparison[] compOptions;
 	private ComboViewer searchField;
 
 	/**
@@ -71,6 +72,8 @@ public class StringFilterComposite extends Composite {
 		}
 	}
 	
+	
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -78,8 +81,22 @@ public class StringFilterComposite extends Composite {
 	public StringFilterComposite(Composite parent, int style, TextField[] searchFields) {
 		super(parent, style);
 		this.searchFields = searchFields;
+		this.compOptions = StringComparison.values();
 		createControls();
 	}
+	
+	/**
+	 * @param parent
+	 * @param style
+	 */
+	public StringFilterComposite(Composite parent, int style, TextField[] searchFields,
+			StringComparison[] comps) {
+		super(parent, style);
+		this.searchFields = searchFields;
+		this.compOptions = comps;
+		createControls();
+	}
+
 
 	private void createControls() {
 		this.setLayout(new GridLayout(1, false));
@@ -116,7 +133,7 @@ public class StringFilterComposite extends Composite {
 		
 		comparatorViewer = new ComboViewer(comp, SWT.READ_ONLY);
 		comparatorViewer.setContentProvider(ArrayContentProvider.getInstance());
-		comparatorViewer.setInput(StringComparison.values());
+		comparatorViewer.setInput(compOptions);
 		comparatorViewer.setSelection(new StructuredSelection(StringComparison.CONTAINS));		
 		comparatorViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {

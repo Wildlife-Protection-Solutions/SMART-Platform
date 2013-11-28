@@ -51,7 +51,6 @@ import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
 import org.wcs.smart.ui.map.location.ILocationPointsChangeListener;
-import org.wcs.smart.ui.map.location.ISmartPoint;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
 /**
@@ -170,7 +169,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
         //location selection
         locationSelect = new LocationSelectComposite<SpatialPlanTargetPoint>(main, SWT.NONE, getStyleSld()) {
 			@Override
-			protected ISmartPoint createNewPoint() {
+			protected SpatialPlanTargetPoint createNewPoint() {
 				return new SpatialPlanTargetPoint();
 			}
         };

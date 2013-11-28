@@ -9,8 +9,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.incident.event.IIncidentListener;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -72,6 +75,13 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 		return parent;
 	}
 
+	@Override
+	public Session getSession(){
+		if (session == null || !session.isOpen()){
+			session = HibernateManager.openSession(new AttachmentInterceptor());
+		}
+		return session;
+	}
 
 	@Override
 	protected boolean performSave() {
@@ -81,14 +91,17 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 				MessageDialog.openError(getShell(), "Error", "You cannot save until you've resolved all errors. " + error );
 				return false;
 			}
-			Session session =getSession();
+			Session session = getSession();
 			session.beginTransaction();
-			panel.updateIncident(incident);
-			session.saveOrUpdate(incident);
-			session.getTransaction().commit();
-			
-			IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_MODIFIED, incident);	
-			
+			try{
+				panel.updateIncident(incident);
+				session.saveOrUpdate(incident);
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				IncidentPlugIn.displayLog("Error saving changes.  Please restart the application.", ex);
+			}
+			IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_MODIFIED, incident);
 			setChangesMade(false);
 		}
 		return true;

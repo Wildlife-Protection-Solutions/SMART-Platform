@@ -38,6 +38,7 @@ public class CommentComposite extends AbstractIncidentComposite {
 			}
 		});
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)txtComment.getLayoutData()).widthHint = 150;
 		((GridData)txtComment.getLayoutData()).heightHint = 150;
 		txtComment.setTextLimit(Waypoint.COMMENT_MAX_LENGTH);
 		return item;

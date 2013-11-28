@@ -5,15 +5,12 @@ import java.text.DateFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -164,7 +161,7 @@ public class IncidentSummaryPage extends EditorPart {
 		summarySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Composite top = toolkit.createComposite(summarySection, SWT.NONE);
-		top.setLayout(new GridLayout(2, false));
+		top.setLayout(new GridLayout(2, true));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		summarySection.setClient(top);
 		
@@ -227,6 +224,8 @@ public class IncidentSummaryPage extends EditorPart {
 		attachments.setContentProvider(ArrayContentProvider.getInstance());
 		attachments.setLabelProvider(new SmartAttachmentLabelProvider());
 		attachments.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)attachments.getControl().getLayoutData()).heightHint = 100;
+		((GridData)attachments.getControl().getLayoutData()).widthHint = 100;
 		createEdit(right, canEdit, IncidentAttachmentComposite.ID);
 		
 		

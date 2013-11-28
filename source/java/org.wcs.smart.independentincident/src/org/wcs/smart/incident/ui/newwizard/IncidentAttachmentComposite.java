@@ -47,9 +47,6 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 			incident.setAttachments(new ArrayList<WaypointAttachment>());
 		}
 		List<WaypointAttachment> atts = attachmentComp.getAttchments();
-		for (WaypointAttachment a : incident.getAttachments()){
-			a.setWaypoint(null);
-		}
 		incident.getAttachments().clear();
 		
 		for (WaypointAttachment a : atts){

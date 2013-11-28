@@ -110,7 +110,7 @@ public class Mergei18n {
 
         List<File> filesList = new ArrayList<File>();
 
-        final String matchDir = pluginName + ".nl";  /*ADD _XX if you want to search for a specific language */
+        final String matchDir = pluginName + ".nl_es";  /*ADD _XX if you want to search for a specific language */
         for (File flangDir : transDir.listFiles()){
 
 
