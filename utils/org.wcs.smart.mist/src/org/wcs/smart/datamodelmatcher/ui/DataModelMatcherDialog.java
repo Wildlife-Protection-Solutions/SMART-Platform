@@ -1,6 +1,10 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -25,7 +29,7 @@ public class DataModelMatcherDialog extends Composite {
 	Text mergeSessionTxtFileName;
 	
 	
-	public DataModelMatcherDialog(Composite c) {
+	public DataModelMatcherDialog(Composite c){
 		super(c, SWT.None);
 		
 		GridLayout shellLayout = new GridLayout(1, false);
@@ -159,8 +163,8 @@ public class DataModelMatcherDialog extends Composite {
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
 	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
-	    		dlg.setFilterNames(new String[] {"FDB", "GDB"});
-	    		dlg.setFilterExtensions(new String[] {"*.fdb", "*.gdb"});
+	    		dlg.setFilterNames(new String[] {"FDB, GDB"});
+	    		dlg.setFilterExtensions(new String[] {"*.*db"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
 	    			startMistTxtFileName.setText(fn);
@@ -225,7 +229,23 @@ public class DataModelMatcherDialog extends Composite {
 	    		ms.setMistLocation(startMistTxtFileName.getText());
 	    		ms.setSmartXmlLocation(startXMLFileName.getText());
 	    		
-	    		ms.loadRows();
+	    		try {
+	    			ms.loadRows(); //loads the mist data
+				} catch (Exception e2) {
+			    	MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+			    	messageBox.setMessage("MIST database error:" + e2);
+			    	messageBox.open();
+				} 
+	    		
+	    		try {
+					ms.loadSmartDataModel();
+				} catch (Exception e1) {
+					MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+					e1.printStackTrace();
+	    			messageBox.setMessage("SMART XML data model file error, ensure the file was created in SMART by selecting 'Export to XML' under the 'Conservation Area -> Data Model...' menu. " + e1 );
+	    			messageBox.open();
+	    			return;
+				}
 	    		
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		

@@ -1,6 +1,6 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
-import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -24,11 +24,17 @@ public class TableColumnSorter extends ViewerComparator {
 	
 	final private SelectionListener selectionHandler = new SelectionAdapter() {
 		public void widgetSelected(SelectionEvent e) {
+
 			TableColumnSorter sorter = (TableColumnSorter) TableColumnSorter.this.viewer.getComparator();
 			Assert.isTrue(TableColumnSorter.this == sorter);
 			TableColumn selectedColumn = (TableColumn) e.widget;
 			Assert.isTrue(TableColumnSorter.this.viewer.getTable() == selectedColumn.getParent());
 			TableColumnSorter.this.setColumn(selectedColumn);
+		
+			//TODO
+			//supposed to make it only sort once and not each time the data is changed, seems to sort twice though... 
+			//when you click the heading to sort and again when the data is changed the first time, then it's fine. weird...
+		    stopSorting();
 		}
 	};
 	
@@ -83,6 +89,8 @@ public class TableColumnSorter extends ViewerComparator {
 		}
 		viewer.setComparator(null);
 		viewer.setComparator(this);
+		
+
 	}
 
 	@Override
@@ -98,5 +106,12 @@ public class TableColumnSorter extends ViewerComparator {
 		if (t1 == null) t1 = "";
 		if (t2 == null) t2 = "";
 		return t1.compareTo(t2);
+	}
+	
+	public void stopSorting(){
+		Table table = viewer.getTable();
+		this.direction = 0;
+		table.setSortColumn(null);
+		table.setSortDirection(SWT.NONE);
 	}
 }
