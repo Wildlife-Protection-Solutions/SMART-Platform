@@ -12,6 +12,7 @@ import org.wcs.smart.observation.model.Waypoint;
 public abstract class AbstractIncidentComposite {
 
 	private List<Listener> listeners = new ArrayList<Listener>();
+	protected boolean initializing = false;
 	
 	public void addChangeListener(Listener listener){
 		listeners.add(listener);
@@ -22,6 +23,7 @@ public abstract class AbstractIncidentComposite {
 	}
 	
 	public void fireChange(Event e){
+		if (initializing) return;
 		for (Listener l : listeners){
 			l.handleEvent(e);
 		}

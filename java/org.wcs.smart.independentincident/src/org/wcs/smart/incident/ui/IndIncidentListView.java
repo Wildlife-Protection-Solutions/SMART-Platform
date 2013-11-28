@@ -33,18 +33,18 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
-import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 
-public class IndIncidentListView extends ViewPart {
+public class IndIncidentListView extends ViewPart implements IIncidentFilteringView {
 
 	public static final String ID = "org.wcs.smart.observation.ui.incidientView";
 	
 	private TableViewer incidentListViewer;
+	private IncidentFilter filter = new IncidentFilter();
 	
 	private Object[] loadingInput = new Object[]{"Loading..."};
 	
@@ -106,20 +106,11 @@ public class IndIncidentListView extends ViewPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask("Loading...", 1);
-//			Display.getDefault().syncExec(new Runnable() {
-//				@Override
-//				public void run() {
-//					incidentListViewer.setInput(loadingInput);
-//					incidentListViewer.refresh();
-//				}
-//			});
-			
+
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				Query query = s.createQuery("SELECT uuid, id, dateTime FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca ORDER by dateTime DESC");
-				query.setParameter("source", IndepedentIncidentSource.KEY);
-				query.setParameter("ca", SmartDB.getCurrentConservationArea());
+				Query query = filter.buildQuery(s);
 				List<?> results  = query.list();
 				final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
 				int i = 0;
@@ -238,6 +229,10 @@ public class IndIncidentListView extends ViewPart {
 		incidentListViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuManager,  incidentListViewer);
 		getSite().setSelectionProvider(incidentListViewer);
+	}
+	
+	public IncidentFilter getFilter(){
+		return this.filter;
 	}
 
 	/**

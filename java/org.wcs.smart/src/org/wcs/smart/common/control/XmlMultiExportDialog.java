@@ -100,7 +100,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 		}
 		Map<String, String> file2Obj = new HashMap<String, String>();
 		for (int i = 0; i < checked.length; i ++){
-			String objName = (String)((Object[])checked[i])[objNameIndex];
+			String objName = String.valueOf(((Object[])checked[i])[objNameIndex]);
 			String fileName = SmartUtils.getFileName(objName);
 			if (file2Obj.containsKey(fileName)) {
 				//output file name conflict error (two exported items will try to write data in a same file)

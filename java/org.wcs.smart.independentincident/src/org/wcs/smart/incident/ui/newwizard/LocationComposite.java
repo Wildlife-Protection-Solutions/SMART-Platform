@@ -4,15 +4,21 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.referencing.CRS;
@@ -82,6 +88,12 @@ public class LocationComposite extends AbstractIncidentComposite {
 			}
 		});
 		cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbProjection.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fireChange(new Event());	
+			}
+		});
 		
 		l = new Label(item, SWT.NONE);
 		l.setText("X:");
@@ -104,6 +116,16 @@ public class LocationComposite extends AbstractIncidentComposite {
 			}
 		});
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Link lnkMap  = new Link(item, SWT.NONE);
+		lnkMap.setText("<a>" + "Select on Map ..." + "</a>");
+		lnkMap.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectOnMap();
+			}
+		});
+		lnkMap.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false,2,1));
 		return item;
 	}
 
@@ -124,28 +146,33 @@ public class LocationComposite extends AbstractIncidentComposite {
 
 	@Override
 	public void initFields(Waypoint incident, Session session) {
-		List<Projection> projs = HibernateManager.getCaProjectionList(session);
-		Projection defaultp = null;
-		for(Projection p : projs){
-			try{
-				if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
-					defaultp = p;
-					break;
+		initializing = true;
+		try{
+			List<Projection> projs = HibernateManager.getCaProjectionList(session);
+			Projection defaultp = null;
+			for(Projection p : projs){
+				try{
+					if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+						defaultp = p;
+						break;
+					}
+				}catch (Exception ex){
+					IncidentPlugIn.log("Error parsing projection info", ex);
 				}
-			}catch (Exception ex){
-				IncidentPlugIn.log("Error parsing projection info", ex);
 			}
-		}
-		if (defaultp == null){
-			defaultp = new Projection();
-			defaultp.setCrs(SmartDB.DATABASE_CRS);
-			projs.add(defaultp);
-		}
-		cmbProjection.setInput(projs);
-		txtX.setText(String.valueOf(incident.getX()));
-		txtY.setText(String.valueOf(incident.getY()));
+			if (defaultp == null){
+				defaultp = new Projection();
+				defaultp.setCrs(SmartDB.DATABASE_CRS);
+				projs.add(defaultp);
+			}
+			cmbProjection.setInput(projs);
+			txtX.setText(String.valueOf(incident.getX()));
+			txtY.setText(String.valueOf(incident.getY()));
 		
-		cmbProjection.setSelection(new StructuredSelection(defaultp));
+			cmbProjection.setSelection(new StructuredSelection(defaultp));
+		}finally{
+			initializing = false;
+		}
 	}
 	
 	@Override
@@ -158,4 +185,30 @@ public class LocationComposite extends AbstractIncidentComposite {
 		return "The incident location. A single point must be selected.";
 	}
 
+	
+	private void selectOnMap(){
+		MapDialog md = new MapDialog(Display.getCurrent().getActiveShell());
+		if (md.open() == MapDialog.OK){
+			if (md.getPoint() != null){
+				txtX.setText(String.valueOf(md.getPoint().getX()));
+				txtY.setText(String.valueOf(md.getPoint().getY()));
+
+				//select the correct projection
+				Projection defaultp = null;
+				for(Projection p : ((List<Projection>)cmbProjection.getInput())){
+					try{
+						if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+							defaultp = p;
+							break;
+						}
+					}catch (Exception ex){
+						IncidentPlugIn.log("Error parsing projection info", ex);
+					}
+				}
+				cmbProjection.setSelection(new StructuredSelection(defaultp));
+			}
+		}
+	}
+	
+	
 }

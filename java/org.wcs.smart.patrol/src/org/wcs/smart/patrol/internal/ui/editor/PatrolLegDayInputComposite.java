@@ -1114,10 +1114,10 @@ public class PatrolLegDayInputComposite {
 	private void addWaypoint() {
 		double y = 0, x = 0;
 		int id = -1;
-		Time last = null;
+		Date last = null;
 		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
 			PatrolWaypoint e = (PatrolWaypoint) iterator.next();
-			Time t = (Time)getWaypointValue(e, OtColumn.TIME);
+			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
 			
 			if(last == null || t.after(last) || t.equals(last)  ){
 				y = (Double) getWaypointValue(e, OtColumn.NORTH);

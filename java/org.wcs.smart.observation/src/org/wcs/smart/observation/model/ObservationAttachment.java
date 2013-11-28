@@ -111,9 +111,7 @@ public class ObservationAttachment extends UuidItem implements ISmartAttachment 
 			}else{
 				return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + 
 						File.separator + 
-						observation.getWaypoint().getSource().getDatastoreFileLocation(observation.getWaypoint()) + 
-						File.separator + 
-						SmartUtils.encodeHex(this.getUuid());
+						observation.getWaypoint().getSource().getDatastoreFileLocation(observation.getWaypoint()) ;
 			}
 		}
 		return null;

@@ -23,7 +23,6 @@ import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
 
 public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,IAdaptable{
 
@@ -99,15 +98,14 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		setPartName(((IncidentEditorInput)getEditorInput()).getName());
 		
 		summaryEditor.initData(incident);
-		//TODO: updatemappage
+		mapPage.updatePointsLayer();
 	}
 	/**
 	 * 
-	 * @return null if the patrol can be editted, otherwise a string
+	 * @return null if the incident can be editted, otherwise a string
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(){
-//		return PatrolManager.getInstance().canEdit(patrol, ops);
 		return null;
 	}
 	
@@ -117,12 +115,10 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 			byte[] uuid = ((IncidentEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			try{
-				//load patrol items so don't have lazy loading issues later.
+				//load incident 
 				session.beginTransaction();
 				this.incident = (Waypoint) session.load(Waypoint.class, uuid);
-			
-				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-//				this.projections = tmp.toArray(new Projection[tmp.size()]);
+				this.incident.getId();
 			
 				session.getTransaction().commit();
 			}finally{			

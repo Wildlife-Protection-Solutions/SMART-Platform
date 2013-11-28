@@ -33,10 +33,9 @@ import net.refractions.udig.project.render.ViewportModelEvent.EventType;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.tool.Tool;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -79,6 +78,9 @@ import com.vividsolutions.jts.geom.Point;
  * Composite to select certain points on the map.
  * Used to save location for some events.
  * 
+ * Styles: SWT.SINGLE - only a single point will be selected and the list of points will not be displayed<br>
+ * SWT.MULTI - multiple points can be selected and list of points will be displayed (default).
+ * 
  * @author elitvin
  * @since 1.0.0
  */
@@ -89,7 +91,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	private ControlDecoration decoration;
 	private TableViewer pointsListViewer;
 
-	private WritableList points = new WritableList();
+	private List<T> points = new ArrayList<T>();
 
 	private Text xCoordText;
 	private Text yCoordText;
@@ -101,6 +103,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	private MapComposite mapComposite;
 	private String layerStyle = null;
 	
+	private boolean isMulti;
+	
 	private List<ILocationPointsChangeListener> pointsChangeListeners = new ArrayList<ILocationPointsChangeListener>();
 	
 	/**
@@ -109,12 +113,13 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	 */
 	public LocationSelectComposite(Composite parent, int style) {
 		super(parent, SWT.HORIZONTAL | style);
+		this.isMulti = (style & SWT.SINGLE) != SWT.SINGLE;
 		createControls();
-		setWeights(new int[] {1, 2});
+		if (isMulti){
+			setWeights(new int[] {1, 2});
+		}
 	}
-	
-	
-	
+
 	/**
 	 * @param parent
 	 * @param style
@@ -122,8 +127,11 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	public LocationSelectComposite(Composite parent, int style, String layerStyle) {
 		super(parent, SWT.HORIZONTAL | style);
 		this.layerStyle = layerStyle;
+		this.isMulti = (style & SWT.SINGLE) != SWT.SINGLE;
 		createControls();
-		setWeights(new int[] {1, 2});
+		if (isMulti){
+			setWeights(new int[] {1, 2});
+		}
 	}
 	
 	@Override
@@ -150,112 +158,115 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setBackground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
 
-		//========points part========
-		Composite pointsComposite = new Composite(this, SWT.NONE);
-		pointsComposite.setLayout(new GridLayout(1, false));
-		pointsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		if(isMulti){
+			//========points part========
+			Composite pointsComposite = new Composite(this, SWT.NONE);
+			pointsComposite.setLayout(new GridLayout(1, false));
+			pointsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
-		Label pointsLabel = new Label(pointsComposite, SWT.NONE);
-		pointsLabel.setText(Messages.LocationSelectComposite_Points_Label);
-		decoration = new ControlDecoration(pointsLabel, SWT.RIGHT);
-		decoration.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		decoration.setShowHover(true);
-		decoration.hide();
+			Label pointsLabel = new Label(pointsComposite, SWT.NONE);
+			pointsLabel.setText(Messages.LocationSelectComposite_Points_Label);
+			decoration = new ControlDecoration(pointsLabel, SWT.RIGHT);
+			decoration.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+			decoration.setShowHover(true);
+			decoration.hide();
 
-		pointsListViewer = new TableViewer(pointsComposite, SWT.MULTI | SWT.BORDER);
-		pointsListViewer.setContentProvider(new ObservableListContentProvider());
-		pointsListViewer.setLabelProvider(createLabelProvider());
-		pointsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)pointsListViewer.getControl().getLayoutData()).widthHint = 180;
-		((GridData)pointsListViewer.getControl().getLayoutData()).heightHint = 300;
-		pointsListViewer.setInput(this.points);
-		pointsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateMapConposite();				
-				removeButton.setEnabled(!pointsListViewer.getSelection().isEmpty());
-			}
-		});
+			pointsListViewer = new TableViewer(pointsComposite, SWT.MULTI | SWT.BORDER);
+			pointsListViewer.setContentProvider(ArrayContentProvider.getInstance());
+			pointsListViewer.setLabelProvider(createLabelProvider());
+			pointsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)pointsListViewer.getControl().getLayoutData()).widthHint = 180;
+			((GridData)pointsListViewer.getControl().getLayoutData()).heightHint = 300;
+			pointsListViewer.setInput(this.points);
+			pointsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					updateMapConposite();				
+					removeButton.setEnabled(!pointsListViewer.getSelection().isEmpty());
+				}
+			});
 
-		//========point coordinates manual input part========
-		Composite coordsComposite = new Composite(pointsComposite, SWT.NONE);
-		coordsComposite.setLayout(new GridLayout(2, false));
-		coordsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			//========point coordinates manual input part========
+			Composite coordsComposite = new Composite(pointsComposite, SWT.NONE);
+			coordsComposite.setLayout(new GridLayout(2, false));
+			coordsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		Label xLabel = new Label(coordsComposite, SWT.NONE);
-		xLabel.setText(Messages.LocationSelectComposite_X_Label);
-		xLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			Label xLabel = new Label(coordsComposite, SWT.NONE);
+			xLabel.setText(Messages.LocationSelectComposite_X_Label);
+			xLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		xCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
-		xCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		xCoordText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				updateAddButtonState();
-			}
-		});
+			xCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
+			xCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			xCoordText.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					updateAddButtonState();
+				}
+			});
 
-		Label yLabel = new Label(coordsComposite, SWT.NONE);
-		yLabel.setText(Messages.LocationSelectComposite_Y_Label);
-		yLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			Label yLabel = new Label(coordsComposite, SWT.NONE);
+			yLabel.setText(Messages.LocationSelectComposite_Y_Label);
+			yLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		yCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
-		yCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		yCoordText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				updateAddButtonState();
-			}
-		});
+			yCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
+			yCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			yCoordText.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					updateAddButtonState();
+				}
+			});
 		
-		//========buttons part part========
-		Composite buttonsComposite = new Composite(pointsComposite, SWT.NONE);
-		buttonsComposite.setLayout(new GridLayout(2, false));
-		buttonsComposite.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+			// ========buttons part part========
+			Composite buttonsComposite = new Composite(pointsComposite,SWT.NONE);
+			buttonsComposite.setLayout(new GridLayout(2, false));
+			buttonsComposite.setLayoutData(new GridData(SWT.CENTER, SWT.FILL,true, false));
 
-		addButton = new Button(buttonsComposite, SWT.PUSH);
-		addButton.setText(DialogConstants.ADD_BUTTON_TEXT);
-		addButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		addButton.setEnabled(false);
-		addButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Double x = convertToDouble(xCoordText.getText(), Messages.LocationSelectComposite_X_Invalid_Error);
-				Double y = convertToDouble(yCoordText.getText(), Messages.LocationSelectComposite_Y_Invalid_Error);
-				if (x != null && y != null) {
-					Point p = convertToDBCrs(x, y);
-					if (p != null) {
-						handleAddPoint(p.getX(), p.getY());
+			addButton = new Button(buttonsComposite, SWT.PUSH);
+			addButton.setText(DialogConstants.ADD_BUTTON_TEXT);
+			addButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false));
+			addButton.setEnabled(false);
+			addButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Double x = convertToDouble(xCoordText.getText(),
+							Messages.LocationSelectComposite_X_Invalid_Error);
+					Double y = convertToDouble(yCoordText.getText(),
+							Messages.LocationSelectComposite_Y_Invalid_Error);
+					if (x != null && y != null) {
+						Point p = convertToDBCrs(x, y);
+						if (p != null) {
+							handleAddPoint(p.getX(), p.getY());
+						}
 					}
 				}
-			}
-		});
-		addButtonDecoration = new ControlDecoration(addButton, SWT.LEFT);
-		addButtonDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
-		addButtonDecoration.setShowHover(true);
-		addButtonDecoration.setDescriptionText(Messages.LocationSelectComposite_CRS_Conversion_Warning);
-		addButtonDecoration.hide();
+			});
+			addButtonDecoration = new ControlDecoration(addButton, SWT.LEFT);
+			addButtonDecoration.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+			addButtonDecoration.setShowHover(true);
+			addButtonDecoration.setDescriptionText(Messages.LocationSelectComposite_CRS_Conversion_Warning);
+			addButtonDecoration.hide();
 
-		removeButton = new Button(buttonsComposite, SWT.PUSH);
-		removeButton.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		removeButton.setEnabled(false);
-		removeButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection) pointsListViewer.getSelection();
-				if (!sel.isEmpty()) {
-					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-						points.remove(iterator.next());
+			removeButton = new Button(buttonsComposite, SWT.PUSH);
+			removeButton.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			removeButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,false, false));
+			removeButton.setEnabled(false);
+			removeButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					IStructuredSelection sel = (IStructuredSelection) pointsListViewer
+							.getSelection();
+					if (!sel.isEmpty()) {
+						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+							points.remove(iterator.next());
+						}
+						updateMapConposite();
+						fireLocationPointsChangeListeners();
 					}
-					updateMapConposite();
-					fireLocationPointsChangeListeners();
+					pointsListViewer.refresh();
 				}
-				pointsListViewer.refresh();
-			}
-		});
-
+			});
+		}
 		//========map part========
 		ScrolledComposite mapScrollCmp = new ScrolledComposite(this, SWT.H_SCROLL);
 		mapComposite = new MapComposite(mapScrollCmp, SWT.NONE);
@@ -287,29 +298,32 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 			}
 		});
 		
-		mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
-			@Override
-			public void changed(ViewportModelEvent event) {
-				if (EventType.CRS.equals(event.getType())) {					
-					//update the transform outside of the display thread
-					//if this is done inside the display thread it seems
-					//to cause deadlocking issues in geotools
-					IBaseLabelProvider provider = pointsListViewer.getLabelProvider();
-					if (provider instanceof SmartPointLabelProvider){
-						((SmartPointLabelProvider) provider).updateTransform();
-					}
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							if (pointsListViewer != null && !LocationSelectComposite.this.isDisposed()) {
-								pointsListViewer.refresh(true);
-								updateAddButtonDecoration();
-							}
+		if (isMulti){
+			mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
+				@Override
+				public void changed(ViewportModelEvent event) {
+				
+					if (EventType.CRS.equals(event.getType())) {					
+						//update the transform outside of the display thread
+						//if this is done inside the display thread it seems
+						//o cause deadlocking issues in geotools
+						IBaseLabelProvider provider = pointsListViewer.getLabelProvider();
+						if (provider instanceof SmartPointLabelProvider){
+							((SmartPointLabelProvider) provider).updateTransform();
 						}
-					});
-				}					
-			}
-		});
+						Display.getDefault().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								if (pointsListViewer != null && !LocationSelectComposite.this.isDisposed()) {
+									pointsListViewer.refresh(true);
+									updateAddButtonDecoration();
+								}
+							}
+						});
+					}
+				}
+			});
+		}
 	}	
 
 	@Override
@@ -333,10 +347,20 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	}
 
 	protected void handleAddPoint(double x, double y) {
-		ISmartPoint point = createNewPoint();
+		if (!isMulti){
+			//need to clear points first
+			points.clear();
+		}
+		T point = createNewPoint();
 		point.setX(x);
 		point.setY(y);
 		points.add(point);
+		
+		pointListModified();
+	}
+	
+	private void pointListModified(){
+		if (pointsListViewer != null) pointsListViewer.refresh();
 		updateMapConposite();
 		fireLocationPointsChangeListeners();
 	}
@@ -358,9 +382,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		return mapComposite.getMap().getViewportModelInternal().getCRS();
 	}
 	
-	protected abstract ISmartPoint createNewPoint();
+	protected abstract T createNewPoint();
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getPoints() {
 		return Collections.unmodifiableList(points);
@@ -368,6 +391,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 	@Override
 	public boolean isSelected(ISmartPoint point) {
+		if (pointsListViewer == null) return false;
 		StructuredSelection selection = (StructuredSelection) pointsListViewer.getSelection();
 		for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 			Object obj = (Object) i.next();
@@ -381,11 +405,11 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	public void setPoints(List<? extends T> pointList) {
 		points.clear();
 		points.addAll(pointList);
-		updateMapConposite();
-		fireLocationPointsChangeListeners();
+		pointListModified();
 	}
 
 	private void updateAddButtonState() {
+		if (addButton == null) return;
 		String x = xCoordText.getText();
 		String y = yCoordText.getText();
 		addButton.setEnabled(x != null && !x.isEmpty() && y != null && !y.isEmpty());
@@ -394,6 +418,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	}
 
 	private void updateAddButtonDecoration() {
+		if (addButton == null) return;
 		boolean warn = addButton.isEnabled() && !CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, getCurrentCrs());
 		if (warn) {
 			addButtonDecoration.show();
