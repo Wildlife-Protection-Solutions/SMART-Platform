@@ -2,21 +2,26 @@
 package org.wcs.smart.datamodelmatcher.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -26,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -35,22 +41,22 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryAttributeLink;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryTypeList;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
 
-
+import sun.reflect.generics.tree.BottomSignature;
 
 
 public class MatchSessionDialog extends Dialog {
 
+	String[] codes; 
+	
 	private MatchSession ms;
 	private TableViewer viewer;
-	// static fields to hold the images
-	//private static final Image CHECKED = Activator.getImageDescriptor("icons/checked.gif").createImage(); 
-	//private static final Image UNCHECKED = Activator.getImageDescriptor("icons/unchecked.gif").createImage();
 
 	private Label totalMatched;
 	  
@@ -68,9 +74,19 @@ public class MatchSessionDialog extends Dialog {
 	private Combo langSelector;
 	
 	private List<CategoryType> rootCategory;
+	private DataModel smartDM;
 	
-	private Combo smartCombo2;
-	private Combo smartCombo3;
+	private HashMap<String, String> smartAttributeHash; 
+	private HashMap<String, AttributeType> smartAttributeDetailsHash;
+	
+	private ComboViewer smartCombo2;
+	private Composite value1;
+	private Combo value1Combo;
+	private ComboViewer value1ComboViewer;
+	private Text value1Text;
+    private Tree value1Tree;
+	
+	private ComboViewer smartCombo3;
 	public final Shell shell;
 	
 	private Button save;
@@ -302,7 +318,7 @@ public class MatchSessionDialog extends Dialog {
 	      Composite bottomRightFirstLine = new Composite(bottomRight, SWT.NONE);
 		  GridLayout brfllayout = new GridLayout(3, false);
 		  bottomRightFirstLine.setLayout(brfllayout);
-		  bottomRightFirstLine.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true,2,1));
+		  bottomRightFirstLine.setLayoutData(new GridData(SWT.FILL,SWT.TOP, true, true,2,1));
 	      
 	      Label smartLabel = new Label(bottomRightFirstLine, SWT.NONE);
 	      smartLabel.setText("SMART Observation Definition" );
@@ -310,21 +326,27 @@ public class MatchSessionDialog extends Dialog {
 	      Font sfont = new Font(getParent().getDisplay(), new FontData(sfontData.getName(), sfontData
 	    		    .getHeight(), SWT.BOLD));
 	      smartLabel.setFont(sfont);
-	      GridData smartLabelData = new GridData(SWT.FILL,SWT.LEFT, true, true,1,1);
+	      GridData smartLabelData = new GridData(SWT.FILL,SWT.TOP, true, true,1,1);
 	      smartLabel.setLayoutData(smartLabelData);
 	      
 	      //Read the XML file
-	      DataModel smartDM = ms.getXmlDataModel();
+	      smartDM = ms.getXmlDataModel();
+	      //make a hashmap of the attributes to use for lookups
+	      smartAttributeHash = new HashMap<String, String>();
+	      smartAttributeDetailsHash = new HashMap<String, AttributeType>();
+	      
+	      buildAttributeHash("");
+	    	  
 	      
 	      //Make the language selector
 	      Label languageLabel = new Label(bottomRightFirstLine, SWT.NONE);
 	      languageLabel .setText("Language:" );
-	      GridData langLabelData = new GridData(SWT.FILL,SWT.RIGHT, false, false);
+	      GridData langLabelData = new GridData(SWT.RIGHT,SWT.TOP, false, false);
 	      languageLabel.setLayoutData(langLabelData);
 	      
 	      
 	      List<LanguageType> langs = smartDM.getLanguages().getLanguages();
-	      final String[] codes = new String[langs.size()];
+	      codes = new String[langs.size()];
 	      for (int i=0; i < langs.size(); i++){
 	    	  codes[i] = langs.get(i).getCode();
 	      }
@@ -348,40 +370,166 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      Label smartLabel1 = new Label(bottomRight, SWT.NONE);
 	      smartLabel1.setText("Category:" );
-	      
+	      smartLabel1.setLayoutData(new GridData(SWT.LEFT,SWT.FILL, false, true));
 	  	  
 	      //Make the category Tree
 	      rootCategory = smartDM.getCategories().getCategories();
 	      
-	      tree = new Tree (bottomRight, SWT.BORDER);
+	      tree = new Tree (bottomRight, SWT.BORDER | SWT.SINGLE);
 	      TreeItem iItem = new TreeItem (tree, 0);
 		  iItem.setText("Data Model");
 	      addCategoriesToTree(iItem, rootCategory, "en");
 
 	      GridData treeData = new GridData(SWT.FILL,SWT.FILL, true, true);
-	      treeData.heightHint = 200;
+	      treeData.heightHint = 120;
 	      tree.setLayoutData(treeData);
+	      tree.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				ArrayList<Attribute> attributeArray = new ArrayList<Attribute>();
+				
+				TreeItem selectedTreeItem = tree.getSelection()[0];
+				while(selectedTreeItem != null){
+					CategoryType cat = (CategoryType)selectedTreeItem.getData();
+					if(cat != null){
+						List<CategoryAttributeLink> attributes = cat.getAttributes();
+						for(CategoryAttributeLink attr : attributes){
+							String key = attr.getAttributekey(); 
+							Attribute newAttribute = new Attribute(smartAttributeHash.get(key) , attr.getAttributekey(), smartAttributeDetailsHash.get(key));
+							attributeArray.add(newAttribute);
+						}
+
+					}
+					selectedTreeItem = selectedTreeItem.getParentItem();
+				}
+				smartCombo2.setInput(attributeArray);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+	      });
 
 
-
-	      
+	      //Make an Attribute selector 
 	      Label smartLabel2 = new Label(bottomRight, SWT.NONE);
-	      smartLabel2.setText("Attribute1:" );
+	      smartLabel2.setText("Attribute #1:" );
+	      smartLabel2.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
 	      
-	      smartCombo2 =  new Combo (bottomRight, SWT.READ_ONLY);
-	  	  smartCombo2.setItems (new String [] {});
-	  	  smartCombo2.setEnabled(false);
+	      smartCombo2 =  new ComboViewer (bottomRight, SWT.READ_ONLY);
+	      smartCombo2.setContentProvider(ArrayContentProvider.getInstance());
+	      smartCombo2.setLabelProvider(new LabelProvider() {
+	    	  @Override
+	    	  public String getText(Object element) {
+	    	    return ((Attribute)element).getText();
+	    	  }
+	    	});
+	      smartCombo2.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+	      smartCombo2.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+	    	  @Override
+	    	  public void selectionChanged(SelectionChangedEvent arg0) {
+	    			ISelection selection = smartCombo2.getSelection();
+	    	  		if (!selection.isEmpty()) {
+	    	  		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+	    	  		    Attribute selected = (Attribute) structuredSelection.getFirstElement();
+	    	  		    String type = selected.getAttributeType().getType();
+	    	  		    Boolean isRequired = selected.getAttributeType().isIsrequired();
+	    	  		    if( type.equals("NUMERIC") ){
+	    	  		    	value1Text.setText("");
+	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
+	    	  		    }else if( type.equals("TEXT") ){
+	    	  		    	value1Text.setText("");
+	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
+	    	  		    }else if( type.equals("LIST") ){
+	    	  		    	String name;
+	    	  		    	String lang;
+	    	  		    	ArrayList<ListOption> options = new ArrayList<ListOption>();
+	    	  		    	List<ListNode> list = selected.getAttributeType().getValues();
+	    	  		    	int langIndex = langSelector.getSelectionIndex();
+
+	    	  		    	if (langIndex != -1 && langIndex < codes.length && codes != null) {
+	    		  				lang = (String) codes[langIndex];
+	    	  		    	}else{
+	    	  		    		lang = "";
+	    	  		    	}
+	    		  			for(ListNode i : list){
+		    					name = i.getNames().get(0).getValue();
+		    					for(int x=0; x < i.getNames().size(); x++){
+		    						if(i.getNames().get(x).getLanguageCode().equals(lang)){
+		    							name = i.getNames().get(x).getValue();
+		    							break;
+		    						}
+		    					}
+		    					options.add(new ListOption(name, i.getKey()));
+		    				}
+	    	  		    	value1ComboViewer.setInput(options);
+	    	  		    	((StackLayout)value1.getLayout()).topControl = value1ComboViewer.getControl();
+	    	  		    }else if( type.equals("TREE") ){
+	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Tree;
+	    	  			}else if( type.equals("BOOLEAN") ){
+	    	  				((StackLayout)value1.getLayout()).topControl = value1Combo;
+	    	  		    }
+	    	  		    value1.layout();
+	    	  		}
+	    	  }
+	      });
 	      
+	  	  //smartCombo2.setItems (new String [] {});
+	  	  //smartCombo2.setEnabled(false);
+	  	  //smartCombo2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	      
+
 	      
 	      Label smartLabel3 = new Label(bottomRight, SWT.NONE);
-	      smartLabel3.setText("Remark:" );
+	      smartLabel3.setText("Value #1:" );
+	      smartLabel3.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+
+	      value1 = new Composite(bottomRight, SWT.NONE);
+	      value1.setLayout(new StackLayout());
+	      value1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	      
-	      smartCombo3 =  new Combo (bottomRight, SWT.READ_ONLY);
-	  	  smartCombo3.setItems (new String [] {});
-	  	  smartCombo3.setEnabled(false);
+	      value1Combo = new Combo(value1, SWT.DROP_DOWN | SWT.SIMPLE | SWT.READ_ONLY);
+	      value1Combo.setItems(new String[]{"TRUE", "FALSE"});
+	      value1Combo.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+
+	      value1ComboViewer =  new ComboViewer (value1, SWT.READ_ONLY);
+	      value1ComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+	      value1ComboViewer.setLabelProvider(new LabelProvider() {
+	    	  @Override
+	    	  public String getText(Object element) {
+	    	    return ((ListOption)element).getName();
+	    	  }
+	    	});
+	      value1ComboViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+	      
+	      
+	      value1Text = new Text(value1, SWT.BORDER);
+	      GridData gridtxt1Data = new GridData(SWT.FILL, SWT.TOP, false, false);
+	      gridData.widthHint = 100;
+	      value1Text.setLayoutData(gridtxt1Data);
+	      
+	      value1Tree = new Tree(value1, SWT.BORDER | SWT.SINGLE);
+	      TreeItem vItem = new TreeItem (value1Tree, 0);
+	      vItem.setText("<Select an Attribute to populate possible values>");
+	      
+	      GridData gridtree1Data = new GridData(SWT.FILL, SWT.FILL, true, true);
+	      gridData.heightHint = 100;
+	      value1Tree.setLayoutData(gridtree1Data);
+	      
+	      ((StackLayout)value1.getLayout()).topControl = value1Combo;
+	      
+	      
+//	      smartCombo3 =  new Combo (bottomRight, SWT.READ_ONLY);
+	//  	  smartCombo3.setItems (new String [] {});
+	  //	  smartCombo3.setEnabled(false);
 	      //end of bottom Right elements--------------------------------------
-	  	  
+	      
+	      
 	  	  //Bottom right Buttons
 	      Composite buttons = new Composite(right, SWT.NONE);
 		  GridLayout buttonsLayout = new GridLayout(2, false);
@@ -392,7 +540,7 @@ public class MatchSessionDialog extends Dialog {
 
 
 	      next = new Button(buttons, SWT.NONE);
-	      next.setText("Next");
+	      next.setText("Accept and Load Next Match");
 	      next.addSelectionListener(new SelectionAdapter() {	
 		    	@Override
 		    	public void widgetSelected(SelectionEvent e) {
@@ -420,13 +568,31 @@ public class MatchSessionDialog extends Dialog {
 	  }
 
 	  
-	  protected void regenerateSmartTree(String lang) {
+
+
+	private void buildAttributeHash(String languageCode) {
+	      for(AttributeType a : smartDM.getAttributes().getAttributes()){
+	    	  String name = a.getNames().get(0).getValue();
+	    	  for(int x=0; x < a.getNames().size(); x++){
+				  if(a.getNames().get(x).getLanguageCode().equals(languageCode)){
+					  name = a.getNames().get(x).getValue();
+					  break;
+				  }
+			  }
+	    	  smartAttributeHash.put(a.getKey(), name);
+	    	  smartAttributeDetailsHash.put(a.getKey(), a);
+	      }
+	}
+
+
+	protected void regenerateSmartTree(String lang) {
 		  //tree.clearAll(true);
 		  tree.removeAll();
 	      TreeItem iItem = new TreeItem (tree, 0);
 		  iItem.setText("Data Model");
 	      addCategoriesToTree(iItem, rootCategory, lang);
 		
+	      buildAttributeHash(lang);
 	  }
 
 
@@ -440,6 +606,7 @@ public class MatchSessionDialog extends Dialog {
 				  if(cat.get(i).getNames().get(x).getLanguageCode().equals(languageCode)){
 					  name = cat.get(i).getNames().get(x).getValue();
 					 //key = cat.get(i).getKey();
+					  break;
 				  }
 			  }
 			  iItem.setText(name);
@@ -466,8 +633,9 @@ public class MatchSessionDialog extends Dialog {
   			mistText9.setEnabled(true);
   			
   			tree.setEnabled(true);
-  			smartCombo2.setEnabled(true);
-  			smartCombo3.setEnabled(true);
+  			//TODO enable other attr/value fields
+  			
+  			
   		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   		    MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
   		   
@@ -581,7 +749,7 @@ public class MatchSessionDialog extends Dialog {
 	  
 	  
 	  public Point getCenterPoint() {
-			Shell parentShell = getParent();//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			Shell parentShell = getParent();
 			Rectangle shellBounds = parentShell.getBounds();
 			return new Point(shellBounds.x + shellBounds.width / 2, (shellBounds.y + shellBounds.height) / 2);
 		}
