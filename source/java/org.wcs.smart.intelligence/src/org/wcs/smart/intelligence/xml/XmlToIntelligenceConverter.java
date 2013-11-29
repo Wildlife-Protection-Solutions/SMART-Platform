@@ -83,7 +83,9 @@ public class XmlToIntelligenceConverter {
 		}
 
 		/* source */
-		IntelligenceSource source = IntelligenceHibernateManager.getSourceByKeyId(session, xml.getSource());
+		String key = xml.getSource();
+		key = key != null ? key.toLowerCase() : ""; //$NON-NLS-1$
+		IntelligenceSource source = IntelligenceHibernateManager.getSourceByKeyId(session, key);
 		if (source == null) {
 			warnings.add(MessageFormat.format(Messages.XmlToIntelligenceConverter_SourceNotFound, xml.getSource()));
 		}
