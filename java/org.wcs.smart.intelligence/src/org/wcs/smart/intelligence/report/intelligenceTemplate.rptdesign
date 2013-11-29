@@ -107,6 +107,45 @@
             </structure>
         </scalar-parameter>
     </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.wcs.smart.intelligence.report.oda.SmartIntelligenceDriver" name="Intelligence Data Source" id="413"/>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.wcs.smart.intelligence.report.oda.SmartIntelligencePoints" name="Intelligence Data Set" id="414">
+            <text-property name="displayName">Intelligence Location Points</text-property>
+            <property name="nullsOrdering">nulls lowest</property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">X</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Y</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Intelligence Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">X</property>
+                    <property name="nativeName">X</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">Y</property>
+                    <property name="nativeName">Y</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[]]></xml-property>
+        </oda-data-set>
+    </data-sets>
     <page-setup>
         <simple-master-page name="NewSimpleMasterPage" id="12">
             <property name="headerHeight">0in</property>
@@ -258,13 +297,13 @@
                     </label>
                 </cell>
                 <cell id="56">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
                     <text-data id="404">
                         <expression name="valueExpr">params["IntelligenceCreator"].value</expression>
                         <property name="contentType">html</property>
                     </text-data>
                 </cell>
-                <cell id="57"/>
-                <cell id="58"/>
             </row>
             <row id="59">
                 <cell id="60">
@@ -274,13 +313,13 @@
                     </label>
                 </cell>
                 <cell id="61">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
                     <text-data id="405">
                         <expression name="valueExpr">params["IntelligenceSource"].value</expression>
                         <property name="contentType">html</property>
                     </text-data>
                 </cell>
-                <cell id="62"/>
-                <cell id="63"/>
             </row>
             <row id="64">
                 <cell id="65">
@@ -290,13 +329,13 @@
                     </label>
                 </cell>
                 <cell id="66">
+                    <property name="colSpan">3</property>
+                    <property name="rowSpan">1</property>
                     <text-data id="406">
                         <expression name="valueExpr">params["IntelligencePatrolID"].value</expression>
                         <property name="contentType">html</property>
                     </text-data>
                 </cell>
-                <cell id="67"/>
-                <cell id="68"/>
             </row>
             <row id="345">
                 <property name="height">15px</property>
@@ -389,6 +428,22 @@
             <property name="pageBreakBefore">always</property>
             <text-property name="text">Location</text-property>
         </label>
+        <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="415">
+            <property name="height">6.479166666666667in</property>
+            <property name="width">7.9375in</property>
+            <simple-property-list name="org.wcs.smart.birt.map.layers">
+                <value/>
+            </simple-property-list>
+            <simple-property-list name="org.wcs.smart.birt.map.layerDataSet">
+                <value>Intelligence Data Set</value>
+            </simple-property-list>
+            <simple-property-list name="org.wcs.smart.birt.map.layerNames">
+                <value>Intelligence Location Points</value>
+            </simple-property-list>
+            <simple-property-list name="org.wcs.smart.birt.map.layerStyles">
+                <value isNull="true"/>
+            </simple-property-list>
+        </extended-item>
     </body>
     <list-property name="images">
         <structure>

@@ -603,5 +603,11 @@
          </dataTypeMapping>
       </dataSet>
    </extension>
+   <extension
+         point="org.wcs.smart.report.birt.maplayer">
+      <MapLayer
+            maplayer="org.wcs.smart.intelligence.report.IntelligencePointsMapLayer">
+      </MapLayer>
+   </extension>
 
 </plugin>
