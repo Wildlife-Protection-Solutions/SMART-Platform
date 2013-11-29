@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointType;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -69,12 +70,12 @@ public class IncidentExporter {
 	 * @throws Exception 
 	 */
 	public static File exportIncident(Waypoint incident, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Exporting Incident ...", includeAttachments ? 4 : 2);
+		monitor.beginTask(Messages.IncidentExporter_ExportProgress, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
 			session.refresh(incident);
 			
-			monitor.subTask("Converting incident...");
+			monitor.subTask(Messages.IncidentExporter_ExportProgress1);
 			WaypointType xml = IncidentToXml.toXml(incident);
 			monitor.worked(1);
 			
@@ -95,7 +96,7 @@ public class IncidentExporter {
 	 * Writes the incident without including attachments
 	 */
 	private static File exportIncidentWithoutAttachments(WaypointType xml, File file, IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Writing output file...");
+		monitor.subTask(Messages.IncidentExporter_ExportProgress2);
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
 		try {
 			IncidentXmlManager.writeIncident(xml, out);
@@ -119,7 +120,7 @@ public class IncidentExporter {
 		exportIncidentWithoutAttachments(xml, xmlFile, monitor);
 		
 		
-		monitor.subTask("Packaging results...");
+		monitor.subTask(Messages.IncidentExporter_ExportProgress3);
 		//create zip file
 		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
 		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));

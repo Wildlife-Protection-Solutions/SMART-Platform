@@ -8,7 +8,7 @@
             class="org.wcs.smart.incident.ui.IndIncidentListView"
             icon="images/icons/obj16/incident.png"
             id="org.wcs.smart.observation.ui.incidientView"
-            name="Independent Incidents"
+            name="%incidentlistview.name"
             restorable="true">
       </view>
    </extension>
@@ -42,9 +42,9 @@
             locationURI="toolbar:org.wcs.smart.observation.ui.incidientView">
          <command
                commandId="org.wcs.smart.incident.delete"
-               label="Delete"
+               label="%delete.command.name"
                style="push"
-               tooltip="delete the selected incidents">
+               tooltip="%delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -65,9 +65,9 @@
          </command>
          <command
                commandId="org.wcs.smart.incident.new"
-               label="New Independent Incident"
+               label="%newincident.command.name"
                style="push"
-               tooltip="create a new un-associated incident ">
+               tooltip="%newincident.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -97,13 +97,13 @@
          <menu
                icon="images/icons/obj16/incident.png"
                id="org.wcs.smart.menu.indient"
-               label="Independent Incident"
-               mnemonic="I">
+               label="%incident.menu.label"
+               mnemonic="%incident.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.incident.new"
-                  mnemonic="n"
+                  mnemonic="%newincident.command.mnemonic"
                   style="push"
-                  tooltip="create a new incident">
+                  tooltip="%newincident.command.tooltip2">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -128,9 +128,9 @@
             </separator>
             <command
                   commandId="org.wcs.smart.independentincident.import"
-                  mnemonic="m"
+                  mnemonic="%import.command.mnemonic"
                   style="push"
-                  tooltip="import incidents from xml file">
+                  tooltip="%import.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -151,9 +151,9 @@
             </command>
             <command
                   commandId="org.wcs.smart.independentincident.export"
-                  mnemonic="x"
+                  mnemonic="%export.command.mnemonic"
                   style="push"
-                  tooltip="ex">
+                  tooltip="%export.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -179,9 +179,9 @@
             <command
                   commandId="org.wcs.smart.incident.perspective"
                   icon="images/icons/obj16/incident.png"
-                  mnemonic="p"
+                  mnemonic="%incidentperspective.command.mnemonic"
                   style="push"
-                  tooltip="shows the incident list">
+                  tooltip="%incidentperspective.command.tooltip">
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -197,9 +197,9 @@
             locationURI="popup:org.wcs.smart.observation.ui.incidientView">
          <command
                commandId="org.wcs.smart.incident.delete"
-               mnemonic="d"
+               mnemonic="%delete.command.mnemomic"
                style="push"
-               tooltip="Delete selected incident">
+               tooltip="%delete.command.tooltip2">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -225,9 +225,9 @@
          <command
                commandId="org.wcs.smart.incident.perspective"
                icon="images/icons/obj16/incident.png"
-               mnemonic="p"
+               mnemonic="%incidentperspective.command.mnemonic2"
                style="push"
-               tooltip="shows the incident list">
+               tooltip="%incidentperspective.command.tooltip2">
          </command>
       </menuContribution>
       <menuContribution
@@ -235,9 +235,9 @@
             locationURI="toolbar:org.wcs.smart.toolbar.create">
          <command
                commandId="org.wcs.smart.incident.new"
-               label="New Independent Incident"
+               label="%new.command.label2"
                style="push"
-               tooltip="create a new un-associated incident ">
+               tooltip="%new.command.tooltip2">
             <visibleWhen
                   checkEnabled="false">
                <and>
@@ -268,27 +268,27 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.incident.new"
-            name="New Indepdence Incident">
+            name="%new.command.name">
       </command>
       <command
             id="org.wcs.smart.incident.delete"
-            name="Delete">
+            name="%dekete.command.name">
       </command>
       <command
             id="org.wcs.smart.incident.perspective"
-            name="View Incidents">
+            name="%view.command.name">
       </command>
       <command
             id="org.wcs.smart.independentincident.filter"
-            name="Filter Independent Incidents">
+            name="%filter.command.name">
       </command>
       <command
             id="org.wcs.smart.independentincident.export"
-            name="Export Incidents ...">
+            name="%export.command">
       </command>
       <command
             id="org.wcs.smart.independentincident.import"
-            name="Import Incidents ...">
+            name="%import.command.name">
       </command>
    </extension>
    <extension
@@ -452,7 +452,7 @@
             default="false"
             icon="images/icons/obj16/incident.png"
             id="org.wcs.smart.incident.ui.IncidentEditor"
-            name="Incident Editor">
+            name="%editor.name">
       </editor>
    </extension>
 

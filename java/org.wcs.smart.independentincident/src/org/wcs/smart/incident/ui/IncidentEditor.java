@@ -1,8 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.List;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -14,25 +34,32 @@ import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.Waypoint;
-
+/**
+ * Incident editor.
+ * 
+ * @author Emily
+ *
+ */
 public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,IAdaptable{
 
 	public static final String ID = "org.wcs.smart.incident.ui.IncidentEditor"; //$NON-NLS-1$
 
 	private Waypoint incident = null;
-	
 	private IncidentSummaryPage summaryEditor;
 	private IncidentMapPage mapPage;
 	
+	/*
+	 * Waypoint listener
+	 */
 	private IWaypointEventListener wlistener = new IWaypointEventListener() {
 		
 		@Override
@@ -43,12 +70,17 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 			}
 		}
 	};
+	
+	/*
+	 * Incident listener
+	 */
 	private IIncidentListener listener = new IIncidentListener() {
 		
 		@Override
 		public void handleEvent(int eventType, Object source) {
-			// TODO Auto-generated method stub
 			if (eventType == IncidentEventManager.INCIDENT_MODIFIED){
+				//if this editor matches the incident being modified
+				//we need to reload values
 				if ((source instanceof Waypoint &&
 						((Waypoint)source).equals(source) ) ||
 						(source instanceof IncidentEditorInput &&
@@ -59,6 +91,8 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				}
 						
 			}else if (eventType == IncidentEventManager.INCIDENT_DELETED){
+				//if this editor matches the item deleted we need to
+				//close the editor
 				if ((source instanceof Waypoint &&
 						((Waypoint)source).equals(source) ) ||
 						(source instanceof IncidentEditorInput &&
@@ -87,6 +121,9 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	}
 
 	
+	/**
+	 * refreshed the incident and the editor values
+	 */
 	private void reloadIncident(){
 		//reload incident
 		incident = null;
@@ -109,6 +146,10 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		return null;
 	}
 	
+	/**
+	 * Loads the incident 
+	 * @return
+	 */
 	public Waypoint getIncident(){
 		if (this.incident == null){
 			
@@ -128,12 +169,18 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		return this.incident;
 	}
 
+	/**
+	 * Updates the incident editor part name 
+	 */
 	public void updatePartName(){
 		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
-		super.setPartName(MessageFormat.format("Incident {0}", input.getId()));
+		super.setPartName(MessageFormat.format(Messages.IncidentEditor_EditorPartName, input.getId()));
 	}
 	
 	
+	/** Creates the summary and map pages
+	 * @see org.eclipse.ui.part.MultiPageEditorPart#createPages()
+	 */
 	@Override
 	protected void createPages() {
 		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
@@ -145,11 +192,11 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 			
 			summaryEditor= new IncidentSummaryPage(this);
 			int i = addPage(summaryEditor, getEditorInput());
-			setPageText(i, "Details");
+			setPageText(i, Messages.IncidentEditor_DetailsPageName);
 			
 			mapPage = new IncidentMapPage(this);
 			int mapIndex = addPage(mapPage, getEditorInput());
-			setPageText(mapIndex, "Map");
+			setPageText(mapIndex, Messages.IncidentEditor_MapPageName);
 			
 			
 			//-- event managers --
@@ -164,9 +211,9 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 								IncidentEditor.this.dispose();
 								IncidentEditor.this.getSite().getPage().closeEditor(IncidentEditor.this, false);
 								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
-									IncidentPlugIn.displayLog("Incident editor could not be created.  Please try closing existing open editors and try again. " + t.getLocalizedMessage(), t);
+									IncidentPlugIn.displayLog(Messages.IncidentEditor_EditorError1 + t.getLocalizedMessage(), t);
 								} else {
-									IncidentPlugIn.displayLog("Error occurred while loading editor. " + t.getLocalizedMessage(), t);
+									IncidentPlugIn.displayLog(Messages.IncidentEditor_EditorError2 + t.getLocalizedMessage(), t);
 								}
 							} catch (Exception ex) {
 								IncidentPlugIn.log("Failure",ex); //$NON-NLS-1$
@@ -180,17 +227,26 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		}
 	}
 	
+	/** 
+	 * @return false
+	 */
 	@Override
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
 
 	
+	/** Does nothing
+	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
+	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 
 	}
 
+	/** Does nothing
+	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
+	 */
 	@Override
 	public void doSaveAs() {
 	}

@@ -32,6 +32,7 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.internal.Messages;
 
 /**
  * Filter dialog for filtering the incidents displayed in the incident list view.
@@ -94,9 +95,9 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
-		setMessage("Filter Independent Incidents");
-		setTitle("Indpendent Incidents");
-		getShell().setText("Filter Independent Incidents");
+		setMessage(Messages.IncidentFilterDialog_FilterDialogMessage);
+		setTitle(Messages.IncidentFilterDialog_DialogTitle);
+		getShell().setText(Messages.IncidentFilterDialog_ShellTitle);
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -105,15 +106,15 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-			Composite dateFilterExpComp = createGroupComposite("Dates", composite);
+			Composite dateFilterExpComp = createGroupComposite(Messages.IncidentFilterDialog_DatesLabel, composite);
 			dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
 
-			Composite patrolIdComp = createGroupComposite("ID", composite);
-			incidentIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE,
-					new StringFilterComposite.TextField[]{new StringFilterComposite.TextField("ID", "id")},
+			Composite incidentIdComp = createGroupComposite(Messages.IncidentFilterDialog_IdLabel, composite);
+			incidentIdFilterCmp = new StringFilterComposite(incidentIdComp, SWT.NONE,
+					new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IncidentFilterDialog_IdOptionLabel, "id")}, //$NON-NLS-1$
 					new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.EQUALS}); 
-			incidentIdFilterCmp.setIncludeAllRadioLabel("Include All");
-			incidentIdFilterCmp.setFilterRadioLabel("Filter IDs");
+			incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
+			incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
 			
 			updateControlsValues();
 		} finally {

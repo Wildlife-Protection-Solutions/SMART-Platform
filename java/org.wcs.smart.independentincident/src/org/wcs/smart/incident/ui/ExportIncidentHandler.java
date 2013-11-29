@@ -41,16 +41,17 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.IncidentExporter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Handler for exporting patrol data.
+ * Handler for exporting incident data.
  * 
  * <p>
  * Displays a dialog for users to select export location and other parameters,
- * then exports the patrol data.
+ * then exports the incident data.
  * </p>
  * 
  * @author Emily
@@ -88,14 +89,14 @@ public class ExportIncidentHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Exporting incidents", incidents.size());
+					monitor.beginTask(Messages.ExportIncidentHandler_ExportingProgress, incidents.size());
 					int exportCnt = 0;
 					for (int i = 0; i < incidents.size(); i++) {
 						if (monitor.isCanceled()) break;
 						byte[] puuid = incidents.get(i);
 						Integer id = null;
 						try {
-							monitor.subTask(MessageFormat.format("Loading incident {0}",new Object[]{ SmartUtils.encodeHex(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_IncidentProgress,new Object[]{ SmartUtils.encodeHex(puuid)}));
 							Waypoint wp = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -104,34 +105,34 @@ public class ExportIncidentHandler extends AbstractHandler {
 								wp = (Waypoint) s.load(Waypoint.class, puuid);
 								id = wp.getId();
 							} catch (Exception ex) {
-								IncidentPlugIn.displayLog(MessageFormat.format("Could not find incident {0}", new Object[]{SmartUtils.encodeHex(puuid)}), ex);
+								IncidentPlugIn.displayLog(MessageFormat.format(Messages.ExportIncidentHandler_IncidentNotFound, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
 								s.close();
 							}
 
-							monitor.subTask(MessageFormat.format("Exporting incident {0}",new Object[]{ String.valueOf(id) }));
+							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_ExportingIncidentProgress,new Object[]{ String.valueOf(id) }));
 
 							File outFile = IncidentExporter.getOutputFile(dir, String.valueOf(wp.getId()), includeAtt);
 							IncidentExporter.exportIncident(wp, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							IncidentPlugIn.displayLog(MessageFormat.format("Error exporting patrol.  Skipping ID {0}." , new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							IncidentPlugIn.displayLog(MessageFormat.format("Error exporting incident.  Skipping ID {0}." , new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()){
-						displayInfo("Export Cancelled", MessageFormat.format("{0, number, integer} of {2, number, integer} selected incidents exported to {1}.", new Object[]{exportCnt,dir.toString(),incidents.size()}));
+						displayInfo(Messages.ExportIncidentHandler_CancelledDialogTitle, MessageFormat.format(Messages.ExportIncidentHandler_CancelledMessage, new Object[]{exportCnt,dir.toString(),incidents.size()}));
 					}else{
-						displayInfo("Export Complete", MessageFormat.format("{0, number, integer} of {2, number, integer} selected incidents exported to {1}.", new Object[]{exportCnt,dir.toString(),incidents.size()}));
+						displayInfo(Messages.ExportIncidentHandler_ComnpleteDialogTitle, MessageFormat.format(Messages.ExportIncidentHandler_CompleteMessage, new Object[]{exportCnt,dir.toString(),incidents.size()}));
 					}
 				}
 
 			});
 		} catch (Exception e) {
 			IncidentPlugIn.displayLog(
-					"Could not export incidents." + e.getLocalizedMessage(), e);
+					Messages.ExportIncidentHandler_Error + e.getLocalizedMessage(), e);
 		}
 
 		return null;

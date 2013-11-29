@@ -44,6 +44,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.IncidentImporter;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -55,7 +56,7 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class ImportIncidentHandler extends AbstractHandler {
 
-	private static final String PATROL_NOT_IMPORTED_ERROR_MSG = "Incident not imported.";
+	private static final String INCIDENT_NO_IMPORTED = Messages.ImportIncidentHandler_ImportError;
 
 
 	/**
@@ -67,9 +68,9 @@ public class ImportIncidentHandler extends AbstractHandler {
 				.getActiveWorkbenchWindow(event).getWorkbench();
 
 		XmlImportDialog dialog = new XmlImportDialog(Display.getCurrent().getActiveShell(),
-				"Import Incident Data",
-				"Import Incidents",
-				"Select the incident file(s) to import.");
+				Messages.ImportIncidentHandler_DialogTitle,
+				Messages.ImportIncidentHandler_DialogMessage1,
+				Messages.ImportIncidentHandler_DialogMessage2);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}
@@ -80,7 +81,7 @@ public class ImportIncidentHandler extends AbstractHandler {
 			File file = new File(files.get(0));
 			if (!file.exists()) {
 				MessageDialog.openError(Display.getCurrent().getActiveShell(),
-						"Error", MessageFormat.format("The location {0} cannot be found",  new Object[]{file.toString()}));
+						Messages.ImportIncidentHandler_ErrorDialog, MessageFormat.format(Messages.ImportIncidentHandler_LocationNotFoundError,  new Object[]{file.toString()}));
 				return null;
 			}			
 			importFiles(activeWorkbench, files);
@@ -115,12 +116,12 @@ public class ImportIncidentHandler extends AbstractHandler {
 					});
 					
 					
-					monitor.beginTask("Loading Incidents", files.size());
+					monitor.beginTask(Messages.ImportIncidentHandler_LoadingProgress, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
 					for (int i = 0; i < files.size(); i ++){
 						File file = new File(files.get(i));
-						monitor.subTask(MessageFormat.format("Processing file {0}.", new Object[]{file.toString()}));
+						monitor.subTask(MessageFormat.format(Messages.ImportIncidentHandler_ProcessingProgress, new Object[]{file.toString()}));
 					
 						monitor.worked(1);
 						if (file.isDirectory()) continue;
@@ -130,13 +131,13 @@ public class ImportIncidentHandler extends AbstractHandler {
 								IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, wp);
 							}
 						}catch (Exception ex){
-							IncidentPlugIn.displayLog(MessageFormat.format("File {0} not imported.", new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex);
+							IncidentPlugIn.displayLog(MessageFormat.format(Messages.ImportIncidentHandler_FileError, new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex);
 						}
 						if (monitor.isCanceled()){
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), "Cancelled", "The import has been cancelled.  All incident loaded to this point will remain in the database.");									
+									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIncidentHandler_CancelledDialogTitle, Messages.ImportIncidentHandler_CancelledDialogMessage);									
 								}
 							});
 							
@@ -147,7 +148,7 @@ public class ImportIncidentHandler extends AbstractHandler {
 			});
 		} catch (Exception e) {
 			IncidentPlugIn.displayLog(
-					PATROL_NOT_IMPORTED_ERROR_MSG + e.getLocalizedMessage(), e);
+					INCIDENT_NO_IMPORTED + e.getLocalizedMessage(), e);
 		}
 	}
 }
