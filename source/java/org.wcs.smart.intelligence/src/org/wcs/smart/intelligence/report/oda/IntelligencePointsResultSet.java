@@ -157,7 +157,12 @@ public class IntelligencePointsResultSet implements IResultSet {
 	 * @return
 	 */
 	private Object getCurrentItem(int colIndex) {
-//		IntelligencePoint pt = points.get(currentRow);
+		IntelligencePoint pt = points.get(currentRow);
+		
+		switch (colIndex) {
+			case 1: return pt.getX();
+			case 2: return pt.getY();
+		}
 		return ""; //$NON-NLS-1$
 	}
 
