@@ -22,29 +22,22 @@
 package org.wcs.smart.incident.xml;
 
 import java.io.File;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.incident.xml.model.WaypointObservationType;
 import org.wcs.smart.incident.xml.model.WaypointType;
@@ -53,11 +46,9 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
-import org.wcs.smart.util.SmartUtils;
-
 /**
- * Converts an xml patrol file to a
- * patrol object.
+ * Converts an xml incident file to a
+ * waypoint object
  * 
  * @author Emily
  * @since 1.0.0
@@ -85,7 +76,8 @@ public class XmlToIncident {
 	}
 	
 	/**
-	 * @return the imported patrol
+	 * @return the imported waypoint
+	 *
 	 */
 	public Waypoint getImportedIncident(){
 		return incident;
@@ -93,13 +85,13 @@ public class XmlToIncident {
 	
 	
 	/**
-	 * Imports a patrol from an xml object.
+	 * Imports a waypoint from an xml object.
 	 * <p>
-	 * Use getImportedPatrol() to retrieve the imported
-	 * patrol object.
+	 * Use getImportedWaypoint() to retrieve the imported
+	 * incident object.
 	 * </p>
-	 * <p>User getWarings() to retireve any warnings
-	 * that ocurred during the import process.
+	 * <p>User getWarings() to retrieve any warnings
+	 * that occurred during the import process.
 	 * </p> 
 	 * @param xml
 	 * @param session
@@ -136,7 +128,7 @@ public class XmlToIncident {
 					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
 					if (!f.exists()){
 						warnings.add(MessageFormat.format(
-								"Attachment {0} will not be imported.  File not found ''{1}''", new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.getAbsolutePath()}));
 								
 					}else{
 						att.setCopyFromLocation(f);
@@ -174,7 +166,7 @@ public class XmlToIncident {
 					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
 					if (!f.exists()){
 						warnings.add(MessageFormat.format(
-								"Attachment {0} will not be imported.  File not found ''{1}''", new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.getAbsolutePath()}));
 								
 					}else{
 						att.setCopyFromLocation(f);
@@ -189,7 +181,7 @@ public class XmlToIncident {
 		
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
-			warnings.add(MessageFormat.format("Observation category {0} for waypoint could not be found. These observations will not be imported.",
+			warnings.add(MessageFormat.format(Messages.XmlToIncident_CategoryNotFound,
 					new Object[]{xml.getCategoryKey()}) 
 					);
 			return null;
@@ -211,12 +203,12 @@ public class XmlToIncident {
 						ob.getAttributes().add(attribute);
 					}else{
 						warnings.add(
-								MessageFormat.format("An observation has more than one value for the attribute {0}.  Only a single value can exist for each attribute within a given observation; only the first will be used all others will be ignored.",
+								MessageFormat.format(Messages.XmlToIncident_MultpleAttributeValues,
 										new Object[]{attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
-					warnings.add("Not all data imported.  See previous warnings.");					
+					warnings.add(Messages.XmlToIncident_DataError);					
 				}
 			}
 		}
@@ -231,7 +223,7 @@ public class XmlToIncident {
 		
 		Attribute dmAttribute = findAttribute(type.getAttributeKey(), parent.getCategory());
 		if (dmAttribute == null){
-			warnings.add(MessageFormat.format("Attribute {0} could not be found for category {1}.  Attribute data will not be imported.",
+			warnings.add(MessageFormat.format(Messages.XmlToIncident_AttributeNotFound,
 					new Object[]{type.getAttributeKey(), parent.getCategory().getHkey()}));
 			return null;
 		}else{
@@ -245,36 +237,36 @@ public class XmlToIncident {
 				
 			}else if (dmAttribute.getType() == AttributeType.NUMERIC){
 				if (type.getDValue() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no double value. Attribute data will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_DoubleValueNotFound, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setNumberValue(type.getDValue());
 			}else if (dmAttribute.getType() == AttributeType.TEXT){
 				if (type.getSValue() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no string value. Attribute data will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_StringValueNotFound, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());	
 				
 			}else if (dmAttribute.getType() == AttributeType.LIST){
 				if (type.getItemKey() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no value. Attribute data will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_NoValueFound, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
 				AttributeListItem item = findAttributeListItem(type.getItemKey(), dmAttribute);
 				if (item == null){
-					warnings.add(MessageFormat.format("No list item with key {0} for attribute {1}.  Attribute data will not be imported.", new Object[]{type.getItemKey(),type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_ListValueNotFound, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}	
 				attribute.setAttributeListItem(item);
 			}else if (dmAttribute.getType() == AttributeType.TREE){
 				if (type.getItemKey() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no value. Attribute data will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_NoValueFound, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
 				AttributeTreeNode item = findAttributeTreeItem(type.getItemKey(), dmAttribute);
 				if (item == null){
-					warnings.add(MessageFormat.format("No tree item with key {0} for attribute {1}.  Attribute data will not be imported.", new Object[]{type.getItemKey(),type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_TreeNodeNotFound, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setAttributeTreeNode(item);
@@ -328,7 +320,7 @@ public class XmlToIncident {
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			throw new IllegalStateException("There should never be more than one attribute with the same key. Please review the data model.");
+			throw new IllegalStateException(Messages.XmlToIncident_TooManyAttributes);
 		}else{
 			Attribute att = (Attribute) results.get(0);
 			//ensure attribute exists for category

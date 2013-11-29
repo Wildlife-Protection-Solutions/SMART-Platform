@@ -52,6 +52,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointType;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
@@ -64,7 +65,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class IncidentImporter {
 	
-	private static final String IMPORTING_INCIDENT_TASKNAME = "Importing Incident...";
+	private static final String IMPORTING_INCIDENT_TASKNAME = Messages.IncidentImporter_ImportingTaskName;
 
 
 	/**
@@ -98,17 +99,17 @@ public class IncidentImporter {
 		
 		WaypointType waypointtype = null;
 		//unzip 
-		monitor.subTask("Processing zip file");
+		monitor.subTask(Messages.IncidentImporter_ProcessingzipFile);
 		File directory = unzip(zipFile);
 		if (directory == null || !directory.isDirectory()){
-			throw new Exception (MessageFormat.format("Error unzipping file {0}", new Object[]{ zipFile.getAbsoluteFile()}));
+			throw new Exception (MessageFormat.format(Messages.IncidentImporter_ErrorUnzipping, new Object[]{ zipFile.getAbsoluteFile()}));
 		}
 		monitor.worked(1);
 		
 		//file xml file
 		String[] files = directory.list();
 		
-		monitor.subTask("Reading xml file.");
+		monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 		for (int i = 0; i < files.length; i ++){
 			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 			if (f.isFile()){
@@ -135,13 +136,13 @@ public class IncidentImporter {
 			}catch (Exception ex){
 				IncidentPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
-			throw new Exception ("Incident xml file not found in zip file.");
+			throw new Exception (Messages.IncidentImporter_XmlNotFound);
 		}
 		monitor.worked(1);
 		
 		Waypoint p = convertAndSave(waypointtype, directory, monitor);
 		
-		monitor.subTask("Removing temporary files.");
+		monitor.subTask(Messages.IncidentImporter_RemoveTempFiles);
 		try{
 			FileUtils.deleteDirectory(directory);
 		}catch (Exception ex){
@@ -161,14 +162,14 @@ public class IncidentImporter {
 		WaypointType waypointtype = null;
 		FileInputStream in = new FileInputStream(xmlFile);
 		try{
-			monitor.subTask("Reading xml file");
+			monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 			waypointtype = IncidentXmlManager.readIncident(in);
 			monitor.worked(1);
 		}finally{
 			in.close();
 		}
 		if (waypointtype == null){
-			throw new Exception("Error reading xml incident.  Please ensure valid incident xml file.");
+			throw new Exception(Messages.IncidentImporter_XmlIncidentNotFound);
 		}
 		return convertAndSave(waypointtype, null, monitor);
 	}
@@ -192,13 +193,13 @@ public class IncidentImporter {
 		XmlToIncident converter = new XmlToIncident();
 		Session session = HibernateManager.openSession(new AttachmentInterceptor());
 		try {
-			monitor.subTask("Validating");
+			monitor.subTask(Messages.IncidentImporter_ValidatingProgress);
 			//check if a incident in the database with the given patorl id already exists
 			if (xmlIncident.getId() != null){
 				Criteria c = session.createCriteria(Waypoint.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-						.add(Restrictions.eq("id", xmlIncident.getId()))
-						.add(Restrictions.eq("sourceId", IndepedentIncidentSource.KEY))
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+						.add(Restrictions.eq("id", xmlIncident.getId())) //$NON-NLS-1$
+						.add(Restrictions.eq("sourceId", IndepedentIncidentSource.KEY)) //$NON-NLS-1$
 						.setProjection(Projections.rowCount()); 
 				Long cnt = (Long)c.uniqueResult();
 				if (cnt > 0){
@@ -208,10 +209,10 @@ public class IncidentImporter {
 
 						@Override
 						public void run() {
-							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Import Incident", 
+							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.IncidentImporter_ImportDialogTitle, 
 									null,
 									MessageFormat.format(
-											"The database already contains an incident with the id ''{0}'' provided in the file.  If you continue a new incident with the same ID will be generated, potentially duplicating data.\n\nDo you want to continue with the import?",new Object[]{String.valueOf(pid)}),
+											Messages.IncidentImporter_IdDuplicated,new Object[]{String.valueOf(pid)}),
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 1){
@@ -227,7 +228,7 @@ public class IncidentImporter {
 					}
 				}
 			}		
-			monitor.subTask("Converting");
+			monitor.subTask(Messages.IncidentImporter_ConvertingProgress);
 			converter.fromXml(xmlIncident, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 		} finally {
 			if (session.isOpen()){
@@ -253,8 +254,8 @@ public class IncidentImporter {
 				public void run() {
 					ConfirmInputDialog dialog = new ConfirmInputDialog(
 							Display.getDefault().getActiveShell(),
-							"Incident Import",
-							"Some data could not be imported.  The following list identifies the problems the occurred while importing the incident data.  If you continue the data identified below will not be imported.  Would you like to continue with the import?",
+							Messages.IncidentImporter_OkDialogTitle,
+							Messages.IncidentImporter_ErrorMessage,
 							message, null);
 					if (dialog.open() != ConfirmInputDialog.OK){
 						cont[0] = false;
@@ -269,7 +270,7 @@ public class IncidentImporter {
 		}
 		
 		//performing actual save in database
-		monitor.subTask("Saving");
+		monitor.subTask(Messages.IncidentImporter_SavingProgress);
 		Waypoint imported = converter.getImportedIncident();
 		if (imported == null)
 			return null;
@@ -280,7 +281,7 @@ public class IncidentImporter {
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			IncidentPlugIn.displayLog("Could not save incident." + ex.getLocalizedMessage(), ex);
+			IncidentPlugIn.displayLog(Messages.IncidentImporter_saveError + ex.getLocalizedMessage(), ex);
 			return null;
 		}finally{
 			session.close();

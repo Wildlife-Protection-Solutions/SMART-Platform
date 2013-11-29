@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
@@ -8,7 +29,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.internal.Messages;
 
+/**
+ * Editor input for incident objects.  Tracks
+ * the uuid, id and datetime.
+ * 
+ * @author Emily
+ *
+ */
 public class IncidentEditorInput implements IEditorInput {
 
 	private int id;
@@ -83,7 +112,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
-		return MessageFormat.format("Independent Incident {0}", new Object[]{String.valueOf(id)});
+		return MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(id)});
 	}
 
 	/**
@@ -99,7 +128,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return MessageFormat.format("edit incident data for id {0}", new Object[]{ id});
+		return MessageFormat.format(Messages.IncidentEditorInput_EditorTooltip, new Object[]{ id});
 	}
 
 	public int hashCode() {

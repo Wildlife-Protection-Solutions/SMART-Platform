@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
@@ -17,9 +38,15 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 
+/**
+ * Delete incident handler.
+ * @author Emily
+ *
+ */
 public class DeleteIncidentHandler extends AbstractHandler{
 
 	@Override
@@ -45,22 +72,22 @@ public class DeleteIncidentHandler extends AbstractHandler{
 			//nothing to delete
 			return null;
 		}
-		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm", MessageFormat.format("Are you sure you want to delete the {0} selected incidents? This action cannot be undone", new Object[]{toDelete.size()}))){
+		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteIncidentHandler_ConfirmLabel, MessageFormat.format(Messages.DeleteIncidentHandler_ConfirmMessage, new Object[]{toDelete.size()}))){
 			return null;
 		}
 				
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			Query q=s.createQuery("delete Waypoint w where w.uuid = :wp");
+			Query q=s.createQuery("delete Waypoint w where w.uuid = :wp"); //$NON-NLS-1$
 			for (IncidentEditorInput w : toDelete){
-				q.setParameter("wp", w.getUuid());
+				q.setParameter("wp", w.getUuid()); //$NON-NLS-1$
 				q.executeUpdate();
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			IncidentPlugIn.displayLog("Error deleteing incidents. " + ex.getMessage(), ex);
+			IncidentPlugIn.displayLog(Messages.DeleteIncidentHandler_Error1 + ex.getMessage(), ex);
 		}
 		
 		//fire events
@@ -72,7 +99,7 @@ public class DeleteIncidentHandler extends AbstractHandler{
 				tmp.setUuid(w.getUuid());
 				WaypointEventManager.getInstance().waypointDeleted(tmp);
 			}catch (Exception ex){
-				IncidentPlugIn.displayLog("Error occurred. " +ex.getMessage(), ex);
+				IncidentPlugIn.displayLog(Messages.DeleteIncidentHandler_Error2 +ex.getMessage(), ex);
 			}
 		}
 	

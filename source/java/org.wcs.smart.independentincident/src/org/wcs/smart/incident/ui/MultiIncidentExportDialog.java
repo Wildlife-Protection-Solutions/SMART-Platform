@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui;
 
 import java.io.File;
@@ -23,12 +44,13 @@ import org.wcs.smart.common.control.XmlMultiExportDialog;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Dialog to allow users to export multiple patrols at once.
+ * Dialog to allow users to export multiple incidents at once.
  * 
- * This code performs validation to ensure at least one patrol is selected
+ * This code performs validation to ensure at least one incident is selected
  * and that the output directory is a valid directory.
  * 
  * @author egouge
@@ -38,9 +60,10 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
-	private static final String EXPORT_DIALOGTITLE = "Export Incidents";
+	private static final String EXPORT_DIALOGTITLE = "Export Incidents"; //$NON-NLS-1$
 
-	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog"); //$NON-NLS-1$
+	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.incident.export.dialog"); //$NON-NLS-1$
+	
 	static{
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
@@ -51,17 +74,17 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 	 * Creates a new dialog.
 	 * 
 	 * @param parentShell parent shell
-	 * @param patrol patrol to export
+	 * @param incident incident to export
 	 */
 	public MultiIncidentExportDialog(Shell parentShell) {
-		super(parentShell, "The incidents below have been filtered.  Click <a>here</a> to change filter.");
+		super(parentShell, Messages.MultiIncidentExportDialog_ChangeFilter);
 		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		setTitle(EXPORT_DIALOGTITLE);
-		setMessage("Export selected incidents to file.");
+		setMessage(Messages.MultiIncidentExportDialog_ExportOk);
 		getShell().setText(EXPORT_DIALOGTITLE);
 		return super.createDialogArea(parent);
 	}
@@ -82,21 +105,21 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 	private boolean validate(){
 		
 		if (super.getTableViewer().getCheckedElements().length == 0) {
-			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, "Nothing to export.");
+			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, Messages.MultiIncidentExportDialog_NothingToExport);
 			return false;
 		}
 		
 		File dir = new File(txtFile.getText());
 		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format("The directory {0} does not exist and will be created.  Do you want to continue?", new Object[]{dir.getAbsolutePath()}))) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.MultiIncidentExportDialog_DirectoryNotFound, new Object[]{dir.getAbsolutePath()}))) {
 				return false;
 			}
 			if (!SmartUtils.createDirectory(dir)){
-				IncidentPlugIn.displayLog("Could not create directory.", null);
+				IncidentPlugIn.displayLog(Messages.MultiIncidentExportDialog_CouldNotCreateDirector, null);
 				return false;
 			}
 		}else if (!dir.isDirectory()){
-			IncidentPlugIn.displayLog(MessageFormat.format("{0} is not a valid directory.", new Object[]{dir.toString()}),null);
+			IncidentPlugIn.displayLog(MessageFormat.format(Messages.MultiIncidentExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
 			return false;
 		}
 		return true;
@@ -120,7 +143,7 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 
 	@Override
 	protected void loadObjectData() {
-		Job loadPatrols = new Job("Loading Incidents..."){
+		Job loadIncidents = new Job(Messages.MultiIncidentExportDialog_Loading){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
@@ -133,7 +156,7 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 					for(Object x : results){
 						Object[] row = (Object[])x;
 						
-						String pname = row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						String pname = row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$
 						Object[] thisdata = {pname, (byte[])row[0], row[1]};
 						data[counter++] = thisdata;
 					}
@@ -156,7 +179,7 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 			}
 			
 		};
-		loadPatrols.schedule();
+		loadIncidents.schedule();
 		
 	}
 

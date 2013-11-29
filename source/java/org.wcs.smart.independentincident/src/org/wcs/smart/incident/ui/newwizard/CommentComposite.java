@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui.newwizard;
 
 import org.eclipse.swt.SWT;
@@ -9,11 +30,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 
+/**
+ * Incident comment field
+ * @author Emily
+ *
+ */
 public class CommentComposite extends AbstractIncidentComposite {
 
-	public static final String ID = "incident.comment";
+	public static final String ID = "incident.comment"; //$NON-NLS-1$
 	
 	private Text txtComment;
 	
@@ -28,7 +55,7 @@ public class CommentComposite extends AbstractIncidentComposite {
 		item.setLayout(new GridLayout(1, false));
 		
 		Label l = new Label(item, SWT.NONE);
-		l.setText("Comments:");
+		l.setText(Messages.CommentComposite_Label);
 		
 		txtComment = new Text(item, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 		txtComment.addListener(SWT.Modify, new Listener() {
@@ -57,7 +84,7 @@ public class CommentComposite extends AbstractIncidentComposite {
 	@Override
 	public void initFields(Waypoint incident, Session session) {
 		if (incident.getComment()== null){
-			txtComment.setText("");
+			txtComment.setText(""); //$NON-NLS-1$
 		}else{
 			txtComment.setText(incident.getComment());
 		}
@@ -65,12 +92,12 @@ public class CommentComposite extends AbstractIncidentComposite {
 
 	@Override
 	public String getName() {
-		return "Comments";
+		return Messages.CommentComposite_Name;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Additional comments about the incident";
+		return Messages.CommentComposite_Description;
 	}
 
 }

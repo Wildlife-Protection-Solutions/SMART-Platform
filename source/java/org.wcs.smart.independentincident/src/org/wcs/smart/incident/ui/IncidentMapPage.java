@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui;
 
 import java.io.IOException;
@@ -27,6 +48,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.style.Style;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -35,6 +57,11 @@ import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Incident editor map page
+ * @author Emily
+ *
+ */
 public class IncidentMapPage extends SmartMapEditorPart {
 
 	private IncidentEditor parent;
@@ -48,6 +75,10 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private IGeoResource pointResource;
 	private String styleSld = null;
 	
+	/**
+	 * Creates a new map page
+	 * @param e parent editor
+	 */
 	public IncidentMapPage(IncidentEditor e){
 		this.parent = e;
 	}
@@ -71,7 +102,9 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		updatePointsLayer();
 	}
 
-	
+	/**
+	 * Creates the incident layer
+	 */
 	private void addPointsLayer() {
         try {
 			featureType = DataUtilities.createType(SMART_POINT_TYPE_NAME, SMART_POINT_SPEC);
@@ -104,7 +137,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					super.run(monitor);
 					//set custom style for points layer
 					Layer pointLayerEx = getLayers().get(0);
-					pointLayerEx.setName("Independent Incident");
+					pointLayerEx.setName(Messages.IncidentMapPage_MapLayerName);
 					String sld = getStylingConfig();
 					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
 					SLDContent c = new SLDContent();
@@ -116,11 +149,14 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			getMap().sendCommandASync(command);
 			
         } catch (Exception exception) {
-			IncidentPlugIn.displayLog("Failed to add incident layer to map.", exception);
+			IncidentPlugIn.displayLog(Messages.IncidentMapPage_Error1, exception);
 		}
 		
 	}
 
+	/**
+	 * Updates the incident layer
+	 */
 	public void updatePointsLayer() {
 		if (store == null) {
 			return; //most likely we failed to add points layer
@@ -133,7 +169,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			
 			
 		} catch (IOException e) {
-			IncidentPlugIn.displayLog("Failed to update incident on map.", e);
+			IncidentPlugIn.displayLog(Messages.IncidentMapPage_Error2, e);
 		}
 		//refresh map - only refresh point layer 
 		if (pointLayer == null){
@@ -150,7 +186,11 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	}
 	
 	
-
+	/**
+	 * Creates a feature from the incident
+	 * @param ftype
+	 * @return
+	 */
 	private SimpleFeature createIncidentFeature(SimpleFeatureType ftype) {
 		Waypoint incident = parent.getIncident();
 		Object data[] = new Object[3];
@@ -163,6 +203,10 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	}
 
 	
+	/**
+	 * Default style for the layer
+	 * @return
+	 */
 	private String getStylingConfig() {
 		if (styleSld != null){
 			return styleSld;

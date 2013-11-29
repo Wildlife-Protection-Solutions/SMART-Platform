@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui.newwizard;
 
 import java.util.List;
@@ -27,14 +48,20 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Incident location composite.
+ * @author Emily
+ *
+ */
 public class LocationComposite extends AbstractIncidentComposite {
 
-	public static final String ID = "incident.location";
+	public static final String ID = "incident.location"; //$NON-NLS-1$
 	
 	private ComboViewer cmbProjection;
 	private Text txtX;
@@ -43,29 +70,29 @@ public class LocationComposite extends AbstractIncidentComposite {
 	@Override
 	public String validate() {
 		if (txtX.getText().trim().isEmpty()){
-			return "X coordinate must be provided.";
+			return Messages.LocationComposite_XRequired;
 		}
 		if (txtY.getText().trim().isEmpty()){
-			return "Y coordinate must be provided.";
+			return Messages.LocationComposite_YRequired;
 		}
 		try{
 			Double.parseDouble(txtX.getText());
 		}catch (Exception ex){
-			return "X value must be a valid number.";
+			return Messages.LocationComposite_XNumberRequired;
 		}
 		try{
 			Double.parseDouble(txtY.getText());
 		}catch (Exception ex){
-			return "Y value must be a valid number.";
+			return Messages.LocationComposite_YNumberRequired;
 		}
 		
 		double x = Double.parseDouble(txtX.getText());
 		double y = Double.parseDouble(txtY.getText());
 		Projection proj = (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
 		try{
-			Coordinate z = ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+			ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
 		}catch (Exception ex){
-			return "Coordinates are not valid. " + ex.getMessage();
+			return Messages.LocationComposite_CoordinatesNotValid + ex.getMessage();
 		}
 		return null;
 	}
@@ -76,7 +103,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 		item.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(item, SWT.NONE);
-		l.setText("Projection:");
+		l.setText(Messages.LocationComposite_ProjectionLabel);
 		cmbProjection = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
 		cmbProjection.setLabelProvider(new LabelProvider(){
@@ -96,7 +123,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 		});
 		
 		l = new Label(item, SWT.NONE);
-		l.setText("X:");
+		l.setText(Messages.LocationComposite_xLabel);
 		txtX = new Text(item, SWT.BORDER);
 		txtX.addListener(SWT.Modify, new Listener() {
 			@Override
@@ -107,7 +134,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 		txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(item, SWT.NONE);
-		l.setText("Y:");
+		l.setText(Messages.LocationComposite_yLabel);
 		txtY = new Text(item, SWT.BORDER);
 		txtY.addListener(SWT.Modify, new Listener() {
 			@Override
@@ -118,7 +145,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Link lnkMap  = new Link(item, SWT.NONE);
-		lnkMap.setText("<a>" + "Select on Map ..." + "</a>");
+		lnkMap.setText("<a>" + Messages.LocationComposite_SelectOnMap + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkMap.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -140,7 +167,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 			incident.setY(z.y);
 		}catch (Exception ex){
 			//this error should be caught in the validate function
-			IncidentPlugIn.log("Could not re-project coordinate to database CRS", ex);
+			IncidentPlugIn.log(Messages.LocationComposite_Error1, ex);
 		}
 	}
 
@@ -157,7 +184,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 						break;
 					}
 				}catch (Exception ex){
-					IncidentPlugIn.log("Error parsing projection info", ex);
+					IncidentPlugIn.log(Messages.LocationComposite_Error2, ex);
 				}
 			}
 			if (defaultp == null){
@@ -177,12 +204,12 @@ public class LocationComposite extends AbstractIncidentComposite {
 	
 	@Override
 	public String getName() {
-		return "Location";
+		return Messages.LocationComposite_Name;
 	}
 
 	@Override
 	public String getDescription() {
-		return "The incident location. A single point must be selected.";
+		return Messages.LocationComposite_Description;
 	}
 
 	
@@ -202,7 +229,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 							break;
 						}
 					}catch (Exception ex){
-						IncidentPlugIn.log("Error parsing projection info", ex);
+						IncidentPlugIn.log(Messages.LocationComposite_Error3, ex);
 					}
 				}
 				cmbProjection.setSelection(new StructuredSelection(defaultp));

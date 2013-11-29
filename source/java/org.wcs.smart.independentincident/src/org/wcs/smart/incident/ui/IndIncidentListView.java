@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.ui;
 
 import java.text.DateFormat;
@@ -33,20 +54,25 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.incident.internal.Messages;
 
+/**
+ * Incident list view.
+ * @author Emily
+ *
+ */
 public class IndIncidentListView extends ViewPart implements IIncidentFilteringView {
 
-	public static final String ID = "org.wcs.smart.observation.ui.incidientView";
+	public static final String ID = "org.wcs.smart.observation.ui.incidientView"; //$NON-NLS-1$
 	
 	private TableViewer incidentListViewer;
 	private IncidentFilter filter = new IncidentFilter();
 	
-	private Object[] loadingInput = new Object[]{"Loading..."};
+	private Object[] loadingInput = new Object[]{Messages.IndIncidentListView_LoadingLabel};
 	
 	
 	private IPartListener2 partListener = new IPartListener2() {
@@ -102,10 +128,10 @@ public class IndIncidentListView extends ViewPart implements IIncidentFilteringV
 	/*
 	 * Job that updates the patrol list based on the current filter
 	 */
-	private Job updateJob = new Job("Update Incident List View") {
+	private Job updateJob = new Job(Messages.IndIncidentListView_UpdateJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Loading...", 1);
+			monitor.beginTask(Messages.IndIncidentListView_LoadingLabel, 1);
 
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
@@ -187,7 +213,7 @@ public class IndIncidentListView extends ViewPart implements IIncidentFilteringV
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IncidentEditorInput){
-					return ((IncidentEditorInput)element).getId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((IncidentEditorInput)element).getDateTime()) + "]";
+					return ((IncidentEditorInput)element).getId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((IncidentEditorInput)element).getDateTime()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}
