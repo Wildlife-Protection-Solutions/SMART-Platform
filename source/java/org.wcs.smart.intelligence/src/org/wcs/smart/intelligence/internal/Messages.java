@@ -368,6 +368,14 @@ public class Messages extends NLS {
 
 	public static String ReportedIntelligenceContribution_Open_Button;
 
+	public static String RevertIntelligenceTemplateHandler_CannotRevert_Error;
+
+	public static String RevertIntelligenceTemplateHandler_ConfirmDialog_Message;
+
+	public static String RevertIntelligenceTemplateHandler_ConfirmDialog_Title;
+
+	public static String RevertIntelligenceTemplateHandler_Error;
+
 	public static String ShowIntelligencePersepctiveHandler_Error;
 
 	public static String SourceTypesPropertyDialog_CannotDelete_Error;
