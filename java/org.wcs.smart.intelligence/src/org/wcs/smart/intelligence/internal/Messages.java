@@ -288,6 +288,10 @@ public class Messages extends NLS {
 
 	public static String IntelligencePlugIn_ErrorDialog_Title;
 
+	public static String IntelligencePointsResultSetMetadata_Column_X;
+
+	public static String IntelligencePointsResultSetMetadata_Column_Y;
+
     public static String IntelligenceReceived_Message;
 
     public static String IntelligenceReceived_PageTitle;
@@ -392,6 +396,8 @@ public class Messages extends NLS {
 
 	public static String ReportedIntelligenceContribution_Open_Button;
 
+	public static String ReportIntelligence_Open_Template_Error;
+
 	public static String RevertIntelligenceTemplateHandler_CannotRevert_Error;
 
 	public static String RevertIntelligenceTemplateHandler_ConfirmDialog_Message;
@@ -401,6 +407,10 @@ public class Messages extends NLS {
 	public static String RevertIntelligenceTemplateHandler_Error;
 
 	public static String ShowIntelligencePersepctiveHandler_Error;
+
+	public static String SmartIntelligenceConnection_UnsupportedDataset;
+
+	public static String SmartIntelligenceDatasetMetadata_DatasetName;
 
 	public static String SourceTypesPropertyDialog_CannotDelete_Error;
 
