@@ -25,6 +25,7 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.intelligence.internal.Messages;
 
 /**
  * SMART intelligence dataset metadata.
@@ -79,7 +80,7 @@ public class SmartIntelligenceDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceProductName()
 	 */
 	public String getDataSourceProductName() throws OdaException {
-		return "Smart Intelligence";
+		return Messages.SmartIntelligenceDatasetMetadata_DatasetName;
 	}
 
 	/*

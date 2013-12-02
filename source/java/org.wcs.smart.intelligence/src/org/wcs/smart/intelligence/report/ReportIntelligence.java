@@ -34,6 +34,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 
 
 /**
@@ -120,7 +121,7 @@ public class ReportIntelligence {
 			ReportIntelligenceEditorInput input = new ReportIntelligenceEditorInput(getCustomTemplateLocation());
 			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
-			IntelligencePlugIn.displayLog("Error opening template for editing." + "\n\n" + ex.getLocalizedMessage(), ex);
+			IntelligencePlugIn.displayLog(Messages.ReportIntelligence_Open_Template_Error + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;
 		}
 	}

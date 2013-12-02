@@ -23,6 +23,7 @@ package org.wcs.smart.intelligence.report.oda;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.intelligence.internal.Messages;
 
 /**
  * SMART intelligence location pointst result set metadata.
@@ -56,8 +57,8 @@ public class IntelligencePointsResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
 		switch(index){
-		case 1: return "X";
-		case 2: return "Y";
+		case 1: return Messages.IntelligencePointsResultSetMetadata_Column_X;
+		case 2: return Messages.IntelligencePointsResultSetMetadata_Column_Y;
 		}
 		return null;
 	}
@@ -68,8 +69,8 @@ public class IntelligencePointsResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnName(int index) throws OdaException {
 		switch(index){
-		case 1: return "X";
-		case 2: return "Y";
+		case 1: return "X"; //$NON-NLS-1$
+		case 2: return "Y"; //$NON-NLS-1$
 		}
 		return null;
 	}

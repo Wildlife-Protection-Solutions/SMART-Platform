@@ -28,6 +28,7 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.intelligence.internal.Messages;
 
 import com.ibm.icu.util.ULocale;
 
@@ -84,7 +85,7 @@ public class SmartIntelligenceConnection implements IConnection {
 			if (dataSetType.equals(IntelligencePointsQuery.ID)) {
 				return new IntelligencePointsQuery();
 			}
-			throw new OdaException(MessageFormat.format("Dataset {0} type not supported.",new Object[]{dataSetType}));
+			throw new OdaException(MessageFormat.format(Messages.SmartIntelligenceConnection_UnsupportedDataset, dataSetType));
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
