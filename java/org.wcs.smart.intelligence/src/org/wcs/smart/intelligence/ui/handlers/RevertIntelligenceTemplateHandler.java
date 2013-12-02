@@ -21,9 +21,16 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import java.io.File;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.report.IntelligenceReportPerspective;
+import org.wcs.smart.intelligence.report.ReportIntelligence;
 
 /**
  * Handler for reverting an intelligence template
@@ -35,7 +42,24 @@ public class RevertIntelligenceTemplateHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.RevertIntelligenceTemplateHandler_ConfirmDialog_Title, Messages.RevertIntelligenceTemplateHandler_ConfirmDialog_Message);
+		if (revert){
+			File customTemplate = ReportIntelligence.getCustomTemplateLocation();
+			if (customTemplate != null){
+				
+				boolean open = ReportIntelligence.closeTemplateEditor();
+
+				//delete
+				if (!ReportIntelligence.getCustomTemplateLocation().delete()){
+					MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.RevertIntelligenceTemplateHandler_Error, Messages.RevertIntelligenceTemplateHandler_CannotRevert_Error);
+				}
+				
+				//re-open
+				if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(IntelligenceReportPerspective.ID) ){
+					ReportIntelligence.editTemplate(event);
+				}
+			}
+		}
 		return null;
 	}
 

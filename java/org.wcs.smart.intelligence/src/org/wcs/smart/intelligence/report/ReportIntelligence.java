@@ -124,5 +124,19 @@ public class ReportIntelligence {
 			return;
 		}
 	}
+
+	/**
+	 * Closes the current template editor.
+	 * 
+	 * @return true if editor is open and closed, false if not open
+	 */
+	public static boolean closeTemplateEditor(){
+		if (templateEditor != null){
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(templateEditor, false);
+			templateEditor = null;
+			return true;
+		}
+		return false;
+	}
 	
 }
