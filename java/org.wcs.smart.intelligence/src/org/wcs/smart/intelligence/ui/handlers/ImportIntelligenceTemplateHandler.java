@@ -21,9 +21,22 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import java.io.File;
+import java.text.MessageFormat;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.report.IntelligenceReportPerspective;
+import org.wcs.smart.intelligence.report.ReportIntelligence;
 
 /**
  * Handler for importing an intelligence template
@@ -35,7 +48,40 @@ public class ImportIntelligenceTemplateHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		if (! MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.ImportIntelligenceTemplateHandler_ConfirmDialog_Title, Messages.ImportIntelligenceTemplateHandler_ConfirmDialog_Message)){
+			return false;
+		}
+		
+	
+		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event), SWT.OPEN);
+		fd.setFilterNames(new String[]{Messages.ImportIntelligenceTemplateHandler_ReportDesignFile, Messages.ImportIntelligenceTemplateHandler_AllFiles});
+		fd.setFilterExtensions(new String[]{"*.rptdesign", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setText(Messages.ImportIntelligenceTemplateHandler_Dialog_Title);
+		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_intelligence_template.rptdesign"); //$NON-NLS-1$
+		fd.setOverwrite(true);
+		String exportFile = fd.open();
+		if (exportFile == null){
+			return null;
+		}
+		final File inFile = new File(exportFile);
+		if (!inFile.exists()){
+			MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.ImportIntelligenceTemplateHandler_Error, MessageFormat.format(Messages.ImportIntelligenceTemplateHandler_FileNotExist_Error, exportFile));
+			return null;
+		}
+		try{
+			boolean open = ReportIntelligence.closeTemplateEditor();
+
+			File f = new File(IntelligencePlugIn.getDefault().getIntelligenceDirectory(), ReportIntelligence.INTELLIGENCE_TEMPLATE);
+			FileUtils.copyFile(inFile, f);
+
+			//re-open
+			if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(IntelligenceReportPerspective.ID) ){
+				ReportIntelligence.editTemplate(event);
+			}
+
+		}catch (Exception ex){
+			IntelligencePlugIn.displayLog(Messages.ImportIntelligenceTemplateHandler_Import_Error + ex.getMessage(), ex);
+		}
 		return null;
 	}
 

@@ -82,6 +82,14 @@ public class Messages extends NLS {
 
 	public static String ExportIntelligenceJob_Title;
 
+	public static String ExportIntelligenceTemplateHandler_AllFiles;
+
+	public static String ExportIntelligenceTemplateHandler_Dialog_Title;
+
+	public static String ExportIntelligenceTemplateHandler_ExportError;
+
+	public static String ExportIntelligenceTemplateHandler_ReportDesignFiles;
+
 	public static String ImportIntelligenceHandler_CancelInfoDialog_Message;
 
 	public static String ImportIntelligenceHandler_CancelInfoDialog_Title;
@@ -99,6 +107,22 @@ public class Messages extends NLS {
 	public static String ImportIntelligenceHandler_LoadingFile;
 
 	public static String ImportIntelligenceHandler_ProcessingFile;
+
+	public static String ImportIntelligenceTemplateHandler_AllFiles;
+
+	public static String ImportIntelligenceTemplateHandler_ConfirmDialog_Message;
+
+	public static String ImportIntelligenceTemplateHandler_ConfirmDialog_Title;
+
+	public static String ImportIntelligenceTemplateHandler_Dialog_Title;
+
+	public static String ImportIntelligenceTemplateHandler_Error;
+
+	public static String ImportIntelligenceTemplateHandler_FileNotExist_Error;
+
+	public static String ImportIntelligenceTemplateHandler_Import_Error;
+
+	public static String ImportIntelligenceTemplateHandler_ReportDesignFile;
 
 	public static String Intelligence_Creator_Label;
 

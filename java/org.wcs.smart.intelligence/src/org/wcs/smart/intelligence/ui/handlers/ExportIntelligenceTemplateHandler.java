@@ -21,9 +21,23 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.report.ReportIntelligence;
 
 /**
  * Handler for exporting an intelligence template
@@ -35,7 +49,34 @@ public class ExportIntelligenceTemplateHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event), SWT.SAVE);
+		fd.setFilterNames(new String[]{Messages.ExportIntelligenceTemplateHandler_ReportDesignFiles, Messages.ExportIntelligenceTemplateHandler_AllFiles});
+		fd.setFilterExtensions(new String[]{"*.rptdesign", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setText(Messages.ExportIntelligenceTemplateHandler_Dialog_Title);
+		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_intelligence_template.rptdesign"); //$NON-NLS-1$
+		fd.setOverwrite(true);
+		String exportFile = fd.open();
+		if (exportFile == null){
+			return null;
+		}
+		final File outFile = new File(exportFile);
+		//zip up the contents of the rptlibrary
+		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+		try{
+			outputDialog.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+					try {
+						FileUtils.copyInputStreamToFile(ReportIntelligence.getIntelligenceTemplate(), outFile);
+					} catch (Exception ex) {
+						IntelligencePlugIn.displayLog(Messages.ExportIntelligenceTemplateHandler_ExportError + ex.getMessage(), ex);
+					}	
+				}
+			});
+		}catch (Exception ex){
+			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceTemplateHandler_ExportError + ex.getMessage(), ex);
+		}
 		return null;
 	}
 
