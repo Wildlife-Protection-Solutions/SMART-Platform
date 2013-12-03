@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;

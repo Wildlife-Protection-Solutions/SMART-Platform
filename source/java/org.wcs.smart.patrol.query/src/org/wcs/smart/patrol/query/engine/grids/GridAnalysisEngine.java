@@ -34,6 +34,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;

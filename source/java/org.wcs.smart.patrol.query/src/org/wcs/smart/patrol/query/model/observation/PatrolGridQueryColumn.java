@@ -22,7 +22,7 @@
 package org.wcs.smart.patrol.query.model.observation;
 
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.GridResultItem;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 

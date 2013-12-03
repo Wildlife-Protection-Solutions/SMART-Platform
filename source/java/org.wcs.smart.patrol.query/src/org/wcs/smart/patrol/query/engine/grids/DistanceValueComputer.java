@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.query.engine.grids;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -44,7 +46,7 @@ public class DistanceValueComputer implements IValueComputer<Double> {
 	 * Computes the distance of the linestring
 	 * in the tile cell.
 	 * 
-	 * @see org.wcs.smart.patrol.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.patrol.query.engine.grids.Tile, org.wcs.smart.patrol.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.patrol.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
 	 */
 	@Override
 	public Double computeValue(Double existingValue, Tile t, Grid gridDef, LineString ls) throws Exception{

@@ -29,9 +29,9 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.ReportPlugIn;
@@ -74,12 +74,12 @@ public class PatrolReportQueryListener extends QueryListenerAdapter {
 					if (!( (savedVisible == null && origVisible == null) || (savedVisible != null && savedVisible.equals(origVisible)))){					
 						confirmSave = true;
 					}
-				}else if (savedQuery != null && savedQuery instanceof SummaryQuery){
+				}else if (savedQuery != null && savedQuery instanceof PatrolSummaryQuery){
 					confirmSave = false;
-					if (!((SummaryQuery)savedQuery).getQuery().equals( ((SummaryQuery)query).getQuery() )){
+					if (!((PatrolSummaryQuery)savedQuery).getQuery().equals( ((PatrolSummaryQuery)query).getQuery() )){
 						confirmSave = true;
 					}
-				}else if (savedQuery instanceof GriddedQuery){
+				}else if (savedQuery instanceof PatrolGriddedQuery){
 					confirmSave = false;
 				}
 				if (confirmSave){

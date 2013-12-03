@@ -30,16 +30,16 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
-import org.wcs.smart.patrol.query.ui.editor.GriddedEditor;
+import org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -65,7 +65,7 @@ public class PatrolGridQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return GriddedQuery.class;
+		return PatrolGriddedQuery.class;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class PatrolGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getEditorId() {
-		return GriddedEditor.ID;
+		return PatrolGriddedEditor.ID;
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class PatrolGridQueryType implements IQueryType {
 	@Override
 	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
 	
-		GriddedQuery summary = (GriddedQuery)query;
+		PatrolGriddedQuery summary = (PatrolGriddedQuery)query;
 		
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$

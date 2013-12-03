@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.engine.visitors;
 
-import org.wcs.smart.patrol.query.parser.internal.summary.AttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.CategoryValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.summary.IValueItem;
 
@@ -40,11 +40,11 @@ public class HasObservationValueVisitor implements IValueVisitor{
 	@Override
 	public void visit(IValueItem item) {
 		if (hasCategory && hasAttribute) return;
-		if (item instanceof CategoryValueItem){
+		if (item instanceof PatrolCategoryValueItem){
 			hasCategory = true;
-		}else if (item instanceof AttributeValueItem){
+		}else if (item instanceof PatrolAttributeValueItem){
 			hasAttribute = true;
-			if (((AttributeValueItem) item).getCategoryKey() != null){
+			if (((PatrolAttributeValueItem) item).getCategoryKey() != null){
 				hasCategory = true;
 			}
 		}		

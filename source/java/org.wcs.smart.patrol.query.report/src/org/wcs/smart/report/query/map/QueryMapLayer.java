@@ -36,15 +36,15 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.patrol.query.model.GridResultItem;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -137,8 +137,8 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 			if (q instanceof SimpleQuery) {
 				((SimpleQuery) q).setDateFilter(dateFilter);
 				q.executeQuery(new NullProgressMonitor());
-			} else if (q instanceof GriddedQuery ){
-				((GriddedQuery)q).setDateFilter(dateFilter);
+			} else if (q instanceof PatrolGriddedQuery ){
+				((PatrolGriddedQuery)q).setDateFilter(dateFilter);
 				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor());
 				if (data.size() <= 0){
 					add = false;

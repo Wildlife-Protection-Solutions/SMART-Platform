@@ -60,6 +60,7 @@ import org.wcs.smart.patrol.query.ui.itempanel.QueryFilterContentProvider;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -361,7 +362,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			proxy.setDropItems(SimplePatrolFilterPanel.ID, asDropItems(queryFilter, session));
 					
 		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
-			SummaryQuery q = (SummaryQuery) proxy.getQuery();
+			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
 			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
@@ -375,7 +376,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 					def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
 			
 		}else if(proxy.getQuery().getType().getClass().equals(PatrolGridQueryType.class)){
-			GriddedQuery q = (GriddedQuery) proxy.getQuery();
+			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();
 			GridQueryDefinition def = q.getQueryDefinition();
 			
 			

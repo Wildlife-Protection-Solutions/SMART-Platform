@@ -24,6 +24,9 @@ package org.wcs.smart.patrol.query.engine.grids;
 import java.util.HashMap;
 import java.util.List;
 
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+
 import com.vividsolutions.jts.algorithm.RobustLineIntersector;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;

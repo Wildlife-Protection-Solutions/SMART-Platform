@@ -115,22 +115,19 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.patrol.query.model.SummaryQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolSummaryQuery">
       </class>
       <class
             class="org.wcs.smart.patrol.query.model.PatrolQuery">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.SimpleQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolGriddedQuery">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.GriddedQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolWaypointQuery">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.WaypointQuery">
-      </class>
-      <class
-            class="org.wcs.smart.patrol.query.model.ObservationQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolObservationQuery">
       </class>
    </extension>
    <extension
@@ -166,14 +163,14 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.patrol.query.ui.editor.QueryResultsEditor"
+            class="org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor"
             default="false"
             icon="images/icons/obj16/observation_query.png"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
             name="%observationqueryeditor.editor.name">
       </editor>
       <editor
-            class="org.wcs.smart.patrol.query.ui.editor.SummaryEditor"
+            class="org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor"
             default="false"
             icon="images/icons/obj16/summary_query.png"
             id="org.wcs.smart.query.ui.SummaryEditor"
@@ -187,7 +184,7 @@
             name="%patrolqueryeditor.editor.name">
       </editor>
       <editor
-            class="org.wcs.smart.patrol.query.ui.editor.GriddedEditor"
+            class="org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor"
             default="false"
             icon="images/icons/obj16/gridded_query.png"
             id="org.wcs.smart.query.ui.GriddedEditor"

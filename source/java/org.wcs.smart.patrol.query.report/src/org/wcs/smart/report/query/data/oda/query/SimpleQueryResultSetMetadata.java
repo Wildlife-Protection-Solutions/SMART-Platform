@@ -28,8 +28,8 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartDriver;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -57,7 +57,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 	}
 	
-	public SimpleQueryResultSetMetadata(GriddedQuery query){
+	public SimpleQueryResultSetMetadata(PatrolGriddedQuery query){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		for (QueryColumn col : query.getQueryColumns()){
 			if (col.isVisible()){

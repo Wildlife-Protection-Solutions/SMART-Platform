@@ -1,5 +1,8 @@
 package org.wcs.smart.patrol.query.engine.grids;
 
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+
 import com.vividsolutions.jts.geom.LineString;
 
 public class ExistsValueComputer implements IValueComputer<Boolean> {

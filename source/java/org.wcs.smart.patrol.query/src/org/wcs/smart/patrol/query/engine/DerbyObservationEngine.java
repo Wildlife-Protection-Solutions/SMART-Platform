@@ -47,8 +47,8 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.model.SimpleQuery;
 
 /**
  * Query engine for executing lazy queries using derby.

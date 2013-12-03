@@ -27,7 +27,7 @@ import java.util.HashMap;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
@@ -73,7 +73,7 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
-		GriddedQuery griddedQuery = PatrolQueryFactory.createGriddedQuery();
+		PatrolGriddedQuery griddedQuery = PatrolQueryFactory.createGriddedQuery();
 		
 		QueryImportEngine.importNames(griddedQuery, qt);
 		

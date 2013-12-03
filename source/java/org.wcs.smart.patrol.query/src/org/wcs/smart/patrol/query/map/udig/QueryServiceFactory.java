@@ -23,9 +23,10 @@ package org.wcs.smart.patrol.query.map.udig;
 
 import net.refractions.udig.catalog.IService;
 
-import org.wcs.smart.patrol.query.model.GriddedQuery;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -49,7 +50,7 @@ public class QueryServiceFactory {
 		if (query instanceof SimpleQuery){
 			return new QueryService((SimpleQuery)query);
 		}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
-			return new RasterService((GriddedQuery)query);
+			return new RasterService((PatrolGriddedQuery)query);
 		}
 		return null;
 	}

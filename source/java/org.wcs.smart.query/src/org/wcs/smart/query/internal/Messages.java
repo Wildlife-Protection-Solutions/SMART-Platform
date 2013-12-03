@@ -28,6 +28,9 @@ public class Messages extends NLS {
 	public static String AttributeTreeGroupByDropItem_FiltersLink;
 	public static String AttributeTreeGroupByDropItem_IncludedLabel;
 	public static String AttributeTreeGroupByDropItem_TreeLevelLabel;
+	public static String AttributeValueDropItem_NoAggregationOptionFound;
+	public static String AttributeValueItem_InvalidTreeorItemNode;
+	public static String AttributeValueItem_NonNumericAttributeInvalid;
 	public static String CaDataModelManagerImpl_LoadDataModelJobName;
 	public static String CategoryAttributeFilter_MissingCategoryAttribute;
 	public static String CategoryFilter_CategoryNotFound;

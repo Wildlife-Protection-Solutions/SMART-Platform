@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
-import org.wcs.smart.patrol.query.parser.internal.summary.AttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.CombinedValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -316,23 +316,23 @@ public class Parser implements ParserConstants {
       break;
     case SUM_CAT_VALUE_KEY:
       jj_consume_token(SUM_CAT_VALUE_KEY);
-                        item = CategoryValueItem.createItem( token.image );
+                        item = PatrolCategoryValueItem.createItem( token.image );
       break;
     case SUM_ATTRIBUTE_VALUE_KEY:
       jj_consume_token(SUM_ATTRIBUTE_VALUE_KEY);
-                        item = AttributeValueItem.createAttributeItem( token.image );
+                        item = PatrolAttributeValueItem.createAttributeItem( token.image );
       break;
     case SUM_CAT_ATT_VALUE_KEY:
       jj_consume_token(SUM_CAT_ATT_VALUE_KEY);
-                        item = AttributeValueItem.createCategoryAttributeItem( token.image );
+                        item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     case SUM_ATTRIBUTE_VALUE_LISTTREE_KEY:
       jj_consume_token(SUM_ATTRIBUTE_VALUE_LISTTREE_KEY);
-                        item = AttributeValueItem.createAttributeItem( token.image );
+                        item = PatrolAttributeValueItem.createAttributeItem( token.image );
       break;
     case SUM_CAT_ATT_VALUE_LISTTREE_KEY:
       jj_consume_token(SUM_CAT_ATT_VALUE_LISTTREE_KEY);
-                        item = AttributeValueItem.createCategoryAttributeItem( token.image );
+                        item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     default:
       jj_la1[9] = jj_gen;

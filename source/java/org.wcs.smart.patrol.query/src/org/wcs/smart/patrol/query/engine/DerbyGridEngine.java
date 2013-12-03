@@ -62,24 +62,24 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.engine.grids.AddCellMerger;
 import org.wcs.smart.patrol.query.engine.grids.DistanceValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.ExistsValueComputer;
-import org.wcs.smart.patrol.query.engine.grids.Grid;
 import org.wcs.smart.patrol.query.engine.grids.GridAnalysisEngine;
 import org.wcs.smart.patrol.query.engine.grids.PatrolCntCellMerger;
 import org.wcs.smart.patrol.query.engine.grids.PatrolCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
-import org.wcs.smart.patrol.query.engine.grids.Tile;
 import org.wcs.smart.patrol.query.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.patrol.query.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.GridResultItem;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
-import org.wcs.smart.patrol.query.parser.internal.summary.AttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.CombinedValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -92,7 +92,7 @@ import com.vividsolutions.jts.io.WKBReader;
 public class DerbyGridEngine extends DerbyQueryEngine2{
 	private Collection<GridResultItem> myResults;
 	
-	private GriddedQuery query;
+	private PatrolGriddedQuery query;
 	
 	private String dataTable;
 	private String gridTable;
@@ -106,7 +106,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * @throws SQLException
 	 */
 	public Collection<GridResultItem> executeQuery(
-			final GriddedQuery query,
+			final PatrolGriddedQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
@@ -262,8 +262,8 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		if(value instanceof PatrolValueItem ){
 			return computePatrolValue(c, (PatrolValueItem)value, gridDef);
 		}else{
-			if(value instanceof AttributeValueItem ){
-				AttributeValueItem tmp = (AttributeValueItem)value;
+			if(value instanceof PatrolAttributeValueItem ){
+				PatrolAttributeValueItem tmp = (PatrolAttributeValueItem)value;
 				
 				String strAggValue = "number_value"; //$NON-NLS-1$
 				strAgg = tmp.getAggregation().getName();
@@ -402,8 +402,8 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
 				PatrolQueryPlugIn.logSql(sql.toString());
 				rs = c.createStatement().executeQuery(sql.toString());
-			}else if(value instanceof CategoryValueItem){
-				CategoryValueItem tmp = (CategoryValueItem)value;
+			}else if(value instanceof PatrolCategoryValueItem){
+				PatrolCategoryValueItem tmp = (PatrolCategoryValueItem)value;
 				strAgg = "count"; //$NON-NLS-1$
 				
 				double minX = gridDef.getOriginX();

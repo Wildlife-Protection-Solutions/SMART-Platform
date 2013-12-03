@@ -33,9 +33,9 @@ import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.ObservationQuery;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
-import org.wcs.smart.patrol.query.model.WaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -60,7 +60,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public QueryDataSource(ObservationQuery query){
+	public QueryDataSource(PatrolObservationQuery query){
 		this.query = query;
 	}
 
@@ -70,7 +70,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public QueryDataSource(WaypointQuery query){
+	public QueryDataSource(PatrolWaypointQuery query){
 		this.query = query;
 	}
 	

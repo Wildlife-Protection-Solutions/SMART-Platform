@@ -26,9 +26,9 @@ import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
-import org.wcs.smart.patrol.query.model.SummaryQueryResult;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.SmartUtils;
@@ -75,7 +75,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 	 */
 	@Override
 	public void export(Query query, File outputFile, IProgressMonitor monitor) throws Exception {
-		SummaryQuery sumQuery = (SummaryQuery)query;
+		PatrolSummaryQuery sumQuery = (PatrolSummaryQuery)query;
 		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults(monitor);
 		if (results == null){
 			throw new Exception(Messages.CsvSummaryExporter_QueryNotRun);
