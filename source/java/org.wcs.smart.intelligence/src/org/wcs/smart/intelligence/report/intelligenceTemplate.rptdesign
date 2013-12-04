@@ -2,6 +2,12 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 4.2.1.v201209101448 Build &lt;4.2.1.v20120912-1721></property>
     <text-property name="title">New Report</text-property>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">queryText</property>
+            <property name="id">414</property>
+        </structure>
+    </list-property>
     <parameters>
         <scalar-parameter name="IntelligenceUUID" id="322">
             <property name="valueType">static</property>
@@ -114,17 +120,39 @@
         <oda-data-set extensionID="org.wcs.smart.intelligence.report.oda.SmartIntelligencePoints" name="Intelligence Data Set" id="414">
             <text-property name="displayName">Intelligence Location Points</text-property>
             <property name="nullsOrdering">nulls lowest</property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">X</property>
+                    <text-property name="displayName">X</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">Y</property>
+                    <text-property name="displayName">Y</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">IntelligenceUUID</property>
+                    <property name="paramName">IntelligenceUUID</property>
+                    <property name="nativeName">IntelligenceUUID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>
                         <property name="position">1</property>
                         <property name="name">X</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">2</property>
                         <property name="name">Y</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">float</property>
                     </structure>
                 </list-property>
             </structure>
@@ -134,13 +162,13 @@
                     <property name="position">1</property>
                     <property name="name">X</property>
                     <property name="nativeName">X</property>
-                    <property name="dataType">string</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">Y</property>
                     <property name="nativeName">Y</property>
-                    <property name="dataType">string</property>
+                    <property name="dataType">float</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[]]></xml-property>
@@ -417,7 +445,91 @@
             </row>
         </grid>
         <label id="272"/>
-        <label id="323">
+        <label id="447">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingLeft">1pt</property>
+            <property name="paddingBottom">5pt</property>
+            <text-property name="text">Location</text-property>
+        </label>
+        <table id="431">
+            <property name="dataSet">Intelligence Data Set</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">X</property>
+                    <text-property name="displayName">X</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["X"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Y</property>
+                    <text-property name="displayName">Y</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Y"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">XX</property>
+                    <text-property name="displayName">X</text-property>
+                    <expression name="expression" type="javascript">row["X"]</expression>
+                    <property name="dataType">float</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">YY</property>
+                    <text-property name="displayName">Y</text-property>
+                    <expression name="expression" type="javascript">row["Y"]</expression>
+                    <property name="dataType">float</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <column id="441"/>
+            <column id="442"/>
+            <header>
+                <row id="432">
+                    <property name="borderBottomColor">#000000</property>
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">1px</property>
+                    <cell id="433">
+                        <label id="443">
+                            <property name="fontWeight">bold</property>
+                            <text-property name="text">X</text-property>
+                        </label>
+                    </cell>
+                    <cell id="434">
+                        <label id="444">
+                            <property name="fontWeight">bold</property>
+                            <text-property name="text">Y</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="435">
+                    <cell id="436">
+                        <data id="445">
+                            <property name="textAlign">center</property>
+                            <property name="resultSetColumn">XX</property>
+                        </data>
+                    </cell>
+                    <cell id="437">
+                        <data id="446">
+                            <property name="textAlign">center</property>
+                            <property name="resultSetColumn">YY</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="438">
+                    <cell id="439"/>
+                    <cell id="440"/>
+                </row>
+            </footer>
+        </table>
+        <label id="430">
             <property name="backgroundColor">#F0F0F0</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontWeight">bold</property>
@@ -426,13 +538,11 @@
             <property name="paddingLeft">1pt</property>
             <property name="paddingBottom">5pt</property>
             <property name="pageBreakBefore">always</property>
-            <text-property name="text">Location</text-property>
+            <text-property name="text">Location Map</text-property>
         </label>
         <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="415">
-            <property name="height">6.479166666666667in</property>
-            <property name="width">7.9375in</property>
             <simple-property-list name="org.wcs.smart.birt.map.layers">
-                <value/>
+                <value></value>
             </simple-property-list>
             <simple-property-list name="org.wcs.smart.birt.map.layerDataSet">
                 <value>Intelligence Data Set</value>
@@ -443,6 +553,8 @@
             <simple-property-list name="org.wcs.smart.birt.map.layerStyles">
                 <value isNull="true"/>
             </simple-property-list>
+            <property name="height">6.479166666666667in</property>
+            <property name="width">7.9375in</property>
         </extended-item>
     </body>
     <list-property name="images">
