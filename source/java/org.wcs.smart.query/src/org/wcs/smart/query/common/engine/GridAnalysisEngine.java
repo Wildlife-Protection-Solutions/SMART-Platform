@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.grids;
+package org.wcs.smart.query.common.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;

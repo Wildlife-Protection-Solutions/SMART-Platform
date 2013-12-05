@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.observation.query.model.columns;
 
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -35,19 +37,16 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryQueryColumn extends QueryColumn{
+public class ObservationCategoryQueryColumn extends CategoryQueryColumn{
 
-	private int level;	//the category level in the database.
-		
 	/**
 	 * Creates a new category column
 	 * 
 	 * @param name the name
 	 * @param level the level in the data model this column represents
 	 */
-	public CategoryQueryColumn(String name, int level){
-		super(name, "category:" + level, ColumnType.STRING); //$NON-NLS-1$
-		this.level = level;
+	public ObservationCategoryQueryColumn(String name, int level){
+		super(name,level);
 	}
 	
 
@@ -56,24 +55,24 @@ public class CategoryQueryColumn extends QueryColumn{
 	 */
 	@Override
 	public Object getValue(IResultItem queryResultItem) {
-//		if (queryResultItem instanceof PatrolQueryResultItem) {
-//			PatrolQueryResultItem item = (PatrolQueryResultItem) queryResultItem;
-//			return getItemValue(item, level);
-//		}
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
+			return getItemValue(item, level);
+		}
 		return ""; //$NON-NLS-1$
 	}
 	
-//	private static String getItemValue(PatrolQueryResultItem item, int level) {
-//		String[] items = item.getCategories();
-//		if (items == null){
-//			return ""; //$NON-NLS-1$
-//		}
-//		if (level < items.length){
-//			return items[level];
-//		}else{
-//			return ""; //$NON-NLS-1$
-//		}
-//	}
+	private static String getItemValue(ObservationQueryResultItem item, int level) {
+		String[] items = item.getCategories();
+		if (items == null){
+			return ""; //$NON-NLS-1$
+		}
+		if (level < items.length){
+			return items[level];
+		}else{
+			return ""; //$NON-NLS-1$
+		}
+	}
 
 
 	/**
@@ -81,7 +80,7 @@ public class CategoryQueryColumn extends QueryColumn{
 	 */
 	@Override
 	public QueryColumn clone() {
-		CategoryQueryColumn newColumn = new CategoryQueryColumn(super.getName(), level);
+		ObservationCategoryQueryColumn newColumn = new ObservationCategoryQueryColumn(super.getName(), level);
 		return newColumn;
 	}
 

@@ -18,6 +18,7 @@ import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -107,7 +108,7 @@ public class ObservationQueryColumnCache {
 				}
 
 				for (int i = 0; i < numCategory; i++) {
-					cols.add(new CategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
+					cols.add(new ObservationCategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
 				}
 					
 				//sort attributes alphabetically
@@ -121,7 +122,7 @@ public class ObservationQueryColumnCache {
 					
 				for (Attribute att : atts) {
 					String name = att.getName();
-					cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
+					cols.add(new ObservationAttributeQueryColumn(name, att.getKeyId(), att.getType()));
 				}
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				

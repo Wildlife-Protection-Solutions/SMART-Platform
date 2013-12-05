@@ -37,9 +37,10 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 
@@ -52,7 +53,7 @@ import org.wcs.smart.query.model.IPagedQueryResultSet;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyWaypointEngine extends DerbyQueryEngine2 {
+public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 
 	private String queryDataTable;
 	
@@ -115,7 +116,7 @@ public class DerbyWaypointEngine extends DerbyQueryEngine2 {
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
 		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		PatrolQueryPlugIn.logSql(sql);
+		QueryPlugIn.logSql(sql);
 		ResultSet rs = c.createStatement().executeQuery(sql);
 		try {
 			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -156,7 +157,7 @@ public class DerbyWaypointEngine extends DerbyQueryEngine2 {
 		};
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			PatrolQueryPlugIn.logSql(sql);
+			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
 		
@@ -199,14 +200,14 @@ public class DerbyWaypointEngine extends DerbyQueryEngine2 {
 		sql.append(queryDataTable);
 		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
 		String q2 = updateSql + "p_pilot = ? where plm_pilot = ?"; //$NON-NLS-1$
-		PatrolQueryPlugIn.logSql(q1);
-		PatrolQueryPlugIn.logSql(q2);
+		QueryPlugIn.logSql(q1);
+		QueryPlugIn.logSql(q2);
 		PreparedStatement leaderSt = c.prepareStatement(q1);
 		PreparedStatement pilotSt = c.prepareStatement(q2);
 		int cnt = 0;
@@ -249,18 +250,18 @@ public class DerbyWaypointEngine extends DerbyQueryEngine2 {
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(DerbyQueryEngine2.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			PatrolQueryPlugIn.logSql(sql.toString());
+			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(DerbyQueryEngine2.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			PatrolQueryPlugIn.logSql(sql.toString());
+			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		

@@ -138,9 +138,6 @@ public class Messages extends NLS {
 	public static String GriddedTableContent_QueryLabel;
 	public static String GriddedTableContent_QueryProperties;
 	public static String GriddedTableContent_RunQueryLink;
-	public static String GridQueryColumn_TileXIdColumnName;
-	public static String GridQueryColumn_TileYIdColumnName;
-	public static String GridQueryColumn_ValueColumnName;
 	public static String GridTiffImageExporter_FileNotFound;
 	public static String GridTiffImageExporter_QueryError;
 	public static String GridTiffImageExporter_TiffExporterName;

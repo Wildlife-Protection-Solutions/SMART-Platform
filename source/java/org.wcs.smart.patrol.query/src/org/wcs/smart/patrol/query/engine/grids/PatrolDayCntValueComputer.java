@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.engine.grids;
 import java.sql.Date;
 import java.util.HashSet;
 
+import org.wcs.smart.query.common.engine.IValueComputer;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.SmartUtils;
@@ -39,7 +40,7 @@ public class PatrolDayCntValueComputer implements IValueComputer<HashSet<Object>
 	 * </p>
 	 * 
 	 * @return 1
-	 * @see org.wcs.smart.patrol.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
 	 */
 	public HashSet<Object> computeValue(HashSet<Object> existingValue, Tile t, Grid gridDef,
 			LineString ls) {

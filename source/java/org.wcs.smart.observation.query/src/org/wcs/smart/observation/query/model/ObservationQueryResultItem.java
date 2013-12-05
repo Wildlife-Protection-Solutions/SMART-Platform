@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.observation.query.model;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import org.wcs.smart.query.model.IResultItem;
 
@@ -45,10 +43,6 @@ public class ObservationQueryResultItem implements IResultItem{
 	private String sourceId;
 	
 	private Date wpDateTime;
-	private Date waypointTime;
-	private String leader;
-	private String pilot;
-	
 	private byte[] waypointUuid;
 	private int waypointId;
 	private double waypointX;
@@ -76,31 +70,7 @@ public class ObservationQueryResultItem implements IResultItem{
 	public byte[] getObservationUuid(){
 		return this.observationUuid;
 	}
-	
-	/**
-	 * @return the patrol-leg leader
-	 */
-	public String getLeader(){
-		return this.leader;
-	}
-	/**
-	 * @param leader the patrol leader
-	 */
-	public void setLeader(String leader){
-		this.leader = leader;
-	}
-	/**
-	 * @return the patrol-leg pilot
-	 */
-	public String getPilot(){
-		return this.pilot;
-	}
-	/**
-	 * @param leader the pilot leader
-	 */
-	public void setPilot(String pilot){
-		this.pilot = pilot;
-	}
+
 	
 	/**
 	 * Each item is associated with a single category.  This
@@ -187,18 +157,7 @@ public class ObservationQueryResultItem implements IResultItem{
 	public void setWpDateTime(Date wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
-	/**
-	 * @return waypoint time
-	 */
-	public Date getWaypointTime() {
-		return waypointTime;
-	}
-	/**
-	 * @param wpTime waypoint time
-	 */
-	public void setWaypointTime(Date wpTime) {
-		this.waypointTime = wpTime;
-	}
+	
 	/**
 	 * @return waypoint id
 	 */

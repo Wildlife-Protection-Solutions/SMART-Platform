@@ -19,42 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.visitors;
-
-import org.wcs.smart.query.model.filter.IGroupByVisitor;
-import org.wcs.smart.query.model.summary.AttributeGroupBy;
-import org.wcs.smart.query.model.summary.CategoryGroupBy;
-import org.wcs.smart.query.model.summary.IGroupBy;
+package org.wcs.smart.query.common.engine;
 
 /**
- * Visitor for group bys that determine if categories are used in any group by clause.
+ * CellMerger that assumes the cell values
+ * are double and merges them by adding them together.
  * 
- * @author Emily
+ * @author egouge
  *
  */
-public class HasObservationGroupByVisitor implements IGroupByVisitor {
+public class AddCellMerger implements ICellMerger<Double> {
 
-
-	private boolean hasCategory = false;
-	
-	@Override
-	public void visit(IGroupBy item) {
-		if (hasCategory) return;
-		if (item instanceof CategoryGroupBy){
-			hasCategory = true;
-		}else if (item instanceof AttributeGroupBy){
-			if (((AttributeGroupBy) item).getCategoryHkey() != null){
-				hasCategory = true;
-			}
-		}		
-	}
-	
 	/**
-	 * 
-	 * @return true if group by contains a category
+	 * <p>
+	 * Assumes the cell values are double.  Adds the
+	 * results together and returns a new double
+	 * </p>
+	 * @see org.wcs.smart.query.common.engine.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
 	 */
-	public boolean hasCategory(){
-		return this.hasCategory;
+	@Override
+	public Double mergeCell(Double v1, Double v2) {
+		if(v1 == null ){
+			return v2;
+		}
+		if (v2 == null){
+			return v1;
+		}
+		
+		return v1 + v2;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.common.engine.ICellMerger#getFinalValue(java.lang.Object)
+	 */
+	@Override
+	public Double getFinalValue(Double value) {
+		return value;
 	}
 
 }

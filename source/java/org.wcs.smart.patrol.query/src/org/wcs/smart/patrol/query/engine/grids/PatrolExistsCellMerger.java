@@ -1,5 +1,7 @@
 package org.wcs.smart.patrol.query.engine.grids;
 
+import org.wcs.smart.query.common.engine.ICellMerger;
+
 public class PatrolExistsCellMerger implements ICellMerger<Boolean> {
 
 	@Override

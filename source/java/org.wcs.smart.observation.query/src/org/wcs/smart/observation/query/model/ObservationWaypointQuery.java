@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -35,12 +34,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.query.engine.DerbyWaypointEngine;
 import org.wcs.smart.observation.query.model.columns.ObservationQueryColumnCache;
 import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.WaypointQuery;
-import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
@@ -92,19 +91,18 @@ public class ObservationWaypointQuery extends WaypointQuery {
 	
 	@Transient
 	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception {
-//		Session session = HibernateManager.openSession();
-//		session.beginTransaction();
-//		try {
-//			DerbyWaypointEngine engine = new DerbyWaypointEngine();
-//			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
-//			return lastResult;
-//		} finally {
-//			if (session.isOpen()){
-//				session.getTransaction().commit();
-//				session.close();
-//			}
-//		}
-		return null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			DerbyWaypointEngine engine = new DerbyWaypointEngine();
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
+		}
 	}
 	/**
 	 * 

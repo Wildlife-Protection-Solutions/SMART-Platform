@@ -81,8 +81,8 @@ public class GriddedTableContent {
 	 * @param editor parent editor 
 	 */
 	public GriddedTableContent(Composite parent, GriddedEditor editor, FormToolkit toolkit) {
-		createContent(parent,toolkit);
 		this.editor = editor;
+		createContent(parent,toolkit);
 	}
 
 	/**

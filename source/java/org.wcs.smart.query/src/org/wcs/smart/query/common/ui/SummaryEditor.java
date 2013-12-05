@@ -452,6 +452,8 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 		
 		initQuery();
 		updatePartName();
+		
+		setTitleImage(getInputInternal().getType().getImage());
 	}
 
 	private void createNameHeader(Composite main, FormToolkit toolkit) {

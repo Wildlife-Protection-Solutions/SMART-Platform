@@ -22,7 +22,6 @@
 package org.wcs.smart.plan.query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,6 +34,7 @@ import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SmartUtils;
@@ -77,13 +77,13 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 
 	
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping, IFilter filter){
+	public String asSql(IQueryEngine engine, IFilter filter){
 		if (!(filter instanceof PatrolPlanQueryFilter)){
 			return null;
 		}
 		PatrolPlanQueryFilter qfilter = (PatrolPlanQueryFilter)filter;
 		
-		String prefix = tableMapping.get(qfilter.getOption().getPatrolAttributeClass());
+		String prefix = engine.tablePrefix(qfilter.getOption().getPatrolAttributeClass());
 		String v = SmartUtils.stripQuotes((String)qfilter.getValue());
 		//if v is empty this means that this is "Any Plan" case
 		String planSqlPart = ""; //$NON-NLS-1$

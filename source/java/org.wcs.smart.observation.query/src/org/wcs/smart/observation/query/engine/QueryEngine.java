@@ -19,33 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.grids;
-
-import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.Tile;
-
-import com.vividsolutions.jts.geom.LineString;
-
+package org.wcs.smart.observation.query.engine;
 
 /**
- * Computes the cell value when rasterizing. 
+ * A query engine for executing
+ * queries.
  * 
- * @author egouge
- *
+ * @author Emily
+ * @since 1.0.0
  */
-public interface IValueComputer<T> {
+public interface QueryEngine {
 
-	/**
-	 * Computes the cell value when rasterizing a linestring.
-	 * 
-	 * @param existingValue if a linestring has already visited this
-	 * tile then this is the value computed earlier; otherwise the value 
-	 * is null 
-	 * @param t tile being visited
-	 * @param gridDef grid definition grid definition
-	 * @param ls linestring being rasterized
-	 * @return value for cell computed for the cell
-	 * @throws expection if error occurs computing value
-	 */
-	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) throws Exception;
 }

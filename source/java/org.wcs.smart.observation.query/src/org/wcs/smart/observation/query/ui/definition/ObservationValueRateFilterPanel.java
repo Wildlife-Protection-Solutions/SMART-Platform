@@ -38,7 +38,7 @@ import org.wcs.smart.query.ui.model.DropItem;
 
 /**
  * Definition panel that allows for the definition of both
- * value and rate filters.  Used for summary and gridded queries.
+ * value and rate filters.  Used for summary and gridded observation queries.
  * @author Emily
  *
  */

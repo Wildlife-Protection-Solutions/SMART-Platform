@@ -51,9 +51,6 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.engine.visitors.HasObservationFilterVisitor;
-import org.wcs.smart.patrol.query.engine.visitors.HasObservationGroupByVisitor;
-import org.wcs.smart.patrol.query.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
@@ -65,6 +62,11 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueIt
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
+import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
@@ -93,7 +95,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbySummaryEngine extends DerbyQueryEngine2{
+public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
@@ -473,7 +475,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		}
 		
 		//do something here with sql
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		return createValueResults(rs, groupBy, patrolItem.asString());
@@ -568,7 +570,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			}
 
 			// do something here with sql
-			PatrolQueryPlugIn.logSql(sql.toString());
+			QueryPlugIn.logSql(sql.toString());
 
 			ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
@@ -659,7 +661,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			}
 			
 			//do something here with sql
-			PatrolQueryPlugIn.logSql(sql.toString());
+			QueryPlugIn.logSql(sql.toString());
 			
 			ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
@@ -756,7 +758,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			}
 			
 			//do something here with sql
-			PatrolQueryPlugIn.logSql(sql.toString());
+			QueryPlugIn.logSql(sql.toString());
 			
 			ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
@@ -926,7 +928,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		}
 		
 		//do something here with sql
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
@@ -985,7 +987,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null){
 						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( DerbyFilterToSqlGenerator.asSql(caFilter, areaPrefix));
+						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix));
 					}
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1019,7 +1021,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null ){
 						fromSql.append(" and ");//$NON-NLS-1$
-						fromSql.append( DerbyFilterToSqlGenerator.asSql(caFilter, areaPrefix));
+						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix));
 					}
 					fromSql.append(" and ");//$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'");//$NON-NLS-1$ //$NON-NLS-2$ 
@@ -1487,7 +1489,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		super.buildTemporaryTableIndexes(c, tableName);
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 

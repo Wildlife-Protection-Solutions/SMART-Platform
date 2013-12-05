@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine;
+package org.wcs.smart.query.common.engine;
 
 
 import java.sql.SQLException;
@@ -33,18 +33,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolEndDateField;
-import org.wcs.smart.patrol.query.model.PatrolStartDateField;
-import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
-import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -77,7 +66,7 @@ public class DerbyFilterToSqlGenerator {
 	 * @return sql string
 	 * @throws SQLException
 	 */
-	public static String toSql(IFilter filter, DerbyQueryEngine2 engine) throws SQLException{
+	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof AreaFilter){
 			return asSql((AreaFilter)filter, engine);
 		}else if (filter instanceof AttributeFilter){
@@ -94,15 +83,10 @@ public class DerbyFilterToSqlGenerator {
 			return ""; //$NON-NLS-1$
 		}else if (filter instanceof NotExpression){
 			return asSql((NotExpression)filter, engine);
-		}else if (filter instanceof PatrolFilter){
-			return asSql((PatrolFilter)filter, engine);
-		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class));
 		}else if (filter instanceof DateFilter){
 			return asSql((DateFilter)filter, engine);
-		}else if (filter instanceof IExtensionFilter){
-			return asSql((IExtensionFilter)filter, engine);
 		}
+		
 		
 		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_FilterTypeNotSupported, new Object[]{filter.getClass().getCanonicalName()}));
 		
@@ -112,18 +96,13 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * Area filter
 	 */
-	private static String asSql(AreaFilter filter, DerbyQueryEngine2 engine){
+	protected String asSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
 		if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
 			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
 			sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
 			sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
 			sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(")");  //$NON-NLS-1$
-		}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
-			sb.append("smart.intersects(");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
-			sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(")");  //$NON-NLS-1$
 		}
 		return sb.toString();
@@ -132,12 +111,7 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * Attribute filter
 	 */
-	private static String asSql(AttributeFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		String col = engine.filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
-	
+	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
 		String attprefix = engine.tablePrefix(Attribute.class);
 		if (attprefix == null){
 			throw new IllegalStateException(Messages.AttributeFilter_InvalidAttributePrefix);
@@ -177,7 +151,7 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * boolean filter
 	 */
-	private static String asSql(BooleanExpression filter, DerbyQueryEngine2 engine) throws SQLException{
+	protected String asSql(BooleanExpression filter, IQueryEngine engine) throws SQLException{
 		String part1 = toSql(filter.getFilter1(), engine);
 		String part2 = toSql(filter.getFilter2(), engine);
 		return part1 + " " + asSql(filter.getOperator()) + " " + part2; //$NON-NLS-1$ //$NON-NLS-2$
@@ -186,19 +160,14 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * bracket filter
 	 */
-	private static String asSql(BracketFilter filter, DerbyQueryEngine2 engine) throws SQLException{
+	protected String asSql(BracketFilter filter, IQueryEngine engine) throws SQLException{
 		return "( " + toSql(filter.getFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/*
 	 * Category filter
 	 */
-	private static String asSql(CategoryFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		String col = engine.filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
-		}
-		
+	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
 		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
 		if (prefix == null){
@@ -210,26 +179,15 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * Category attribute filter
 	 */
-	private static String asSql(CategoryAttributeFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		String col = engine.filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		return "( " + toSql(filter.getCategoryFilter(), engine) + asSql(Operator.AND) + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$	
 	}
 	
 	/*
 	 * not expression
 	 */
-	private static String asSql(NotExpression filter, DerbyQueryEngine2 engine) throws SQLException{
+	protected String asSql(NotExpression filter, IQueryEngine engine) throws SQLException{
 		return asSql(Operator.NOT) + " ( " + toSql(filter.getFilter(), engine) + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
-	}
-	
-	/*
-	 * not expression
-	 */
-	private static String asSql(IExtensionFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		return PatrolContributionFactory.getSql(DerbyQueryEngine2.tablePrefix, filter);	
 	}
 	
 	/**
@@ -240,7 +198,7 @@ public class DerbyFilterToSqlGenerator {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static String asSql(ConservationAreaFilter filter, String caTablePrefix) throws SQLException{
+	public String asSql(ConservationAreaFilter filter, String caTablePrefix) throws SQLException{
 		ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
 		if (filter.includeAll()){
 			//include all current conservation areas
@@ -274,81 +232,17 @@ public class DerbyFilterToSqlGenerator {
 		return sb.toString();
 	}
 	
-	/*
-	 * Patrol Filter
-	 */
-	private static String asSql(PatrolFilter filter, DerbyQueryEngine2 engine) throws SQLException{
-		PatrolQueryOption option = filter.getPatrolOption();
-		if (option.isEmployeeItem()){
-			String prefix = engine.tablePrefix(PatrolLeg.class);
-			String x = prefix + ".uuid IN ( select patrol_leg_uuid from smart.patrol_leg_members "  //$NON-NLS-1$
-					+ " where "; //$NON-NLS-1$
-			if (option == PatrolQueryOption.LEADER) {
-				x += " is_leader  AND "; //$NON-NLS-1$
-			} else if (option == PatrolQueryOption.PILOT) {
-				x += " is_pilot AND "; //$NON-NLS-1$
-			}
-			String value2 = SmartUtils.stripQuotes((String)filter.getValue());			
-			x += " employee_uuid = x'" + value2 + "')"; //$NON-NLS-1$ //$NON-NLS-2$
-			return x;			
-		}		
-		String prefix = engine.tablePrefix(filter.getPatrolOption().getPatrolAttributeClass());
-		if (prefix == null){
-			throw new SQLException(MessageFormat.format(
-					Messages.PatrolFilter_InvalidPrefix, new Object[]{ filter.getPatrolOption().getKey()}));
-		}
-		
-		if (option.getType() == PatrolQueryOptionType.STRING){
-			if (option == PatrolQueryOption.PATROL_TYPE){
-				String x = prefix + "." + option.getColumnName() + " = '" + SmartUtils.stripQuotes((String)filter.getValue()) + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				return x;				
-			}else{
-				String value1 = SmartUtils.stripQuotes((String)filter.getValue());
-				if (filter.getOperator() == Operator.STR_CONTAINS || 
-						filter.getOperator() == Operator.STR_NOTCONTAINS){
-					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " '" + value1.toLowerCase() + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-				return x;
-			}
-		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
-			//boolean
-			String x = prefix + "." + option.getColumnName() ; //+ " = 'true'" ; //$NON-NLS-1$
-			return x;
-		}else if (option.getType() == PatrolQueryOptionType.UUID){
-			//uuid
-			try{
-				String value2 = SmartUtils.stripQuotes((String)filter.getValue());
-				String x = prefix + "." + option.getColumnName() + " = x'" + value2 + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				return x;
-			}catch (Exception ex){
-				throw new IllegalStateException(ex);
-			}
-			
-		}else if (option.getType() == PatrolQueryOptionType.KEY){
-			String key = SmartUtils.stripQuotes((String)filter.getValue());
-			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = '" + key + "') "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			
-		}
-		return ""; //$NON-NLS-1$	
-	}
 	
 	/*
 	 * Date Filter
 	 */
-	private static String asSql(DateFilter filter, DerbyQueryEngine2 engine) throws SQLException{
+	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
 		String table = ""; //$NON-NLS-1$
 		String field = ""; //$NON-NLS-1$
 		
-		if (filter.getDateFieldOption() == PatrolEndDateField.INSTANCE){
-			table = engine.tablePrefix(Patrol.class);
-			field = "end_date"; //$NON-NLS-1$
-		}else if (filter.getDateFieldOption() == PatrolStartDateField.INSTANCE){
-			table = engine.tablePrefix(Patrol.class);
-			field = "start_date"; //$NON-NLS-1$
-		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
-			table = engine.tablePrefix(PatrolLegDay.class);
-			field = "patrol_day"; //$NON-NLS-1$
+		if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
+			table = engine.tablePrefix(Waypoint.class);
+			field = "date_time"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
 		}
@@ -378,7 +272,7 @@ public class DerbyFilterToSqlGenerator {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static String asSql(Operator op) throws SQLException{
+	public String asSql(Operator op) throws SQLException{
 		if (op == Operator.EQUALS){
 			return "="; //$NON-NLS-1$
 		}else if (op == Operator.LESSTHAN){

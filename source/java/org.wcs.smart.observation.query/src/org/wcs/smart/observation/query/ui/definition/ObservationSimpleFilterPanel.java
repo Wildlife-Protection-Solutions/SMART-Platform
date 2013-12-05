@@ -24,7 +24,7 @@ package org.wcs.smart.observation.query.ui.definition;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
 /**
- * Simple filter panel for patrol, observation and incident queries.
+ * Simple filter panel for observation and incident queries.
  * @author Emily
  *
  */

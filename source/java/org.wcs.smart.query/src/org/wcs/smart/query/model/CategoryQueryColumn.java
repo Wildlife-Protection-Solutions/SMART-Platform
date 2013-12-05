@@ -19,57 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.visitors;
+package org.wcs.smart.query.model;
 
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Determines if an observation filter (category or attribute filter)
- * are used in the filter.
+ * 
+ * A column in the results table that contains 
+ * a category from the datamodel.
+ * 
+ * <p>There should be one column for each
+ * "level" in the datamodel category tree.</p>
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public class HasObservationFilterVisitor implements IFilterVisitor{
+public abstract class CategoryQueryColumn extends QueryColumn{
 
-	private boolean hasCategory = false;
-	private boolean hasAttribute = false;
-	
-	
-	@Override
-	public void visit(IFilter filter) {
-		if (hasCategory && hasAttribute) return;
-		if (filter instanceof AttributeFilter){
-			hasAttribute = true;
-		}else if (filter instanceof CategoryFilter){
-			hasCategory = true;
-		}
-	}
-	
+	protected int level;	//the category level in the database.
+		
 	/**
+	 * Creates a new category column
 	 * 
-	 * @return true if the filter contains a category filter
+	 * @param name the name
+	 * @param level the level in the data model this column represents
 	 */
-	public boolean hasCategoryFilter(){
-		return this.hasCategory;
-	}
-
-	/**
-	 * 
-	 * @return ture if filter contains an attribute filter
-	 */
-	public boolean hasAttributeFilter(){
-		return this.hasAttribute;
+	public CategoryQueryColumn(String name, int level){
+		super(name, "category:" + level, ColumnType.STRING); //$NON-NLS-1$
+		this.level = level;
 	}
 	
-	/**
-	 * clears the state of the visitor so it can be re-used
-	 */
-	public void clear(){
-		hasCategory = false;
-		hasAttribute = false;
-	}
 }

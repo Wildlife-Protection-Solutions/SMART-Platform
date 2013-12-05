@@ -31,7 +31,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.query.engine.DerbyObservationEngine;
 import org.wcs.smart.observation.query.model.columns.ObservationQueryColumnCache;
 import org.wcs.smart.observation.query.model.types.ObservationQueryType;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
@@ -91,19 +94,18 @@ public class ObsObservationQuery extends ObservationQuery implements IPagedQuery
 	
 	@Transient
 	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception {
-//		Session session = HibernateManager.openSession();
-//		session.beginTransaction();
-//		try {
-//			DerbyObservationEngine engine = new DerbyObservationEngine();
-//			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
-//			return lastResult;
-//		} finally {
-//			if (session.isOpen()){
-//				session.getTransaction().commit();
-//				session.close();
-//			}
-//		}
-		return null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			DerbyObservationEngine engine = new DerbyObservationEngine();
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
+		}
 	}
 	/**
 	 * 

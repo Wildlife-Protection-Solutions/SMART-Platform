@@ -19,21 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.model;
+package org.wcs.smart.query.common.engine;
 
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+
+import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Interface for observation query paging results.
- * 
+ * Checks for existance.  This always returns true.
  * @author Emily
  *
  */
-public interface IObservationPagedQueryResultSet extends IPagedQueryResultSet{
+public class ExistsValueComputer implements IValueComputer<Boolean> {
 
-	/**
-	 * 
-	 * @return the count of distinct waypoints in the query result set
-	 */
-	public int getWpCount();
+	@Override
+	public Boolean computeValue(Boolean existingValue, Tile t, Grid gridDef, LineString ls)
+			throws Exception {
+		
+		return Boolean.TRUE;
+	}
+
 }

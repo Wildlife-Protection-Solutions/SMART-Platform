@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.observation.query.ui.definition;
 
 import java.text.MessageFormat;
@@ -14,12 +35,16 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
+import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
+import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
 import org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel;
 import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.QueryProxy;
@@ -36,7 +61,11 @@ import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
-
+/**
+ * Drop item factory for observation queries
+ * @author Emily
+ *
+ */
 public class ObservationDropItemFactory extends BasicDropItemFactory implements IDropItemFactory {
 
 	public static ObservationDropItemFactory INSTANCE = new ObservationDropItemFactory();
@@ -240,46 +269,45 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	 */
 	@Override
 	public void generateDropItems(QueryProxy proxy, Session session) {
-		
-//		if (proxy.getQuery() instanceof SimpleQuery){
-//			
-//			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-//			proxy.setDropItems(SimplePatrolFilterPanel.ID, asDropItems(queryFilter, session));
-//					
-//		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
-//			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
-//			SumQueryDefinition def = q.getQueryDefinition();
-//			
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
-//			
-//			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-//					def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
-//			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-//					def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
-//			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), //$NON-NLS-1$
-//					def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
-//			
-//		}else if(proxy.getQuery().getType().getClass().equals(PatrolGridQueryType.class)){
-//			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();
-//			GridQueryDefinition def = q.getQueryDefinition();
-//			
-//			
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
-//			
-//			DropItem valueItem = null;
-//			try{
-//				valueItem = def.getValuePart().asDropItem(session);
-//			}catch(Exception ex){
-//				QueryPlugIn.log(ex.getMessage(), ex);
-//				valueItem = new ErrorDropItem(ex.getMessage());
-//			}
-//			proxy.setDropItems(PatrolGriddedQueryDefinitionPanel.VALUE_PANEL_ID,
-//					Collections.singletonList(valueItem));
-//					
-//			
-//		}
+		if (proxy.getQuery() instanceof SimpleQuery){
+			
+			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
+			proxy.setDropItems(ObservationSimpleFilterPanel.ID, asDropItems(queryFilter, session));
+					
+		}else if (proxy.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)){
+			ObservationSummaryQuery q = (ObservationSummaryQuery) proxy.getQuery();
+			SumQueryDefinition def = q.getQueryDefinition();
+			
+			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			
+			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
+					def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
+					def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
+			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.VALUE.name(), //$NON-NLS-1$
+					def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
+			
+		}else if(proxy.getQuery().getType().getKey().equalsIgnoreCase(ObservationGridQueryType.KEY)){
+			ObservationGriddedQuery q = (ObservationGriddedQuery) proxy.getQuery();
+			GridQueryDefinition def = q.getQueryDefinition();
+			
+			
+			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			
+			DropItem valueItem = null;
+			try{
+				valueItem = def.getValuePart().asDropItem(session);
+			}catch(Exception ex){
+				ObservationQueryPlugIn.log(ex.getMessage(), ex);
+				valueItem = new ErrorDropItem(ex.getMessage());
+			}
+			proxy.setDropItems(ObservationGriddedQueryDefinitionPanel.VALUE_PANEL_ID,
+					Collections.singletonList(valueItem));
+					
+			
+		}
 	}
 	
 	/*

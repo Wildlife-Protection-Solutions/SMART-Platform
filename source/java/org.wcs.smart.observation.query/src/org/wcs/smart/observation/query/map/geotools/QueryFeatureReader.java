@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
@@ -94,11 +95,10 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public boolean hasNext() throws IOException {
-		return false;
-//		if (fIterator == null){
-//			return false;
-//		}
-//		return fIterator.hasNext();
+		if (fIterator == null){
+			return false;
+		}
+		return fIterator.hasNext();
 	}
 
 	/**
@@ -106,10 +106,9 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
-//		PatrolQueryResultItem next = (PatrolQueryResultItem) this.fIterator.next();
-//		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(), ftype);
-//		return f;
-		return null;
+		ObservationQueryResultItem next = (ObservationQueryResultItem) this.fIterator.next();
+		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(), ftype);
+		return f;
 	}
 	
 	

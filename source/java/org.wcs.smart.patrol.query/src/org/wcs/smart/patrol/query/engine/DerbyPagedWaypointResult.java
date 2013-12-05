@@ -42,6 +42,7 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -318,7 +319,7 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 						try {
 							String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
 							c.createStatement().execute(sql);
-							PatrolQueryPlugIn.logSql(sql);
+							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
 							ex.printStackTrace();

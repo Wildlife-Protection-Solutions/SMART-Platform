@@ -21,6 +21,15 @@
  */
 package org.wcs.smart.observation.query.map.geotools;
 
+import java.util.List;
+
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
@@ -34,87 +43,36 @@ public class QueryResultItemFeature {
 
 	private static GeometryFactory gf = new GeometryFactory();
 	
-//	
-//	/**
-//	 * Converts a query result item to a feature.
-//	 * The feature type must have been generated 
-//	 * from the same set of query table columns.
-//	 * 
-//	 * @param it the query result item 
-//	 * @param columns the columns that make up the feature type
-//	 * @param ftype the feature type 
-//	 * @return created feature 
-//	 */
-//	public static SimpleFeature createObservationFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-//		
-//		Object[] data = new Object[columns.size() + 2];
-//		data[0] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
-//		
-//		for (int i = 0; i < columns.size(); i ++){
-//			Object x =  columns.get(i).getValue(it);
-//			if (x instanceof Boolean){
-//				if ((Boolean)x){
-//					x = 0;
-//				}else{
-//					x = 1;
-//				}
-//			}
-//			data[i + 1] = x;
-//		}
-//		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-//		
-//		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
-//		
-//	}
-//	
-//	
-//	/**
-//	 * Converts a query result item track feature.
-//	 * 
-//	 * The feature type must have been generated 
-//	 * from the same set of query table columns.
-//	 * 
-//	 * @param it the query result item 
-//	 * @param columns the columns that make up the feature type
-//	 * @param ftype the feature type 
-//	 * @return created feature 
-//	 */
-//	public static SimpleFeature createTrackFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-//		
-//		Object[] data = new Object[columns.size() + 2];
-//		data[0] = it.getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
-//		
-//		for (int i = 0; i < columns.size(); i ++){
-//			Object x =  columns.get(i).getValue(it);
-//			if (x instanceof Boolean){
-//				if ((Boolean)x){
-//					x = 0;
-//				}else{
-//					x = 1;
-//				}
-//			}
-//			data[i + 1] = x;
-//		}
-//
-//		if (it.getTrack() == null || it.getTrack().size() == 0) {
-//			data[data.length - 1] = gf.createLineString((Coordinate[]) null);
-//		} else {
-//			try {
-//				WKBReader reader = new WKBReader();
-//				List<byte[]> tracks = it.getTrack();
-//				LineString[] lss = new LineString[tracks.size()];
-//				for (int i = 0; i < lss.length; i ++){
-//					lss[i] = (LineString)reader.read(tracks.get(i));
-//				}
-//				data[data.length - 1] = gf.createMultiLineString(lss);
-//			} catch (ParseException e) {
-//				data[data.length - 1] = gf.createLineString((Coordinate[]) null);
-//				PatrolQueryPlugIn.log(MessageFormat.format(Messages.QueryResultItemFeature_GeomParseError, new Object[]{it.getPatrolId()}), e);
-//			}
-//		}
-//
-//		
-//		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
-//		
-//	}
+	
+	/**
+	 * Converts a query result item to a feature.
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	public static SimpleFeature createObservationFeature(ObservationQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+		
+		Object[] data = new Object[columns.size() + 2];
+		data[0] = it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		for (int i = 0; i < columns.size(); i ++){
+			Object x =  columns.get(i).getValue(it);
+			if (x instanceof Boolean){
+				if ((Boolean)x){
+					x = 0;
+				}else{
+					x = 1;
+				}
+			}
+			data[i + 1] = x;
+		}
+		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		
+	}
 }

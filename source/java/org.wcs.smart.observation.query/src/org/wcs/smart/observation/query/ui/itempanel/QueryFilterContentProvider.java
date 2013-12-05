@@ -105,7 +105,6 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Root node children
 	 */
 	public enum RootNodeType  {
-		PATROL_FILTERS(Messages.QueryFilterContentProvider_PatrolFiltersLabel),
 		DATA_MODEL_FILTERS(Messages.QueryFilterContentProvider_DataModelFiltersLabel),
 		AREA_FILTERS(Messages.QueryFilterContentProvider_AreaFiltersLabel),
 		OTHER_ITEMS(Messages.QueryFilterContentProvider_OperatoresLabel);
@@ -173,7 +172,6 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			}
 			
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
-			patrolOptions = (Object[]) in.get(RootNodeType.PATROL_FILTERS);	
 			
 			provider.inputChanged(viewer, oldInput, this.dataModel);
 			clearAreas();
@@ -316,9 +314,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 		 * @return the children of the given root node
 		 */
 		public Object[] getChildren(){
-			if (type == RootNodeType.PATROL_FILTERS){
-				return QueryFilterContentProvider.this.patrolOptions;
-			}else if (type == RootNodeType.AREA_FILTERS){
+			if (type == RootNodeType.AREA_FILTERS){
 				return Area.AreaType.values();
 			}else if (type == RootNodeType.DATA_MODEL_FILTERS){				
 				return DataModelItem.values();

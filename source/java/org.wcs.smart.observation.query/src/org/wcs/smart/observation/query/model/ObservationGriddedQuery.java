@@ -31,11 +31,15 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.query.engine.DerbyGridEngine;
 import org.wcs.smart.observation.query.model.columns.ObservationQueryColumnCache;
 import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IQueryType;
@@ -81,22 +85,21 @@ public class ObservationGriddedQuery extends GriddedQuery {
 
 	@Transient
 	public Collection<GridResultItem> executeQueryInternal(IProgressMonitor monitor) throws Exception{
-//		resultMetadata = null;
-//		Session session = HibernateManager.openSession();
-//		session.beginTransaction();
-//		try{
-//			
-//			DerbyGridEngine engine = new DerbyGridEngine();
-//			Collection<GridResultItem> lastResults = engine.executeQuery(this, session, monitor);
-//			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
-//			return lastResults;
-//		}finally{
-//			if (session.isOpen()){
-//				session.getTransaction().commit();
-//				session.close();
-//			}
-//		}
-		return null;
+		resultMetadata = null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try{
+			
+			DerbyGridEngine engine = new DerbyGridEngine();
+			Collection<GridResultItem> lastResults = engine.executeQuery(this, session, monitor);
+			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
+			return lastResults;
+		}finally{
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
+		}
 	}
 	
 	/**

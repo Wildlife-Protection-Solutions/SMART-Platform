@@ -24,10 +24,9 @@ package org.wcs.smart.observation.query.ui.definition;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.ui.definition.AbstractSummaryGroupByValuePanel;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
 
 /**
- * Summary patrol query definition panel. This panel allows
+ * Summary observation query definition panel. This panel allows
  * users to specify row, column group by and values to compute.
  * 
  * @author Emily

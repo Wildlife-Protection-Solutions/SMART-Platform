@@ -28,10 +28,9 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.AbstractGridDefinitionPanel;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
 
 /**
- * Gridded patrol query definition panel.
+ * Gridded observation query definition panel.
  * @author Emily
  *
  */

@@ -59,16 +59,10 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.engine.grids.AddCellMerger;
-import org.wcs.smart.patrol.query.engine.grids.DistanceValueComputer;
-import org.wcs.smart.patrol.query.engine.grids.ExistsValueComputer;
-import org.wcs.smart.patrol.query.engine.grids.GridAnalysisEngine;
 import org.wcs.smart.patrol.query.engine.grids.PatrolCntCellMerger;
 import org.wcs.smart.patrol.query.engine.grids.PatrolCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
-import org.wcs.smart.patrol.query.engine.visitors.HasObservationFilterVisitor;
-import org.wcs.smart.patrol.query.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -77,6 +71,14 @@ import org.wcs.smart.patrol.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.AddCellMerger;
+import org.wcs.smart.query.common.engine.DistanceValueComputer;
+import org.wcs.smart.query.common.engine.ExistsValueComputer;
+import org.wcs.smart.query.common.engine.GridAnalysisEngine;
+import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.query.model.GridResultItem;
@@ -89,7 +91,7 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
-public class DerbyGridEngine extends DerbyQueryEngine2{
+public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	private Collection<GridResultItem> myResults;
 	
 	private PatrolGriddedQuery query;
@@ -400,7 +402,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				}
 
 				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
-				PatrolQueryPlugIn.logSql(sql.toString());
+				QueryPlugIn.logSql(sql.toString());
 				rs = c.createStatement().executeQuery(sql.toString());
 			}else if(value instanceof PatrolCategoryValueItem){
 				PatrolCategoryValueItem tmp = (PatrolCategoryValueItem)value;
@@ -451,7 +453,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				sql.append(" group by "); //$NON-NLS-1$
 				sql.append("tile_id"); //$NON-NLS-1$
 				
-				PatrolQueryPlugIn.logSql(sql.toString());
+				QueryPlugIn.logSql(sql.toString());
 				rs = c.createStatement().executeQuery(sql.toString());
 			}else{
 				throw new SQLException(Messages.DerbyGridEngine_Error_GridValueNotSupported);	
@@ -549,7 +551,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		sql.append(tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = "); //$NON-NLS-1$
 		sql.append("tmp.pld_uuid"); //$NON-NLS-1$
 
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		
 		while(rs.next()){
@@ -619,16 +621,16 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		DateFilter dateFilter = query.getDateFilter();
 		if (dateFilter != null ){
-			String dfilter = DerbyFilterToSqlGenerator.toSql(dateFilter, this);
+			String dfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, this);
 			if (dfilter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
 				sql.append(dfilter);
 			}
 		}
 		sql.append( " and "); //$NON-NLS-1$
-		sql.append(DerbyFilterToSqlGenerator.toSql(query.getConservationAreaFilterAsFilter(), this));
+		sql.append(PatrolFilterSqlGenerator.INSTANCE.toSql(query.getConservationAreaFilterAsFilter(), this));
 		
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		
 		
@@ -743,7 +745,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 

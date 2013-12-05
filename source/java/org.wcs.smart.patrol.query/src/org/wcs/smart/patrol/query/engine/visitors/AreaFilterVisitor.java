@@ -27,7 +27,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.query.engine.DerbyQueryEngine2;
+import org.wcs.smart.patrol.query.engine.DerbyPatrolQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
@@ -43,7 +43,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 
 	private HashSet<String> addedTableNames = new HashSet<String>();
 	private StringBuilder sql;
-	private DerbyQueryEngine2 engine;
+	private DerbyPatrolQueryEngine engine;
 	private HashSet<Class<?>> usedTables;
 	
 	/**
@@ -53,7 +53,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	 * @param usedTables list of tables already added to sql (Track.class)
 	 * only needs to be added once
 	 */
-	public AreaFilterVisitor(StringBuilder sql, DerbyQueryEngine2 engine,
+	public AreaFilterVisitor(StringBuilder sql, DerbyPatrolQueryEngine engine,
 			HashSet<Class<?>> usedTables){
 		this.sql = sql;
 		this.engine = engine;

@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.query.model.columns;
 
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -82,67 +83,36 @@ public class FixedQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-//		if (queryResultItem instanceof PatrolQueryResultItem) {
-//			PatrolQueryResultItem item = (PatrolQueryResultItem) queryResultItem;
-//
-//			switch (column) {
-//			case PATROL_ARMED:
-//				if (item.isArmed()) {
-//					return Boolean.TRUE;
-//				} else {
-//					return Boolean.FALSE;
-//				}
-//			case PATROL_END_DATE:
-//				return item.getPatrolEndDate();
-//			case PATROL_ID:
-//				return item.getPatrolId();
-//			case PATROL_LEG_ID:
-//				return item.getPatrolLegId();
-//			case PATROL_MANDATE:
-//				return item.getMandate();
-//			case PATROL_OBJETIVE:
-//				return item.getObjective();
-//			case PATROL_START_DATE:
-//				return item.getPatrolStartDate();
-//			case PATROL_STATION:
-//				return item.getStation();
-//			case PATROL_LEG_LEADER:
-//				return item.getLeader();
-//			case PATROL_LEG_PILOT:
-//				return item.getPilot();
-//			case PATROL_LEG_START_DATE:
-//				return item.getPatrolLegStartDate();
-//			case PATROL_LEG_END_DATE:
-//				return item.getPatrolLegEndDate();
-//			case PATROL_TEAM:
-//				return item.getTeam();
-//			case PATROL_TYPE:
-//				return item.getPatrolType().getGuiName();
-//			case WAYPOINT_ID:
-//				return item.getWaypointId();
-//			case TRANSPORT_TYPE:
-//				return item.getTransportType();
-//			case WAYPOINT_COMMENT:
-//				return item.getWaypointComment();
-//			case WAYPOINT_DATE:
-//				return item.getWpDateTime();
-//			case WAYPOINT_DIRECTION:
-//				return item.getWaypointDirection();
-//			case WAYPOINT_DISTANCE:
-//				return item.getWaypointDistance();
-//			case WAYPOINT_TIME:
-//				return item.getWaypointTime();
-//			case WAYPOINT_X:
-//				return item.getWaypointX();
-//			case WAYPOINT_Y:
-//				return item.getWaypointY();
-//			case CA_ID:
-//				return item.getConservationAreaId();
-//			case CA_NAME:
-//				return item.getConservationAreaName();
-//			}
-//		}
-		return ""; //$NON-NLS-1$
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
+
+			switch (column) {
+			
+			case WAYPOINT_ID:
+				return item.getWaypointId();
+			case WAYPOINT_SOURCE:
+				return item.getSourceId();
+			case WAYPOINT_COMMENT:
+				return item.getWaypointComment();
+			case WAYPOINT_DATE:
+				return item.getWpDateTime();
+			case WAYPOINT_DIRECTION:
+				return item.getWaypointDirection();
+			case WAYPOINT_DISTANCE:
+				return item.getWaypointDistance();
+			case WAYPOINT_TIME:
+				return item.getWpDateTime();
+			case WAYPOINT_X:
+				return item.getWaypointX();
+			case WAYPOINT_Y:
+				return item.getWaypointY();
+			case CA_ID:
+				return item.getConservationAreaId();
+			case CA_NAME:
+				return item.getConservationAreaName();
+			}
+		}
+		return null;
 	}
 
 	/**

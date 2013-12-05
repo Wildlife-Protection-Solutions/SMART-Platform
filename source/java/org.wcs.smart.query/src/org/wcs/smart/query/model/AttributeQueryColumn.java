@@ -19,11 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.model.columns;
+package org.wcs.smart.query.model;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.query.model.QueryColumn;
 
 
 /**
@@ -34,9 +32,9 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeQueryColumn extends QueryColumn {
+public abstract class AttributeQueryColumn extends QueryColumn {
 
-	private String attributeKey = null;
+	protected String attributeKey = null;
 	
 	/**
 	 * Creates a new attribute column.
@@ -71,30 +69,4 @@ public class AttributeQueryColumn extends QueryColumn {
 		this.attributeKey = key.split(":")[1]; //$NON-NLS-1$
 	}
 
-
-	/**
-	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
-	 */
-	@Override
-	public Object getValue(IResultItem queryResultItem) {
-//		if (queryResultItem instanceof PatrolQueryResultItem) {
-//			PatrolQueryResultItem item = (PatrolQueryResultItem) queryResultItem;
-//			Object x = item.getAttributeValue(attributeKey);
-//			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
-//				return Boolean.valueOf((Double)x >= 0.5);
-//			}
-//			return x;
-//		}
-		return ""; //$NON-NLS-1$
-	}
-
-
-	/**
-	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#clone()
-	 */
-	@Override
-	public QueryColumn clone() {
-		QueryColumn newColumn = new AttributeQueryColumn(getName(), getKey(), getType());
-		return newColumn;
-	}
 }

@@ -1,4 +1,4 @@
-package org.wcs.smart.patrol.query.engine;
+package org.wcs.smart.query.common.engine;
 
 import java.sql.Connection;
 import java.sql.SQLException;

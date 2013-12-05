@@ -43,6 +43,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -246,8 +247,10 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 			}else{
 				loadQueryLoad.schedule();
 			}
+			QueryEventManager.getInstance().addListener(qListener);
 		}
-		QueryEventManager.getInstance().addListener(qListener);
+		
+		
 	}
 
 	/**
@@ -313,6 +316,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 			resultPage = new GriddedTableResultsPage(this);
 			addPage(0, resultPage, input);
 			setPageText(0, Messages.GriddedEditor_TableResultsTabName);
+			setPageImage(0, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
 			if (this.query != null && this.getQuery().getUuid() == null){
 				resultPage.setQuery();
 			}
@@ -320,7 +324,9 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 			mapPage = new GriddedResultsMapEditorPage(this);
 			addPage(1, mapPage, input);
 			setPageText(1, Messages.GriddedEditor_MappedResultsTabName);
+			setPageImage(1, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
+			setTitleImage(input.getType().getImage());
 		} catch (final Throwable t) {
 			QueryPlugIn.log(Messages.GriddedEditor_Error_CouldNotOpen, t);
 		}finally{

@@ -4,6 +4,12 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.query.internal.messages"; //$NON-NLS-1$
+	public static String DerbyFilterToSqlGenerator_FilterTypeNotSupported;
+	public static String AttributeFilter_InvalidAttributePrefix;
+	public static String AttributeFilter_InvalidWaypointObservationPrefix;
+	public static String CategoryFilter_InvalidPrefix;
+	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
+	public static String DerbyFilterToSqlGenerator_OperatorNotSupported;
 	public static String AddFolderHandler_CouldNotAddFolderError;
 	public static String AddFolderHandler_DefaultNewFolderName;
 	public static String AllCategory_AllCategoriesLabel;
@@ -114,6 +120,9 @@ public class Messages extends NLS {
 	public static String GriddedValuePanel_ProjectionsLabel;
 	public static String GriddedValuePanel_UknownProjectionLabel;
 	public static String GriddedValuePanel_UnknownUnitsLabel;
+	public static String GridQueryColumn_TileXIdColumnName;
+	public static String GridQueryColumn_TileYIdColumnName;
+	public static String GridQueryColumn_ValueColumnName;
 	public static String GroupByFilterDialog_DeSelectAllLabel;
 	public static String GroupByFilterDialog_DialogMessage;
 	public static String GroupByFilterDialog_DialogTitle;

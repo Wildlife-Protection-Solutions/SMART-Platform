@@ -19,50 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.visitors;
+package org.wcs.smart.query.common.engine.visitors;
 
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
-import org.wcs.smart.query.model.filter.IValueVisitor;
-import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.filter.AttributeFilter;
+import org.wcs.smart.query.model.filter.CategoryFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Determines if a value item has a category or attribute value.
+ * Determines if an observation filter (category or attribute filter)
+ * are used in the filter.
  * 
  * @author Emily
  *
  */
-public class HasObservationValueVisitor implements IValueVisitor{
+public class HasObservationFilterVisitor implements IFilterVisitor{
 
 	private boolean hasCategory = false;
 	private boolean hasAttribute = false;
 	
+	
 	@Override
-	public void visit(IValueItem item) {
+	public void visit(IFilter filter) {
 		if (hasCategory && hasAttribute) return;
-		if (item instanceof PatrolCategoryValueItem){
-			hasCategory = true;
-		}else if (item instanceof PatrolAttributeValueItem){
+		if (filter instanceof AttributeFilter){
 			hasAttribute = true;
-			if (((PatrolAttributeValueItem) item).getCategoryKey() != null){
-				hasCategory = true;
-			}
-		}		
+		}else if (filter instanceof CategoryFilter){
+			hasCategory = true;
+		}
 	}
 	
 	/**
 	 * 
-	 * @return true if value has category
+	 * @return true if the filter contains a category filter
 	 */
-	public boolean hasCategory(){
+	public boolean hasCategoryFilter(){
 		return this.hasCategory;
 	}
 
 	/**
 	 * 
-	 * @return true if value has attribute
+	 * @return ture if filter contains an attribute filter
 	 */
-	public boolean hasAttribute(){
+	public boolean hasAttributeFilter(){
 		return this.hasAttribute;
+	}
+	
+	/**
+	 * clears the state of the visitor so it can be re-used
+	 */
+	public void clear(){
+		hasCategory = false;
+		hasAttribute = false;
 	}
 }

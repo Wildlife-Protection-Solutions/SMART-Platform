@@ -19,42 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.visitors;
+package org.wcs.smart.query.common.engine;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
 
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.AttributeInfo;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
+import com.vividsolutions.jts.geom.LineString;
+
 
 /**
- * Attribute Filter collector. This visitor collects
- * attribute filters.
+ * Computes the cell value when rasterizing. 
  * 
- * @author Emily
+ * @author egouge
  *
  */
-public class AttributeFilterCollectorVisitor implements IFilterVisitor{
+public interface IValueComputer<T> {
 
-	private List<AttributeInfo> filters = new ArrayList<AttributeInfo>();
-
-	@Override
-	public void visit(IFilter filter) {
-		if (filter instanceof AttributeFilter){
-			AttributeFilter f = (AttributeFilter) filter;
-			filters.add(new AttributeInfo(f.getAttributeKey(),f.getAttributeType()));
-			
-		}
-	}
-	
 	/**
+	 * Computes the cell value when rasterizing a linestring.
 	 * 
-	 * @return list of attribute filters found
+	 * @param existingValue if a linestring has already visited this
+	 * tile then this is the value computed earlier; otherwise the value 
+	 * is null 
+	 * @param t tile being visited
+	 * @param gridDef grid definition grid definition
+	 * @param ls linestring being rasterized
+	 * @return value for cell computed for the cell
+	 * @throws expection if error occurs computing value
 	 */
-	public List<AttributeInfo> getAttributeInfo(){
-		return this.filters;
-	}
+	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) throws Exception;
 }
-

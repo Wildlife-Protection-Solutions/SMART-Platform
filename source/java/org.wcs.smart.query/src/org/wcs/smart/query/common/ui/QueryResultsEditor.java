@@ -43,6 +43,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -320,11 +321,16 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			page1 = new QueryResultsTablePage(this);
 			addPage(0, page1, input);
 			setPageText(0, Messages.QueryResultsEditor_TableResultsTabName);
+			setPageImage(0, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
 			page1.updateQueryName();
+			
 			
 			page2 = new QueryMapPageEditor(this);
 			addPage(1, page2, input);
 			setPageText(1, Messages.QueryResultsEditor_MappedResultsTabName);
+			setPageImage(1, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			
+			setTitleImage(input.getType().getImage());
 			
 			//run this in a job as it needs
 			//to load the data model to get the query

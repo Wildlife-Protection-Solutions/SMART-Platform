@@ -19,42 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.grids;
+package org.wcs.smart.query.common.engine.visitors;
+
+import org.wcs.smart.query.model.filter.IGroupByVisitor;
+import org.wcs.smart.query.model.summary.AttributeGroupBy;
+import org.wcs.smart.query.model.summary.CategoryGroupBy;
+import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**
- * CellMerger that assumes the cell values
- * are double and merges them by adding them together.
+ * Visitor for group bys that determine if categories are used in any group by clause.
  * 
- * @author egouge
+ * @author Emily
  *
  */
-public class AddCellMerger implements ICellMerger<Double> {
+public class HasObservationGroupByVisitor implements IGroupByVisitor {
 
-	/**
-	 * <p>
-	 * Assumes the cell values are double.  Adds the
-	 * results together and returns a new double
-	 * </p>
-	 * @see org.wcs.smart.patrol.query.engine.grids.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
-	 */
+
+	private boolean hasCategory = false;
+	
 	@Override
-	public Double mergeCell(Double v1, Double v2) {
-		if(v1 == null ){
-			return v2;
-		}
-		if (v2 == null){
-			return v1;
-		}
-		
-		return v1 + v2;
+	public void visit(IGroupBy item) {
+		if (hasCategory) return;
+		if (item instanceof CategoryGroupBy){
+			hasCategory = true;
+		}else if (item instanceof AttributeGroupBy){
+			if (((AttributeGroupBy) item).getCategoryHkey() != null){
+				hasCategory = true;
+			}
+		}		
 	}
-
+	
 	/**
-	 * @see org.wcs.smart.patrol.query.engine.grids.ICellMerger#getFinalValue(java.lang.Object)
+	 * 
+	 * @return true if group by contains a category
 	 */
-	@Override
-	public Double getFinalValue(Double value) {
-		return value;
+	public boolean hasCategory(){
+		return this.hasCategory;
 	}
 
 }

@@ -19,31 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.grids;
+package org.wcs.smart.query.common.engine.visitors;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.wcs.smart.query.model.filter.AttributeFilter;
+import org.wcs.smart.query.model.filter.AttributeInfo;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Merges together data from two grid cells from
- * two different linestrings.
+ * Attribute Filter collector. This visitor collects
+ * attribute filters.
  * 
- * @author egouge
+ * @author Emily
  *
  */
-public interface ICellMerger<T> {
+public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 
-	/**
-	 * Merges data from two cells  
-	 * @param v1 cell 1 value
-	 * @param v2 cell 2 value
-	 * @return new value
-	 */
-	public T mergeCell(T v1, T v2);
+	private List<AttributeInfo> filters = new ArrayList<AttributeInfo>();
+
+	@Override
+	public void visit(IFilter filter) {
+		if (filter instanceof AttributeFilter){
+			AttributeFilter f = (AttributeFilter) filter;
+			filters.add(new AttributeInfo(f.getAttributeKey(),f.getAttributeType()));
+			
+		}
+	}
 	
 	/**
-	 * Converts the cell object to a double value
-	 * that is used to create the raster image.
 	 * 
-	 * @param value cell object value
-	 * @return double value
+	 * @return list of attribute filters found
 	 */
-	public Double getFinalValue(T value);
+	public List<AttributeInfo> getAttributeInfo(){
+		return this.filters;
+	}
 }
+

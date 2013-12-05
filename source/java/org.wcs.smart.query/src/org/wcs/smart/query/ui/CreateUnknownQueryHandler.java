@@ -26,8 +26,10 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
@@ -39,29 +41,68 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  */
 public class CreateUnknownQueryHandler extends AbstractHandler {
 
+	private static final String QUERY_TYPE_KEY = "org.wcs.smart.query.type";
+	
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		QueryTypeDialog dialog = new QueryTypeDialog(HandlerUtil.getActiveShell(event));
-		if (dialog.open() != IDialogConstants.OK_ID){
-			return null;
+		showQueryPerspective(event);
+		String qType = event.getParameter(QUERY_TYPE_KEY);
+		if (qType != null){
+			IQueryType type = QueryTypeManager.getInstance().findQueryType(qType);
+			if (type != null){
+				createQuery(type);
+				return null;
+			}
 		}
-		IQueryType type = dialog.getSelectedQueryType();
-		if (type == null){
-			return null;
-		}
-		/* open editor for query type */
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-					new QueryEditorInput(type),
-					type.getEditorId());	
-		} catch (Throwable t) {
-			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
-		}
+		createUnknownQuery(event);
 		
 		return null;
 	}
 
+	private void showQueryPerspective(final ExecutionEvent event){
+		try {
+			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
+			
+			String perspectiveId = QueryPlugIn.getActivePerspectiveId();
+			if (!activeId.equals(perspectiveId)){
+				//show query perspective
+				HandlerUtil
+				.getActiveWorkbenchWindow(event)
+				.getWorkbench()
+				.showPerspective(perspectiveId,
+						HandlerUtil.getActiveWorkbenchWindow(event));	
+			}
+			
+		} catch (WorkbenchException e) {
+			QueryPlugIn
+					.displayLog("Error opening query perspective", e);
+		}
+	}
+	private void createQuery(IQueryType qtype){
+		/* open editor for query type */
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+					new QueryEditorInput(qtype),
+					qtype.getEditorId());	
+		} catch (Throwable t) {
+			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
+		}
+	}
+	
+	private void createUnknownQuery(final ExecutionEvent event){
+
+		QueryTypeDialog dialog = new QueryTypeDialog(HandlerUtil.getActiveShell(event));
+		if (dialog.open() != IDialogConstants.OK_ID){
+			return ;
+		}
+		IQueryType type = dialog.getSelectedQueryType();
+		if (type == null){
+			return ;
+		}
+		createQuery(type);
+		
+	}
 }
 

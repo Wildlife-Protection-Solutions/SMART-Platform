@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,16 +34,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.engine.DerbySummaryEngine;
 import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
@@ -91,19 +88,18 @@ public class ObservationSummaryQuery extends SummaryQuery {
 	
 	@Transient
 	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor) throws Exception{
-//		Session session = HibernateManager.openSession();
-//		session.beginTransaction();
-//		try{
-//			DerbySummaryEngine engine = new DerbySummaryEngine();
-//			SummaryQueryResult lastResults = engine.executeQuery(this, session, monitor);
-//			return lastResults;
-//		}finally{
-//			if (session.isOpen()){
-//				session.getTransaction().commit();
-//				session.close();
-//			}
-//		}
-		return null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try{
+			DerbySummaryEngine engine = new DerbySummaryEngine();
+			SummaryQueryResult lastResults = engine.executeQuery(this, session, monitor);
+			return lastResults;
+		}finally{
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
+		}
 	}
 	
 	/**
