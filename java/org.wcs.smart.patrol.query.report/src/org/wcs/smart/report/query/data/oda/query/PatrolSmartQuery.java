@@ -31,14 +31,14 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.ISmartQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
-import org.wcs.smart.patrol.query.model.SimpleQuery;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -69,8 +69,8 @@ public class PatrolSmartQuery implements ISmartQuery {
 		// attempt to parse query
 		if (query.getQuery() instanceof SimpleQuery) {
 			((SimpleQuery) query.getQuery()).getFilter();
-		} else if (query.getQuery() instanceof SummaryQuery) {
-			SummaryQuery sumQuery = (SummaryQuery)query.getQuery();
+		} else if (query.getQuery() instanceof PatrolSummaryQuery) {
+			PatrolSummaryQuery sumQuery = (PatrolSummaryQuery)query.getQuery();
 			
 			//date group by problem with reports 
 			GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
@@ -80,8 +80,8 @@ public class PatrolSmartQuery implements ISmartQuery {
 					throw new OdaException(Messages.SmartQuery_Warning_SummaryGroupByDates);
 				}
 			}
-		} else if (query.getQuery() instanceof GriddedQuery){
-			((GriddedQuery)query.getQuery()).getQueryDefinition();
+		} else if (query.getQuery() instanceof PatrolGriddedQuery){
+			((PatrolGriddedQuery)query.getQuery()).getQueryDefinition();
 		}
 	}
 
@@ -95,9 +95,9 @@ public class PatrolSmartQuery implements ISmartQuery {
 				query.getQuery().getType().getKey().equals(PatrolQueryType.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) query.getQuery());
 		} else if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)) {
-			return new SummaryQueryResultSetMetadata((SummaryQuery) query.getQuery());
+			return new SummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery());
 		} else if (query.getQuery().getType().getKey().equals(PatrolGridQueryType.KEY)){
-			return new SimpleQueryResultSetMetadata( (GriddedQuery) query.getQuery());
+			return new SimpleQueryResultSetMetadata( (PatrolGriddedQuery) query.getQuery());
 		}
 		throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadMetadata);
 	}
@@ -141,13 +141,13 @@ public class PatrolSmartQuery implements ISmartQuery {
 			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new MemoryQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
 		}else  if (query.getQuery().getType().getKey().equals(PatrolGridQueryType.KEY)){
-			((GriddedQuery) query.getQuery()).setDateFilter(dateFilter);
+			((PatrolGriddedQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new MemoryQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
 		} else if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)){
-			((SummaryQuery) query.getQuery()).setDateFilter(dateFilter);
+			((PatrolSummaryQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
-					(SummaryQuery) query.getQuery(),
-					new SummaryQueryResultSetMetadata((SummaryQuery) query.getQuery()));
+					(PatrolSummaryQuery) query.getQuery(),
+					new SummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery()));
 		}
 		
 		return resultSet;

@@ -639,6 +639,11 @@
       <command
             id="org.wcs.smart.query.createUnknownQuery"
             name="%createunknowquery.command.name">
+         <commandParameter
+               id="org.wcs.smart.query.type"
+               name="Query Type"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.query.openQuery"
@@ -671,23 +676,6 @@
                      </equals>
                   </or>
                </with>
-               <with
-                     variable="activeEditorId">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.ui.QueryResultsEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.SummaryEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.GriddedEditor">
-                     </equals>
-                  </or>
-               </with>
             </and>
          </enabledWhen>
       </handler>
@@ -707,23 +695,6 @@
                   <equals
                         value="true">
                   </equals>
-               </with>
-               <with
-                     variable="activeEditorId">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.ui.QueryResultsEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.SummaryEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.GriddedEditor">
-                     </equals>
-                  </or>
                </with>
                <with
                      variable="activeWorkbenchWindow.activePerspective">

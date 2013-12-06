@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.model.observation;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -35,10 +36,8 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolAttributeQueryColumn extends QueryColumn {
+public class PatrolAttributeQueryColumn extends AttributeQueryColumn {
 
-	private String attributeKey = null;
-	
 	/**
 	 * Creates a new attribute column.
 	 * 
@@ -47,18 +46,7 @@ public class PatrolAttributeQueryColumn extends QueryColumn {
 	 * @param type the type of the attribute column
 	 */
 	public PatrolAttributeQueryColumn(String name, String attributeId, AttributeType type){
-		super(name, "attribute:" + attributeId, null); //$NON-NLS-1$
-		this.attributeKey = attributeId;
-		
-		ColumnType ctype = ColumnType.STRING;
-		if (type == AttributeType.NUMERIC ){
-			ctype = ColumnType.NUMBER;
-		}else if (type == AttributeType.BOOLEAN){
-			ctype = ColumnType.BOOLEAN;
-		}else {
-			ctype = ColumnType.STRING;
-		}
-		super.setType(ctype);
+		super(name, attributeId, type); //$NON-NLS-1$
 	}
 	
 	/**
@@ -69,7 +57,6 @@ public class PatrolAttributeQueryColumn extends QueryColumn {
 	 */
 	public PatrolAttributeQueryColumn(String name, String key, ColumnType type){
 		super(name, key, type);
-		this.attributeKey = key.split(":")[1]; //$NON-NLS-1$
 	}
 
 

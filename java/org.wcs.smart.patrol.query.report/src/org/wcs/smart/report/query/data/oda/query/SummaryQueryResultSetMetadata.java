@@ -32,8 +32,8 @@ import org.wcs.smart.data.oda.smart.impl.SmartDriver;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.engine.DerbySummaryEngine;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
-import org.wcs.smart.patrol.query.model.SummaryQueryResult;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
@@ -56,7 +56,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 * creates a new metadata object for a given query
 	 * @param query
 	 */
-	public SummaryQueryResultSetMetadata(final SummaryQuery query){
+	public SummaryQueryResultSetMetadata(final PatrolSummaryQuery query){
 		results =  new SummaryQueryResult();
 		Job parseQuery = new Job(Messages.SummaryQueryResultSetMetadata_ParseQueryJob) {
 			

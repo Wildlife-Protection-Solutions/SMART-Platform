@@ -24,6 +24,10 @@ package org.wcs.smart.patrol.query.engine.grids;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.wcs.smart.query.common.engine.IValueComputer;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+
 import com.vividsolutions.jts.geom.LineString;
 
 /**
@@ -38,7 +42,7 @@ public class PatrolCntValueComputer implements IValueComputer<HashSet<Object>> {
 
 	
 	/**
-	 * @see org.wcs.smart.patrol.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.patrol.query.engine.grids.Tile, org.wcs.smart.patrol.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
 	 * 
 	 * @return a hashset that contains the hashcode patrol_uuid represented by the linestring
 	 * being processed

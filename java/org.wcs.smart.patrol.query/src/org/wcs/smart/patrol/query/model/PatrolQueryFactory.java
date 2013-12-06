@@ -62,15 +62,15 @@ public class PatrolQueryFactory {
 	 */
 	public static Query createBlankQuery(IQueryType querytype){
 		if (querytype.getClass().equals(PatrolObservationQueryType.class)){
-			return new ObservationQuery();
+			return new PatrolObservationQuery();
 		}else if (querytype.getClass().equals(PatrolGridQueryType.class)){
-			return new GriddedQuery();
+			return new PatrolGriddedQuery();
 		}else if (querytype.getClass().equals(PatrolQueryType.class)){
 			return new PatrolQuery();
 		}else if (querytype.getClass().equals(PatrolWaypointQueryType.class)){
-			return new WaypointQuery();
+			return new PatrolWaypointQuery();
 		}else if (querytype.getClass().equals(PatrolSummaryQueryType.class)){
-			return new SummaryQuery();
+			return new PatrolSummaryQuery();
 		}
 		return null;
 	}
@@ -97,15 +97,15 @@ public class PatrolQueryFactory {
 		return null;
 	}
 	
-	public static ObservationQuery createObservationQuery(){
-		ObservationQuery query = new ObservationQuery();
+	public static PatrolObservationQuery createObservationQuery(){
+		PatrolObservationQuery query = new PatrolObservationQuery();
 		initQuery(query, null);
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;
 	}
 	
-	public static WaypointQuery createWaypointQuery(){
-		WaypointQuery query = new WaypointQuery();
+	public static PatrolWaypointQuery createWaypointQuery(){
+		PatrolWaypointQuery query = new PatrolWaypointQuery();
 		initQuery(query, null);
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;
@@ -119,16 +119,16 @@ public class PatrolQueryFactory {
 	}
 	
 	
-	public static GriddedQuery createGriddedQuery(){
-		GriddedQuery query = new GriddedQuery();
+	public static PatrolGriddedQuery createGriddedQuery(){
+		PatrolGriddedQuery query = new PatrolGriddedQuery();
 		initQuery(query, Messages.GriddedQuery_DefaultQueryName);
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		query.setDateFilter(null);
 		return query;
 	}
 	
-	public static SummaryQuery createSummaryQuery(){
-		SummaryQuery query = new SummaryQuery();
+	public static PatrolSummaryQuery createSummaryQuery(){
+		PatrolSummaryQuery query = new PatrolSummaryQuery();
 		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
 		
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));

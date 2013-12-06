@@ -41,10 +41,11 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IFilterProcessor;
 
 /**
  * Query engine for patrol queries.
@@ -53,7 +54,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbyPatrolEngine extends DerbyQueryEngine2{
+public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 
 	private List<PatrolQueryResultItem> myResults;
 	private String queryDataTable;
@@ -120,7 +121,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(buildFromClause());
 		sql.append(" ORDER BY p_id, pl_uuid "); //$NON-NLS-1$
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
 		try {
@@ -298,7 +299,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		PatrolQueryPlugIn.logSql(sql.toString());
+		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 

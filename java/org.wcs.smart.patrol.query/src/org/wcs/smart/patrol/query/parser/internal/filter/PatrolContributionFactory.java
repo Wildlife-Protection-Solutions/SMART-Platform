@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
@@ -106,9 +107,9 @@ public class PatrolContributionFactory {
 	 *  
 	 * @return the sql for the given filter or null if filter cannot be processed
 	 */
-	public static String getSql(HashMap<Class<?>, String> tableMapping, IFilter filter){
+	public static String getSql(IQueryEngine engine, IFilter filter){
 		for (IQueryFilterPatrolContribution contribution : getContributions()) {
-			String sql = contribution.asSql(tableMapping, filter);
+			String sql = contribution.asSql(engine, filter);
 			if (sql != null){
 				return sql;
 			}

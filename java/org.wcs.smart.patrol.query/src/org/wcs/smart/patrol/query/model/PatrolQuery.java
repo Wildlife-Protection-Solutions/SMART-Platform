@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.query.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,10 +39,14 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.engine.DerbyPatrolEngine;
 import org.wcs.smart.patrol.query.model.observation.PatrolQueryColumnCache;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
+import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.filter.EmptyFilter;
+import org.wcs.smart.query.model.filter.QueryFilter;
 
 /**
  * A representation of a patrol query.
@@ -185,6 +191,22 @@ public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 				session.close();
 			}
 		}
+	}
+
+	@Override
+	protected QueryFilter parseQueryFilter() throws Exception {
+		if (strQueryFilter == null || strQueryFilter.length() == 0){
+			return new QueryFilter(EmptyFilter.INSTANCE);
+		}
+		if(queryFilter != null){
+			return queryFilter;
+		}
+		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
+		Parser parser = new Parser(is);
+		QueryFilter myQuery = parser.QueryFilter();
+		is.close();
+		queryFilter = myQuery;
+		return myQuery;
 	}
 }
 

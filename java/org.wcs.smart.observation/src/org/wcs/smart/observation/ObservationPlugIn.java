@@ -24,6 +24,7 @@ package org.wcs.smart.observation;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -38,6 +39,11 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.observation"; //$NON-NLS-1$
 
+	/**
+	 * waypoint source icon
+	 */
+	public static final String WAYPOINT_SOURCE_ICON = "org.wcs.smart.observation.waypointsource"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static ObservationPlugIn plugin;
 	
@@ -102,5 +108,13 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 			
 		});
 		
+	}
+	
+	@Override
+	public void initializeImageRegistry(ImageRegistry reg) {
+		reg.put(WAYPOINT_SOURCE_ICON,
+				imageDescriptorFromPlugin(PLUGIN_ID,
+						"images/icons/obj16/waypoint_source.png"));//$NON-NLS-1$
+		super.initializeImageRegistry(reg);
 	}
 }

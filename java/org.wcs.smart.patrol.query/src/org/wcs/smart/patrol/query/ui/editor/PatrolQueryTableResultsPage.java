@@ -33,7 +33,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.ui.querytable.QueryResultsTable;
+import org.wcs.smart.query.common.ui.QueryResultsTable;
 import org.wcs.smart.query.model.filter.DateFilter;
 
 

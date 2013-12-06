@@ -102,7 +102,7 @@ public class KeyGenerator {
 	}
 	
 	public static void main(String args[]) throws Exception{
-		File dbFile = new File("C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java\\org.wcs.smart\\data\\database\\smartdb");
+		File dbFile = new File("D:\\SMART\\Source\\trunk\\source\\java\\org.wcs.smart\\data\\database\\smartdb");
 		Connection c = getConnection(dbFile);
 		
 		KeyGenerator kg = new KeyGenerator();

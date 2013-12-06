@@ -10,10 +10,16 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart;bundle-version="2.0.0",
  org.eclipse.ui.forms,
  net.refractions.udig.catalog.rasterings;bundle-version="1.2.0",
- org.wcs.smart.observation;bundle-version="3.0.0"
+ org.wcs.smart.observation;bundle-version="3.0.0",
+ net.refractions.udig.style.sld;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.query,
+ org.wcs.smart.query.common.engine,
+ org.wcs.smart.query.common.engine.visitors,
+ org.wcs.smart.query.common.model,
+ org.wcs.smart.query.common.model.udig,
+ org.wcs.smart.query.common.ui,
  org.wcs.smart.query.event,
  org.wcs.smart.query.importexport,
  org.wcs.smart.query.model,
@@ -30,3 +36,4 @@ Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.ui.querylist,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
+Eclipse-BuddyPolicy: global

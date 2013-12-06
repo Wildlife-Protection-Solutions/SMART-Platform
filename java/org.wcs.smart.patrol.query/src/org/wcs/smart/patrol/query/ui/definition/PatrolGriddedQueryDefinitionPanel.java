@@ -24,7 +24,7 @@ package org.wcs.smart.patrol.query.ui.definition;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.AbstractGridDefinitionPanel;
@@ -85,7 +85,7 @@ public class PatrolGriddedQueryDefinitionPanel extends
 		
 		isInitializing = true;
 		try{
-			GriddedQuery gridQuery = (GriddedQuery)q.getQuery();
+			PatrolGriddedQuery gridQuery = (PatrolGriddedQuery)q.getQuery();
 			txtGridSize.setText(String.valueOf(gridQuery.getGridSize()));
 			try {
 				selectProjection(gridQuery.getCoordinateReferenceSystem());
@@ -102,7 +102,7 @@ public class PatrolGriddedQueryDefinitionPanel extends
 	@Override
 	public CoordinateReferenceSystem getDefaultProjection() {
 		try {
-			return ((GriddedQuery)currentQuery.getQuery()).getCoordinateReferenceSystem();
+			return ((PatrolGriddedQuery)currentQuery.getQuery()).getCoordinateReferenceSystem();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

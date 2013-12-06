@@ -27,6 +27,9 @@ import org.wcs.smart.query.ui.QueryPerspective;
  */
 public class QueryPlugIn extends AbstractUIPlugin {
 
+	private static final boolean LOG_QUERY = true;
+
+	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.query"; //$NON-NLS-1$
 
@@ -138,6 +141,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String GRID_ICON = "org.wcs.smart.query.grid"; //$NON-NLS-1$
 	
+	/**
+	 * Table Icon
+	 */
+	public static final String TABLE_ICON = "org.wcs.smart.query.tableicon"; //$NON-NLS-1$
+	
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
 	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
 
@@ -217,6 +225,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(COLUMN_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/column_header.png"));//$NON-NLS-1$
 		reg.put(AREA_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_filter.png"));//$NON-NLS-1$
 		reg.put(AREA_POLYGON_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_polygon.png"));//$NON-NLS-1$
+		reg.put(TABLE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/table_icon.png"));//$NON-NLS-1$)
 		super.initializeImageRegistry(reg);
 		
 	}
@@ -284,4 +293,22 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		return propertyProviders;
 		
 	}
+	
+	/**
+	 * Logs the given error to the error log.
+	 * 
+	 * @param message
+	 *            message
+	 * @param t
+	 *            error
+	 */
+	public static void logSql(String sql) {
+		if (!LOG_QUERY)
+			return;
+		
+		int status = IStatus.INFO;
+		getDefault().getLog().log(
+				new Status(status, PLUGIN_ID, IStatus.OK, sql, null));
+	}
+
 }

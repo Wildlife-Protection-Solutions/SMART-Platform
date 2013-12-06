@@ -23,6 +23,7 @@ import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -315,10 +316,10 @@ public class PatrolQueryColumnCache {
 			if (gridQueryColumns != null){
 				return cloneColumns(gridQueryColumns);
 			}	
-			QueryColumn[] tmp = new QueryColumn[PatrolGridQueryColumn.GridColumns.values().length];	
-			for (int i = 0; i < PatrolGridQueryColumn.GridColumns.values().length; i++) {
-				PatrolGridQueryColumn.GridColumns item = PatrolGridQueryColumn.GridColumns.values()[i];
-				tmp[i] = new PatrolGridQueryColumn(item); 
+			QueryColumn[] tmp = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
+			for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
+				GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
+				tmp[i] = new GridQueryColumn(item); 
 			}
 			gridQueryColumns  = tmp;
 		}

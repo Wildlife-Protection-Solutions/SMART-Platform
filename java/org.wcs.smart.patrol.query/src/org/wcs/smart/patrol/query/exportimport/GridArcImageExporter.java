@@ -30,7 +30,7 @@ import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.opengis.coverage.grid.GridCoverage;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 
@@ -61,14 +61,14 @@ public class GridArcImageExporter implements IQueryExporter {
 
 	@Override
 	public boolean canExport(Query query) {
-		return (GriddedQuery.class.isAssignableFrom(query.getClass()));
+		return (PatrolGriddedQuery.class.isAssignableFrom(query.getClass()));
 	}
 
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor)
 			throws Exception {
 		
-		File sourceFile = ((GriddedQuery)query).getLastRasterFile();
+		File sourceFile = ((PatrolGriddedQuery)query).getLastRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){
 			throw new Exception(Messages.GridArcImageExporter_ExportError, 
 					new Exception(

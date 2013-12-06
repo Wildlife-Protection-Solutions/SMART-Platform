@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.parser;
 import java.util.HashMap;
 import java.util.List;
 
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 
@@ -72,5 +73,5 @@ public interface IQueryFilterPatrolContribution {
 	 * @return null if filter is not one of the filters produced by createFilter; otherwise 
 	 * the sql string representing the query filter
 	 */
-	public String asSql(HashMap<Class<?>, String> tableMapping, IFilter filter );
+	public String asSql(IQueryEngine engine, IFilter filter );
 }
