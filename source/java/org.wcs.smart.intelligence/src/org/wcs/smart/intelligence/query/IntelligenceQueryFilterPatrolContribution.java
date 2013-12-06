@@ -22,12 +22,12 @@
 package org.wcs.smart.intelligence.query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.wcs.smart.patrol.query.parser.IExtensionFilter;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SmartUtils;
@@ -80,13 +80,13 @@ public class IntelligenceQueryFilterPatrolContribution implements IQueryFilterPa
 	 * @see org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution#asSql(java.util.HashMap, org.wcs.smart.query.model.filter.IFilter)
 	 */
 	@Override
-	public String asSql(HashMap<Class<?>, String> tableMapping, IFilter filter ){
+	public String asSql(IQueryEngine engine, IFilter filter ){
 		if (!(filter instanceof PatrolIntelligenceQueryFilter)){
 			return null;
 		}
 		
 		PatrolIntelligenceQueryFilter qFilter = (PatrolIntelligenceQueryFilter)filter;
-		String prefix = tableMapping.get(intelligenceOption.getOption().getPatrolAttributeClass());
+		String prefix = engine.tablePrefix(intelligenceOption.getOption().getPatrolAttributeClass());
 		String v = SmartUtils.stripQuotes((String)qFilter.getValue());
 		//if v is empty this means that this is "Any Plan" case
 		String intelPart = !qFilter.isAnyIntelligence(v) ? " AND p2i.intelligence_uuid = x'" + v + "'" : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$

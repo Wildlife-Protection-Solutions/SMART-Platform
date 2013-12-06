@@ -33,10 +33,10 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
-import org.wcs.smart.patrol.query.model.WaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.definition.SimplePatrolFilterPanel;
-import org.wcs.smart.patrol.query.ui.editor.QueryResultsEditor;
+import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -61,7 +61,7 @@ public class PatrolWaypointQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return WaypointQuery.class;
+		return PatrolWaypointQuery.class;
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class PatrolWaypointQueryType implements IQueryType {
 	 */
 	@Override
 	public String getEditorId() {
-		return QueryResultsEditor.ID;
+		return PatrolSimpleQueryResultEditor.ID;
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class PatrolWaypointQueryType implements IQueryType {
 	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(SimplePatrolFilterPanel.ID)){
-				((WaypointQuery)query).setQueryFilter(p.getQueryPart());
+				((PatrolWaypointQuery)query).setQueryFilter(p.getQueryPart());
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
 			}

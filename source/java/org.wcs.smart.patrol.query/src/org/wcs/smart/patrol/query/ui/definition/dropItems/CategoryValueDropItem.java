@@ -33,9 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.patrol.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
 /**
  * A drop item for a category value item.
@@ -95,7 +95,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("category:sum:"); //$NON-NLS-1$
-		CategoryValueItem.ValueType[] values = CategoryValueItem.ValueType.values();
+		ValueType[] values = ValueType.values();
 		for (int i = 0; i < values.length; i++){
 			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
 				sb.append(values[i].key + ":"); //$NON-NLS-1$

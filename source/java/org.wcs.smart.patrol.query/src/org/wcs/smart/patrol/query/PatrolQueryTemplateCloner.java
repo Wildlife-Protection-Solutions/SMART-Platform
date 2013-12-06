@@ -31,12 +31,12 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
-import org.wcs.smart.patrol.query.model.ObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
-import org.wcs.smart.patrol.query.model.WaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
@@ -97,10 +97,10 @@ public class PatrolQueryTemplateCloner implements
 	private void cloneGriddedQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
 		@SuppressWarnings("unchecked")
-		List<GriddedQuery> queries = (List<GriddedQuery>) engine.getSession().createCriteria(GriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<PatrolGriddedQuery> queries = (List<PatrolGriddedQuery>) engine.getSession().createCriteria(PatrolGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		for(GriddedQuery query : queries){
-			GriddedQuery clone = (GriddedQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolGridQueryType.KEY) );
+		for(PatrolGriddedQuery query : queries){
+			PatrolGriddedQuery clone = (PatrolGriddedQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolGridQueryType.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -127,10 +127,10 @@ public class PatrolQueryTemplateCloner implements
 	private void cloneSummaryQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
 		@SuppressWarnings("unchecked")
-		List<SummaryQuery> queries = (List<SummaryQuery>) engine.getSession().createCriteria(SummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<PatrolSummaryQuery> queries = (List<PatrolSummaryQuery>) engine.getSession().createCriteria(PatrolSummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		for(SummaryQuery query : queries){
-			SummaryQuery clone = (SummaryQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolSummaryQueryType.KEY) );
+		for(PatrolSummaryQuery query : queries){
+			PatrolSummaryQuery clone = (PatrolSummaryQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolSummaryQueryType.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -184,10 +184,10 @@ public class PatrolQueryTemplateCloner implements
 	private void cloneObservationQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
 		@SuppressWarnings("unchecked")
-		List<ObservationQuery> queries = (List<ObservationQuery>) engine.getSession().createCriteria(ObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
+		List<PatrolObservationQuery> queries = (List<PatrolObservationQuery>) engine.getSession().createCriteria(PatrolObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
 		
-		for(ObservationQuery query : queries){
-			ObservationQuery clone = (ObservationQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolObservationQueryType.KEY) );
+		for(PatrolObservationQuery query : queries){
+			PatrolObservationQuery clone = (PatrolObservationQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolObservationQueryType.KEY) );
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -214,10 +214,10 @@ public class PatrolQueryTemplateCloner implements
 	private void cloneWaypointQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
 		@SuppressWarnings("unchecked")
-		List<WaypointQuery> queries = (List<WaypointQuery>) engine.getSession().createCriteria(WaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<PatrolWaypointQuery> queries = (List<PatrolWaypointQuery>) engine.getSession().createCriteria(PatrolWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		for(WaypointQuery query : queries){
-			WaypointQuery clone = (WaypointQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolWaypointQueryType.KEY) );
+		for(PatrolWaypointQuery query : queries){
+			PatrolWaypointQuery clone = (PatrolWaypointQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolWaypointQueryType.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());

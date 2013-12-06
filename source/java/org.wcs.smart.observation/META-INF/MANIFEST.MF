@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.wcs.smart.observation.events,
+Export-Package: org.wcs.smart.observation,
+ org.wcs.smart.observation.events,
  org.wcs.smart.observation.model,
  org.wcs.smart.observation.ui,
  org.wcs.smart.observation.ui.input,

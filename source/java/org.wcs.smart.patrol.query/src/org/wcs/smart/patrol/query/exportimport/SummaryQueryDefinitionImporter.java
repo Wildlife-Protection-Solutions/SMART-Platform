@@ -28,7 +28,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
 import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
 import org.wcs.smart.query.importexport.IQueryImporter;
@@ -75,7 +75,7 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
-		SummaryQuery summaryQuery = PatrolQueryFactory.createSummaryQuery();
+		PatrolSummaryQuery summaryQuery = PatrolQueryFactory.createSummaryQuery();
 		QueryImportEngine.importNames(summaryQuery, qt);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();

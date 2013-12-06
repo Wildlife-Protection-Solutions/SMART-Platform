@@ -30,13 +30,13 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.ObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.definition.SimplePatrolFilterPanel;
-import org.wcs.smart.patrol.query.ui.editor.QueryResultsEditor;
+import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -62,7 +62,7 @@ public class PatrolObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return ObservationQuery.class;
+		return PatrolObservationQuery.class;
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class PatrolObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public String getEditorId() {
-		return QueryResultsEditor.ID;
+		return PatrolSimpleQueryResultEditor.ID;
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class PatrolObservationQueryType implements IQueryType {
 	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(SimplePatrolFilterPanel.ID)){
-				((ObservationQuery)query).setQueryFilter(p.getQueryPart());
+				((PatrolObservationQuery)query).setQueryFilter(p.getQueryPart());
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
 			}

@@ -23,6 +23,8 @@ package org.wcs.smart.patrol.query.engine.grids;
 
 import java.util.HashSet;
 
+import org.wcs.smart.query.common.engine.ICellMerger;
+
 /**
  * Merges together hashsets of hashcodes
  * of patrol uuids.
@@ -35,7 +37,7 @@ import java.util.HashSet;
 public class PatrolCntCellMerger implements ICellMerger<HashSet<Object>> {
 
 	/**
-	 * @see org.wcs.smart.patrol.query.engine.grids.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
+	 * @see org.wcs.smart.query.common.engine.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public HashSet<Object> mergeCell(HashSet<Object> v1, HashSet<Object> v2) {
@@ -55,7 +57,7 @@ public class PatrolCntCellMerger implements ICellMerger<HashSet<Object>> {
 	/**
 	 * @return the number of patrols in the hashset.
 	 * 
-	 * @see org.wcs.smart.patrol.query.engine.grids.ICellMerger#getFinalValue(java.lang.Object)
+	 * @see org.wcs.smart.query.common.engine.ICellMerger#getFinalValue(java.lang.Object)
 	 */
 	@Override
 	public Double getFinalValue(HashSet<Object> value) {

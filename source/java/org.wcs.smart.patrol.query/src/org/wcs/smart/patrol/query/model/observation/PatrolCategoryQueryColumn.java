@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.model.observation;
 
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -36,10 +37,9 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolCategoryQueryColumn extends QueryColumn{
+public class PatrolCategoryQueryColumn extends CategoryQueryColumn{
 
-	private int level;	//the category level in the database.
-		
+	
 	/**
 	 * Creates a new category column
 	 * 
@@ -47,8 +47,7 @@ public class PatrolCategoryQueryColumn extends QueryColumn{
 	 * @param level the level in the data model this column represents
 	 */
 	public PatrolCategoryQueryColumn(String name, int level){
-		super(name, "category:" + level, ColumnType.STRING); //$NON-NLS-1$
-		this.level = level;
+		super(name,level);
 	}
 	
 

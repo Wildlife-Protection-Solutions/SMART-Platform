@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -53,7 +53,7 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof SummaryQuery){
+		if (query instanceof PatrolSummaryQuery){
 			return true;
 		}
 		return false;
@@ -64,7 +64,7 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 	 */
 	@Override
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery) throws Exception {
-		SummaryQuery summary = (SummaryQuery) query;
+		PatrolSummaryQuery summary = (PatrolSummaryQuery) query;
 		if (summary.getDateFilter() == null){
 			summary.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
 		}

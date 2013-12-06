@@ -33,13 +33,13 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
-import org.wcs.smart.patrol.query.ui.editor.SummaryEditor;
+import org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -66,7 +66,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return SummaryQuery.class;
+		return PatrolSummaryQuery.class;
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getEditorId() {
-		return SummaryEditor.ID;
+		return PatrolSummaryEditor.ID;
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 	@Override
 	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
 	
-		SummaryQuery summary = (SummaryQuery)query;
+		PatrolSummaryQuery summary = (PatrolSummaryQuery)query;
 		
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$

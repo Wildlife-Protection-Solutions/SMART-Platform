@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -46,7 +47,9 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.ui.querytable.QueryResultsTable;
+import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
+import org.wcs.smart.query.common.ui.QueryResultsTable;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
@@ -317,7 +320,12 @@ public class PatrolQueryEditorTableContent {
 		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberofRecordsLabel);
 		lblNumResults = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
 	
-		resultsTable = new QueryResultsTable();
+		resultsTable = new QueryResultsTable(){
+			@Override
+			public CellLabelProvider getLabelProvider(QueryColumn column) {
+				return PatrolTableColumn.getLabelProvider(column);
+			}
+		};
 
 		TableViewer viewer = resultsTable.createTable(main);
 		viewer.getTable().setLayoutData(

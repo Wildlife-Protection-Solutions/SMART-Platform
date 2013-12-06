@@ -32,8 +32,8 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.patrol.query.model.SummaryQuery;
-import org.wcs.smart.patrol.query.model.SummaryQueryResult;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 
 /**
  * Result set for a summary SMART query.
@@ -58,7 +58,7 @@ public class SummaryQueryResultSet implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public SummaryQueryResultSet(SummaryQuery query,
+	public SummaryQueryResultSet(PatrolSummaryQuery query,
 			SummaryQueryResultSetMetadata metadata) {
 
 		this.metadata = metadata;

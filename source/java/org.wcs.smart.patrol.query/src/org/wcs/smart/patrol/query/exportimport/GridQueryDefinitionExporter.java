@@ -23,7 +23,7 @@ package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.model.GriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -47,7 +47,7 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		return GriddedQuery.class.isAssignableFrom(query.getClass());		
+		return PatrolGriddedQuery.class.isAssignableFrom(query.getClass());		
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery)
 			throws Exception {
 		
-		GriddedQuery gQuery = (GriddedQuery)query;
+		PatrolGriddedQuery gQuery = (PatrolGriddedQuery)query;
 		
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition"); //$NON-NLS-1$

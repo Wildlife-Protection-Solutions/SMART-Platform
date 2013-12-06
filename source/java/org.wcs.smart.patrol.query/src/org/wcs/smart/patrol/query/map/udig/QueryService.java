@@ -42,14 +42,16 @@ import org.geotools.data.DataStore;
 import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSourceFactory;
-import org.wcs.smart.patrol.query.model.ObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.WaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -59,7 +61,7 @@ import org.wcs.smart.query.model.Query;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryService extends IService {
+public class QueryService extends IQueryService {
 
 	/**
 	 * The query service id
@@ -225,9 +227,9 @@ public class QueryService extends IService {
                 if (ds == null) {
                 	if (query != null){
                 		if (query.getType().getClass().equals(PatrolObservationQueryType.class) ){
-                			ds = new QueryDataSource((ObservationQuery)query);
+                			ds = new QueryDataSource((PatrolObservationQuery)query);
                 		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){
-                    		ds = new QueryDataSource((WaypointQuery)query);
+                    		ds = new QueryDataSource((PatrolWaypointQuery)query);
                 		}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
                 			ds = new PatrolQueryDataSource((PatrolQuery)query);
                 		}

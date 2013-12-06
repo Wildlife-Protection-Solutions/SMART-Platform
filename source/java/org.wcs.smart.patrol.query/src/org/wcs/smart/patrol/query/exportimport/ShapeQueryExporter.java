@@ -37,9 +37,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryResultItemFeature;
-import org.wcs.smart.patrol.query.model.ObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.model.WaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IResultItem;
@@ -116,8 +116,8 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof ObservationQuery ||
-				query instanceof WaypointQuery){
+		if (query instanceof PatrolObservationQuery ||
+				query instanceof PatrolWaypointQuery){
 			return true;
 		}
 		return false;
@@ -127,7 +127,7 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	 */
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
-		ObservationQuery q = ((ObservationQuery)query);
+		PatrolObservationQuery q = ((PatrolObservationQuery)query);
 		super.setData((IPagedQueryResultSet)q.getCachedResults(monitor), q.getQueryColumns(), file);
 		super.export(monitor);
 		

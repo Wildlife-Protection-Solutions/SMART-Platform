@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.query.queryItemPanel">
+      <QueryItemPanel
+            id="org.wcs.smart.observation.query.GriddedItemPanel"
+            panel="org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.observation.query.summaryItemPanel"
+            panel="org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.observation.query.filterPanel"
+            panel="org.wcs.smart.observation.query.ui.itempanel.QueryFilterPanel">
+      </QueryItemPanel>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryType">
+      <QueryType
+            class="org.wcs.smart.observation.query.model.types.ObservationQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               itemPanelId="org.wcs.smart.observation.query.filterPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.conservationAreaPanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            class="org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               itemPanelId="org.wcs.smart.observation.query.filterPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.conservationAreaPanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            class="org.wcs.smart.observation.query.model.types.ObservationGridQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.observation.query.ObservationGriddedQueryDefinitionPanel"
+               itemPanelId="org.wcs.smart.observation.query.GriddedItemPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               itemPanelId="org.wcs.smart.observation.query.filterPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.conservationAreaPanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            class="org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.observation.query.ObservationSummaryGroupByValuePanel"
+               itemPanelId="org.wcs.smart.observation.query.summaryItemPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               itemPanelId="org.wcs.smart.observation.query.filterPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.conservationAreaPanel">
+         </DefinitionPanel>
+      </QueryType>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryDefinitionPanel">
+      <QueryDefinitionPanel
+            id="org.wcs.smart.observation.query.ObservationGriddedQueryDefinitionPanel"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.observation.query.ui.definition.ObservationGriddedQueryDefinitionPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.observation.query.ObservationSummaryGroupByValuePanel"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.observation.query.ui.definition.ObservationSummaryGroupByValuePanel">
+      </QueryDefinitionPanel>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.createUnknownQuery">
+         <separator
+               name="org.wcs.smart.patrol.observation.menu.newquery.sep3"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/observation_query.png"
+               label="New Observation Query"
+               style="pulldown"
+               tooltip="creates a new observation query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationobservation">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/waypoint_query.png"
+               label="New Incident Query"
+               style="push"
+               tooltip="creates a new incident query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationwaypoint">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/summary_query.png"
+               label="New Summary Query"
+               style="push"
+               tooltip="creates a new summary query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationsummary">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/gridded_query.png"
+               label="New Gridded Query"
+               style="push"
+               tooltip="creates a new grid query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationgrid">
+            </parameter>
+         </command>
+         <separator
+               name="org.wcs.smart.patrol.observation.menu.newquery.sep4"
+               visible="true">
+         </separator>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.query.newquery">
+         <separator
+               name="org.wcs.smart.patrol.observation.menu.newquery.sep2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/observation_query.png"
+               label="New Observation Query"
+               style="pulldown"
+               tooltip="creates a new observation query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationobservation">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/waypoint_query.png"
+               label="New Incident Query"
+               style="push"
+               tooltip="creates a new incident query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationwaypoint">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/summary_query.png"
+               label="New Summary Query"
+               style="push"
+               tooltip="creates a new summary query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationsummary">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               icon="images/icons/obj16/gridded_query.png"
+               label="New Gridded Query"
+               style="push"
+               tooltip="creates a new grid query that queries all observations">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationgrid">
+            </parameter>
+         </command>
+         <separator
+               name="org.wcs.smart.patrol.observation.menu.newquery.sep1"
+               visible="true">
+         </separator>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.observation.query.ui.SimpleQueryEditor"
+            default="false"
+            id="org.wcs.smart.observation.editor.simple"
+            name="Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.observation.query.ui.ObservationSummaryQueryEditor"
+            default="false"
+            id="org.wcs.smart.observation.editor.summary"
+            name="Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor"
+            default="false"
+            id="org.wcs.smart.observation.editor.gridded"
+            name="Query Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.observation.query.model.ObservationGriddedQuery">
+      </class>
+      <class
+            class="org.wcs.smart.observation.query.model.ObservationWaypointQuery">
+      </class>
+      <class
+            class="org.wcs.smart.observation.query.model.ObservationSummaryQuery">
+      </class>
+      <class
+            class="org.wcs.smart.observation.query.model.ObsObservationQuery">
+      </class>
+   </extension>
+
+</plugin>

@@ -43,12 +43,13 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.SmartUtils;
 
@@ -87,15 +88,15 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	//current direction
 	private int direction = SWT.UP;
 	private boolean hasSortColumns = false;
-	private DerbyQueryEngine2 engine;
+	private DerbyPatrolQueryEngine engine;
 
 	
-	public DerbyPagedObservationResult(String queryTempTable, DerbyQueryEngine2 engine) {
+	public DerbyPagedObservationResult(String queryTempTable, DerbyPatrolQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyQueryEngine2 engine) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyPatrolQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;
@@ -628,7 +629,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 						try {
 							String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
 							c.createStatement().execute(sql);
-							PatrolQueryPlugIn.logSql(sql);
+							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
 							ex.printStackTrace();
@@ -637,7 +638,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 						try {
 							String sql = "DROP TABLE " + queryTempTable + "_LIST"; //$NON-NLS-1$ //$NON-NLS-2$
 							c.createStatement().execute(sql);
-							PatrolQueryPlugIn.logSql(sql);
+							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
 							ex.printStackTrace();
@@ -646,7 +647,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 						try {
 							String sql = "DROP TABLE " + queryTempTable + "_TREE"; //$NON-NLS-1$ //$NON-NLS-2$
 							c.createStatement().execute(sql);
-							PatrolQueryPlugIn.logSql(sql);
+							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
 							ex.printStackTrace();
