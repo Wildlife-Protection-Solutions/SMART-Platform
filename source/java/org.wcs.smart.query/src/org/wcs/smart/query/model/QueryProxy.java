@@ -82,8 +82,10 @@ public class QueryProxy {
 	 */
 	public void dispose(){
 		for(Collection<DropItem> dis : dropItems.values()){
-			for (DropItem di : dis){
-				di.dispose();
+			if (dis != null){
+				for (DropItem di : dis){
+					di.dispose();
+				}
 			}
 		}
 		dropItems.clear();

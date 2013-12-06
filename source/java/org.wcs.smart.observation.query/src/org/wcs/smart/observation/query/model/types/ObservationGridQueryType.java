@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
+import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
@@ -60,7 +61,7 @@ public class ObservationGridQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return GriddedQuery.class;
+		return ObservationGriddedQuery.class;
 	}
 
 	/**

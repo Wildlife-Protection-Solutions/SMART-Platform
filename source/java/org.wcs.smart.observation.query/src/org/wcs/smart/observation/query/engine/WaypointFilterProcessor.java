@@ -209,12 +209,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM "); //$NON-NLS-1$
-		
-		
-	
-		
 		sql.append(namePrefix(Waypoint.class));
-		
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
 		sql.append(" on "); //$NON-NLS-1$
@@ -255,9 +250,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
-		//TODO:
-//		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, usedTables);
-//		queryFilter.accept(av);
+		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine);
+		queryFilter.accept(av);
 
 		sql.append(engine.appendFromClause(usedTables));
 		
@@ -329,7 +323,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(" and "); //$NON-NLS-1$
 				}
 				sql.append(" ( ");
-				sql.append(filter);
+				sql.append(dfilter);
 				sql.append( " ) ");
 			}
 		}

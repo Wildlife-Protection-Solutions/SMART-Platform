@@ -30,7 +30,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;

@@ -34,9 +34,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.query.common.internal.Messages;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

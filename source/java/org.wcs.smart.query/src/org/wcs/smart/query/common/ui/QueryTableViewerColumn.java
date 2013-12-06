@@ -39,19 +39,6 @@ public class QueryTableViewerColumn {
 	
 	private QueryColumn column;
 	private TableViewerColumn tcolumn;
-	
-//	public ColumnLabelProvider getLabelProvider(QueryColumn column){
-//		if (column instanceof FixedQueryColumn){
-//			return new FixedColumnLabelProvider(column);
-//		}else if (column instanceof PatrolAttributeQueryColumn){
-//			return new AttributeColumnLabelProvider(column);
-//		}else if (column instanceof PatrolCategoryQueryColumn){
-//			return new CategoryColumnLabelProvider(column);
-//		}else if (column instanceof PatrolGridQueryColumn){
-//			return new GridColumnLabelProvider(column);
-//		}
-//		return null;
-//	}
 
 	/**
 	 * Adds the given column to the table viewer.

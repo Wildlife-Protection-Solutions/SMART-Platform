@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.observation;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,10 +57,24 @@ public class WaypointSourceEngine {
 	 */
 	private Map<String,IWaypointSource> supportedSources = null;
 	
+	/**
+	 * private constructor
+	 */
 	private WaypointSourceEngine(){
 		
 	}
 	
+	/**
+	 * return set of all supported sources
+	 * 
+	 * @return
+	 */
+	public Collection<IWaypointSource> getSupportedSources(){
+		if (supportedSources == null){
+			loadWaypointSources();
+		}
+		return supportedSources.values();
+	}
 	/**
 	 * Get the waypoint source for the given key
 	 * @param sourceKey

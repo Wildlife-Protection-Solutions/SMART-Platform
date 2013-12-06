@@ -54,10 +54,10 @@ import org.geotools.gce.geotiff.GeoTiffFormatFactorySpi;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.styling.Style;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.internal.Messages;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.util.SmartUtils;
 

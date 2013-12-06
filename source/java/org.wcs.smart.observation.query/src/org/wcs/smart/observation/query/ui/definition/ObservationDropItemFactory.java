@@ -43,8 +43,10 @@ import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
 import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
 import org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel;
 import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider;
+import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider.GeneralItems;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.observation.query.ui.itempanel.SummaryQueryContentProvider;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.QueryProxy;
@@ -111,12 +113,26 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 					queryItemPanelId == GriddedItemPanel.ID){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
+		}else if (source instanceof QueryFilterContentProvider.GeneralItems){
+			items = new DropItem[]{createWaypointSourceFilterDropItem((QueryFilterContentProvider.GeneralItems)source)};
+		}else if (source instanceof SummaryQueryContentProvider.RootNode){
+			if (((SummaryQueryContentProvider.RootNode) source).getType() == SummaryQueryContentProvider.NodeType.WAYPOINT_SOURCE_GROUPBY){
+				items = new DropItem[]{createWaypointSourceGroupByDropItem()};
+			}
 		}
 		return items;
 		
 	}
 
-	
+	public DropItem createWaypointSourceGroupByDropItem(){
+		return new WaypointSourceGroupByDropItem();
+	}
+	public DropItem createWaypointSourceFilterDropItem(QueryFilterContentProvider.GeneralItems source){
+		if (source == GeneralItems.WAYPOINT_SOURCE){
+			return new WaypointSourceFilterDropItem();
+		}
+		throw new IllegalStateException(MessageFormat.format("General item {0} not supported.", new Object[]{source.guiName}));
+	}
 	
 	/**
 	 * Creates anew attribute value drop item

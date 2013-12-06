@@ -424,13 +424,12 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT "); //$NON-NLS-1$
 		
-		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
-			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
 		}else{
 			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data)");	//wpob_uuid //$NON-NLS-1$
 		}
 		return sql.toString();
 	}
@@ -440,7 +439,7 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_uuid char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}

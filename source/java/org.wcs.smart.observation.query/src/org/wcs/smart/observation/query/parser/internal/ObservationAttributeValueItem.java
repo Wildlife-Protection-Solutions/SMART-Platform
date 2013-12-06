@@ -122,7 +122,7 @@ public class ObservationAttributeValueItem extends AttributeValueItem {
 				}
 			}
 			if (di != null){
-				di.initializeData(new Object[]{getDropItemInitializeData(), null});
+				di.initializeData(getDropItemInitializeData());
 			}
 			return di;
 		} catch (Exception ex) {

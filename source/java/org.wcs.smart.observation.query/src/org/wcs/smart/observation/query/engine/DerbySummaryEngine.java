@@ -43,6 +43,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.observation.query.parser.internal.ObservationAttributeValueItem;
 import org.wcs.smart.observation.query.parser.internal.ObservationCategoryValueItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -834,14 +835,31 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){
-					groupByInnerSql.append("wp_date_time as wp_date_time_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime as wp_date_time_" + itemcnt);
 					groupBySql.append("wp_date_time_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("trim(cast(month(wp_date_time) as char(2))) || '/' || cast(year(wp_date_time) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("trim(cast(month(");
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) as char(2))) || '/' || cast(year(");
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) as char(4)) as datePart_");
+					groupByInnerSql.append( itemcnt); //$NON-NLS-1$
+
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("YEAR(wp_date_time) as datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("YEAR(");
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) as datePart_" + itemcnt); //$NON-NLS-1$
+				}
+				
+				if (!waypointAdd) {
+					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
 				}
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);
@@ -916,7 +934,21 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 				fromSql.append(".keyid = '"); //$NON-NLS-1$
 				fromSql.append(((AttributeGroupBy)gb).getAttributeKey());
 				fromSql.append("' "); //$NON-NLS-1$
-								
+				
+			}else if (gb instanceof WaypointSourceGroupBy){
+				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
+				groupByInnerSql.append(tablePrefix(Waypoint.class));
+				groupByInnerSql.append(".source");
+				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
+				
+				groupBySql.append(categoryKey);
+				
+				if (!waypointAdd) {
+					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
 			}else{
 				//throw new exception; should only be patrol group bys here for now
 			}
@@ -1002,10 +1034,10 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
-			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
 		}else{
 			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data)");	//wpob_uuid //$NON-NLS-1$
 		}
 		return sql.toString();
 	}
@@ -1016,9 +1048,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+		sql.append("ob_uuid char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}

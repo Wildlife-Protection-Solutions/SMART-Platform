@@ -22,7 +22,6 @@
 package org.wcs.smart.observation.query.engine;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -108,35 +107,6 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 
 		dropTable(c, queryDataTable);
 	}
-
-	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		QueryPlugIn.logSql(sql);
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		try {
-			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				byte[] ca_uuid = rs.getBytes(1);
-				byte[] uuid = rs.getBytes(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(uuid, ca_uuid, session);
-				statement.setString(1, name);
-				statement.setBytes(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		} finally {
-			rs.close();
-		}
-	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
@@ -199,9 +169,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
-//		sql.append(prefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
-//		sql.append(prefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".wp_comment "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -211,8 +179,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		//TODO: pick right size
-		sql.append("wp_source varchar(128),"); //$NON-NLS-1$
+		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
 		sql.append("wp_x double,"); //$NON-NLS-1$
 		sql.append("wp_y double,"); //$NON-NLS-1$
@@ -220,19 +187,14 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096)"); //$NON-NLS-1$
-//		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-//		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
 
 	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		ObservationQueryResultItem it = new ObservationQueryResultItem();
-
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		
-		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source"));
 		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$

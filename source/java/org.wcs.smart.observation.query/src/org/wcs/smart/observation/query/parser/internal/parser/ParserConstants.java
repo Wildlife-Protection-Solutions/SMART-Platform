@@ -99,31 +99,35 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int WAYPOINT_FILTER_TYPE_KEY = 48;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 49;
+  int WAYPOINT_SOURCE_KEY = 49;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 50;
+  int SUM_CAT_VALUE_KEY = 50;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 51;
+  int SUM_ATTRIBUTE_VALUE_KEY = 51;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 52;
+  int SUM_CAT_ATT_VALUE_KEY = 52;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 53;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 53;
   /** RegularExpression Id. */
-  int AGG = 54;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 54;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 55;
+  int AGG = 55;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 56;
+  int DATE_GROUPBY_ITEM = 56;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 57;
+  int QUERY_SPLITTER = 57;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 58;
+  int CATEGORY_GROUPBY_ITEM = 58;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 59;
+  int AREA_GROUPBY_ITEM = 59;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 60;
+  int ATTRIBUTE_GROUPBY_ITEM = 60;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 61;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 61;
+  /** RegularExpression Id. */
+  int WAYPOINT_SOURCE_GROUP_BY = 62;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 63;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -179,6 +183,7 @@ public interface ParserConstants {
     "<AREA_KEY>",
     "\"observation\"",
     "\"waypoint\"",
+    "\"wpn:src\"",
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",
     "<SUM_CAT_ATT_VALUE_KEY>",
@@ -191,6 +196,7 @@ public interface ParserConstants {
     "<AREA_GROUPBY_ITEM>",
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
+    "<WAYPOINT_SOURCE_GROUP_BY>",
     "<QUOTED_STRING>",
   };
 

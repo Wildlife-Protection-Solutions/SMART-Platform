@@ -43,7 +43,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;

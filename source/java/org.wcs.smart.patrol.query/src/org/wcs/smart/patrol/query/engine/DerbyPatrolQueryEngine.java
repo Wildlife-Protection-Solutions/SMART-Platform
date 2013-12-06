@@ -55,7 +55,6 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine {
 	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
 	
 	static {
-		tablePrefix = new HashMap<Class<?>, String>();
 		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
 		tablePrefix.put(PatrolLeg.class, "pl"); //$NON-NLS-1$
 		tablePrefix.put(PatrolLegDay.class, "pld"); //$NON-NLS-1$
@@ -72,7 +71,6 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine {
 	 * Maps hibernate classes to database table names
 	 */
 	static {
-		tableNames = new HashMap<Class<?>, String>();
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
 		tableNames.put(PatrolLeg.class, "smart.patrol_leg"); //$NON-NLS-1$
 		tableNames.put(PatrolLegDay.class, "smart.patrol_leg_day"); //$NON-NLS-1$

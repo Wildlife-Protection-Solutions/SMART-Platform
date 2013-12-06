@@ -65,14 +65,13 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	
 	//root nodes
 	public static final String ROOT_NODES = "RootNodes"; //$NON-NLS-1$
+	private RootNode generalFiltersRoot =new RootNode(RootNodeType.GENERAL_FILTERS);
 	private RootNode dataModelFiltersRoot =new RootNode(RootNodeType.DATA_MODEL_FILTERS);
 	private RootNode areaFilterRoot = new RootNode(RootNodeType.AREA_FILTERS);
 	private RootNode otherItemRoot = new RootNode(RootNodeType.OTHER_ITEMS);
 	
-	private Object[] roots = new Object[]{dataModelFiltersRoot, areaFilterRoot, otherItemRoot};
-	
-	private Object[] patrolOptions = null;
-	
+	private Object[] roots = new Object[]{generalFiltersRoot, dataModelFiltersRoot, areaFilterRoot, otherItemRoot};
+		
 	private HashMap<Area.AreaType, Area[]> areas = new HashMap<Area.AreaType, Area[]>();
 	
 	/**
@@ -84,6 +83,18 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 		
 		String guiName;
 		DataModelItem(String guiName){
+			this.guiName = guiName;
+		}
+	}
+	
+	/**
+	 * Other item children
+	 */
+	public enum GeneralItems{
+		WAYPOINT_SOURCE("Waypoint Source");
+		
+		public String guiName;
+		GeneralItems(String guiName){
 			this.guiName = guiName;
 		}
 	}
@@ -105,6 +116,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Root node children
 	 */
 	public enum RootNodeType  {
+		GENERAL_FILTERS("General Filters"),
 		DATA_MODEL_FILTERS(Messages.QueryFilterContentProvider_DataModelFiltersLabel),
 		AREA_FILTERS(Messages.QueryFilterContentProvider_AreaFiltersLabel),
 		OTHER_ITEMS(Messages.QueryFilterContentProvider_OperatoresLabel);
@@ -152,10 +164,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput == null){
-			patrolOptions = null;
 			provider.inputChanged(viewer, oldInput, null);
 		}else if (newInput instanceof String){
-			patrolOptions = null;
 			dataModel = null;
 		}else{
 			if (newInput != null && !(newInput instanceof Map)){
@@ -183,7 +193,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (dataModel == null && patrolOptions == null){
+		if (dataModel == null ){
 			return new String[]{LOADING_TEXT};
 		}
 		return roots;
@@ -320,6 +330,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 				return DataModelItem.values();
 			}else if (type == RootNodeType.OTHER_ITEMS){
 				return OtherItems.values();
+			}else if (type == RootNodeType.GENERAL_FILTERS){
+				return GeneralItems.values();
 			}
 			return null;
 		}

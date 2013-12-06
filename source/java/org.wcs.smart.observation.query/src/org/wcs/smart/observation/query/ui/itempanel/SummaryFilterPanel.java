@@ -46,6 +46,10 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.IDateGroupBy;
+import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
  * Panel for displaying summary value
@@ -135,8 +139,13 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			
-//			input.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS,					
-//					PatrolQueryOptions.DATE_GROUBY_OPS);
+			input.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS,					
+					new IDateGroupBy[]{
+					DayDateGroupBy.INSTANCE,
+					MonthDateGroupBy.INSTANCE,
+					YearDateGroupBy.INSTANCE
+			});
+			
 			input.put(SummaryQueryContentProvider.NodeType.DATAMODEL_VALUES, QueryDataModelManager.getInstance().getDataModel());
 			
 			Display.getDefault().asyncExec(new Runnable(){

@@ -374,9 +374,8 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		//TODO: update the size of this field 
-		sql.append("wp_source varchar(256),"); //$NON-NLS-1$
+		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$ 
+		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
 		sql.append("wp_x double,"); //$NON-NLS-1$
 		sql.append("wp_y double,"); //$NON-NLS-1$

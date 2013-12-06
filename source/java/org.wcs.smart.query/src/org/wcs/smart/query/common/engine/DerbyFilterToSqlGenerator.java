@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.engine;
 
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 
@@ -242,7 +243,7 @@ public class DerbyFilterToSqlGenerator {
 		
 		if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
 			table = engine.tablePrefix(Waypoint.class);
-			field = "date_time"; //$NON-NLS-1$
+			field = "datetime"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
 		}
@@ -255,11 +256,11 @@ public class DerbyFilterToSqlGenerator {
 			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			f = " ( " +field + " >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			f = " ( " +field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){ 
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( " + field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' and " + field  + " <= '" + (new Timestamp(bits[1].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( " + field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' and " + field  + " < '" + (new Timestamp(bits[1].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		return f;

@@ -25,7 +25,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider.DataModelItem;
+import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider.GeneralItems;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -54,6 +56,10 @@ public class QueryFilterLabelProvider extends LabelProvider {
 			return ((QueryFilterContentProvider.RootNode)element).getImage();
 		}else if (element instanceof Area.AreaType || element instanceof Area){
 			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_POLYGON_FILTER_ICON);
+		}else if (element instanceof QueryFilterContentProvider.GeneralItems){
+			if (((QueryFilterContentProvider.GeneralItems) element) == GeneralItems.WAYPOINT_SOURCE){
+				return ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON);
+			}
 		}else if (element instanceof QueryFilterContentProvider.DataModelItem){
 			if (element == DataModelItem.CATEGORIES){
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
@@ -86,6 +92,8 @@ public class QueryFilterLabelProvider extends LabelProvider {
 			return ((Area) element).getName();
 		}else if (element instanceof QueryFilterContentProvider.OtherItems){
 			return ((QueryFilterContentProvider.OtherItems) element).guiName;
+		}else if (element instanceof QueryFilterContentProvider.GeneralItems){
+			return ((QueryFilterContentProvider.GeneralItems) element).guiName;
 		}else if (element instanceof QueryFilterContentProvider.DataModelItem){
 			return ((QueryFilterContentProvider.DataModelItem) element).guiName;
 		}else {

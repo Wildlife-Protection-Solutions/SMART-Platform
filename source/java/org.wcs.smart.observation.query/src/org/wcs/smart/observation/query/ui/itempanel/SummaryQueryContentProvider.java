@@ -54,6 +54,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -95,6 +96,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 
 	private RootNode dataModelGroupByCategory = new RootNode(NodeType.DATAMODEL_GROUPBY_CATEGORY);
 	private RootNode dataModelGroupByAttribute = new RootNode(NodeType.DATAMODEL_GROUPBY_ATTRIBUTES);
+	private RootNode waypointSource = new RootNode(NodeType.WAYPOINT_SOURCE_GROUPBY);
 	
 	private IDateGroupBy[] dateGroupByOptions = null;
 
@@ -113,7 +115,8 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		DATAMODEL_GROUPBYS(Messages.SummaryQueryContentProvider_DataModelGroupByLabel),
 		DATAMODEL_VALUE_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelAttributeLabel),
 		DATAMODEL_GROUPBY_CATEGORY(Messages.SummaryQueryContentProvider_GroupByCategoryAttributeLabel),
-		DATAMODEL_GROUPBY_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelGroupByAttributesLabel);		
+		DATAMODEL_GROUPBY_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelGroupByAttributesLabel),		
+		WAYPOINT_SOURCE_GROUPBY("Waypoint Source");
 		
 		private String name;
 		
@@ -476,6 +479,9 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof RootNode){
+			if (element == waypointSource){
+				return false;
+			}
 			return true;
 		}else if (element instanceof Area.AreaType){
 			return true;
@@ -515,7 +521,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	/*
 	 * A root node of the content provider
 	 */
-	class RootNode{
+	public class RootNode{
 		private NodeType type;
 		
 		/**
@@ -524,6 +530,10 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		 */
 		public RootNode(NodeType type){
 			this.type = type;
+		}
+		
+		public NodeType getType(){
+			return this.type;
 		}
 		
 		/**
@@ -535,9 +545,9 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			}else if (type == NodeType.GROUP_BY_NODE){				
 				if (SmartDB.isMultipleAnalysis()){
 					//areas are not applicable for cross-ca analysis
-					return new Object[]{dataModelGroupByNode};
+					return new Object[]{waypointSource, dateGroupByNode, dataModelGroupByNode};
 				}else{
-					return new Object[]{areaGroupByNode, dataModelGroupByNode};
+					return new Object[]{waypointSource, dateGroupByNode, areaGroupByNode, dataModelGroupByNode};
 				}
 			}else if (type == NodeType.AREA_GROUPBYS){
 				return Area.AreaType.values();
@@ -642,6 +652,8 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 			}else if (type == NodeType.AREA_GROUPBYS){
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_FILTER_ICON);
+			}else if (type == NodeType.WAYPOINT_SOURCE_GROUPBY){
+				return ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON);
 			}
 			return null;
 		}

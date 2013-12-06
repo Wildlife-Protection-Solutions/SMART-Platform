@@ -32,7 +32,7 @@ import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.summary.IGroupBy;

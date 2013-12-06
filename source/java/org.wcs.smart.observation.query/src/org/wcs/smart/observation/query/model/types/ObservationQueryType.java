@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.SimpleQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
@@ -59,7 +60,7 @@ public class ObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return ObservationQuery.class;
+		return ObsObservationQuery.class;
 	}
 
 	/**

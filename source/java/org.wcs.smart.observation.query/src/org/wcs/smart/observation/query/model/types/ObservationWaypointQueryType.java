@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.SimpleQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
@@ -58,7 +59,7 @@ public class ObservationWaypointQueryType implements IQueryType {
 	 */
 	@Override
 	public Class<? extends Query> getHibernateClass() {
-		return WaypointQuery.class;
+		return ObservationWaypointQuery.class;
 	}
 
 	/**

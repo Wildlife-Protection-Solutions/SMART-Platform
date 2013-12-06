@@ -243,13 +243,10 @@ public class FilterProcessor implements IFilterProcessor {
 					sql.append(prefix(WaypointObservation.class) + ".uuid"); //$NON-NLS-1$
 				}
 		}
-
 		
-		//TODO:
-//		// area filters
-//		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables);
-//		queryFilter.accept(areaVisitor);
-//		
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine);
+		queryFilter.accept(areaVisitor);
+
 		sql.append(engine.appendFromClause(usedTables));
 		
 		boolean where = true;

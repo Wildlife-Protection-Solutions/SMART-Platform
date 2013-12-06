@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.query.common.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geomgraph.Edge;

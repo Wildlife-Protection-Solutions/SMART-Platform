@@ -25,7 +25,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.query.common.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 /**

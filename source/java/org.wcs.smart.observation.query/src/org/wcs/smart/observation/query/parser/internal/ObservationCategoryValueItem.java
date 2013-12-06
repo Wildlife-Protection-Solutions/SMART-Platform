@@ -36,7 +36,9 @@ public class ObservationCategoryValueItem extends CategoryValueItem {
 	public DropItem asDropItem(Session session) throws Exception {
 		try{
 			if (categoryHkey == null){
-				return ObservationDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+				DropItem di = ObservationDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+				di.initializeData(getDropItemInitializeData());
+				return di;
 			}
 			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 			if (category == null){
@@ -44,7 +46,7 @@ public class ObservationCategoryValueItem extends CategoryValueItem {
 			}
 			category.getFullCategoryName();		//cache this
 			DropItem di = ObservationDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			di.initializeData(getDropItemInitializeData());
 			return di;
 		} catch (Exception ex) {
 			return new ErrorDropItem(ex.getMessage());

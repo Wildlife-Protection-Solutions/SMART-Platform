@@ -23,7 +23,6 @@ package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
 
-import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -51,7 +50,6 @@ import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.internal.Messages;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.event.IQueryListener;
@@ -59,6 +57,7 @@ import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;

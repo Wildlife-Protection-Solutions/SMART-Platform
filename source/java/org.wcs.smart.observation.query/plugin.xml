@@ -46,7 +46,7 @@
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
-               itemPanelId="org.wcs.smart.observation.query.summaryItemPanel">
+               itemPanelId="org.wcs.smart.observation.query.filterPanel">
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.query.conservationAreaPanel">
@@ -60,7 +60,7 @@
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
-               itemPanelId="org.wcs.smart.observation.query.summaryItemPanel">
+               itemPanelId="org.wcs.smart.observation.query.filterPanel">
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.query.conservationAreaPanel">
@@ -223,6 +223,21 @@
             id="org.wcs.smart.observation.editor.gridded"
             name="Query Editor">
       </editor>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.observation.query.model.ObservationGriddedQuery">
+      </class>
+      <class
+            class="org.wcs.smart.observation.query.model.ObservationWaypointQuery">
+      </class>
+      <class
+            class="org.wcs.smart.observation.query.model.ObservationSummaryQuery">
+      </class>
+      <class
+            class="org.wcs.smart.observation.query.model.ObsObservationQuery">
+      </class>
    </extension>
 
 </plugin>
