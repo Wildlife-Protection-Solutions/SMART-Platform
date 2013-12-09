@@ -7,16 +7,21 @@ import java.text.ParseException;
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.jface.*;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
 
 
 public class DataModelMatcherDialog extends Composite {
@@ -27,7 +32,8 @@ public class DataModelMatcherDialog extends Composite {
 	
 	Text startXMLFileName;
 	Text mergeSessionTxtFileName;
-	
+	MatchSession ms;
+	ProcessingDialog wait; 
 	
 	public DataModelMatcherDialog(Composite c){
 		super(c, SWT.None);
@@ -224,17 +230,59 @@ public class DataModelMatcherDialog extends Composite {
 	    		}	    		
 	    		
 	    		
-	    		MatchSession ms = new MatchSession(getShell());
+	    		ms = new MatchSession(getShell());
 	    		
 	    		ms.setMistLocation(startMistTxtFileName.getText());
 	    		ms.setSmartXmlLocation(startXMLFileName.getText());
 	    		
 	    		try {
-	    			ms.loadRows(); //loads the mist data
+
+	    			
+//					try {
+//						ms.loadRows();//loads the mist data
+//					} catch (Exception e2) {
+//						e2.printStackTrace();
+//					} 
+
+					
+//	    			BusyIndicator.showWhile(Display.getDefault(), new Runnable(){
+//
+//	    			    public void run(){
+//	    					try {
+//								ms.loadRows();//loads the mist data
+//							} catch (Exception e) {
+//								e.printStackTrace();
+//							} 
+//	    			    }
+//	    			    });
+
+					
+					
+
+	    			final Shell dlgShell = new Shell(getShell(), SWT.APPLICATION_MODAL);
+	    			
+					wait = new ProcessingDialog(dlgShell, dlgShell.getBounds());
+	    			wait.open();
+	    			
+	    			
+	    			Thread t = new Thread(new Runnable() { public void run() { 
+	    				try {
+							ms.loadRows(); //loads the mist data	   
+						} catch (Exception e) {
+							e.printStackTrace();
+						} 
+	    				
+	    			}});
+	    			
+	    			t.start();
+	    			t.join();
+	    			dlgShell.dispose();
+    				
 				} catch (Exception e2) {
 			    	MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
 			    	messageBox.setMessage("MIST database error:" + e2);
 			    	messageBox.open();
+			    	return;
 				} 
 	    		
 	    		try {
@@ -250,8 +298,7 @@ public class DataModelMatcherDialog extends Composite {
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
-	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION
-	                    | SWT.YES | SWT.NO);
+	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 	                messageBox.setMessage("Do you want to save your changes?");
 	                messageBox.setText("Exiting Application");
 	                int response = messageBox.open();

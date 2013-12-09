@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -17,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 import org.wcs.smart.mist.dataReader.MistDatabase;
@@ -190,4 +192,15 @@ public class MatchSession {
 	public DataModel getXmlDataModel(){
 		return smartDataModel;
 	}
+
+	public void sort(int direction, int column) {
+		MatchRowSorter sorter = new MatchRowSorter();
+		sorter.setDirection(direction);
+		sorter.setCol(column);
+		Collections.sort(rows, sorter);
+	}
+	
+	
 }
+
+
