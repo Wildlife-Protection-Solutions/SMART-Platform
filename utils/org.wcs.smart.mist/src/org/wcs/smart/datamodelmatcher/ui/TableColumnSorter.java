@@ -17,6 +17,8 @@ public class TableColumnSorter extends ViewerComparator {
 	public static final int NONE = 0;
 	public static final int DESC = -1;
 
+	MatchSession ms;
+	
 	private int direction = 0;
 	private TableColumn column = null;
 	private int columnIndex = 0;
@@ -24,24 +26,15 @@ public class TableColumnSorter extends ViewerComparator {
 	
 	final private SelectionListener selectionHandler = new SelectionAdapter() {
 		public void widgetSelected(SelectionEvent e) {
-
-			TableColumnSorter sorter = (TableColumnSorter) TableColumnSorter.this.viewer.getComparator();
-			Assert.isTrue(TableColumnSorter.this == sorter);
 			TableColumn selectedColumn = (TableColumn) e.widget;
-			Assert.isTrue(TableColumnSorter.this.viewer.getTable() == selectedColumn.getParent());
 			TableColumnSorter.this.setColumn(selectedColumn);
-		
-			//TODO
-			//supposed to make it only sort once and not each time the data is changed, seems to sort twice though... 
-			//when you click the heading to sort and again when the data is changed the first time, then it's fine. weird...
-		    stopSorting();
 		}
 	};
 	
 	public TableColumnSorter(TableViewer viewer) {
 		this.viewer = viewer;
 		Assert.isTrue(this.viewer.getComparator() == null);
-		viewer.setComparator(this);
+		viewer.setComparator(null);
 		
 		for (TableColumn tableColumn : viewer.getTable().getColumns()) {
 			tableColumn.addSelectionListener(selectionHandler);
@@ -66,31 +59,18 @@ public class TableColumnSorter extends ViewerComparator {
 			this.direction = ASC;
 		}
 
+		
 		Table table = viewer.getTable();
-		switch (direction) {
-		case ASC:
-			table.setSortColumn(selectedColumn);
-			table.setSortDirection(SWT.UP);
-			break;
-		case DESC:
-			table.setSortColumn(selectedColumn);
-			table.setSortDirection(SWT.DOWN);
-			break;
-		default:
-			table.setSortColumn(null);
-			table.setSortDirection(SWT.NONE);
-			break;
-		}
-
+		
 		TableColumn[] columns = table.getColumns();
 		for (int i = 0; i < columns.length; i++) {
 			TableColumn theColumn = columns[i];
 			if (theColumn == this.column) columnIndex = i;
 		}
-		viewer.setComparator(null);
-		viewer.setComparator(this);
 		
-
+		ms.sort(direction, columnIndex);
+		viewer.setInput(ms.getRows());
+		viewer.refresh();
 	}
 
 	@Override
@@ -108,10 +88,8 @@ public class TableColumnSorter extends ViewerComparator {
 		return t1.compareTo(t2);
 	}
 	
-	public void stopSorting(){
-		Table table = viewer.getTable();
-		this.direction = 0;
-		table.setSortColumn(null);
-		table.setSortDirection(SWT.NONE);
+	public void setMs(MatchSession ms){
+		this.ms = ms;
 	}
+
 }

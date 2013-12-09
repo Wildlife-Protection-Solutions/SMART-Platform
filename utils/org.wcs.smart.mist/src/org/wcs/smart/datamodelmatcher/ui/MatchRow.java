@@ -29,7 +29,7 @@ public class MatchRow {
 	}
 	
 	public void setSmartItem(String s){
-		smartItem.setCategory(s);
+		smartItem.setConcatKey(s);
 		matched = true;
 	}
 	

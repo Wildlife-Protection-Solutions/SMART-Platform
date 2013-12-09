@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.smartcardio.ATR;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -31,11 +33,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
@@ -47,8 +51,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
-
-import sun.reflect.generics.tree.BottomSignature;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 
 public class MatchSessionDialog extends Dialog {
@@ -79,14 +82,26 @@ public class MatchSessionDialog extends Dialog {
 	private HashMap<String, String> smartAttributeHash; 
 	private HashMap<String, AttributeType> smartAttributeDetailsHash;
 	
-	private ComboViewer smartCombo2;
-	private Composite value1;
-	private Combo value1Combo;
-	private ComboViewer value1ComboViewer;
-	private Text value1Text;
-    private Tree value1Tree;
+	private TabFolder tabFolder; 
 	
-	private ComboViewer smartCombo3;
+	private Composite tab1Composite;
+	private Composite tab2Composite;
+	private Composite tab3Composite;
+	private Composite tab4Composite;
+	private Composite tab5Composite;
+	
+	private TabItem tab1; 
+	private TabItem tab2;
+	private TabItem tab3;
+	private TabItem tab4;
+	private TabItem tab5;
+	
+	private AttributeSelection attribute1;
+	private AttributeSelection attribute2;
+	private AttributeSelection attribute3;
+	private AttributeSelection attribute4;
+	private AttributeSelection attribute5;
+	
 	public final Shell shell;
 	
 	private Button save;
@@ -95,9 +110,8 @@ public class MatchSessionDialog extends Dialog {
 	
 	public MatchSessionDialog(Shell parentShell, MatchSession ms) {
 	    super(parentShell);
-        shell = new Shell(parentShell, SWT.SHELL_TRIM);
+        shell = new Shell(parentShell, SWT.SHELL_TRIM );
         Point size = shell.computeSize(-1, -1);
-        Rectangle screen = shell.getDisplay().getMonitors()[0].getBounds();
         shell.setBounds(50, 50, size.x, size.y);    
         shell.setText("Match Session - " + ms.getSaveLocation());
 	    this.ms = ms;
@@ -112,17 +126,22 @@ public class MatchSessionDialog extends Dialog {
 		    
 		  GridData gridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 		  shell.setLayoutData(gridData);
-		    
+		  
+		  shell.setMinimumSize(840, 640);
+		  
 		    
           // (widget creation, set result, etc).
         
           //main composite and layout
-  		  Composite main = new Composite(shell, SWT.None);
+  		  final Composite main = new Composite(shell, SWT.None);
   		  GridLayout mlayout = new GridLayout(2, true);
   	      main.setLayout(mlayout);
   	      GridData mainGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
   	      main.setLayoutData(mainGridData);
 
+  	      //main.setSize (840, 580);
+  	    
+  	      
   	      //left
   	      Composite left = new Composite(main, SWT.None);
 		  GridLayout llayout = new GridLayout(3, false);
@@ -134,7 +153,7 @@ public class MatchSessionDialog extends Dialog {
   	    
 	      //left - content
 	      // define the TableViewer---------------------------------------------------------------------------------
-	      viewer = new TableViewer(left, SWT.CHECK | SWT.MULTI | SWT.H_SCROLL
+	      viewer = new TableViewer(left, SWT.MULTI | SWT.H_SCROLL
 	            | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
 	      // create the columns 
@@ -147,7 +166,10 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      viewer.setContentProvider(new ArrayContentProvider());
 	      viewer.setInput(ms.getRows());
+
+	      
 	      TableColumnSorter sorter = new TableColumnSorter(viewer);
+	      sorter.setMs(ms);
 	      viewer.setComparator(sorter);
 	
 	   // define layout for the viewer
@@ -208,12 +230,12 @@ public class MatchSessionDialog extends Dialog {
 	      //Right side components
 	      
 	      //right composite
-  	      Composite right = new Composite(main, SWT.None);
+	      final Composite right = new Composite(main, SWT.NONE);
 		  GridLayout rlayout = new GridLayout(1, false);
 	      right.setLayout(rlayout);
-	    
 	      GridData rightGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      right.setLayoutData(rightGridData);
+
 	      
 	      //Top Right composite
 	      Composite topRight = new Composite(right, SWT.BORDER);
@@ -305,20 +327,26 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      
 	      //bottom Right composite
+	      
 	      Composite bottomRight = new Composite(right, SWT.BORDER);
 		  GridLayout brlayout = new GridLayout(2, false);
 		  bottomRight.setLayout(brlayout);
+
 	    
 	      GridData bottomRightGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      bottomRight.setLayoutData(bottomRightGridData);
-	      
+
+	      bottomRight.setSize (420, 380);
 
 	      //Bottom Right elements---------------------------------------------
 	      //top line spacing, label and language drop down
 	      Composite bottomRightFirstLine = new Composite(bottomRight, SWT.NONE);
 		  GridLayout brfllayout = new GridLayout(3, false);
 		  bottomRightFirstLine.setLayout(brfllayout);
-		  bottomRightFirstLine.setLayoutData(new GridData(SWT.FILL,SWT.TOP, true, true,2,1));
+		  GridData bottomRightFL = new GridData(SWT.FILL,SWT.TOP, true, true,2,1);
+		  bottomRightFL.minimumHeight = 28;
+		  bottomRightFirstLine.setLayoutData(bottomRightFL);
+
 	      
 	      Label smartLabel = new Label(bottomRightFirstLine, SWT.NONE);
 	      smartLabel.setText("SMART Observation Definition" );
@@ -380,30 +408,15 @@ public class MatchSessionDialog extends Dialog {
 		  iItem.setText("Data Model");
 	      addCategoriesToTree(iItem, rootCategory, "en");
 
-	      GridData treeData = new GridData(SWT.FILL,SWT.FILL, true, true);
-	      treeData.heightHint = 120;
+	      GridData treeData = new GridData(SWT.FILL,SWT.TOP, true, true);
+	      treeData.heightHint = 130;
+	      treeData.minimumHeight = 100;
 	      tree.setLayoutData(treeData);
 	      tree.addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				ArrayList<Attribute> attributeArray = new ArrayList<Attribute>();
-				
-				TreeItem selectedTreeItem = tree.getSelection()[0];
-				while(selectedTreeItem != null){
-					CategoryType cat = (CategoryType)selectedTreeItem.getData();
-					if(cat != null){
-						List<CategoryAttributeLink> attributes = cat.getAttributes();
-						for(CategoryAttributeLink attr : attributes){
-							String key = attr.getAttributekey(); 
-							Attribute newAttribute = new Attribute(smartAttributeHash.get(key) , attr.getAttributekey(), smartAttributeDetailsHash.get(key));
-							attributeArray.add(newAttribute);
-						}
-
-					}
-					selectedTreeItem = selectedTreeItem.getParentItem();
-				}
-				smartCombo2.setInput(attributeArray);
+				treeSelectionChanged();
 			}
 
 			@Override
@@ -413,120 +426,66 @@ public class MatchSessionDialog extends Dialog {
 			}
 	      });
 
-
-	      //Make an Attribute selector 
-	      Label smartLabel2 = new Label(bottomRight, SWT.NONE);
-	      smartLabel2.setText("Attribute #1:" );
-	      smartLabel2.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
 	      
-	      smartCombo2 =  new ComboViewer (bottomRight, SWT.READ_ONLY);
-	      smartCombo2.setContentProvider(ArrayContentProvider.getInstance());
-	      smartCombo2.setLabelProvider(new LabelProvider() {
-	    	  @Override
-	    	  public String getText(Object element) {
-	    	    return ((Attribute)element).getText();
-	    	  }
-	    	});
-	      smartCombo2.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-	      smartCombo2.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-	    	  @Override
-	    	  public void selectionChanged(SelectionChangedEvent arg0) {
-	    			ISelection selection = smartCombo2.getSelection();
-	    	  		if (!selection.isEmpty()) {
-	    	  		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
-	    	  		    Attribute selected = (Attribute) structuredSelection.getFirstElement();
-	    	  		    String type = selected.getAttributeType().getType();
-	    	  		    Boolean isRequired = selected.getAttributeType().isIsrequired();
-	    	  		    if( type.equals("NUMERIC") ){
-	    	  		    	value1Text.setText("");
-	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
-	    	  		    }else if( type.equals("TEXT") ){
-	    	  		    	value1Text.setText("");
-	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
-	    	  		    }else if( type.equals("LIST") ){
-	    	  		    	String name;
-	    	  		    	String lang;
-	    	  		    	ArrayList<ListOption> options = new ArrayList<ListOption>();
-	    	  		    	List<ListNode> list = selected.getAttributeType().getValues();
-	    	  		    	int langIndex = langSelector.getSelectionIndex();
-
-	    	  		    	if (langIndex != -1 && langIndex < codes.length && codes != null) {
-	    		  				lang = (String) codes[langIndex];
-	    	  		    	}else{
-	    	  		    		lang = "";
-	    	  		    	}
-	    		  			for(ListNode i : list){
-		    					name = i.getNames().get(0).getValue();
-		    					for(int x=0; x < i.getNames().size(); x++){
-		    						if(i.getNames().get(x).getLanguageCode().equals(lang)){
-		    							name = i.getNames().get(x).getValue();
-		    							break;
-		    						}
-		    					}
-		    					options.add(new ListOption(name, i.getKey()));
-		    				}
-	    	  		    	value1ComboViewer.setInput(options);
-	    	  		    	((StackLayout)value1.getLayout()).topControl = value1ComboViewer.getControl();
-	    	  		    }else if( type.equals("TREE") ){
-	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Tree;
-	    	  			}else if( type.equals("BOOLEAN") ){
-	    	  				((StackLayout)value1.getLayout()).topControl = value1Combo;
-	    	  		    }
-	    	  		    value1.layout();
-	    	  		}
-	    	  }
-	      });
+	      tabFolder = new TabFolder (bottomRight, SWT.NONE);
+	      tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
 	      
-	  	  //smartCombo2.setItems (new String [] {});
-	  	  //smartCombo2.setEnabled(false);
-	  	  //smartCombo2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+	      tab1 = new TabItem (tabFolder, SWT.NONE);
+	      tab1.setText ("Attribute #1");
+	      tab2 = new TabItem (tabFolder, SWT.NONE);
+	      tab2.setText ("Attribute #2");
+	      tab3 = new TabItem (tabFolder, SWT.NONE);
+	      tab3.setText ("Attribute #3");
+	      tab4 = new TabItem (tabFolder, SWT.NONE);
+	      tab4.setText ("Attribute #4");
+	      tab5 = new TabItem (tabFolder, SWT.NONE);
+	      tab5.setText ("Attribute #5");
+	      
+	      
+	      tab1Composite = new Composite(tabFolder, SWT.NONE);
+	      tab1Composite.setLayout(new GridLayout());
+	      tab2Composite = new Composite(tabFolder, SWT.NONE);
+	      tab2Composite.setLayout(new GridLayout());
+	      tab3Composite = new Composite(tabFolder, SWT.NONE);
+	      tab3Composite.setLayout(new GridLayout());
+	      tab4Composite = new Composite(tabFolder, SWT.NONE);
+	      tab4Composite.setLayout(new GridLayout());
+	      tab5Composite = new Composite(tabFolder, SWT.NONE);
+	      tab5Composite.setLayout(new GridLayout());
 	      
 
 	      
-	      Label smartLabel3 = new Label(bottomRight, SWT.NONE);
-	      smartLabel3.setText("Value #1:" );
-	      smartLabel3.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+	      
+	      //Make Attribute #1 selector
+	      attribute1 = new AttributeSelection();
+	      attribute1.init(codes, langSelector);
+	      attribute1.CreateAttribute(tab1Composite);
+	      
+	      attribute2 = new AttributeSelection();
+	      attribute2.init(codes, langSelector);
+	      attribute2.CreateAttribute(tab2Composite);
+	      
+	      attribute3 = new AttributeSelection();
+	      attribute3.init(codes, langSelector);
+	      attribute3.CreateAttribute(tab3Composite);
+	      
+	      attribute4 = new AttributeSelection();
+	      attribute4.init(codes, langSelector);
+	      attribute4.CreateAttribute(tab4Composite);
+	      
+	      attribute5 = new AttributeSelection();
+	      attribute5.init(codes, langSelector);
+	      attribute5.CreateAttribute(tab5Composite);
+	      
+	      
+	      tab1.setControl(tab1Composite);
+	      tab2.setControl(tab2Composite);
+	      tab3.setControl(tab3Composite);
+	      tab4.setControl(tab4Composite);
+	      tab5.setControl(tab5Composite);
+	      tabFolder.pack();
 
-	      value1 = new Composite(bottomRight, SWT.NONE);
-	      value1.setLayout(new StackLayout());
-	      value1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	      
-	      value1Combo = new Combo(value1, SWT.DROP_DOWN | SWT.SIMPLE | SWT.READ_ONLY);
-	      value1Combo.setItems(new String[]{"TRUE", "FALSE"});
-	      value1Combo.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-
-	      value1ComboViewer =  new ComboViewer (value1, SWT.READ_ONLY);
-	      value1ComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-	      value1ComboViewer.setLabelProvider(new LabelProvider() {
-	    	  @Override
-	    	  public String getText(Object element) {
-	    	    return ((ListOption)element).getName();
-	    	  }
-	    	});
-	      value1ComboViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-	      
-	      
-	      value1Text = new Text(value1, SWT.BORDER);
-	      GridData gridtxt1Data = new GridData(SWT.FILL, SWT.TOP, false, false);
-	      gridData.widthHint = 100;
-	      value1Text.setLayoutData(gridtxt1Data);
-	      
-	      value1Tree = new Tree(value1, SWT.BORDER | SWT.SINGLE);
-	      TreeItem vItem = new TreeItem (value1Tree, 0);
-	      vItem.setText("<Select an Attribute to populate possible values>");
-	      
-	      GridData gridtree1Data = new GridData(SWT.FILL, SWT.FILL, true, true);
-	      gridData.heightHint = 100;
-	      value1Tree.setLayoutData(gridtree1Data);
-	      
-	      ((StackLayout)value1.getLayout()).topControl = value1Combo;
-	      
-	      
-//	      smartCombo3 =  new Combo (bottomRight, SWT.READ_ONLY);
-	//  	  smartCombo3.setItems (new String [] {});
-	  //	  smartCombo3.setEnabled(false);
 	      //end of bottom Right elements--------------------------------------
 	      
 	      
@@ -553,6 +512,8 @@ public class MatchSessionDialog extends Dialog {
 		    });
 	      
 
+
+	      
 	      
   	      shell.pack();
           shell.open();
@@ -568,6 +529,9 @@ public class MatchSessionDialog extends Dialog {
 	  }
 
 	  
+
+
+
 
 
 	private void buildAttributeHash(String languageCode) {
@@ -614,9 +578,8 @@ public class MatchSessionDialog extends Dialog {
 			  addCategoriesToTree(iItem, cat.get(i).getCategories(), languageCode);
 			  i++;
 		  }
-  		  
-		
 	}
+	
 
 
 	protected void ViewerSelectionChanged() {
@@ -633,7 +596,7 @@ public class MatchSessionDialog extends Dialog {
   			mistText9.setEnabled(true);
   			
   			tree.setEnabled(true);
-  			//TODO enable other attr/value fields
+
   			
   			
   		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
@@ -648,8 +611,44 @@ public class MatchSessionDialog extends Dialog {
   		    mistText7.setText(selected.getMistItem().getCat7());
   		    mistText8.setText(selected.getMistItem().getCat8());
   		    mistText9.setText(selected.getMistItem().getCat9());
+  		    
+  		    SmartItem smartItem = selected.getSmartItem();
+  		    
+  		    
+  			if(tree.getItemCount() == 1){
+  					updateTree(smartItem.getCategoryKey(), tree.getItem(0),"");
+  					treeSelectionChanged();
+  					if(smartItem.getCategoryKey() == null || smartItem.getCategoryKey().equals("")){
+  						tabFolder.setEnabled(false);
+  					}
+  					attribute1.update(smartItem.getAttr1key(), smartItem.getB1(), smartItem.getText1(), smartItem.getList1(), smartItem.getTree1());
+  		  		    attribute2.update(smartItem.getAttr2key(), smartItem.getB2(), smartItem.getText2(), smartItem.getList2(), smartItem.getTree2());
+  		  		    attribute3.update(smartItem.getAttr3key(), smartItem.getB3(), smartItem.getText3(), smartItem.getList3(), smartItem.getTree3());
+  		  		    attribute4.update(smartItem.getAttr4key(), smartItem.getB4(), smartItem.getText4(), smartItem.getList4(), smartItem.getTree4());
+  		  		    attribute5.update(smartItem.getAttr5key(), smartItem.getB5(), smartItem.getText5(), smartItem.getList5(), smartItem.getTree5());
+  			}
+  			
+  			
+
+  		    
   		}
 	}
+
+	private boolean updateTree(String catKey, TreeItem ti, String prefix) {
+		for(int x=0; x < ti.getItemCount(); x++){
+			CategoryType c = (CategoryType)ti.getItem(x).getData();
+			if(c != null){ 
+				if( (prefix + c.getKey()).equals(catKey)){
+					tree.setSelection(ti.getItem(x));
+					return true;
+				}else{
+					if(updateTree(catKey, ti.getItem(x), prefix + c.getKey() + ".")) return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 	public void saveCurrentMatch(SelectionEvent e){
 		    
@@ -660,15 +659,43 @@ public class MatchSessionDialog extends Dialog {
   				
   				TreeItem selectedTreeItem = tree.getSelection()[0];
   				CategoryType cat = (CategoryType)selectedTreeItem.getData();
+  				if(cat == null){
+  					MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR);
+			    	messageBox.setMessage("The selected cateogory is invalid, please select a different category.");
+			    	messageBox.open();
+			    	return;
+  				}
+  				
+
   				String fullKey = cat.getKey();
+
+  				String catKey="";
+  				//Get Category
   				while(selectedTreeItem.getParentItem() != null){
   					selectedTreeItem = selectedTreeItem.getParentItem();
   					if(selectedTreeItem.getData() != null){
   						fullKey = ((CategoryType)selectedTreeItem.getData()).getKey() + "." + fullKey;
+  						catKey = fullKey;
   					}else{
   						break;
   					}
   				}
+  				
+  				//get Attributes
+  				fullKey += getAttributeString(attribute1);
+  				fullKey += getAttributeString(attribute2);
+  				fullKey += getAttributeString(attribute3);
+  				fullKey += getAttributeString(attribute4);
+  				fullKey += getAttributeString(attribute5);
+  				
+  				selected.getSmartItem().setCategoryKey(catKey);
+  				selected.getSmartItem().updateItem(getSelectedAttributeKey(attribute1), getSelectedAttributeKey(attribute2), getSelectedAttributeKey(attribute3), getSelectedAttributeKey(attribute4), getSelectedAttributeKey(attribute5),
+  						getBooleanText(attribute1), getAttributeText(attribute1), getAttributeList(attribute1), getAttributeTree(attribute1),
+  						getBooleanText(attribute2), getAttributeText(attribute2), getAttributeList(attribute2), getAttributeTree(attribute2),
+  						getBooleanText(attribute3), getAttributeText(attribute3), getAttributeList(attribute3), getAttributeTree(attribute3),
+  						getBooleanText(attribute4), getAttributeText(attribute4), getAttributeList(attribute4), getAttributeTree(attribute4),
+  						getBooleanText(attribute5), getAttributeText(attribute5), getAttributeList(attribute5), getAttributeTree(attribute5));
+  				
   				selected.setSmartItem(fullKey);
   			}
   			viewer.refresh();
@@ -693,8 +720,8 @@ public class MatchSessionDialog extends Dialog {
 	  
 	// create the columns for the table
 	  private void createColumns(final Composite parent, final TableViewer viewer) {
-	    String[] titles = { "", "MIST Item", "SMART Item"};
-	    int[] bounds = { 30, 240, 240};
+	    String[] titles = { "Complete", "MIST Item", "SMART Item"};
+	    int[] bounds = { 70, 240, 240};
 
 	    // first column is for the checkbox
 	    TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
@@ -702,10 +729,8 @@ public class MatchSessionDialog extends Dialog {
 	      @Override
 	      public String getText(Object element) {
 	    	  MatchRow row = (MatchRow) element;
-	    	  //TODO check the boxes for ones that are matched when opening a file, I think it should be here somehow.
-	    	  //also if we re-order by sorting hopefully this could be run again to reset the boxes?
 	    	  if(row.getMatched()){
-	    		  return "";
+	    		  return "Complete";
 	    	  }else{
 	    		  return "";
 	    	  }
@@ -753,4 +778,137 @@ public class MatchSessionDialog extends Dialog {
 			Rectangle shellBounds = parentShell.getBounds();
 			return new Point(shellBounds.x + shellBounds.width / 2, (shellBounds.y + shellBounds.height) / 2);
 		}
+	  
+	  private String getAttributeString(AttributeSelection attributeSelection){
+		  String fullKey = "";
+		  ISelection selection = attributeSelection.getAttrComboViwer().getSelection();
+			if (!selection.isEmpty()) {
+  				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+  				Attribute selectedAttr = (Attribute) structuredSelection.getFirstElement();
+  				String type = selectedAttr.getAttributeType().getType();
+  				String attrKey = selectedAttr.getKey();
+  				
+  				fullKey = fullKey + "|" + attrKey;
+  				
+  				if( type.equals("NUMERIC") || type.equals("TEXT") ){
+  					fullKey += "|" + attributeSelection.getValueText().getText() + "|dValue|1";
+  				}else if( type.equals("LIST") ){
+  					ISelection listSelection = attributeSelection.getValueComboViewer().getSelection();
+  					if (!listSelection.isEmpty()) {
+  						IStructuredSelection sListSelection = (IStructuredSelection) listSelection;      
+  						ListOption listItem = (ListOption) sListSelection.getFirstElement();
+  						String listKey = listItem.getKey();
+  						fullKey += "|" + listKey + "|itemKey|1" ; //1 is the value multiplier
+  					}
+  						
+  				}else if( type.equals("TREE") ){
+		    		TreeItem treeItem = attributeSelection.getValueTree().getSelection()[0];
+		    		TreeNodeType data = (TreeNodeType)treeItem.getData();
+		    		String treeKey = data.getKey();
+
+					while(treeItem.getParentItem() != null){
+						treeItem = treeItem.getParentItem();
+						if(treeItem.getData() != null){
+							treeKey = ((TreeNodeType)treeItem.getData()).getKey() + "." + treeKey;
+						}else{
+							break;
+						}
+					}
+					
+					fullKey += "|" + treeKey + "|itemKey|1" ; //1 is the value multiplier
+					
+  				}else if( type.equals("BOOLEAN") ){
+  					fullKey += "|" + attributeSelection.getValueCombo().getText() + "|bValue|1";
+  				}
+  				
+			}
+			return fullKey;
+	  }
+	  
+	  private String getSelectedAttributeKey(AttributeSelection attributeSelection){
+		  ISelection selection = attributeSelection.getAttrComboViwer().getSelection();
+			if (!selection.isEmpty()) {
+  				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+  				Attribute selectedAttr = (Attribute) structuredSelection.getFirstElement();
+  				String type = selectedAttr.getAttributeType().getType();
+  				return selectedAttr.getKey();
+			}
+			return "";
+	  }
+	  
+	  private String getAttributeText(AttributeSelection attributeSelection){
+		  return attributeSelection.getValueText().getText();
+	  }
+	  
+	  private boolean getBooleanText(AttributeSelection attributeSelection){
+		  if(attributeSelection.getValueCombo().getText().equals("TRUE")){
+			  return true;
+		  }else if(attributeSelection.getValueCombo().getText().equals("FALSE")){
+			  return false;
+		  }else{
+			  return false;
+		  }
+	  }
+	  
+	  private String getAttributeList(AttributeSelection attributeSelection){
+		  ISelection listSelection = attributeSelection.getValueComboViewer().getSelection();
+		  if (!listSelection.isEmpty()) {
+			  IStructuredSelection sListSelection = (IStructuredSelection) listSelection;      
+			  ListOption listItem = (ListOption) sListSelection.getFirstElement();
+			  return listItem.getKey();
+		  }else{
+			  return "";
+		  }
+	  }
+	  
+	  private String getAttributeTree(AttributeSelection attributeSelection){
+		  	if(attributeSelection.getValueTree().getSelection().length == 0) return "";
+		  	TreeItem treeItem = attributeSelection.getValueTree().getSelection()[0];
+  			TreeNodeType data = (TreeNodeType)treeItem.getData();
+  			String treeKey = data.getKey();
+
+			while(treeItem.getParentItem() != null){
+				treeItem = treeItem.getParentItem();
+				if(treeItem.getData() != null){
+					treeKey = ((TreeNodeType)treeItem.getData()).getKey() + "." + treeKey;
+				}else{
+					break;
+				}
+			}
+			
+			return treeKey;
+	  }
+	  
+		private void treeSelectionChanged() {
+			ArrayList<Attribute> attributeArray = new ArrayList<Attribute>();
+			if(tree.getSelectionCount() == 0)return;
+			TreeItem selectedTreeItem = tree.getSelection()[0];
+			while(selectedTreeItem != null){
+				CategoryType cat = (CategoryType)selectedTreeItem.getData();
+				if(cat != null){
+					List<CategoryAttributeLink> attributes = cat.getAttributes();
+					for(CategoryAttributeLink attr : attributes){
+						String key = attr.getAttributekey(); 
+						Attribute newAttribute = new Attribute(smartAttributeHash.get(key) , attr.getAttributekey(), smartAttributeDetailsHash.get(key));
+						attributeArray.add(newAttribute);
+					}
+
+				}
+				selectedTreeItem = selectedTreeItem.getParentItem();
+			}
+			attribute1.clearValues();
+			attribute2.clearValues();
+			attribute3.clearValues();
+			attribute4.clearValues();
+			attribute5.clearValues();
+			
+			attribute1.getAttrComboViwer().setInput(attributeArray);
+			attribute2.getAttrComboViwer().setInput(attributeArray);
+			attribute3.getAttrComboViwer().setInput(attributeArray);
+			attribute4.getAttrComboViwer().setInput(attributeArray);
+			attribute5.getAttrComboViwer().setInput(attributeArray);
+			
+			tabFolder.setEnabled(true);
+		}
+
 }
