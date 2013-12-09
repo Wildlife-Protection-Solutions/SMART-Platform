@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
@@ -42,7 +43,7 @@ public class ObservationCategoryValueItem extends CategoryValueItem {
 			}
 			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 			if (category == null){
-				throw new Exception(MessageFormat.format("Category with key ''{0}'' not found.", new Object[]{categoryHkey}));
+				throw new Exception(MessageFormat.format(Messages.ObservationCategoryValueItem_CategoryKeyNotFound, new Object[]{categoryHkey}));
 			}
 			category.getFullCategoryName();		//cache this
 			DropItem di = ObservationDropItemFactory.INSTANCE.createCategoryValueDropItem(category);

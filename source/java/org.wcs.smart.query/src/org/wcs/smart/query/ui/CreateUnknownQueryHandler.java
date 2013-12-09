@@ -30,6 +30,7 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
@@ -41,7 +42,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  */
 public class CreateUnknownQueryHandler extends AbstractHandler {
 
-	private static final String QUERY_TYPE_KEY = "org.wcs.smart.query.type";
+	private static final String QUERY_TYPE_KEY = "org.wcs.smart.query.type"; //$NON-NLS-1$
 	
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
@@ -77,7 +78,7 @@ public class CreateUnknownQueryHandler extends AbstractHandler {
 			
 		} catch (WorkbenchException e) {
 			QueryPlugIn
-					.displayLog("Error opening query perspective", e);
+					.displayLog(Messages.CreateUnknownQueryHandler_ErrorLoadingQueryView, e);
 		}
 	}
 	private void createQuery(IQueryType qtype){

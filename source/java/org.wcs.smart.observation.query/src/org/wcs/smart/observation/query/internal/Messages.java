@@ -34,6 +34,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_DistanceColumnName;
 	public static String FixedQueryColumn_WaypointDateColumnName;
 	public static String FixedQueryColumn_WaypointIdColumnName;
+	public static String FixedQueryColumn_WaypointSourceColumnName;
 	public static String FixedQueryColumn_WaypointTimeColumnName;
 	public static String FixedQueryColumn_xColumnName;
 	public static String FixedQueryColumn_yColumnName;
@@ -72,10 +73,12 @@ public class Messages extends NLS {
 	public static String QueryFilterContentProvider_BracketsLabel;
 	public static String QueryFilterContentProvider_CategoriesLabel;
 	public static String QueryFilterContentProvider_DataModelFiltersLabel;
+	public static String QueryFilterContentProvider_GeneralFiltersName;
 	public static String QueryFilterContentProvider_LoadingItemsJobName;
 	public static String QueryFilterContentProvider_LoadingLabel;
 	public static String QueryFilterContentProvider_NotLabel;
 	public static String QueryFilterContentProvider_OperatoresLabel;
+	public static String QueryFilterContentProvider_WaypointSourceName;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
@@ -108,11 +111,23 @@ public class Messages extends NLS {
 	public static String SummaryQueryContentProvider_LoadingTreeJobName;
 	public static String SummaryQueryContentProvider_LoadListItemJob;
 	public static String SummaryQueryContentProvider_ValueOpsLabel;
+	public static String SummaryQueryContentProvider_WaypointSourceGroupByName;
 	public static String SummaryQueryLabelProvider_CountCatLabel;
 	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
+	public static String WaypointSourceFilter_InvalidSourceFilter;
+	public static String WaypointSourceFilterDropItem_IncidentSourceDropItem;
+	public static String WaypointSourceGroupByDropItem_AllLabel;
+	public static String WaypointSourceGroupByDropItem_FiltersLabel;
+	public static String WaypointSourceGroupByDropItem_WaypointSourceLabel;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String ObservationCategoryValueItem_CategoryKeyNotFound;
+	public static String ObservationDropItemFactory_QueryItemNotSupported;
+	public static String ObservationGridQueryType_QueryName;
+	public static String ObservationQueryType_QueryName;
+	public static String ObservationSummaryQueryType_QueryName;
+	public static String ObservationWaypointQueryType_QueryName;
 
 	static {
 		// initialize resource bundle

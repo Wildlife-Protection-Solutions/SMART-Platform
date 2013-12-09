@@ -37,7 +37,7 @@ import org.wcs.smart.observation.model.IWaypointSource;
  */
 public class WaypointSourceEngine {
 
-	private static String SOURCE_EXTENSION_ID = "org.wcs.smart.observation.ObservationSource";
+	private static String SOURCE_EXTENSION_ID = "org.wcs.smart.observation.ObservationSource"; //$NON-NLS-1$
 	
 	private static WaypointSourceEngine instance;
 	
@@ -95,10 +95,10 @@ public class WaypointSourceEngine {
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(SOURCE_EXTENSION_ID);
 		for (IConfigurationElement element : elements){
 			try{
-				IWaypointSource source = (IWaypointSource) element.createExecutableExtension("class");
+				IWaypointSource source = (IWaypointSource) element.createExecutableExtension("class"); //$NON-NLS-1$
 				supportedSources.put(source.getKey(), source);
 			}catch (Exception ex){
-				ObservationPlugIn.log("Error loading all waypoint sources", ex);
+				ObservationPlugIn.log("Error loading all waypoint sources", ex); //$NON-NLS-1$
 			}
 		}
 	}

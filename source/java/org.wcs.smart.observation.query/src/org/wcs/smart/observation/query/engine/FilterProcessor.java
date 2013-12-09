@@ -206,7 +206,7 @@ public class FilterProcessor implements IFilterProcessor {
 		HashSet<Class<?>> usedTables = new HashSet<Class<?>>();
 		
 		// ---- FROM CLAUSE -----
-		sql.append(" FROM " );
+		sql.append(" FROM " ); //$NON-NLS-1$
 		usedTables.add(Waypoint.class);
 		sql.append(namePrefix(Waypoint.class));
 		
@@ -270,9 +270,9 @@ public class FilterProcessor implements IFilterProcessor {
 				}else{
 					sql.append(" and "); //$NON-NLS-1$
 				}
-				sql.append(" ( ");
+				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(filter);
-				sql.append(" ) ");
+				sql.append(" ) "); //$NON-NLS-1$
 			}
 		}
 				
@@ -287,9 +287,9 @@ public class FilterProcessor implements IFilterProcessor {
 				}else{
 					sql.append(" AND "); //$NON-NLS-1$	
 				}
-				sql.append(" ( ");
+				sql.append(" ( "); //$NON-NLS-1$
 			    sql.append(filter);
-			    sql.append(" ) ");
+			    sql.append(" ) "); //$NON-NLS-1$
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());

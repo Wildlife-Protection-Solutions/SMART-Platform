@@ -55,6 +55,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaFilterPanel_Error_NoCas;
 	public static String ConservationAreaFilterPanel_FilterCaOp;
 	public static String ConservationAreaFilterPanel_IncludeAllCaOp;
+	public static String CreateUnknownQueryHandler_ErrorLoadingQueryView;
 	public static String DateGroupBy_GroupByNoSupported;
 	public static String DateGroupBy_InvalidFilter;
 	public static String DayDateGroupBy_GroupByDayName;
@@ -336,6 +337,25 @@ public class Messages extends NLS {
 	public static String SummaryResultsArea_RunSummaryLink;
 	public static String WaypointQuerySummaryInfo_NumberOfIncidentLabel;
 	public static String WaypointQuerySummaryInfo_UnknownNumberOfIncidents;
+	
+	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
+	public static String CsvSummaryExporter_CSV_ExporterName;
+	public static String CsvSummaryExporter_QueryNotRun;
+	public static String DefinitionQueryExporter_ExporterName;
+	public static String GridArcImageExporter_ExporterName;
+	public static String GridArcImageExporter_ExportError;
+	public static String GridArcImageExporter_FileNotFound;
+	public static String GridTiffImageExporter_FileNotFound;
+	public static String GridTiffImageExporter_QueryError;
+	public static String GridTiffImageExporter_TiffExporterName;
+	public static String ShapeQueryExporter_ExporterName;
+	public static String SimpleQueryExporter_Error_ExportFailed;
+	public static String SimpleQueryExporter_Error_QueryNotRun;
+	public static String SimpleQueryExporter_Progress_CleanUp;
+	public static String SimpleQueryExporter_Progress_ExportingFile;
+	public static String SimpleQueryExporter_Progress_InitializingWriter;
+	public static String SimpleQueryExporter_Progress_WritingData;
+	public static String SimpleQueryDefinitionImporter_InvalidPatrolType;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -131,7 +131,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		if (source == GeneralItems.WAYPOINT_SOURCE){
 			return new WaypointSourceFilterDropItem();
 		}
-		throw new IllegalStateException(MessageFormat.format("General item {0} not supported.", new Object[]{source.guiName}));
+		throw new IllegalStateException(MessageFormat.format(Messages.ObservationDropItemFactory_QueryItemNotSupported, new Object[]{source.guiName}));
 	}
 	
 	/**
@@ -308,9 +308,9 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			ObservationGriddedQuery q = (ObservationGriddedQuery) proxy.getQuery();
 			GridQueryDefinition def = q.getQueryDefinition();
 			
-			
-			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+//			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
+//			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
 			
 			DropItem valueItem = null;
 			try{

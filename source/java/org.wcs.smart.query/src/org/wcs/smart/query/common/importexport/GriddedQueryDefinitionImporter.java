@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +27,7 @@ import java.util.HashMap;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
@@ -46,12 +43,12 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  * @author Emily
  *
  */
-public class GriddedQueryDefinitionImporter implements IQueryImporter{
+public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 
 	/*
 	 * list of warnings generated during import process
 	 */
-	private ArrayList<String> warnings = new ArrayList<String>();
+	protected ArrayList<String> warnings = new ArrayList<String>();
 	
 	
 	/**
@@ -73,7 +70,7 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
-		PatrolGriddedQuery griddedQuery = PatrolQueryFactory.createGriddedQuery();
+		GriddedQuery griddedQuery = createQuery(qt.getQueryType());
 		
 		QueryImportEngine.importNames(griddedQuery, qt);
 		
@@ -92,17 +89,8 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 					session.beginTransaction();
 					try {
 						GridQueryDefinition def = griddedQuery.getQueryDefinition();
-						PatrolQueryValidator validator = new PatrolQueryValidator(langCode,uuidLookup, session);
-						if (def.getValueFilter() != null){
-							warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
-						}
 						
-						if (def.getRateFilter() != null){
-							warnings.addAll(validator.validate(def.getRateFilter().getFilter()));
-						}
-						
-						//process value items
-						warnings.addAll(validator.validate(def.getValuePart()));
+						validateQuery(def, langCode, uuidLookup, session);
 						
 						griddedQuery.setQuery(def.asQuery(), def);
 					} finally {
@@ -132,12 +120,23 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 		return this.warnings;
 	}
 	
-
+	/**
+	 * Validates the given query definition adding to warnings
+	 * as necessary;
+	 * @param def
+	 * @return
+	 */
+	protected abstract void validateQuery(GridQueryDefinition def, String langCode, HashMap<String,UuidItemType> uuidLookup, Session session) throws Exception;
 
 	@Override
-	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(PatrolGridQueryType.KEY);
-	}
+	public abstract boolean canImport(IQueryType qt);
 	
+
+	/**
+	 * Creates a new gridded query
+	 * @param qtype
+	 * @return
+	 */
+	protected abstract GriddedQuery createQuery(String qtype);
 	
 }

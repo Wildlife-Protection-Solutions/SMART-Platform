@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationSummaryQueryEditor;
@@ -78,7 +79,7 @@ public class ObservationSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Summary Query";
+		return Messages.ObservationSummaryQueryType_QueryName;
 	}
 
 	/**

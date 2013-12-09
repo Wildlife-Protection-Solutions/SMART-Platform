@@ -19,17 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
 import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
-import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.SmartUtils;
 
@@ -58,7 +57,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(PatrolSummaryQueryType.KEY)){
+		if (query instanceof SummaryQuery){
 			return true;
 		}
 		return false;
@@ -75,7 +74,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 	 */
 	@Override
 	public void export(Query query, File outputFile, IProgressMonitor monitor) throws Exception {
-		PatrolSummaryQuery sumQuery = (PatrolSummaryQuery)query;
+		SummaryQuery sumQuery = (SummaryQuery)query;
 		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults(monitor);
 		if (results == null){
 			throw new Exception(Messages.CsvSummaryExporter_QueryNotRun);

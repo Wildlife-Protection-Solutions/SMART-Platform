@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ICombinableDropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
@@ -69,7 +70,8 @@ public class WaypointSourceGroupByDropItem extends DropItem implements IGroupByD
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
-		sb.append ("Waypoint Source\n");
+		sb.append (Messages.WaypointSourceGroupByDropItem_WaypointSourceLabel);
+		sb.append("\n"); //$NON-NLS-1$
 		int cnt = 0;
 		for (ListItem it : selectedItems){
 			if (cnt >= 3){
@@ -141,7 +143,7 @@ public class WaypointSourceGroupByDropItem extends DropItem implements IGroupByD
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.WaypointSourceGroupByDropItem_FiltersLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -176,7 +178,7 @@ public class WaypointSourceGroupByDropItem extends DropItem implements IGroupByD
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
-		toolTip.setMessage("");
+		toolTip.setMessage(""); //$NON-NLS-1$
 		toolTip.setAutoHide(true);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -231,7 +233,7 @@ public class WaypointSourceGroupByDropItem extends DropItem implements IGroupByD
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (selectedItems == null){
-			tipStr.append("All");
+			tipStr.append(Messages.WaypointSourceGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: selectedItems){
 				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

@@ -836,21 +836,21 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime as wp_date_time_" + itemcnt);
+					groupByInnerSql.append(".datetime as wp_date_time_" + itemcnt); //$NON-NLS-1$
 					groupBySql.append("wp_date_time_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					
-					groupByInnerSql.append("trim(cast(month(");
+					groupByInnerSql.append("trim(cast(month("); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime) as char(2))) || '/' || cast(year(");
+					groupByInnerSql.append(".datetime) as char(2))) || '/' || cast(year("); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime) as char(4)) as datePart_");
-					groupByInnerSql.append( itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".datetime) as char(4)) as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append( itemcnt); 
 
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("YEAR(");
+					groupByInnerSql.append("YEAR("); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
 					groupByInnerSql.append(".datetime) as datePart_" + itemcnt); //$NON-NLS-1$
 				}
@@ -938,7 +938,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			}else if (gb instanceof WaypointSourceGroupBy){
 				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
 				groupByInnerSql.append(tablePrefix(Waypoint.class));
-				groupByInnerSql.append(".source");
+				groupByInnerSql.append(".source"); //$NON-NLS-1$
 				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				
 				groupBySql.append(categoryKey);

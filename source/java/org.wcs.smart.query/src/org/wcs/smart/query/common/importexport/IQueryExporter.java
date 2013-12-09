@@ -19,38 +19,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation;
+package org.wcs.smart.query.common.importexport;
+
+import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.ICaDeleteHandler;
-import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.query.model.Query;
 
 /**
- * Delete handler than ensures all waypoints are removed
- * when the conservation area is deleted.
+ * Query exporter interface. 
+ * <p>
+ * To add an additional query exporter, create
+ * a new query exporter extension point that
+ * extends this class.
+ * </p>
  * 
- * @author Emily
- *
+ * @author egouge
+ * @since 1.0.0
  */
-public class CaDeleteHandler implements ICaDeleteHandler {
+public interface IQueryExporter {
 
-	public static int DELETE_ORDER = 2;
-	@Override
-	public void beforeDelete(ConservationArea ca, Session session,
-			IProgressMonitor monitor) throws Exception {
-		
-		monitor.subTask(Messages.CaDeleteHandler_ProgressDeleteWp);
-		deleteWaypoints(ca, session);
-
-	}
+	/**
+	 * 
+	 * @return unique exporter identifier 
+	 */
+	public String getId();
 	
-	private void deleteWaypoints(ConservationArea ca, Session session){
-		Query q = session.createQuery("delete from Waypoint where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-	}
+	/**
+	 * @return the exporter name
+	 */
+	public String getName();
 
+	/**
+	 * @return the default file extension for the exporter
+	 */
+	String getDefaultExtension();
+	
+	
+	/**
+	 * @param query the query to export
+	 * @return <code>true</code> if this class can export the
+	 * given query.
+	 */
+	boolean canExport(Query query);
+	
+	/**
+	 * Export the given query.
+	 * 
+	 * @param query the query to export
+	 * @param file the file to write results to
+	 * @param monitor the progress monitor
+	 * @throws Exception an exception if an error occurs
+	 * while exporting
+	 */
+	void export (Query query, File file, IProgressMonitor monitor) throws Exception;
 }

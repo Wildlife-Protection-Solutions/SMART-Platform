@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -29,9 +29,9 @@ import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridCoverageWriter;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -62,14 +62,14 @@ public class GridTiffImageExporter implements IQueryExporter {
 
 	@Override
 	public boolean canExport(Query query) {
-		return (PatrolGriddedQuery.class.isAssignableFrom(query.getClass()));
+		return (GriddedQuery.class.isAssignableFrom(query.getClass()));
 	}
 
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor)
 			throws Exception {
 		
-		File sourceFile = ((PatrolGriddedQuery)query).getLastRasterFile();
+		File sourceFile = ((GriddedQuery)query).getLastRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){
 			throw new Exception(Messages.GridTiffImageExporter_QueryError, 
 					new Exception(
