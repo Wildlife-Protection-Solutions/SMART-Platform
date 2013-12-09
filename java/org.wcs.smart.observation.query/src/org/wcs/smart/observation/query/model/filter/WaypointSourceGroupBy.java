@@ -84,7 +84,7 @@ public class WaypointSourceGroupBy implements IGroupBy {
 
 	@Override
 	public String getKeyPart() {
-		return "wpt:src";
+		return "wpt:src"; //$NON-NLS-1$
 	}
 
 	@Override

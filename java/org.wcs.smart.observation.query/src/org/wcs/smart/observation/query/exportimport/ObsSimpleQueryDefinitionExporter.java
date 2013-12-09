@@ -19,44 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.observation.query.exportimport;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.query.importexport.IQueryExporter;
+import org.hibernate.Session;
+import org.wcs.smart.observation.query.model.types.ObservationQueryType;
+import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
+import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.xml.model.QueryType;
 
 /**
- * Support functions for exporting queries
+ * Exports a observation query definition
+ * 
  * @author egouge
  * @since 1.0.0
  */
-public class QueryExportEngine {
-	public static final String MAPPING_ID = "org.wcs.smart.query.export.format"; //$NON-NLS-1$
-	
-	/**
-	 * Returns all valid query exporters for the given query.
-	 * @param query
-	 * @return
+public class ObsSimpleQueryDefinitionExporter extends SimpleQueryDefinitionExporter {
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
-	public static final List<IQueryExporter>  getQueryExports(Query query){
-		List<IQueryExporter> items = new ArrayList<IQueryExporter>();
-		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				IQueryExporter exporter = (IQueryExporter) e.createExecutableExtension("class"); //$NON-NLS-1$
-				if (exporter.canExport(query)) {
-					items.add(exporter);
-				}
-	}
-		}catch (Exception ex){
-			ex.printStackTrace();
+	@Override
+	public boolean canExport(Query query) {
+		if (query.getType().getKey().equals(ObservationQueryType.KEY) ||
+				query.getType().getKey().equals(ObservationWaypointQueryType.KEY)){
+			return true;
 		}
-		return items;
+		return false;
 	}
+
+	/**
+	 * Nothing to do here.
+	 */
+	@Override
+	protected void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
+	}
+
 }
+

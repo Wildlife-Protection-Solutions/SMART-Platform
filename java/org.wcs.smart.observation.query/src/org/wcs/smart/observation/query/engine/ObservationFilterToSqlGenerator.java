@@ -77,10 +77,10 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(engine.tablePrefix(Waypoint.class));
-		sb.append(".source ");
+		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
 		//TODO: escape waypoint source key
-		sb.append(" '" + SmartUtils.stripQuotes(filter.getWaypointSourceKey()) + "'");
+		sb.append(" '" + SmartUtils.stripQuotes(filter.getWaypointSourceKey()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}
 	

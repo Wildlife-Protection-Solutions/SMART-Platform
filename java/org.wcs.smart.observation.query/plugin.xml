@@ -239,5 +239,32 @@
             class="org.wcs.smart.observation.query.model.ObsObservationQuery">
       </class>
    </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.observation.query.exportimport.ObsGridQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.observation.query.exportimport.ObsSummaryQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.observation.query.exportimport.ObsSimpleQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.observation.query.exportimport.ObsShapeQueryExporter">
+      </Exporter>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.import">
+      <QueryImporter
+            class="org.wcs.smart.observation.query.exportimport.ObsGriddedQueryDefImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.observation.query.exportimport.ObsSimpleQueryDefinitionImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.observation.query.exportimport.ObsSummaryQueryDefinitionImporter">
+      </QueryImporter>
+   </extension>
 
 </plugin>

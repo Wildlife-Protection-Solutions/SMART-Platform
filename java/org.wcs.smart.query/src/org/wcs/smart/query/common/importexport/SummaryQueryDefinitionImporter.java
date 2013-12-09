@@ -19,48 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
-import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
- * Importer for importing query definition files.
- * 
- * @author Emily
+ * Query importer for importing summary query definitions
+ * @author egouge
  * @since 1.0.0
  */
-public class SimpleQueryDefinitionImporter implements IQueryImporter {
+public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 
 	/*
 	 * list of warnings generated during import process
 	 */
-	private ArrayList<String> warnings = new ArrayList<String>();
+	protected ArrayList<String> warnings = new ArrayList<String>();
 	
 	
 	/**
@@ -80,64 +68,63 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 	@Override
 	public Query importQuery(QueryType qt) throws Exception{
 		warnings.clear();
-		SimpleQuery wq;
-
-		String langCode = qt.getLanguage();
-		IQueryType qType = QueryTypeManager.getInstance().findQueryType(qt.getQueryType());
-		if (qType == null){
-			qType = QueryTypeManager.getInstance().findDeprecatedQueryType(qt.getQueryType());
-		}
-		if (qType == null){
-			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
-		}
-		wq = (SimpleQuery) PatrolQueryFactory.createQuery(qType);
-		if (wq == null){
-			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
-		}
 		
-		QueryImportEngine.importNames(wq, qt);
+		String langCode = qt.getLanguage();
+		SummaryQuery summaryQuery = createQuery();
+		QueryImportEngine.importNames(summaryQuery, qt);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
-		String strQueryFilter = ""; //$NON-NLS-1$
-		String strColumnFilter = ""; //$NON-NLS-1$
 		for (QueryPart part : qt.getQueryPart()) {
+			
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
-					InputStream is = new ByteArrayInputStream(part.getValue().getBytes());
-				
-					Parser parser = new Parser(is);
-					QueryFilter queryFilter = parser.QueryFilter();
-					is.close();
-
+					
+					summaryQuery.setQuery(part.getValue());
 					Session session = HibernateManager.openSession();
 					session.beginTransaction();
 					try {
-						PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session);
-						warnings.addAll(validator.validate(queryFilter.getFilter()));
+						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
+						validateQuery(sumDef, langCode, uuidLookup, session);
+//						PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session);
+//						if (sumDef.getValueFilter() != null ){
+//							warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
+//						}
+//						if (sumDef.getRateFilter() != null){
+//							warnings.addAll(validator.validate(sumDef.getRateFilter().getFilter()));
+//						}
+//						//process value items
+//						for (IValueItem item: sumDef.getValuePart().getValueItems()){
+//							warnings.addAll(validator.validate(item));
+//						}
+//						
+//						//process group by 
+//						for (IGroupBy gbpart: sumDef.getColumnGroupByPart().getGroupBys()){
+//							warnings.addAll(validator.validate(gbpart));
+//						}		
+//						for (IGroupBy gbpart: sumDef.getRowGroupByPart().getGroupBys()){
+//							warnings.addAll(validator.validate(gbpart));
+//						}		
+					
+						summaryQuery.setQuery(sumDef.asQuery(), sumDef);
 					} finally {
 						session.getTransaction().rollback();
 						session.close();
 					}
-					strQueryFilter = queryFilter.asString();
 				}
-			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
-				strColumnFilter = part.getValue();
 			}
 		}
 		
-		wq.setQueryFilter(strQueryFilter);
-		wq.setVisibleColumns(strColumnFilter);
-		wq.setConservationArea(SmartDB.getCurrentConservationArea());
-		wq.setOwner(SmartDB.getCurrentEmployee());
 		
-		wq.setConservationAreaFilter(new ConservationAreaFilter(true));
+		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
+		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
 		
+		summaryQuery.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
-		return wq;
+		return summaryQuery;
 	}
 	
 	/**
@@ -147,12 +134,21 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 	public ArrayList<String> getWarnings(){
 		return this.warnings;
 	}
-
+	
+	/**
+	 * Validates the imported query definition.  Updates
+	 * warning array as required
+	 */
+	protected abstract void validateQuery(SumQueryDefinition sumDef, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception;
+	
 	@Override
-	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(PatrolObservationQueryType.KEY) ||
-				qt.getKey().equals(PatrolWaypointQueryType.KEY) || 
-				qt.getKey().equals(PatrolQueryType.KEY);
-	}
+	public abstract boolean canImport(IQueryType qt);
+	
+	/**
+	 * Creates a new summary query;
+	 * @param at
+	 * @return
+	 */
+	public abstract SummaryQuery createQuery();
 	
 }

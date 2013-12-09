@@ -19,41 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
-import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.summary.IGroupBy;
-import org.wcs.smart.query.model.summary.IValueItem;
-import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
- * Query importer for importing summary query definitions
- * @author egouge
+ * Importer for importing query definition files.
+ * 
+ * @author Emily
  * @since 1.0.0
  */
-public class SummaryQueryDefinitionImporter implements IQueryImporter{
+public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 
 	/*
 	 * list of warnings generated during import process
 	 */
-	private ArrayList<String> warnings = new ArrayList<String>();
+	protected ArrayList<String> warnings = new ArrayList<String>();
 	
 	
 	/**
@@ -73,62 +69,49 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 	@Override
 	public Query importQuery(QueryType qt) throws Exception{
 		warnings.clear();
-		
+		SimpleQuery wq;
+
 		String langCode = qt.getLanguage();
-		PatrolSummaryQuery summaryQuery = PatrolQueryFactory.createSummaryQuery();
-		QueryImportEngine.importNames(summaryQuery, qt);
+		IQueryType qType = QueryTypeManager.getInstance().findQueryType(qt.getQueryType());
+		if (qType == null){
+			qType = QueryTypeManager.getInstance().findDeprecatedQueryType(qt.getQueryType());
+		}
+		if (qType == null){
+			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
+		}
+		wq = (SimpleQuery) createQuery(qType);
+		if (wq == null){
+			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
+		}
+		
+		QueryImportEngine.importNames(wq, qt);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
+		String strQueryFilter = ""; //$NON-NLS-1$
+		String strColumnFilter = ""; //$NON-NLS-1$
 		for (QueryPart part : qt.getQueryPart()) {
-			
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
-					
-					summaryQuery.setQuery(part.getValue());
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
-					try {
-						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
-						PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session);
-						if (sumDef.getValueFilter() != null ){
-							warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
-						}
-						if (sumDef.getRateFilter() != null){
-							warnings.addAll(validator.validate(sumDef.getRateFilter().getFilter()));
-						}
-						//process value items
-						for (IValueItem item: sumDef.getValuePart().getValueItems()){
-							warnings.addAll(validator.validate(item));
-						}
-						
-						//process group by 
-						for (IGroupBy gbpart: sumDef.getColumnGroupByPart().getGroupBys()){
-							warnings.addAll(validator.validate(gbpart));
-						}		
-						for (IGroupBy gbpart: sumDef.getRowGroupByPart().getGroupBys()){
-							warnings.addAll(validator.validate(gbpart));
-						}		
-					
-						summaryQuery.setQuery(sumDef.asQuery(), sumDef);
-					} finally {
-						session.getTransaction().rollback();
-						session.close();
-					}
+					strQueryFilter = processDefinition(part.getValue(), langCode, uuidLookup);
 				}
+			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
+				strColumnFilter = part.getValue();
 			}
 		}
 		
+		wq.setQueryFilter(strQueryFilter);
+		wq.setVisibleColumns(strColumnFilter);
+		wq.setConservationArea(SmartDB.getCurrentConservationArea());
+		wq.setOwner(SmartDB.getCurrentEmployee());
 		
-		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
-		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
+		wq.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
-		summaryQuery.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
-		return summaryQuery;
+		return wq;
 	}
 	
 	/**
@@ -139,10 +122,24 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 		return this.warnings;
 	}
 	
+	/**
+	 * Converts the query definition in the xml file
+	 * to the query definition.  Performs necessary validation
+	 * and updates warnings as required.
+	 * @param query
+	 * @param queryDef
+	 */
+	protected abstract String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception;
 
 	@Override
-	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(PatrolSummaryQueryType.KEY);
-	}
+	public abstract boolean canImport(IQueryType qt);
+	
+	/**
+	 * Creates a query for the given query type;
+	 * @param queryType
+	 * @return
+	 */
+	protected abstract SimpleQuery createQuery(IQueryType qt);
+	
 	
 }

@@ -112,7 +112,7 @@ public class WaypointAttachment extends UuidItem implements ISmartAttachment {
 	public String getDatastoreFolderPath() {
 		if (getWaypoint() != null ){
 			if (getWaypoint().getSource() == null){
-				ObservationPlugIn.log("No attachment information found for waypoint attachment " + SmartUtils.encodeHex(getUuid()), null);
+				ObservationPlugIn.log("No attachment information found for waypoint attachment " + SmartUtils.encodeHex(getUuid()), null); //$NON-NLS-1$
 			}else{
 				StringBuilder sb = new StringBuilder();
 				sb.append(SmartDB.getCurrentConservationArea().getFileDataStoreLocation());

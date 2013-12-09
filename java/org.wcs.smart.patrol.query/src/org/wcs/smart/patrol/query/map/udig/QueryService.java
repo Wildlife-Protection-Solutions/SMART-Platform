@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.IServiceInfo;
 import net.refractions.udig.ui.UDIGDisplaySafeLock;
 

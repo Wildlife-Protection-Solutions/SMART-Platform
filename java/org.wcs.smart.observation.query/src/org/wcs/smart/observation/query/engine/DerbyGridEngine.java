@@ -22,14 +22,6 @@
 
 package org.wcs.smart.observation.query.engine;
 
-/**
- * Query engine for gridded summaries.
- * 
- * 
- * @author jeffloun
- * @since 1.0.0
- */
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -64,6 +56,14 @@ import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
+
+/**
+ * Query engine for gridded summaries.
+ * 
+ * 
+ * @author jeffloun
+ * @since 1.0.0
+ */
 
 public class DerbyGridEngine extends DerbyObservationQueryEngine{
 	private Collection<GridResultItem> myResults;

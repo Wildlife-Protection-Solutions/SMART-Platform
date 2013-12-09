@@ -19,38 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation;
+package org.wcs.smart.patrol.query.exportimport;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.ICaDeleteHandler;
-import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.query.common.importexport.GridQueryDefinitionExporter;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.xml.model.QueryType;
 
 /**
- * Delete handler than ensures all waypoints are removed
- * when the conservation area is deleted.
+ * Definition exporter for a gridded query.
  * 
  * @author Emily
  *
  */
-public class CaDeleteHandler implements ICaDeleteHandler {
+public class PatrolGridQueryDefinitionExporter extends GridQueryDefinitionExporter{
 
-	public static int DELETE_ORDER = 2;
+	/**
+	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
+	 */
 	@Override
-	public void beforeDelete(ConservationArea ca, Session session,
-			IProgressMonitor monitor) throws Exception {
-		
-		monitor.subTask(Messages.CaDeleteHandler_ProgressDeleteWp);
-		deleteWaypoints(ca, session);
-
+	public boolean canExport(Query query) {
+		return PatrolGriddedQuery.class.isAssignableFrom(query.getClass());		
 	}
+
+	/*
+	 * Process the filter
+	 */
+	@Override
+	protected void processFilter(IFilter f, final QueryType qt, final Session session) throws Exception{
+		if (f == null) return;
 	
-	private void deleteWaypoints(ConservationArea ca, Session session){
-		Query q = session.createQuery("delete from Waypoint where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		PatrolFilterProcessorVisitor visitor = new PatrolFilterProcessorVisitor(session,qt);
+		f.accept(visitor);
 	}
 
 }

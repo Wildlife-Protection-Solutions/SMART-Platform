@@ -116,7 +116,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		DATAMODEL_VALUE_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelAttributeLabel),
 		DATAMODEL_GROUPBY_CATEGORY(Messages.SummaryQueryContentProvider_GroupByCategoryAttributeLabel),
 		DATAMODEL_GROUPBY_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelGroupByAttributesLabel),		
-		WAYPOINT_SOURCE_GROUPBY("Waypoint Source");
+		WAYPOINT_SOURCE_GROUPBY(Messages.SummaryQueryContentProvider_WaypointSourceGroupByName);
 		
 		private String name;
 		

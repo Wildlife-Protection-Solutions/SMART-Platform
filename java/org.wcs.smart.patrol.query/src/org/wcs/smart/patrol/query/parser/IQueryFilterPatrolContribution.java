@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.query.parser;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.wcs.smart.query.common.engine.IQueryEngine;

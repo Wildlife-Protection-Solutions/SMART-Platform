@@ -113,6 +113,7 @@ public class Parser implements ParserConstants {
       jj_la1[3] = jj_gen;
       ;
     }
+    jj_consume_token(QUERY_SPLITTER);
     jj_consume_token(0);
         {if (true) return GridQueryDefinition.createQuery(value, gridSize, valueFilter, null);}
     throw new Error("Missing return statement in function");

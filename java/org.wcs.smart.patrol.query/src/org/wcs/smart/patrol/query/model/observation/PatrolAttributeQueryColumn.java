@@ -46,7 +46,7 @@ public class PatrolAttributeQueryColumn extends AttributeQueryColumn {
 	 * @param type the type of the attribute column
 	 */
 	public PatrolAttributeQueryColumn(String name, String attributeId, AttributeType type){
-		super(name, attributeId, type); //$NON-NLS-1$
+		super(name, attributeId, type);
 	}
 	
 	/**

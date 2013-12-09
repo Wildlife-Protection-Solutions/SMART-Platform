@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -99,7 +100,7 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 	 */
 	@Override
 	public String getText() {
-		return "wpn:src" + " " + opViewer.getCombo().getText() + " " + listViewer.getCombo().getText();
+		return "wpn:src" + " " + opViewer.getCombo().getText() + " " + listViewer.getCombo().getText(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -107,10 +108,10 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 	 */
 	@Override
 	public String asQueryPart() {
-		StringBuilder query = new StringBuilder("wpn:src");
+		StringBuilder query = new StringBuilder("wpn:src"); //$NON-NLS-1$
 		query.append(" "); //$NON-NLS-1$
 		query.append(currentOperator.asSmartValue());
-		query.append(" ");
+		query.append(" "); //$NON-NLS-1$
 		
 		IWaypointSource it = null;
 		if (currentSelection != null){
@@ -122,7 +123,7 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 			}
 		}
 		if (it != null){
-			query.append("\"" + it.getKey() + "\"");
+			query.append("\"" + it.getKey() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return query.toString();
 	}
@@ -143,7 +144,7 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Incident Source");
+		l.setText(Messages.WaypointSourceFilterDropItem_IncidentSourceDropItem);
 		
 		/* -- operator viewer **/
 		opViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);

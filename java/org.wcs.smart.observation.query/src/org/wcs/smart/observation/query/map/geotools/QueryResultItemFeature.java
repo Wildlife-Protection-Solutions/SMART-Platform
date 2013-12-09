@@ -57,7 +57,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createObservationFeature(ObservationQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		data[0] = it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 		
 		for (int i = 0; i < columns.size(); i ++){
 			Object x =  columns.get(i).getValue(it);

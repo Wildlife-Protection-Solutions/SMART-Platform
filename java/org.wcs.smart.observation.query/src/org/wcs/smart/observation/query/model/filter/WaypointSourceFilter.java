@@ -26,12 +26,14 @@ import java.text.MessageFormat;
 import org.hibernate.Session;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.ui.definition.WaypointSourceFilterDropItem;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.util.SmartUtils;
 /**
  * Waypoint source filter
  * @author Emily
@@ -47,7 +49,7 @@ public class WaypointSourceFilter implements IFilter {
 	private Operator op;
 	
 	public WaypointSourceFilter(String key, Operator op){
-		this.key = key;
+		this.key = SmartUtils.stripQuotes(key);
 		this.op = op;
 	}
 
@@ -61,7 +63,7 @@ public class WaypointSourceFilter implements IFilter {
 	
 	@Override
 	public String asString() {
-		return "wpn:src " + op.asSmartValue() + "\"" + key + "\"";
+		return "wpn:src " + op.asSmartValue() + " \"" + key + "\"";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override
@@ -75,7 +77,7 @@ public class WaypointSourceFilter implements IFilter {
 		IWaypointSource src = WaypointSourceEngine.getInstance().getSource(key);
 		DropItem di;
 		if (src == null){
-			di = new ErrorDropItem(MessageFormat.format("The waypoint source {0} is not supported by this version of SMART.", new Object[]{key}));
+			di = new ErrorDropItem(MessageFormat.format(Messages.WaypointSourceFilter_InvalidSourceFilter, new Object[]{key}));
 		}else{
 	
 			di = new WaypointSourceFilterDropItem();

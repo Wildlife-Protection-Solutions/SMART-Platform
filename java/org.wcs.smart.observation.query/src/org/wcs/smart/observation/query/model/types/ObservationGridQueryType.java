@@ -29,11 +29,13 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.observation.query.ui.definition.ObservationGriddedQueryDefinitionPanel;
+import org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel;
 import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterPanel;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -77,7 +79,7 @@ public class ObservationGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Gridded Query";
+		return Messages.ObservationGridQueryType_QueryName;
 	}
 
 	/**
@@ -153,6 +155,8 @@ public class ObservationGridQueryType implements IQueryType {
 				if (((ObservationGriddedQueryDefinitionPanel)p).getCrs() != null){
 					summary.setCrsDefinition(((ObservationGriddedQueryDefinitionPanel)p).getCrs().toWKT());
 				}
+			}else if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+				filters = p.getQueryPart() + "|"; //$NON-NLS-1$
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
 			}
@@ -180,6 +184,8 @@ public class ObservationGridQueryType implements IQueryType {
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(ObservationGriddedQueryDefinitionPanel.ID)){
 				definition = p.getQueryPart();
+			}else if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+				filters = p.getQueryPart() + "|"; //$NON-NLS-1$
 			}
 			
 		}
