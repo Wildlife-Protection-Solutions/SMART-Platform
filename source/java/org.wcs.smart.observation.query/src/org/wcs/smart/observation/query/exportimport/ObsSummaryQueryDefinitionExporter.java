@@ -19,71 +19,67 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.observation.query.exportimport;
+
+import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.xml.model.QueryPart;
+import org.wcs.smart.query.model.summary.DateGroupBy;
+import org.wcs.smart.query.model.summary.GroupByPart;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.query.xml.model.UuidItemType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
- * Exports a observation query definition
- * 
+ * Summary query definition exporter
  * @author egouge
  * @since 1.0.0
  */
-public class SimpleQueryDefinitionExporter extends DefinitionQueryExporter {
+public class ObsSummaryQueryDefinitionExporter extends SummaryQueryDefinitionExporter {
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof SimpleQuery){
+		if (query instanceof ObservationSummaryQuery){
 			return true;
 		}
 		return false;
 	}
 
-	/**
-	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#writeQuerySpecifics(org.wcs.smart.query.model.Query, org.wcs.smart.query.xml.model.QueryType)
+	/*
+	 * Exports the group by part information
 	 */
 	@Override
-	public void writeQuerySpecifics(Query query, QueryType xmlQuery) throws Exception {
-		SimpleQuery sQuery = (SimpleQuery) query;
-		QueryPart defPart = new QueryPart();
-		defPart.setKey("definition"); //$NON-NLS-1$
-		defPart.setValue( sQuery.getQueryFilter() );
-		xmlQuery.getQueryPart().add(defPart);
-		
-		
-		defPart = new QueryPart();
-		defPart.setKey("columns"); //$NON-NLS-1$
-		defPart.setValue( sQuery.getVisibleColumns() );
-		xmlQuery.getQueryPart().add(defPart);
-		
-		if (((SimpleQuery)query).getFilter() != null){
-			IFilter queryFilter = sQuery.getFilter().getFilter();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				processFilter(queryFilter, xmlQuery, s);
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+	protected void processGroupBy(GroupByPart values, QueryType qt, Session session) throws Exception{
+		if (values == null) return;
+		for (IGroupBy item: values.getGroupBys()){
+			if (item instanceof DateGroupBy) continue;
+			List<ListItem> bits = item.getItems(session);
+			for (ListItem it : bits){
+				if (it.getUuid() != null){
+					UuidItemType uuiditem = new UuidItemType();
+					uuiditem.setUuid( SmartUtils.encodeHex( it.getUuid() ) );
+					uuiditem.getValue().add(it.getName());
+					qt.getUuiditem().add(uuiditem);
+				}
 			}
 		}
 	}
-
-	/*
-	 * Process the filter
+	
+	/**
+	 * Nothing to do
+	 * 
 	 */
-	private void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
-		PatrolFilterProcessorVisitor visitor = new PatrolFilterProcessorVisitor(session,qt);
-		f.accept(visitor);
+	@Override
+	protected void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
 	}
 
 }

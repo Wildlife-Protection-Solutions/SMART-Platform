@@ -91,7 +91,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Other item children
 	 */
 	public enum GeneralItems{
-		WAYPOINT_SOURCE("Waypoint Source");
+		WAYPOINT_SOURCE(Messages.QueryFilterContentProvider_WaypointSourceName);
 		
 		public String guiName;
 		GeneralItems(String guiName){
@@ -116,7 +116,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Root node children
 	 */
 	public enum RootNodeType  {
-		GENERAL_FILTERS("General Filters"),
+		GENERAL_FILTERS(Messages.QueryFilterContentProvider_GeneralFiltersName),
 		DATA_MODEL_FILTERS(Messages.QueryFilterContentProvider_DataModelFiltersLabel),
 		AREA_FILTERS(Messages.QueryFilterContentProvider_AreaFiltersLabel),
 		OTHER_ITEMS(Messages.QueryFilterContentProvider_OperatoresLabel);

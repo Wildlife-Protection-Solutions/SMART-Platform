@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -36,7 +36,7 @@ import org.wcs.smart.query.xml.model.QueryType;
  * @author Emily
  *
  */
-public class GridQueryDefinitionExporter extends DefinitionQueryExporter
+public abstract class GridQueryDefinitionExporter extends DefinitionQueryExporter
 		implements IQueryExporter {
 
 	public GridQueryDefinitionExporter() {
@@ -46,10 +46,7 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
-	public boolean canExport(Query query) {
-		return PatrolGriddedQuery.class.isAssignableFrom(query.getClass());		
-	}
-
+	public abstract boolean canExport(Query query);
 	/**
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#writeQuerySpecifics(org.wcs.smart.query.model.Query, org.wcs.smart.query.xml.model.QueryType)
 	 */
@@ -57,7 +54,7 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery)
 			throws Exception {
 		
-		PatrolGriddedQuery gQuery = (PatrolGriddedQuery)query;
+		GriddedQuery gQuery = (GriddedQuery)query;
 		
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition"); //$NON-NLS-1$
@@ -87,11 +84,6 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 	/*
 	 * Process the filter
 	 */
-	private void processFilter(IFilter f, final QueryType qt, final Session session) throws Exception{
-		if (f == null) return;
-	
-		PatrolFilterProcessorVisitor visitor = new PatrolFilterProcessorVisitor(session,qt);
-		f.accept(visitor);
-	}
+	protected abstract void processFilter(IFilter f, final QueryType qt, final Session session) throws Exception;
 
 }

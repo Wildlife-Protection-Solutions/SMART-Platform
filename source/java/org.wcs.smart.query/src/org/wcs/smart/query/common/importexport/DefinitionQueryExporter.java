@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,16 +30,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;
 import org.wcs.smart.query.xml.model.QueryType;
-import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query exporter that exports the query definition
@@ -52,41 +48,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public abstract class DefinitionQueryExporter implements IQueryExporter {
 
-
-	/**
-	 * Converts a patrol option and associated uuid option to
-	 * a xml uuiditemtype
-	 * 
-	 * @param option
-	 * @param uuid
-	 * @param session
-	 * @return
-	 * @throws Exception
-	 */
-	public static UuidItemType processPatrolOption(PatrolQueryOption option, String uuid, Session session) throws Exception{
-
-		if (option.getType() == PatrolQueryOptionType.UUID){
-			//we need to add a uuid type
-			UuidItemType item = new UuidItemType();
-			item.setUuid(uuid);
-			//find item in database
-			
-			String[] data = option.getNames(session, SmartUtils.decodeHex(uuid));
-			if (data != null){
-				int index = 0;
-				if (data.length > 1){
-					item.setId(data[0]);
-					index = 1;
-				}
-				for (;index < data.length; index++){
-					item.getValue().add(data[index]);
-				}
-			}
-			
-			return item;
-		}
-		return null;
-	}
 	
 	@Override
 	public String getId(){

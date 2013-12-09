@@ -133,31 +133,16 @@
    <extension
          point="org.wcs.smart.query.export.format">
       <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.ShapeQueryExporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolSimpleQueryDefinitionExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.CsvSimpleQueryExporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolSummaryQueryDefinitionExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.CsvSummaryExporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolShapeQueryExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.SimpleQueryDefinitionExporter">
-      </Exporter>
-      <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.SummaryQueryDefinitionExporter">
-      </Exporter>
-      <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.ShapePatrolQueryExporter">
-      </Exporter>
-      <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.GridQueryDefinitionExporter">
-      </Exporter>
-      <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.GridArcImageExporter">
-      </Exporter>
-      <Exporter
-            class="org.wcs.smart.patrol.query.exportimport.GridTiffImageExporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolGridQueryDefinitionExporter">
       </Exporter>
    </extension>
    <extension
@@ -323,13 +308,13 @@
    <extension
          point="org.wcs.smart.query.import">
       <QueryImporter
-            class="org.wcs.smart.patrol.query.exportimport.SimpleQueryDefinitionImporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolSimpleQueryDefinitionImporter">
       </QueryImporter>
       <QueryImporter
-            class="org.wcs.smart.patrol.query.exportimport.SummaryQueryDefinitionImporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolSummaryQueryDefinitionImporter">
       </QueryImporter>
       <QueryImporter
-            class="org.wcs.smart.patrol.query.exportimport.GriddedQueryDefinitionImporter">
+            class="org.wcs.smart.patrol.query.exportimport.PatrolGriddedQueryDefImporter">
       </QueryImporter>
    </extension>
    <extension

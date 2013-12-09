@@ -115,6 +115,7 @@ GridQueryDefinition GridQuery() :
 	(
 	  valueFilter = QueryFilterInternal()
 	)?
+	< QUERY_SPLITTER > 
 	< EOF >
 	{
     	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, null);

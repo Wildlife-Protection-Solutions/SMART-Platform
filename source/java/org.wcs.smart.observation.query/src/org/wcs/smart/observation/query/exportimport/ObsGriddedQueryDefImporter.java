@@ -19,58 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.observation.query.exportimport;
 
-import java.io.File;
+import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.query.model.Query;
+import org.hibernate.Session;
+import org.wcs.smart.observation.query.model.ObservationQueryFactory;
+import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
+import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
- * Query exporter interface. 
- * <p>
- * To add an additional query exporter, create
- * a new query exporter extension point that
- * extends this class.
- * </p>
- * 
- * @author egouge
- * @since 1.0.0
+ * Query importer for importing gridded queries
+ * @author Emily
+ *
  */
-public interface IQueryExporter {
+public class ObsGriddedQueryDefImporter extends GriddedQueryDefinitionImporter{
+
+	@Override
+	public boolean canImport(IQueryType qt) {
+		return qt.getKey().equals(ObservationGridQueryType.KEY);
+	}
+
+	@Override
+	protected GriddedQuery createQuery(String qtype) {
+		return ObservationQueryFactory.createGriddedQuery();
+	}
 
 	/**
-	 * 
-	 * @return unique exporter identifier 
+	 * There is nothing special to validate in these queries.  
 	 */
-	public String getId();
-	
-	/**
-	 * @return the exporter name
-	 */
-	public String getName();
+	@Override
+	protected void validateQuery(GridQueryDefinition def, String langCode,
+			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 
-	/**
-	 * @return the default file extension for the exporter
-	 */
-	String getDefaultExtension();
+	}
 	
 	
-	/**
-	 * @param query the query to export
-	 * @return <code>true</code> if this class can export the
-	 * given query.
-	 */
-	boolean canExport(Query query);
-	
-	/**
-	 * Export the given query.
-	 * 
-	 * @param query the query to export
-	 * @param file the file to write results to
-	 * @param monitor the progress monitor
-	 * @throws Exception an exception if an error occurs
-	 * while exporting
-	 */
-	void export (Query query, File file, IProgressMonitor monitor) throws Exception;
 }

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
 import java.net.URL;
@@ -35,12 +35,12 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.indexed.IndexedShapefileDataStore;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
-import org.wcs.smart.patrol.query.map.geotools.QueryResultItemFeature;
-import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
@@ -51,15 +51,16 @@ import org.wcs.smart.query.model.Query;
  * @author Emily
  * @since 1.0.0
  */
-public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQueryExporter{
+public abstract class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExporter{
 
-    private ShapefileDataStore shapefile = null;    
-    private ArrayList<SimpleFeature> features = null;
+    protected ShapefileDataStore shapefile = null;    
+    protected ArrayList<SimpleFeature> features = null;
+    private Query query;
    
     /**
      * Creates new shapefile exporter
      */
-    public ShapePatrolQueryExporter() {
+    public ShapeQueryExporter() {
 
 	}
 	/**
@@ -71,7 +72,7 @@ public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQu
 	protected void init() throws Exception {
 		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
         shapefile = new IndexedShapefileDataStore(shpFileURL);
-		SimpleFeatureType type = DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDataSource.getFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+		SimpleFeatureType type = createSchema(this.query.getType());
 		shapefile.createSchema(type);
 		features = new ArrayList<SimpleFeature>();
 	}
@@ -81,7 +82,7 @@ public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQu
 	 */
 	@Override
 	protected void writeRow(IResultItem row) throws Exception {
-		features.add(QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)row,  queryColumns, shapefile.getSchema()));
+		features.add(createFeature(row, this.query.getType()));
 	}
 
 	/**
@@ -98,12 +99,12 @@ public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQu
 	
 	@Override
 	public String getId(){
-		return "org.wcs.smart.query.export.patrol.shp"; //$NON-NLS-1$
+		return "org.wcs.smart.query.export.observation.shp"; //$NON-NLS-1$
 	}
 	
 	@Override
 	public String getName() {
-		return Messages.ShapePatrolQueryExporter_ExporterName;
+		return Messages.ShapeQueryExporter_ExporterName;
 	}
 
 	@Override
@@ -114,24 +115,36 @@ public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQu
 	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
-	public boolean canExport(Query query) {
-		if (query instanceof PatrolQuery){
-			return true;
-		}
-		return false;
-	}
+	public abstract boolean canExport(Query query);
+	
+	/**
+	 * Creates a feature for the given result item row
+	 * @param it
+	 * @return
+	 */
+	protected abstract SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception;
+	
+	/**
+	 * Creates the feature type
+	 * @return
+	 */
+	protected abstract SimpleFeatureType createSchema(IQueryType queryType) throws Exception;
+	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public void export(Query query, File file, IProgressMonitor monitor)
-			throws Exception {
-		PatrolQuery q = ((PatrolQuery)query);
-		super.setData((Collection<IResultItem>)q.getCachedResults(monitor), q.getQueryColumns(), file);
+	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
+		this.query = ((SimpleQuery)query);
+		
+		if (query instanceof IPagedQuery) {
+			super.setData((IPagedQueryResultSet)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
+		} else {
+			super.setData((Collection<IResultItem>)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
+		}
+
 		super.export(monitor);
 		
 	}
 		
 }
-

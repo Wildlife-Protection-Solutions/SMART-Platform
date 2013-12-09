@@ -84,7 +84,7 @@ public class WaypointSourceGroupBy implements IGroupBy {
 
 	@Override
 	public String getKeyPart() {
-		return "wpt:src";
+		return "wpt:src"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -113,8 +113,8 @@ public class WaypointSourceGroupBy implements IGroupBy {
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
 		WaypointSourceGroupByDropItem dropItem = new WaypointSourceGroupByDropItem();
-		dropItem.initializeData(new Object[]{getItems(null)});
-		return null;
+		dropItem.initializeData(getItems(null));
+		return dropItem;
 	}
 
 	@Override

@@ -17,6 +17,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.common.engine,
  org.wcs.smart.query.common.engine.visitors,
+ org.wcs.smart.query.common.importexport,
  org.wcs.smart.query.common.model,
  org.wcs.smart.query.common.model.udig,
  org.wcs.smart.query.common.ui,

@@ -195,7 +195,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 		ObservationQueryResultItem it = new ObservationQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setSourceId(rs.getString("wp_source"));
+		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$

@@ -19,16 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.exportimport;
+package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;

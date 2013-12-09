@@ -273,11 +273,11 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql);
 
-		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()
-				+", r.P_CA_UUID FROM " 
-				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join "
-				+ queryDataTable + " r on "
-				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn() //$NON-NLS-1$
+				+", r.P_CA_UUID FROM "  //$NON-NLS-1$
+				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
+				+ queryDataTable + " r on " //$NON-NLS-1$
+				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
 		
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql);
@@ -394,7 +394,7 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 		ObservationQueryResultItem it = new ObservationQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setSourceId(rs.getString("wp_source"));
+		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$

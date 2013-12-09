@@ -44,7 +44,7 @@ public class FixedQueryColumn extends QueryColumn {
 	public enum FixedColumns{
 		CA_ID(Messages.FixedQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id"), //$NON-NLS-1$
 		CA_NAME(Messages.FixedQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name"), //$NON-NLS-1$
-		WAYPOINT_SOURCE("Source", ColumnType.STRING,"wp:source"), //$NON-NLS-1$
+		WAYPOINT_SOURCE(Messages.FixedQueryColumn_WaypointSourceColumnName, ColumnType.STRING,"wp:source"),  //$NON-NLS-1$
 		WAYPOINT_ID(Messages.FixedQueryColumn_WaypointIdColumnName, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(Messages.FixedQueryColumn_WaypointDateColumnName, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME(Messages.FixedQueryColumn_WaypointTimeColumnName, ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$

@@ -24,10 +24,7 @@ package org.wcs.smart.patrol.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;

@@ -707,6 +707,12 @@
                      </equals>
                   </or>
                </with>
+               <with
+                     variable="activeEditorInput">
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </with>
             </and>
          </enabledWhen>
       </handler>
@@ -727,21 +733,10 @@
                   </or>
                </with>
                <with
-                     variable="activeEditorId">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.ui.QueryResultsEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.SummaryEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.ui.GriddedEditor">
-                     </equals>
-                  </or>
+                     variable="activeEditorInput">
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
                </with>
             </and>
          </enabledWhen>
@@ -842,6 +837,21 @@
                id="org.wcs.smart.conservationAreaCloner">
          </require>
       </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.query.common.importexport.CsvSummaryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.common.importexport.CsvSimpleQueryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.common.importexport.GridTiffImageExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.common.importexport.GridArcImageExporter">
+      </Exporter>
    </extension>
 
 

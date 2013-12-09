@@ -22,11 +22,14 @@
 package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Filter visitor for processing patrol filters.
@@ -36,6 +39,41 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  */
 public class PatrolFilterProcessorVisitor implements IFilterVisitor {
 
+	/**
+     * Converts a patrol option and associated uuid option to
+     * a xml uuiditemtype
+     *
+     * @param option
+     * @param uuid
+     * @param session
+     * @return
+     * @throws Exception
+     */
+    public static UuidItemType processPatrolOption(PatrolQueryOption option, String uuid, Session session) throws Exception{
+
+        if (option.getType() == PatrolQueryOptionType.UUID){
+            //we need to add a uuid type
+            UuidItemType item = new UuidItemType();
+            item.setUuid(uuid);
+            //find item in database
+
+            String[] data = option.getNames(session, SmartUtils.decodeHex(uuid));
+            if (data != null){
+                int index = 0;
+                if (data.length > 1){
+                    item.setId(data[0]);
+                    index = 1;
+                }
+                for (;index < data.length; index++){
+                    item.getValue().add(data[index]);
+                }
+            }
+
+            return item;
+        }
+        return null;
+    }
+    
 	private Session session;
 	private Exception ex;
 	private QueryType qt;
@@ -49,7 +87,7 @@ public class PatrolFilterProcessorVisitor implements IFilterVisitor {
 		if (filter instanceof PatrolFilter){
 			PatrolFilter pf = (PatrolFilter)filter;
 			try{
-				UuidItemType item = DefinitionQueryExporter.processPatrolOption(pf.getPatrolOption(), pf.getValue(), session);
+				UuidItemType item = processPatrolOption(pf.getPatrolOption(), pf.getValue(), session);
 				if (item != null){
 					qt.getUuiditem().add(item);
 				}

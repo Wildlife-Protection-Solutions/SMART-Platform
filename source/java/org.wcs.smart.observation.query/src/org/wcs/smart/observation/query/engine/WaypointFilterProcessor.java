@@ -308,9 +308,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			if (cfilter.length() > 0) {
 				sql.append(" WHERE "); //$NON-NLS-1$
 				where = false;
-				sql.append(" ( ");
+				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(cfilter);
-				sql.append( " ) ");
+				sql.append( " ) "); //$NON-NLS-1$
 			}
 		}
 		
@@ -318,13 +318,13 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			String dfilter = ObservationFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (dfilter.length() > 0) {
 				if (where){
-					sql.append(" WHERE ");
+					sql.append(" WHERE "); //$NON-NLS-1$
 				}else{
 					sql.append(" and "); //$NON-NLS-1$
 				}
-				sql.append(" ( ");
+				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(dfilter);
-				sql.append( " ) ");
+				sql.append( " ) "); //$NON-NLS-1$
 			}
 		}
 
