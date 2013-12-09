@@ -107,7 +107,7 @@ public class ObservationAttachment extends UuidItem implements ISmartAttachment 
 	public String getDatastoreFolderPath() {
 		if (observation != null && observation.getWaypoint() != null){
 			if (observation.getWaypoint().getSource() == null){
-				ObservationPlugIn.log("No attachment information found for observation attachment " + SmartUtils.encodeHex(getUuid()), null);
+				ObservationPlugIn.log("No attachment information found for observation attachment " + SmartUtils.encodeHex(getUuid()), null); //$NON-NLS-1$
 			}else{
 				return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + 
 						File.separator + 

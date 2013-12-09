@@ -26,6 +26,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.observation.internal.Messages;
 
 /**
  * Delete handler than ensures all waypoints are removed
@@ -41,7 +42,7 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 	public void beforeDelete(ConservationArea ca, Session session,
 			IProgressMonitor monitor) throws Exception {
 		
-		monitor.subTask("Deleting Waypoints");
+		monitor.subTask(Messages.CaDeleteHandler_ProgressDeleteWp);
 		deleteWaypoints(ca, session);
 
 	}

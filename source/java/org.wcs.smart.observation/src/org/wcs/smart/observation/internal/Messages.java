@@ -29,6 +29,8 @@ public class Messages extends NLS {
 	public static String AttributeWizardPage_UpdateObsButton;
 	public static String AttributeWizardPage_Warning_DialogTitle;
 	public static String BooleanAttributeField_UnderfinedBooleanOption;
+	public static String CaDeleteHandler_ProgressDeleteWp;
+
 	public static String CategoryAttributeDMAdvisor_DeleteError;
 	public static String CategoryAttributeDMAdvisor_InvalidObjectType;
 	public static String CategoryDMAdvisor_DeleteError;
@@ -53,10 +55,14 @@ public class Messages extends NLS {
 	public static String SearchTree_RemoveCategories_ToolTip;
 	public static String SmartPatrolPlugIn_Error_DialogMessage1;
 	public static String TreeAttributeField_InvalidTreeValue;
+	public static String Waypoint_CloneError;
+
 	public static String WaypointInfoView_DateTimeLabel;
 	public static String WaypointInfoView_LoadingThumbnails;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
+
+	public static String WaypointObservation_CloneError;
 	
 	static {
 		// initialize resource bundle

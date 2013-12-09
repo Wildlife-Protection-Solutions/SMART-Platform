@@ -45,6 +45,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.internal.Messages;
 
 /**
  * Waypoint object
@@ -262,7 +263,7 @@ public class Waypoint extends UuidItem {
 					att.setWaypoint(wp);
 					wp.getAttachments().add(att);
 				} catch (IOException ex) {
-					throw new RuntimeException("Error cloning waypoint.  Waypoint attachments could not be cloned.", ex);
+					throw new RuntimeException(Messages.Waypoint_CloneError, ex);
 				}
 
 			}

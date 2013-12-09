@@ -40,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.observation.internal.Messages;
 
 /**
  * Waypoint observation
@@ -150,7 +151,7 @@ public class WaypointObservation extends UuidItem {
 					att.setObservation(clone);
 					clone.getAttachments().add(att);
 				} catch (IOException ex) {
-					throw new RuntimeException("Error cloning waypoint.  Waypoint attachments could not be cloned.", ex);
+					throw new RuntimeException(Messages.WaypointObservation_CloneError, ex);
 				}
 
 			}
