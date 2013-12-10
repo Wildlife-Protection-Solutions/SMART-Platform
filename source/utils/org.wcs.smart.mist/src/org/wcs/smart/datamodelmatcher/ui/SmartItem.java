@@ -175,6 +175,41 @@ public class SmartItem {
 	public String getCategoryKey() {
 		return categoryKey;
 	}
-
 	
+	public void setSmartAttributes(String[] list) {
+
+		categoryKey = list[0];
+		
+		attr1key = list[1];
+		attr2key = list[2];
+		attr3key = list[3];
+		attr4key = list[4];
+		attr5key= list[5];
+		
+		attr1BooleanValue = list[6].equals("TRUE");
+		attr1TextValue = list[7];
+		attr1ListValue = list[8];
+		attr1TreeValue = list[9];
+		
+		attr2BooleanValue = list[10].equals("TRUE");
+		attr2TextValue = list[11];
+		attr2ListValue = list[12];
+		attr2TreeValue = list[13];
+		
+		attr3BooleanValue = list[14].equals("TRUE");
+		attr3TextValue = list[15];
+		attr3ListValue = list[16];
+		attr3TreeValue = list[17];
+		
+		attr4BooleanValue = list[18].equals("TRUE");
+		attr4TextValue = list[19];
+		attr4ListValue = list[20];
+		attr4TreeValue = list[21];
+		
+		attr5BooleanValue = list[22].equals("TRUE");
+		attr5TextValue = list[23];
+		attr5ListValue = list[24];
+		attr5TreeValue = list[25];
+	}
+		
 }
