@@ -18,7 +18,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 import org.wcs.smart.mist.dataReader.MistDatabase;
@@ -72,25 +71,56 @@ public class MatchSession {
 		return rows;
 	}
 	
-	//Writes the Session to the saveLocation file and asks for a filename is one doens't already exist.
+	//Writes the Session to the saveLocation file and asks for a filename if one doesn't already exist.
 	public void save(){
 		
-		//get a save location and confirm file overwrite etc, probably do this later.
+		//get a save location if we don't have one already
 		if( saveLocation == null){
 			this.saveLocation = CreateNewSessionFile();
 		}
 		
 		
 		try{
-			CSVWriter sessionWriter = new CSVWriter(new FileWriter(saveLocation), ','); 
-			
+			CSVWriter sessionWriter = new CSVWriter(new FileWriter(saveLocation), ',','\0','\0'); 
+
 			//write out the basic session file information.
-			String[] header = {smartXmlLocation}; 
+			String output = smartXmlLocation.replace("\\","\\\\");
+			String[] header = {output,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","-"};
+			//ensure the files always looks like it has enough columns in it by putting this "-" in the 36th column, otherwise opening and closing in Excel will break loading many files
+			
 			sessionWriter.writeNext(header);
 			
 			//write out all the row-matching data
+			
 			for(MatchRow row: rows){
-				String[] rowStrings = { row.getMistItem().getText(), row.getSmartItem().getText(), row.getMistItem().getCat1() , row.getMistItem().getCat2() , row.getMistItem().getCat3() , row.getMistItem().getCat4() , row.getMistItem().getCat5() , row.getMistItem().getCat6() , row.getMistItem().getCat7() , row.getMistItem().getCat8() , row.getMistItem().getCat9()};
+				SmartItem s = row.getSmartItem();
+				String b1 = "TRUE"; 
+				if(!s.getB1()){
+					b1 = "FALSE";
+				}
+				String b2 = "TRUE"; 
+				if(!s.getB2()){
+					b2 = "FALSE";
+				}
+				String b3 = "TRUE"; 
+				if(!s.getB3()){
+					b3 = "FALSE";
+				}
+				String b4 = "TRUE"; 
+				if(!s.getB4()){
+					b4 = "FALSE";
+				}
+				String b5 = "TRUE"; 
+				if(!s.getB5()){
+					b5 = "FALSE";
+				}
+
+				String[] rowStrings = { row.getMistItem().getText(), row.getSmartItem().getText(), row.getMistItem().getCat1() , row.getMistItem().getCat2() , row.getMistItem().getCat3() , row.getMistItem().getCat4() , row.getMistItem().getCat5() , row.getMistItem().getCat6() , row.getMistItem().getCat7() , row.getMistItem().getCat8() , row.getMistItem().getCat9(),
+									s.getCategoryKey(), s.getAttr1key(), s.getAttr2key(), s.getAttr3key(), s.getAttr4key(), s.getAttr5key(),b1 , s.getText1(), s.getList1(), s.getTree1()
+									, b2, s.getText2(), s.getList2(), s.getTree2()
+									, b3,  s.getText3(), s.getList3(), s.getTree3()
+									, b4, s.getText4(), s.getList4(), s.getTree4()
+									, b5, s.getText5(), s.getList5(), s.getTree5()};
 				sessionWriter.writeNext(rowStrings);
 			}
 			sessionWriter.close();
@@ -149,12 +179,16 @@ public class MatchSession {
 	}
 	
 	public String loadSessionFromFile(){
+		int x=0;
 		try{
 			CSVReader reader = new CSVReader(new FileReader(saveLocation),','); 
 		
 			String[] header = reader.readNext();
 			smartXmlLocation = header[0];
+			loadSmartDataModel();
+			
 			String[] line = reader.readNext();
+
 		
 			while ( line != null){
 				MatchRow matchRow = new MatchRow();
@@ -170,14 +204,19 @@ public class MatchSession {
 				matchRow.getMistItem().setCat9(line[10]);
 				
 				if(!line[1].equals("") ){
+					String[] list = {line[11], line[12], line[13], line[14], line[15], line[16], line[17], line[18], line[19], line[20], line[21], line[22]
+							, line[23], line[24], line[25], line[26], line[27], line[28], line[29], line[30], line[31], line[32], line[33], line[34], line[35], line[36]};
+
+					matchRow.setSmartAttributes(list);
 					matchRow.setSmartItem(line[1]);
 				}
 				rows.add(matchRow);
 				line = reader.readNext();
+				x++;
 			}
 			reader.close();
 		}catch (Exception e){
-			return e + " ; Match Session File read error on file: '" + saveLocation.toString() + "'";
+			return e + " ; Invalid Match Session File, line: '" + x + " of file: " + saveLocation.toString() + "'";
 		}
 		return null;
 	}

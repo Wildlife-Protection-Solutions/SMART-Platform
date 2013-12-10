@@ -13,8 +13,6 @@ public class MistItem {
 	private String cat8;
 	private String cat9;
 	
-	private String value;
-
 	public MistItem(String category){
 		this.category = category;
 	}

@@ -5,20 +5,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.smartcardio.ATR;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -50,7 +45,6 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryAttributeLink;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 
@@ -106,6 +100,7 @@ public class MatchSessionDialog extends Dialog {
 	
 	private Button save;
 	private Button next;
+	private Button clear;
 	private Button done;
 	
 	public MatchSessionDialog(Shell parentShell, MatchSession ms) {
@@ -421,8 +416,7 @@ public class MatchSessionDialog extends Dialog {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				
+				// nothing to do here.
 			}
 	      });
 
@@ -497,6 +491,16 @@ public class MatchSessionDialog extends Dialog {
 	      GridData buttonsData = new GridData(SWT.RIGHT,SWT.BOTTOM, true, false,2,0);
 	      buttons.setLayoutData(buttonsData);
 
+	      clear = new Button(buttons, SWT.NONE);
+	      clear.setText("Clear Match");
+	      clear.addSelectionListener(new SelectionAdapter() {	
+		    	@Override
+		    	public void widgetSelected(SelectionEvent e) {
+		    		clearCurrentMatch(e);
+		    		totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );		
+	    			done.setVisible(false);
+		    	}
+		    });
 
 	      next = new Button(buttons, SWT.NONE);
 	      next.setText("Accept and Load Next Match");
@@ -532,6 +536,33 @@ public class MatchSessionDialog extends Dialog {
 
 
 
+
+
+	protected void clearCurrentMatch(SelectionEvent e) {
+		ISelection selection = viewer.getSelection();
+		if (!selection.isEmpty()) {
+			IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+			MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
+			selected.getSmartItem().setConcatKey("");
+			selected.setMatched(false);
+		}
+		tree.setSelection(tree.getItem(0));
+
+		attribute1.clearValues();
+		attribute2.clearValues();
+		attribute3.clearValues();
+		attribute4.clearValues();
+		attribute5.clearValues();
+			
+		Table t = viewer.getTable();
+		int currentSelection = t.getSelectionIndex();
+		if(currentSelection != -1){
+			t.getItem(currentSelection).setChecked(false);
+		}
+		ViewerSelectionChanged();
+		viewer.refresh();
+		
+	}
 
 
 	private void buildAttributeHash(String languageCode) {
@@ -615,17 +646,18 @@ public class MatchSessionDialog extends Dialog {
   		    SmartItem smartItem = selected.getSmartItem();
   		    
   		    
-  			if(tree.getItemCount() == 1){
+  			if(!(smartItem.getCategoryKey() == null)){
   					updateTree(smartItem.getCategoryKey(), tree.getItem(0),"");
   					treeSelectionChanged();
   					if(smartItem.getCategoryKey() == null || smartItem.getCategoryKey().equals("")){
-  						tabFolder.setEnabled(false);
+  						//tabFolder.setEnabled(false);
+  					}else{
+  						attribute1.update(smartItem.getAttr1key(), smartItem.getB1(), smartItem.getText1(), smartItem.getList1(), smartItem.getTree1());
+  						attribute2.update(smartItem.getAttr2key(), smartItem.getB2(), smartItem.getText2(), smartItem.getList2(), smartItem.getTree2());
+  						attribute3.update(smartItem.getAttr3key(), smartItem.getB3(), smartItem.getText3(), smartItem.getList3(), smartItem.getTree3());
+  						attribute4.update(smartItem.getAttr4key(), smartItem.getB4(), smartItem.getText4(), smartItem.getList4(), smartItem.getTree4());
+  						attribute5.update(smartItem.getAttr5key(), smartItem.getB5(), smartItem.getText5(), smartItem.getList5(), smartItem.getTree5());
   					}
-  					attribute1.update(smartItem.getAttr1key(), smartItem.getB1(), smartItem.getText1(), smartItem.getList1(), smartItem.getTree1());
-  		  		    attribute2.update(smartItem.getAttr2key(), smartItem.getB2(), smartItem.getText2(), smartItem.getList2(), smartItem.getTree2());
-  		  		    attribute3.update(smartItem.getAttr3key(), smartItem.getB3(), smartItem.getText3(), smartItem.getList3(), smartItem.getTree3());
-  		  		    attribute4.update(smartItem.getAttr4key(), smartItem.getB4(), smartItem.getText4(), smartItem.getList4(), smartItem.getTree4());
-  		  		    attribute5.update(smartItem.getAttr5key(), smartItem.getB5(), smartItem.getText5(), smartItem.getList5(), smartItem.getTree5());
   			}
   			
   			
@@ -681,7 +713,23 @@ public class MatchSessionDialog extends Dialog {
   					}
   				}
   				
-  				//get Attributes
+  				//test Attributes for valid values then update the smartItem
+  				if(!hasValidValue(attribute1, 1)){
+  					return;
+  				}
+  				if(!hasValidValue(attribute2, 2)){
+  					return;
+  				}
+  				if(!hasValidValue(attribute3, 3)){
+  					return;
+  				}
+  				if(!hasValidValue(attribute4, 5)){
+  					return;
+  				}
+  				if(!hasValidValue(attribute5, 5)){
+  					return;
+  				}
+  				
   				fullKey += getAttributeString(attribute1);
   				fullKey += getAttributeString(attribute2);
   				fullKey += getAttributeString(attribute3);
@@ -697,6 +745,8 @@ public class MatchSessionDialog extends Dialog {
   						getBooleanText(attribute5), getAttributeText(attribute5), getAttributeList(attribute5), getAttributeTree(attribute5));
   				
   				selected.setSmartItem(fullKey);
+  				
+  				PerformAutoMatch();//runs before the viewer is moved down 1
   			}
   			viewer.refresh();
   			
@@ -712,13 +762,83 @@ public class MatchSessionDialog extends Dialog {
     		ViewerSelectionChanged();
   			viewer.refresh();
 	  }
+
+
+	private boolean hasValidValue(AttributeSelection attribute, int attributeNumber) {
+		if(!getSelectedAttributeKey(attribute).equals("") && getAttributeString(attribute).equals("empty")){
+			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR);
+			messageBox.setMessage("Attribute " + attributeNumber + " is selected, but no valid value is provided. Please select or enter a value.");
+			messageBox.open();
+			return false;
+		}
+		return true;
+	}
 	  
 	  
+	  private void PerformAutoMatch() {
+		Table t = viewer.getTable();
+		for(int x=0; x < t.getItemCount() ; x++){
+			MatchRow r = (MatchRow)viewer.getElementAt(x);
+			if(r.getMatched()){
+				continue;//don't automatch anything that has already been completed.
+			}else{
+				MistItem mi = r.getMistItem();
+				String group = mi.getCat1();
+				String observation = mi.getCat2();
+				String obCode = mi.getCat3();
+				String subcode1 = mi.getCat5();
+				if(group.equals(mistText1.getText()) && observation.equals(mistText2.getText()) && obCode.equals(mistText3.getText()) && subcode1.equals(mistText5.getText())){
+					SmartItem si = r.getSmartItem();
+					
+					si.updateItem(getSelectedAttributeKey(attribute1), getSelectedAttributeKey(attribute2), getSelectedAttributeKey(attribute3), getSelectedAttributeKey(attribute4), getSelectedAttributeKey(attribute5),
+							false,"","","",
+							false,"","","",
+							false,"","","",
+							false,"","","",
+							false,"","","");//update everything excepts the values
+
+					//update the concatenated String
+					TreeItem selectedTreeItem = tree.getSelection()[0];
+					CategoryType cat = (CategoryType)selectedTreeItem.getData();
+					
+
+	  				
+	  				
+	  				String catKey= cat.getKey();
+	  				//Get Category
+	  				while(selectedTreeItem.getParentItem() != null){
+	  					selectedTreeItem = selectedTreeItem.getParentItem();
+	  					if(selectedTreeItem.getData() != null){
+	  						catKey = ((CategoryType)selectedTreeItem.getData()).getKey() + "." + catKey;
+	  					}else{
+	  						break;
+	  					}
+	  				}
+
+	  				si.setCategoryKey(catKey);
+	  				//get Attributes
+	  				String fullKey = catKey;
+	  				fullKey += getConcatStringNoValues(attribute1);
+	  				fullKey += getConcatStringNoValues(attribute2);
+	  				fullKey += getConcatStringNoValues(attribute3);
+	  				fullKey += getConcatStringNoValues(attribute4);
+	  				fullKey += getConcatStringNoValues(attribute5);
+
+					si.setConcatKey(fullKey);
+				}
+				
+			}
+			
+		}
+		
+	  }
+
+
 	  public TableViewer getViewer() {
 		  return viewer;
 	  }
 	  
-	// create the columns for the table
+	  // create the columns for the table
 	  private void createColumns(final Composite parent, final TableViewer viewer) {
 	    String[] titles = { "Complete", "MIST Item", "SMART Item"};
 	    int[] bounds = { 70, 240, 240};
@@ -791,6 +911,9 @@ public class MatchSessionDialog extends Dialog {
   				fullKey = fullKey + "|" + attrKey;
   				
   				if( type.equals("NUMERIC") || type.equals("TEXT") ){
+  					if(attributeSelection.getValueText().getText() .equals("")){
+  						return "empty";
+  					}
   					fullKey += "|" + attributeSelection.getValueText().getText() + "|dValue|1";
   				}else if( type.equals("LIST") ){
   					ISelection listSelection = attributeSelection.getValueComboViewer().getSelection();
@@ -799,38 +922,75 @@ public class MatchSessionDialog extends Dialog {
   						ListOption listItem = (ListOption) sListSelection.getFirstElement();
   						String listKey = listItem.getKey();
   						fullKey += "|" + listKey + "|itemKey|1" ; //1 is the value multiplier
+  					}else{
+  						return "empty"; 
   					}
   						
   				}else if( type.equals("TREE") ){
-		    		TreeItem treeItem = attributeSelection.getValueTree().getSelection()[0];
-		    		TreeNodeType data = (TreeNodeType)treeItem.getData();
-		    		String treeKey = data.getKey();
-
-					while(treeItem.getParentItem() != null){
-						treeItem = treeItem.getParentItem();
-						if(treeItem.getData() != null){
-							treeKey = ((TreeNodeType)treeItem.getData()).getKey() + "." + treeKey;
-						}else{
-							break;
-						}
-					}
-					
-					fullKey += "|" + treeKey + "|itemKey|1" ; //1 is the value multiplier
+  					if(attributeSelection.getValueTree().getSelection().length >0){
+  						TreeItem treeItem = attributeSelection.getValueTree().getSelection()[0];
+  						TreeNodeType data = (TreeNodeType)treeItem.getData();
+  						if(data == null){
+  							return "empty";
+  						}else{
+  							String treeKey = data.getKey();
+  						
+  							while(treeItem.getParentItem() != null){
+  								treeItem = treeItem.getParentItem();
+  								if(treeItem.getData() != null){
+  									treeKey = ((TreeNodeType)treeItem.getData()).getKey() + "." + treeKey;
+  								}else{
+  									break;
+  								}
+  							}
+  							fullKey += "|" + treeKey + "|itemKey|1" ; //1 is the value multiplier
+  						}
+  					}else{
+  						return "empty"; 
+  					}
 					
   				}else if( type.equals("BOOLEAN") ){
+  					if(attributeSelection.getValueCombo().getText().equals("")){
+  						return "empty";
+  					}
   					fullKey += "|" + attributeSelection.getValueCombo().getText() + "|bValue|1";
   				}
   				
 			}
 			return fullKey;
 	  }
+
+	  private String getConcatStringNoValues(AttributeSelection attributeSelection){
+		  String fullKey = "";
+		  ISelection selection = attributeSelection.getAttrComboViwer().getSelection();
+			if (!selection.isEmpty()) {
+  				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
+  				Attribute selectedAttr = (Attribute) structuredSelection.getFirstElement();
+  				String type = selectedAttr.getAttributeType().getType();
+  				String attrKey = selectedAttr.getKey();
+  				
+  				fullKey = fullKey + "|" + attrKey;
+  				
+  				if( type.equals("NUMERIC") || type.equals("TEXT") ){
+  					fullKey += "|" + "" + "|dValue|1";
+  				}else if( type.equals("LIST") ){
+  						fullKey += "|" + "" + "|itemKey|1" ; //1 is the value multiplier
+  				}else if( type.equals("TREE") ){
+		    			fullKey += "|" + "" + "|itemKey|1" ; //1 is the value multiplier
+  				}else if( type.equals("BOOLEAN") ){
+  					fullKey += "|" + "" + "|bValue|1";
+  				}
+			}
+			return fullKey;
+	  }
+
+	  
 	  
 	  private String getSelectedAttributeKey(AttributeSelection attributeSelection){
 		  ISelection selection = attributeSelection.getAttrComboViwer().getSelection();
 			if (!selection.isEmpty()) {
   				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   				Attribute selectedAttr = (Attribute) structuredSelection.getFirstElement();
-  				String type = selectedAttr.getAttributeType().getType();
   				return selectedAttr.getKey();
 			}
 			return "";
@@ -865,6 +1025,9 @@ public class MatchSessionDialog extends Dialog {
 		  	if(attributeSelection.getValueTree().getSelection().length == 0) return "";
 		  	TreeItem treeItem = attributeSelection.getValueTree().getSelection()[0];
   			TreeNodeType data = (TreeNodeType)treeItem.getData();
+  			if(data == null){
+  				return "";
+  			}
   			String treeKey = data.getKey();
 
 			while(treeItem.getParentItem() != null){

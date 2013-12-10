@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 

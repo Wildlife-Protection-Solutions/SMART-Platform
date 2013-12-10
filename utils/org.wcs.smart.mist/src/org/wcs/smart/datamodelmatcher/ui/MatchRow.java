@@ -40,5 +40,14 @@ public class MatchRow {
 	public boolean getMatched(){
 		return matched;
 	}
+
+	public void setSmartAttributes(String[] string) {
+		smartItem.setSmartAttributes(string);
+		setSmartItem(smartItem.getText());
+	}
+
+	public void setMatched(boolean b) {
+		matched = b;
+	}
 	
 }
