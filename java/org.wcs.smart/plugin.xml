@@ -326,6 +326,11 @@
                label="%help.menu.label"
                mnemonic="%help.menu.mnemonic">
             <command
+                  commandId="org.eclipse.equinox.p2.ui.sdk.install"
+                  label="%install.command.label"
+                  style="push">
+            </command>
+            <command
                   commandId="org.eclipse.ui.help.aboutAction"
                   icon="images/icons/smart16.gif"
                   label="%about.command.label"

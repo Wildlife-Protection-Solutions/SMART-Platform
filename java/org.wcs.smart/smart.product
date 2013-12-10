@@ -33,6 +33,7 @@
       </win>
    </launcher>
 
+
    <vm>
    </vm>
 
@@ -116,6 +117,7 @@ limitations under the License.
    <features>
       <feature id="org.wcs.smart.smart_feature"/>
       <feature id="org.eclipse.rcp"/>
+      <feature id="org.eclipse.equinox.p2.rcp.feature"/>
    </features>
 
    <configurations>
