@@ -590,6 +590,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		if (mapItem != null && mapItem.getLayers() != null) {
 			for (int i = 0; i < mapItem.getLayers().size(); i++) {
 				LayerDefinition def = new LayerDefinition();
+
 				def.handle = BirtMapUtils.findHandle(
 						(ReportDesignHandle) this.itemHandle.getRoot(),
 						i < mapItem.getDatasets().size() ? mapItem.getDatasets().get(i) : null,

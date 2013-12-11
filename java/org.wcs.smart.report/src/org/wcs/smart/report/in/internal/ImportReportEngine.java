@@ -188,7 +188,7 @@ public class ImportReportEngine {
 				
 				importReport.setId(ReportManager.generateReportId(session));
 				if (SmartDB.isMultipleAnalysis() && importReport.getShared()){
-					importReport.setOwner(SmartDB.getSharedEmployee());
+					importReport.setOwner(SmartDB.getSharedEmployee(session));
 				}else{
 					importReport.setOwner(SmartDB.getCurrentEmployee());
 				}

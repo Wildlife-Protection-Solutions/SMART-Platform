@@ -160,5 +160,15 @@
          </adapter>
       </adaptable>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.report.birt.map.SmartMapItemCloner"
+            id="org.wcs.smart.report.birt.map.mapItemClonder">
+         <require
+               id="org.wcs.smart.reportCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>

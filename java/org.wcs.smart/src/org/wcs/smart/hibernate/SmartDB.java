@@ -132,15 +132,7 @@ public class SmartDB {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			Query q = s.createQuery("From Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca"); //$NON-NLS-1$
-			q.setParameter("e", Employee.SHARED_UUID); //$NON-NLS-1$
-			q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Employee> es = q.list();
-			if (es.size() > 0){
-				return es.get(0);
-			}
-			return null;
+			return getSharedEmployee(s);
 		}finally{
 			try{
 				s.getTransaction().rollback();
@@ -149,6 +141,24 @@ public class SmartDB {
 			}
 			s.close();
 		}
+	}
+	/**
+	 * Loads from the DB the shared user which is used 
+	 * for associated shared cross conservation area queries.
+	 * 
+	 * @param session current open session
+	 * @return shared user or null if shared user not found
+	 */
+	public static Employee getSharedEmployee(Session session){
+		Query q = session.createQuery("From Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca"); //$NON-NLS-1$
+		q.setParameter("e", Employee.SHARED_UUID); //$NON-NLS-1$
+		q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Employee> es = q.list();
+		if (es.size() > 0){
+			return es.get(0);
+		}
+		return null;
 	}
 	
 	

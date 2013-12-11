@@ -176,7 +176,7 @@ public class ReportTemplateCloner implements
 			if (save){
 				engine.getSession().save(clone);
 				engine.addConservationItemMapping(r, clone);
-			
+				
 				@SuppressWarnings("unchecked")
 				List<ReportQuery> queries = engine.getSession().createCriteria(ReportQuery.class).add(Restrictions.eq("id.report", r)).list(); //$NON-NLS-1$
 				for (ReportQuery rq : queries){

@@ -113,7 +113,7 @@ public class BirtMapUtils {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle) {
 				OdaDataSetHandle h = (OdaDataSetHandle) dataset;
-				if (h.getQueryText().equals(queryText)){
+ 				if (h.getQueryText().equals(queryText)){
 					return h;
 				}
 				

@@ -19,51 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.util;
 
-import org.eclipse.equinox.app.IApplication;
-import org.eclipse.equinox.app.IApplicationContext;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.application.WorkbenchAdvisor;
+import java.util.Locale;
+
+import org.eclipse.jface.viewers.LabelProvider;
 
 /**
- * Smart application 
- * 
- * @author egouge
- * @since 1.0.0
+ * Label provider for locales
+ * @author Emily
+ * @since 2.0.1
  */
-public class SmartApp implements IApplication {
+public class LocaleLabelProvider extends LabelProvider {
 
 	@Override
-	public Object start(IApplicationContext context) throws Exception {	
-		WorkbenchAdvisor workbenchAdvisor = new SmartWorkbenchAdvisor();
-		Display display = PlatformUI.createDisplay();
-		
-		try {
-			int returnCode = PlatformUI.createAndRunWorkbench(display,
-					workbenchAdvisor);
-			if (returnCode == PlatformUI.RETURN_RESTART) {
-				return IApplication.EXIT_RESTART;
-			}
+	public String getText(Object x){
+		if (x instanceof Locale){
+			Locale l = (Locale)x;
 			
-			return IApplication.EXIT_OK;
-		} finally {
-			display.dispose();
-		}
-	}
-
-	@Override
-	public void stop() {
-		final IWorkbench workbench = PlatformUI.getWorkbench();
-		final Display display = workbench.getDisplay();
-		display.syncExec(new Runnable() {
-			public void run() {
-				if (!display.isDisposed()) workbench.close();
+			String name = l.getDisplayName();
+			name += " [" + l.getLanguage() ; //$NON-NLS-1$
+			if (!l.getCountry().isEmpty()){
+				name += "_" + l.getCountry(); //$NON-NLS-1$
 			}
-		});
+			name += "]"; //$NON-NLS-1$
+			return name;
+		}
+		return super.getText(x);
 	}
-	
-	
 }
