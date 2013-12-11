@@ -19,10 +19,19 @@ file and place it into your m2 repository:
 C:\Users\XXX\.m2\repository\org\wcs\smart\smart-core\2.0.1\smart-core-2.0.1.jar
 
 
+mistReader
+----------------------------------------------
 To package into a distribute:
 run "mvn package" 
 
 This will create a directory in the target folder that contains all files (including
 the jre) and a bat file to run the program.  The BAT file is required because
 firebird requires the Firebird application to be on the PATH.
+  
+  
+mistMatcher
+----------------------------------------------
+To package into a distribute:
+run "mvn -f pom-matcher.xml clean package" 
+
   

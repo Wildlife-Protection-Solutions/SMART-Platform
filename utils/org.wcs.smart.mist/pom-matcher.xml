@@ -92,8 +92,8 @@
                    				<phase>package</phase>
                    				<goals><goal>replace</goal></goals>                   
                    				<configuration>
-                   				    <file>mistReader.bat</file>
-               						<outputFile>${package.dir}/mistReader.bat</outputFile>
+                   				    <file>mistMatcher.bat</file>
+               						<outputFile>${package.dir}/mistMatcher.bat</outputFile>
                						<replacements>
                    						<replacement>
                        							<token>%CP1%</token>
@@ -215,6 +215,11 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.wcs.smart</groupId>
+			<artifactId>smart-core</artifactId>
+			<version>2.0.1</version>
+		</dependency>
 		<dependency>
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
