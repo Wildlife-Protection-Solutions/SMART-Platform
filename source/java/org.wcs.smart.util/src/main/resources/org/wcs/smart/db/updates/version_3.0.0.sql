@@ -89,7 +89,8 @@ ALTER TABLE smart.wp_observation
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
 ;
- 
+
+create index waypoint_datetime_idx on smart.waypoint(datetime);
  
 CREATE TABLE smart.observation_attachment
 (
