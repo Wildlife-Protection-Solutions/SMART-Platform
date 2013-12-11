@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -142,20 +143,21 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
 			if (mapqueries != null){
 				for (int i = 0; i < mapqueries.size(); i++) {
-					String dataSet = i < datasets.size() ? datasets.get(i) : null;
+					String dataSet = i < datasets.size() ? datasets.get(i) : null;			
 					DataSetHandle handle = null;
 					if (dataSet != null){
 						handle = ((ReportDesignHandle)super.modelHandle.getRoot()).findDataSet(dataSet);
-						if (handle == null){
-							//search for query string
-							OdaDataSetHandle[] handles = BirtMapUtils.getDataSets(super.modelHandle);
-							for (OdaDataSetHandle h : handles){
-								if (h.getQueryText().equals(mapqueries.get(i))){
-									handle = h;
-								}
+					}
+					if (handle == null){
+						//search for query string
+						OdaDataSetHandle[] handles = BirtMapUtils.getDataSets(super.modelHandle);
+						for (OdaDataSetHandle h : handles){
+							if (h.getQueryText().equals(mapqueries.get(i))){
+								handle = h;
 							}
 						}
 					}
+					
 					GeoSmart layer = new GeoSmart();
 					layer.name = mapnames.get(i);
 					layer.style = mapstyles.get(i);

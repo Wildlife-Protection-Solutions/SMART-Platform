@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.wcs.smart.Localization;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -60,6 +61,8 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.LocaleComparator;
+import org.wcs.smart.util.LocaleLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -141,35 +144,13 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Locale[] ls = Locale.getAvailableLocales();
-				Arrays.sort(ls, new Comparator<Locale>() {
-					@Override
-					public int compare(Locale o1, Locale o2) {
-						if (o1.getDisplayLanguage().equals(o2.getDisplayLanguage())){
-							return Collator.getInstance().compare(o1.getDisplayCountry(), o2.getDisplayCountry());
-						}else{
-							return Collator.getInstance().compare(o1.getDisplayLanguage(), o2.getDisplayLanguage());
-						}
-					}
-				});
+//				Locale[] ls = Locale.getAvailableLocales();
+				Locale[] ls = Localization.getSupportedLocals();
+				Arrays.sort(ls,new LocaleComparator());
+			
 				ListSelectionDialog lstSelection = new ListSelectionDialog(
-					getShell(), ls, ArrayContentProvider.getInstance(), 
-					new LabelProvider(){
-						public String getText(Object x){
-							if (x instanceof Locale){
-								Locale l = (Locale)x;
-								String name = l.getDisplayName();
-								name += " [" + l.getLanguage() ; //$NON-NLS-1$
-								if (!l.getCountry().isEmpty()){
-									name += "_" + l.getCountry(); //$NON-NLS-1$
-								}
-								name += "]"; //$NON-NLS-1$
-								return name;
-							}
-							return super.getText(x);
-						}
-					},
-					Messages.CaPropertyPage_LocaleToAddLabel);
+					getShell(), ls, ArrayContentProvider.getInstance(),
+					new LocaleLabelProvider(), Messages.CaPropertyPage_LocaleToAddLabel);
 				if (lstSelection.open() == IDialogConstants.CANCEL_ID){
 					return ;
 				}

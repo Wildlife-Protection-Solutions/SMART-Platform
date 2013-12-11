@@ -43,6 +43,7 @@ public class Messages extends NLS {
 	public static String StyleCellEditor_Error_CouldNotCreateStyleEditor;
 	public static String StyleCellEditor_Error_CouldNotOpenStyleDialog;
 	public static String SmartMapItem_Name;
+	public static String SmartMapItemCloner_CloneError;
 	
 	static {
 		// initialize resource bundle

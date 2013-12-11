@@ -19,51 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.util;
 
-import org.eclipse.equinox.app.IApplication;
-import org.eclipse.equinox.app.IApplicationContext;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.application.WorkbenchAdvisor;
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.Locale;
 
 /**
- * Smart application 
+ * Comparator for sorting Locale.  Languages without countries
+ * appear first in alphebetical order, then languages
+ * with countries.
  * 
- * @author egouge
- * @since 1.0.0
+ * @author Emily
+ * @since 2.0.1
+ *
  */
-public class SmartApp implements IApplication {
-
+public class LocaleComparator implements Comparator<Locale> {
+	
 	@Override
-	public Object start(IApplicationContext context) throws Exception {	
-		WorkbenchAdvisor workbenchAdvisor = new SmartWorkbenchAdvisor();
-		Display display = PlatformUI.createDisplay();
-		
-		try {
-			int returnCode = PlatformUI.createAndRunWorkbench(display,
-					workbenchAdvisor);
-			if (returnCode == PlatformUI.RETURN_RESTART) {
-				return IApplication.EXIT_RESTART;
-			}
-			
-			return IApplication.EXIT_OK;
-		} finally {
-			display.dispose();
+	public int compare(Locale o1, Locale o2) {
+		if (o1.getCountry().isEmpty() && !o2.getCountry().isEmpty()){
+			return -1;
+		}else if (!o1.getCountry().isEmpty() && o2.getCountry().isEmpty()){
+			return 1;
+		}
+		if (o1.getDisplayLanguage().equals(o2.getDisplayLanguage())){
+			return Collator.getInstance().compare(o1.getDisplayCountry(), o2.getDisplayCountry());
+		}else{
+			return Collator.getInstance().compare(o1.getDisplayLanguage(), o2.getDisplayLanguage());
 		}
 	}
-
-	@Override
-	public void stop() {
-		final IWorkbench workbench = PlatformUI.getWorkbench();
-		final Display display = workbench.getDisplay();
-		display.syncExec(new Runnable() {
-			public void run() {
-				if (!display.isDisposed()) workbench.close();
-			}
-		});
-	}
-	
-	
 }
