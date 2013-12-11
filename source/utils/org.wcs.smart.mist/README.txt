@@ -11,6 +11,14 @@ the results in the jre_win32 folder.
 
 Firebird is downloaded directly from the firebird website.
 
+org.wcs.smart
+------------------
+This project requires the org.wcs.smart project for the
+xml file library.  You will need to manually create a jar
+file and place it into your m2 repository:
+C:\Users\XXX\.m2\repository\org\wcs\smart\smart-core\2.0.1\smart-core-2.0.1.jar
+
+
 To package into a distribute:
 run "mvn package" 
 
