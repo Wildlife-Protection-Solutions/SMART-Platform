@@ -2,6 +2,8 @@ package org.wcs.smart.query;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -289,6 +291,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 			}catch (Exception ex){
 				ex.printStackTrace();
 			}
+			
+			
 		}
 		return propertyProviders;
 		

@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -246,10 +249,31 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		lblOwnerName.setText(query.getOwner().getFullLabel());
 		
 
-		props = QueryPlugIn.getPropertyProviders();
-		for(AbstractQueryPropertyProvider prop: props){
+		List<AbstractQueryPropertyProvider> allProps = new ArrayList<AbstractQueryPropertyProvider>();
+		allProps.addAll(QueryPlugIn.getPropertyProviders());
+		
+		//	sort so simple names are first, then more complex composites
+		Collections.sort(allProps, new Comparator<AbstractQueryPropertyProvider>() {
+			@Override
+			public int compare(AbstractQueryPropertyProvider o1,
+					AbstractQueryPropertyProvider o2) {
+				if (o1.getName() == null && o2.getName() == null){
+					return 0;
+				}else if (o1.getName() == null && o2.getName() != null){
+					return 1;
+				}else if (o1.getName() != null && o2.getName() == null){
+					return -1;
+				}else{
+					return o1.getName().compareTo(o2.getName());
+				}
+			}
+		});
+		props = new ArrayList<AbstractQueryPropertyProvider>();
+		for(AbstractQueryPropertyProvider prop: allProps){
 			if (prop.isValid(query.getType())){
 				//prop.clearChangeListener();
+				props.add(prop);
+				
 				prop.addChangeListener(changeListener);
 				if (prop.getName() != null){
 					Label lblProp = new Label(main, SWT.NONE);

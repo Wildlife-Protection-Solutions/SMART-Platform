@@ -266,5 +266,12 @@
             class="org.wcs.smart.observation.query.exportimport.ObsSummaryQueryDefinitionImporter">
       </QueryImporter>
    </extension>
+   <extension
+         point="org.wcs.smart.query.property">
+      <queryproperty
+            propertyName="org.wcs.smart.observation.query.observationquerycolumns"
+            propertyProvider="org.wcs.smart.observation.query.ui.ColumnQueryPropertyProvider">
+      </queryproperty>
+   </extension>
 
 </plugin>

@@ -337,6 +337,9 @@ public class Messages extends NLS {
 	public static String SummaryResultsArea_RunSummaryLink;
 	public static String WaypointQuerySummaryInfo_NumberOfIncidentLabel;
 	public static String WaypointQuerySummaryInfo_UnknownNumberOfIncidents;
+	public static String QueryPropertiesDialog_ColumnsLabel;
+	public static String QueryPropertiesDialog_DeSelectAllLabel;
+	public static String QueryPropertiesDialog_SelectAllLabel;
 	
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
 	public static String CsvSummaryExporter_CSV_ExporterName;

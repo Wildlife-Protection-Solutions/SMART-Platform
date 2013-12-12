@@ -1,4 +1,4 @@
-package org.wcs.smart.report.query;
+package org.wcs.smart.report.birt.query;
 
 import org.eclipse.ui.IStartup;
 

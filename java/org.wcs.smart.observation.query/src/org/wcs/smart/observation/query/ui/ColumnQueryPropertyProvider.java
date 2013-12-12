@@ -19,11 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.ui;
+package org.wcs.smart.observation.query.ui;
 
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.observation.query.model.types.ObservationQueryType;
+import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
 import org.wcs.smart.query.common.model.AbstractColumnQueryPropertyProvider;
 import org.wcs.smart.query.model.IQueryType;
 
@@ -36,9 +35,8 @@ public class ColumnQueryPropertyProvider extends AbstractColumnQueryPropertyProv
 
 	@Override
 	public boolean isValid(IQueryType query) {
-		if (query.getClass().equals(PatrolQueryType.class) || 
-			query.getClass().equals(PatrolObservationQueryType.class) ||
-			query.getClass().equals(PatrolWaypointQueryType.class)){
+		if (query.getClass().equals(ObservationQueryType.class) ||
+			query.getClass().equals(ObservationWaypointQueryType.class)){
 			return true;
 		}
 		return false;

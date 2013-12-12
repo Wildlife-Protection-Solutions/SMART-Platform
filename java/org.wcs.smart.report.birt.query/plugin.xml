@@ -177,6 +177,12 @@
          </dataSetPage>
       </dataSetUI>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.wcs.smart.report.birt.query.DummyStartUp">
+      </startup>
+   </extension>
 
 
 </plugin>

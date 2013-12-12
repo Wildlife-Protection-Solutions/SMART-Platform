@@ -30,11 +30,5 @@
             queryTypeKey="patrolwaypoint">
       </QueryTypeDataset>
    </extension>
-   <extension
-         point="org.eclipse.ui.startup">
-      <startup
-            class="org.wcs.smart.report.query.DummyStartUp">
-      </startup>
-   </extension>
 
 </plugin>
