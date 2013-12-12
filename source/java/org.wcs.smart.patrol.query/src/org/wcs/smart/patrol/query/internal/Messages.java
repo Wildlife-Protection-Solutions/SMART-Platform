@@ -219,9 +219,6 @@ public class Messages extends NLS {
 	public static String QueryHibernateManager_LoadEmployeeError;
 	public static String QueryHibernateManager_LoadError;
 	public static String QueryPlugIn_Error_DialogTitle;
-	public static String QueryPropertiesDialog_ColumnsLabel;
-	public static String QueryPropertiesDialog_DeSelectAllLabel;
-	public static String QueryPropertiesDialog_SelectAllLabel;
 	public static String QueryResultItemFeature_GeomParseError;
 	public static String QueryServiceInfo_Description;
 	public static String QueryServiceInfo_Keyword1;
