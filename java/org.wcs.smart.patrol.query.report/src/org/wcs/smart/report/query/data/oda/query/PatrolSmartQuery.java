@@ -31,6 +31,11 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.ISmartQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
+import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
+import org.wcs.smart.data.oda.smart.query.common.MemoryQueryResultSet;
+import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
+import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
+import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
@@ -95,7 +100,7 @@ public class PatrolSmartQuery implements ISmartQuery {
 				query.getQuery().getType().getKey().equals(PatrolQueryType.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) query.getQuery());
 		} else if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)) {
-			return new SummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery());
+			return new PatrolSummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery());
 		} else if (query.getQuery().getType().getKey().equals(PatrolGridQueryType.KEY)){
 			return new SimpleQueryResultSetMetadata( (PatrolGriddedQuery) query.getQuery());
 		}
@@ -147,7 +152,7 @@ public class PatrolSmartQuery implements ISmartQuery {
 			((PatrolSummaryQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
 					(PatrolSummaryQuery) query.getQuery(),
-					new SummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery()));
+					new PatrolSummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery()));
 		}
 		
 		return resultSet;

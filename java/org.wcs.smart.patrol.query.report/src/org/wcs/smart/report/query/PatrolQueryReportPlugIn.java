@@ -23,8 +23,6 @@ package org.wcs.smart.report.query;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.query.event.QueryEventManager;
-import org.wcs.smart.report.query.internal.PatrolReportQueryListener;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -37,8 +35,6 @@ public class PatrolQueryReportPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static PatrolQueryReportPlugIn plugin;
 	
-	private PatrolReportQueryListener queryListener = new PatrolReportQueryListener();
-
 	
 	/**
 	 * The constructor
@@ -53,7 +49,7 @@ public class PatrolQueryReportPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		QueryEventManager.getInstance().addListener(queryListener);
+		
 	}
 
 	/*
@@ -63,7 +59,7 @@ public class PatrolQueryReportPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		QueryEventManager.getInstance().removeListener(queryListener);
+		
 	}
 
 	/**
