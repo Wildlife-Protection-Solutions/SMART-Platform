@@ -6,7 +6,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.data.oda.smart.query.common.PatrolReportQueryListener;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
+import org.wcs.smart.query.event.QueryEventManager;
 
 public class Activator extends  AbstractUIPlugin{
 
@@ -18,6 +20,9 @@ public class Activator extends  AbstractUIPlugin{
 	
 	private static BundleContext context;
 
+	private PatrolReportQueryListener queryListener = new PatrolReportQueryListener();
+
+	
 	static BundleContext getContext() {
 		return context;
 	}
@@ -29,6 +34,7 @@ public class Activator extends  AbstractUIPlugin{
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		plugin = this;
+		QueryEventManager.getInstance().addListener(queryListener);
 	}
 
 	/*
@@ -38,6 +44,7 @@ public class Activator extends  AbstractUIPlugin{
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
 		plugin = null;
+		QueryEventManager.getInstance().removeListener(queryListener);
 	}
 
 	/**

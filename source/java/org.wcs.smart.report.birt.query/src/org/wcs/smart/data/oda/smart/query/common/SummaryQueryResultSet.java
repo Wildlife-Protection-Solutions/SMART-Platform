@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.query.data.oda.query;
+package org.wcs.smart.data.oda.smart.query.common;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -32,7 +32,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 
 /**
@@ -58,7 +58,7 @@ public class SummaryQueryResultSet implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public SummaryQueryResultSet(PatrolSummaryQuery query,
+	public SummaryQueryResultSet(SummaryQuery query,
 			SummaryQueryResultSetMetadata metadata) {
 
 		this.metadata = metadata;

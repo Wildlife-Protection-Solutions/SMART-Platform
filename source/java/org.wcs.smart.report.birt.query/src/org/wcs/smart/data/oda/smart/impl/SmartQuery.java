@@ -122,27 +122,30 @@ public class SmartQuery implements IQuery {
 	public void prepare(String queryText) throws OdaException {
 		
 		parameters = new HashMap<SmartParameterMetaData.Parameter, Object>();
+		
+		String[] bits = queryText.split(":"); //$NON-NLS-1$
+		this.queryType = QueryTypeManager.getInstance().findQueryType(bits[0]);
+			
+		/* for historic support */
+		if (this.queryType == null){
+			this.queryType = QueryTypeManager.getInstance().findDeprecatedQueryType(bits[0]);
+		}
+			
+		if (this.queryType == null){
+			throw new OdaException(MessageFormat.format(Messages.SmartQuery_QueryTypeNotSupported, new Object[]{bits[0]}));
+		}
+		
 		try {
-			String[] bits = queryText.split(":"); //$NON-NLS-1$
-			this.queryType = QueryTypeManager.getInstance().findQueryType(bits[0]);
-			
-			/* for historic support */
-			if (this.queryType == null){
-				this.queryType = QueryTypeManager.getInstance().findDeprecatedQueryType(bits[0]);
-			}
-			
-			if (this.queryType == null){
-				throw new Exception(MessageFormat.format(Messages.SmartQuery_QueryTypeNotSupported, new Object[]{bits[0]}));
-			}
 			this.uuid = SmartUtils.decodeHex(bits[1]);
 			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType.getKey());
-			if (this.wrapperObject == null){
-				throw new Exception(MessageFormat.format(Messages.SmartQuery_QueryTypeNotSupportedReports, new Object[]{queryType}));
-			}
-			
 		} catch (Exception e1) {
 			throw new OdaException(e1);
 		}
+		
+		if (this.wrapperObject == null){
+			throw new OdaException(MessageFormat.format(Messages.SmartQuery_QueryTypeNotSupportedReports, new Object[]{queryType.getGuiName()}));
+		}			
+		
 
 		if (smartQuery == null) {
 			loadQueryJob.schedule();

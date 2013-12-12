@@ -19,77 +19,74 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.query.data.oda.query;
+package org.wcs.smart.data.oda.smart.query.common;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**
- * Result set for a SMART observation query.
+ * Result set for a simple SMART query.
  * 
- * @author elitvin
+ * @author egouge
  * @since 1.0.0
  */
-public class PagedQueryResultSet extends AbstractQueryResultSet {
+public class MemoryQueryResultSet extends AbstractQueryResultSet {
 
+	private List<IResultItem> items = null;
 	private SimpleQueryResultSetMetadata metadata;
 
-	private IPagedQueryResultSet pagedQueryResults;
-	private Map<Integer, IResultItem> weakMap = new WeakHashMap<Integer, IResultItem>();
 
 	/**
 	 * Creates a new results set
 	 * 
-	 * @param metadata
-	 *            query metadata
+	 * @param metadata query metadata
+	 * @param query gridded query
 	 */
-	public PagedQueryResultSet(Query query, SimpleQueryResultSetMetadata metadata) {
+	public MemoryQueryResultSet(Query query, SimpleQueryResultSetMetadata metadata) {
 		super(metadata);
 		this.metadata = metadata;
-
 		try {
-			pagedQueryResults = (IPagedQueryResultSet) query.getCachedResults(new NullProgressMonitor());
-			setMaxRows(pagedQueryResults.getItemCount());
+			Collection<? extends IResultItem> results = (Collection<? extends IResultItem>) query.getCachedResults(new NullProgressMonitor());
+			init(results);
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void init(Collection<? extends IResultItem> queryResults){
+		setMaxRows(queryResults.size());
+		
+		if (queryResults instanceof List){
+			items =  (List<IResultItem>)queryResults;
+		}else{
+			items = new ArrayList<IResultItem>();
+			for (IResultItem i : queryResults){
+				items.add(i);
+			}
+		}
+	}
+	
 	@Override
 	protected int getDatasetSize() {
-		return pagedQueryResults.getItemCount();
+		return items.size();
 	}
 
 	@Override
 	protected Object getCurrentItem(int colIndex) {
-		return metadata.getQueryColumn(colIndex - 1).getValue(getItemForIndex(getRow()));
+		return metadata.getQueryColumn(colIndex - 1).getValue(items.get(getRow()));
 	}
 
-	private IResultItem getItemForIndex(int index) {
-		IResultItem item = weakMap.get(index);
-		if (item != null)
-			return item;
-		//item was not previously loaded or was garbage collected
-		List<? extends IResultItem> data = pagedQueryResults.getData(index, 500);
-		for (int i = 0; i < data.size(); i++) {
-			weakMap.put(index + i, data.get(i));
-		}
-		return data.get(0);
-	}
-	
 	@Override
 	public void close() throws OdaException {
 		super.close();
-		if (pagedQueryResults != null)
-			pagedQueryResults.destroy();
-		pagedQueryResults = null;
+		items = null;
 	}
-	
 }

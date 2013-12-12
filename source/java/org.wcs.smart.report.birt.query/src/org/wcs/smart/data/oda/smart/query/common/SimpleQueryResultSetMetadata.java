@@ -19,79 +19,67 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.query.data.oda.query;
+package org.wcs.smart.data.oda.smart.query.common;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.impl.SmartDriver;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.engine.DerbySummaryEngine;
-import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
-import org.wcs.smart.query.common.model.SummaryQueryResult;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.report.query.internal.Messages;
 
 /**
  * Resultset Metadata object for 
- * an summary query
+ * an simple query
  * 
  * @author egouge
  * @since 1.0.0
  */
-public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
+public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 
-	private final static String HEADER_COLUMN_KEY = "header"; //$NON-NLS-1$
-	private SummaryQueryResult results;
+	private QueryColumn[] queryColumns;
 	
 	/**
-	 * creates a new metadata object for a given query
-	 * @param query
+	 * Creates a new metadata object
+	 * @param query the query to gather metadata for
 	 */
-	public SummaryQueryResultSetMetadata(final PatrolSummaryQuery query){
-		results =  new SummaryQueryResult();
-		Job parseQuery = new Job(Messages.SummaryQueryResultSetMetadata_ParseQueryJob) {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				try{
-					//set a default date filter for parsing
-					if (query.getDateFilter() == null){
-						query.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
-					}
-					DerbySummaryEngine.getHeaderInfo(query, results, session);
-				}finally{
-					session.close();
-				}
-				return Status.OK_STATUS;
+	public SimpleQueryResultSetMetadata(SimpleQuery query){
+		List<QueryColumn> vis = new ArrayList<QueryColumn>();
+		for (QueryColumn col : query.getQueryColumns()){
+			if (col.isVisible()){
+				vis.add(col);
 			}
-		};
-		parseQuery.schedule();
-		
-		try {
-			parseQuery.join();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
 		}
-		
+		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 	}
 	
+	public SimpleQueryResultSetMetadata(GriddedQuery query){
+		List<QueryColumn> vis = new ArrayList<QueryColumn>();
+		for (QueryColumn col : query.getQueryColumns()){
+			if (col.isVisible()){
+				vis.add(col);
+			}
+		}
+		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
+	}
+	/**
+	 * @param index column index
+	 * @return the query column at a given index
+	 */
+	public QueryColumn getQueryColumn(int index){
+		return queryColumns[index];
+	}
 	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnCount()
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return results.getNumDataColumns() + results.getRowHeaders().size();
+		return queryColumns.length;
 	}
 
 	/**
@@ -108,19 +96,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		index = index - 1;
-		if (index < results.getRowHeaders().size()){
-			return ""; //$NON-NLS-1$
-		}else{
-			StringBuilder sb= new StringBuilder();
-			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
-				if (i != 0){
-					sb.append("\n");	 //$NON-NLS-1$
-				}
-				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getName());
-			}
-			return sb.toString();
-		}
+		return queryColumns[index-1].getName();
 	}
 
 	/**
@@ -128,19 +104,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		index = index - 1;
-		if (index < results.getRowHeaders().size()){
-			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
-		}else{
-			StringBuilder sb= new StringBuilder();
-			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
-				if (i != 0){
-					sb.append(" _ "); //$NON-NLS-1$
-				}
-				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getKey());
-			}
-			return sb.toString();
-		}
+		return queryColumns[index-1].getKey();
 	}
 
 	/**
@@ -148,12 +112,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		index--;
-		if (index < results.getRowHeaders().size()){
-			return QueryColumn.ColumnType.STRING.getSqlType();
-		}else{
-			return QueryColumn.ColumnType.NUMBER.getSqlType();
-		}
+		return queryColumns[index-1].getType().getSqlType();
 	}
 
 	/**
@@ -162,12 +121,12 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return SmartDriver.getNativeDataTypeName( nativeTypeCode , SmartQuery.SMART_DATASET_TYPE);
+	     return SmartDriver.getNativeDataTypeName( nativeTypeCode, SmartQuery.SMART_DATASET_TYPE );
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getPrecision(int)
-	 * @return -1
+	 * @return -1;
 	 */
 	@Override
 	public int getPrecision(int index) throws OdaException {
@@ -176,7 +135,6 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getScale(int)
-	 * @return -1
 	 */
 	@Override
 	public int getScale(int index) throws OdaException {

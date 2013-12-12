@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.query.data.oda.query;
+package org.wcs.smart.data.oda.smart.query.common;
 
 import java.math.BigDecimal;
 import java.sql.Date;
