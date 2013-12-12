@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
@@ -225,7 +227,16 @@ public class MatchSession {
 	public void loadSmartDataModel() throws JAXBException, ParseException, IOException{
 		File xmlFile = new File(smartXmlLocation);
 		FileInputStream is = new FileInputStream(xmlFile);
-		this.smartDataModel = XmlSmartDataModelManager.readDataModel(is);
+
+		//read file directly instead of using the XmlSmartDataModelManager
+		//because that manager uses classes which require hibernate and
+		//we don't have to have to include hibernate in our build
+		//this.smartDataModel = XmlSmartDataModelManager.readDataModel(is);
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.internal.ca.datamodel.xml.generate");
+		Unmarshaller un = context.createUnmarshaller();	
+		Object o = un.unmarshal(is);
+		this.smartDataModel = (DataModel) o;
+		
 	}
 	
 	public DataModel getXmlDataModel(){
