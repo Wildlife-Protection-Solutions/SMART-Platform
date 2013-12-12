@@ -117,6 +117,14 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportHandler_InfoDialog_Message;
 	public static String CyberTrackerExportHandler_InfoDialog_Title;
 	public static String CyberTrackerExportHandler_TaskName;
+	public static String CyberTrackerFileImportDialog_ArchiveFile;
+	public static String CyberTrackerFileImportDialog_Button_Import;
+	public static String CyberTrackerFileImportDialog_Column_Date;
+	public static String CyberTrackerFileImportDialog_Column_Filename;
+	public static String CyberTrackerFileImportDialog_ImportFrom;
+	public static String CyberTrackerFileImportDialog_Message;
+	public static String CyberTrackerFileImportDialog_OtherFile;
+	public static String CyberTrackerFileImportDialog_Title;
 	public static String CyberTrackerImportDialog_AllFiles;
 	public static String CyberTrackerImportDialog_Button_Import;
 	public static String CyberTrackerImportDialog_Button_ImportFromDevice;

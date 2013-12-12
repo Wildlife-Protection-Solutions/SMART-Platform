@@ -60,7 +60,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -509,28 +508,9 @@ public class CTPatrolTableContainer extends Composite {
 	}
 
 	private File[] selectFile() {
-		FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
-		fd.setFilterExtensions(new String[] {
-				"*.xml;*.ctx", //$NON-NLS-1$
-				"*.xml", //$NON-NLS-1$
-				"*.ctx", //$NON-NLS-1$
-				"*.*" //$NON-NLS-1$
-		});
-		fd.setFilterNames(new String[] {
-				Messages.CTPatrolTableContainer_SupportedFiles,
-				Messages.CyberTrackerImportDialog_XmlFiles,
-				Messages.CTPatrolTableContainer_CyberTrackerFiles,
-				Messages.CyberTrackerImportDialog_AllFiles
-		});
-		String f = fd.open();
-		
-		if (f != null) {
-			File[] files = new File[fd.getFileNames().length];
-			for (int i = 0; i < fd.getFileNames().length; i ++){
-				files[i] = new File(fd.getFilterPath(), fd.getFileNames()[i]);
-			}
-			return files;
-		}
+		CyberTrackerFileImportDialog fileDialog = new CyberTrackerFileImportDialog();
+		if (fileDialog.open() == IDialogConstants.OK_ID)
+			return fileDialog.getSelectedFiles();
 		return null;
 	}
 	
