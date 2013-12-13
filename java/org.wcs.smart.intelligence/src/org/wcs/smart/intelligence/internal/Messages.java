@@ -314,14 +314,6 @@ public class Messages extends NLS {
 
 	public static String IntelligenceServiceInfo_Keyword2;
 
-	public static String IntelligenceSourceType_CET;
-
-	public static String IntelligenceSourceType_Informant;
-
-	public static String IntelligenceSourceType_Patrol;
-
-	public static String IntelligenceSourceType_Public;
-
 	public static String IntelligenceSource_Error_PatrolIdRequired;
 
 	public static String IntelligenceSource_Error_SourceRequired;
