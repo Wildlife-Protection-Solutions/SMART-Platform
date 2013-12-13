@@ -113,6 +113,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		storageViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		GridData sgd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		sgd.horizontalIndent = 25;
+		sgd.heightHint = 250;
 		storageViewer.getControl().setLayoutData(sgd);
 		
 		storageViewer.getTable().setHeaderVisible(true);
