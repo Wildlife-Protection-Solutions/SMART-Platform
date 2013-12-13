@@ -692,12 +692,6 @@
       </image>
    </extension>
    <extension
-         point="org.wcs.smart.patrol.query.filter.patrol">
-      <contribution
-            class="org.wcs.smart.intelligence.query.IntelligenceQueryFilterPatrolContribution">
-      </contribution>
-   </extension>
-   <extension
          point="org.wcs.smart.patrol.xml">
       <contribution
             class="org.wcs.smart.intelligence.xml.patrol.PatrolXmlExtraDataContribution">
@@ -735,6 +729,15 @@
       <MapLayer
             maplayer="org.wcs.smart.intelligence.report.IntelligencePointsMapLayer">
       </MapLayer>
+   </extension>
+   <extension
+         point="org.wcs.smart.patrol.query.contribution">
+      <FilterItem
+            class="org.wcs.smart.intelligence.query.IntelligenceQueryFilterPatrolContribution">
+      </FilterItem>
+      <GroupByItem
+            class="org.wcs.smart.intelligence.query.IntelligenceGroupByPatrolContribution">
+      </GroupByItem>
    </extension>
 
 </plugin>

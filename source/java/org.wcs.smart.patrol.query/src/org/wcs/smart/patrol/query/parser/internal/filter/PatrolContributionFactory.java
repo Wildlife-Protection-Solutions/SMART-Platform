@@ -28,12 +28,14 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**
  * Factory for providing all patrol contribution related information added via extension point.
@@ -43,27 +45,89 @@ import org.wcs.smart.query.model.filter.Operator;
  */
 public class PatrolContributionFactory {
 	
-	private static List<IQueryFilterPatrolContribution> contributions = null;
+	/**
+	 * Extension id
+	 */
+	public static final String EXTENSION_ID = "org.wcs.smart.patrol.query.contribution"; //$NON-NLS-1$
+	
+	
+	private static List<IQueryFilterPatrolContribution> filterContributions = null;
+	private static List<IGroupByPatrolContribution> groupByContributions = null;
 	
 	private PatrolContributionFactory() {}
 
-	public static List<IQueryFilterPatrolContribution> getContributions() {
-		if (contributions == null) {
+	public static List<IQueryFilterPatrolContribution> getFilterContributions() {
+		if (filterContributions == null) {
 			if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 			List<IQueryFilterPatrolContribution> items = new ArrayList<IQueryFilterPatrolContribution>();
-			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IQueryFilterPatrolContribution.EXTENSION_ID);
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
 			try {
 				for (IConfigurationElement e : config) {
-					IQueryFilterPatrolContribution contribution = (IQueryFilterPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
-					items.add(contribution);
+					if (e.getName().equals("FilterItem")){ //$NON-NLS-1$
+						IQueryFilterPatrolContribution contribution = (IQueryFilterPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+						items.add(contribution);
+					}
 				}
-				contributions = items;
+				filterContributions = items;
 			} catch (Exception ex) {
 				QueryPlugIn.displayLog(Messages.PatrolContributionFactory_ParseContribution_Error, ex);
 				return Collections.emptyList();
 			}
 		}
-		return contributions;
+		return filterContributions;
+	}
+	
+	public static List<IGroupByPatrolContribution> getGroupByContributions() {
+		if (groupByContributions == null) {
+			if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+			List<IGroupByPatrolContribution> items = new ArrayList<IGroupByPatrolContribution>();
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					if (e.getName().equals("GroupByItem")){ //$NON-NLS-1$
+						IGroupByPatrolContribution contribution = (IGroupByPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+						items.add(contribution);
+					}
+				}
+				groupByContributions = items;
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog(Messages.PatrolContributionFactory_ParseContribution_Error, ex);
+				return Collections.emptyList();
+			}
+		}
+		return groupByContributions;
+	}
+	
+	/**
+	 * Key is of the form:
+	 * patrol:contribution:key:items
+	 * @param key
+	 * @return
+	 */
+	public static IGroupBy createGroupBy(String key){
+		for (IGroupByPatrolContribution contribution: getGroupByContributions()){
+			IGroupBy gb = contribution.createGroupBy(key);
+			if (gb != null){
+				return gb;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Key is of the form:
+	 * patrol:contribution:key:items
+	 * @param key
+	 * @return
+	 */
+	public static IGroupByPatrolContribution findGroupByContribution(String key){
+		for (IGroupByPatrolContribution contribution: getGroupByContributions()){
+			IGroupBy gb = contribution.createGroupBy(key);
+			if (gb != null){
+				return contribution;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -75,7 +139,7 @@ public class PatrolContributionFactory {
 	 * @return
 	 */
 	public static IFilter createFilter(String key, Operator op, Object value) {
-		for (IQueryFilterPatrolContribution contribution : getContributions()) {
+		for (IQueryFilterPatrolContribution contribution : getFilterContributions()) {
 			IFilter filter = contribution.createFilter(key, op, value);
 			if (filter != null) {
 				return filter;
@@ -91,7 +155,7 @@ public class PatrolContributionFactory {
 	 * @return
 	 */
 	public static IFilter createFilter(String key){
-		for (IQueryFilterPatrolContribution contribution : getContributions()) {
+		for (IQueryFilterPatrolContribution contribution : getFilterContributions()) {
 			IFilter filter = contribution.createFilter(key);
 			if (filter != null) {
 				return filter;
@@ -107,7 +171,7 @@ public class PatrolContributionFactory {
 	 * @return the sql for the given filter or null if filter cannot be processed
 	 */
 	public static String getSql(IQueryEngine engine, IFilter filter){
-		for (IQueryFilterPatrolContribution contribution : getContributions()) {
+		for (IQueryFilterPatrolContribution contribution : getFilterContributions()) {
 			String sql = contribution.asSql(engine, filter);
 			if (sql != null){
 				return sql;

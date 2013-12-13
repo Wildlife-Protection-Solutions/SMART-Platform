@@ -54,9 +54,12 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
@@ -330,7 +333,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
+			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -1138,7 +1141,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				fromSql.append(".keyid = '"); //$NON-NLS-1$
 				fromSql.append(((AttributeGroupBy)gb).getAttributeKey());
 				fromSql.append("' "); //$NON-NLS-1$
-								
+			}else if (gb instanceof IExtensionGroupBy){
+				IGroupByPatrolContribution cont = PatrolContributionFactory.findGroupByContribution(gb.asString());
+				cont.addGroupBySql(gb, fromSql, 
+						groupBySql, groupByInnerSql, 
+						value, caFilter, itemcnt, this);
 			}else{
 				//throw new exception; should only be patrol group bys here for now
 			}

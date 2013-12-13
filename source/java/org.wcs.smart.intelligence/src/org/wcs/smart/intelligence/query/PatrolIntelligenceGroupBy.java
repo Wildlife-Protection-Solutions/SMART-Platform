@@ -19,15 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser;
 
-import org.wcs.smart.query.model.filter.IFilter;
+package org.wcs.smart.intelligence.query;
+
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
+import org.wcs.smart.query.model.filter.IGroupByVisitor;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.ListItem;
+
 /**
- * Filter wrapper for extension items.
- * 
+ * Group by query item for patrol intelligence group bys
  * @author Emily
  *
  */
-public interface IExtensionFilter extends IFilter {
+public class PatrolIntelligenceGroupBy implements IExtensionGroupBy{
+
+	@Override
+	public String asString() {
+		return "contribution:patrol:intelligence"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String getKeyPart() {
+		return asString();
+	}
+
+	@Override
+	public GroupByType getType() {
+		return GroupByType.KEY;
+	}
+
+	@Override
+	public List<ListItem> getItems(Session session) {
+		return IntelligenceGroupByPatrolContribution.SUPPORTEDVALUES;
+	}
+
+	@Override
+	public DropItem asDropItem(Session session) throws Exception {
+		return new IntelligenceGroupByDropItem();
+	}
+
+	@Override
+	public void visit(IGroupByVisitor visitor) {
+		visitor.visit(this);
+	}
 
 }

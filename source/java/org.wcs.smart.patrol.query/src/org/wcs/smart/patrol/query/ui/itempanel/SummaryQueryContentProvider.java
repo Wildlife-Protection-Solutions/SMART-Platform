@@ -104,7 +104,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	private RootNode dataModelGroupByAttribute = new RootNode(NodeType.DATAMODEL_GROUPBY_ATTRIBUTES);
 	
 	private PatrolValueOption[] patrolValueOptions = null;
-	private PatrolQueryOption[] patrolGroupByOption = null;
+	private List<Object> patrolGroupByOption = null;
 	private IDateGroupBy[] dateGroupByOptions = null;
 
 	private HashMap<Area.AreaType, Area[]> areas = new HashMap<Area.AreaType, Area[]>();
@@ -185,7 +185,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(NodeType.DATAMODEL_VALUES);
 			patrolValueOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
-			patrolGroupByOption = (PatrolQueryOption[])in.get(NodeType.PATROL_GROUPBYS);
+			patrolGroupByOption = (List<Object>)in.get(NodeType.PATROL_GROUPBYS);
 			dateGroupByOptions = (IDateGroupBy[]) in.get(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS);
 			provider.inputChanged(viewer, oldInput, this.dataModel);	
 		}
@@ -565,9 +565,9 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			}else if (type == NodeType.PATROL_VALUES){
 				return patrolValueOptions;
 			}else if (type == NodeType.PATROL_GROUPBYS){
-				Object[] kids = new Object[patrolGroupByOption.length + 1];
-				for (int i = 0; i < patrolGroupByOption.length; i++){
-					kids[i] = patrolGroupByOption[i];
+				Object[] kids = new Object[patrolGroupByOption.size() + 1];
+				for (int i = 0; i < patrolGroupByOption.size(); i++){
+					kids[i] = patrolGroupByOption.get(i);
 				}
 				kids[kids.length-1] = dateGroupByNode;
 				return kids;
