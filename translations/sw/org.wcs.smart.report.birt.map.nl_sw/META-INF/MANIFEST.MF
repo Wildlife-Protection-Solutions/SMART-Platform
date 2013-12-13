@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART BIRT Map Swahili Fragment
+Bundle-SymbolicName: org.wcs.smart.report.birt.map.nl_sw
+Bundle-Version: 2.0.1
+Fragment-Host: org.wcs.smart.report.birt.map;bundle-version="2.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: org.wcs.smart
