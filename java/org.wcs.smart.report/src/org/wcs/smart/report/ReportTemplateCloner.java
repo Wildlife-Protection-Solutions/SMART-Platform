@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.DesignConfig;
 import org.eclipse.birt.report.model.api.DesignEngine;
+import org.eclipse.birt.report.model.api.LibraryHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
@@ -195,6 +196,15 @@ public class ReportTemplateCloner implements
 		SessionHandle session = new DesignEngine(new DesignConfig()).newSessionHandle(null);
 		ReportDesignHandle rdh = session.openDesign(dest.getAbsolutePath());
 		
+		//update library reference
+		//here we look for the templateuuid in the library file name
+		//and replace it with the newuuid
+		LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
+		rdh.dropLibraryAndBreakExtends(library);
+		String newLibraryLocation = engine.getNewCa().getFileDataStoreLocation() + File.separator + ReportPlugIn.REPORT_DIR + File.separator + SmartBirtLibrary.LIBRARY_DIR + File.separator + SmartBirtLibrary.LIBRARY_FILENAME;
+		rdh.includeLibrary(newLibraryLocation, SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
+		
+		//updates query references
 		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
