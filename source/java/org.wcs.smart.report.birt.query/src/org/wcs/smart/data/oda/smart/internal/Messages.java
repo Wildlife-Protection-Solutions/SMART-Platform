@@ -5,7 +5,6 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.data.oda.smart.internal.messages"; //$NON-NLS-1$
 	
-	public static String ReportQueryListener_BeforeDelete_QueryUsedWarning;
 	public static String ReportQueryListener_BeforeSave_QueryUsedWarning;
 	public static String ReportQueryListener_QuerySaveError;
 	public static String ReportQueryListener_Warning_DialogTitle;
@@ -18,8 +17,6 @@ public class Messages extends NLS {
 	public static String SmartQuery_LoadQuery_JobName;
 	public static String SmartQuery_QueryTypeNotSupported;
 	public static String SmartQuery_QueryTypeNotSupportedReports;
-	public static String SmartQuery_Warning_SummaryGroupByDates;
-	public static String SummaryQueryResultSetMetadata_ParseQueryJob;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
