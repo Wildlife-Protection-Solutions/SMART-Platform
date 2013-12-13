@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.patrol.query.parser;
 
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.summary.IGroupBy;
+
 /**
- * Filter wrapper for extension items.
+ * Extension for group by.
  * 
  * @author Emily
  *
  */
-public interface IExtensionFilter extends IFilter {
+public interface IExtensionGroupBy extends IGroupBy {
 
 }

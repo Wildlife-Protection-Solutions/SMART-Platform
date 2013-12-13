@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.patrol.query.ui.itempanel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -46,8 +49,11 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.parser.IExtensionOption;
+import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
@@ -139,9 +145,16 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			
 			if (SmartDB.isMultipleAnalysis()){
-				input.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, PatrolQueryOptions.SHARED_PATROL_GROUBY_OPTIONS);
+				List<Object> options = new ArrayList<Object>();
+				options.addAll(Arrays.asList(PatrolQueryOptions.SHARED_PATROL_GROUBY_OPTIONS));
+				options.addAll(findContributedPatrolGroupByOptions());
+				
+				input.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, options);
 			}else{
-				input.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, PatrolQueryOptions.PATROL_GROUBY_OPTIONS);
+				List<Object> options = new ArrayList<Object>();
+				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_GROUBY_OPTIONS));
+				options.addAll(findContributedPatrolGroupByOptions());
+				input.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, options);
 				
 			}
 			input.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
@@ -175,5 +188,14 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			main = createPanel(parent);
 		}
 		return main;
+	}
+	
+	
+	private List<IExtensionOption> findContributedPatrolGroupByOptions() {
+		List<IExtensionOption> items = new ArrayList<IExtensionOption>();
+		for (IGroupByPatrolContribution contribution : PatrolContributionFactory.getGroupByContributions()) {
+			items.add(contribution.getOption());
+		}
+		return items;
 	}
 }

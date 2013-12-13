@@ -3,10 +3,11 @@
 <schema targetNamespace="org.wcs.smart.patrol.query" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.wcs.smart.patrol.query" id="org.wcs.smart.patrol.query.filter.patrol" name="Patrol Filter"/>
+         <meta.schema plugin="org.wcs.smart.patrol.query" id="org.wcs.smart.patrol.query.contribution" name="Patrol Filter"/>
       </appinfo>
       <documentation>
-         Implement this extension point to contribute new items to Patrol Filter node.
+         Implement this extension point to contribute new items to Patrol Filter node or
+the patrol group by node in summary queries.
       </documentation>
    </annotation>
 
@@ -17,8 +18,9 @@
          </appinfo>
       </annotation>
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="contribution"/>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="FilterItem" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="GroupByItem" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +49,7 @@
       </complexType>
    </element>
 
-   <element name="contribution">
+   <element name="FilterItem">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -56,6 +58,21 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.model.IQueryFilterPatrolContribution"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="GroupByItem">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution"/>
                </appinfo>
             </annotation>
          </attribute>

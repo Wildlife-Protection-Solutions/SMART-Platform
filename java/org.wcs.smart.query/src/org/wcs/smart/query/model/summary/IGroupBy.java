@@ -86,34 +86,10 @@ public interface IGroupBy {
 	 */
 	public DropItem asDropItem(Session session) throws Exception;
 	
+	/**
+	 * Visit the group by and any sub-groupbys
+	 * @param visitor
+	 */
 	public void visit(IGroupByVisitor visitor);
-//	
-//	/**
-//	 * @return <code>true</code> if group by part includes category
-//	 */
-//	public boolean hasCategory();
-//	
-//	/**
-//	 * @return <code>true</code> if group by part includes attribute
-//	 */
-//	public boolean hasAttribute();
-//	
-//	/**
-//	 * Validates the current value item against the database.  This includes
-//	 * ensuring that any keys/uuids exist in the database and updating
-//	 * if required.
-//	 * 
-//	 * <p>Warnings are created when the process can continue but
-//	 * incorrect values my be substituted.  Errors are thrown 
-//	 * if the process cannot continue (ie attribute key not found in database).
-//	 * </p>
-//	 * 
-//	 * @param langCode - the language code of the uuid lookup items
-//	 * @param uuidLookup - a mapping from uuid to the associated name items can attempt to
-//	 * be matched to names if uuids do not match
-//	 * @param session
-//	 * @return list of warnings or null if no warnings
-//	 * @throws Exception if the item cannot be validated
-//	 */
-//	public List<String> validateAndImport(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception;
+
 }

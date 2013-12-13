@@ -35,11 +35,7 @@ import org.wcs.smart.query.model.filter.Operator;
  */
 public interface IQueryFilterPatrolContribution {
 
-	/**
-	 * Extension id
-	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.patrol.query.filter.patrol"; //$NON-NLS-1$
-	
+
 	/**
 	 * 
 	 * @return the patrol query string

@@ -179,7 +179,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 
 	private List<IExtensionOption> findContributedPatrolQueryOptions() {
 		List<IExtensionOption> items = new ArrayList<IExtensionOption>();
-		for (IQueryFilterPatrolContribution contribution : PatrolContributionFactory.getContributions()) {
+		for (IQueryFilterPatrolContribution contribution : PatrolContributionFactory.getFilterContributions()) {
 			items.addAll(contribution.getOptions());
 		}
 		return items;

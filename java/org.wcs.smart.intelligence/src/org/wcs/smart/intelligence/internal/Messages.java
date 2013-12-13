@@ -222,6 +222,14 @@ public class Messages extends NLS {
 
 	public static String IntelligenceFilteredSelectComposite_Filter_Tooltip;
 
+	public static String IntelligenceGroupByDropItem_DropItemName;
+
+	public static String IntelligenceGroupByPatrolContribution_ContributionName;
+
+	public static String IntelligenceGroupByPatrolContribution_MotivatedByIntelligenceLabel;
+
+	public static String IntelligenceGroupByPatrolContribution_NotMotivatedByIntelligenceLabel;
+
 	public static String IntelligenceHandler_LoadingErrorMessage;
 
 	public static String IntelligenceHandler_LoadPerspective_Error;

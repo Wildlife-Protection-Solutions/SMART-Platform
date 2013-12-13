@@ -660,12 +660,6 @@
       </image>
    </extension>
    <extension
-         point="org.wcs.smart.patrol.query.filter.patrol">
-      <contribution
-            class="org.wcs.smart.plan.query.PlanQueryFilterPatrolContribution">
-      </contribution>
-   </extension>
-   <extension
          point="org.wcs.smart.patrol.xml">
       <contribution
             class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution">
@@ -797,6 +791,12 @@
                id="org.wcs.smart.conservationAreaCloner">
          </require>
       </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.patrol.query.contribution">
+      <FilterItem
+            class="org.wcs.smart.plan.query.PlanQueryFilterPatrolContribution">
+      </FilterItem>
    </extension>
 
 </plugin>
