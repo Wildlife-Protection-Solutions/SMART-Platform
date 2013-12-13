@@ -15,10 +15,6 @@ public class Messages extends NLS {
 	public static String AttributeValueItem_TreeNodeNotFound;
 	public static String CategoryValueItem_CategoryNotFoundError;
 	public static String CombinedValueItem_PER_LABEL;
-	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
-	public static String CsvSummaryExporter_CSV_ExporterName;
-	public static String CsvSummaryExporter_QueryNotRun;
-	public static String DefinitionQueryExporter_ExporterName;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
 	public static String DerbyGridEngine_Error_PatrolValueNotSupported;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
@@ -84,9 +80,6 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_WaypointTimeColumnName;
 	public static String FixedQueryColumn_xColumnName;
 	public static String FixedQueryColumn_yColumnName;
-	public static String GridArcImageExporter_ExporterName;
-	public static String GridArcImageExporter_ExportError;
-	public static String GridArcImageExporter_FileNotFound;
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
@@ -102,9 +95,6 @@ public class Messages extends NLS {
 	public static String GriddedQueryContentProvider_ValueOptionsLabel;
 	public static String GriddedQueryDefinitionComposite_GridValueDefinitionSectionHeader;
 	public static String GriddedQueryLabelProvider_CountCategoryLabel;
-	public static String GridTiffImageExporter_FileNotFound;
-	public static String GridTiffImageExporter_QueryError;
-	public static String GridTiffImageExporter_TiffExporterName;
 	public static String PatrolContributionFactory_ParseContribution_Error;
 	public static String PatrolFilter_EmployeeNotFound;
 	public static String PatrolFilter_InvalidPrefix;
@@ -234,17 +224,8 @@ public class Messages extends NLS {
 	public static String QueryTemplateCloner_ProgressCopySummary;
 	public static String QueryTemplateCloner_ProgressCopyWaypoint;
 	public static String QueryTemplateCloner_ProgressQuery;
-	public static String ShapePatrolQueryExporter_ExporterName;
-	public static String ShapeQueryExporter_ExporterName;
 	public static String SimplePatrolFilterPanel_PanelTitle;
 	public static String SimpleQuery_DropItemParseError;
-	public static String SimpleQueryExporter_Error_ExportFailed;
-	public static String SimpleQueryExporter_Error_QueryNotRun;
-	public static String SimpleQueryExporter_Progress_CleanUp;
-	public static String SimpleQueryExporter_Progress_ExportingFile;
-	public static String SimpleQueryExporter_Progress_InitializingWriter;
-	public static String SimpleQueryExporter_Progress_WritingData;
-	public static String SimpleQueryDefinitionImporter_InvalidPatrolType;
 	public static String SummaryFilterPanel_RefreshTreeJobName;
 	public static String SummaryQuery_CannotGroupByAttribute;
 	public static String SummaryQuery_CannotGroupByCategory;
