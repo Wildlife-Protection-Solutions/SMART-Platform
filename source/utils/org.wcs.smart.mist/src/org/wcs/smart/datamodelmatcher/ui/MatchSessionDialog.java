@@ -103,6 +103,8 @@ public class MatchSessionDialog extends Dialog {
 	private Button clear;
 	private Button done;
 	
+	private Button autoMatch;
+	
 	public MatchSessionDialog(Shell parentShell, MatchSession ms) {
 	    super(parentShell);
         shell = new Shell(parentShell, SWT.SHELL_TRIM );
@@ -485,10 +487,10 @@ public class MatchSessionDialog extends Dialog {
 	      
 	  	  //Bottom right Buttons
 	      Composite buttons = new Composite(right, SWT.NONE);
-		  GridLayout buttonsLayout = new GridLayout(2, false);
+		  GridLayout buttonsLayout = new GridLayout(3, false);
 		  buttons.setLayout(buttonsLayout);
 	    
-	      GridData buttonsData = new GridData(SWT.RIGHT,SWT.BOTTOM, true, false,2,0);
+	      GridData buttonsData = new GridData(SWT.FILL,SWT.BOTTOM, true, false,2,0);
 	      buttons.setLayoutData(buttonsData);
 
 	      clear = new Button(buttons, SWT.NONE);
@@ -501,7 +503,15 @@ public class MatchSessionDialog extends Dialog {
 	    			done.setVisible(false);
 		    	}
 		    });
+	      
+	      clear.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
+	      autoMatch = new Button (buttons, SWT.CHECK);
+	      autoMatch.setText("Auto-update matching observations");
+	      autoMatch.setSelection(true);
+	      
+	      autoMatch.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+	      
 	      next = new Button(buttons, SWT.NONE);
 	      next.setText("Accept and Load Next Match");
 	      next.addSelectionListener(new SelectionAdapter() {	
@@ -514,6 +524,7 @@ public class MatchSessionDialog extends Dialog {
 		    		}
 		    	}
 		    });
+	      next.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 	      
 
 
@@ -746,7 +757,9 @@ public class MatchSessionDialog extends Dialog {
   				
   				selected.setSmartItem(fullKey);
   				
-  				PerformAutoMatch();//runs before the viewer is moved down 1
+  				if(autoMatch.getSelection()){
+  					PerformAutoMatch();//runs before the viewer is moved down 1
+  				}
   			}
   			viewer.refresh();
   			
@@ -758,9 +771,9 @@ public class MatchSessionDialog extends Dialog {
     		t.deselect(currentSelection);
     		t.select(currentSelection + 1);
     		
-    		
+    		//viewer.reveal(viewer.getSelection());
     		ViewerSelectionChanged();
-  			viewer.refresh();
+  			viewer.refresh(true, true);
 	  }
 
 
@@ -911,10 +924,14 @@ public class MatchSessionDialog extends Dialog {
   				fullKey = fullKey + "|" + attrKey;
   				
   				if( type.equals("NUMERIC") || type.equals("TEXT") ){
-  					if(attributeSelection.getValueText().getText() .equals("")){
+  					if(attributeSelection.getValueText().getText().equals("")){
   						return "empty";
   					}
-  					fullKey += "|" + attributeSelection.getValueText().getText() + "|dValue|1";
+  					if(attributeSelection.getValueText().getText().equals(AttributeSelection.useTotalObservations) ){
+  						fullKey += "|" + "TOTAL_OBSERVED" + "|dValue|1"; //TOTAL_OBSERVED is a keyword for the FME process to use a value for that particular observation.
+  					}else{
+  						fullKey += "|" + attributeSelection.getValueText().getText() + "|dValue|1";
+  					}
   				}else if( type.equals("LIST") ){
   					ISelection listSelection = attributeSelection.getValueComboViewer().getSelection();
   					if (!listSelection.isEmpty()) {

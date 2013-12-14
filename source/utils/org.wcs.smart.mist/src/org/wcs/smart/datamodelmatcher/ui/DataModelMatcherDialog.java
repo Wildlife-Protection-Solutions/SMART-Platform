@@ -3,12 +3,14 @@ package org.wcs.smart.datamodelmatcher.ui;
 import java.io.File;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
@@ -19,6 +21,8 @@ import org.eclipse.swt.widgets.Text;
 
 public class DataModelMatcherDialog extends Composite {
 
+	Thread t;
+	
 	Text restoreFileName;
 	Text startMistTxtFileName;
 	Text mergeMistTxtFileName;
@@ -258,7 +262,7 @@ public class DataModelMatcherDialog extends Composite {
 	    			wait.open();
 	    			
 	    			
-	    			Thread t = new Thread(new Runnable() { public void run() { 
+	    			t = new Thread(new Runnable() { public void run() { 
 	    				try {
 							ms.loadRows(); //loads the mist data	   
 						} catch (Exception e) {
@@ -268,7 +272,13 @@ public class DataModelMatcherDialog extends Composite {
 	    			}});
 	    			
 	    			t.start();
-	    			t.join();
+	    			Display display = getShell().getDisplay();
+	    			
+	    			while(t.isAlive()){
+    			          if (!display.readAndDispatch()) {
+    			            display.sleep();
+    			          }
+	    			}
 	    			dlgShell.dispose();
     				
 				} catch (Exception e2) {
@@ -357,16 +367,119 @@ public class DataModelMatcherDialog extends Composite {
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
 	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
-	    		dlg.setFilterNames(new String[] {"FDB", "GDB"});
-	    		dlg.setFilterExtensions(new String[] {"*.fdb", "*.gdb"});
+	    		dlg.setFilterNames(new String[] {"FDB, GDB"});
+	    		dlg.setFilterExtensions(new String[] {"*.*db"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
 	    			mergeMistTxtFileName.setText(fn);
 	    		}
+	    		
 	    	}
 	    });
 	    
 		
+		Button m_open = new Button(merge, SWT.PUSH);
+		m_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,3,0));
+		((GridData)open.getLayoutData()).heightHint = 10;
+		m_open.setText("Merge Session");
+		m_open.addSelectionListener(new SelectionAdapter() {
+		
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		File dbFile = new File(mergeMistTxtFileName.getText());
+	    		File sessionFile = new File(mergeSessionTxtFileName.getText());
+	    		if (!dbFile.exists()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage("MIST database file not found: '" + dbFile.toString() + "'" );
+	    			messageBox.open();
+	    			return;
+	    		}
+	    		if (!sessionFile.exists()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage("SMART XML data model file not found: '" + sessionFile.toString() + "'" );
+	    			messageBox.open();
+	    			return;
+	    		}	    		
+	    		
+	    		
+	    		ms = new MatchSession( getShell() );
+	    		ms.setMistLocation(mergeMistTxtFileName.getText());
+	    		ms.setSaveLocation(mergeSessionTxtFileName.getText());
+	    		
+	    		String result = ms.loadSessionFromFile();
+	    		
+	    		ms.setSaveLocation(null);//once the session is loaded, remove the filename so the user doesn't overwite it and is asked for a new filename when saving. 
+	    		
+	    		if(result != null){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+	    			messageBox.setMessage(result);
+	    			messageBox.open();
+	    			return;
+	    		}
+	    		
+	    		
+	    		
+	    		try {
+
+	    			final Shell dlgShell = new Shell(getShell(), SWT.APPLICATION_MODAL);
+	    			
+					wait = new ProcessingDialog(dlgShell, dlgShell.getBounds());
+	    			wait.open();
+	    			
+	    			
+	    			Thread t = new Thread(new Runnable() { public void run() { 
+	    				try {
+							ms.mergeRows(); //loads the mist data	   
+						} catch (Exception e) {
+							e.printStackTrace();
+						} 
+	    				
+	    			}});
+	    			
+	    			t.start();
+
+	    			Display display = getShell().getDisplay();
+	    			
+	    			while(t.isAlive()){
+    			          if (!display.readAndDispatch()) {
+    			            display.sleep();
+    			          }
+	    			}
+
+	    			dlgShell.dispose();
+    				
+				} catch (Exception e2) {
+			    	MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+			    	messageBox.setMessage("MIST database error:" + e2);
+			    	messageBox.open();
+			    	return;
+				} 
+	    		
+	    		try {
+					ms.loadSmartDataModel();
+				} catch (Exception e1) {
+					MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+					e1.printStackTrace();
+	    			messageBox.setMessage("SMART XML data model file error, ensure the file was created in SMART by selecting 'Export to XML' under the 'Conservation Area -> Data Model...' menu. " + e1 );
+	    			messageBox.open();
+	    			return;
+				}
+	    		
+	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
+	    		
+	    		matchSession.open();
+	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+	                messageBox.setMessage("Do you want to save your changes?");
+	                messageBox.setText("Exiting Application");
+	                int response = messageBox.open();
+	                if (response == SWT.YES)
+	              	  ms.save();
+	    	}
+	    });
+		
 	}
 
 }
+
+
+

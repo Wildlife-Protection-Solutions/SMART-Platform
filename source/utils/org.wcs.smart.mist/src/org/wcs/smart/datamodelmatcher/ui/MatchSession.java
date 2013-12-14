@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
+
 import org.wcs.smart.mist.dataReader.MistDatabase;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -248,6 +249,31 @@ public class MatchSession {
 		sorter.setDirection(direction);
 		sorter.setCol(column);
 		Collections.sort(rows, sorter);
+	}
+
+	public void mergeRows() throws Exception{
+		File mistFile = new File(mistLocation);
+	    Connection c = MistDatabase.getConnection(mistFile.getAbsolutePath());
+		ResultSet rs = c
+				.createStatement()
+				.executeQuery(
+						"SELECT DISTINCT LO.OBSERVATION_GROUP, GPO.OBSERVATION, GPO.OBSERVATION_CODE, LRC.ITEM, LRC1.ITEM AS SUBCODE1, LRC2.ITEM AS SUBCODE2, LRC3.ITEM AS SUBCODE3, LRC4.ITEM AS SUBCODE4, LRC5.ITEM AS SUBCODE5 FROM GROUND_PATROL_OBSERVATIONS GPO LEFT JOIN OBSERVATION_REMARKS OBR ON OBR.OBS_REMARKS_RELATION = GPO.OBS_REMARKS_RELATION LEFT JOIN LK_REMARKS_CURRENT LRC ON LRC.OBSERVATION_RELATION = GPO.OBSERVATION_RELATION LEFT JOIN LK_REMARKS_CURRENT LRC1 ON LRC1.OBS_REMARKS = LRC.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC2 ON LRC2.OBS_REMARKS = LRC1.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC3 ON LRC3.OBS_REMARKS = LRC2.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC4 ON LRC4.OBS_REMARKS = LRC3.PARENT_ITEM LEFT JOIN LK_REMARKS_CURRENT LRC5 ON LRC5.OBS_REMARKS = LRC4.PARENT_ITEM LEFT JOIN LK_OBS_CODES LOC ON GPO.OBSERVATION_RELATION = LOC.OBSERVATION_RELATION LEFT JOIN LK_OBSERVATIONS LO ON LO.OBS_CODE_RELATION = LOC.OBS_CODE_RELATION WHERE  (LRC.OBS_REMARKS = OBR.OBS_REMARKS OR (LRC.OBS_REMARKS IS NULL AND OBR.OBS_REMARKS IS NULL)) ");
+		while (rs.next()) {
+			MistItem mist = new MistItem(rs.getString(1) , rs.getString(2) , rs.getString(3) , rs.getString(4) , rs.getString(5) , rs.getString(6) , rs.getString(7) , rs.getString(8) , rs.getString(9));
+			boolean alreadyExists = false;
+			for(MatchRow r: rows){
+				MistItem m = r.getMistItem();
+				if(m.equalTo(mist)){
+					alreadyExists = true;
+					break;
+				}
+			}
+			if(!alreadyExists){
+				rows.add(new MatchRow(false, mist , new SmartItem("") ) );
+			}
+		}
+
+		
 	}
 	
 	
