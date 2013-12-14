@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
 public class ProcessingDialog extends Dialog{
@@ -36,12 +37,13 @@ public class ProcessingDialog extends Dialog{
 
 	Label wait1 = new Label(shell, SWT.NONE);
     wait1.setText("Please Wait, Loading MIST Data.");
+
+    ProgressBar pb1 = new ProgressBar(shell, SWT.INDETERMINATE);
+    pb1.setSelection(100);
     
 	Label wait2 = new Label(shell, SWT.NONE);
     wait2.setText("----------------------------------");
 
-    //ProgressBar pb1 = new ProgressBar(shell, SWT.INDETERMINATE);
-    //pb1.setSelection(100);
     
 
 	//shell.setSize(250 , 250);

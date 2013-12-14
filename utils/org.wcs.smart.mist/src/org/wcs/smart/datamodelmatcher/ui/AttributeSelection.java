@@ -24,6 +24,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 public class AttributeSelection {
+	public static String useTotalObservations = "<Use TOTAL_OBSERVED from MIST>";
 	private Combo langSelector;
 	private String[] codes;
 	
@@ -75,7 +76,7 @@ public class AttributeSelection {
 	    	  		    Attribute selected = (Attribute) structuredSelection.getFirstElement();
 	    	  		    String type = selected.getAttributeType().getType();
 	    	  		    if( type.equals("NUMERIC") ){
-	    	  		    	value1Text.setText("");
+	    	  		    	value1Text.setText(useTotalObservations);
 	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
 	    	  		    }else if( type.equals("TEXT") ){
 	    	  		    	value1Text.setText("");
@@ -139,6 +140,7 @@ public class AttributeSelection {
 	      GridData gridtxt1Data = new GridData(SWT.LEFT, SWT.TOP, false, false);
 	      gridtxt1Data.heightHint = 20;
 	      value1Text.setLayoutData(gridtxt1Data);
+	      value1Text.setText(useTotalObservations);
 	      
 	      value1Tree = new Tree(value1, SWT.BORDER | SWT.SINGLE);
 	      TreeItem vItem = new TreeItem (value1Tree, 0);

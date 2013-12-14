@@ -142,5 +142,9 @@ public class MistItem {
 	public void setCat9(String s){
 		this.cat9 = s;
 	}
+
+	public boolean equalTo(MistItem mist) {
+		return this.category.equals(mist.getText());
+	}
 	
 }
