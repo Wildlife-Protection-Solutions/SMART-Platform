@@ -105,8 +105,7 @@ public class IncidentSummaryPage extends EditorPart {
 	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -347,7 +346,6 @@ public class IncidentSummaryPage extends EditorPart {
 				
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					// TODO Auto-generated method stub
 					EditIncidentDialog d = new EditIncidentDialog(getSite().getShell(), panelId, editor.getIncident());
 					d.open();
 					initData(editor.getIncident());
