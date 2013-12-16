@@ -57,6 +57,10 @@ public class NewEntityWizardPage extends WizardPage {
 	}
 	
 	public boolean canFlipToNextPage(){
+		if (contents instanceof AttributeNameField){
+			return false;
+		}
+			
 		return getErrorMessage() == null;
 	}
 	

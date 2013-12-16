@@ -24,6 +24,7 @@ package org.wcs.smart.entity.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -36,6 +37,7 @@ import javax.persistence.Table;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
@@ -47,7 +49,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
  */
 @javax.persistence.Entity
 @Table(name="smart.entity_type")
-public class EntityType extends NamedItem{
+public class EntityType extends NamedKeyItem{
 
 	public enum Status{
 		ACTIVE("Active"), INACTIVE("Inactive");
@@ -78,7 +80,6 @@ public class EntityType extends NamedItem{
 	}
 	
 	private ConservationArea ca;
-	private String keyId;
 	private String id;
 	private Date dateCreated;
 	private Employee creator;
@@ -91,7 +92,7 @@ public class EntityType extends NamedItem{
 	public EntityType(){
 	}
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="entityType", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<Entity> getEntities(){
 		return this.entities;
 	}
@@ -113,21 +114,6 @@ public class EntityType extends NamedItem{
 	 */
 	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
-	}
-
-	/**
-	 * The keyid is used for sharing entity models
-	 * across conservation areas. 
-	 * 
-	 * @return the key id associated with the entity type
-	 */
-	@Column(name="keyid")
-	public String getKeyId() {
-		return keyId;
-	}
-
-	public void setKeyId(String keyId) {
-		this.keyId = keyId;
 	}
 
 	/**
@@ -160,7 +146,8 @@ public class EntityType extends NamedItem{
 	 * Users who created the entity type
 	 * @return
 	 */
-	@Column(name="creator_uuid")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="creator_uuid", referencedColumnName="uuid")
 	public Employee getCreator() {
 		return creator;
 	}
@@ -189,7 +176,8 @@ public class EntityType extends NamedItem{
 	 * 
 	 * @return
 	 */
-	@Column(name="dm_attribute_uuid")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
 	public Attribute getDmAttribute() {
 		return dmAttribute;
 	}
@@ -202,7 +190,7 @@ public class EntityType extends NamedItem{
 	 * The type of the entity (fixed or transient)
 	 * @return
 	 */
-	@Column(name="type")
+	@Column(name="entity_type")
 	@Enumerated(EnumType.STRING)
 	public Type getType() {
 		return type;

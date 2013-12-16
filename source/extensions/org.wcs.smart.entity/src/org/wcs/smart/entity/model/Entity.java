@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.entity.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -42,6 +43,10 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.entity")
 public class Entity extends UuidItem {
 
+	public static final int NAME_MAX_LENGTH = 1014;
+	public static final int ID_MAX_LENGTH = 32;
+	public static final int KEY_MAX_LENGTH = 128;
+			
 	public enum Status{
 		ACTIVE, INACTIVE
 	}
@@ -56,13 +61,13 @@ public class Entity extends UuidItem {
 		
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
 	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
-	public EntityType getType() {
+	public EntityType getEntityType() {
 		return type;
 	}
 
-	public void setType(EntityType type) {
+	public void setEntityType(EntityType type) {
 		this.type = type;
 	}
 

@@ -33,7 +33,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
 @Entity
-@Table(name="smart.entity_attribute_value")
+@Table(name="smart.entity_attribute")
 public class EntityAttribute extends NamedItem {
 
 	private Attribute dmAttribute;
