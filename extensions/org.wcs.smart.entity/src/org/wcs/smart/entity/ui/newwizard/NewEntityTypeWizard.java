@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.entity.ui.newwizard;
 
+import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -30,11 +32,15 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.EntityType.Status;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -56,16 +62,29 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		newType.setConservationArea(SmartDB.getCurrentConservationArea());
 		newType.setCreator(SmartDB.getCurrentEmployee());
 		newType.setDateCreated(new Date());
+		newType.setStatus(Status.ACTIVE);
 		
-//		Query q = session.createQuery("SELECT max(id) FROM Waypoint WHERE sourceId = ?"); //$NON-NLS-1$
-//		q.setParameter(0, IndepedentIncidentSource.KEY);
-//		List<?> maxIs = q.list();
-//		if (maxIs.size() > 0){
-//			newIncident.setId((Integer)maxIs.get(0) + 1);
-//		}else{
-//			//start at 1
-//			newIncident.setId(1);
-//		}
+		//set initial id
+		session = HibernateManager.openSession();
+		Query q = session.createQuery("SELECT max(id) FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		List<?> maxIs = q.list();
+		
+		Integer i = 1;
+		if (maxIs.size() > 0){
+			String id = (String) maxIs.get(0);
+			try{
+				i = Integer.parseInt(id.replaceAll("[^0-9]", ""));
+			}catch (Exception ex){
+				//eat me
+			}
+			if (i <=0 ){
+				i = 1;
+			}	
+		}
+		DecimalFormat entityIdFormat = new DecimalFormat("000000");
+		newType.setId(entityIdFormat.format(i));
+		
 		
 	}
 
@@ -77,6 +96,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		//save to db
 		session.beginTransaction();
 		try{
+			session.saveOrUpdate(newType.getDmAttribute());
 			session.save(newType);
 			session.getTransaction().commit();
 		}catch(Exception ex){
@@ -86,14 +106,14 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		}
 		
 		// fire events
-//		IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, newIncident);
+		EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newType);
 		
 		// open in editor
 		EntityTypeEditorInput input = new EntityTypeEditorInput(this.newType.getUuid(),this.newType.getId(), this.newType.getName());
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityTypeEditor.ID);
 		} catch (PartInitException e) {
-			throw new RuntimeException(e);
+			EntityPlugIn.displayLog(e.getMessage(), e);
 		}
 		return true;
 	}

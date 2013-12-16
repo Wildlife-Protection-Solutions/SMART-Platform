@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.entity.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -34,8 +39,8 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 @Table(name="smart.entity_attribute_value")
 public class EntityAttributeValue {
 	
-	private Entity entity;
-	private EntityAttribute attribute;
+	private EntityAttributeValuePk id = new EntityAttributeValuePk();
+	
 	
 	private String stringValue;
 	private Double doubleValue;
@@ -46,25 +51,34 @@ public class EntityAttributeValue {
 		
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+	@EmbeddedId
+	public EntityAttributeValuePk getId(){
+		return this.id;
+	}
+	
+	public void setId(EntityAttributeValuePk id){
+		this.id = id;
+	}
+	
+	@Transient
 	public Entity getEntity() {
-		return entity;
+		return id.getEntity();
 	}
 
 	public void setEntity(Entity entity) {
-		this.entity = entity;
+		id.setEntity(entity);
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="entity_attribute_uuid", referencedColumnName="uuid")
+	
+	@Transient
 	public EntityAttribute getEntityAttribute() {
-		return attribute;
+		return id.getEntityAttribute();
 	}
 
 	public void setEntityAttribute(EntityAttribute attribute) {
-		this.attribute = attribute;
+		id.setEntityAttribute(attribute);
 	}
+
 	
 	/**
 	 * value for string attributes
@@ -96,7 +110,8 @@ public class EntityAttributeValue {
 	 * value for list attributes
 	 * @return
 	 */
-	@Column(name="list_element_uuid")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="list_element_uuid", referencedColumnName="uuid")
 	public AttributeListItem getListItem(){
 		return this.listItem;
 	}
@@ -109,12 +124,47 @@ public class EntityAttributeValue {
 	 * value for tree attributes
 	 * @return
 	 */
-	@Column(name="tree_node_uuid")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="tree_node_uuid", referencedColumnName="uuid")
 	public AttributeTreeNode getTreeNode(){
 		return this.treeNode;
 	}
 	
-	public void setListItem(AttributeTreeNode treeNode){
+	public void setTreeNode(AttributeTreeNode treeNode){
 		this.treeNode = treeNode;
+	}
+	
+	@Embeddable
+	private static class EntityAttributeValuePk implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
+		private Entity entity;
+		private EntityAttribute attribute;
+		
+		public EntityAttributeValuePk(){
+		}
+		
+		@ManyToOne(fetch = FetchType.LAZY)
+		@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+		public Entity getEntity() {
+			return entity;
+		}
+
+		public void setEntity(Entity entity) {
+			this.entity = entity;
+		}
+
+		@ManyToOne(fetch = FetchType.LAZY)
+		@JoinColumn(name="entity_attribute_uuid", referencedColumnName="uuid")
+		public EntityAttribute getEntityAttribute() {
+			return attribute;
+		}
+
+		public void setEntityAttribute(EntityAttribute attribute) {
+			this.attribute = attribute;
+		}
 	}
 }

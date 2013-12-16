@@ -9,7 +9,7 @@ public class EntityFilter {
 	
 	public Query buildQuery(Session session){
 	
-		Query q = session.createQuery("SELECT uuid, id, name FROM Entity WHERE conservationArea = :ca");
+		Query q = session.createQuery("SELECT e.uuid, e.id, e.name FROM EntityType e WHERE e.conservationArea = :ca");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		
 		return q;

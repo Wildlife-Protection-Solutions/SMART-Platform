@@ -3,8 +3,9 @@ package org.wcs.smart.entity.ui;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.core.commands.IHandlerListener;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.entity.ui.newwizard.NewEntityTypeWizard;
 import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
 
@@ -12,6 +13,10 @@ public class NewEntityHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
+		WizardDialog newEntityDialog = new WizardDialog(HandlerUtil.getActiveShell(event), new NewEntityTypeWizard());
+		newEntityDialog.open();
+		
 		FieldDataPerspective.openPerspective(EntityTypeListView.ID);
 		return null;
 	}

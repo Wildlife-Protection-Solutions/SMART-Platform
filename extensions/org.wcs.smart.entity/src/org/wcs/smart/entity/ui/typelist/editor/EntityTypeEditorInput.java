@@ -17,6 +17,15 @@ public class EntityTypeEditorInput implements IEditorInput {
 		this.id = id;
 		this.name = name;
 	}
+	
+	/**
+	 * 
+	 * @return the uuid
+	 * of the entity type represented
+	 */
+	public byte[] getUuid(){
+		return this.uuid;
+	}
 	@Override
 	public Object getAdapter(Class adapter) {
 		return null;

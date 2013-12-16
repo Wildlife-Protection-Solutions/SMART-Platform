@@ -8,6 +8,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -39,11 +40,12 @@ public class TypeComposite extends AbstractEntityComposite{
 	public Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
-
+		
+		
 		Label l = new Label(main, SWT.NONE);
 		l.setText("Type:");
 		
-		typeviewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+		typeviewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		typeviewer.setContentProvider(ArrayContentProvider.getInstance());
 		typeviewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -52,13 +54,13 @@ public class TypeComposite extends AbstractEntityComposite{
 		});
 		typeviewer.setInput(EntityType.Type.values());
 		typeviewer.setSelection(new StructuredSelection(EntityType.Type.TRANSIENT));
-
 		typeviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fireChange(new Event());
 			}
 		});
+		typeviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		return main;
 	}
 

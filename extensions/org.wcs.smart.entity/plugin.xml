@@ -139,6 +139,63 @@
                style="push">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.entity.typelist">
+         <command
+               commandId="org.wcs.smart.entity.delete"
+               style="push"
+               tooltip="Deletes the selected entity types">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.entity.new"
+               style="push"
+               tooltip="Creates a new entity type">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
+            locationURI="popup:org.wcs.smart.entity.typelist">
+         <command
+               commandId="org.wcs.smart.entity.delete"
+               style="push"
+               tooltip="Deletes the selected Entity Types">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -148,7 +205,11 @@
       </command>
       <command
             id="org.wcs.smart.entity.perspective"
-            name="View Entities">
+            name="View Entity Types">
+      </command>
+      <command
+            id="org.wcs.smart.entity.delete"
+            name="Delete Entity Types">
       </command>
    </extension>
    <extension
@@ -180,7 +241,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.entity.ui.ViewIncidentHandler"
+            class="org.wcs.smart.entity.ui.ViewEntityHandler"
             commandId="org.wcs.smart.entity.perspective">
          <activeWhen>
             <test
@@ -189,6 +250,56 @@
             </test>
          </activeWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.entity.ui.DeleteEntityTypeHandler"
+            commandId="org.wcs.smart.entity.delete">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            ca_property=".entityType.conservationArea"
+            class="org.wcs.smart.entity.model.Entity">
+      </class>
+      <class
+            ca_property=".entityType.conservationArea"
+            class="org.wcs.smart.entity.model.EntityAttribute">
+      </class>
+      <class
+            ca_property=".entity.entityType.conservationArea"
+            class="org.wcs.smart.entity.model.EntityAttributeValue">
+      </class>
+      <class
+            class="org.wcs.smart.entity.model.EntityType">
+      </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.entity.event.DeleteEntityTypeAdvisor"
+            class="org.wcs.smart.entity.model.EntityType">
+      </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.entity.delete"
+            icon="images/icons/etool16/deleteentitytype.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entity.new"
+            icon="images/icons/etool16/newentitytype.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entity.perspective"
+            icon="images/icons/obj16/entitytype.png">
+      </image>
    </extension>
 
 </plugin>

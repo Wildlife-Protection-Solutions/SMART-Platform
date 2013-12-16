@@ -40,8 +40,8 @@
 		<use_bezier_curve>false</use_bezier_curve>
 		<suspend_validator>false</suspend_validator>
 		<export_setting>
-			<category_name_to_export></category_name_to_export>
-			<ddl_output></ddl_output>
+			<category_name_to_export>All</category_name_to_export>
+			<ddl_output>D:\SMART\Source\trunk\source\extensions\org.wcs.smart.entity\entity.database.sql</ddl_output>
 			<excel_output></excel_output>
 			<excel_template></excel_template>
 			<image_output></image_output>
@@ -110,7 +110,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2013-12-13 14:20:33</creation_date>
-			<updated_date>2013-12-13 15:04:11</updated_date>
+			<updated_date>2013-12-16 08:34:17</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -133,7 +133,6 @@
 			</model_property>
 		</model_properties>
 		<table_properties>
-			<schema></schema>
 		</table_properties>
 		<environment_setting>
 			<environment>
@@ -447,7 +446,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>16</word_id>
+					<word_id>14</word_id>
 					<id>0</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -512,7 +511,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>3</word_id>
+					<word_id>2</word_id>
 					<id>2</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -544,7 +543,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>9</word_id>
+					<word_id>8</word_id>
 					<id>3</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -645,7 +644,6 @@
 			<complex_unique_key_list>
 			</complex_unique_key_list>
 			<table_properties>
-				<schema></schema>
 			</table_properties>
 		</table>
 		<table>
@@ -671,7 +669,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>14</word_id>
+					<word_id>17</word_id>
 					<id>6</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -708,7 +706,6 @@
 			<complex_unique_key_list>
 			</complex_unique_key_list>
 			<table_properties>
-				<schema></schema>
 			</table_properties>
 		</table>
 		<table>
@@ -734,7 +731,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>15</word_id>
+					<word_id>13</word_id>
 					<id>7</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -771,7 +768,6 @@
 			<complex_unique_key_list>
 			</complex_unique_key_list>
 			<table_properties>
-				<schema></schema>
 			</table_properties>
 		</table>
 		<table>
@@ -831,7 +827,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>17</word_id>
+					<word_id>15</word_id>
 					<id>8</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -928,7 +924,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>2</word_id>
+					<word_id>3</word_id>
 					<id>11</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1024,7 +1020,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>8</word_id>
+					<word_id>9</word_id>
 					<id>14</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1126,7 +1122,6 @@
 			<complex_unique_key_list>
 			</complex_unique_key_list>
 			<table_properties>
-				<schema></schema>
 			</table_properties>
 		</table>
 		<table>
@@ -1145,7 +1140,7 @@
 			<connections>
 				<relation>
 					<id>3</id>
-					<source>3</source>
+					<source>2</source>
 					<target>4</target>
 					<child_cardinality>1..n</child_cardinality>
 					<parent_cardinality>1</parent_cardinality>
@@ -1162,7 +1157,7 @@
 				</relation>
 				<relation>
 					<id>4</id>
-					<source>2</source>
+					<source>3</source>
 					<target>4</target>
 					<child_cardinality>1..n</child_cardinality>
 					<parent_cardinality>1</parent_cardinality>
@@ -1186,7 +1181,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>13</word_id>
+					<word_id>16</word_id>
 					<id>17</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1220,7 +1215,7 @@
 				<normal_column>
 					<id>18</id>
 					<referenced_column>8</referenced_column>
-					<relation>3</relation>
+					<relation>4</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>ENTITY_TYPE_UUID</logical_name>
@@ -1253,7 +1248,7 @@
 				<normal_column>
 					<id>19</id>
 					<referenced_column>7</referenced_column>
-					<relation>4</relation>
+					<relation>3</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>DM_ATTRIBUTE_UUID</logical_name>
@@ -1321,7 +1316,6 @@
 			<complex_unique_key_list>
 			</complex_unique_key_list>
 			<table_properties>
-				<schema></schema>
 			</table_properties>
 		</table>
 		<table>
@@ -1340,7 +1334,7 @@
 			<connections>
 				<relation>
 					<id>5</id>
-					<source>4</source>
+					<source>0</source>
 					<target>5</target>
 					<child_cardinality>1..n</child_cardinality>
 					<parent_cardinality>1</parent_cardinality>
@@ -1357,7 +1351,7 @@
 				</relation>
 				<relation>
 					<id>6</id>
-					<source>0</source>
+					<source>4</source>
 					<target>5</target>
 					<child_cardinality>1..n</child_cardinality>
 					<parent_cardinality>1</parent_cardinality>
@@ -1383,7 +1377,7 @@
 				<normal_column>
 					<id>21</id>
 					<referenced_column>17</referenced_column>
-					<relation>5</relation>
+					<relation>6</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>ENTITY_ATTRIBUTE_UUID</logical_name>
@@ -1416,7 +1410,7 @@
 				<normal_column>
 					<id>22</id>
 					<referenced_column>0</referenced_column>
-					<relation>6</relation>
+					<relation>5</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>ENTITY_UUID</logical_name>
@@ -1580,7 +1574,6 @@
 			<complex_unique_key_list>
 			</complex_unique_key_list>
 			<table_properties>
-				<schema></schema>
 			</table_properties>
 		</table>
 	</contents>

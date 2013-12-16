@@ -32,6 +32,8 @@ import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.model.EntityFilter;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
@@ -125,17 +127,20 @@ public class EntityTypeListView extends ViewPart {
 		}
 	};
 	
-//	/**
-//	 * listener for patrol change events.
-//	 */
-//	private PatrolEventManager.IPatrolEventListener patrolListener = new IPatrolEventListener(){
-//		@Override
-//		public void eventFired(int type, Object source) {
-//			updateContent(1000);
-//
-//		}
-//	};
-
+	/**
+	 * listener for patrol change events.
+	 */
+	private IEntityListener entityListener = new IEntityListener() {
+		
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			if (eventType == EntityEventManager.ENTITY_TYPE_ADDED || 
+				eventType == EntityEventManager.ENTITY_TYPE_MODIFIED || 
+				eventType == EntityEventManager.ENTITY_TYPE_DELETED){
+				updateContent(1000);
+			}
+		}
+	};
 		
 	/**
 	 * Creates a new vies
@@ -145,10 +150,8 @@ public class EntityTypeListView extends ViewPart {
 	}
 
 	public void dispose() {		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
-//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
-//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
-//		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolListener);
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);		
+		EntityEventManager.getInstance().removeListener(entityListener);
 		super.dispose();
 	}
 
@@ -199,11 +202,7 @@ public class EntityTypeListView extends ViewPart {
 		entityListViewer.setInput(loadingInput);
 		entityListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		updateContent();
-		
-//		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
-//		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolListener);
-//		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolListener);
-		
+
 		entityListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
@@ -225,6 +224,8 @@ public class EntityTypeListView extends ViewPart {
 				
 			}
 		});
+		
+		EntityEventManager.getInstance().addListener(entityListener);
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
