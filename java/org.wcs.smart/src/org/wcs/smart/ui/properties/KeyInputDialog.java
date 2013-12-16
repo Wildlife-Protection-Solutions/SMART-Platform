@@ -32,7 +32,19 @@ public class KeyInputDialog extends InputDialog{
 			
 
 	}
+	/**
+	 * Opens the dialog without displaying
+	 * a warning about modifying keys.
+	 * @return
+	 */
+	public int openNoWarning(){
+		return super.open();
+	}
 	
+	/**
+	 * Opens the dialog, but first display a warning
+	 * that modifying keys may invalidate queries,reports.
+	 */
 	@Override
 	public int open(){
 		MessageDialog.openInformation(getShell(), Messages.KeyInputDialog_DialogTitle, Messages.KeyInputDialog_EditKeyWarning);
