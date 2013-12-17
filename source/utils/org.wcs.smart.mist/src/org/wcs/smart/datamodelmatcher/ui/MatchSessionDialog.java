@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 package org.wcs.smart.datamodelmatcher.ui;
 
@@ -19,6 +40,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -187,15 +210,22 @@ public class MatchSessionDialog extends Dialog {
 	   // end Viewer---------------------------------------------------------------------------------
 	      
 
-	      totalMatched = new Label(left, SWT.READ_ONLY);
+	      Composite bottomLeft = new Composite(left, SWT.None);
+	      GridLayout btmleftLayout = new GridLayout(3, false);
+	      bottomLeft.setLayout(btmleftLayout);
+	    
+	      GridData btmleftData = new GridData(SWT.FILL,SWT.BOTTOM, true, false,3,0);
+	      bottomLeft.setLayoutData(btmleftData);
+	      
+	      totalMatched = new Label(bottomLeft, SWT.READ_ONLY);
 	      totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );
 	      GridData totalGridData = new GridData(SWT.FILL,SWT.FILL, false, false);
 	      totalGridData.widthHint = 115;
 	      totalMatched.setLayoutData(totalGridData);
 	      
-	      done = new Button(left, SWT.NONE);
+	      done = new Button(bottomLeft, SWT.NONE);
 	      done.setText("Matching Complete - Exit");
-	      GridData doneGridData = new GridData(SWT.CENTER,SWT.FILL, false, false);
+	      GridData doneGridData = new GridData(SWT.CENTER,SWT.FILL, true, false);
 	      done.setLayoutData(doneGridData);
 	      done.setVisible(false);
 	      done.addSelectionListener(new SelectionAdapter() {	
@@ -207,7 +237,7 @@ public class MatchSessionDialog extends Dialog {
 		    });
 	      
 	      
-	      save = new Button(left, SWT.NONE);
+	      save = new Button(bottomLeft, SWT.NONE);
 	      save.setText("   Save Session   ");
 	      GridData saveGridData = new GridData(SWT.RIGHT,SWT.FILL, false, false);
 	      saveGridData.heightHint = 20;
@@ -238,12 +268,17 @@ public class MatchSessionDialog extends Dialog {
 	      Composite topRight = new Composite(right, SWT.BORDER);
 		  GridLayout trlayout = new GridLayout(2, false);
 	      topRight.setLayout(trlayout);
+	      
+	      Device device = Display.getCurrent();
+	      Color topColor = new Color (device, 255, 235, 235);
+	      topRight.setBackground(topColor);
 	    
 	      GridData topRightGridData = new GridData(SWT.FILL,SWT.CENTER, true, false);
 	      topRight.setLayoutData(topRightGridData);
 	      
 	      //Top Right elements---------------------------------------------
 	      Label mistLabel = new Label(topRight, SWT.NONE);
+	      mistLabel.setBackground(topColor);
 	      mistLabel.setText("MIST Observation:" );
 	      FontData fontData = mistLabel.getFont().getFontData()[0];
 	      Font font = new Font(getParent().getDisplay(), new FontData(fontData.getName(), fontData
@@ -255,68 +290,86 @@ public class MatchSessionDialog extends Dialog {
  
 	      
 	      Label mistLabel1 = new Label(topRight, SWT.NONE);
+	      mistLabel1.setBackground(topColor);
 	      mistLabel1.setText("Observation Group:" );
 	      
 	      mistText1 = new Text(topRight, SWT.NONE);
+	      mistText1.setBackground(topColor);
 	      GridData m1 = new GridData(SWT.FILL,SWT.CENTER, true, false);
 	      m1.widthHint = 250;
 	      mistText1.setLayoutData(m1);
 	      
 	      mistText1.setEnabled(false);
 	      
-	      Label mistLabel2 = new Label(topRight, SWT.NONE);
+	      Label mistLabel2 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistLabel2.setBackground(topColor);
 	      mistLabel2.setText("Observation:" );
 	      
-	      mistText2 = new Text(topRight, SWT.NONE);
+	      mistText2 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText2.setBackground(topColor);
 	      mistText2.setLayoutData(m1);
 	      mistText2.setEnabled(false);
 	      
-	      Label mistLabel3 = new Label(topRight, SWT.NONE);
+	      Label mistLabel3 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistLabel3.setBackground(topColor);
 	      mistLabel3.setText("Observation Code:" );
 	      
-	      mistText3 = new Text(topRight, SWT.NONE);
+	      mistText3 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText3.setBackground(topColor);
 	      mistText3.setLayoutData(m1);
 	      mistText3.setEnabled(false);
 	      
-	      Label mistLabel4 = new Label(topRight, SWT.NONE);
+	      Label mistLabel4 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistLabel4.setBackground(topColor);
 	      mistLabel4.setText("Item:" );
 	      
-	      mistText4 = new Text(topRight, SWT.NONE);
+	      mistText4 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText4.setBackground(topColor);
 	      mistText4.setLayoutData(m1);
 	      mistText4.setEnabled(false);
 	      
-	      Label mistLabel5 = new Label(topRight, SWT.NONE);
+	      Label mistLabel5 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistLabel5.setBackground(topColor);
 	      mistLabel5.setText("Subcode 1:" );
 	      
-	      mistText5 = new Text(topRight, SWT.NONE);
+	      mistText5 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText5.setBackground(topColor);
 	      mistText5.setLayoutData(m1);
 	      mistText5.setEnabled(false);
 	      
-	      Label mistLabel6 = new Label(topRight, SWT.NONE);
+	      Label mistLabel6 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistLabel6.setBackground(topColor);
 	      mistLabel6.setText("Subcode 2:" );
 	      
-	      mistText6 = new Text(topRight, SWT.NONE);
+	      mistText6 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText6.setBackground(topColor);
 	      mistText6.setLayoutData(m1);
 	      mistText6.setEnabled(false);
 	      
-	      Label mistLabel7 = new Label(topRight, SWT.NONE);
+	      Label mistLabel7 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistLabel7.setBackground(topColor);
 	      mistLabel7.setText("Subcode 3:" );
 	      
-	      mistText7 = new Text(topRight, SWT.NONE);
+	      mistText7 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText7.setBackground(topColor);
 	      mistText7.setLayoutData(m1);
 	      mistText7.setEnabled(false);
 	      
-	      Label mistLabel8 = new Label(topRight, SWT.NONE);
+	      Label mistLabel8 = new Label(topRight, SWT.NONE );
+	      mistLabel8.setBackground(topColor);
 	      mistLabel8.setText("Subcode 4:" );
 	      
-	      mistText8 = new Text(topRight, SWT.NONE);
+	      mistText8 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText8.setBackground(topColor);
 	      mistText8.setLayoutData(m1);
 	      mistText8.setEnabled(false);
 	      
 	      Label mistLabel9 = new Label(topRight, SWT.NONE);
+	      mistLabel9.setBackground(topColor);
 	      mistLabel9.setText("Subcode 5:" );
 	      
-	      mistText9 = new Text(topRight, SWT.NONE);
+	      mistText9 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText9.setBackground(topColor);
 	      mistText9.setLayoutData(m1);
 	      mistText9.setEnabled(false);
 	      //end of Top Right elements--------------------------------------
@@ -340,7 +393,7 @@ public class MatchSessionDialog extends Dialog {
 	      Composite bottomRightFirstLine = new Composite(bottomRight, SWT.NONE);
 		  GridLayout brfllayout = new GridLayout(3, false);
 		  bottomRightFirstLine.setLayout(brfllayout);
-		  GridData bottomRightFL = new GridData(SWT.FILL,SWT.TOP, true, true,2,1);
+		  GridData bottomRightFL = new GridData(SWT.FILL,SWT.TOP, true, false,2,1);
 		  bottomRightFL.minimumHeight = 28;
 		  bottomRightFirstLine.setLayoutData(bottomRightFL);
 
@@ -353,6 +406,9 @@ public class MatchSessionDialog extends Dialog {
 	      smartLabel.setFont(sfont);
 	      GridData smartLabelData = new GridData(SWT.FILL,SWT.TOP, true, true,1,1);
 	      smartLabel.setLayoutData(smartLabelData);
+
+	      
+
 	      
 	      //Read the XML file
 	      smartDM = ms.getXmlDataModel();
@@ -360,7 +416,15 @@ public class MatchSessionDialog extends Dialog {
 	      smartAttributeHash = new HashMap<String, String>();
 	      smartAttributeDetailsHash = new HashMap<String, AttributeType>();
 	      
-	      buildAttributeHash("");
+	      
+	      //Get the language codes
+	      List<LanguageType> langs = smartDM.getLanguages().getLanguages();
+	      codes = new String[langs.size()];
+	      for (int i=0; i < langs.size(); i++){
+	    	  codes[i] = langs.get(i).getCode();
+	      }
+	      
+	      buildAttributeHash(codes[0]);
 	    	  
 	      
 	      //Make the language selector
@@ -370,14 +434,10 @@ public class MatchSessionDialog extends Dialog {
 	      languageLabel.setLayoutData(langLabelData);
 	      
 	      
-	      List<LanguageType> langs = smartDM.getLanguages().getLanguages();
-	      codes = new String[langs.size()];
-	      for (int i=0; i < langs.size(); i++){
-	    	  codes[i] = langs.get(i).getCode();
-	      }
 	      langSelector =  new Combo (bottomRightFirstLine, SWT.READ_ONLY);
 	      langSelector.setItems(codes);
 	      langSelector.setLayoutData(new GridData(SWT.FILL,SWT.RIGHT, false, false));
+	      langSelector.select(0);
 
 	      langSelector.addModifyListener(new ModifyListener() {
 			
@@ -403,9 +463,9 @@ public class MatchSessionDialog extends Dialog {
 	      tree = new Tree (bottomRight, SWT.BORDER | SWT.SINGLE);
 	      TreeItem iItem = new TreeItem (tree, 0);
 		  iItem.setText("Data Model");
-	      addCategoriesToTree(iItem, rootCategory, "en");
+	      addCategoriesToTree(iItem, rootCategory, codes[0]);
 
-	      GridData treeData = new GridData(SWT.FILL,SWT.TOP, true, true);
+	      GridData treeData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      treeData.heightHint = 130;
 	      treeData.minimumHeight = 100;
 	      tree.setLayoutData(treeData);
@@ -492,6 +552,7 @@ public class MatchSessionDialog extends Dialog {
 	    
 	      GridData buttonsData = new GridData(SWT.FILL,SWT.BOTTOM, true, false,2,0);
 	      buttons.setLayoutData(buttonsData);
+	      
 
 	      clear = new Button(buttons, SWT.NONE);
 	      clear.setText("Clear Match");
@@ -505,13 +566,15 @@ public class MatchSessionDialog extends Dialog {
 		    });
 	      
 	      clear.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+	      clear.setEnabled(false);
 
+	      
 	      autoMatch = new Button (buttons, SWT.CHECK);
 	      autoMatch.setText("Auto-update matching observations");
 	      autoMatch.setSelection(true);
 	      
 	      autoMatch.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
-	      
+
 	      next = new Button(buttons, SWT.NONE);
 	      next.setText("Accept and Load Next Match");
 	      next.addSelectionListener(new SelectionAdapter() {	
@@ -525,7 +588,7 @@ public class MatchSessionDialog extends Dialog {
 		    	}
 		    });
 	      next.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-	      
+	      next.setEnabled(false);	      
 
 
 	      
@@ -550,6 +613,7 @@ public class MatchSessionDialog extends Dialog {
 
 
 	protected void clearCurrentMatch(SelectionEvent e) {
+		ms.setDirty(true);
 		ISelection selection = viewer.getSelection();
 		if (!selection.isEmpty()) {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
@@ -599,6 +663,8 @@ public class MatchSessionDialog extends Dialog {
 	      addCategoriesToTree(iItem, rootCategory, lang);
 		
 	      buildAttributeHash(lang);
+	      
+	      next.setEnabled(false);
 	  }
 
 
@@ -636,6 +702,8 @@ public class MatchSessionDialog extends Dialog {
   			mistText7.setEnabled(true);
   			mistText8.setEnabled(true);
   			mistText9.setEnabled(true);
+  			
+  			clear.setEnabled(true);
   			
   			tree.setEnabled(true);
 
@@ -694,12 +762,15 @@ public class MatchSessionDialog extends Dialog {
 
 
 	public void saveCurrentMatch(SelectionEvent e){
-		    
+		    ms.setDirty(true);
 		  	ISelection selection = viewer.getSelection();
   			if (!selection.isEmpty()) {
   				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   				MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
   				
+  				if(tree.getSelection().length <1 ){
+  					return;
+  				}
   				TreeItem selectedTreeItem = tree.getSelection()[0];
   				CategoryType cat = (CategoryType)selectedTreeItem.getData();
   				if(cat == null){
@@ -1060,6 +1131,18 @@ public class MatchSessionDialog extends Dialog {
 	  }
 	  
 		private void treeSelectionChanged() {
+			next.setEnabled(true);
+	    	
+			
+			String lang;
+			int langIndex = langSelector.getSelectionIndex();
+		    if (langIndex != -1 && langIndex < codes.length && codes != null) {
+  				lang = (String) codes[langIndex];
+		    }else{
+		    	lang = "";
+		    }
+		    
+		    
 			ArrayList<Attribute> attributeArray = new ArrayList<Attribute>();
 			if(tree.getSelectionCount() == 0)return;
 			TreeItem selectedTreeItem = tree.getSelection()[0];
