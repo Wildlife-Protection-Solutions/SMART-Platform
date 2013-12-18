@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.observation;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.wcs.smart.patrol.query.engine,
+Export-Package: org.wcs.smart.patrol.query,
+ org.wcs.smart.patrol.query.engine,
  org.wcs.smart.patrol.query.map.udig,
  org.wcs.smart.patrol.query.model,
  org.wcs.smart.patrol.query.model.observation,
