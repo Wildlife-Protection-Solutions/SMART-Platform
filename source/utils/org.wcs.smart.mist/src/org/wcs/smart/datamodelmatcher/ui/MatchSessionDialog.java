@@ -645,7 +645,7 @@ public class MatchSessionDialog extends Dialog {
 	    	  String name = a.getNames().get(0).getValue();
 	    	  for(int x=0; x < a.getNames().size(); x++){
 				  if(a.getNames().get(x).getLanguageCode().equals(languageCode)){
-					  name = a.getNames().get(x).getValue();
+					  name = a.getNames().get(x).getValue() + " (" + a.getType() + ")";
 					  break;
 				  }
 			  }

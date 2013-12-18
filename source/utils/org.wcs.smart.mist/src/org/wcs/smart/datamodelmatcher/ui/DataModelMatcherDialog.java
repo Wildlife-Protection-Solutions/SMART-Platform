@@ -48,6 +48,11 @@ public class DataModelMatcherDialog extends Composite {
 	Text startMistTxtFileName;
 	Text mergeMistTxtFileName;
 	
+	Text startPass;
+	Text mergePass;
+	Text startUser;
+	Text mergeUser;
+	
 	Text startXMLFileName;
 	Text mergeSessionTxtFileName;
 	MatchSession ms;
@@ -198,7 +203,30 @@ public class DataModelMatcherDialog extends Composite {
 	    	}
 	    });
 
-		//start new line 2
+		//Line 2 user/pass
+		Composite userPassLine = new Composite(start, SWT.NONE);
+		userPassLine.setLayout(new GridLayout(4, true));
+		userPassLine.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3,0));
+
+		Label startUserLabel = new Label(userPassLine, SWT.NONE);
+		startUserLabel.setText("DB Username:");
+		startUserLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		startUser = new Text(userPassLine, SWT.NONE);
+		startUser.setText("SYSDBA");
+		GridData textGridData = new GridData(SWT.LEFT, SWT.FILL, true, false);
+		textGridData.widthHint = 75;
+		startUser.setLayoutData(textGridData);
+		
+		Label startPassLabel = new Label(userPassLine, SWT.NONE);
+		startPassLabel.setText("DB Password:");
+		startPassLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		startPass= new Text(userPassLine, SWT.NONE |SWT.PASSWORD);
+		startPass.setText("masterkey");
+		startPass.setLayoutData(textGridData);
+		
+		//start new line 3
 	    Label label_s2 = new Label(start, SWT.NONE);
 	    label_s2.setText("SMART Data Model:");
 	    
@@ -251,34 +279,13 @@ public class DataModelMatcherDialog extends Composite {
 	    		
 	    		
 	    		ms = new MatchSession(getShell());
+
+	    		ms.setUserNamePass(startUser.getText(), startPass.getText());
 	    		
 	    		ms.setMistLocation(startMistTxtFileName.getText());
 	    		ms.setSmartXmlLocation(startXMLFileName.getText());
 	    		
 	    		try {
-
-	    			
-//					try {
-//						ms.loadRows();//loads the mist data
-//					} catch (Exception e2) {
-//						e2.printStackTrace();
-//					} 
-
-					
-//	    			BusyIndicator.showWhile(Display.getDefault(), new Runnable(){
-//
-//	    			    public void run(){
-//	    					try {
-//								ms.loadRows();//loads the mist data
-//							} catch (Exception e) {
-//								e.printStackTrace();
-//							} 
-//	    			    }
-//	    			    });
-
-					
-					
-
 	    			final Shell dlgShell = new Shell(getShell(), SWT.APPLICATION_MODAL);
 	    			
 					wait = new ProcessingDialog(dlgShell, dlgShell.getBounds());
@@ -289,7 +296,8 @@ public class DataModelMatcherDialog extends Composite {
 	    				try {
 							ms.loadRows(); //loads the mist data	   
 						} catch (Exception e) {
-							e.printStackTrace();
+							ms.setError(e.toString());
+							//e.printStackTrace();
 						} 
 	    				
 	    			}});
@@ -303,6 +311,13 @@ public class DataModelMatcherDialog extends Composite {
     			          }
 	    			}
 	    			dlgShell.dispose();
+	    			
+	    			if(!ms.getError().equals("")){
+						MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+				    	messageBox.setMessage("Error while processing data, most likely an incorrect user/pass:  " + ms.getError());
+				    	messageBox.open();
+				    	return;
+	    			}
     				
 				} catch (Exception e2) {
 			    	MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
@@ -373,7 +388,29 @@ public class DataModelMatcherDialog extends Composite {
 	    	}
 	    });
 	    
-	    //Line 2 of merge, database file
+	  //Line 2 user/pass
+	  		Composite mergeUserPassLine = new Composite(merge, SWT.NONE);
+	  		mergeUserPassLine.setLayout(new GridLayout(4, true));
+	  		mergeUserPassLine.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3,0));
+
+	  		Label mergeUserLabel = new Label(mergeUserPassLine, SWT.NONE);
+	  		mergeUserLabel.setText("DB Username:");
+	  		mergeUserLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+	  		mergeUser = new Text(mergeUserPassLine, SWT.NONE);
+	  		mergeUser.setText("SYSDBA");
+	  		mergeUser.setLayoutData(textGridData);
+	  		
+	  		Label mergePassLabel = new Label(mergeUserPassLine, SWT.NONE);
+	  		mergePassLabel.setText("DB Password:");
+	  		mergePassLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+	  		
+	  		mergePass= new Text(mergeUserPassLine, SWT.NONE |SWT.PASSWORD);
+	  		mergePass.setText("masterkey");
+	  		mergePass.setLayoutData(textGridData);
+	  		
+	  		
+	    //Line 3 of merge, database file
 	    Label label_m2 = new Label(merge, SWT.NONE);
 	    label_m2.setText("MIST Database File:");
 	    
@@ -426,6 +463,9 @@ public class DataModelMatcherDialog extends Composite {
 	    		
 	    		
 	    		ms = new MatchSession( getShell() );
+	    		
+	    		ms.setUserNamePass(mergeUser.getText(), mergePass.getText());
+	    		
 	    		ms.setMistLocation(mergeMistTxtFileName.getText());
 	    		ms.setSaveLocation(mergeSessionTxtFileName.getText());
 	    		
@@ -440,7 +480,7 @@ public class DataModelMatcherDialog extends Composite {
 	    			return;
 	    		}
 	    		
-	    		
+	    		int existingRows = ms.getRowCount();
 	    		
 	    		try {
 
@@ -454,6 +494,7 @@ public class DataModelMatcherDialog extends Composite {
 	    				try {
 							ms.mergeRows(); //loads the mist data	   
 						} catch (Exception e) {
+							ms.setError(e.toString());
 							e.printStackTrace();
 						} 
 	    				
@@ -470,6 +511,13 @@ public class DataModelMatcherDialog extends Composite {
 	    			}
 
 	    			dlgShell.dispose();
+	    			
+	    			if(!ms.getError().equals("")){
+						MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+				    	messageBox.setMessage("Error while processing data, most likely an incorrect user/pass:   " + ms.getError());
+				    	messageBox.open();
+				    	return;
+	    			}
     				
 				} catch (Exception e2) {
 			    	MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);

@@ -22,13 +22,13 @@ public class MistDatabase {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Connection getConnection(String databaseFileName) throws Exception{
+	public static Connection getConnection(String databaseFileName, String username, String password) throws Exception{
 		
 		Class.forName("org.firebirdsql.jdbc.FBDriver");
 
 		Connection c = DriverManager.getConnection(
 				"jdbc:firebirdsql:embedded:" + databaseFileName,
-				"sysdba", "masterkey");
+				username, password);
 		return c;
 		
 	}

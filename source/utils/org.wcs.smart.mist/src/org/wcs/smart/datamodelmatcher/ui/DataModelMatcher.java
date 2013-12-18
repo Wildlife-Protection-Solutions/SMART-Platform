@@ -45,7 +45,7 @@ public class DataModelMatcher {
 		    GridData gridData = new GridData(SWT.LEFT,SWT.TOP, false, false);
 		    shell.setLayoutData(gridData);
 			
-			shell.setText("Data Model Matcher");
+			shell.setText("MIST to SMART - Data Model Matcher");
 			new DataModelMatcherDialog(shell);
 
 			shell.pack();
