@@ -90,7 +90,7 @@ public abstract class NameKeyComposite extends Composite {
 	 * from the composite fields
 	 * @param dmObject object to update
 	 */
-	protected void updateFields(DmObject dmObject){
+	public void updateFields(DmObject dmObject){
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
 			if (type.getValue() != null){
@@ -114,7 +114,7 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param dmObject data model object
 	 * @param defaultLang language
 	 */
-	protected void initFields(DmObject dmObject, Language defaultLang){
+	public void initFields(DmObject dmObject, Language defaultLang){
 		currentSelection = null;
 		values = new HashMap<Language, String>();
 		if (dmObject.getNames() != null){
@@ -153,7 +153,7 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param canEdit if fields can be editing
 	 * @param createNew <code>true</code> if a new object is being created or <code>false</code> if exisitng object being modified
 	 */
-	protected void createNameKeyFields(Composite parent, final boolean canEdit, boolean createNew){
+	public void createNameKeyFields(Composite parent, final boolean canEdit, boolean createNew){
 		values = new HashMap<Language, String>();
 		final KeyListener generateKeyListener = new KeyListener() {
 			@Override
@@ -290,7 +290,7 @@ public abstract class NameKeyComposite extends Composite {
 	 * Validate the name and key fields.  
 	 * @return <code>true</code> if error on page; <code>false</code> otherwise
 	 */
-	protected boolean validate(){
+	public boolean validate(){
 		boolean error = false;
 		
 		if (currentSelection != null ){

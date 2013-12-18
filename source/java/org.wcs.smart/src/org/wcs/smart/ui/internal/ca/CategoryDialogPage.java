@@ -99,7 +99,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 			
 			
 			@Override
-			protected boolean validate(){
+			public boolean validate(){
 				boolean valid = super.validate();
 				if(okBtn != null)okBtn.setEnabled(!valid);
 				return valid;

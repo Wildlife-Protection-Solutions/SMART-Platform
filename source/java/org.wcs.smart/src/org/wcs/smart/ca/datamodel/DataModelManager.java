@@ -57,7 +57,7 @@ public class DataModelManager {
 	 * Registered change listeners
 	 */
 	private List<IDataModelListener> changeListeners = new ArrayList<IDataModelListener>();
-	private List<IDataModelItemListener> deleteListeners = new ArrayList<IDataModelItemListener>();
+	private List<IDataModelItemListener> itemChangeListeners = new ArrayList<IDataModelItemListener>();
 
 	
 	/**
@@ -95,7 +95,7 @@ public class DataModelManager {
 	 * @throws Exception
 	 */
 	public void fireDeleteListener(Session currentSession, Object deleteItem) throws Exception{
-		for (IDataModelItemListener listener : deleteListeners){
+		for (IDataModelItemListener listener : itemChangeListeners){
 			listener.deleteItem(currentSession, deleteItem);
 		}
 	}
@@ -108,7 +108,7 @@ public class DataModelManager {
 	 * @param deleteItem
 	 */
 	public void fireAddListener(Session currentSession, Object addItem){
-		for (IDataModelItemListener listener : deleteListeners){
+		for (IDataModelItemListener listener : itemChangeListeners){
 			listener.addItem(currentSession, addItem);
 		}
 	}
@@ -119,7 +119,7 @@ public class DataModelManager {
 	 * @param enabledItem
 	 */
 	public void fireEnabledStateListener(Session currentSession, Object enabledItem){
-		for (IDataModelItemListener listener : deleteListeners){
+		for (IDataModelItemListener listener : itemChangeListeners){
 			listener.itemEnabledStateChanged(currentSession, enabledItem);
 		}
 	}
@@ -132,7 +132,7 @@ public class DataModelManager {
 	 * @param listener
 	 */
 	public void addItemChangeListener(IDataModelItemListener listener){
-		deleteListeners.add(listener);
+		itemChangeListeners.add(listener);
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public class DataModelManager {
 	 * @param listener
 	 */
 	public void removeItemChangeListener(IDataModelItemListener listener){
-		deleteListeners.remove(listener);
+		itemChangeListeners.remove(listener);
 	}
 	
 	

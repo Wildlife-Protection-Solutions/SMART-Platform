@@ -66,6 +66,7 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -600,12 +601,12 @@ public class AttributeTree {
 		viewer.refresh();
 	}
 	
-	
+	public interface AttributeTreeChangeListener{
+		public void treeModified();
+	}
+
 }
 
-interface AttributeTreeChangeListener{
-	public void treeModified();
-}
 
 /**
  * Drag listener for attribute tree

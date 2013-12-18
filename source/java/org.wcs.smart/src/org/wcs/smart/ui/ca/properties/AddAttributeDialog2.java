@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.ca.properties;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
 
@@ -67,7 +68,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	 * @param defaultLang the current language being modified
 	 * @param currentSession active hibernate session
 	 */
-	protected AddAttributeDialog2(Shell parentShell,  
+	public AddAttributeDialog2(Shell parentShell,  
 			Attribute toUpdate,  Collection<Attribute> siblings, 
 			Language defaultLang, Session currentSession) {
 		super(parentShell);
@@ -76,7 +77,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 		this.defaultLang = defaultLang;
 		this.currentSession = currentSession;
 	}
-	
+
 	
 	@Override
 	protected void configureShell(Shell shell) {
@@ -88,7 +89,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	protected boolean isResizable() {
 		return true;
 	}
-	
+
 	/**
 	 * Create contents of the dialog.
 	 */
@@ -110,7 +111,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 
 
 		attributePanel = new AttributeInfoPanel(composite, SWT.NONE, 
-				true, toUpdate.getKeyId() == null, this.currentSession){
+				true, toUpdate.getKeyId() == null, currentSession){
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return siblings;

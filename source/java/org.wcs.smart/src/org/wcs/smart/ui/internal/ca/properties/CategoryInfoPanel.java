@@ -102,7 +102,7 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	}
 	
 	@Override
-	protected boolean validate(){
+	public boolean validate(){
 		return super.validate();
 	}
 }
