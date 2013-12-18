@@ -88,6 +88,7 @@ public class EntityType extends NamedKeyItem{
 	private Type type;
 	
 	private List<Entity> entities;
+	private List<EntityAttribute> attributes;
 	
 	public EntityType(){
 	}
@@ -198,5 +199,19 @@ public class EntityType extends NamedKeyItem{
 
 	public void setType(Type type) {
 		this.type = type;
+	}
+	
+	/**
+	 * 
+	 * @return list of attributes associated with entity
+	 * type
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="entityType", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<EntityAttribute> getAttributes(){
+		return this.attributes;
+	}
+	
+	public void setAttributes(List<EntityAttribute> attributes){
+		this.attributes = attributes;
 	}
 }

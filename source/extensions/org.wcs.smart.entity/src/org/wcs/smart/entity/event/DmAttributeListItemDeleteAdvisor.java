@@ -19,45 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.wcs.smart.entity.event;
 
 import java.text.MessageFormat;
+import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.EntityType;
 
 /**
- * Advisor for deleting entity types.  Validates
- * that all entities associated with the entity can be
- * deleted.
+ * Delete advisor for deleting attribute list items
+ * from the attribute of an entity type.  If an entity
+ * references the list item, it cannot be deleted.
  * 
  * @author Emily
  *
  */
-public class DeleteEntityTypeAdvisor implements IDeleteAdvisor {
+public class DmAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 
-	public DeleteEntityTypeAdvisor() {
-	}
 
 	@Override
 	public String canDelete(Object object, Session session) {
-		if (!(object instanceof EntityType)){
+		if (!(object instanceof AttributeListItem)){
 			return "Invalid object type.";
 		}
-		EntityType toDelete = (EntityType)object;
-		
-		
-		//validate that all entities can be deleted
-		for (Entity e : toDelete.getEntities()){
-			try{
-				DeleteManager.canDelete(e, session);			
-			}catch (Exception ex){
-				return MessageFormat.format("The Entity Type {0} cannot be deleted, as the associated entity {1} cannot be deleted.", new Object[]{toDelete.getName(), e.getId()})
-						+ "\n\n" + ex.getMessage();
-			}	
+		AttributeListItem toDelete = (AttributeListItem)object;
+		Query q = session.createQuery("FROM Entity WHERE attributeListItem = :todelete");
+		q.setParameter("todelete", toDelete);
+		List<?> results = q.list();
+		if (results.size() > 0){
+			//attribute associated with an entity and cannot be deleted
+			return MessageFormat.format("The attribute list item is associated with the Entity {0}.  This list item cannot be removed until the entity is removed.", 
+					new Object[]{((Entity)results.get(0)).getId()});	
 		}
 		
 		return null;

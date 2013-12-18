@@ -34,16 +34,17 @@ import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
-import org.wcs.smart.entity.model.EntityFilter;
+import org.wcs.smart.entity.model.EntityTypeFilter;
+import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
-public class EntityTypeListView extends ViewPart {
+public class EntityTypeListView extends ViewPart implements IEntityTypeFilteringView{
 	
 	public static final String ID = "org.wcs.smart.entity.typelist"; //$NON-NLS-1$
 	private TableViewer entityListViewer;
-	private EntityFilter filter = new EntityFilter();
+	private EntityTypeFilter filter = new EntityTypeFilter();
 
 	private Object[] loadingInput = new Object[]{"Loading..."};
 	
@@ -159,7 +160,7 @@ public class EntityTypeListView extends ViewPart {
 	 * 
 	 * @return the current filter
 	 */
-	public EntityFilter getFilter() {
+	public EntityTypeFilter getFilter() {
 		return this.filter;
 	}
 

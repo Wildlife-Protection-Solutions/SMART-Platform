@@ -28,9 +28,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 
 /**
  * An entity object.  This represents a particular
@@ -56,6 +58,7 @@ public class Entity extends UuidItem {
 	private Status status;
 	private double x;
 	private double y;
+	private AttributeListItem attributeItem;
 	
 	public Entity(){
 		
@@ -123,5 +126,19 @@ public class Entity extends UuidItem {
 
 	public void setY(double y) {
 		this.y = y;
+	}
+	
+	/**
+	 * The attribute list item that represents this entity
+	 * @return
+	 */
+	@OneToOne(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
+	@JoinColumn(name="attribute_list_item_uuid", referencedColumnName="uuid")
+	public AttributeListItem getAttributeListItem(){
+		return this.attributeItem;
+	}
+	
+	public void setAttributeListItem(AttributeListItem item){
+		this.attributeItem = item;
 	}
 }
