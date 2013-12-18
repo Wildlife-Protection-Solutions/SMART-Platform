@@ -114,6 +114,11 @@
                   style="push"
                   tooltip="%systempref.command.tooltip">
             </command>
+            <command
+                  commandId="org.eclipse.equinox.p2.ui.sdk.install"
+                  label="%install.command.label"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.separator1"
                   visible="true">
@@ -325,11 +330,6 @@
                id="org.wcs.smart.menu.help"
                label="%help.menu.label"
                mnemonic="%help.menu.mnemonic">
-            <command
-                  commandId="org.eclipse.equinox.p2.ui.sdk.install"
-                  label="%install.command.label"
-                  style="push">
-            </command>
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
                   icon="images/icons/smart16.gif"
