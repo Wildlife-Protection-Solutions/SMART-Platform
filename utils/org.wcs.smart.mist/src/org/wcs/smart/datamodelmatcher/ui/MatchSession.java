@@ -52,12 +52,16 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class MatchSession {
 	
 	private boolean dirty = true; //remember if we just saved the file, if so don't ask again.
+	private String error = "";//record if any of the thread-based processing threw an exception
 
 	private Shell shell;
 	
 	private String saveLocation;
 	private String mistLocation;
 	private String smartXmlLocation;
+	
+	private String username = "";
+	private String password = "";
 	
 	private DataModel smartDataModel;
 	
@@ -80,7 +84,7 @@ public class MatchSession {
 		rows = new ArrayList<MatchRow>();
 
 	    File mistFile = new File(mistLocation);
-	    Connection c = MistDatabase.getConnection(mistFile.getAbsolutePath());
+	    Connection c = MistDatabase.getConnection(mistFile.getAbsolutePath(), username, password);
 		ResultSet rs = c
 				.createStatement()
 				.executeQuery(
@@ -275,7 +279,7 @@ public class MatchSession {
 
 	public void mergeRows() throws Exception{
 		File mistFile = new File(mistLocation);
-	    Connection c = MistDatabase.getConnection(mistFile.getAbsolutePath());
+	    Connection c = MistDatabase.getConnection(mistFile.getAbsolutePath(), username, password);
 		ResultSet rs = c
 				.createStatement()
 				.executeQuery(
@@ -304,6 +308,23 @@ public class MatchSession {
 
 	public boolean isDirty() {
 		return dirty;
+	}
+
+	public void setUserNamePass(String user, String pass) {
+		this.username = user;
+		this.password = pass;
+	}
+
+	public int getRowCount() {
+		return rows.size();
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+	
+	public String getError(){
+		return error;
 	}
 	
 	

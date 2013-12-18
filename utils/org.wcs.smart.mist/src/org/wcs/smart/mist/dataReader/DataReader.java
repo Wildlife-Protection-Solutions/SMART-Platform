@@ -33,7 +33,7 @@ public class DataReader {
 			lang = "en"; //$NON-NLS-1$
 		}
 
-		Connection c = MistDatabase.getConnection(dbFile.getAbsolutePath());
+		Connection c = MistDatabase.getConnection(dbFile.getAbsolutePath(), "SYSDBA", "masterkey");
 
 		
 		//AGENCIES AND RANKS
