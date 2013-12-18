@@ -186,6 +186,11 @@
                </or>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.entity.entitytypefilter"
+               style="push"
+               tooltip="Opens a dialog where you can filter the entity types.">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="true"
@@ -210,6 +215,10 @@
       <command
             id="org.wcs.smart.entity.delete"
             name="Delete Entity Types">
+      </command>
+      <command
+            id="org.wcs.smart.entity.entitytypefilter"
+            name="Open Entity Type Filter Dialog">
       </command>
    </extension>
    <extension
@@ -260,6 +269,16 @@
             </test>
          </activeWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.entity.ui.OpenFilterDialogHandler"
+            commandId="org.wcs.smart.entity.entitytypefilter">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">
@@ -285,6 +304,14 @@
             advisor="org.wcs.smart.entity.event.DeleteEntityTypeAdvisor"
             class="org.wcs.smart.entity.model.EntityType">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.entity.event.DmAttributeDeleteAdvisor1"
+            class="org.wcs.smart.ca.datamodel.Attribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.entity.event.DmAttributeListItemDeleteAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeListItem">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -300,6 +327,20 @@
             commandId="org.wcs.smart.entity.perspective"
             icon="images/icons/obj16/entitytype.png">
       </image>
+      <image
+            commandId="org.wcs.smart.entity.entitytypefilter"
+            icon="images/icons/etool16/filterentitytype.png">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor"
+            default="false"
+            icon="images/icons/obj16/entitytype.png"
+            id="org.wcs.smart.entity.editor.entitytype"
+            name="Entity Type Editor">
+      </editor>
    </extension>
 
 </plugin>

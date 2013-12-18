@@ -19,48 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.event;
+package org.wcs.smart.entity.ui;
 
-import java.text.MessageFormat;
-
-import org.hibernate.Session;
-import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.EntityType;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.entity.ui.typelist.EntityTypeFilterDialog;
+import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 
 /**
- * Advisor for deleting entity types.  Validates
- * that all entities associated with the entity can be
- * deleted.
+ * Handler for displaying filter dialog, for entity type list view.
  * 
  * @author Emily
  *
  */
-public class DeleteEntityTypeAdvisor implements IDeleteAdvisor {
+public class OpenFilterDialogHandler extends AbstractHandler {
 
-	public DeleteEntityTypeAdvisor() {
-	}
-
-	@Override
-	public String canDelete(Object object, Session session) {
-		if (!(object instanceof EntityType)){
-			return "Invalid object type.";
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+		
+		if (part.getSite().getId().equals(EntityTypeListView.ID)){
+			EntityTypeListView view = ((EntityTypeListView)part);
+			EntityTypeFilterDialog dialog = new EntityTypeFilterDialog(HandlerUtil.getActiveShell(event), view);
+			dialog.open();
 		}
-		EntityType toDelete = (EntityType)object;
-		
-		
-		//validate that all entities can be deleted
-		for (Entity e : toDelete.getEntities()){
-			try{
-				DeleteManager.canDelete(e, session);			
-			}catch (Exception ex){
-				return MessageFormat.format("The Entity Type {0} cannot be deleted, as the associated entity {1} cannot be deleted.", new Object[]{toDelete.getName(), e.getId()})
-						+ "\n\n" + ex.getMessage();
-			}	
-		}
-		
 		return null;
 	}
-
 }

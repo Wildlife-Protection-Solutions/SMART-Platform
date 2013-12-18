@@ -101,7 +101,7 @@ public class AttributeNameField extends AbstractEntityComposite{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Attribute ID:");
+		l.setText("Attribute Key:");
 		txtAttributeId = new Text(main, SWT.BORDER);
 		txtAttributeId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		Button btnEditKey = new Button(main, SWT.PUSH);

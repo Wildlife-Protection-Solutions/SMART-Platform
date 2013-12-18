@@ -19,48 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.event;
+package org.wcs.smart.entity.ui;
 
-import java.text.MessageFormat;
-
-import org.hibernate.Session;
-import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.common.filter.IUpdatableView;
+import org.wcs.smart.entity.model.EntityTypeFilter;
 
 /**
- * Advisor for deleting entity types.  Validates
- * that all entities associated with the entity can be
- * deleted.
+ * Interface for views that filter entity types.
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public class DeleteEntityTypeAdvisor implements IDeleteAdvisor {
+public interface IEntityTypeFilteringView extends IUpdatableView {
 
-	public DeleteEntityTypeAdvisor() {
-	}
-
-	@Override
-	public String canDelete(Object object, Session session) {
-		if (!(object instanceof EntityType)){
-			return "Invalid object type.";
-		}
-		EntityType toDelete = (EntityType)object;
-		
-		
-		//validate that all entities can be deleted
-		for (Entity e : toDelete.getEntities()){
-			try{
-				DeleteManager.canDelete(e, session);			
-			}catch (Exception ex){
-				return MessageFormat.format("The Entity Type {0} cannot be deleted, as the associated entity {1} cannot be deleted.", new Object[]{toDelete.getName(), e.getId()})
-						+ "\n\n" + ex.getMessage();
-			}	
-		}
-		
-		return null;
-	}
-
+	/**
+	 * 
+	 * @return the current active filter
+	 */
+	public EntityTypeFilter getFilter();
 }

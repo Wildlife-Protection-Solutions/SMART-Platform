@@ -41,6 +41,7 @@ public class EntityPlugIn extends AbstractUIPlugin {
 	private static EntityPlugIn plugin;
 	
 	public static final String ENTITY_TYPE_ICON = "org.wcs.smart.entitytype.icon"; //$NON-NLS-1$
+	public static final String CONFIGURATION_ICON = "org.wcs.smart.entity.configuration.icon"; //$NON-NLS-1$
 	/**
 	 * The constructor
 	 */
@@ -77,6 +78,7 @@ public class EntityPlugIn extends AbstractUIPlugin {
     protected void initializeImageRegistry(ImageRegistry reg) {
      	super.initializeImageRegistry(reg);
      	reg.put(ENTITY_TYPE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entitytype.png")); //$NON-NLS-1$
+     	reg.put(CONFIGURATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/configuration.png")); //$NON-NLS-1$
     }
     
     

@@ -84,12 +84,13 @@ public class EntityAttribute extends NamedItem {
 	 * If the attribute is required or not
 	 * @return
 	 */
-	public boolean isRequired() {
+	@Column(name="is_required")
+	public boolean getIsRequired() {
 		return isRequired;
 	}
 
 
-	public void setRequired(boolean isRequired) {
+	public void setIsRequired(boolean isRequired) {
 		this.isRequired = isRequired;
 	}
 

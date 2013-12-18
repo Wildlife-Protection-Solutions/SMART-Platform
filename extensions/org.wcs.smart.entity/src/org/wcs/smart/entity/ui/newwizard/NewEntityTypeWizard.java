@@ -80,8 +80,11 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 			}
 			if (i <=0 ){
 				i = 1;
-			}	
+			}else{
+				i++;
+			}
 		}
+		
 		DecimalFormat entityIdFormat = new DecimalFormat("000000");
 		newType.setId(entityIdFormat.format(i));
 		

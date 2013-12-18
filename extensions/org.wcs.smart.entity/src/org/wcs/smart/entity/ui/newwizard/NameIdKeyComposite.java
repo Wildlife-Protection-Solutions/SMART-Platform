@@ -34,7 +34,7 @@ import org.wcs.smart.util.SmartUtils.RegExLevel;
 public class NameIdKeyComposite extends AbstractEntityComposite{
 
 	private Text txtName;
-	private Text txtId;
+	private IdComposite txtId;
 	private Text txtKey;
 	
 	private List<NamedKeyItem> sharedKeys;
@@ -51,13 +51,11 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 
 	@Override
 	public String validate() {
-		if (txtId.getText().length() == 0){
-			return "An id must be provided";
+		String error = txtId.validate();
+		if (error != null){
+			return error;
 		}
-		if (!SmartUtils.isSimpleString(txtId.getText().trim(), RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Entity.KEY_MAX_LENGTH, 1)){
-			return MessageFormat.format("The id must be between {0} and {1} characters long and can only contain {2}.",
-					new Object[]{1, Entity.KEY_MAX_LENGTH, RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc});
-		}
+		
 		if (!SmartUtils.isSimpleString(txtName.getText().trim(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Entity.NAME_MAX_LENGTH, 0)){
 			return MessageFormat.format("The name must only contain the characters {0}.", new String[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});
 		}
@@ -77,22 +75,12 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
 		
-		//ID
-		Label l = new Label(main, SWT.NONE);
-		l.setText("Entity Type ID:");
-		l.setToolTipText("A unique identifier for the entity type.  Required.");
-		
-		txtId = new Text(main, SWT.BORDER);
-		txtId.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fireChange(new Event());
-			}
-		});
-		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		txtId = new IdComposite();
+		Composite idComp = txtId.createComposite(main);
+		idComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
 		// NAME
-		l = new Label(main, SWT.NONE);
+		Label l = new Label(main, SWT.NONE);
 		l.setText("Entity Type Name:");
 		l.setToolTipText("A name for the entity type.  Optional.");
 		txtName = new Text(main, SWT.BORDER);
@@ -141,7 +129,7 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 	
 	@Override
 	public void updateEntityType(EntityType entityType) {
-		entityType.setId(txtId.getText().trim());
+		txtId.updateEntityType(entityType);
 		entityType.setName(txtName.getText().trim());
 		entityType.setKeyId(txtKey.getText().trim());
 		
@@ -151,9 +139,8 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 
 	@Override
 	public void initFields(EntityType entityType, Session session) {
-		if (entityType.getId() != null){
-			txtId.setText(entityType.getId());
-		}
+		txtId.initFields(entityType, session);
+		
 		if (entityType.getKeyId() != null){
 			txtKey.setText(entityType.getKeyId());
 			txtKey.setData(entityType.getKeyId());

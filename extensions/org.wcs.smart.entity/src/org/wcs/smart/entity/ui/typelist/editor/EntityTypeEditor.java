@@ -1,127 +1,218 @@
 package org.wcs.smart.entity.ui.typelist.editor;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.event.IEntityListener;
+import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.HibernateManager;
 
-public class EntityTypeEditor implements IEditorPart {
+public class EntityTypeEditor extends MultiPageEditorPart  {
 
 
-	public static final String ID = "org.wcs.smart.entity.editor"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.entity.editor.entitytype"; //$NON-NLS-1$
 	
-	@Override
-	public void addPropertyListener(IPropertyListener listener) {
-		// TODO Auto-generated method stub
-
+	private EntityTypeConfigurationPage configPage;
+	private EntityType entityType;
+	
+	
+	private IEntityListener listener = new IEntityListener() {
+		
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			boolean isThisEditor = false;
+			
+			if (source instanceof EntityType){
+				if (((EntityType)source).equals(entityType)){
+					isThisEditor = true;
+				}
+			}else if (source instanceof EntityTypeEditorInput){
+				if (Arrays.equals(((EntityTypeEditorInput) source).getUuid(), entityType.getUuid())){
+					isThisEditor = true;
+				}
+			}
+			
+			if (eventType == EntityEventManager.ENTITY_TYPE_MODIFIED){
+				if (isThisEditor){
+					//reload
+					entityType = null;
+					getEntityType();
+					initEditor();
+				}
+			}else if (eventType == EntityEventManager.ENTITY_TYPE_DELETED){
+				if (isThisEditor){
+					//close this editor
+					getSite().getShell().getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityTypeEditor.this, false);					
+						}
+					});
+				}
+			}
+		}
+	};
+	
+	/**
+	 * 
+	 * @return the current entity type associated with the editor
+	 */
+	public synchronized EntityType getEntityType(){
+		if (entityType == null){
+			entityType = loadEntityType();
+		}
+		return entityType;
 	}
 
 	@Override
-	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-
+	public void dispose(){
+		super.dispose();
+		
+		EntityEventManager.getInstance().removeListener(listener);
+	}
+	
+	/**
+	 * 
+	 * @return <code>true</code> if current user
+	 * can modify the entity type
+	 */
+	public boolean canEdit(){
+		return true;
 	}
 
 	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-
+	protected void createPages() {
+		try{
+			configPage = new EntityTypeConfigurationPage(this);
+			int index = addPage(configPage, getEditorInput());
+			super.setPageText(index, "Configuration");
+			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.CONFIGURATION_ICON));
+					
+		}catch (Exception ex){
+			EntityPlugIn.displayLog("Error opening entity type editor. " + ex.getMessage(), ex);
+		}
+		initEditor();
+		
+		EntityEventManager.getInstance().addListener(listener);
 	}
-
-	@Override
-	public IWorkbenchPartSite getSite() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Image getTitleImage() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getTitleToolTip() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removePropertyListener(IPropertyListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Object getAdapter(Class adapter) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	private void initEditor(){
+		getEntityType();
+		
+		configPage.initValues();
+		
+		setPartName(entityType.getName() + " [" + entityType.getId() + "]");
+		setTitleImage(EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));
+		
 	}
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void doSaveAs() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean isDirty() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
-
+	
 	@Override
-	public boolean isSaveOnCloseNeeded() {
-		// TODO Auto-generated method stub
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		if (!(input instanceof EntityTypeEditorInput)) {
+			throw new IllegalArgumentException("Invalid editor input."); //$NON-NLS-1$
+		}
+		setSite(site);
+		setInput(input);
+	}
+
+	
+	@Override
+	public boolean isDirty() {
 		return false;
 	}
-
+	
 	@Override
-	public IEditorInput getEditorInput() {
-		// TODO Auto-generated method stub
-		return null;
+	public void setFocus() {
+		configPage.setFocus();
 	}
-
-	@Override
-	public IEditorSite getEditorSite() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	/**
+	 * loads the plan from the database populating all 
+	 * lazy fields from the database.
+	 * 
+	 * Will always get a new object.
+	 */
+	public EntityType loadEntityType(){
+		byte[] uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
+		
+		Session session = HibernateManager.openSession();
+		//load parent plan so don't have lazy loading issues later.
+		session.beginTransaction();
+		EntityType t = (EntityType) session.load(EntityType.class, uuid);
+//		if (t.getAttributes() != null){
+//			for (EntityAttribute a : t.getAttributes()){
+//				a.getDmAttribute().getNames().size();
+//				a.getNames().size();
+//			}
+//		}
+//		t.getDmAttribute().getNames().size();
+		session.getTransaction().rollback();
+		session.close();
+		return t;
 	}
-
-	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-		// TODO Auto-generated method stub
-
+	
+	
+	public void saveEntityType(){
+		EntityType et = entityType;
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			
+			for (EntityAttribute a : et.getAttributes()){
+				if (a.getDmAttribute().getUuid() == null){
+					//new attribute save it and fire required events
+					s.save(a.getDmAttribute());
+					
+					DataModelManager.getInstance().fireAddListener(s, a.getDmAttribute());
+				}
+			}
+			s.saveOrUpdate(et);
+			s.getTransaction().commit();
+			
+			try{
+				DataModelManager.getInstance().fireChangeListeners();
+			}catch(Exception ex){
+				EntityPlugIn.displayLog(ex.getMessage(), ex);
+			}
+			try{
+				EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
+			}catch(Exception ex){
+				EntityPlugIn.displayLog(ex.getMessage(), ex);
+			}
+			
+		}catch (Exception ex){
+			if (s.getTransaction().isActive()){
+				s.getTransaction().rollback();
+			}
+			EntityPlugIn.log("Error saving entity type modifications.  Please close and re-open the editor." + "\n\n" + ex.getMessage(), ex);
+		}finally{
+			s.close();
+		}
+		
+		
 	}
-
+	
 }

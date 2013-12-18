@@ -22,42 +22,36 @@
 package org.wcs.smart.entity.event;
 
 import java.text.MessageFormat;
+import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.model.EntityType;
 
 /**
- * Advisor for deleting entity types.  Validates
- * that all entities associated with the entity can be
- * deleted.
+ * Disallows the deleting of a datamodel attribute if
+ * it is associated with an entity type.
  * 
  * @author Emily
  *
  */
-public class DeleteEntityTypeAdvisor implements IDeleteAdvisor {
-
-	public DeleteEntityTypeAdvisor() {
-	}
+public class DmAttributeDeleteAdvisor implements IDeleteAdvisor {
 
 	@Override
 	public String canDelete(Object object, Session session) {
-		if (!(object instanceof EntityType)){
+		if (!(object instanceof Attribute)){
 			return "Invalid object type.";
 		}
-		EntityType toDelete = (EntityType)object;
-		
-		
-		//validate that all entities can be deleted
-		for (Entity e : toDelete.getEntities()){
-			try{
-				DeleteManager.canDelete(e, session);			
-			}catch (Exception ex){
-				return MessageFormat.format("The Entity Type {0} cannot be deleted, as the associated entity {1} cannot be deleted.", new Object[]{toDelete.getName(), e.getId()})
-						+ "\n\n" + ex.getMessage();
-			}	
+		Attribute toDelete = (Attribute)object;
+		Query q = session.createQuery("FROM EntityType WHERE dmAttribute = :todelete");
+		q.setParameter("todelete", toDelete);
+		List<?> results = q.list();
+		if (results.size() > 0){
+			//attribute associated with an entity and cannot be deleted
+			return MessageFormat.format("Attribute is associated with the EntityType {0}.  This attribute cannot be removed until the entity type is removed.", 
+					new Object[]{((EntityType)results.get(0)).getName()});	
 		}
 		
 		return null;
