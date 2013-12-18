@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -81,6 +81,8 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.internal.ca.properties.AttributeTree;
+import org.wcs.smart.ui.internal.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -510,7 +512,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			attTree = new AttributeTree();
 			Composite tree = attTree.createTree(treeComposite);
 			cdAttTree = createDecoration(tree);
-			attTree.setListener(new AttributeTreeChangeListener() {
+			attTree.setListener(new AttributeTree.AttributeTreeChangeListener() {
 				@Override
 				public void treeModified() {
 					validate();	

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.ca.properties;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	public static final int NEXT = 4;
 
 	/* GUI Components */
-	private CheckboxTableViewer checkboxTableViewer; // list of existing
+	protected CheckboxTableViewer checkboxTableViewer; // list of existing
 														// attribute
 	private Button btnAddNew; // add new radio
 	private Button btnAddExsiting; // add existing radio
@@ -137,7 +137,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	 * @param defaultLang
 	 *            the current language being modified
 	 */
-	protected AddAttributeDialog1(Shell parentShell, Category cat,
+	public AddAttributeDialog1(Shell parentShell, Category cat,
 			DataModel dm, Language lang) {
 		super(parentShell);
 		this.category = cat;
@@ -314,7 +314,11 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		//set title message for dialog
-		setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(lang));
+		if (category != null){
+			setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(lang));
+		}else{
+			setMessage("Add a new attribute.");
+		}
 		setTitle(Messages.AddAttributeDialog1_DialogTitle);
 		return myparent;
 	}

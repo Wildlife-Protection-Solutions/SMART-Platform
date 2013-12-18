@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.ca.properties;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.internal.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -61,7 +62,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	 * @param siblings list of sibling attribute list items
 	 * @param language current display language
 	 */
-	protected AttributeItemDialog(Shell parent, DmObject toUpdate, List<? extends DmObject> siblings, Language language) {
+	public AttributeItemDialog(Shell parent, DmObject toUpdate, List<? extends DmObject> siblings, Language language) {
 		super(parent);
 		this.toUpdate = toUpdate;
 		this.lang = language;
@@ -93,7 +94,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 			}
 			
 			@Override
-			protected boolean validate(){
+			public boolean validate(){
 				boolean ok = super.validate();
 				Button btn = getButton(IDialogConstants.OK_ID);
 				if (btn != null){
