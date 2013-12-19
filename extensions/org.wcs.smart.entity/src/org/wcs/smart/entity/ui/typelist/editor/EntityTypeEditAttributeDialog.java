@@ -19,13 +19,13 @@ import org.wcs.smart.entity.ui.newwizard.AbstractEntityComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class EntityTypeFieldEditorDialog extends TitleAreaDialog{
+public class EntityTypeEditAttributeDialog extends TitleAreaDialog{
 
 	private AbstractEntityComposite editComponent;
 	private EntityType toEdit;
 	private Session session;
 	
-	public EntityTypeFieldEditorDialog(Shell parentShell, 
+	public EntityTypeEditAttributeDialog(Shell parentShell, 
 			AbstractEntityComposite editComponent, EntityType toEdit) {
 		super(parentShell);
 		

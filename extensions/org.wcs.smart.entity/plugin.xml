@@ -305,7 +305,7 @@
             class="org.wcs.smart.entity.model.EntityType">
       </DeleteAdvisor>
       <DeleteAdvisor
-            advisor="org.wcs.smart.entity.event.DmAttributeDeleteAdvisor1"
+            advisor="org.wcs.smart.entity.event.DmAttributeDeleteAdvisor"
             class="org.wcs.smart.ca.datamodel.Attribute">
       </DeleteAdvisor>
       <DeleteAdvisor
