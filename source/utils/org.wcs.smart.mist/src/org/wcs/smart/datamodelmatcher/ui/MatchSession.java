@@ -110,7 +110,8 @@ public class MatchSession {
 		
 		
 		try{
-			CSVWriter sessionWriter = new CSVWriter(new FileWriter(saveLocation), ',','\0','\0'); 
+			CSVWriter sessionWriter = new CSVWriter(new FileWriter(saveLocation), ','); 
+			//CSVWriter sessionWriter = new CSVWriter(new FileWriter(saveLocation), ',','\0','\0');
 
 			//write out the basic session file information.
 			String output = smartXmlLocation.replace("\\","\\\\");
@@ -151,6 +152,7 @@ public class MatchSession {
 									, b4, s.getText4(), s.getList4(), s.getTree4()
 									, b5, s.getText5(), s.getList5(), s.getTree5()};
 				sessionWriter.writeNext(rowStrings);
+				//sessionWriter.writeNext(new String[]{""});
 			}
 			sessionWriter.close();
 		}catch(Exception exception){
