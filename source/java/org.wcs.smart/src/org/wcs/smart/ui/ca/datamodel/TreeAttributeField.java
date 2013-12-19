@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.ui.input.field;
+package org.wcs.smart.ui.ca.datamodel;
 
 import java.text.MessageFormat;
 
@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
-import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**

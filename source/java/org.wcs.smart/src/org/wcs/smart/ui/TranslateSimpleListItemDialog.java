@@ -69,10 +69,10 @@ import org.wcs.smart.util.SmartUtils;
 public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 
 	private TableViewer tblViewer;
-	private NamedItem item;
-	private List<org.wcs.smart.ca.Label> input;
+	protected NamedItem item;
+	protected List<org.wcs.smart.ca.Label> input;
 	
-	private boolean isDirty = false;
+	protected boolean isDirty = false;
 	
 	/**
 	 * @param parentShell parent shell
@@ -103,7 +103,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		
 	}
 
-	private boolean validate(){
+	protected boolean validate(){
 		boolean ok = true;
 		setErrorMessage(null);
 		for (org.wcs.smart.ca.Label lbl : input){
@@ -130,7 +130,11 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		}
 		Button btn = getButton(IDialogConstants.OK_ID);
 		if (btn != null){
-			btn.setEnabled(ok);
+			if (isDirty){
+				btn.setEnabled(ok);
+			}else{
+				btn.setEnabled(false);
+			}
 		}
 		return ok;
 	}
@@ -166,7 +170,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 	}
 	
 	
-	private boolean save(){
+	protected boolean save(){
 		if (!validate()){
 			return false;
 		}
@@ -283,9 +287,10 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private void setDirty(boolean isDirty){
+	protected void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
-		getButton(IDialogConstants.CANCEL_ID).setEnabled(isDirty);
+		validate();
+		//getButton(IDialogConstants.CANCEL_ID).setEnabled(isDirty);
 	}
 	
 	/**
