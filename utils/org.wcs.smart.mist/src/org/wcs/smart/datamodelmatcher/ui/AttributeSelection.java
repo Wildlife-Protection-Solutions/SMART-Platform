@@ -64,9 +64,9 @@ public class AttributeSelection {
 		this.langSelector = langSelector;
 	}
 	
-	public void CreateAttribute(Composite tab1Composite){
+	public void CreateAttribute(Composite tab1Composite, int number){
 	      Label smartLabel2 = new Label(tab1Composite, SWT.NONE);
-	      smartLabel2.setText("Attribute #1:" );
+	      smartLabel2.setText("Attribute #" + number + ":" );
 	      smartLabel2.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
 	      
 	      attr1 =  new ComboViewer (tab1Composite, SWT.READ_ONLY);
@@ -135,7 +135,7 @@ public class AttributeSelection {
 	      });
 	      	      
 	      Label smartLabel3 = new Label(tab1Composite, SWT.NONE);
-	      smartLabel3.setText("Value #1:" );
+	      smartLabel3.setText("Value #" + number + ":" );
 	      smartLabel3.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
 
 	      //value1 options
