@@ -516,23 +516,23 @@ public class MatchSessionDialog extends Dialog {
 	      //Make Attribute #1 selector
 	      attribute1 = new AttributeSelection();
 	      attribute1.init(codes, langSelector);
-	      attribute1.CreateAttribute(tab1Composite);
+	      attribute1.CreateAttribute(tab1Composite,1);
 	      
 	      attribute2 = new AttributeSelection();
 	      attribute2.init(codes, langSelector);
-	      attribute2.CreateAttribute(tab2Composite);
+	      attribute2.CreateAttribute(tab2Composite,2);
 	      
 	      attribute3 = new AttributeSelection();
 	      attribute3.init(codes, langSelector);
-	      attribute3.CreateAttribute(tab3Composite);
+	      attribute3.CreateAttribute(tab3Composite,3);
 	      
 	      attribute4 = new AttributeSelection();
 	      attribute4.init(codes, langSelector);
-	      attribute4.CreateAttribute(tab4Composite);
+	      attribute4.CreateAttribute(tab4Composite,4);
 	      
 	      attribute5 = new AttributeSelection();
 	      attribute5.init(codes, langSelector);
-	      attribute5.CreateAttribute(tab5Composite);
+	      attribute5.CreateAttribute(tab5Composite,5);
 	      
 	      
 	      tab1.setControl(tab1Composite);
@@ -580,17 +580,13 @@ public class MatchSessionDialog extends Dialog {
 	      next.addSelectionListener(new SelectionAdapter() {	
 		    	@Override
 		    	public void widgetSelected(SelectionEvent e) {
-		    		saveCurrentMatch(e);
-		    		totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );		
-		    		if( ms.getNumMatched() == ms.getNumTotal()){
-		    			done.setVisible(true);
-		    		}
+		    		saveCurrentMatch();
 		    	}
 		    });
 	      next.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 	      next.setEnabled(false);	      
 
-
+	      saveCurrentMatch();
 	      
 	      
   	      shell.pack();
@@ -761,7 +757,8 @@ public class MatchSessionDialog extends Dialog {
 	}
 
 
-	public void saveCurrentMatch(SelectionEvent e){
+	public void saveCurrentMatch(){
+	
 		    ms.setDirty(true);
 		  	ISelection selection = viewer.getSelection();
   			if (!selection.isEmpty()) {
@@ -845,6 +842,13 @@ public class MatchSessionDialog extends Dialog {
     		//viewer.reveal(viewer.getSelection());
     		ViewerSelectionChanged();
   			viewer.refresh(true, true);
+  			
+  			//update count
+			totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );		
+			if( ms.getNumMatched() == ms.getNumTotal()){
+				done.setVisible(true);
+			}
+
 	  }
 
 
