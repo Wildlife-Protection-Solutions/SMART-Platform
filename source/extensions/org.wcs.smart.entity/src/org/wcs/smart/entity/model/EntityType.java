@@ -33,7 +33,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -207,11 +209,25 @@ public class EntityType extends NamedKeyItem{
 	 * type
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="entityType", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OrderBy(clause="attribute_order")
 	public List<EntityAttribute> getAttributes(){
 		return this.attributes;
 	}
 	
 	public void setAttributes(List<EntityAttribute> attributes){
 		this.attributes = attributes;
+	}
+	
+	/**
+	 * Combine the name with the id to generate a 
+	 * label for display on the GUI
+	 * @return
+	 */
+	@Transient
+	public String getLabel(){
+		if (getName() != null){
+			return getName() + " [" + id + "]";
+		}
+		return "[" + id + "]";
 	}
 }

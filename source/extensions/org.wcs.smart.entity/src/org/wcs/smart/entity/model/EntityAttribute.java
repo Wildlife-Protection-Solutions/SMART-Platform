@@ -39,8 +39,10 @@ public class EntityAttribute extends NamedItem {
 	private Attribute dmAttribute;
 	private EntityType entityType;
 	private boolean isRequired;
+	private boolean isPrimary;
 	
-
+	private int order;
+	
 
 	public EntityAttribute(){
 		
@@ -95,6 +97,37 @@ public class EntityAttribute extends NamedItem {
 	}
 
 	/**
+	 * The order of the attributes for the
+	 * entity.  Allows users to sort
+	 * the order the attributes are displayed
+	 * in the UI.
+	 * @return
+	 */
+	@Column(name="attribute_order")
+	public int getOrder(){
+		return this.order;
+	}
+	
+	public void setOrder(int order){
+		this.order = order;
+	}
+	
+	/**
+	 * If the attribute is to appear in the
+	 * main entity is or if the attribute
+	 * is of secondary importance.
+	 * 
+	 * @return
+	 */
+	@Column(name="is_primary")
+	public boolean getIsPrimary(){
+		return this.isPrimary;
+	}
+	public void setIsPrimary(boolean isPrimary){
+		this.isPrimary = isPrimary;
+	}
+	
+	/**
 	 * 
 	 * @return the names associated with the list element in the
 	 * language the platform is running in.
@@ -104,7 +137,7 @@ public class EntityAttribute extends NamedItem {
 	@Column(name="uuid", insertable=false, updatable=false)
 	public String getName() {
 		String n = super.getName();
-		if (n == null){
+		if (n == null || n.length() == 0){
 			return getDmAttribute().getName();
 		}
 		return n;

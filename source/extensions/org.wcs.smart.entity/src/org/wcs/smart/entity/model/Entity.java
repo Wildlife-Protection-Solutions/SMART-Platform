@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.model;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -28,8 +30,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -49,8 +53,23 @@ public class Entity extends UuidItem {
 	public static final int ID_MAX_LENGTH = 32;
 	public static final int KEY_MAX_LENGTH = 128;
 			
+	public static final String ID_FIELD_NAME = "ID";
+	public static final String STATUS_FIELD_NAME = "Status";
+	public static final String X_FIELD_NAME = "X Position:";
+	public static final String Y_FIELD_NAME = "Y Position:";
+	
 	public enum Status{
-		ACTIVE, INACTIVE
+		ACTIVE("Active"), INACTIVE("InActive");
+		
+		private String guiName;
+		
+		private Status(String guiName){
+			this.guiName = guiName;
+		}
+		
+		public String getGuiName(){
+			return this.guiName;
+		}
 	}
 	
 	private EntityType type;
@@ -59,6 +78,7 @@ public class Entity extends UuidItem {
 	private double x;
 	private double y;
 	private AttributeListItem attributeItem;
+	private List<EntityAttributeValue> attributes;
 	
 	public Entity(){
 		
@@ -106,12 +126,12 @@ public class Entity extends UuidItem {
 	 * entity type. This is the Longitude.
 	 * @return
 	 */
-	public double getX() {
+	public Double getX() {
 		return x;
 	}
 
 
-	public void setX(double x) {
+	public void setX(Double x) {
 		this.x = x;
 	}
 
@@ -120,11 +140,11 @@ public class Entity extends UuidItem {
 	 * entity type.  This is the Latitude.
 	 * @param x
 	 */
-	public double getY() {
+	public Double getY() {
 		return y;
 	}
 
-	public void setY(double y) {
+	public void setY(Double y) {
 		this.y = y;
 	}
 	
@@ -140,5 +160,27 @@ public class Entity extends UuidItem {
 	
 	public void setAttributeListItem(AttributeListItem item){
 		this.attributeItem = item;
+	}
+	
+	/**
+	 * The attribute values for the given entity
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id.entity", orphanRemoval = true)
+	public List<EntityAttributeValue> getAttributes(){
+		return this.attributes;
+	}
+	public void setAttributes(List<EntityAttributeValue> attributes){
+		this.attributes = attributes;
+	}
+	
+	@Transient
+	public EntityAttributeValue findAttribute(EntityAttribute ea){
+		for (EntityAttributeValue v : getAttributes()){
+			if (v.getEntityAttribute().equals(ea)){
+				return v;
+			}
+		}
+		return null;
 	}
 }

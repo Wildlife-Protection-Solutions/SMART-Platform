@@ -17,6 +17,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -27,7 +29,7 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -51,10 +53,9 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -66,7 +67,6 @@ import org.wcs.smart.entity.ui.newwizard.StatusComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
-import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
@@ -201,7 +201,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				EntityTypeFieldEditorDialog dialog = new EntityTypeFieldEditorDialog(getSite().getShell(),
+				EntityTypeEditAttributeDialog dialog = new EntityTypeEditAttributeDialog(getSite().getShell(),
 						new StatusComposite(), parentEditor.getEntityType());
 				dialog.open();
 			}
@@ -216,7 +216,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				EntityTypeFieldEditorDialog dialog = new EntityTypeFieldEditorDialog(getSite().getShell(),
+				EntityTypeEditAttributeDialog dialog = new EntityTypeEditAttributeDialog(getSite().getShell(),
 						new IdComposite(), parentEditor.getEntityType());
 				dialog.open();
 			}
@@ -312,7 +312,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		attributeSelection.setClient(scroll);
 		scroll.setContent(targetContent);
 		
-		targetContent.setLayout(new GridLayout(1, false));
+		targetContent.setLayout(new GridLayout(2, false));
 		targetContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// --- attribute table list
@@ -323,6 +323,12 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		attributeTable.setContentProvider(ArrayContentProvider.getInstance());
 		attributeTable.getTable().setHeaderVisible(true);
 		attributeTable.getTable().setLinesVisible(true);
+		attributeTable.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				editAttribute();
+			}
+		});
 		
 		TableViewerColumn colAlias = new TableViewerColumn(attributeTable, SWT.NONE);
 		colAlias.getColumn().setText("Alias");
@@ -350,6 +356,14 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				}
 				return super.getText(element);
 			}
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof EntityAttribute){
+					return ((EntityAttribute) element).getDmAttribute().getType().getImage();
+				}
+				return super.getImage(element);
+				
+			}
 		});
 		
 		TableViewerColumn colRequired = new TableViewerColumn(attributeTable, SWT.NONE);
@@ -367,15 +381,98 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				return super.getText(element);
 			}
 		});
+		
+		TableViewerColumn colPrimary = new TableViewerColumn(attributeTable, SWT.NONE);
+		colPrimary.getColumn().setText("Primary?");
+		colPrimary.setLabelProvider(new ColumnLabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof EntityAttribute){
+					if (((EntityAttribute) element).getIsPrimary()){
+						return "Yes";
+					}else{
+						return "No";
+					}
+				}
+				return super.getText(element);
+			}
+		});
 		TableColumnLayout layout = new TableColumnLayout();
 		attributeTableComp.setLayout( layout );
-		layout.setColumnData( colAlias.getColumn(), new ColumnWeightData( 45 ) );
-		layout.setColumnData( colAttribute.getColumn(), new ColumnWeightData( 45 ) );
-		layout.setColumnData( colRequired.getColumn(), new ColumnWeightData( 10 ) );
 		
+		layout.setColumnData( colAlias.getColumn(), new ColumnWeightData( 35 ) );
+		layout.setColumnData( colAttribute.getColumn(), new ColumnWeightData( 35 ) );
+		layout.setColumnData( colRequired.getColumn(), new ColumnWeightData( 10 ) );
+		layout.setColumnData( colPrimary.getColumn(), new ColumnWeightData( 10 ) );
+		
+		
+		Composite buttonComp = toolkit.createComposite(targetContent);
+		buttonComp.setLayout(new GridLayout());
+		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
+		
+		Button btnMoveUp = toolkit.createButton(buttonComp, "Move Up", SWT.PUSH);
+		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)btnMoveUp.getLayoutData()).widthHint = 100;
+		btnMoveUp.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				EntityType et = parentEditor.getEntityType();
+				
+				ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
+				entities.addAll(et.getAttributes());
+				
+				for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					int i = et.getAttributes().indexOf(type);
+					entities.remove(i);
+					i--;
+					if (i <=0){
+						i = 0;
+					}
+					entities.add(i, (EntityAttribute)type);
+					
+				}
+				for (int i = 0; i < entities.size();i++){
+					entities.get(i).setOrder(i+1);
+				}
+				
+				parentEditor.saveEntityType();
+			}
+		});
+		
+		Button btnMoveDown = toolkit.createButton(buttonComp, "Move Down", SWT.PUSH);
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)btnMoveDown.getLayoutData()).widthHint = 100;
+		btnMoveDown.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				EntityType et = parentEditor.getEntityType();
+				
+				ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
+				entities.addAll(et.getAttributes());
+				
+				for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					int i = et.getAttributes().indexOf(type);
+					entities.remove(i);
+					i++;
+					if (i >= et.getAttributes().size()){
+						i = et.getAttributes().size();
+					}
+					entities.add(i, (EntityAttribute)type);
+					
+				}
+				for (int i = 0; i < entities.size();i++){
+					entities.get(i).setOrder(i+1);
+				}
+				
+				parentEditor.saveEntityType();
+			}
+		});
 		
 		Composite buttonTableComp = toolkit.createComposite(targetContent);
-		buttonTableComp.setLayout(new GridLayout(4, false));
+		buttonTableComp.setLayout(new GridLayout(3, false));
+		buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
 		
 		Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -407,6 +504,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 			}
 		});
 		
+		
 		scroll.setMinSize(targetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 	
@@ -435,12 +533,12 @@ public class EntityTypeConfigurationPage extends EditorPart {
 	
 	private void addAttribute(){
 		final List<Attribute> dmAttributes = new ArrayList<Attribute>();
-	
+		final ArrayList<Attribute> attributeToAdd = new ArrayList<Attribute>();
+		
 		final Session s = HibernateManager.openSession();
 		
 		try{
-		
-		
+			//load attributes from datamodel
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
 			try{
 				pmd.run(true, false, new IRunnableWithProgress() {
@@ -459,11 +557,10 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				EntityPlugIn.displayLog(ex.getMessage(), ex);
 				return;
 			}
+			
+			//display add attribute dialog 1
 			DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
-		
-			final ArrayList<Attribute> attributeToAdd = new ArrayList<Attribute>();
-		
-			AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
+		AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
 				null, tmpDm, SmartDB.getCurrentLanguage()){
 			
 				@Override
@@ -471,8 +568,6 @@ public class EntityTypeConfigurationPage extends EditorPart {
 					if (IDialogConstants.NEXT_ID == buttonId) {
 						setReturnCode(NEXT);
 					} else if (IDialogConstants.FINISH_ID == buttonId) {
-						//addAttributes(this.category, this.dm);
-					
 						Object[] checked = checkboxTableViewer.getCheckedElements();
 						for (int i = 0; i < checked.length; i++) {
 							Object x = checked[i];
@@ -480,8 +575,6 @@ public class EntityTypeConfigurationPage extends EditorPart {
 								attributeToAdd.add((Attribute)x);
 							}
 						}
-
-					
 						setReturnCode(FINISH);
 					} else if (IDialogConstants.CANCEL_ID == buttonId) {
 						setReturnCode(CANCEL);
@@ -493,8 +586,6 @@ public class EntityTypeConfigurationPage extends EditorPart {
 			int ret = d1.open();
 			if (ret == AddAttributeDialog1.CANCEL){
 				return;
-			}else if (ret == AddAttributeDialog1.FINISH){
-				addAttributes(attributeToAdd);
 			}else if (ret == AddAttributeDialog1.NEXT){
 				Attribute att = new Attribute();
 				att.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -508,12 +599,13 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				if (ret == Window.CANCEL){
 					return;
 				}
-				addAttributes(Collections.singletonList(att));			
+				attributeToAdd.add(att);			
 			}
 		}finally{
 			s.close();
 		}
 
+		addAttributes(attributeToAdd);
 	}
 	
 	private void addAttributes(List<Attribute> attributes){
@@ -524,15 +616,17 @@ public class EntityTypeConfigurationPage extends EditorPart {
 			ea.setDmAttribute(attribute);
 			ea.setEntityType(et);
 			ea.setIsRequired(true);
-			
+			ea.setIsPrimary(true);
+			ea.setOrder(et.getAttributes().size()+1);
 			et.getAttributes().add(ea);
 		}
 		
 		parentEditor.saveEntityType();
 	}
+	
+	
 	private void deleteAttribute(){
-		//TODO:
-		List<EntityAttribute> toDelete = new ArrayList<EntityAttribute>();
+		final List<EntityAttribute> toDelete = new ArrayList<EntityAttribute>();
 		
 		for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
 			Object type = (Object) iterator.next();
@@ -546,28 +640,133 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				delete = true;
 			}
 		}else{
-			if (MessageDialog.openConfirm(getSite().getShell(), "Delete", MessageFormat.format("Are you sure you want to remove the attribute {0}?", new Object[]{toDelete.get(0).getDmAttribute().getName()}))){
+			String attName = toDelete.get(0).getName();
+			if (attName.length() == 0){
+				attName = toDelete.get(0).getDmAttribute().getName();
+			}else{
+				attName = attName + " (" + toDelete.get(0).getDmAttribute().getName() + ")";
+			}
+			if (MessageDialog.openConfirm(getSite().getShell(), "Delete", MessageFormat.format("Are you sure you want to remove the attribute {0}?", 
+					new Object[]{attName}))){
 				delete = true;
 			}
 		}
 		if (delete){
-			parentEditor.getEntityType().getAttributes().removeAll(toDelete);
-			for (EntityAttribute ea : toDelete){
-				ea.setEntityType(null);
+			
+			ProgressMonitorDialog deleteDialog = new ProgressMonitorDialog(getSite().getShell());
+			try{
+			deleteDialog.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						
+						s.saveOrUpdate(parentEditor.getEntityType());
+						
+						parentEditor.getEntityType().getAttributes().removeAll(toDelete);
+						for (final EntityAttribute ea : toDelete){
+						//	ea.setEntityType(null);
+							
+							//at this point we should try to delete the attribute as well
+							boolean canDeleteAttribute = false;
+							try{
+								if (DeleteManager.canDelete(ea.getDmAttribute(), s)){
+									canDeleteAttribute = true;
+								}
+							}catch (Exception ex){
+								//something is using this attribute therefore
+								//it cannot be deleted
+							}
+							
+							if (canDeleteAttribute){
+								final int[] ret = {-1};
+								Display.getDefault().syncExec(new Runnable(){
+
+									@Override
+									public void run() {
+										MessageDialog dialog = new MessageDialog(getSite().getShell(), "Delete Attribute", null,
+												MessageFormat.format("The attribute ''{0}'' is not longer associated with any elements in the Data Model.  Would you like to delete this attribute?", new Object[]{ ea.getDmAttribute().getName() } ), 
+												MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+										ret[0] = dialog.open();
+									}});
+							
+								if (ret[0] == 0){  //YES
+									boolean deletel = DataModelManager.getInstance().validateDelete(ea.getDmAttribute(), monitor, s);
+									if (deletel){
+										DataModelManager.getInstance().fireDeleteListener(s, ea.getDmAttribute());
+										s.delete(ea.getDmAttribute());
+									}
+								}
+							}
+						}
+						
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						EntityPlugIn.displayLog("Error deleting the selected attributes.  Please close and reopen the editor." + "\n\n" + ex.getMessage(), ex);
+						s.getTransaction().rollback();
+					}finally{
+						s.close();
+					}
+				}
+			});
+			}catch (Exception ex){
+				EntityPlugIn.displayLog("Error deleting entity attribute.  Please close and re-open the editor. " + "\n\n" + ex.getMessage(), ex);
 			}
-			parentEditor.saveEntityType();
+			
+			try{
+				DataModelManager.getInstance().fireChangeListeners();
+			}catch(Exception ex){
+				EntityPlugIn.displayLog(ex.getMessage(), ex);
+			}
+			try{
+				EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, parentEditor.getEntityType());
+			}catch(Exception ex){
+				EntityPlugIn.displayLog(ex.getMessage(), ex);
+			}
+			
 		}
 	}
 	
 	private void editAttribute(){
-		//TODO
+		boolean fire = false;
+		Object type = ((StructuredSelection)attributeTable.getSelection()).getFirstElement();
+		if (type instanceof EntityAttribute){
+			Session s = HibernateManager.openSession();
+			try{
+				s.saveOrUpdate(type);
+				EntityAttributeDialog dia = new EntityAttributeDialog(getSite().getShell(), (EntityAttribute)type);
+				if (dia.open()==EntityAttributeDialog.OK){
+				
+					s.beginTransaction();
+					try{
+						((EntityAttribute) type).setName(((EntityAttribute) type).findName(SmartDB.getCurrentLanguage()));
+						s.saveOrUpdate(type);
+						s.getTransaction().commit();
+						fire = true;
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						return;
+					}
+				}
+				
+			}finally{
+				s.close();
+			}
+			
+			if (fire){
+				EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, ((EntityAttribute) type).getEntityType());
+			}
+		}
+		
 	}
 	
 	/**
 	 * Updates the widgets with the value from the plan.
 	 */
 	public void initValues() {
-		
 		EntityType type = this.parentEditor.getEntityType();
 		form.setText(getPartName());
 		
@@ -598,54 +797,16 @@ public class EntityTypeConfigurationPage extends EditorPart {
 	 * @param partEditor editor to use
 	 * @return hyperlink created
 	 */
-	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent){//, final PanelType panelType) {
+	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent){
 		Hyperlink editLink = toolkit.createHyperlink(parent,"edit", SWT.WRAP);
 		
 		if (!this.parentEditor.canEdit()) {
 			editLink.setEnabled(false);
 			editLink.setVisible(false);
 		}
-		
-//		if (panelType != null){
-//			editLink.addHyperlinkListener(new HyperlinkAdapter() {
-//				@Override
-//				public void linkActivated(HyperlinkEvent e) {
-//					showEditDialog(panelType);
-//				}
-//			});
-//		}
 		return editLink;
 	}
 
-//	/**
-//	 * Displays and edit dialog for editing a particular item in
-//	 * plan object.
-//	 * 
-//	 * @param panelType type of inner panel to be created
-//	 * @return  true if changes made, false otherwise
-//	 */
-//	private boolean showEditDialog(PanelType panelType){
-//		
-//		int ret = -1;
-//		try {
-//			//get a copy to edit incase something goes wrong
-//			Plan copy = parentEditor.loadPlan();
-//			final EditPlanItemDialog editDialog = new EditPlanItemDialog(
-//					getEditorSite().getShell(), 
-//					panelType, copy);
-//			
-//			ret = editDialog.open();
-//		} finally {
-//			//this ensure the map tools work correctly
-//			ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
-//		}
-//		
-//		if (ret == IDialogConstants.OK_ID){
-//			return true;
-//		}
-//		return false;
-//	}
-	
 
 	@Override
 	public void setFocus() {

@@ -22,6 +22,7 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 	public static final String ID = "org.wcs.smart.entity.editor.entitytype"; //$NON-NLS-1$
 	
 	private EntityTypeConfigurationPage configPage;
+	private EntityTypeEntitiesPage entityPage;
 	private EntityType entityType;
 	
 	
@@ -58,6 +59,14 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 						}
 					});
 				}
+			}else if (eventType == EntityEventManager.ENTITY_ADDED || 
+					eventType == EntityEventManager.ENTITY_MODIFIED ||
+					eventType == EntityEventManager.ENTITY_DELETED){
+				
+				if (isThisEditor){
+					getEntityType();					
+					entityPage.initValues();
+				}
 			}
 		}
 	};
@@ -92,10 +101,17 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 	@Override
 	protected void createPages() {
 		try{
+			entityPage = new EntityTypeEntitiesPage(this);
+			int index = addPage(entityPage, getEditorInput());
+			super.setPageText(index, "Entities");
+			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));
+
+			
 			configPage = new EntityTypeConfigurationPage(this);
-			int index = addPage(configPage, getEditorInput());
+			index = addPage(configPage, getEditorInput());
 			super.setPageText(index, "Configuration");
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.CONFIGURATION_ICON));
+			
 					
 		}catch (Exception ex){
 			EntityPlugIn.displayLog("Error opening entity type editor. " + ex.getMessage(), ex);
@@ -109,8 +125,9 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 		getEntityType();
 		
 		configPage.initValues();
+		entityPage.initValues();
 		
-		setPartName(entityType.getName() + " [" + entityType.getId() + "]");
+		setPartName(entityType.getLabel());
 		setTitleImage(EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));
 		
 	}
@@ -191,27 +208,26 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 			}
 			s.saveOrUpdate(et);
 			s.getTransaction().commit();
-			
-			try{
-				DataModelManager.getInstance().fireChangeListeners();
-			}catch(Exception ex){
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-			}
-			try{
-				EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
-			}catch(Exception ex){
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-			}
-			
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
 			}
 			EntityPlugIn.log("Error saving entity type modifications.  Please close and re-open the editor." + "\n\n" + ex.getMessage(), ex);
+			return;
 		}finally{
 			s.close();
 		}
 		
+		try{
+			DataModelManager.getInstance().fireChangeListeners();
+		}catch(Exception ex){
+			EntityPlugIn.displayLog(ex.getMessage(), ex);
+		}
+		try{
+			EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
+		}catch(Exception ex){
+			EntityPlugIn.displayLog(ex.getMessage(), ex);
+		}
 		
 	}
 	

@@ -32,6 +32,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import net.refractions.udig.project.internal.SetDefaultStyleProcessor;
+
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
@@ -98,11 +101,11 @@ public class EntityAttributeValue {
 	 * @return
 	 */
 	@Column(name="double_value")
-	public Double getDoubleValue(){
+	public Double getNumberValue(){
 		return this.doubleValue;
 	}
 	
-	public void setDoubleValue(Double doubleValue){
+	public void setNumberValue(Double doubleValue){
 		this.doubleValue = doubleValue;
 	}
 	
@@ -112,11 +115,11 @@ public class EntityAttributeValue {
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="list_element_uuid", referencedColumnName="uuid")
-	public AttributeListItem getListItem(){
+	public AttributeListItem getAttributeListItem(){
 		return this.listItem;
 	}
 	
-	public void setListItem(AttributeListItem listItem){
+	public void setAttributeListItem(AttributeListItem listItem){
 		this.listItem = listItem;
 	}
 
@@ -126,13 +129,118 @@ public class EntityAttributeValue {
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="tree_node_uuid", referencedColumnName="uuid")
-	public AttributeTreeNode getTreeNode(){
+	public AttributeTreeNode getAttributeTreeNode(){
 		return this.treeNode;
 	}
 	
-	public void setTreeNode(AttributeTreeNode treeNode){
+	public void setAttributeTreeNode(AttributeTreeNode treeNode){
 		this.treeNode = treeNode;
 	}
+	
+	/**
+	 * 
+	 * @return the string representation of the 
+	 * entity attribute value
+	 */
+	@Transient
+	public String getValueAsString(){
+		String text = ""; //$NON-NLS-1$
+		switch (getEntityAttribute().getDmAttribute().getType()){
+		case TEXT:
+			text = getStringValue();
+			break;
+		case NUMERIC:
+			if (getNumberValue() != null){
+				text = String.valueOf(getNumberValue());	
+			}
+			break;
+		case BOOLEAN:
+			if (getNumberValue() != null){
+				if (getNumberValue() < 0.5){
+					text = Attribute.BOOLEAN_FALSE_LABEL;
+				}else{
+					text = Attribute.BOOLEAN_TRUE_LABEL;
+				}
+			}
+			break;
+		case LIST:
+			if (getAttributeListItem() != null){
+				text = getAttributeListItem().getName();
+			}
+			break;
+		case TREE:
+			if (getAttributeTreeNode() != null){
+				text = getAttributeTreeNode().getName();
+			}
+			break;
+		}
+		if (text == null){
+			text = ""; //$NON-NLS-1$
+		}
+		return text;
+	}
+	
+	/**
+	 * 
+	 * @return the object representation of the 
+	 * entity attribute value
+	 */
+	@Transient
+	public Object getValue(){
+		String text = ""; //$NON-NLS-1$
+		switch (getEntityAttribute().getDmAttribute().getType()){
+		case TEXT:
+			return getStringValue();
+		case NUMERIC:
+			return getNumberValue();	
+		case BOOLEAN:
+			if (getNumberValue() != null){
+				if (getNumberValue() < 0.5){
+					return Boolean.FALSE;
+				}else{
+					return Boolean.TRUE;
+				}
+			}
+			break;
+		case LIST:
+			return getAttributeListItem();
+		case TREE:
+			return getAttributeTreeNode();
+		}
+		return null;
+	}
+	
+	/**
+	 * 
+	 * @return set the object representation of the 
+	 * entity attribute value
+	 */
+	@Transient
+	public void setValue(Object value){
+		String text = ""; //$NON-NLS-1$
+		switch (getEntityAttribute().getDmAttribute().getType()){
+		case TEXT:
+			setStringValue((String)value);
+			break;
+		case NUMERIC:
+			setNumberValue((Double)value);
+			break;
+		case BOOLEAN:
+			if ((Boolean)value){
+				setNumberValue(1.0);
+			}else{
+				setNumberValue(0.0);
+			}
+			break;
+		case LIST:
+			setAttributeListItem((AttributeListItem) value);
+			break;
+		case TREE:
+			setAttributeTreeNode((AttributeTreeNode) value);
+			break;
+		}
+	}
+	
 	
 	@Embeddable
 	private static class EntityAttributeValuePk implements Serializable{
