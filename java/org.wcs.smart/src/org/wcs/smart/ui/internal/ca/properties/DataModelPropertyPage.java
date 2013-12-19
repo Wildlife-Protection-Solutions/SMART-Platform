@@ -65,6 +65,7 @@ import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -636,14 +637,17 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 						
 							//at this point we should try to delete the attribute as well
-							boolean contains = false;
-							for (Category root :dataModel.getCategories()){
-								if (containsAttribute(root, catAtt.getAttribute())){
-									contains = true;
-									break;
+							boolean canDeleteAttribute = false;
+							try{
+								if (DeleteManager.canDelete(catAtt.getAttribute(), getSession())){
+									canDeleteAttribute = true;
 								}
+							}catch (Exception ex){
+								//something is using this attribute therefore
+								//it cannot be deleted
 							}
-							if (!contains){
+							
+							if (canDeleteAttribute){
 								final int[] ret = {-1};
 								Display.getDefault().syncExec(new Runnable(){
 
@@ -689,30 +693,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		refreshTree();
 		setChangesMade(true);
 		updateInfoPanel();
-	}
-
-	
-	/**
-	 * Determines if a particular category or parent category
-	 * contains the given attribute 
-	 * 
-	 * @param cat category to test
-	 * @param att attribute to look for
-	 * @return
-	 */
-	private boolean containsAttribute(Category cat, Attribute att){
-		if (cat.getAttributes() != null && cat.getAttributes().contains(new CategoryAttribute(cat,att))){
-			return true;
-		}else{
-			if (cat.getChildren() != null){
-				for (Category kid : cat.getChildren()){
-					if (containsAttribute(kid, att)){
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 	
 	/*

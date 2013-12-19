@@ -28,14 +28,14 @@ public class Messages extends NLS {
 	public static String AttributeWizardPage_SaveModificationsWarningMessage;
 	public static String AttributeWizardPage_UpdateObsButton;
 	public static String AttributeWizardPage_Warning_DialogTitle;
-	public static String BooleanAttributeField_UnderfinedBooleanOption;
+	
 	public static String CaDeleteHandler_ProgressDeleteWp;
 
 	public static String CategoryAttributeDMAdvisor_DeleteError;
 	public static String CategoryAttributeDMAdvisor_InvalidObjectType;
 	public static String CategoryDMAdvisor_DeleteError;
 	public static String CategoryDMAdvisor_Error_InvalidObjectType;
-	public static String NumericAttributeField_InvalidNumericAttribute;
+	
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;
 	public static String ObservationSummaryWizardPage_PageMessage;
@@ -54,7 +54,7 @@ public class Messages extends NLS {
 	public static String SearchTree_RemoveAllCategories_Tooltip;
 	public static String SearchTree_RemoveCategories_ToolTip;
 	public static String SmartPatrolPlugIn_Error_DialogMessage1;
-	public static String TreeAttributeField_InvalidTreeValue;
+
 	public static String Waypoint_CloneError;
 
 	public static String WaypointInfoView_DateTimeLabel;

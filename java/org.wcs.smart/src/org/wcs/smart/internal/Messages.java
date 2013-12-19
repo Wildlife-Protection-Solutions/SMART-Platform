@@ -951,6 +951,10 @@ public class Messages extends NLS {
 	public static String ZipUtil_Error_UnzipFailed;
 	public static String ZipUtil_Progress_CreatingZip;
 	public static String ZipUtil_Progress_ProcessingFile;
+	
+	public static String BooleanAttributeField_UnderfinedBooleanOption;
+	public static String NumericAttributeField_InvalidNumericAttribute;
+	public static String TreeAttributeField_InvalidTreeValue;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

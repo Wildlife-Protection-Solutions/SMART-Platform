@@ -19,75 +19,77 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.ui.input.field;
+package org.wcs.smart.ui.ca.datamodel;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
-
+import org.wcs.smart.internal.Messages;
 
 /**
- * Attribute field for list attributes.
+ * Attribute field for modifying boolean observation
+ * attributes.
  * <p>
- * Displays a combobox to users for 
- * selecting the attribute value.  For optional attributes
- * a blank option is added to the combobox.
- * <p>
+ * Display two or three radio buttons depending on the required
+ * state of the attribute.
+ * </p>
  * @author egouge
  *
  */
-public class ListAttributeField implements IAttributeField<AttributeListItem> {
-
-	/* attribute fields */
+public class BooleanAttributeField implements IAttributeField<Boolean> {
+	
+	/* attribute info */
 	private Attribute attribute;
 	private boolean isModified = false;
-	private AttributeListItem originalValue = null;
+	private Boolean originalValue = null;
 	
 	/* ui fields */
-	private ComboViewer cmbViewer;
+	private Button btnYes;
+	private Button btnNo;
+	private Button btnUndefined;
 	private ControlDecoration cd;
 	
+	SelectionListener validateListener = new SelectionAdapter() {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			Boolean v = getValue();
+			isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v == originalValue));
+			validate();
+		}
+	};
+	
 	/**
-	 * Creates a new list field
-	 * @param attribute
+	 * Creates a new boolean attribute field
+	 * @param attribute must be boolean type attribute
 	 */
-	public ListAttributeField(Attribute attribute){
+	public BooleanAttributeField(Attribute attribute){
 		this.attribute = attribute;
 	}
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#getValue()
-	 * @return the list item selected by the user or null if none selected
+	 * @return <code>true</code> if yes selected, <code>false</code> if no selected, and null if
+	 * undefined.
 	 */
 	@Override
-	public AttributeListItem getValue() {
-		if (cmbViewer.getSelection().isEmpty()){
-			return null;
-		}else{
-			IStructuredSelection sel = (IStructuredSelection)cmbViewer.getSelection();
-			if (sel.getFirstElement() instanceof AttributeListItem){
-				return (AttributeListItem) sel.getFirstElement();
-			}else{
-				return null;
-			}
+	public Boolean getValue() {
+		if (btnYes.getSelection()){
+			return true;
+		}else if (btnNo.getSelection()){
+			return false;
 		}
+		return null;
 	}
 
 	/**
@@ -97,60 +99,38 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
-		cmbViewer = new ComboViewer(new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY));
-		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)cmbViewer.getControl().getLayoutData()).horizontalIndent = 5;
+		Composite comp = new Composite(parent, SWT.NONE);
+		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)comp.getLayoutData()).horizontalIndent = 5;
+		GridLayout gl = new GridLayout(3, false);
+		gl.verticalSpacing = gl.marginHeight = 0;
+		comp.setLayout(gl);
 		
 		
-		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-
-//		cmbViewer.getCombo().addFocusListener(new FocusListener() {
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//			}
-//			
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				cmbViewer.getCombo().setListVisible(true);
-//				
-//			}
-//		});
+		btnYes = new Button(comp, SWT.RADIO);
+		btnYes.setText(Attribute.BOOLEAN_TRUE_LABEL);
+		btnYes.addSelectionListener(validateListener);
 		
-		cmbViewer.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof AttributeListItem){
-					return ((AttributeListItem) element).getName();
-				}
-				return super.getText(element);
-			}
-		});
-		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				AttributeListItem v = getValue();
-				isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v.equals(originalValue)));
-				validate();
-			}
-		});
+		btnNo = new Button(comp, SWT.RADIO);
+		btnNo.setText(Attribute.BOOLEAN_FALSE_LABEL);
+		btnNo.addSelectionListener(validateListener);
 		
-		List<Object> items = new ArrayList<Object>();
-		items.addAll(this.attribute.getActiveListItems());
 		if (!attribute.getIsRequired()){
-			items.add(0, ""); //$NON-NLS-1$
+			btnUndefined = new Button(comp, SWT.RADIO);
+			btnUndefined.setText(Messages.BooleanAttributeField_UnderfinedBooleanOption);
+			btnUndefined.setSelection(true);
+			btnUndefined.addSelectionListener(validateListener);
 		}
-		cmbViewer.setInput(items.toArray(new Object[items.size()]));
 		
-		cd = new ControlDecoration(cmbViewer.getControl(), SWT.LEFT | SWT.TOP);
+		cd = new ControlDecoration(comp, SWT.LEFT | SWT.TOP);
 		cd.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		
 		validate();
-		originalValue = null;
+	
 		isModified = false;
-		
+		originalValue = null;
 	}
 
 	/**
@@ -181,10 +161,14 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	 */
 	@Override
 	public void clear() {
-		cmbViewer.setSelection(null);
+		btnNo.setSelection(false);
+		btnYes.setSelection(false);
+		if (btnUndefined != null){
+			btnUndefined.setSelection(true);
+		}
 		validate();
-		originalValue = null;
 		isModified = false;
+		originalValue = null;
 	}
 	
 	/**
@@ -194,38 +178,65 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	public boolean isModified(){
 		return this.isModified;
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#setValue(java.lang.Object)
-	 * @param x the observation AttributeListItem value
+	 * @param x must be Double (< 0.5 represents false, >= 0.5 represents true)
 	 */
 	@Override
 	public void setValue(Object x){
-		if (x != null & !(x instanceof AttributeListItem)){
+		if (x != null & !(x instanceof Double)){
 			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
-		this.originalValue = (AttributeListItem)x;
-		if (originalValue == null){
-			cmbViewer.setSelection(null);
+		if (x == null){
+			this.originalValue = null;
+			btnYes.setSelection(false);
+			btnNo.setSelection(false);
+			if (btnUndefined != null){
+				btnUndefined.setSelection(true);
+			}
 		}else{
-			cmbViewer.setSelection(new StructuredSelection(this.originalValue));
+			if ((Double)x < 0.5){
+				this.originalValue = false;
+			}else{
+				this.originalValue = true;
+			}
+			btnYes.setSelection(this.originalValue);
+			btnNo.setSelection(!this.originalValue);
+			if (btnUndefined != null){
+				btnUndefined.setSelection(false);
+			}
 		}
 		validate();
 		this.isModified = false;
+		
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#setFocus()
 	 */
 	@Override
 	public void setFocus(){
-		cmbViewer.getControl().setFocus();
+		if (btnYes.getSelection()){
+			btnYes.setFocus();
+			return;
+		}
+		if (btnNo.getSelection()){
+			btnNo.setFocus();
+			return;
+		}
+		if (btnUndefined != null){
+			btnUndefined.setFocus();
+			return;
+		}
+		btnYes.setFocus();
+		return;
 	}
+	
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#dispose()
 	 */
-	@Override
 	public void dispose(){
 	}
 }

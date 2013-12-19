@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.ui.input.field;
+package org.wcs.smart.ui.ca.datamodel;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -32,42 +32,50 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.internal.Messages;
+
 
 /**
- * String attribute field for Stringg type attributes.
- * <p>Represented as a text field where users can enter
- * free-form text.
+ * Attribute field for numeric attributes.
+ * <p>
+ * Represented as a text box where users can enter 
+ * valid numbers only.
  * </p>
  * @author egouge
  *
  */
-public class StringAttributeField implements IAttributeField<String>{
+public class NumericAttributeField implements IAttributeField<Double> {
 
+	
 	private Attribute attribute;
-	private boolean isModified = false;
-	private String originalValue = null;
+	private boolean isModified;
+	private Double originalValue;
 	
 	private Text txt;
 	private ControlDecoration cd;
 	
+	
 	/**
-	 * creates a new string attribute field.
-	 * @param attribute
+	 * Creates a new numeric attribute field
 	 */
-	public StringAttributeField(Attribute attribute){
+	public NumericAttributeField(Attribute attribute){
 		this.attribute = attribute;
 	}
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#getValue()
-	 * @return the string value entered or null if value entered
+	 * @return the double value entered by the user or null if no value entered
 	 */
 	@Override
-	public String getValue() {
+	public Double getValue() {
 		if (txt.getText().trim().isEmpty()){
 			return null;
 		}
-		return txt.getText().trim();
+		try{
+			return Double.parseDouble(txt.getText());
+		}catch (Exception ex){
+			return null;
+		}
 	}
 
 	/**
@@ -77,15 +85,18 @@ public class StringAttributeField implements IAttributeField<String>{
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		txt = new Text(parent, SWT.BORDER);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txt.getLayoutData()).horizontalIndent = 5;
+
 		txt.addListener(SWT.Modify, new Listener(){
+
 			@Override
 			public void handleEvent(Event event) {
-				isModified = (!txt.getText().equals(originalValue));
+				Double v = getValue();
+				isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v.doubleValue() == originalValue.doubleValue()));
 				validate();
 			}});
 		
@@ -95,7 +106,7 @@ public class StringAttributeField implements IAttributeField<String>{
 
 		validate();
 		this.isModified = false;
-		this.originalValue = ""; //$NON-NLS-1$
+		this.originalValue = null;
 	}
 
 	/**
@@ -103,7 +114,18 @@ public class StringAttributeField implements IAttributeField<String>{
 	 */
 	@Override
 	public String validate() {
-		String error = AttributeValidator.validateAttribute(attribute, getValue());
+		String error = null;
+		if (!txt.getText().trim().isEmpty()){
+			try{
+				Double.parseDouble(txt.getText());
+			}catch (Exception ex){
+				error = Messages.NumericAttributeField_InvalidNumericAttribute;
+			}
+		}
+		if (error == null){
+			error = AttributeValidator.validateAttribute(attribute, getValue());
+		}
+		
 		if (error != null){
 			cd.setDescriptionText(error);
 			cd.show();
@@ -112,7 +134,7 @@ public class StringAttributeField implements IAttributeField<String>{
 		}
 		return error;
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#getAttribute()
 	 */
@@ -120,7 +142,7 @@ public class StringAttributeField implements IAttributeField<String>{
 	public Attribute getAttribute() {
 		return this.attribute;
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#clear()
 	 */
@@ -129,31 +151,31 @@ public class StringAttributeField implements IAttributeField<String>{
 		txt.setText(""); //$NON-NLS-1$
 		validate();
 		this.isModified = false;
-		this.originalValue = ""; //$NON-NLS-1$
+		this.originalValue = null;
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#isModified()
 	 */
 	@Override
-	public boolean isModified(){
+	public boolean isModified() {
 		return this.isModified;
 	}
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#setValue(java.lang.Object)
-	 * @param x the initial string value
+	 * @param x the observation attribute Double value
 	 */
 	@Override
 	public void setValue(Object x){
-		if (x != null & !(x instanceof String)){
+		if (x != null & !(x instanceof Double)){
 			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
-		this.originalValue = (String)x;
+		this.originalValue = (Double)x;
 		if (originalValue == null){
 			txt.setText(""); //$NON-NLS-1$
 		}else{
-			txt.setText(originalValue);
+			txt.setText(String.valueOf(this.originalValue));
 		}
 		validate();
 		this.isModified = false;

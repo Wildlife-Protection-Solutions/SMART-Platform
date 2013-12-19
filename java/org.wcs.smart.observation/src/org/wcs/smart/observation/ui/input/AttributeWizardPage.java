@@ -57,8 +57,8 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.ui.input.field.AttributeFieldFactory;
-import org.wcs.smart.observation.ui.input.field.IAttributeField;
+import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
+import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
