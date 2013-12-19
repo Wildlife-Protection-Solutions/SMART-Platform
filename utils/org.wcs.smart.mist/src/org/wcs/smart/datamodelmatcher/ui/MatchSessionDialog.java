@@ -615,6 +615,7 @@ public class MatchSessionDialog extends Dialog {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
 			MatchRow selected = (MatchRow) structuredSelection.getFirstElement();
 			selected.getSmartItem().setConcatKey("");
+			selected.getSmartItem().setSmartAttributes(new String[]{"","","","","","","","","","","","","","","","","","","","","","","","","",""} );
 			selected.setMatched(false);
 		}
 		tree.setSelection(tree.getItem(0));
@@ -778,9 +779,8 @@ public class MatchSessionDialog extends Dialog {
   				}
   				
 
-  				String fullKey = cat.getKey();
-
-  				String catKey="";
+  				String catKey= cat.getKey();
+  				String fullKey = catKey;
   				//Get Category
   				while(selectedTreeItem.getParentItem() != null){
   					selectedTreeItem = selectedTreeItem.getParentItem();
@@ -994,6 +994,9 @@ public class MatchSessionDialog extends Dialog {
   				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
   				Attribute selectedAttr = (Attribute) structuredSelection.getFirstElement();
   				String type = selectedAttr.getAttributeType().getType();
+  				if (type==null){
+  					return "";//no attribute selection, do nothing
+  				}
   				String attrKey = selectedAttr.getKey();
   				
   				fullKey = fullKey + "|" + attrKey;
@@ -1062,7 +1065,9 @@ public class MatchSessionDialog extends Dialog {
   				String attrKey = selectedAttr.getKey();
   				
   				fullKey = fullKey + "|" + attrKey;
-  				
+  				if(type == null){
+  					return "";
+  				}
   				if( type.equals("NUMERIC") || type.equals("TEXT") ){
   					fullKey += "|" + "" + "|dValue|1";
   				}else if( type.equals("LIST") ){
@@ -1148,6 +1153,9 @@ public class MatchSessionDialog extends Dialog {
 		    
 		    
 			ArrayList<Attribute> attributeArray = new ArrayList<Attribute>();
+			Attribute blankAttribute = new Attribute("<None>" , "", new AttributeType());
+			attributeArray.add(blankAttribute);
+			
 			if(tree.getSelectionCount() == 0)return;
 			TreeItem selectedTreeItem = tree.getSelection()[0];
 			while(selectedTreeItem != null){

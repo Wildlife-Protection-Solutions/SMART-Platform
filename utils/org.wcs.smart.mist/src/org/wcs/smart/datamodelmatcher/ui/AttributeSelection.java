@@ -97,6 +97,9 @@ public class AttributeSelection {
 	    	  		    IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
 	    	  		    Attribute selected = (Attribute) structuredSelection.getFirstElement();
 	    	  		    String type = selected.getAttributeType().getType();
+	    	  		    if(type == null){
+	    	  		    	return;//the blank attribute was selected, do nothing.
+	    	  		    }
 	    	  		    if( type.equals("NUMERIC") ){
 	    	  		    	value1Text.setText(useTotalObservations);
 	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;

@@ -58,6 +58,10 @@ public class DataModelMatcherDialog extends Composite {
 	MatchSession ms;
 	ProcessingDialog wait; 
 	
+	Button r_open;
+	Button s3_open;
+	Button m_open; 
+	
 	public DataModelMatcherDialog(Composite c){
 		super(c, SWT.None);
 		
@@ -117,7 +121,7 @@ public class DataModelMatcherDialog extends Composite {
 	    
 	  //Existing go button
 		  
-	    Button r_open = new Button(restore, SWT.PUSH);
+	    r_open = new Button(restore, SWT.PUSH);
 		r_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,3,0));
 		((GridData)open.getLayoutData()).heightHint = 10;
 		r_open.setText("Restore Session");
@@ -144,18 +148,20 @@ public class DataModelMatcherDialog extends Composite {
 	    			return;
 	    		}
 	    		
+	    		enableButtons(false);
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
 	    		if(ms.isDirty()){
 	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION
 	    					| SWT.YES | SWT.NO);
-	                	messageBox.setMessage("Do you want to save your changes?");
-	                	messageBox.setText("Exiting Application");
-	                	int response = messageBox.open();
-	                	if (response == SWT.YES)
+	                messageBox.setMessage("Do you want to save your changes?");
+	                messageBox.setText("Exiting Application");
+	                int response = messageBox.open();
+	                if (response == SWT.YES)
 	                		ms.save();
 	    		}
+	    		enableButtons(true);
 	    	}
 	    });
 
@@ -254,7 +260,7 @@ public class DataModelMatcherDialog extends Composite {
 		
 		//start new line 3
 	  
-	    Button s3_open = new Button(start, SWT.PUSH);
+	    s3_open = new Button(start, SWT.PUSH);
 		s3_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,3,0));
 		((GridData)open.getLayoutData()).heightHint = 10;
 		s3_open.setText("Start New Session");
@@ -335,16 +341,17 @@ public class DataModelMatcherDialog extends Composite {
 	    			messageBox.open();
 	    			return;
 				}
-	    		
+	    		enableButtons(false);
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
 	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-	                messageBox.setMessage("Do you want to save your changes?");
-	                messageBox.setText("Exiting Application");
-	                int response = messageBox.open();
-	                if (response == SWT.YES)
+	            messageBox.setMessage("Do you want to save your changes?");
+	            messageBox.setText("Exiting Application");
+	            int response = messageBox.open();
+	            if (response == SWT.YES)
 	              	  ms.save();
+	            enableButtons(true);
 	    	}
 	    });
 
@@ -438,7 +445,7 @@ public class DataModelMatcherDialog extends Composite {
 	    });
 	    
 		
-		Button m_open = new Button(merge, SWT.PUSH);
+		m_open = new Button(merge, SWT.PUSH);
 		m_open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false,3,0));
 		((GridData)open.getLayoutData()).heightHint = 10;
 		m_open.setText("Merge Session");
@@ -536,18 +543,28 @@ public class DataModelMatcherDialog extends Composite {
 	    			return;
 				}
 	    		
+	    		enableButtons(false);
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
 	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-	                messageBox.setMessage("Do you want to save your changes?");
-	                messageBox.setText("Exiting Application");
-	                int response = messageBox.open();
-	                if (response == SWT.YES)
-	              	  ms.save();
+	            messageBox.setMessage("Do you want to save your changes?");
+	            messageBox.setText("Exiting Application");
+	            int response = messageBox.open();
+	            if (response == SWT.YES)
+	            	ms.save();
+	            enableButtons(true);
+	            
 	    	}
+
+			
 	    });
 		
+	}
+	private void enableButtons(boolean b) {
+		m_open.setEnabled(b);
+		s3_open.setEnabled(b);
+		r_open.setEnabled(b);
 	}
 
 }
