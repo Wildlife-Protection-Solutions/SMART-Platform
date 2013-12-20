@@ -81,7 +81,6 @@ public class Messages extends NLS {
 	public static String PatrolPlanComposite_Message;
 	public static String PatrolPlanComposite_Title;
 	public static String PatrolPlanContribution_Description_Label;
-	public static String PatrolPlanContribution_Edit_Link;
 	public static String PatrolPlanContribution_Name;
 	public static String PatrolPlanContribution_Name_Label;
 	public static String PatrolPlanContribution_NoAssociatedPlan_Label;
@@ -126,7 +125,6 @@ public class Messages extends NLS {
 	public static String PlanEditor_ChildPatrolLabel;
 	public static String PlanEditor_ChildPlanTarges_Label;
 	public static String PlanEditor_Description_Label;
-	public static String PlanEditor_Edit_Link_Label;
 	public static String PlanEditor_EndDate_Label;
 	public static String PlanEditor_ErrorOpeningPlanEditor;
 	public static String PlanEditor_Loading_Label;

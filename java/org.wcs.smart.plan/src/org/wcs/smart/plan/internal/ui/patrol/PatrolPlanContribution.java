@@ -60,6 +60,7 @@ import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.perspective.PlanPerspective;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Contribution item for the patrol editor.
@@ -151,7 +152,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(outer, Messages.PatrolPlanContribution_Edit_Link, SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(outer, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			edit.addHyperlinkListener(new HyperlinkAdapter(){
 				@Override

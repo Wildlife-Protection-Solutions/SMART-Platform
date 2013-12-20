@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -44,7 +45,7 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class PatrolUtils {
 
-	public static final String EDIT_LINK_TEXT = Messages.PatrolUtils_Edit_Link_Label;
+	public static final String EDIT_LINK_TEXT = DialogConstants.EDIT_LINK_TEXT;
 	/**
 	 * Returns the image to use for a given patrol type or
 	 * null if no image found

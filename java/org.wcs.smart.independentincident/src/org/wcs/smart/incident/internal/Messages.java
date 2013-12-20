@@ -99,7 +99,6 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_DirectionLabel;
 	public static String IncidentSummaryPage_DistanceLabel;
 	public static String IncidentSummaryPage_EditButtonName;
-	public static String IncidentSummaryPage_EditLabel;
 	public static String IncidentSummaryPage_EqualsFunction;
 	public static String IncidentSummaryPage_IdLabel;
 	public static String IncidentSummaryPage_LocationLabel;

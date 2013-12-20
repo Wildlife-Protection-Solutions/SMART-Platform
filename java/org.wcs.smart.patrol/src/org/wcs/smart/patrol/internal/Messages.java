@@ -612,7 +612,6 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_PageMessage;
 	public static String PatrolTypeWizardPage_SelectType_Label;
 	public static String PatrolTypeWizardPage_Title;
-	public static String PatrolUtils_Edit_Link_Label;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
 	public static String PatrolWaypointSource_WaypointNotFoundError;
 	public static String SavePatrolPartJob_Name;
