@@ -28,6 +28,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 
@@ -43,27 +44,27 @@ public class DmAttributeDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Attribute)){
-			return "Invalid object type.";
+			return Messages.DmAttributeDeleteAdvisor_InvalidType;
 		}
 		
 		//check if this is the attribute associated with any entity type
 		Attribute toDelete = (Attribute)object;
-		Query q = session.createQuery("FROM EntityType WHERE dmAttribute = :todelete");
-		q.setParameter("todelete", toDelete);
+		Query q = session.createQuery("FROM EntityType WHERE dmAttribute = :todelete"); //$NON-NLS-1$
+		q.setParameter("todelete", toDelete); //$NON-NLS-1$
 		List<?> results = q.list();
 		if (results.size() > 0){
 			//attribute associated with an entity and cannot be deleted
-			return MessageFormat.format("Attribute is associated with the entity type {0}.  This attribute cannot be removed until the entity type is removed.", 
+			return MessageFormat.format(Messages.DmAttributeDeleteAdvisor_CannotDeleteAttributeEtAssociation, 
 					new Object[]{((EntityType)results.get(0)).getName()});	
 		}
 		
 		//check if this is an attribute used to describe entities
-		q = session.createQuery("FROM EntityAttribute WHERE dmAttribute = :todelete");
-		q.setParameter("todelete", toDelete);
+		q = session.createQuery("FROM EntityAttribute WHERE dmAttribute = :todelete"); //$NON-NLS-1$
+		q.setParameter("todelete", toDelete); //$NON-NLS-1$
 		results = q.list();
 		if (results.size() > 0){
 			//attribute associated with an entity and cannot be deleted
-			return MessageFormat.format("The attribute is associated with the entity type {0} attributes.  This attribute cannot be removed until it is removed from the entity type attributes.", 
+			return MessageFormat.format(Messages.DmAttributeDeleteAdvisor_CannotDeleteAttributeAssociation, 
 					new Object[]{((EntityAttribute)results.get(0)).getEntityType().getName()});	
 		}
 		return null;

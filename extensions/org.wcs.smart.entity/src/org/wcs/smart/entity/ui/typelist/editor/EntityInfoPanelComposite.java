@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import java.util.HashMap;
@@ -8,7 +29,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
@@ -40,7 +60,11 @@ public class EntityInfoPanelComposite extends Composite{
 	
 	private HashMap<EntityAttribute, Text> attributeToUi = null;
 	
-	
+	/**
+	 * Creates a new panel.
+	 * 
+	 * @param parent
+	 */
 	public EntityInfoPanelComposite(Composite parent){
 		super(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -64,8 +88,9 @@ public class EntityInfoPanelComposite extends Composite{
 	}
 	
 	/**
-	 * Updates the entity type; rebuilding
-	 * the info composite as required.
+	 * Updates the entity type of the panel.  This disposes of
+	 * all existing composites then rebuilds them
+	 * as required for the new entity type.
 	 * 
 	 * @param et
 	 */
@@ -98,7 +123,6 @@ public class EntityInfoPanelComposite extends Composite{
 		Session s = HibernateManager.openSession();
 		try{
 			this.entity = (Entity) s.load(Entity.class, entity.getUuid());
-//			s.saveOrUpdate(entity);
 			initEntityFields();
 		}finally{
 			s.close();
@@ -120,21 +144,21 @@ public class EntityInfoPanelComposite extends Composite{
 				if ( entity.getX() != null){
 					txtX.setText(String.valueOf(entity.getX()));
 				}else{
-					txtX.setText("");
+					txtX.setText(""); //$NON-NLS-1$
 				}
 			}
 			if (txtY != null){
 				if ( entity.getY() != null){
 					txtY.setText(String.valueOf(entity.getY()));
 				}else{
-					txtY.setText("");
+					txtY.setText(""); //$NON-NLS-1$
 				}
 			}
 		}
 		
 		txtStatus.setText(entity.getStatus().getGuiName());
 		for (Text t : attributeToUi.values()){
-			t.setText("");
+			t.setText(""); //$NON-NLS-1$
 		}
 		
 		for(EntityAttributeValue v : entity.getAttributes()){
@@ -150,17 +174,17 @@ public class EntityInfoPanelComposite extends Composite{
 	 * opening a session.
 	 */
 	private void clearFields(){
-		txtId.setText("");
+		txtId.setText(""); //$NON-NLS-1$
 		if (txtX != null){
-			txtX.setText("");
+			txtX.setText(""); //$NON-NLS-1$
 		}
 		if (txtY != null){
-			txtY.setText("");
+			txtY.setText(""); //$NON-NLS-1$
 		}
 		
-		txtStatus.setText("");
+		txtStatus.setText(""); //$NON-NLS-1$
 		for (Text t : attributeToUi.values()){
-			t.setText("");
+			t.setText(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -173,27 +197,27 @@ public class EntityInfoPanelComposite extends Composite{
 		comp.setLayout(new GridLayout(4, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(comp, Entity.ID_FIELD_NAME + ":");
-		txtId = toolkit.createText(comp, "");
+		toolkit.createLabel(comp, Entity.ID_FIELD_NAME + ":"); //$NON-NLS-1$
+		txtId = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtId.getLayoutData()).widthHint = 100;
 		txtId.setEditable(false);
 		
-		toolkit.createLabel(comp, Entity.STATUS_FIELD_NAME + ":");
-		txtStatus = toolkit.createText(comp, "");
+		toolkit.createLabel(comp, Entity.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
+		txtStatus = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtStatus.getLayoutData()).widthHint = 100;
 		txtStatus.setEditable(false);
 		
 		if (etype.getType() == EntityType.Type.FIXED){
-			toolkit.createLabel(comp, Entity.X_FIELD_NAME + ":");
-			txtX = toolkit.createText(comp, "");
+			toolkit.createLabel(comp, Entity.X_FIELD_NAME + ":"); //$NON-NLS-1$
+			txtX = toolkit.createText(comp, ""); //$NON-NLS-1$
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtX.getLayoutData()).widthHint = 100;
 			txtX.setEditable(false);
 			
-			toolkit.createLabel(comp, Entity.Y_FIELD_NAME + ":");
-			txtY = toolkit.createText(comp, "");
+			toolkit.createLabel(comp, Entity.Y_FIELD_NAME + ":"); //$NON-NLS-1$
+			txtY = toolkit.createText(comp, ""); //$NON-NLS-1$
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtY.getLayoutData()).widthHint = 100;
 			txtY.setEditable(false);
@@ -201,8 +225,8 @@ public class EntityInfoPanelComposite extends Composite{
 		
 		if (etype.getAttributes() != null){
 			for (EntityAttribute ea : etype.getAttributes()){
-				Label l = toolkit.createLabel(comp, ea.getName());
-				Text txt = toolkit.createText(comp, "");
+				toolkit.createLabel(comp, ea.getName());
+				Text txt = toolkit.createText(comp, ""); //$NON-NLS-1$
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				((GridData)txt.getLayoutData()).widthHint = 100;
 				txt.setEditable(false);

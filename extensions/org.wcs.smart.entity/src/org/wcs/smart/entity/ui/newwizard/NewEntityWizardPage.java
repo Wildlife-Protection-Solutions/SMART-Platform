@@ -30,10 +30,9 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.observation.model.Waypoint;
 
 /**
- * Incident wizard page.
+ * A new entity wizard page.
  * 
  * @author Emily
  *

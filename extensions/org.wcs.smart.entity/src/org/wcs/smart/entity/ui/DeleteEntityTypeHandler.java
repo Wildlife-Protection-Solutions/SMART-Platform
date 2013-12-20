@@ -46,6 +46,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -80,9 +81,9 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 				
-				monitor.beginTask("Delete Entity Types", toDelete.size());
+				monitor.beginTask(Messages.DeleteEntityTypeHandler_DeleteProgress, toDelete.size());
 				for (EntityTypeEditorInput type : toDelete){
-					monitor.subTask(MessageFormat.format("Deleting Type {0}", new Object[]{type.getName()}));
+					monitor.subTask(MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteTypeProgress, new Object[]{type.getName()}));
 					delete(type);
 					monitor.worked(1);
 				}		
@@ -112,7 +113,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 				
 			Attribute dmAttribute = entity.getDmAttribute();
 			
-			final String message = MessageFormat.format("The entity type {0} is associated with the data model attribute {1}. Do you want to delete this attribute from the data model?  ",
+			final String message = MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteAttributeConfirm,
 					new Object[]{type.getName(), dmAttribute.getName()});
 			final boolean[] deleteAttribute = new boolean[]{true};
 			
@@ -122,7 +123,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 				@Override
 				public void run() {
 					if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), 
-							"Confirm", message)){
+							Messages.DeleteEntityTypeHandler_ConfirmDialogTitle, message)){
 						deleteAttribute[0] = false;
 					}
 				}});
@@ -188,7 +189,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			if (session.getTransaction().isActive()){
 				session.getTransaction().rollback();
 			}
-			EntityPlugIn.displayLog(MessageFormat.format("Error deleting entity type {0}.", new Object[]{type.getName()}) + "\n\n" + ex.getMessage(), ex);
+			EntityPlugIn.displayLog(MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteError, new Object[]{type.getName()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}finally{
 			session.close();
 		}
@@ -201,7 +202,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-						"Delete", MessageFormat.format("The entity type {0} was not deleted.", new Object[]{entity.getName()}));
+						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, MessageFormat.format("The entity type {0} was not deleted.", new Object[]{entity.getName()})); //$NON-NLS-1$
 			}});
 	}
 }

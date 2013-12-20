@@ -33,12 +33,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import net.refractions.udig.project.internal.SetDefaultStyleProcessor;
-
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
+/**
+ * Represents an value for an entity attribute.
+ * 
+ * @author Emily
+ *
+ */
 @javax.persistence.Entity
 @Table(name="smart.entity_attribute_value")
 public class EntityAttributeValue {
@@ -188,7 +192,6 @@ public class EntityAttributeValue {
 	 */
 	@Transient
 	public Object getValue(){
-		String text = ""; //$NON-NLS-1$
 		switch (getEntityAttribute().getDmAttribute().getType()){
 		case TEXT:
 			return getStringValue();
@@ -211,7 +214,6 @@ public class EntityAttributeValue {
 	 */
 	@Transient
 	public void setValue(Object value){
-		String text = ""; //$NON-NLS-1$
 		switch (getEntityAttribute().getDmAttribute().getType()){
 		case TEXT:
 			setStringValue((String)value);

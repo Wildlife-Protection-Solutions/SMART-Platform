@@ -38,9 +38,9 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * Entity type object.  These objects
@@ -54,7 +54,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 public class EntityType extends NamedKeyItem{
 
 	public enum Status{
-		ACTIVE("Active"), INACTIVE("Inactive");
+		ACTIVE(Messages.EntityType_ActiveStatusLabel), INACTIVE(Messages.EntityType_InvActiveStatusLabel);
 		
 		private String guiName;
 		
@@ -68,7 +68,7 @@ public class EntityType extends NamedKeyItem{
 	}
 	
 	public enum Type{
-		FIXED("Fixed"),TRANSIENT("Transient");
+		FIXED(Messages.EntityType_FixedTypeLabel),TRANSIENT(Messages.EntityType_TransientTypeLabel);
 
 		private String guiName;
 		
@@ -226,8 +226,8 @@ public class EntityType extends NamedKeyItem{
 	@Transient
 	public String getLabel(){
 		if (getName() != null){
-			return getName() + " [" + id + "]";
+			return getName() + " [" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		return "[" + id + "]";
+		return "[" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

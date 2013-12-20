@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.newwizard;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -14,21 +35,27 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityType.Type;
 
+/**
+ * Composite for modifying the type property of entity types.
+ * @author Emily
+ *
+ */
 public class TypeComposite extends AbstractEntityComposite{
 
 	private ComboViewer typeviewer;
 	
 	@Override
 	public String getName() {
-		return "Entity Type";
+		return Messages.TypeComposite_CompositeName;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Select the type of entity. Entities can either be fixed (waterholes) or transient (animals).";
+		return Messages.TypeComposite_CompositeDescription;
 	}
 
 	@Override
@@ -43,7 +70,7 @@ public class TypeComposite extends AbstractEntityComposite{
 		
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Type:");
+		l.setText(Messages.TypeComposite_TypeLabel);
 		
 		typeviewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		typeviewer.setContentProvider(ArrayContentProvider.getInstance());

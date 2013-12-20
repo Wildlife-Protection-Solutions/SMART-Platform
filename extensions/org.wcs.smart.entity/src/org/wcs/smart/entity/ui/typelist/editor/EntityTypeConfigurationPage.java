@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -63,6 +84,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.newwizard.IdComposite;
@@ -75,9 +97,14 @@ import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Editor page for displaying and modifying the
+ * entity type configuration page.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityTypeConfigurationPage extends EditorPart implements IEntityTypeEditorPage {
-
-	private static final int SECTION_SPACING = 8;
 	
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -143,7 +170,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		form.getBody().setLayout(glayout);
 		
 		if (this.parentEditor.canEdit()) {
-			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), "Translate...", SWT.WRAP);
+			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.EntityTypeConfigurationPage_TranslateLabel, SWT.WRAP);
 			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
@@ -156,7 +183,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		final Section summary = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE );
 		summary.setLayout(new GridLayout(2, false));
 		summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		summary.setText("Entity Type Summary");
+		summary.setText(Messages.EntityTypeConfigurationPage_SummarySectionName);
 		summary.addExpansionListener(new ExpansionAdapter() {			
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
@@ -195,7 +222,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		((GridLayout)rightContent.getLayout()).marginLeft = 20;
 		
 		//left
-		toolkit.createLabel(leftContent, "Status:");
+		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_StatusLabel);
 		txtStatus = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStatus.setEditable(false);
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -210,7 +237,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			}
 		});
 		
-		toolkit.createLabel(leftContent, "ID:");
+		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_IdLabel);
 		txtId = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtId.setEditable(false);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -225,7 +252,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			}
 		});
 
-		toolkit.createLabel(leftContent, "Name:");
+		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_NameLabel);
 		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -239,34 +266,34 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		});
 	
 		
-		toolkit.createLabel(leftContent, "Data Model Attribute:");
+		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_AttributeLabel);
 		txtDmAttribute = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtDmAttribute.setEditable(false);
 		txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtId.getLayoutData()).widthHint = 100;
-		toolkit.createLabel(leftContent, "");
+		toolkit.createLabel(leftContent, ""); //$NON-NLS-1$
 		
 		// - right
-		toolkit.createLabel(rightContent, "Type:");
+		toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_TypeLabel);
 		txtType = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtType.setEditable(false);
 		txtType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtType.getLayoutData()).widthHint = 100;
-		toolkit.createLabel(rightContent, "");
+		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
-		toolkit.createLabel(rightContent, "Created By:");
+		toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_CreateByLabel);
 		txtCreatedBy = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtCreatedBy.setEditable(false);
 		txtCreatedBy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtCreatedBy.getLayoutData()).widthHint = 100;
-		toolkit.createLabel(rightContent, "");
+		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
-		toolkit.createLabel(rightContent, "Date Created:");
+		toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_DateCreatedLabel);
 		txtDateCreated = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtDateCreated.setEditable(false);
 		txtDateCreated.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtDateCreated.getLayoutData()).widthHint = 100;
-		toolkit.createLabel(rightContent, "");
+		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
 		
 		summaryScroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -283,7 +310,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		
 		/* --- target section --- */
 		final Section attributeSelection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
-		attributeSelection.setText("Entity Attributes");
+		attributeSelection.setText(Messages.EntityTypeConfigurationPage_AttributeLabels);
 		attributeSelection.setLayout(new GridLayout(1, false));
 		attributeSelection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		attributeSelection.addExpansionListener(new ExpansionAdapter() {
@@ -334,7 +361,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		});
 		
 		TableViewerColumn colAlias = new TableViewerColumn(attributeTable, SWT.NONE);
-		colAlias.getColumn().setText("Alias");
+		colAlias.getColumn().setText(Messages.EntityTypeConfigurationPage_AliasColumnName);
 		colAlias.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -350,7 +377,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		});
 		
 		TableViewerColumn colAttribute = new TableViewerColumn(attributeTable, SWT.NONE);
-		colAttribute.getColumn().setText("Data Model Attribute Name");
+		colAttribute.getColumn().setText(Messages.EntityTypeConfigurationPage_DataModelAttributeNameColumnName);
 		colAttribute.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -370,15 +397,15 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		});
 		
 		TableViewerColumn colRequired = new TableViewerColumn(attributeTable, SWT.NONE);
-		colRequired.getColumn().setText("Required?");
+		colRequired.getColumn().setText(Messages.EntityTypeConfigurationPage_RequiredColumnName);
 		colRequired.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
 				if (element instanceof EntityAttribute){
 					if (((EntityAttribute) element).getIsRequired()){
-						return "Yes";
+						return Messages.EntityTypeConfigurationPage_RequiredYesLabel;
 					}else{
-						return "No";
+						return Messages.EntityTypeConfigurationPage_RequiredNoLabel;
 					}
 				}
 				return super.getText(element);
@@ -386,15 +413,15 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		});
 		
 		TableViewerColumn colPrimary = new TableViewerColumn(attributeTable, SWT.NONE);
-		colPrimary.getColumn().setText("Primary?");
+		colPrimary.getColumn().setText(Messages.EntityTypeConfigurationPage_PrimaryColumnName);
 		colPrimary.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
 				if (element instanceof EntityAttribute){
 					if (((EntityAttribute) element).getIsPrimary()){
-						return "Yes";
+						return Messages.EntityTypeConfigurationPage_PrimaryYesLabel;
 					}else{
-						return "No";
+						return Messages.EntityTypeConfigurationPage_PrimaryNoLabel;
 					}
 				}
 				return super.getText(element);
@@ -413,7 +440,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		buttonComp.setLayout(new GridLayout());
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
 		
-		final Button btnMoveUp = toolkit.createButton(buttonComp, "Move Up", SWT.PUSH);
+		final Button btnMoveUp = toolkit.createButton(buttonComp, Messages.EntityTypeConfigurationPage_MoveUpLabel, SWT.PUSH);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)btnMoveUp.getLayoutData()).widthHint = 100;
 		btnMoveUp.addSelectionListener(new SelectionAdapter() {
@@ -448,7 +475,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		});
 		btnMoveUp.setEnabled(false);
 		
-		final Button btnMoveDown = toolkit.createButton(buttonComp, "Move Down", SWT.PUSH);
+		final Button btnMoveDown = toolkit.createButton(buttonComp, Messages.EntityTypeConfigurationPage_MoveDownLabel, SWT.PUSH);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)btnMoveDown.getLayoutData()).widthHint = 100;
 		btnMoveDown.addSelectionListener(new SelectionAdapter() {
@@ -536,6 +563,10 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		scroll.setMinSize(targetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 	
+	/*
+	 * Opens the translate names dialog for modifying
+	 * the entity type name.
+	 */
 	private void translateName() {
 		final EntityType toEdit = EntityTypeConfigurationPage.this.parentEditor.getEntityType();
 		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
@@ -559,6 +590,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		}
 	}
 	
+	/*
+	 * Adds a new attribute to the entity type.
+	 */
 	private void addAttribute(){
 		final List<Attribute> dmAttributes = new ArrayList<Attribute>();
 		final ArrayList<Attribute> attributeToAdd = new ArrayList<Attribute>();
@@ -574,9 +608,10 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-						monitor.beginTask("Loading Existing Attributes...", 1);
+						monitor.beginTask(Messages.EntityTypeConfigurationPage_LoadAttributeProgressName, 1);
 				
-						Criteria c = s.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));	
+						Criteria c = s.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));	 //$NON-NLS-1$
+						@SuppressWarnings("unchecked")
 						List<Attribute> atts = c.list();
 						dmAttributes.addAll(atts);
 					}
@@ -588,7 +623,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			
 			//display add attribute dialog 1
 			DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
-		AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
+			AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
 				null, tmpDm, SmartDB.getCurrentLanguage()){
 			
 				@Override
@@ -636,6 +671,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		addAttributes(attributeToAdd);
 	}
 	
+	/*
+	 * Adds the set of attributes to the entity type.
+	 */
 	private void addAttributes(List<Attribute> attributes){
 		EntityType et = parentEditor.getEntityType();
 		if (et.getAttributes() == null){
@@ -655,7 +693,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		parentEditor.saveEntityType();
 	}
 	
-	
+	/*
+	 * Deletes attributes from the entity type
+	 */
 	private void deleteAttribute(){
 		final List<EntityAttribute> toDelete = new ArrayList<EntityAttribute>();
 		
@@ -667,7 +707,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		}
 		boolean delete = false;
 		if (toDelete.size() > 1){
-			if (MessageDialog.openConfirm(getSite().getShell(), "Delete", MessageFormat.format("Are you sure you want to remove the {0,number,integer} selected attributes?", new Object[]{toDelete.size()}))){
+			if (MessageDialog.openConfirm(getSite().getShell(), Messages.EntityTypeConfigurationPage_DeleteDialogTitle, MessageFormat.format(Messages.EntityTypeConfigurationPage_DeleteDialogMessage, new Object[]{toDelete.size()}))){
 				delete = true;
 			}
 		}else{
@@ -675,9 +715,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			if (attName.length() == 0){
 				attName = toDelete.get(0).getDmAttribute().getName();
 			}else{
-				attName = attName + " (" + toDelete.get(0).getDmAttribute().getName() + ")";
+				attName = attName + " (" + toDelete.get(0).getDmAttribute().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			if (MessageDialog.openConfirm(getSite().getShell(), "Delete", MessageFormat.format("Are you sure you want to remove the attribute {0}?", 
+			if (MessageDialog.openConfirm(getSite().getShell(), Messages.EntityTypeConfigurationPage_DeleteDialogTitle, MessageFormat.format(Messages.EntityTypeConfigurationPage_DeleteConfirmMessage, 
 					new Object[]{attName}))){
 				delete = true;
 			}
@@ -697,8 +737,8 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						
 						s.saveOrUpdate(parentEditor.getEntityType());
 						
-						Query q = s.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)");
-						q.setParameterList("toDelete", toDelete);
+						Query q = s.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)"); //$NON-NLS-1$
+						q.setParameterList("toDelete", toDelete); //$NON-NLS-1$
 						q.executeUpdate();						
 						
 						parentEditor.getEntityType().getAttributes().removeAll(toDelete);
@@ -721,8 +761,8 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 
 									@Override
 									public void run() {
-										MessageDialog dialog = new MessageDialog(getSite().getShell(), "Delete Attribute", null,
-												MessageFormat.format("The attribute ''{0}'' is not longer associated with any elements in the Data Model.  Would you like to delete this attribute?", new Object[]{ ea.getDmAttribute().getName() } ), 
+										MessageDialog dialog = new MessageDialog(getSite().getShell(), Messages.EntityTypeConfigurationPage_DeleteAttributeDialogTitle, null,
+												MessageFormat.format(Messages.EntityTypeConfigurationPage_DeleteAttributeDialogMessage, new Object[]{ ea.getDmAttribute().getName() } ), 
 												MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 										ret[0] = dialog.open();
 									}});
@@ -739,7 +779,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						
 						s.getTransaction().commit();
 					}catch (Exception ex){
-						EntityPlugIn.displayLog("Error deleting the selected attributes.  Please close and reopen the editor." + "\n\n" + ex.getMessage(), ex);
+						EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_DeleteAttributeError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						s.getTransaction().rollback();
 					}finally{
 						s.close();
@@ -747,7 +787,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				}
 			});
 			}catch (Exception ex){
-				EntityPlugIn.displayLog("Error deleting entity attribute.  Please close and re-open the editor. " + "\n\n" + ex.getMessage(), ex);
+				EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_DeleteAttributeError2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
 			try{
@@ -764,6 +804,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		}
 	}
 	
+	/*
+	 * Edits a attribute
+	 */
 	private void editAttribute(){
 		boolean fire = false;
 		Object type = ((StructuredSelection)attributeTable.getSelection()).getFirstElement();
@@ -798,7 +841,12 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	}
 	
 	/**
-	 * Updates the widgets with the value from the plan.
+	 * Updates the widgets in the composite 
+	 * with the entity type.
+	 * @param currentSession open session
+	 * @param typeChanged if the entity type structure has changed (if false
+	 * only an entity may have been modified)
+	 * 
 	 */
 	public void updatePage(Session currentSession, boolean typeChanged) {
 		EntityType type = this.parentEditor.getEntityType();
@@ -829,8 +877,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent){
-		Hyperlink editLink = toolkit.createHyperlink(parent, "edit", SWT.WRAP);
-		
+		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
 		if (!this.parentEditor.canEdit()) {
 			editLink.setEnabled(false);
 			editLink.setVisible(false);

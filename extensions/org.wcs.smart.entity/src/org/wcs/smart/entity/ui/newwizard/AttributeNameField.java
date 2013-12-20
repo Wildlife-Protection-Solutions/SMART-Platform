@@ -44,10 +44,18 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.KeyInputDialog;
 
+/**
+ * Composite for entering attribute name for attribute
+ * associated with entity type. 
+ *  
+ * @author Emily
+ *
+ */
 public class AttributeNameField extends AbstractEntityComposite{
 
 	private Text txtAttributeName;
@@ -57,18 +65,18 @@ public class AttributeNameField extends AbstractEntityComposite{
 	
 	@Override
 	public String getName() {
-		return "Entity Attribute Name";
+		return Messages.AttributeNameField_CompositeName;
 	}
 
 	@Override
 	public String getDescription() {
-		return "An attribute with this name and id will be create in the data model to reference this entity type.";
+		return Messages.AttributeNameField_CompositeDescription;
 	}
 
 	@Override
 	public String validate() {
 		if (txtAttributeName.getText().trim().length() == 0){
-			return "An attribute name must be provided";
+			return Messages.AttributeNameField_AttributeNameRequired;
 		}
 		return DataModel.validateName(txtAttributeName.getText().trim(), SmartDB.getCurrentLanguage());
 		
@@ -80,7 +88,7 @@ public class AttributeNameField extends AbstractEntityComposite{
 		main.setLayout(new GridLayout(3, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Attribute Name:");
+		l.setText(Messages.AttributeNameField_NameLabel);
 		
 		txtAttributeName = new Text(main, SWT.BORDER);
 		txtAttributeName.addModifyListener(new ModifyListener() {
@@ -101,19 +109,19 @@ public class AttributeNameField extends AbstractEntityComposite{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Attribute Key:");
+		l.setText(Messages.AttributeNameField_NameKey);
 		txtAttributeId = new Text(main, SWT.BORDER);
 		txtAttributeId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		Button btnEditKey = new Button(main, SWT.PUSH);
-		btnEditKey.setText("...");
+		btnEditKey.setText("..."); //$NON-NLS-1$
 		btnEditKey.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (!MessageDialog
 						.openConfirm(
 								txtAttributeId.getShell(),
-								"Set Key",
-								"Keys effect reporting across multiple conservation areas, and should not be changed unless you understand the implications.  Are you sure you want to continue?")){
+								Messages.AttributeNameField_KeyDialogTitle,
+								Messages.AttributeNameField_KeyDialogMessage)){
 					return;
 				}
 				KeyInputDialog id = new KeyInputDialog(txtAttributeId.getShell(), txtAttributeId.getText(), sharedKeys);
@@ -155,8 +163,9 @@ public class AttributeNameField extends AbstractEntityComposite{
 	@Override
 	public void initFields(EntityType entityType, Session session) {
 		//load other entity keys
-		Query q = session.createQuery("SELECT keyId from Attribute WHERE conservationArea = :ca");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		Query q = session.createQuery("SELECT keyId from Attribute WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
 		List<String> keys = q.list();
 		sharedKeys = new ArrayList<NamedKeyItem>();
 				
@@ -167,7 +176,7 @@ public class AttributeNameField extends AbstractEntityComposite{
 		}
 				
 		if (entityType.getDmAttribute() == null){
-			txtAttributeName.setText(entityType.getName() + " ID");
+			txtAttributeName.setText(entityType.getName() + Messages.AttributeNameField_IdLabel);
 			txtAttributeId.setText(NamedKeyItem.generateKey(txtAttributeName.getText(), sharedKeys));
 			txtAttributeId.setData(null);
 			txtAttributeName.setData(null);

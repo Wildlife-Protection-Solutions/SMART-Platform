@@ -37,6 +37,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * An entity object.  This represents a particular
@@ -53,13 +54,13 @@ public class Entity extends UuidItem {
 	public static final int ID_MAX_LENGTH = 32;
 	public static final int KEY_MAX_LENGTH = 128;
 			
-	public static final String ID_FIELD_NAME = "ID";
-	public static final String STATUS_FIELD_NAME = "Status";
-	public static final String X_FIELD_NAME = "X Position:";
-	public static final String Y_FIELD_NAME = "Y Position:";
+	public static final String ID_FIELD_NAME = Messages.Entity_IDFieldName;
+	public static final String STATUS_FIELD_NAME = Messages.Entity_StatusFieldName;
+	public static final String X_FIELD_NAME = Messages.Entity_XFieldName;
+	public static final String Y_FIELD_NAME = Messages.Entity_YFieldName;
 	
 	public enum Status{
-		ACTIVE("Active"), INACTIVE("InActive");
+		ACTIVE(Messages.Entity_ActiveStatusLabel), INACTIVE(Messages.Entity_InActiveStatusLabel);
 		
 		private String guiName;
 		

@@ -26,17 +26,19 @@ import org.hibernate.Session;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.common.filter.StringFilterComposite.TextField;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * Entity type filter
+ * Filter for filtering entity types.
+ * 
  * @author Emily
  *
  */
 public class EntityTypeFilter  {
 
-	private static StringFilterComposite.TextField ENTITYTYPE_ID_FILTER = new StringFilterComposite.TextField("ID", "e.id");
-	private static StringFilterComposite.TextField ENTITYTYPE_NAME_FILTER = new StringFilterComposite.TextField("Name", "lbl.value"); 
+	private static StringFilterComposite.TextField ENTITYTYPE_ID_FILTER = new StringFilterComposite.TextField(Messages.EntityTypeFilter_IDFieldName, "e.id"); //$NON-NLS-1$
+	private static StringFilterComposite.TextField ENTITYTYPE_NAME_FILTER = new StringFilterComposite.TextField(Messages.EntityTypeFilter_NameFieldName, "lbl.value");  //$NON-NLS-1$
 	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {ENTITYTYPE_ID_FILTER, ENTITYTYPE_NAME_FILTER};
 	
 	private EntityType.Type[] types = null;
@@ -151,14 +153,14 @@ public class EntityTypeFilter  {
 		
 		if (strFilter != null && stringComparator != null && searchField != null){
 			str.append(" AND "); //$NON-NLS-1$
-			str.append(" lower(" + searchField.getDbFieldName() + ") like :eid "); //$NON-NLS-1$
+			str.append(" lower(" + searchField.getDbFieldName() + ") like :eid "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		str.append(" ORDER BY lbl.value asc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString());
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		query.setParameter("language", SmartDB.getCurrentLanguage());
+		query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
 		
 		if (types != null && types.length > 0){
 			query.setParameterList("types", this.types); //$NON-NLS-1$

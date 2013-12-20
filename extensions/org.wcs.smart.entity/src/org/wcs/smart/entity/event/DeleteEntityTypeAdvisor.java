@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
 
@@ -45,7 +46,7 @@ public class DeleteEntityTypeAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof EntityType)){
-			return "Invalid object type.";
+			return Messages.DeleteEntityTypeAdvisor_InvalidType;
 		}
 		EntityType toDelete = (EntityType)object;
 		
@@ -55,8 +56,8 @@ public class DeleteEntityTypeAdvisor implements IDeleteAdvisor {
 			try{
 				DeleteManager.canDelete(e, session);			
 			}catch (Exception ex){
-				return MessageFormat.format("The Entity Type {0} cannot be deleted, as the associated entity {1} cannot be deleted.", new Object[]{toDelete.getName(), e.getId()})
-						+ "\n\n" + ex.getMessage();
+				return MessageFormat.format(Messages.DeleteEntityTypeAdvisor_CannotDelete, new Object[]{toDelete.getName(), e.getId()})
+						+ "\n\n" + ex.getMessage(); //$NON-NLS-1$
 			}	
 		}
 		
