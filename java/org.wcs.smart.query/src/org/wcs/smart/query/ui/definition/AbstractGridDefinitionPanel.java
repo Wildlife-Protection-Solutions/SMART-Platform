@@ -440,7 +440,6 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 			try {
 				return ((Projection)o).getCrs();
 			} catch (FactoryException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

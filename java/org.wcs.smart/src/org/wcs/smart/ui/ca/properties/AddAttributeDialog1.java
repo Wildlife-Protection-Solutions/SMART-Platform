@@ -26,7 +26,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,10 +43,15 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -62,6 +72,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
  * Dialog to prompt user if they want to create a new attribute or add one of
@@ -88,6 +99,8 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	private Button btnAddNew; // add new radio
 	private Button btnAddExsiting; // add existing radio
 	private Label lblSelectAttribute; // select attribute label
+	
+	private FilterComposite txtFilter;
 
 	/* Data Model Items */
 	private Language lang; // current working language
@@ -242,17 +255,55 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		lblSelectAttribute.setBounds(0, 0, 58, 13);
 		lblSelectAttribute.setText(Messages.AddAttributeDialog1_SelectAttribute_Label);
 
+		//search filter field
+		final AttributeNameFilter viewerFilter = new AttributeNameFilter();
+		txtFilter = new FilterComposite(compAddExisting, SWT.BORDER);
+		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtFilter.addChangeListener(new ChangeListener() {	
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				viewerFilter.setFilterString(txtFilter.getPatternFilter());
+				checkboxTableViewer.refresh();
+			}
+		});
+	
+		//spacer label
+		new Label(compAddExisting, SWT.NONE);
+		
+		//table viewer
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(compAddExisting,
-				SWT.BORDER | SWT.FULL_SELECTION);
+				SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		Table tblAttributes = checkboxTableViewer.getTable();
 		tblAttributes.setHeaderVisible(false);
+		checkboxTableViewer.addFilter(viewerFilter);
+		
+		checkboxTableViewer.getTable().addKeyListener(new KeyAdapter() {
+			//spacebar check
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (checkboxTableViewer.getSelection().isEmpty()){
+					return;
+				}
+				if (e.keyCode == SWT.SPACE){
+					IStructuredSelection selection = ((IStructuredSelection)checkboxTableViewer.getSelection());
+					selection.getFirstElement();
+					boolean value = checkboxTableViewer.getChecked(selection.getFirstElement() );
+					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+						Object tp = (Object) iterator.next();
+						checkboxTableViewer.setChecked(tp, !value);
+					}
+					e.doit = false;
+							
+				}
+				
+			}
+		});
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		gd.heightHint = 300;
 		gd.widthHint = 300;
 		tblAttributes.setLayoutData(gd);
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
-
 		checkboxTableViewer.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element) {
@@ -317,7 +368,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		if (category != null){
 			setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(lang));
 		}else{
-			setMessage("Add a new attribute.");
+			setMessage(Messages.AddAttributeDialog1_NewAttributeTitle);
 		}
 		setTitle(Messages.AddAttributeDialog1_DialogTitle);
 		return myparent;
@@ -329,6 +380,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	private void enableAddAttribute(boolean enable) {
 		lblSelectAttribute.setEnabled(enable);
 		checkboxTableViewer.getTable().setEnabled(enable);
+		txtFilter.setEnabled(enable);
 	}
 
 	@Override
@@ -389,5 +441,30 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	 */
 	public List<CategoryAttribute> getAddedAttributes(){
 		return this.addedElements;
+	}
+	
+	
+	private class AttributeNameFilter extends ViewerFilter{
+		private String filter;
+		
+		public void setFilterString(String filter){
+			this.filter = filter;
+		}
+		
+		@Override
+		public boolean select(Viewer viewer, Object parentElement,
+				Object element) {
+			
+			if (filter == null || filter.length() == 0) {
+				return true;
+			}
+			String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			Attribute a = (Attribute) element;
+			if (a.getName().toLowerCase().matches(search)){
+				return true;
+			}
+			return false;
+		}
+		
 	}
 }

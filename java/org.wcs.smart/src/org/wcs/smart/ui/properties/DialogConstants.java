@@ -50,6 +50,6 @@ public class DialogConstants {
 	public static final String IMPORT_BUTTON_TEXT = Messages.DialogConstants_ImportButton_Label;
 	public static final String EXPORT_BUTTON_TEXT = Messages.DialogConstants_ExportButton_Label;
 	
-	public static final String EDIT_LINK_TEXT = "edit";
+	public static final String EDIT_LINK_TEXT = Messages.DialogConstants_EditLinkLabel;
 	
 }

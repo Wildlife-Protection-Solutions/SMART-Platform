@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui;
 
-import org.codehaus.groovy.tools.shell.IO;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;

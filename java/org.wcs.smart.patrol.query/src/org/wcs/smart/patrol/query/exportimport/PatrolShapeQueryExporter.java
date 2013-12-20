@@ -60,7 +60,6 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
-		// TODO Auto-generated method stub
 		if (queryType.getKey().equals(PatrolQueryType.KEY)){
 			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema());
 		}else{

@@ -59,11 +59,4 @@ public class QueryDataModelManager {
 		return instance;
 	}
 	
-	public static void dispose(){
-		//TODO: remove me
-//		if (dmListener != null){
-//			dmListener.dispose();
-//		}
-	}
-	
 }

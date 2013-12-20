@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
 

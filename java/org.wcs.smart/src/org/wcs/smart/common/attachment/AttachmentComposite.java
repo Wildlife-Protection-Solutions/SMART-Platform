@@ -112,10 +112,10 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 						SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
 						return;
 					}
-					ISmartAttachment wpa = createNewAttachement();
+					T wpa = createNewAttachement();
 					wpa.setCopyFromLocation(f);
 					wpa.setFilename(f.getName());
-					attachments.add((T)wpa);
+					attachments.add(wpa);
 				}
 				fireAttachmentsChangeListeners();
 				tblAttachments.refresh();
