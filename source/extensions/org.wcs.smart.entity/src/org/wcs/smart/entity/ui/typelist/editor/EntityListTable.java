@@ -21,24 +21,46 @@
  */
 package org.wcs.smart.entity.ui.typelist.editor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
  * A composite that contains a table for displaying the
@@ -50,9 +72,18 @@ import org.wcs.smart.entity.model.EntityType;
  */
 public class EntityListTable extends Composite {
 
+	private HashMap<TableViewerColumn, ColumnLabelProvider> tableLabelProviders;
 	private TableViewer entityTable;
 	private EntityTableViewerComparator tableSorter = new EntityTableViewerComparator();
 
+	
+	private ComboViewer filterFieldViewer;
+	private FilterComposite txtFilter;
+	private List<Object> filterColumns;
+	
+	private EntityTableFilter tableFilter;
+	private EntityActiveFilter activeFilter;
+	
 	/**
 	 * Creates a new table
 	 * @param parent
@@ -65,12 +96,41 @@ public class EntityListTable extends Composite {
 	}
 
 	/**
+	 * Sets the entity table input.
 	 * 
-	 * @return the underlying table viewer
+	 * @param input
 	 */
-	public TableViewer getViewer() {
-		return entityTable;
+	public void setInput(Object input){
+		//we remove any filters here so the data is
+		//all refreshed while a hibernate session is open
+		ViewerFilter[] currentFilters = entityTable.getFilters();
+		for (ViewerFilter f : currentFilters){
+			entityTable.removeFilter(f);
+		}
+		entityTable.setInput(input);
+
+		//add back any removed filters
+		for (ViewerFilter f : currentFilters){
+			entityTable.addFilter(f);
+		}
 	}
+	
+	/**
+	 * Adds a double click listener to the table
+	 * @param listener
+	 */
+	public void addDoubleClickListener(IDoubleClickListener listener){
+		entityTable.addDoubleClickListener(listener);
+	}
+	
+	/**
+	 * Adds a selection changed listener to the table
+	 * @param listener
+	 */
+	public void addSelectionChangedListener(ISelectionChangedListener listener){
+		entityTable.addSelectionChangedListener(listener);
+	}
+	
 
 	/**
 	 * 
@@ -84,7 +144,71 @@ public class EntityListTable extends Composite {
 	 * Create a table.
 	 */
 	private void createTable() {
-		// --- attribute table list
+		
+		// ---- FILTER FIELD -----
+		Composite filtercomp = new Composite(this, SWT.NONE);
+		GridLayout gl = new GridLayout(3, false);
+		gl.marginWidth =  0;
+		filtercomp.setLayout(gl);
+		filtercomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Label l = new Label(filtercomp, SWT.NONE);
+		l.setText(Messages.EntityListTable_FilterFieldLabel);
+		l.setToolTipText(Messages.EntityListTable_FilterFieldTooltip);
+		
+		filterFieldViewer = new ComboViewer(filtercomp, SWT.NONE);
+		filterFieldViewer.setContentProvider(ArrayContentProvider.getInstance());
+		filterFieldViewer.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				if (element instanceof TableViewerColumn){
+					return ((TableViewerColumn) element).getColumn().getText();
+				}
+				return super.getText(element);
+			}
+		});
+		filterFieldViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		//((GridData)filterFieldViewer.getControl().getLayoutData()).widthHint = 50;
+		filterFieldViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)filterFieldViewer.getSelection()).getFirstElement();
+				if (x instanceof TableViewerColumn){
+					tableFilter.setColumn((TableViewerColumn) x);
+				}else{
+					tableFilter.setColumn(null);
+				}
+				entityTable.refresh();	
+			}
+		});
+		
+		txtFilter = new FilterComposite(filtercomp, SWT.NONE);
+		txtFilter.addChangeListener(new ChangeListener() {	
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				tableFilter.setText(txtFilter.getPatternFilter());
+				entityTable.refresh();	
+			}
+		});
+		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)txtFilter.getLayoutData()).widthHint = 250;
+
+		// --- ACTIVE FILTER ---
+		final Button chActive = new Button(this, SWT.CHECK);
+		chActive.setText(Messages.EntityListTable_IncludeInactiveLabel);
+		chActive.setSelection(false);
+		chActive.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
+		chActive.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (chActive.getSelection()){
+					entityTable.removeFilter(activeFilter);
+				}else{
+					entityTable.addFilter(activeFilter);
+				}
+			}
+		});
+		
+		// --- ENTITY TABLE LIST ---
 		entityTable = new TableViewer(this, SWT.FULL_SELECTION | SWT.MULTI
 				| SWT.BORDER | SWT.V_SCROLL);
 		entityTable.getTable().setLayoutData(
@@ -94,6 +218,9 @@ public class EntityListTable extends Composite {
 		entityTable.getTable().setLinesVisible(true);
 
 		entityTable.setComparator(tableSorter);
+		tableFilter = new EntityTableFilter();
+		activeFilter = new EntityActiveFilter();
+		entityTable.setFilters(new ViewerFilter[]{tableFilter, activeFilter});
 	}
 
 	/**
@@ -109,17 +236,13 @@ public class EntityListTable extends Composite {
 		for (TableColumn c : entityTable.getTable().getColumns()) {
 			c.dispose();
 		}
-
-		createTableColumn(Entity.ID_FIELD_NAME, new ColumnLabelProvider() {
-			public String getText(Object element) {
-				if (element instanceof Entity) {
-					return ((Entity) element).getId();
-				}
-				return super.getText(element);
-			}
-		});
 		
-		createTableColumn(Entity.STATUS_FIELD_NAME, new ColumnLabelProvider() {
+		tableLabelProviders = new HashMap<TableViewerColumn, ColumnLabelProvider>();
+		
+		filterColumns = new ArrayList<Object>();
+		filterColumns.add(Messages.EntityListTable_AnyLabel);
+		
+		TableViewerColumn col = createTableColumn(Entity.STATUS_FIELD_NAME,60, new ColumnLabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof Entity) {
 					return ((Entity) element).getStatus().getGuiName();
@@ -128,6 +251,18 @@ public class EntityListTable extends Composite {
 			}
 		});
 		
+		col = createTableColumn(Entity.ID_FIELD_NAME,null, new ColumnLabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof Entity) {
+					return ((Entity) element).getId();
+				}
+				return super.getText(element);
+			}
+		});
+		filterColumns.add(col);
+		
+		
+		
 		if (entityType.getAttributes() == null){
 			return;
 		}
@@ -135,12 +270,11 @@ public class EntityListTable extends Composite {
 		for (final EntityAttribute ea : entityType.getAttributes()) {
 			if (ea.getIsPrimary()) {
 				// only show primary columns in this table
-				createTableColumn(ea.getName(), new ColumnLabelProvider() {
+				col = createTableColumn(ea.getName(),null, new ColumnLabelProvider() {
 						public String getText(Object element) {
 							if (element instanceof Entity) {
 								Entity e = (Entity) element;
-								EntityAttributeValue value = e
-										.findAttribute(ea);
+								EntityAttributeValue value = e.findAttribute(ea);
 								if (value != null) {
 									return value.getValueAsString();
 								}
@@ -149,20 +283,32 @@ public class EntityListTable extends Composite {
 							return super.getText(element);
 						}
 				});
+				if (ea.getDmAttribute().getType() == Attribute.AttributeType.LIST || 
+						ea.getDmAttribute().getType() == Attribute.AttributeType.TREE ||
+						ea.getDmAttribute().getType() == Attribute.AttributeType.TEXT ){
+					filterColumns.add(col);
+				}
 				
 			}
 		}
+		
+		filterFieldViewer.setInput(filterColumns);
+		filterFieldViewer.setSelection(new StructuredSelection(filterColumns.get(0)));
+		filterFieldViewer.refresh();
+		filterFieldViewer.getControl().getParent().layout(true,  true);
+		
 	}
+	
 	
 	/*
 	 * Creates a new table viewer column.
 	 */
-	private TableViewerColumn createTableColumn(String name, final ColumnLabelProvider provider){
+	private TableViewerColumn createTableColumn(String name, Integer width, final ColumnLabelProvider provider){
+		
 		final TableViewerColumn column = new TableViewerColumn(entityTable, SWT.NONE);
 		column.getColumn().setText(name);
-		column.getColumn().setWidth(160);
+		column.getColumn().setWidth(width == null ? 150 : width);
 		column.setLabelProvider(provider);
-		
 		column.getColumn().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -173,9 +319,65 @@ public class EntityListTable extends Composite {
 			}
 
 		});
+		tableLabelProviders.put(column, provider);
 		return column;
 	}
 	
+	
+	private class EntityTableFilter extends ViewerFilter{
+		private String filterText = null;
+		private TableViewerColumn filterColumn = null;
+		
+		
+		
+		public void setText(String text){
+			this.filterText = text;
+		}
+		
+		public void setColumn(TableViewerColumn filter){
+			this.filterColumn = filter;
+		}
+
+		@Override
+		public boolean select(Viewer viewer, Object parentElement,
+				Object element) {
+			
+			if (filterText == null || filterText.trim().length() == 0){
+				return true;
+			}
+			
+			String filter = ".*" + Pattern.quote(filterText.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			
+			if (filterColumn != null){
+				return tableLabelProviders.get(filterColumn).getText(element).toLowerCase().matches(filter);
+			}else{
+				//search all columns				
+				for (Object x : filterColumns){
+					if (x instanceof TableViewerColumn){
+						if (tableLabelProviders.get(x).getText(element).toLowerCase().matches(filter)){
+							return true;
+						}
+					}
+				}
+				
+			}
+			
+			return false;
+		}
+	}
+	
+	/**
+	 * A filter that filters based on if an entity is active
+	 * or not.
+	 *
+	 */
+	private class EntityActiveFilter extends ViewerFilter {
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			Entity p = (Entity) element;
+			return p.getStatus() == Status.ACTIVE;
+		}
+	}
 	
 	private class EntityTableViewerComparator extends ViewerComparator {
 		  private ColumnLabelProvider sortColumn;
