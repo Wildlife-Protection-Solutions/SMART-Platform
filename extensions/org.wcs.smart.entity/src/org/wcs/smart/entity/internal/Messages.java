@@ -35,6 +35,10 @@ public class Messages extends NLS {
 	public static String EntityEditPanelComposite_IdError;
 	public static String EntityEditPanelComposite_xError;
 	public static String EntityEditPanelComposite_yError;
+	public static String EntityListTable_AnyLabel;
+	public static String EntityListTable_FilterFieldLabel;
+	public static String EntityListTable_FilterFieldTooltip;
+	public static String EntityListTable_IncludeInactiveLabel;
 	public static String EntityPlugIn_ErrorDialogTitle;
 	public static String EntityType_ActiveStatusLabel;
 	public static String EntityType_FixedTypeLabel;

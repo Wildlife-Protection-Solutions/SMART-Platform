@@ -141,7 +141,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		// --- attribute table list
 		entityTable = new EntityListTable(main);
 		entityTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		entityTable.getViewer().addDoubleClickListener(new IDoubleClickListener() {
+		entityTable.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				editEntity();
@@ -206,7 +206,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		entityInfoPanel = new EntityInfoPanelComposite(entityDetails);
 		entityInfoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		entityTable.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+		entityTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -217,7 +217,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		
 		btnEdit.setEnabled(false);
 		btnDelete.setEnabled(false);
-		entityTable.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+		entityTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -404,12 +404,12 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		}else{
 			entityInfoPanel.initEntityFields();
 		}
-		entityTable.getViewer().setInput(type.getEntities());
+		entityTable.setInput(type.getEntities());
 	}
 	
 	@Override
 	public void setFocus() {
-		entityTable.getViewer().getTable().setFocus();
+		entityTable.setFocus();
 	}
 
 }
