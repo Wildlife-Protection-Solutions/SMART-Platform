@@ -82,6 +82,7 @@ import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
 import org.wcs.smart.plan.ui.targets.TargetPropertyDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 /**
  * Plan editor summary page.
  * 
@@ -686,7 +687,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent, final PanelType panelType) {
-		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.PlanEditor_Edit_Link_Label, SWT.WRAP);
+		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
 		
 		if (!this.parentEditor.canEdit()) {
 			editLink.setEnabled(false);

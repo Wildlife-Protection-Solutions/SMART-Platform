@@ -172,8 +172,6 @@ public class Messages extends NLS {
 
 	public static String IntelligenceDescComposite_NameTooLong;
 
-	public static String IntelligenceEditor_Edit_LinkLabel;
-
 	public static String IntelligenceEditor_ErrorCreatingPages;
 
 	public static String IntelligenceEditor_FailOpenPatrol_Error;

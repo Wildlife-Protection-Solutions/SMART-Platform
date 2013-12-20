@@ -65,6 +65,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Incident editor summary page
@@ -335,7 +336,7 @@ public class IncidentSummaryPage extends EditorPart {
 	
 	private void createEdit(Composite parent, String canEdit, final String panelId){
 		if (canEdit == null){
-			Hyperlink l = toolkit.createHyperlink(parent,Messages.IncidentSummaryPage_EditLabel,SWT.NONE);
+			Hyperlink l = toolkit.createHyperlink(parent,DialogConstants.EDIT_LINK_TEXT,SWT.NONE);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
 			l.addHyperlinkListener(new IHyperlinkListener() {
 				@Override

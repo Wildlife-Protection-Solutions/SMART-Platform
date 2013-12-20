@@ -67,6 +67,7 @@ import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 /**
  * Ingeliigence editor summary page
@@ -277,7 +278,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent, final PanelType panelType) {
-		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
+		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
 		
 		boolean canEdit = canEdit();
 		editLink.setEnabled(canEdit);

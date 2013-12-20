@@ -63,6 +63,7 @@ import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Motivation Intelligence contribution item for the patrol editor.
@@ -187,7 +188,7 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent) {
-		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
+		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
