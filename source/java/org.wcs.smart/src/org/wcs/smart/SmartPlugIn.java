@@ -31,6 +31,8 @@ import net.refractions.udig.catalog.IService;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.equinox.p2.ui.Policy;
+import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
@@ -164,6 +166,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		configureP2Policy(ProvisioningUI.getDefaultUI().getPolicy());
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
 		
 		// add delete handler
@@ -257,6 +260,14 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	private void configureP2Policy(Policy policy) {
+//		policy.setRepositoriesVisible(false);
+		policy.setShowLatestVersionsOnly(true);
+		policy.setGroupByCategory(true);
+		policy.setShowDrilldownRequirements(true);
+		policy.setRestartPolicy(Policy.RESTART_POLICY_PROMPT);
+	}
+	
 	public static void log(int status, String message, Throwable t){
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
 	}
