@@ -125,7 +125,7 @@ public class GriddedItemPanel extends AbstractQueryItemPanel{
 		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
 	}
 	
-	
+	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer == null){
 			return;

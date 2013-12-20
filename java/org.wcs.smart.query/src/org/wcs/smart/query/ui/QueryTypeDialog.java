@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.query.ui;
 
+import org.codehaus.groovy.tools.shell.IO;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -90,6 +93,13 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		ops.setInput(queryTypes);
 		ops.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)ops.getControl().getLayoutData()).heightHint = 150;
+		ops.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				buttonPressed(IDialogConstants.OK_ID);
+			}
+		});
+		
 		
 		setTitle(Messages.QueryTypeDialog_Title);
 		setMessage(Messages.QueryTypeDialog_Message);

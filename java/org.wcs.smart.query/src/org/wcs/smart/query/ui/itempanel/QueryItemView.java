@@ -28,11 +28,13 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.QuerySourceProvider;
@@ -58,9 +60,10 @@ public class QueryItemView extends ViewPart {
 	private Composite main;
 	
 	private Label defaultFilter;
+	private QueryDataModelModifiedListener dmListener;
 	
 	public QueryItemView() {
-
+		dmListener = new QueryDataModelModifiedListener();
 	}
 
 	/**
@@ -100,7 +103,9 @@ public class QueryItemView extends ViewPart {
 							(IQueryType)provider.getCurrentState().get(QuerySourceProvider.QUERY_TYPE));
 					
 					if (panel != null){
-						((StackLayout)main.getLayout()).topControl = panel.getComposite(main);
+						Composite pnlComp = panel.getComposite(main);
+						pnlComp.setData(panel);
+						((StackLayout)main.getLayout()).topControl = pnlComp;
 					}else{
 						((StackLayout)main.getLayout()).topControl = defaultFilter;
 					}
@@ -115,8 +120,30 @@ public class QueryItemView extends ViewPart {
 		});
 	}
 
+	/**
+	 * Refreshes all item panels that have been loaded into the view
+	 */
+	public void refresh(){
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				for (Control c : main.getChildren()){
+					if (c.getData() != null){
+						if (c.getData() instanceof IQueryItemPanel){
+							((IQueryItemPanel)c.getData()).refreshPanel();
+						}
+					}
+				}
+			}	
+		});
+		
+	}
+	
 	@Override
 	public void dispose(){
+		if (dmListener != null){
+			dmListener.dispose();
+		}
 		super.dispose();
 	}
 	

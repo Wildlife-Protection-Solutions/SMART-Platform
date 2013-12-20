@@ -130,6 +130,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
 	}
 	
+	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer != null){
 			filterTreeViewer.setInput(LOADING_TEXT);

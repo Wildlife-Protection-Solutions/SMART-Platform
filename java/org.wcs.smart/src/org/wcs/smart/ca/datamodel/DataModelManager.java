@@ -102,7 +102,7 @@ public class DataModelManager {
 	
 	
 	/**
-	 * Fires delete listeners
+	 * Fires add item listeners
 	 * 
 	 * @param currentSession
 	 * @param deleteItem
@@ -114,7 +114,7 @@ public class DataModelManager {
 	}
 	
 	/**
-	 * 
+	 * Fires then enabled state changed listeners 
 	 * @param currentSession
 	 * @param enabledItem
 	 */
@@ -136,7 +136,7 @@ public class DataModelManager {
 	}
 	
 	/**
-	 * Remove delete listsner
+	 * Removes the item changed listener
 	 * 
 	 * @param listener
 	 */
