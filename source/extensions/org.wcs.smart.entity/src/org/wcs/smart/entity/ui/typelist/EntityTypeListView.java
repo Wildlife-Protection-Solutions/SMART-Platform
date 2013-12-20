@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist;
 
 import java.util.Iterator;
@@ -34,19 +55,26 @@ import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * View containing a list of supported entity types.
+ *  
+ * @author Emily
+ *
+ */
 public class EntityTypeListView extends ViewPart implements IEntityTypeFilteringView{
 	
 	public static final String ID = "org.wcs.smart.entity.typelist"; //$NON-NLS-1$
 	private TableViewer entityListViewer;
 	private EntityTypeFilter filter = new EntityTypeFilter();
 
-	private Object[] loadingInput = new Object[]{"Loading..."};
+	private Object[] loadingInput = new Object[]{Messages.EntityTypeListView_LoadingLabel};
 	
 	
 	private IPartListener2 partListener = new IPartListener2() {
@@ -88,10 +116,10 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 	/*
 	 * Job that updates the patrol list based on the current filter
 	 */
-	private Job updateJob = new Job("Refreshing Entity Type List") {
+	private Job updateJob = new Job(Messages.EntityTypeListView_RefreshJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Loading Entity Types", 1);
+			monitor.beginTask(Messages.EntityTypeListView_LoadingProgress, 1);
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {

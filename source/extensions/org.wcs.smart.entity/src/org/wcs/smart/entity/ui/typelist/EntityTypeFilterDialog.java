@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
@@ -148,9 +149,9 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
-		setMessage("Filters entity types using various parameters.");
-		setTitle("Entity Type Filters");
-		getShell().setText("Entity Type Filters");
+		setMessage(Messages.EntityTypeFilterDialog_DialogMessage);
+		setTitle(Messages.EntityTypeFilterDialog_DialogTitle);
+		getShell().setText(Messages.EntityTypeFilterDialog_DialogTitle);
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -159,18 +160,18 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-			Composite status = createGroupComposite("Entity Type Status", composite);
+			Composite status = createGroupComposite(Messages.EntityTypeFilterDialog_StatusGroupTitle, composite);
 			createStatusComposite(session, status);
 			
-			Composite type = createGroupComposite("Entity Type", composite);
+			Composite type = createGroupComposite(Messages.EntityTypeFilterDialog_EntityTypeGroupName, composite);
 			createTypeComposite(session, type);
 			
-			Composite patrolIdComp = createGroupComposite("Entity Type", composite);
+			Composite patrolIdComp = createGroupComposite(Messages.EntityTypeFilterDialog_IdNameGroupName, composite);
 			idFilterCmp = new StringFilterComposite(
 					patrolIdComp, SWT.NONE,  EntityTypeFilter.SEARCH_FIELDS);
 			
-			idFilterCmp.setIncludeAllRadioLabel("Include All");
-			idFilterCmp.setFilterRadioLabel("Filter");
+			idFilterCmp.setIncludeAllRadioLabel(Messages.EntityTypeFilterDialog_IncludeAll);
+			idFilterCmp.setFilterRadioLabel(Messages.EntityTypeFilterDialog_FilterLabel);
 			
 			updateControlsValues();
 		} finally {
@@ -191,10 +192,10 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 		typeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		btnIncludeAllTypes = new Button(typeComp, SWT.RADIO);
-		btnIncludeAllTypes.setText("Include All Types");
+		btnIncludeAllTypes.setText(Messages.EntityTypeFilterDialog_IncludeAllTypes);
 		
 		btnFilterTypes = new Button(typeComp, SWT.RADIO);
-		btnFilterTypes.setText("Filter Types");
+		btnFilterTypes.setText(Messages.EntityTypeFilterDialog_FilterTypesLabel);
 		
 		typeTableViewer = CheckboxTableViewer.newCheckList(typeComp, SWT.BORDER | SWT.FULL_SELECTION);
 		typeTableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));		
@@ -234,10 +235,10 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 		typeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnIncludeAllStatus = new Button(typeComp, SWT.RADIO);
-		btnIncludeAllStatus.setText("Include All");
+		btnIncludeAllStatus.setText(Messages.EntityTypeFilterDialog_IncludeAllStatus);
 		
 		btnFilterStatus = new Button(typeComp, SWT.RADIO);
-		btnFilterStatus.setText("Filter Status");
+		btnFilterStatus.setText(Messages.EntityTypeFilterDialog_FilterStatus);
 		
 		statusTableViewer = CheckboxTableViewer.newCheckList(typeComp, SWT.BORDER | SWT.FULL_SELECTION);
 		statusTableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));		

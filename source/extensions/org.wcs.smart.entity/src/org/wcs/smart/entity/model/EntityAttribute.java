@@ -32,6 +32,13 @@ import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
+/**
+ * Represents a attribute associated
+ * with an etity type.
+ * 
+ * @author Emily
+ *
+ */
 @Entity
 @Table(name="smart.entity_attribute")
 public class EntityAttribute extends NamedItem {

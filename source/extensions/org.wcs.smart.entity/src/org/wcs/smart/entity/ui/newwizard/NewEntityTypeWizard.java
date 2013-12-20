@@ -36,6 +36,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityType.Status;
 import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor;
@@ -56,7 +57,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 	public NewEntityTypeWizard(){
 		super();
 		
-		setWindowTitle("New Entity Type");
+		setWindowTitle(Messages.NewEntityTypeWizard_WizardTitle);
 
 		newType = new EntityType();
 		newType.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -67,14 +68,14 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		//set initial id
 		session = HibernateManager.openSession();
 		Query q = session.createQuery("SELECT max(id) FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> maxIs = q.list();
 		
 		Integer i = 1;
 		if (maxIs.size() > 0){
 			String id = (String) maxIs.get(0);
 			try{
-				i = Integer.parseInt(id.replaceAll("[^0-9]", ""));
+				i = Integer.parseInt(id.replaceAll("[^0-9]", "")); //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				//eat me
 			}
@@ -85,7 +86,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 			}
 		}
 		
-		DecimalFormat entityIdFormat = new DecimalFormat("000000");
+		DecimalFormat entityIdFormat = new DecimalFormat("000000"); //$NON-NLS-1$
 		newType.setId(entityIdFormat.format(i));
 		
 		
@@ -104,7 +105,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 			session.getTransaction().commit();
 		}catch(Exception ex){
 			session.getTransaction().rollback();
-			EntityPlugIn.displayLog("Error saving new entity type." + ex.getMessage(), ex);
+			EntityPlugIn.displayLog(Messages.NewEntityTypeWizard_ErrorSavingEntityType + ex.getMessage(), ex);
 			return false;
 		}
 		

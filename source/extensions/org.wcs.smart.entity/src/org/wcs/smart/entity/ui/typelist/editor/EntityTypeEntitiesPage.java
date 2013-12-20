@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -10,27 +31,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -46,13 +60,18 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.EntityAttribute;
-import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Editor page for managing entities.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -112,7 +131,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		final Section entityList = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED );
 		entityList.setLayout(new GridLayout(1, false));
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		entityList.setText("Entity List");
+		entityList.setText(Messages.EntityTypeEntitiesPage_EntityListSectionTitle);
 		
 		Composite main = toolkit.createComposite(entityList);
 		main.setLayout(new GridLayout());
@@ -167,7 +186,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		final Section entityDetailsSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
 		entityDetailsSection.setLayout(new GridLayout(1, false));
 		entityDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		entityDetailsSection.setText("Entity Details");
+		entityDetailsSection.setText(Messages.EntityTypeEntitiesPage_EntityDetailsSectionTitle);
 		entityDetailsSection.addExpansionListener(new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
@@ -208,7 +227,9 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		});
 	}
 	
-	
+	/*
+	 * Adds an entity
+	 */
 	private void addEntity(){
 		NewEntityDialog dialog = new NewEntityDialog(getSite().getShell(), parentEditor.getEntityType(),null);
 		if (dialog.open() == NewEntityDialog.OK){
@@ -220,7 +241,9 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		}
 	}
 	
-	
+	/*
+	 * Deletes entities
+	 */
 	private void deleteEntity(){
 		if (entityTable.getSelection().isEmpty()){
 			return;
@@ -234,13 +257,13 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		
 		String message = null;
 		if (toDelete.size() == 1){
-			message = MessageFormat.format("Are you sure you want to delete the entity {0}? The associated list item from the data model attribute {1} will also be deleted. This action cannot be undone.",
+			message = MessageFormat.format(Messages.EntityTypeEntitiesPage_DeleteConfirmSingle,
 					new Object[]{toDelete.get(0).getId(), parentEditor.getEntityType().getDmAttribute().getName()});
 		}else{
-			message = MessageFormat.format("Are you sure you want to delete the {0,number,integer} selected entities? The associated list items from the data model attribute {1} will also be deleted. This action cannot be undone.",
+			message = MessageFormat.format(Messages.EntityTypeEntitiesPage_DeleteConfirmMulti,
 					new Object[]{toDelete.size(), toDelete.get(0).getEntityType().getDmAttribute().getName()});
 		}
-		if (!MessageDialog.openConfirm(getSite().getShell(), "Delete", message)){
+		if (!MessageDialog.openConfirm(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteDialogTitle, message)){
 			return;
 		}
 		
@@ -257,7 +280,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			}
 		});
 		}catch (Exception ex){
-			EntityPlugIn.displayLog("Error deleting entities.  Please close and re-open the editor. " + "\n\n" + ex.getMessage(), ex);
+			EntityPlugIn.displayLog(Messages.EntityTypeEntitiesPage_DeleteError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		try{
@@ -268,6 +291,9 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		
 	}
 	
+	/*
+	 * deletes a specific entity
+	 */
 	private void deleteEntity(final Entity e){
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
@@ -278,18 +304,18 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			String errorMessage = null;
 			try{
 				if (!DeleteManager.canDelete(e, s)){
-					errorMessage = MessageFormat.format("The entity {0} cannot be removed.", new Object[]{e.getId()});
+					errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityDeleteError, new Object[]{e.getId()});
 				}
 			}catch (Exception ex){
 				EntityPlugIn.log(ex.getMessage(), ex);
-				errorMessage = MessageFormat.format("The entity {0} cannot be removed." + "\n\n" + ex.getMessage(), new Object[]{e.getId()});
+				errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityDeleteError + "\n\n" + ex.getMessage(), new Object[]{e.getId()}); //$NON-NLS-1$
 			}
 			if (errorMessage != null){
 				final String lerror = errorMessage;
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						MessageDialog.openInformation(getSite().getShell(), "Delete Entity",lerror);
+						MessageDialog.openInformation(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteEntityDialogTitle,lerror);
 					}});
 				return;
 			}
@@ -301,11 +327,11 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			errorMessage = null;
 			try{
 				if (!DeleteManager.canDelete(itemToDelete, s)){
-					errorMessage = MessageFormat.format("The entity {0} cannot be removed because the attribute list item {1} cannot be removed.", new Object[]{e.getId(), itemToDelete.getName()});
+					errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityCannotDelete, new Object[]{e.getId(), itemToDelete.getName()});
 				}
 			}catch (Exception ex){
 				EntityPlugIn.log(ex.getMessage(), ex);
-				errorMessage = MessageFormat.format("The entity {0} cannot be removed because the attribute list item {1} cannot be removed." + "\n\n" + ex.getMessage(), new Object[]{e.getId(), itemToDelete.getName()});
+				errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityCannotDelete + "\n\n" + ex.getMessage(), new Object[]{e.getId(), itemToDelete.getName()}); //$NON-NLS-1$
 			}
 
 			if (errorMessage != null){
@@ -313,7 +339,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						MessageDialog.openInformation(getSite().getShell(), "Delete Entity",error);
+						MessageDialog.openInformation(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteEntityDialogTitle,error);
 					}});
 				return;
 			}
@@ -325,7 +351,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			EntityPlugIn.displayLog(MessageFormat.format("Error deleting the entity {0}.  " + "\n\n" + ex.getMessage(), new Object[]{e.getId()}), ex);
+			EntityPlugIn.displayLog(MessageFormat.format(Messages.EntityTypeEntitiesPage_DeleteEntityError + "\n\n" + ex.getMessage(), new Object[]{e.getId()}), ex); //$NON-NLS-1$
 		}finally{
 			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
@@ -345,6 +371,9 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		
 	}
 	
+	/*
+	 * edits the selected entity
+	 */
 	private void editEntity(){
 		if (entityTable.getSelection().isEmpty()){
 			return;
@@ -363,7 +392,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 	
 	
 	/**
-	 * Updates the table structure widgets with the value from the plan.
+	 * Updates the entity table
 	 */
 	public void updatePage(Session currentSession, boolean typeModified) {
 		EntityType type = this.parentEditor.getEntityType();

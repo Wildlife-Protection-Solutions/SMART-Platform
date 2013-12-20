@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import java.util.Arrays;
@@ -12,11 +33,19 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * Editor for managing entity types and 
+ * their entities.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityTypeEditor extends MultiPageEditorPart  {
 
 
@@ -107,18 +136,18 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 		try{
 			entityPage = new EntityTypeEntitiesPage(this);
 			int index = addPage(entityPage, getEditorInput());
-			super.setPageText(index, "Entities");
+			super.setPageText(index, Messages.EntityTypeEditor_EntitiesPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));
 
 			
 			configPage = new EntityTypeConfigurationPage(this);
 			index = addPage(configPage, getEditorInput());
-			super.setPageText(index, "Configuration");
+			super.setPageText(index, Messages.EntityTypeEditor_ConfigurationPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.CONFIGURATION_ICON));
 			
 					
 		}catch (Exception ex){
-			EntityPlugIn.displayLog("Error opening entity type editor. " + ex.getMessage(), ex);
+			EntityPlugIn.displayLog(Messages.EntityTypeEditor_ErrorOpeningEditor + ex.getMessage(), ex);
 		}
 		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
 		
@@ -187,23 +216,22 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 	public EntityType loadEntityType(){
 		byte[] uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
 		
+		EntityType et = null;
 		Session session = HibernateManager.openSession();
-		//load parent plan so don't have lazy loading issues later.
 		session.beginTransaction();
-		EntityType t = (EntityType) session.load(EntityType.class, uuid);
-//		if (t.getAttributes() != null){
-//			for (EntityAttribute a : t.getAttributes()){
-//				a.getDmAttribute().getNames().size();
-//				a.getNames().size();
-//			}
-//		}
-//		t.getDmAttribute().getNames().size();
-		session.getTransaction().rollback();
-		session.close();
-		return t;
+		try{
+			et = (EntityType) session.load(EntityType.class, uuid);
+		}finally{
+			session.getTransaction().rollback();
+			session.close();
+		}
+		
+		return et;
 	}
 	
-	
+	/**
+	 * Saves the entity type to the database
+	 */
 	public void saveEntityType(){
 		EntityType et = entityType;
 		Session s = HibernateManager.openSession();
@@ -224,12 +252,13 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
 			}
-			EntityPlugIn.log("Error saving entity type modifications.  Please close and re-open the editor." + "\n\n" + ex.getMessage(), ex);
+			EntityPlugIn.log(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return;
 		}finally{
 			s.close();
 		}
 		
+		//fire associated event changes
 		try{
 			DataModelManager.getInstance().fireChangeListeners();
 		}catch(Exception ex){

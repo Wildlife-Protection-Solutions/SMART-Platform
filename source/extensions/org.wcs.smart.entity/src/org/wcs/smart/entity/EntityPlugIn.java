@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -106,7 +107,7 @@ public class EntityPlugIn extends AbstractUIPlugin {
 
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EntityPlugIn_ErrorDialogTitle, message);
 			}
 			
 		});

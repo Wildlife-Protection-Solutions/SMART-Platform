@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import java.text.MessageFormat;
@@ -19,17 +40,22 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.Entity.Status;
-import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog for creating a new entity or modifying an existing entity.
+ * 
+ * @author Emily
+ *
+ */
 public class NewEntityDialog extends TitleAreaDialog {
 
 	private EntityType etype;
@@ -122,7 +148,7 @@ public class NewEntityDialog extends TitleAreaDialog {
 		
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			EntityPlugIn.displayLog("Error saving entity." + "\n\n" + ex.getMessage(), ex);
+			EntityPlugIn.displayLog(Messages.NewEntityDialog_SaveEntityError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			session.getTransaction().rollback();
 			return false;
 		}
@@ -137,20 +163,20 @@ public class NewEntityDialog extends TitleAreaDialog {
 				super.okPressed();
 			}
 		}else{
-			MessageDialog.openError(getShell(), "Error", error);
+			MessageDialog.openError(getShell(), Messages.NewEntityDialog_SaveErrorDialogTitle, error);
 		}
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		if (newEntity.getUuid() == null){
-			super.getShell().setText("New Entity");
-			setTitle("New Entity");
-			super.setMessage(MessageFormat.format("Create a new entity of type {0}", new Object[]{etype.getName()}));
+			super.getShell().setText(Messages.NewEntityDialog_DialogTitle);
+			setTitle(Messages.NewEntityDialog_DialogTitle);
+			super.setMessage(MessageFormat.format(Messages.NewEntityDialog_NewEntityMessage, new Object[]{etype.getName()}));
 		}else{
-			super.getShell().setText("Edit Entity");
-			setTitle("Edit Entity");
-			super.setMessage(MessageFormat.format("Edit the entity {0}.", new Object[]{newEntity.getId()}));
+			super.getShell().setText(Messages.NewEntityDialog_EditDialogTitle);
+			setTitle(Messages.NewEntityDialog_EditDialogTitle);
+			super.setMessage(MessageFormat.format(Messages.NewEntityDialog_EditMessage, new Object[]{newEntity.getId()}));
 		}
 		super.setTitleImage(EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_WIZBAN));
 

@@ -1,9 +1,29 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -20,11 +40,23 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 
+/**
+ * A composite that contains a table for displaying the
+ * list of entities associated with a given
+ * entity type.
+ *  
+ * @author Emily
+ *
+ */
 public class EntityListTable extends Composite {
 
 	private TableViewer entityTable;
 	private EntityTableViewerComparator tableSorter = new EntityTableViewerComparator();
 
+	/**
+	 * Creates a new table
+	 * @param parent
+	 */
 	public EntityListTable(Composite parent) {
 		super(parent, SWT.NONE);
 
@@ -32,14 +64,25 @@ public class EntityListTable extends Composite {
 		createTable();
 	}
 
+	/**
+	 * 
+	 * @return the underlying table viewer
+	 */
 	public TableViewer getViewer() {
 		return entityTable;
 	}
 
+	/**
+	 * 
+	 * @return the current selection
+	 */
 	public ISelection getSelection() {
 		return this.entityTable.getSelection();
 	}
 
+	/*
+	 * Create a table.
+	 */
 	private void createTable() {
 		// --- attribute table list
 		entityTable = new TableViewer(this, SWT.FULL_SELECTION | SWT.MULTI
@@ -53,6 +96,14 @@ public class EntityListTable extends Composite {
 		entityTable.setComparator(tableSorter);
 	}
 
+	/**
+	 * Sets the entity type for the table.  This disposes
+	 * of all existing columns and re-creates them based
+	 * on the new entity type.
+	 * Only primary attribute columns are displayed. 
+	 *  
+	 * @param entityType
+	 */
 	public void setEntityType(EntityType entityType) {
 		// create entity table columns
 		for (TableColumn c : entityTable.getTable().getColumns()) {
@@ -93,7 +144,7 @@ public class EntityListTable extends Composite {
 								if (value != null) {
 									return value.getValueAsString();
 								}
-								return "";
+								return ""; //$NON-NLS-1$
 							}
 							return super.getText(element);
 						}
@@ -103,16 +154,18 @@ public class EntityListTable extends Composite {
 		}
 	}
 	
+	/*
+	 * Creates a new table viewer column.
+	 */
 	private TableViewerColumn createTableColumn(String name, final ColumnLabelProvider provider){
 		final TableViewerColumn column = new TableViewerColumn(entityTable, SWT.NONE);
 		column.getColumn().setText(name);
 		column.getColumn().setWidth(160);
 		column.setLabelProvider(provider);
+		
 		column.getColumn().addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				entityTable.getTable().setSortDirection(tableSorter.getDirection());
 				entityTable.getTable().setSortColumn(column.getColumn());
 				tableSorter.setColumn(provider);
