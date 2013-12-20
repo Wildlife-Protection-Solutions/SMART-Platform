@@ -16,13 +16,20 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.SmartUtils;
 
-public class EntityAttributeDialog extends TranslateSimpleListItemDialog  {
+/**
+ * Dialog for editing the attribute which represents the entity
+ * type in the data model.
+ *  
+ * @author Emily
+ *
+ */
+public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDialog  {
 
 	private Button btnIsRequired; 
 	private Button btnIsPrimary; 
 	
 	
-	public EntityAttributeDialog(Shell parentShell, EntityAttribute attribute) {
+	public EntityTypeEditDmAttributeDialog(Shell parentShell, EntityAttribute attribute) {
 		super(parentShell, attribute);
 	}
 
