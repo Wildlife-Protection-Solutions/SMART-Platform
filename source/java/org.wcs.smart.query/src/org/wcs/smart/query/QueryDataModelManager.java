@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.query;
 
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.internal.CaDataModelManagerImpl;
 import org.wcs.smart.query.internal.MultiCaDataModelManagerImpl;
 
@@ -37,6 +39,7 @@ public class QueryDataModelManager {
 
 	private static IDataModelManager instance = null;
 	
+	private static QueryDataModelModifiedListener dmListener;
 	/**
 	 * 
 	 * @return the active data model manager
@@ -48,8 +51,19 @@ public class QueryDataModelManager {
 			}else{
 				instance = new CaDataModelManagerImpl();
 			}
+			
+			dmListener = new QueryDataModelModifiedListener();
+			DataModelManager.getInstance().addChangeListener(dmListener);
+			
 		}
 		return instance;
+	}
+	
+	public static void dispose(){
+		//TODO: remove me
+//		if (dmListener != null){
+//			dmListener.dispose();
+//		}
 	}
 	
 }

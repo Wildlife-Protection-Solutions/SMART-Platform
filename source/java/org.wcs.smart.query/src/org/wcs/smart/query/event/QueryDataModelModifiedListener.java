@@ -21,28 +21,105 @@
  */
 package org.wcs.smart.query.event;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.itempanel.QueryItemView;
 
 /**
- * A listener that re-parses open queries when the data model
- * is modified.
+ * A listener that deals with update the
+ * query perspective when the data model is
+ * modified.  The QueryItemView is refreshed and all
+ * query editor queries are reparsed.
  * 
  * @author Emily
- *
+ * 
  */
-public class QueryDataModelModifiedListener implements IDataModelListener{
+public class QueryDataModelModifiedListener implements IDataModelListener {
 
-	private IQueryEditor queryEditor;
+	private List<IQueryEditor> editors = new ArrayList<IQueryEditor>();
+	private QueryItemView itemView = null;
 	
-	public QueryDataModelModifiedListener(IQueryEditor queryEditor){
-		this.queryEditor = queryEditor;
+	IPartListener2 partListener = new IPartListener2() {
+		
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) {
+		}
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) {
+			IWorkbenchPart part = partRef.getPart(false);
+			if (part instanceof IQueryEditor){
+				editors.add((IQueryEditor)part);
+			}else if (part instanceof QueryItemView){
+				itemView = (QueryItemView) part;
+			}
+		}
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) {
+		}
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) {
+		}
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) {
+		}
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {
+			IWorkbenchPart part = partRef.getPart(false);
+			if (part instanceof IQueryEditor){
+				editors.remove((IQueryEditor)part);
+			}else if (part instanceof QueryItemView){
+				itemView = null;
+			}
+			
+		}
+		
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {
+		}
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) {
+		}
+	};
+	
+	
+	public QueryDataModelModifiedListener() {
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+		DataModelManager.getInstance().addChangeListener(this);
 	}
 	
+	public void dispose(){
+		DataModelManager.getInstance().removeChangeListener(this);
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
+	}
+	
+
 	@Override
 	public void modified() {
-		this.queryEditor.reparseQuery();
+		// clear the current data model
+		QueryDataModelManager.getInstance().clearDataModel();
 		
+		for (IQueryEditor e : editors){
+			e.reparseQuery();
+		}
+		if (itemView != null){
+			itemView.refresh();
+		}
+
 	}
 
 }

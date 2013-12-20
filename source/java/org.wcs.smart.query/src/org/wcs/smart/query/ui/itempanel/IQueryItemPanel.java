@@ -58,4 +58,11 @@ public interface IQueryItemPanel {
 	 * to pass the item to the query definition panel.
 	 */
 	public void addQueryItem(IStructuredSelection currentSelection);
+	
+	/**
+	 * This is called after the data model or some other item
+	 * is changed that requires the panel contents
+	 * to be refreshed.
+	 */
+	public void refreshPanel();
 }

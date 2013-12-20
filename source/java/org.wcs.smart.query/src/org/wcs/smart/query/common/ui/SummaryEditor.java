@@ -49,8 +49,6 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -58,7 +56,6 @@ import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
-import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
@@ -88,8 +85,6 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 	
 	private boolean isDirty = false;
 	private IAreaModifiedListener areaListener = null;
-	private IDataModelListener dmListener = null;
-	
 
 	private QueryDateFilterComposite dateFilterComposite;
 	private Form frmSummaryArea;
@@ -186,9 +181,6 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 		
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
-		
-		dmListener = new QueryDataModelModifiedListener(this);
-		DataModelManager.getInstance().addChangeListener(dmListener);
 	}
 
 	/**
@@ -204,9 +196,6 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 		QueryEventManager.getInstance().removeListener(qListener);
 		if (areaListener != null){
 			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
-		}
-		if (dmListener != null){
-			DataModelManager.getInstance().removeChangeListener(dmListener);
 		}
 		query.dispose();
 		runQueryJob.cancel();

@@ -45,8 +45,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -54,7 +52,6 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
-import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
@@ -87,7 +84,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 * Listener for changes to area names/ids
 	 */
 	private IAreaModifiedListener areaListener = null;
-	private IDataModelListener dmListener = null;
 	
 	/**
 	 * Job to run the query and refresh the results
@@ -188,9 +184,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
-		
-		dmListener = new QueryDataModelModifiedListener(this);
-		DataModelManager.getInstance().addChangeListener(dmListener);
 	}
 
 	
@@ -205,9 +198,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		QueryEventManager.getInstance().removeListener(qListener);
 		if (areaListener != null){
 			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
-		}
-		if (dmListener != null){
-			DataModelManager.getInstance().removeChangeListener(dmListener);
 		}
 		runQueryJob.cancel();
 	}

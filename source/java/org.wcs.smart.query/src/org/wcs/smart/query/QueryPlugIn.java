@@ -2,8 +2,6 @@ package org.wcs.smart.query;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -150,7 +148,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
 	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
-
+	
 	/**
 	 * Query property extension id
 	 */
@@ -178,6 +176,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		//add required listeners
 		ConservationAreaManager.getInstance().addDeleteHandler(new QueryCaDeleteHandler(),QueryCaDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
+	
 		
 		QueryCleanUpJob cleanUp = new QueryCleanUpJob();
 		cleanUp.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
@@ -185,6 +184,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		
 	}
 
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
@@ -194,6 +195,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		super.stop(context);
 		
 		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
+		QueryDataModelManager.dispose();
+		
 	}
 
 	/**

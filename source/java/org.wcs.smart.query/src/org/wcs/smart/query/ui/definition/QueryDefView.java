@@ -150,7 +150,7 @@ public class QueryDefView extends ViewPart {
 	private IQueryListener queryRefreshed = new QueryListenerAdapter() {
 		@Override
 		public void queryRefreshed(Query query) {
-			if (query.equals(current)){
+			if (query.equals(current.getQuery())){
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {

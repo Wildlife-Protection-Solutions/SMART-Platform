@@ -127,6 +127,7 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 	}
 	
 	
+	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer == null){
 			return;
