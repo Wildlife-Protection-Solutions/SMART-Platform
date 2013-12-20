@@ -26,7 +26,6 @@ import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
@@ -43,6 +42,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -58,7 +58,7 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
 public class QueryMapPageEditor extends SmartMapEditorPart{
 	
 	private QueryResultsEditor parentEditor;
-	private IService queryService = null;
+	private IQueryService queryService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
 	private IViewportModelListener initListener ;
 	/*
@@ -92,8 +92,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 		protected IStatus run(IProgressMonitor monitor) {
 			if (queryService != null){
 				try {
-					//TODO: fix this
-					//queryService.refresh(null);
+					queryService.refresh(null);
 					List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 					boolean found = false;
 					if (layers.size() > 0){

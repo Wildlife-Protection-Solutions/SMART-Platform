@@ -193,10 +193,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		
 		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
-		QueryDataModelManager.dispose();
-		
 	}
 
 	/**

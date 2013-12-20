@@ -237,7 +237,7 @@ public class QueryEditorUtils {
 					result[0] = newQuery;
 
 					QueryDefView view = (QueryDefView)ieditor.getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
-					//TODO: update the Query Def View; see if there is a better way to do this
+					//update the Query Def View; see if there is a better way to do this
 					if(view != null){
 						if (view.getQuery().equals(oldQuery)){
 							view.setQuery(newProxy);

@@ -18,6 +18,7 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_DialogQuestion_Label;
 	public static String AddAttributeDialog1_DialogTitle;
 	public static String AddAttributeDialog1_LoadingAttributesText;
+	public static String AddAttributeDialog1_NewAttributeTitle;
 	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_OpCreateNew;
 	public static String AddAttributeDialog1_SelectAttribute_Label;
@@ -496,6 +497,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_DisableButton_Label;
 	public static String DialogConstants_EditButton_Label;
 	public static String DialogConstants_EditKeyButtonText;
+	public static String DialogConstants_EditLinkLabel;
 	public static String DialogConstants_EnableAllButton_Label;
 	public static String DialogConstants_EnableButton_Label;
 	public static String DialogConstants_ExportButton_Label;

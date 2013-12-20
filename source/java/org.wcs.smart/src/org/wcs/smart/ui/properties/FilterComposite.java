@@ -366,13 +366,6 @@ public class FilterComposite extends Composite {
 			}
 		});
 
-		// clearButton.getAccessible().addAccessibleListener(
-		// new AccessibleAdapter() {
-		// public void getName(AccessibleEvent e) {
-		// e.result=
-		// WorkbenchMessages.FilteredTree_AccessibleListenerClearButton;
-		// }
-		// });
 		clearButton.getAccessible().addAccessibleControlListener(
 				new AccessibleControlAdapter() {
 					public void getRole(AccessibleControlEvent e) {
@@ -382,6 +375,11 @@ public class FilterComposite extends Composite {
 		this.clearButtonContro = clearButton;
 	}
 	
+	@Override
+	public void setEnabled (boolean enabled) {
+		super.setEnabled(enabled);
+		txtFilter.setEnabled(enabled);
+	}
 	/**
 	 * determines if the current client can use the native
 	 * search field or not

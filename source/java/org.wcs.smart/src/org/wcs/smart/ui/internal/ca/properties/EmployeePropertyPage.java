@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -813,7 +814,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			if (searchString == null || searchString.length() == 0) {
 				return true;
 			}
-			String search = ".*" + searchString.toLowerCase() + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			String search = ".*" + Pattern.quote(searchString.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 			Employee p = (Employee) element;
 			if (p.getGivenName().toLowerCase().matches(search)){
 				return true;
