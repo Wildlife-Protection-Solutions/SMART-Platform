@@ -88,7 +88,8 @@ public class TeamComposite extends PatrolItemComposite{
 		teamList.setContentProvider(ArrayContentProvider.getInstance());
 		teamList.setLabelProvider(lblProvider);
 		teamList.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+		((GridData)teamList.getCombo().getLayoutData()).widthHint = 100;
+		
 		teamList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
