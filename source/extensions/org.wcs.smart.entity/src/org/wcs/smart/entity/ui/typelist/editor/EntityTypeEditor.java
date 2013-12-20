@@ -12,6 +12,7 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
+import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -40,14 +41,17 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 				if (Arrays.equals(((EntityTypeEditorInput) source).getUuid(), entityType.getUuid())){
 					isThisEditor = true;
 				}
+			}else if (source instanceof Entity){
+				if (((Entity)source).getEntityType().equals(entityType)){
+					isThisEditor = true;
+				}
 			}
 			
 			if (eventType == EntityEventManager.ENTITY_TYPE_MODIFIED){
 				if (isThisEditor){
 					//reload
 					entityType = null;
-					getEntityType();
-					initEditor();
+					initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
 				}
 			}else if (eventType == EntityEventManager.ENTITY_TYPE_DELETED){
 				if (isThisEditor){
@@ -64,8 +68,8 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 					eventType == EntityEventManager.ENTITY_DELETED){
 				
 				if (isThisEditor){
-					getEntityType();					
-					entityPage.initValues();
+					entityType = null;
+					initEditor(new IEntityTypeEditorPage[]{entityPage}, false);
 				}
 			}
 		}
@@ -116,16 +120,24 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 		}catch (Exception ex){
 			EntityPlugIn.displayLog("Error opening entity type editor. " + ex.getMessage(), ex);
 		}
-		initEditor();
+		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
 		
 		EntityEventManager.getInstance().addListener(listener);
 	}
 	
-	private void initEditor(){
+	private void initEditor(IEntityTypeEditorPage[] partsToUpdate, boolean typeChanged){
 		getEntityType();
 		
-		configPage.initValues();
-		entityPage.initValues();
+		Session s = HibernateManager.openSession();
+		s.saveOrUpdate(entityType);
+		entityType.getDmAttribute().getName();
+		try{
+			for (int i = 0; i < partsToUpdate.length; i ++){
+				partsToUpdate[i].updatePage(s, typeChanged);
+			}
+		}finally{
+			s.close();
+		}
 		
 		setPartName(entityType.getLabel());
 		setTitleImage(EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));

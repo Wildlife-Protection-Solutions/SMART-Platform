@@ -23,6 +23,7 @@ package org.wcs.smart.entity.model;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -100,7 +101,7 @@ public class EntityAttributeValue {
 	 * value for double/boolean attributes
 	 * @return
 	 */
-	@Column(name="double_value")
+	@Column(name="number_value")
 	public Double getNumberValue(){
 		return this.doubleValue;
 	}
@@ -194,14 +195,7 @@ public class EntityAttributeValue {
 		case NUMERIC:
 			return getNumberValue();	
 		case BOOLEAN:
-			if (getNumberValue() != null){
-				if (getNumberValue() < 0.5){
-					return Boolean.FALSE;
-				}else{
-					return Boolean.TRUE;
-				}
-			}
-			break;
+			return getNumberValue();
 		case LIST:
 			return getAttributeListItem();
 		case TREE:
@@ -226,7 +220,9 @@ public class EntityAttributeValue {
 			setNumberValue((Double)value);
 			break;
 		case BOOLEAN:
-			if ((Boolean)value){
+			if (value == null){
+				setNumberValue(null);
+			}else if ((Boolean)value){
 				setNumberValue(1.0);
 			}else{
 				setNumberValue(0.0);
@@ -255,7 +251,7 @@ public class EntityAttributeValue {
 		public EntityAttributeValuePk(){
 		}
 		
-		@ManyToOne(fetch = FetchType.LAZY)
+		@ManyToOne(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
 		@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
 		public Entity getEntity() {
 			return entity;

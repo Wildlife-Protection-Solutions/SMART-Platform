@@ -84,7 +84,7 @@ public class Entity extends UuidItem {
 		
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
 	public EntityType getEntityType() {
 		return type;
@@ -152,7 +152,7 @@ public class Entity extends UuidItem {
 	 * The attribute list item that represents this entity
 	 * @return
 	 */
-	@OneToOne(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="attribute_list_item_uuid", referencedColumnName="uuid")
 	public AttributeListItem getAttributeListItem(){
 		return this.attributeItem;
@@ -166,7 +166,8 @@ public class Entity extends UuidItem {
 	 * The attribute values for the given entity
 	 * @return
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id.entity", orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id.entity", 
+			cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<EntityAttributeValue> getAttributes(){
 		return this.attributes;
 	}

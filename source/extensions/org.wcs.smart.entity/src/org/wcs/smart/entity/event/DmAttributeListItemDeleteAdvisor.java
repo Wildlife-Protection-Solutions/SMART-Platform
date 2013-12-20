@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttributeValue;
 
 /**
  * Delete advisor for deleting attribute list items
@@ -47,16 +48,29 @@ public class DmAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 		if (!(object instanceof AttributeListItem)){
 			return "Invalid object type.";
 		}
+		
+		//if entity is represented by list item cannot delete
 		AttributeListItem toDelete = (AttributeListItem)object;
 		Query q = session.createQuery("FROM Entity WHERE attributeListItem = :todelete");
 		q.setParameter("todelete", toDelete);
 		List<?> results = q.list();
 		if (results.size() > 0){
 			//attribute associated with an entity and cannot be deleted
-			return MessageFormat.format("The attribute list item is associated with the Entity {0}.  This list item cannot be removed until the entity is removed.", 
+			return MessageFormat.format("The attribute list item is associated with the Entity ''{0}''.  This list item cannot be removed until the entity is removed.", 
 					new Object[]{((Entity)results.get(0)).getId()});	
 		}
 		
+		
+		//if an entity attribute is represented by the list item cannot delete
+		q = session.createQuery("FROM EntityAttributeValue v WHERE v.attributeListItem = :todelete");
+		q.setParameter("todelete", toDelete);
+		results = q.list();
+		if (results.size() > 0){
+			EntityAttributeValue v1 = (EntityAttributeValue) results.get(0);
+			//attribute associated with an entity and cannot be deleted
+			return MessageFormat.format("The attribute list item is the value for the attribute ''{0}'' for entity ''{1}''.  This list item cannot be removed until the relationship is removed.", 
+					new Object[]{v1.getEntityAttribute().getName(), v1.getEntity().getId()});	
+		}
 		return null;
 	}
 

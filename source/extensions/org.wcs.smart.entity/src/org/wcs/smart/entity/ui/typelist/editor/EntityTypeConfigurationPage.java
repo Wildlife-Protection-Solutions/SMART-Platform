@@ -19,6 +19,8 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -51,6 +53,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -72,7 +75,7 @@ import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class EntityTypeConfigurationPage extends EditorPart {
+public class EntityTypeConfigurationPage extends EditorPart implements IEntityTypeEditorPage {
 
 	private static final int SECTION_SPACING = 8;
 	
@@ -201,7 +204,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				EntityTypeEditAttributeDialog dialog = new EntityTypeEditAttributeDialog(getSite().getShell(),
+				EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
 						new StatusComposite(), parentEditor.getEntityType());
 				dialog.open();
 			}
@@ -216,7 +219,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				EntityTypeEditAttributeDialog dialog = new EntityTypeEditAttributeDialog(getSite().getShell(),
+				EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
 						new IdComposite(), parentEditor.getEntityType());
 				dialog.open();
 			}
@@ -410,20 +413,19 @@ public class EntityTypeConfigurationPage extends EditorPart {
 		buttonComp.setLayout(new GridLayout());
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
 		
-		Button btnMoveUp = toolkit.createButton(buttonComp, "Move Up", SWT.PUSH);
+		final Button btnMoveUp = toolkit.createButton(buttonComp, "Move Up", SWT.PUSH);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)btnMoveUp.getLayoutData()).widthHint = 100;
 		btnMoveUp.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				EntityType et = parentEditor.getEntityType();
-				
 				ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
 				entities.addAll(et.getAttributes());
 				
 				for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
 					Object type = (Object) iterator.next();
-					int i = et.getAttributes().indexOf(type);
+					int i = entities.indexOf(type);
 					entities.remove(i);
 					i--;
 					if (i <=0){
@@ -432,15 +434,21 @@ public class EntityTypeConfigurationPage extends EditorPart {
 					entities.add(i, (EntityAttribute)type);
 					
 				}
+				boolean isChanged = false;
 				for (int i = 0; i < entities.size();i++){
+					if (entities.get(i).getOrder() != i+1){
+						isChanged = true;
+					}
 					entities.get(i).setOrder(i+1);
 				}
-				
-				parentEditor.saveEntityType();
+				if (isChanged){
+					parentEditor.saveEntityType();
+				}
 			}
 		});
+		btnMoveUp.setEnabled(false);
 		
-		Button btnMoveDown = toolkit.createButton(buttonComp, "Move Down", SWT.PUSH);
+		final Button btnMoveDown = toolkit.createButton(buttonComp, "Move Down", SWT.PUSH);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)btnMoveDown.getLayoutData()).widthHint = 100;
 		btnMoveDown.addSelectionListener(new SelectionAdapter() {
@@ -451,24 +459,32 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
 				entities.addAll(et.getAttributes());
 				
-				for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
-					Object type = (Object) iterator.next();
-					int i = et.getAttributes().indexOf(type);
+				List<?> items = ((StructuredSelection)attributeTable.getSelection()).toList();
+				for (int k = items.size() -1; k >=0; k --){
+					Object type = (Object) items.get(k);
+					int i = entities.indexOf(type);
 					entities.remove(i);
 					i++;
-					if (i >= et.getAttributes().size()){
-						i = et.getAttributes().size();
+					if (i >= entities.size()){
+						entities.add((EntityAttribute)type);
+					}else{
+						entities.add(i, (EntityAttribute)type);
 					}
-					entities.add(i, (EntityAttribute)type);
 					
 				}
+				boolean isChanged = false;
 				for (int i = 0; i < entities.size();i++){
+					if (entities.get(i).getOrder() != i+1){
+						isChanged = true;
+					}
 					entities.get(i).setOrder(i+1);
 				}
-				
-				parentEditor.saveEntityType();
+				if (isChanged){
+					parentEditor.saveEntityType();
+				}
 			}
 		});
+		btnMoveDown.setEnabled(false);
 		
 		Composite buttonTableComp = toolkit.createComposite(targetContent);
 		buttonTableComp.setLayout(new GridLayout(3, false));
@@ -484,7 +500,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 			}
 		});
 		
-		Button btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
+		final Button btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)btnEdit.getLayoutData()).widthHint = 100;
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -493,8 +509,9 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				editAttribute();
 			}
 		});
+		btnEdit.setEnabled(false);
 		
-		Button btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
+		final Button btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)btnDelete.getLayoutData()).widthHint = 100;
 		btnDelete.addSelectionListener(new SelectionAdapter() {
@@ -503,7 +520,18 @@ public class EntityTypeConfigurationPage extends EditorPart {
 				deleteAttribute();
 			}
 		});
+		btnDelete.setEnabled(false);
 		
+		attributeTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnMoveDown.setEnabled(!attributeTable.getSelection().isEmpty());
+				btnMoveUp.setEnabled(!attributeTable.getSelection().isEmpty());
+				btnEdit.setEnabled(!attributeTable.getSelection().isEmpty());
+				btnDelete.setEnabled(!attributeTable.getSelection().isEmpty());
+			}
+		});
 		
 		scroll.setMinSize(targetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
@@ -610,6 +638,9 @@ public class EntityTypeConfigurationPage extends EditorPart {
 	
 	private void addAttributes(List<Attribute> attributes){
 		EntityType et = parentEditor.getEntityType();
+		if (et.getAttributes() == null){
+			et.setAttributes(new ArrayList<EntityAttribute>());
+		}
 		for (Attribute attribute : attributes){
 			//create a new Entity Attribute
 			EntityAttribute ea = new EntityAttribute();
@@ -666,9 +697,12 @@ public class EntityTypeConfigurationPage extends EditorPart {
 						
 						s.saveOrUpdate(parentEditor.getEntityType());
 						
+						Query q = s.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)");
+						q.setParameterList("toDelete", toDelete);
+						q.executeUpdate();						
+						
 						parentEditor.getEntityType().getAttributes().removeAll(toDelete);
 						for (final EntityAttribute ea : toDelete){
-						//	ea.setEntityType(null);
 							
 							//at this point we should try to delete the attribute as well
 							boolean canDeleteAttribute = false;
@@ -737,8 +771,8 @@ public class EntityTypeConfigurationPage extends EditorPart {
 			Session s = HibernateManager.openSession();
 			try{
 				s.saveOrUpdate(type);
-				EntityAttributeDialog dia = new EntityAttributeDialog(getSite().getShell(), (EntityAttribute)type);
-				if (dia.open()==EntityAttributeDialog.OK){
+				EntityTypeEditDmAttributeDialog dia = new EntityTypeEditDmAttributeDialog(getSite().getShell(), (EntityAttribute)type);
+				if (dia.open()==EntityTypeEditDmAttributeDialog.OK){
 				
 					s.beginTransaction();
 					try{
@@ -766,27 +800,24 @@ public class EntityTypeConfigurationPage extends EditorPart {
 	/**
 	 * Updates the widgets with the value from the plan.
 	 */
-	public void initValues() {
+	public void updatePage(Session currentSession, boolean typeChanged) {
 		EntityType type = this.parentEditor.getEntityType();
 		form.setText(getPartName());
 		
-		Session s = HibernateManager.openSession();
-		try{
-			s.update(type);
-			type.getNames().size();
-			txtId.setText(type.getId());
-			txtName.setText(type.getName());
-			txtDmAttribute.setText(type.getDmAttribute().getName());
-			txtStatus.setText(type.getStatus().getGuiName());
-			txtType.setText(type.getType().getGuiName());
-			txtCreatedBy.setText(type.getCreator().getFullLabel());
-			txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));
+		type.getNames().size();
+		txtId.setText(type.getId());
+		txtName.setText(type.getName());
+		txtDmAttribute.setText(type.getDmAttribute().getName());
+		txtStatus.setText(type.getStatus().getGuiName());
+		txtType.setText(type.getType().getGuiName());
+		txtCreatedBy.setText(type.getCreator().getFullLabel());
+		txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));
 		
-			attributeTable.setInput(type.getAttributes());
-			
-			form.setText(getEditorInput().getName());
-		}finally{
-			s.close();
+		attributeTable.setInput(type.getAttributes());			
+		form.setText(getEditorInput().getName());
+		
+		if (type.getAttributes() != null){
+			type.getAttributes().size();
 		}
 	}
 	
@@ -798,7 +829,7 @@ public class EntityTypeConfigurationPage extends EditorPart {
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent){
-		Hyperlink editLink = toolkit.createHyperlink(parent,"edit", SWT.WRAP);
+		Hyperlink editLink = toolkit.createHyperlink(parent, "edit", SWT.WRAP);
 		
 		if (!this.parentEditor.canEdit()) {
 			editLink.setEnabled(false);
