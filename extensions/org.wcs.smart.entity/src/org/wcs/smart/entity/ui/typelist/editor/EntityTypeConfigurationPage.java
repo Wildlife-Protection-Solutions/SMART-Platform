@@ -30,6 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -123,6 +126,23 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	private EntityTypeEditor parentEditor;
 	private ScrolledComposite summaryScroll;
 	
+	Job fireDataModelListeners = new Job(Messages.EntityTypeConfigurationPage_DataModeUpdateJobName){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try{
+				DataModelManager.getInstance().fireChangeListeners();
+			}catch(final Exception ex){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						EntityPlugIn.displayLog(ex.getMessage(), ex);
+					}});
+			}
+			return Status.OK_STATUS;
+		}
+		
+	};
 		
 	/**
 	 * Creates a new plan editor page
@@ -598,7 +618,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		final ArrayList<Attribute> attributeToAdd = new ArrayList<Attribute>();
 		
 		final Session s = HibernateManager.openSession();
-		
+		s.beginTransaction();
 		try{
 			//load attributes from datamodel
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
@@ -662,14 +682,26 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				if (ret == Window.CANCEL){
 					return;
 				}
-				attributeToAdd.add(att);			
+				attributeToAdd.add(att);	
+				DataModelManager.getInstance().fireAddListener(s, att);
 			}
+			s.getTransaction().commit();
+			
+			//schedule the data model changed listener; we have saved modifications to the data model
+			fireDataModelListeners.schedule();
+		}catch (Exception ex){
+			EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_SaveError, ex);
 		}finally{
+			if (s.getTransaction().isActive()){
+				s.getTransaction().rollback();
+			}
 			s.close();
 		}
 
 		addAttributes(attributeToAdd);
 	}
+	
+
 	
 	/*
 	 * Adds the set of attributes to the entity type.
@@ -778,10 +810,19 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						}
 						
 						s.getTransaction().commit();
+						
+						try{
+							EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, parentEditor.getEntityType());
+						}catch(Exception ex){
+							EntityPlugIn.displayLog(ex.getMessage(), ex);
+						}
 					}catch (Exception ex){
 						EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_DeleteAttributeError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-						s.getTransaction().rollback();
+						
 					}finally{
+						if (s.getTransaction().isActive()){
+							s.getTransaction().rollback();
+						}
 						s.close();
 					}
 				}
@@ -790,17 +831,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_DeleteAttributeError2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
-			try{
-				DataModelManager.getInstance().fireChangeListeners();
-			}catch(Exception ex){
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-			}
-			try{
-				EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, parentEditor.getEntityType());
-			}catch(Exception ex){
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-			}
-			
+			fireDataModelListeners.schedule();
 		}
 	}
 	

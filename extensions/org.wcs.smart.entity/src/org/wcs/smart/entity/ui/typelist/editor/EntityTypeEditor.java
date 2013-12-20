@@ -21,21 +21,23 @@
  */
 package org.wcs.smart.entity.ui.typelist.editor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -80,7 +82,13 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 				if (isThisEditor){
 					//reload
 					entityType = null;
-					initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
+					
+					getSite().getShell().getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
+						}});
+					
 				}
 			}else if (eventType == EntityEventManager.ENTITY_TYPE_DELETED){
 				if (isThisEditor){
@@ -98,7 +106,12 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 				
 				if (isThisEditor){
 					entityType = null;
-					initEditor(new IEntityTypeEditorPage[]{entityPage}, false);
+					getSite().getShell().getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							initEditor(new IEntityTypeEditorPage[]{entityPage}, false);
+						}});
+					
 				}
 			}
 		}
@@ -231,45 +244,51 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 	
 	/**
 	 * Saves the entity type to the database
+	 * @param dmChanged true if a change has been made to the
+	 * data model; false if not changed 
 	 */
 	public void saveEntityType(){
-		EntityType et = entityType;
-		Session s = HibernateManager.openSession();
+		final EntityType et = entityType;
+
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getSite().getShell());
 		try{
-			s.beginTransaction();
+		dialog.run(true, false, new IRunnableWithProgress() {
 			
-			for (EntityAttribute a : et.getAttributes()){
-				if (a.getDmAttribute().getUuid() == null){
-					//new attribute save it and fire required events
-					s.save(a.getDmAttribute());
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				monitor.beginTask(MessageFormat.format(Messages.EntityTypeEditor_SaveProgress, new Object[]{et.getId()}), 0);
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
 					
-					DataModelManager.getInstance().fireAddListener(s, a.getDmAttribute());
+					
+					s.saveOrUpdate(et);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					if (s.getTransaction().isActive()){
+						s.getTransaction().rollback();
+					}
+					EntityPlugIn.log(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+					return;
+				}finally{
+					s.close();
 				}
+				
+				//fire associated event changes
+				try{
+					EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
+				}catch(Exception ex){
+					EntityPlugIn.displayLog(ex.getMessage(), ex);
+				}
+				
 			}
-			s.saveOrUpdate(et);
-			s.getTransaction().commit();
+		});	
 		}catch (Exception ex){
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
 			EntityPlugIn.log(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return;
-		}finally{
-			s.close();
 		}
-		
-		//fire associated event changes
-		try{
-			DataModelManager.getInstance().fireChangeListeners();
-		}catch(Exception ex){
-			EntityPlugIn.displayLog(ex.getMessage(), ex);
-		}
-		try{
-			EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
-		}catch(Exception ex){
-			EntityPlugIn.displayLog(ex.getMessage(), ex);
-		}
-		
 	}
+	
 	
 }

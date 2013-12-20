@@ -45,6 +45,7 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_AttributeLabels;
 	public static String EntityTypeConfigurationPage_CreateByLabel;
 	public static String EntityTypeConfigurationPage_DataModelAttributeNameColumnName;
+	public static String EntityTypeConfigurationPage_DataModeUpdateJobName;
 	public static String EntityTypeConfigurationPage_DateCreatedLabel;
 	public static String EntityTypeConfigurationPage_DeleteAttributeDialogMessage;
 	public static String EntityTypeConfigurationPage_DeleteAttributeDialogTitle;
@@ -64,6 +65,7 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_RequiredColumnName;
 	public static String EntityTypeConfigurationPage_RequiredNoLabel;
 	public static String EntityTypeConfigurationPage_RequiredYesLabel;
+	public static String EntityTypeConfigurationPage_SaveError;
 	public static String EntityTypeConfigurationPage_StatusLabel;
 	public static String EntityTypeConfigurationPage_SummarySectionName;
 	public static String EntityTypeConfigurationPage_TranslateLabel;
@@ -77,6 +79,7 @@ public class Messages extends NLS {
 	public static String EntityTypeEditor_EditingSavingType;
 	public static String EntityTypeEditor_EntitiesPageName;
 	public static String EntityTypeEditor_ErrorOpeningEditor;
+	public static String EntityTypeEditor_SaveProgress;
 	public static String EntityTypeEditorInput_EntityTypeEditorTooltip;
 	public static String EntityTypeEntitiesPage_DeleteConfirmMulti;
 	public static String EntityTypeEntitiesPage_DeleteConfirmSingle;
