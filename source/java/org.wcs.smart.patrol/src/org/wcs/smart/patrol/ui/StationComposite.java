@@ -94,7 +94,7 @@ public class StationComposite extends PatrolItemComposite{
 		stationList.setContentProvider(ArrayContentProvider.getInstance());
 		stationList.setLabelProvider(lblProvider);
 		stationList.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+		((GridData)stationList.getCombo().getLayoutData()).widthHint = 100;
 		stationList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
