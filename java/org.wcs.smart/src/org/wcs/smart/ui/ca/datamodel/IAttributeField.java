@@ -66,7 +66,7 @@ public interface IAttributeField<T> {
 	public void clear();
 	
 	/**
-	 * @return <code>true</code> if the value has been modifed; <code>false</code>
+	 * @return <code>true</code> if the value has been modified; <code>false</code>
 	 * if not.
 	 */
 	public boolean isModified();
