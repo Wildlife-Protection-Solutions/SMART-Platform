@@ -39,7 +39,6 @@ public class QueryDataModelManager {
 
 	private static IDataModelManager instance = null;
 	
-	private static QueryDataModelModifiedListener dmListener;
 	/**
 	 * 
 	 * @return the active data model manager
@@ -51,10 +50,6 @@ public class QueryDataModelManager {
 			}else{
 				instance = new CaDataModelManagerImpl();
 			}
-			
-			dmListener = new QueryDataModelModifiedListener();
-			DataModelManager.getInstance().addChangeListener(dmListener);
-			
 		}
 		return instance;
 	}
