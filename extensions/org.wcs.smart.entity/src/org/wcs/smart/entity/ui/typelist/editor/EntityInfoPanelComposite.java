@@ -120,6 +120,7 @@ public class EntityInfoPanelComposite extends Composite{
 			clearFields();
 			return;
 		}
+		
 		Session s = HibernateManager.openSession();
 		try{
 			this.entity = (Entity) s.load(Entity.class, entity.getUuid());

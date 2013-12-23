@@ -721,7 +721,6 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			ea.setOrder(et.getAttributes().size()+1);
 			et.getAttributes().add(ea);
 		}
-		
 		parentEditor.saveEntityType();
 	}
 	

@@ -76,8 +76,8 @@ public class Entity extends UuidItem {
 	private EntityType type;
 	private String id;
 	private Status status;
-	private double x;
-	private double y;
+	private Double x;
+	private Double y;
 	private AttributeListItem attributeItem;
 	private List<EntityAttributeValue> attributes;
 	

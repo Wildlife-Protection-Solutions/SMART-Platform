@@ -37,12 +37,12 @@ import org.wcs.smart.entity.model.EntityType;
  * @author Emily
  *
  */
-public class NewEntityWizardPage extends WizardPage {
+public class NewEntityTypeWizardPage extends WizardPage {
 
 	private AbstractEntityComposite contents;
 	private NewEntityTypeWizard wizard;
 	
-	public NewEntityWizardPage(NewEntityTypeWizard wizard, AbstractEntityComposite contents){
+	public NewEntityTypeWizardPage(NewEntityTypeWizard wizard, AbstractEntityComposite contents){
 		super(contents.getName());
 		this.contents = contents;
 		this.wizard = wizard;

@@ -38,6 +38,7 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -171,13 +172,20 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 		getEntityType();
 		
 		Session s = HibernateManager.openSession();
-		s.saveOrUpdate(entityType);
-		entityType.getDmAttribute().getName();
+		s.beginTransaction();
 		try{
+			s.saveOrUpdate(entityType);
+			entityType.getName();
+			entityType.getDmAttribute().getName();
+			if (entityType.getAttributes() != null){
+				entityType.getAttributes().size();
+			}
+			
 			for (int i = 0; i < partsToUpdate.length; i ++){
 				partsToUpdate[i].updatePage(s, typeChanged);
 			}
 		}finally{
+			s.getTransaction().rollback();
 			s.close();
 		}
 		
@@ -234,6 +242,11 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 		session.beginTransaction();
 		try{
 			et = (EntityType) session.load(EntityType.class, uuid);
+			
+			//ensure attributes are lazily loaded
+			for (EntityAttribute att : et.getAttributes()){
+				att.getName().length();
+			}
 		}finally{
 			session.getTransaction().rollback();
 			session.close();
@@ -261,15 +274,13 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					
-					
 					s.saveOrUpdate(et);
 					s.getTransaction().commit();
 				}catch (Exception ex){
 					if (s.getTransaction().isActive()){
 						s.getTransaction().rollback();
 					}
-					EntityPlugIn.log(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+					EntityPlugIn.displayLog(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					return;
 				}finally{
 					s.close();

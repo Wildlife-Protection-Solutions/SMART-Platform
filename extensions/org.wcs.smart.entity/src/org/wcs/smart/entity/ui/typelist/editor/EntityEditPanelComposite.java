@@ -23,7 +23,13 @@ package org.wcs.smart.entity.ui.typelist.editor;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+
+import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -39,19 +45,37 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.referencing.CRS;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.datamodel.Aggregation;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Creates a panel for entering/editing
@@ -69,6 +93,7 @@ public class EntityEditPanelComposite extends Composite{
 	private Text txtId;
 	private Text txtX;
 	private Text txtY;
+	private ComboViewer cmbProjection;
 	private ComboViewer cmbStatus;
 	
 	private ControlDecoration cdId;
@@ -107,7 +132,7 @@ public class EntityEditPanelComposite extends Composite{
 	 * @param et the new entity type.
 	 */
 	
-	public void setEntityType(EntityType et){
+	public void setEntityType(EntityType et, Session session){
 		this.etype = et;
 		
 		if (attributeToEdit != null){
@@ -120,6 +145,11 @@ public class EntityEditPanelComposite extends Composite{
 		}
 		
 		createEditComposite(main);
+		if (cmbProjection != null){
+			List<Projection> projs = HibernateManager.getCaProjectionList(session);
+			cmbProjection.setInput(projs);
+			cmbProjection.setSelection(new StructuredSelection(projs.get(0)));
+		}
 	}
 	
 	@Override
@@ -182,6 +212,12 @@ public class EntityEditPanelComposite extends Composite{
 		if (cdY != null && cdY.getDescriptionText() != null){
 			return cdY.getDescriptionText();
 		}
+		try{
+			getPosition();
+		}catch (Exception ex){
+			EntityPlugIn.log(Messages.EntityEditPanelComposite_ProjectionError, ex);
+			return ex.getMessage();
+		}
 		for (IAttributeField<?> et : attributeToEdit.values()){
 			String x = et.validate();
 			if (x != null){
@@ -198,8 +234,14 @@ public class EntityEditPanelComposite extends Composite{
 	public void updateEntity(){
 		entity.setId(txtId.getText());
 		if (entity.getEntityType().getType() == EntityType.Type.FIXED){
-			entity.setX(Double.parseDouble(txtX.getText()));
-			entity.setY(Double.parseDouble(txtY.getText()));
+			try{
+				Coordinate c = getPosition();
+				entity.setX(c.x);
+				entity.setY(c.y);
+			}catch (Exception ex){
+				
+			}
+			
 		}		
 		entity.setStatus((Status) ((IStructuredSelection)cmbStatus.getSelection()).getFirstElement());
 		
@@ -278,11 +320,31 @@ public class EntityEditPanelComposite extends Composite{
 		cmbStatus.setInput(Entity.Status.values());
 			
 		if (etype.getType() == EntityType.Type.FIXED){
+			//Position
+			Group g = new Group(comp, SWT.NONE);
+			g.setLayout(new GridLayout(2, false));
+			g.setText(Messages.EntityEditPanelComposite_LocationLabel);
+			g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
-			lbl = new Label(comp, SWT.NONE);
+			lbl = new Label(g, SWT.NONE);
+			lbl.setText(Messages.EntityEditPanelComposite_ProjectionLabel );
+			
+			cmbProjection = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
+			cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
+			
+			cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Composite posComp = new Composite(g, SWT.NONE);
+			GridLayout gl = new GridLayout(4, false);
+			gl.marginWidth = gl.marginHeight = 0;
+			posComp.setLayout(gl);
+			posComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			lbl = new Label(posComp, SWT.NONE);
 			lbl.setText(Entity.X_FIELD_NAME + ":"); //$NON-NLS-1$
 			
-			txtX = new Text(comp, SWT.BORDER);
+			txtX = new Text(posComp, SWT.BORDER);
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtX.getLayoutData()).horizontalIndent = 5;
 			((GridData)txtX.getLayoutData()).widthHint = 100;
@@ -310,10 +372,10 @@ public class EntityEditPanelComposite extends Composite{
 				}
 			});
 			
-			lbl = new Label(comp, SWT.NONE);
+			lbl = new Label(posComp, SWT.NONE);
 			lbl.setText(Entity.Y_FIELD_NAME + ":"); //$NON-NLS-1$
 			
-			txtY = new Text(comp, SWT.BORDER);			
+			txtY = new Text(posComp, SWT.BORDER);			
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtY.getLayoutData()).horizontalIndent = 5;
 			((GridData)txtY.getLayoutData()).widthHint = 100;
@@ -340,24 +402,300 @@ public class EntityEditPanelComposite extends Composite{
 					}
 				}
 			});
+			
+			Link lnk = new Link(g,  SWT.NONE);
+			lnk.setText("<a>" + Messages.EntityEditPanelComposite_SelectOnMapLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnk.addListener(SWT.Selection, new Listener(){
+				@Override
+				public void handleEvent(Event event) {	
+					selectOnMap();
+				}});
+			lnk.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		}
 		
 		for (EntityAttribute ea : etype.getAttributes()){
-			
-			boolean isRequired = etype.getDmAttribute().getIsRequired();
-			String name = etype.getDmAttribute().getName();
-			try{
-				etype.getDmAttribute().setIsRequired(ea.getIsRequired());
-				etype.getDmAttribute().setName(ea.getName());
-				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(ea.getDmAttribute());
-				
-				field.createComposite(comp);
-				attributeToEdit.put(ea, field);
-			}finally{
-				etype.getDmAttribute().setIsRequired(isRequired);
-				etype.getDmAttribute().setName(name);
-			}
+			EntityAttributeWrapper wrapper = new EntityAttributeWrapper(ea);
+			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(wrapper);
+			field.createComposite(comp);
+			attributeToEdit.put(ea, field);
 		}
 	}
 
+	private Coordinate getPosition() throws Exception{
+		if (txtX == null || txtY == null || cmbProjection == null){
+			return null;
+		}
+		
+		Double x = null;
+		Double y = null;
+		try{
+			x = Double.parseDouble(txtX.getText());
+			y = Double.parseDouble(txtY.getText());
+		}catch (Exception ex){
+			
+		}
+		if (x == null || y == null){
+			return null;
+		}
+		
+		//we need to get the x and y and projection and transform to latLong
+		Projection proj = (Projection) ((StructuredSelection)cmbProjection.getSelection()).getFirstElement();
+		if (CRS.equalsIgnoreMetadata(proj.getCrs(), SmartDB.DATABASE_CRS)){
+			//this is in db crs so we don't need to do anything
+			return new Coordinate(x,y);
+		}else{
+			//need to reproject 
+			return ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+		}
+		
+	}
+	private void selectOnMap(){
+		MapDialog md = new MapDialog(Display.getCurrent().getActiveShell());		
+		if (entity.getUuid() != null){
+			try{
+				Coordinate c = getPosition();
+				if (c != null){
+					md.setInitPoint(c.x, c.y);
+				}
+			}catch (Exception ex){}
+			
+		}
+		
+		if (md.open() == MapDialog.OK){
+			if (md.getPoint() != null){
+				txtX.setText(String.valueOf(md.getPoint().getX()));
+				txtY.setText(String.valueOf(md.getPoint().getY()));
+
+				//select the correct projection
+				Projection defaultp = null;
+				for(Projection p : ((List<Projection>)cmbProjection.getInput())){
+					try{
+						if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+							defaultp = p;
+							break;
+						}
+					}catch (Exception ex){
+						EntityPlugIn.displayLog(Messages.EntityEditPanelComposite_ProjectionError2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+					}
+				}
+				cmbProjection.setSelection(new StructuredSelection(defaultp));
+			}
+		}
+	}
+	
+	private class EntityAttributeWrapper extends Attribute{
+		
+		private EntityAttribute wrapped;
+		
+		/**
+		 * Creates a new attribute
+		 */
+		public EntityAttributeWrapper(EntityAttribute ea){
+			this.wrapped = ea;
+		}
+		
+		/**
+		 * Key that represents the team.  Teams that
+		 * are to be considered the "same" in cross-ca analysis should
+		 * have the same key.
+		 *    
+		 * @return
+		 */
+		public String getKeyId(){
+			return wrapped.getDmAttribute().getKeyId();
+		}
+		
+		/**
+		 * Unique key
+		 * @param keyId
+		 */
+		public void setKeyId(String keyId){
+			wrapped.getDmAttribute().setKeyId(keyId);
+		}
+
+		public String getName(){
+			return wrapped.getName();
+		}
+		/**
+		 * 
+		 * @return <code>true</code> if attribute must be populated, <code>false</code> otherwise
+		 */
+		public boolean getIsRequired(){
+			return wrapped.getIsRequired();
+		}
+		/**
+		 * 
+		 * @param isRequired if attribute is required
+		 */
+		public void setIsRequired(boolean isRequired){
+			wrapped.setIsRequired(isRequired);
+		}
+		
+		/**
+		 * 
+		 * @return the attribute type
+		 */
+		public AttributeType getType() {
+			return wrapped.getDmAttribute().getType();
+		}
+		/**
+		 * 
+		 * @param type the attribute type
+		 */
+		public void setType(AttributeType type) {
+			wrapped.getDmAttribute().setType(type);
+		}
+		
+		/**
+		 * 
+		 * @return the conservation area associated with the attribute
+		 */
+		@ManyToOne(fetch = FetchType.LAZY)
+		@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+		public ConservationArea getConservationArea() {
+			return wrapped.getDmAttribute().getConservationArea();
+		}
+		/**
+		 * 
+		 * @param ca the conservation area to be associated with the attribute
+		 */
+		public void setConservationArea(ConservationArea ca) {
+			wrapped.getDmAttribute().setConservationArea(ca);
+		}
+		
+		/**
+		 * Only valid for numeric attributes.
+		 * @return the minimum value of the attribute
+		 */
+		@Column(name="min_value")
+		public Double getMinValue() {
+			return wrapped.getDmAttribute().getMinValue();
+		}
+
+
+		/**
+		 * Only valid for numeric attributes.
+		 * @param minValue the minimum value of the attribute
+		 */
+		public void setMinValue(Double minValue) {
+			wrapped.getDmAttribute().setMinValue(minValue);
+		}
+
+		/**
+		 * Only valid for numeric attributes.
+		 * @return the maximum value of the attribute
+		 */
+		@Column(name="max_value")
+		public Double getMaxValue() {
+			return wrapped.getDmAttribute().getMaxValue();
+		}
+
+		/**
+		 * Only valid for numeric attributes.
+		 * @param maxValue the maximum value of the attribute
+		 */
+		public void setMaxValue(Double maxValue) {
+			wrapped.getDmAttribute().setMaxValue(maxValue);
+		}
+
+		/**
+		 * Only valid for text attributes.
+		 * 
+		 * @return a regex pattern for validating string values
+		 */
+		public String getRegex() {
+			return wrapped.getDmAttribute().getRegex();
+		}
+
+
+		/**
+		 * Only valid for text attributes.
+		 * 
+		 * @param regex the regex pattern for validating string values
+		 */
+		public void setRegex(String regex) {
+			wrapped.getDmAttribute().setRegex(regex);
+		}
+
+
+		/**
+		 * 
+		 * Only valid for numeric attributes.
+		 * 
+		 * @return the set of aggregations that are valid for the attribute
+		 */
+		public List<Aggregation> getAggregations(){
+			return wrapped.getDmAttribute().getAggregations();
+		}
+		
+		/**
+		 *  Only valid for numeric attributes.
+		 *  
+		 * @param aggs the set of aggregations that are valid for the attribute
+		 */
+		public void setAggregations(List<Aggregation> aggs){
+			wrapped.getDmAttribute().setAggregations(aggs);
+		}
+		
+		/**
+		 * 
+		 * @return list of active list items
+		 */
+		public List<AttributeListItem> getActiveListItems(){
+			return wrapped.getDmAttribute().getActiveListItems();
+		}
+
+		/**
+		 * Only valid for list attributes.
+		 * 
+		 * @return set of valid list elements
+		 */
+		public List<AttributeListItem> getAttributeList(){
+			return wrapped.getDmAttribute().getAttributeList();
+		}
+		/**
+		 * Only valid for list attributes.
+		 * 
+		 * @param attributeList the set of valid list elements
+		 */
+		public void setAttributeList(List<AttributeListItem> attributeList){
+			wrapped.getDmAttribute().setAttributeList(attributeList);
+		}
+		
+
+		/**
+		 * Only valid for tree attributes.
+		 * @return  set of root tree nodes
+		 */
+		public List<AttributeTreeNode> getTree(){
+			return wrapped.getDmAttribute().getTree();
+		}
+		/**
+		 * Only valid for tree attributes.
+		 * 
+		 * @param tree the set of root tree nodes
+		 */
+		public void setTree(List<AttributeTreeNode> tree){
+			wrapped.getDmAttribute().setTree(tree);
+		}
+		
+		
+		/**
+		 * Only valid for tree attributes.
+		 * @return  set of root tree nodes
+		 */
+		public List<AttributeTreeNode> getActiveTreeNodes(){
+			return wrapped.getDmAttribute().getActiveTreeNodes();
+		}
+		/**
+		 * Only valid for tree attributes.
+		 * 
+		 * @param tree the set of root tree nodes
+		 */
+		public void setActiveTreeNodes(List<AttributeTreeNode> activeTootTreeNodes){
+			wrapped.getDmAttribute().setActiveTreeNodes(activeTootTreeNodes);
+		}
+		
+		
+	}
 }

@@ -193,7 +193,7 @@ public class NewEntityDialog extends TitleAreaDialog {
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		eaComp = new EntityEditPanelComposite(scroll);
-		eaComp.setEntityType(etype);
+		eaComp.setEntityType(etype, session);
 		
 		
 		scroll.setContent(eaComp);

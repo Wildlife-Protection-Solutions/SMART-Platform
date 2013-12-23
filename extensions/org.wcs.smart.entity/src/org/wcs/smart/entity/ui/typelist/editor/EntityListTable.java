@@ -101,6 +101,8 @@ public class EntityListTable extends Composite {
 	 * @param input
 	 */
 	public void setInput(Object input){
+		entityTable.setSelection(new StructuredSelection());
+		
 		//we remove any filters here so the data is
 		//all refreshed while a hibernate session is open
 		ViewerFilter[] currentFilters = entityTable.getFilters();
@@ -131,7 +133,14 @@ public class EntityListTable extends Composite {
 		entityTable.addSelectionChangedListener(listener);
 	}
 	
-
+	/**
+	 * Sets the selection
+	 * 
+	 * @param newSelection
+	 */
+	public void setSelection(ISelection newSelection, boolean show){
+		this.entityTable.setSelection(newSelection, show);
+	}
 	/**
 	 * 
 	 * @return the current selection

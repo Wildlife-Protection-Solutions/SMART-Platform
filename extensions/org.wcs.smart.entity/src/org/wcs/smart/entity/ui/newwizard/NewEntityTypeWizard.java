@@ -95,7 +95,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 	@Override
 	public boolean performFinish() {
 		//update the last page
-		((NewEntityWizardPage)this.getPages()[this.getPageCount()-1]).updateEntityType(newType);
+		((NewEntityTypeWizardPage)this.getPages()[this.getPageCount()-1]).updateEntityType(newType);
 		
 		//save to db
 		session.beginTransaction();
@@ -137,7 +137,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 	public boolean canFinish(){
 		if (!super.canFinish()) return false;
 		
-		if (getContainer().getCurrentPage() != null && ((NewEntityWizardPage)super.getContainer().getCurrentPage()).canFinish()){
+		if (getContainer().getCurrentPage() != null && ((NewEntityTypeWizardPage)super.getContainer().getCurrentPage()).canFinish()){
 			return true;
 		}
 		return false;
@@ -146,9 +146,9 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
     public void addPages() {
     	((WizardDialog) getContainer()).addPageChangingListener(this);
     	
-    	super.addPage(new NewEntityWizardPage(this, new TypeComposite()));
-    	super.addPage(new NewEntityWizardPage(this, new NameIdKeyComposite()));
-    	super.addPage(new NewEntityWizardPage(this, new AttributeNameField()));
+    	super.addPage(new NewEntityTypeWizardPage(this, new TypeComposite()));
+    	super.addPage(new NewEntityTypeWizardPage(this, new NameIdKeyComposite()));
+    	super.addPage(new NewEntityTypeWizardPage(this, new AttributeNameField()));
     	
     }
     
@@ -157,14 +157,14 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 	 public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 	
-		((NewEntityWizardPage)super.getPages()[0]).initPage(newType, session);
+		((NewEntityTypeWizardPage)super.getPages()[0]).initPage(newType, session);
 	}
 	
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		NewEntityWizardPage page = (NewEntityWizardPage) event.getCurrentPage();
-		NewEntityWizardPage next = (NewEntityWizardPage) event.getTargetPage();
-		NewEntityWizardPage enext = (NewEntityWizardPage) getNextPage(page);
+		NewEntityTypeWizardPage page = (NewEntityTypeWizardPage) event.getCurrentPage();
+		NewEntityTypeWizardPage next = (NewEntityTypeWizardPage) event.getTargetPage();
+		NewEntityTypeWizardPage enext = (NewEntityTypeWizardPage) getNextPage(page);
 		if (next == enext){
 			//we are moving forward
 			String error = page.validate();
