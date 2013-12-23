@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +60,7 @@ import org.wcs.smart.internal.Messages;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attribute extends DmObject{
 
+	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
 	public static final String BOOLEAN_TRUE_LABEL = Messages.Attribute_BooleanAttribute_True_Label;
 	public static final String BOOLEAN_FALSE_LABEL = Messages.Attribute_BooleanAttribute_False_Label;
 	/**
@@ -98,7 +100,8 @@ public class Attribute extends DmObject{
 		TEXT("s"), //$NON-NLS-1$
 		LIST("l"), //$NON-NLS-1$
 		TREE("t"), //$NON-NLS-1$
-		BOOLEAN("b"); //$NON-NLS-1$
+		BOOLEAN("b"), //$NON-NLS-1$
+		DATE("d"); //$NON-NLS-1$
 		
 		/**
 		 * type key is used in the queries
@@ -120,6 +123,8 @@ public class Attribute extends DmObject{
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 			}else if (this == Attribute.AttributeType.TREE){
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
+			}else if (this == Attribute.AttributeType.DATE){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
 			}
 			return null;
 		}
@@ -434,7 +439,14 @@ public class Attribute extends DmObject{
 		for (int i = 0; i < siblings.size(); i ++){
 			siblings.get(i).setNodeOrder(i);
 		}
-		
-		
+	}
+	
+	public static boolean isValidDateString(String date){
+		try{
+			Date.valueOf(date);
+			return true;
+		}catch (Exception ex){
+			return false;
+		}
 	}
 }

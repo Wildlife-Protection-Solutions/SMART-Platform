@@ -27,6 +27,7 @@ TOKEN :
 | < CONTAINS : "contains" >
 | < NOT_CONTAINS : "notcontains" >
 | < STREQUALS : "equals" >
+| < BETWEEN : "between" >
 }TOKEN : /* Numeric Constants */{  < NUMBER :
   	(["-","+"])?< FLOAT >  | (["-","+"])?< FLOAT >    (      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >    )?     >| < #FLOAT :    < INTEGER >  | < INTEGER > ("." < INTEGER >)?  | "." < INTEGER >     >| < #INTEGER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}TOKEN : /* Literal Constants */{  < S_CONST_LITERAL :    "true"  | "false"  | "null" >}
 /* Query Filters */
@@ -38,12 +39,15 @@ TOKEN :
  | < ATT_BOOL_KEY : "attribute:b:"< DM_KEY > >
  | < ATT_LIST_KEY : "attribute:l:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
+ | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
  | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
- | < PATROL_BOOL_KEY : "patrol:" ("armed")  > |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
+ | < PATROL_BOOL_KEY : "patrol:" ("armed")  >
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
  | < PATROL_ID_KEY : "patrol:id" >
@@ -481,6 +485,9 @@ IFilter AttributeExpression():
 	/* boolean */
 	filter = BooleanItemExpression()
 	| 
+	/* date */
+	filter = DateItemExpression()
+	| 
 	/* attribute list items */
 	(
 		< ATT_LIST_KEY > {key = token.image;}		    
@@ -527,6 +534,43 @@ IFilter AttributeExpression():
 		return filter;
 	}
 }
+IFilter DateItemExpression():
+{
+  IFilter filter = null;
+  String key = null;
+  String date1 = null;
+  String date2 = null;
+}
+{
+	(		(
+			< ATT_DATE_KEY > {key = token.image;}
+			< BETWEEN >
+			< DATE_STRING >  {date1 = token.image;}
+			< K_AND >
+			< DATE_STRING > {date2 = token.image;}
+		)
+		{
+  			filter = AttributeFilter.createDateFilter(key, date1, date2);
+		}
+	)
+	|
+	(
+	  	(
+			< CAT_ATT_DATE_KEY > {key = token.image;}
+			< BETWEEN >
+			< DATE_STRING >  {date1 = token.image;}
+			< K_AND >
+			< DATE_STRING > {date2 = token.image;}
+		)
+		{
+  			filter = CategoryAttributeFilter.createDateFilter(key, date1, date2);
+		}
+	)
+	{		return filter;
+	}
+}
+
+
 IFilter StringExpression():
 {
   IFilter filter = null;

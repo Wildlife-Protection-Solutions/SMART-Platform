@@ -69,6 +69,11 @@ public class Operator {
 	public static Operator STR_NOTCONTAINS = new Operator(Messages.Operator_StrNotContains, "notcontains"); //$NON-NLS-1$
 	
 	/**
+	 * The between operator
+	 */
+	public static Operator BETWEEN = new Operator("BETWEEN", "between");
+	
+	/**
 	 * Boolean and operator
 	 */
 	public static Operator AND = new Operator(Messages.Operator_AND, "and"); //$NON-NLS-1$

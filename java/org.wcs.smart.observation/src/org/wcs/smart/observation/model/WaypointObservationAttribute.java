@@ -22,6 +22,8 @@
 package org.wcs.smart.observation.model;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.Date;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -35,6 +37,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.swt.SWT;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -186,9 +189,44 @@ public class WaypointObservationAttribute {
 			return getAttributeListItem();
 		}else if (type == AttributeType.TREE){
 			return getAttributeTreeNode();
+		}else if (type == AttributeType.DATE){
+			return getDateValue();
 		}
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
+	
+	/**
+	 * Date attribute types are stored
+	 * as in the string field in the ISO8601 format
+	 * of yyyy-mm-dd.  This is a transient
+	 * function which converts the string value to 
+	 * a date.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public Date getDateValue(){
+		if (getStringValue() == null){
+			return null;
+		}
+		return java.sql.Date.valueOf(getStringValue());
+	}
+	
+	/**
+	 * This calls setStringValue formating the
+	 * date as required for SMART
+	 * @return
+	 */
+	@Transient
+	public void setDateValue(Date date){
+		if (date == null){
+			setStringValue(null);
+			return;
+		}
+		java.sql.Date tmp = new java.sql.Date(date.getTime());
+		setStringValue(tmp.toString());
+	}
+	
 	
 	/**
 	 * The string representation of the attribute value based
@@ -198,6 +236,7 @@ public class WaypointObservationAttribute {
 	 * * LIST - return the name of the list item or empty string
 	 * * TREE - name of the tree node or empty string
 	 * * NUMERIC - string representation of numeric value
+	 * * DATE - the date string in format default locale medium format
 	 * 
 	 * @return the string representation of the attribute values.
 	 */
@@ -208,6 +247,11 @@ public class WaypointObservationAttribute {
 		case TEXT:
 			if (getStringValue() != null){
 				text = getStringValue();
+			}
+			break;
+		case DATE:
+			if (getStringValue() != null){
+				text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(getDateValue());
 			}
 			break;
 		case NUMERIC:

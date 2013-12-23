@@ -1,6 +1,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
+import java.util.Date;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.internal.Messages;
@@ -29,6 +30,8 @@ public class AttributeValidator {
 			return validateList(attribute, value);
 		}else if (attribute.getType() == AttributeType.TREE){
 			return validateTree(attribute, value);
+		}else if (attribute.getType() == AttributeType.DATE){
+			return validateDate(attribute, value);
 		}
 		throw new IllegalStateException("Attribute type not supported."); //$NON-NLS-1$
 	}
@@ -107,6 +110,17 @@ public class AttributeValidator {
 	
 	public static String validateTree(Attribute attribute, Object value){
 		if (value != null && !(value instanceof AttributeTreeNode)){
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+		}
+	
+		if (attribute.getIsRequired() && value == null){
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		return null;
+	}
+	
+	public static String validateDate(Attribute attribute, Object value){
+		if (value != null && !(value instanceof Date)){
 			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
 	

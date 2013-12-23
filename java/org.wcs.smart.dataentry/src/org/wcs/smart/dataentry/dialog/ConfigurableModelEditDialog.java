@@ -251,6 +251,10 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);
 
+		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.DATE, attrComposite);
+		
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
 

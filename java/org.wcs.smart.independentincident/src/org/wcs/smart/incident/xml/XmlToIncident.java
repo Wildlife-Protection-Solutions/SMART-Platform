@@ -247,7 +247,14 @@ public class XmlToIncident {
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());	
-				
+			}else if (dmAttribute.getType() == AttributeType.DATE){
+				if (type.getSValue() == null){
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_StringValueNotFound, new Object[]{type.getAttributeKey()}));
+					return null;
+				}
+				if (!Attribute.isValidDateString(type.getSValue())){
+					warnings.add(MessageFormat.format("The date string ''{0}'' is not valid for attribute ''{1}''  (Requires ''{2}'').  Attribute data will not be imported.", new Object[]{type.getSValue(), type.getAttributeKey(), Attribute.DATE_FORMAT}));
+				}
 			}else if (dmAttribute.getType() == AttributeType.LIST){
 				if (type.getItemKey() == null){
 					warnings.add(MessageFormat.format(Messages.XmlToIncident_NoValueFound, new Object[]{type.getAttributeKey()}));

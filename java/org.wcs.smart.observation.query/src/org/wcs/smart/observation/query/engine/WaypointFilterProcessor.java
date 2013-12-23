@@ -482,6 +482,20 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(prefix(AttributeTreeNode.class));
 					sql.append(".hkey < '" + ((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/'");  //$NON-NLS-1$  //$NON-NLS-2$
 					sql.append(") ");  //$NON-NLS-1$
+				}else if (attfilter.getAttributeType() == AttributeType.DATE){
+					sql.append("("); //$NON-NLS-1$
+					sql.append(" DATE ("); //$NON-NLS-1$
+					sql.append(prefix(WaypointObservationAttribute.class));
+					sql.append(".string_value ) "); //$NON-NLS-1$
+					sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()));
+					sql.append(" DATE('"); //$NON-NLS-1$
+					sql.append(attfilter.getValue());
+					sql.append("') "); //$NON-NLS-1$
+					sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(Operator.AND));
+					sql.append(" DATE('"); //$NON-NLS-1$
+					sql.append(attfilter.getValue2());
+					sql.append("') "); //$NON-NLS-1$
+					sql.append(") "); //$NON-NLS-1$
 				}
 			}
 			
