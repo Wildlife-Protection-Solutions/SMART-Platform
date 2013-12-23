@@ -196,7 +196,8 @@ public class PatrolToXmlConverter {
 					xml2.setDValue(att.getNumberValue());
 					add = true;
 				}
-			}else if (att.getAttribute().getType().equals(AttributeType.TEXT)){
+			}else if (att.getAttribute().getType().equals(AttributeType.TEXT) ||
+					att.getAttribute().getType().equals(AttributeType.DATE)){
 				if (att.getStringValue() != null){
 					xml2.setSValue(att.getStringValue());
 					add = true;

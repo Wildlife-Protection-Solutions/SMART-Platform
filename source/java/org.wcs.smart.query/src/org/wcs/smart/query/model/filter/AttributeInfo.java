@@ -75,6 +75,8 @@ public class AttributeInfo {
 			return "number_value"; //$NON-NLS-1$
 		case TEXT:
 			return "string_value"; //$NON-NLS-1$
+		case DATE:
+			return "string_value"; //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

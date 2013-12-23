@@ -53,6 +53,27 @@ public class CategoryAttributeFilter implements IFilter{
 	private CategoryFilter categoryFilter;
 	private AttributeFilter attributeFilter;
 	
+	/**
+	 * Creates a new date category attribute filter
+	 * 
+	 * Date filters are of the form: <DATE> BETWEEN <DATE1> AND <DATE2>
+	 * 
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:s:<key>"
+	 * @param date1 the first date
+	 * @param date2 the second date
+	 * @return
+	 */
+	public static CategoryAttributeFilter createDateFilter(String catAttributeIdentifier, String date1, String date2){
+		
+		String bits[] = catAttributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
+		
+		CategoryFilter cat = CategoryFilter.createFilter(catPart);
+		AttributeFilter att = AttributeFilter.createDateFilter(attPart, date1, date2);
+		
+		return new CategoryAttributeFilter(cat, att);
+	}
 	
 	/**
 	 * 

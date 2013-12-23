@@ -78,6 +78,20 @@ public class AttributeFilter implements IFilter {
 	}
 
 	/**
+	 * Creates a new date attribute filter
+	 * 
+	 * Date filters are of the form: <DATE> BETWEEN <DATE1> AND <DATE2>
+	 * 
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:s:<key>"
+	 * @param date1 the first date
+	 * @param date2 the second date
+	 * @return
+	 */
+	public static AttributeFilter createDateFilter(String attributeIdentifier, String date1, String date2){
+		return new AttributeFilter(attributeIdentifier, Operator.BETWEEN, date1, date2);
+	}
+	
+	/**
 	 * Creates a new list item attribute filter 
 	 * @param attributeIdentifier the attribute identifier in the form "attribute:l:<key>"
 	 * @param op the list operator
@@ -118,17 +132,8 @@ public class AttributeFilter implements IFilter {
 		this.fullIdentifier = attributeIdentifier;
 		
 		String[] bits = this.fullIdentifier.split(":"); //$NON-NLS-1$
-		if (bits[1].equals("b")){ //$NON-NLS-1$
-			this.attributeType = AttributeType.BOOLEAN;
-		}else if (bits[1].equals("n")){  //$NON-NLS-1$
-			this.attributeType = AttributeType.NUMERIC;
-		}else if (bits[1].equals("t")){ //$NON-NLS-1$
-			this.attributeType = AttributeType.TREE;
-		}else if (bits[1].equals("s")){ //$NON-NLS-1$
-			this.attributeType = AttributeType.TEXT;
-		}else if (bits[1].equals("l")){ //$NON-NLS-1$
-			this.attributeType = AttributeType.LIST;
-		}
+		
+		this.attributeType = Attribute.decodeAttributeTypeKey(bits[1]);
 		attributeKey = bits[2];
 	}
 	
@@ -171,7 +176,12 @@ public class AttributeFilter implements IFilter {
 	public Object getValue(){
 		return this.value1;
 	}
-	
+	/**
+	 * @return the second attribute filter value; the type depends on the attribute type
+	 */
+	public Object getValue2(){
+		return this.value2;
+	}
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
 	 */
@@ -185,6 +195,8 @@ public class AttributeFilter implements IFilter {
 			return fullIdentifier + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$ 
 		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
+		}else if (attributeType == AttributeType.DATE){
+			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ 
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -233,6 +245,8 @@ public class AttributeFilter implements IFilter {
 				throw new IllegalStateException(MessageFormat.format(Messages.AttributeFilter_TreeNodeNotFound, new Object[]{(String)value1, attributeKey}));
 			}
 			it.initializeData(ali);
+		}else if (attributeType == AttributeType.DATE){
+			it.initializeData(new String[]{(String)value1, (String)value2});
 		}
 	}
 	

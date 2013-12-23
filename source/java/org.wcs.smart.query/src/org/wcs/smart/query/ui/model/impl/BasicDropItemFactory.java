@@ -69,7 +69,8 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	public DropItem createAttributeDropItem(CategoryAttribute ca){
 		if (ca.getAttribute().getType() == AttributeType.BOOLEAN || 
 				ca.getAttribute().getType() == AttributeType.NUMERIC ||
-				ca.getAttribute().getType() == AttributeType.TEXT ){
+				ca.getAttribute().getType() == AttributeType.TEXT ||
+				ca.getAttribute().getType() == AttributeType.DATE ){
 			return new AttributeDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.LIST ){
 			return new AttributeListDropItem(ca);
@@ -82,7 +83,8 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	public DropItem createAttributeDropItem(Attribute attribute){
 		if (attribute.getType() == AttributeType.BOOLEAN || 
 				attribute.getType() == AttributeType.NUMERIC ||
-						attribute.getType() == AttributeType.TEXT ){
+				attribute.getType() == AttributeType.TEXT ||
+				attribute.getType() == AttributeType.DATE ){
 			return new AttributeDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.LIST ){
 			return new AttributeListDropItem(attribute);

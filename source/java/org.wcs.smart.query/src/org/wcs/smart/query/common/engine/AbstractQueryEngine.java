@@ -147,6 +147,8 @@ public class AbstractQueryEngine implements IQueryEngine {
 			return "double"; //$NON-NLS-1$
 		case TEXT:
 			return "varchar(1024)"; //$NON-NLS-1$
+		case DATE:
+			return "varchar(10)"; //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 

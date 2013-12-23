@@ -140,6 +140,10 @@ public class DerbyFilterToSqlGenerator {
 				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " '" + val.toLowerCase() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
+		}else if (filter.getAttributeType() == AttributeType.DATE){
+			String date1 = (String) filter.getValue();
+			String date2 = (String) filter.getValue2();			
+			return "( DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " DATE('" + date1 + "' ) " + asSql(Operator.AND) + " DATE('" + date2 + "') )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
 			return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " '" + (String)filter.getValue() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}else if (filter.getAttributeType() == AttributeType.TREE){
@@ -298,6 +302,8 @@ public class DerbyFilterToSqlGenerator {
 			return "or"; //$NON-NLS-1$
 		}else if (op == Operator.NOT){
 			return "not"; //$NON-NLS-1$
+		}else if (op == Operator.BETWEEN){
+			return "between"; //$NON-NLS-1$
 		}
 		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_OperatorNotSupported, new Object[]{op.getGuiValue()}));
 	}

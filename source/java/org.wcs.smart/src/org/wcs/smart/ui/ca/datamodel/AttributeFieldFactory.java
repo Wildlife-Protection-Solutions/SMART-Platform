@@ -50,6 +50,8 @@ public class AttributeFieldFactory {
 			return new ListAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.TREE){
 			return new TreeAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.DATE){
+			return new DateAttributeField(attribute);
 		}
 		throw new IllegalStateException("Invalid attribute type."); //$NON-NLS-1$
 	}

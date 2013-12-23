@@ -53,81 +53,89 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int STREQUALS = 25;
   /** RegularExpression Id. */
-  int NUMBER = 26;
+  int BETWEEN = 26;
   /** RegularExpression Id. */
-  int FLOAT = 27;
+  int NUMBER = 27;
   /** RegularExpression Id. */
-  int INTEGER = 28;
+  int FLOAT = 28;
   /** RegularExpression Id. */
-  int DIGIT = 29;
+  int INTEGER = 29;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 30;
+  int DIGIT = 30;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 31;
+  int S_CONST_LITERAL = 31;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 32;
+  int CATEGORY_KEY = 32;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 33;
+  int ATT_STR_KEY = 33;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 34;
+  int ATT_VALUE_KEY = 34;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 35;
+  int ATT_BOOL_KEY = 35;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 36;
+  int ATT_LIST_KEY = 36;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 37;
+  int ATT_TREE_KEY = 37;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 38;
+  int ATT_DATE_KEY = 38;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 39;
+  int CAT_ATT_STR_KEY = 39;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 40;
+  int CAT_ATT_VALUE_KEY = 40;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 41;
+  int CAT_ATT_BOOL_KEY = 41;
   /** RegularExpression Id. */
-  int DM_KEY = 42;
+  int CAT_ATT_LIST_KEY = 42;
   /** RegularExpression Id. */
-  int LETTER = 43;
+  int CAT_ATT_TREE_KEY = 43;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 44;
+  int CAT_ATT_DATE_KEY = 44;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 45;
+  int DM_KEY = 45;
   /** RegularExpression Id. */
-  int AREA_KEY = 46;
+  int DATE_STRING = 46;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 47;
+  int LETTER = 47;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 48;
+  int SPECIAL_CHARS = 48;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_KEY = 49;
+  int AREA_TYPE_KEY = 49;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 50;
+  int AREA_KEY = 50;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 51;
+  int OBSERVATION_FILTER_TYPE_KEY = 51;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 52;
+  int WAYPOINT_FILTER_TYPE_KEY = 52;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 53;
+  int WAYPOINT_SOURCE_KEY = 53;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 54;
+  int SUM_CAT_VALUE_KEY = 54;
   /** RegularExpression Id. */
-  int AGG = 55;
+  int SUM_ATTRIBUTE_VALUE_KEY = 55;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 56;
+  int SUM_CAT_ATT_VALUE_KEY = 56;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 57;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 57;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 58;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 58;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 59;
+  int AGG = 59;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 60;
+  int DATE_GROUPBY_ITEM = 60;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 61;
+  int QUERY_SPLITTER = 61;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_GROUP_BY = 62;
+  int CATEGORY_GROUPBY_ITEM = 62;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 63;
+  int AREA_GROUPBY_ITEM = 63;
+  /** RegularExpression Id. */
+  int ATTRIBUTE_GROUPBY_ITEM = 64;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 65;
+  /** RegularExpression Id. */
+  int WAYPOINT_SOURCE_GROUP_BY = 66;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 67;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -160,6 +168,7 @@ public interface ParserConstants {
     "\"contains\"",
     "\"notcontains\"",
     "\"equals\"",
+    "\"between\"",
     "<NUMBER>",
     "<FLOAT>",
     "<INTEGER>",
@@ -171,12 +180,15 @@ public interface ParserConstants {
     "<ATT_BOOL_KEY>",
     "<ATT_LIST_KEY>",
     "<ATT_TREE_KEY>",
+    "<ATT_DATE_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
     "<CAT_ATT_BOOL_KEY>",
     "<CAT_ATT_LIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
+    "<CAT_ATT_DATE_KEY>",
     "<DM_KEY>",
+    "<DATE_STRING>",
     "<LETTER>",
     "<SPECIAL_CHARS>",
     "<AREA_TYPE_KEY>",

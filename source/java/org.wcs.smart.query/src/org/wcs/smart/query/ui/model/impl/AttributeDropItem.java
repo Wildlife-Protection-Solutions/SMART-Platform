@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.model.impl;
 
+import java.sql.Date;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,8 +32,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -39,6 +44,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Attribute drop item for numeric, text, and boolean attributes in observation
@@ -49,9 +55,13 @@ import org.wcs.smart.query.ui.model.IFilterDropItem;
  */
 public class AttributeDropItem extends DropItem implements IFilterDropItem {
 
+	private DateTime dtime1;
+	private DateTime dtime2;
+	
 	private String text;
 	private String key;
 	
+	private String currentValue2 = null;
 	private String currentValue = null;
 	private String currentOp = null;	
 	private Label lblAttribute;
@@ -102,8 +112,14 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 	 */
 	public void initializeData(Object data){
 		if (data != null && data instanceof String[]){
-			this.currentOp = ((String[])data)[0];
-			this.currentValue = ((String[])data)[1];
+			String[] initd = (String[])data;
+			if (type == AttributeType.DATE){
+				this.currentValue = initd[0];
+				this.currentValue2 = initd[1];
+			}else{
+				this.currentOp = initd[0];
+				this.currentValue = initd[1];
+			}
 		}
 	}
 
@@ -143,6 +159,16 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 			querypart.append("\""); //$NON-NLS-1$
 		}else if (type == AttributeType.BOOLEAN){
 			querypart.append(this.key);
+		}else if (type == AttributeType.DATE){
+			querypart.append(this.key);
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append( Operator.BETWEEN.asSmartValue() );
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append(new Date(SmartUtils.getDate(dtime1).getTime()).toString());
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append( Operator.AND.asSmartValue() );
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append(new Date(SmartUtils.getDate(dtime2).getTime()).toString());
 		}
 		return querypart.toString();
 	}
@@ -227,6 +253,31 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 				}
 				operators.select(index);
 			}
+		}else if (type == AttributeType.DATE){
+			Label l = new Label(main, SWT.NONE);
+			l.setText(Operator.BETWEEN.getGuiValue());
+			
+			dtime1 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
+			dtime1.addListener(SWT.Selection, new Listener(){
+				@Override
+				public void handleEvent(Event event) {
+					String newValue = (new java.sql.Date(SmartUtils.getDate(dtime1).getTime())).toString();
+					if (!newValue.equals(currentValue)){
+						queryChanged();
+						currentValue = newValue;
+					}
+				}});
+			
+			dtime2 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
+			dtime2.addListener(SWT.Selection, new Listener(){
+				@Override
+				public void handleEvent(Event event) {
+					String newValue = (new java.sql.Date(SmartUtils.getDate(dtime2).getTime())).toString();
+					if (!newValue.equals(currentValue2)){
+						queryChanged();
+						currentValue2 = newValue;
+					}
+				}});
 		}
 		
 		initDrag(main);
@@ -234,7 +285,15 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 		
 		lblAttribute.setText(formatStringForLabel(this.text));
 		if (currentValue != null){
-			value.setText(currentValue);
+			if (value != null){
+				value.setText(currentValue);
+			}
+			if (dtime1 != null && currentValue != null){
+				SmartUtils.initDateDateTimeWidget(dtime1, java.sql.Date.valueOf(currentValue));	
+			}
+			if (dtime2 != null && currentValue2 != null){
+				SmartUtils.initDateDateTimeWidget(dtime2, java.sql.Date.valueOf(currentValue2));	
+			}
 		}
 	}
 

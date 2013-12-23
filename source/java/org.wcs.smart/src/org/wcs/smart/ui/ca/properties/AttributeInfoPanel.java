@@ -104,6 +104,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	
 	private Composite optionComposite;
 	private Composite booleanComposite;
+	private Composite dateComposite;
 	private Composite treeComposite;
 	private Composite listComposite;
 	private Composite textComposite;
@@ -533,6 +534,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		booleanComposite.setLayout(new GridLayout(1, false));
 		booleanComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
+		
+		/*   Date Attribute Options */
+		dateComposite = new Composite(optionComposite, SWT.NONE);
+		dateComposite.setLayout(new GridLayout(1, false));
+		dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		
 		selectOption();
 		if (canEdit){
 			validate();
@@ -678,6 +685,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			((StackLayout)optionComposite.getLayout()).topControl = listComposite;
 		}else if (type.equals(AttributeType.TREE)){
 			((StackLayout)optionComposite.getLayout()).topControl = treeComposite;
+		}else if (type.equals(AttributeType.DATE)){
+			((StackLayout)optionComposite.getLayout()).topControl = dateComposite;
 		}
 		optionComposite.layout();
 	}
