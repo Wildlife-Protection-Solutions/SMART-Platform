@@ -22,6 +22,8 @@
 package org.wcs.smart.entity.model;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -32,6 +34,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import net.refractions.udig.project.internal.SetDefaultStyleProcessor;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -143,6 +147,38 @@ public class EntityAttributeValue {
 	}
 	
 	/**
+	 * Date attribute types are stored
+	 * as in the string field in the ISO8601 format
+	 * of yyyy-mm-dd.  This is a transient
+	 * function which converts the string value to 
+	 * a date.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public Date getDateValue(){
+		if (getStringValue() == null){
+			return null;
+		}
+		return java.sql.Date.valueOf(getStringValue());
+	}
+	
+	/**
+	 * This calls setStringValue formating the
+	 * date as required for SMART
+	 * @return
+	 */
+	@Transient
+	public void setDateValue(Date date){
+		if (date == null){
+			setStringValue(null);
+			return;
+		}
+		java.sql.Date tmp = new java.sql.Date(date.getTime());
+		setStringValue(tmp.toString());
+	}
+	
+	/**
 	 * 
 	 * @return the string representation of the 
 	 * entity attribute value
@@ -154,6 +190,10 @@ public class EntityAttributeValue {
 		case TEXT:
 			text = getStringValue();
 			break;
+		case DATE:
+			if (getStringValue() != null){
+				text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(java.sql.Date.valueOf(getStringValue()));
+			}
 		case NUMERIC:
 			if (getNumberValue() != null){
 				text = String.valueOf(getNumberValue());	
@@ -203,6 +243,8 @@ public class EntityAttributeValue {
 			return getAttributeListItem();
 		case TREE:
 			return getAttributeTreeNode();
+		case DATE:
+			return getDateValue();
 		}
 		return null;
 	}
@@ -217,6 +259,9 @@ public class EntityAttributeValue {
 		switch (getEntityAttribute().getDmAttribute().getType()){
 		case TEXT:
 			setStringValue((String)value);
+			break;
+		case DATE:
+			setDateValue((Date)value);
 			break;
 		case NUMERIC:
 			setNumberValue((Double)value);
