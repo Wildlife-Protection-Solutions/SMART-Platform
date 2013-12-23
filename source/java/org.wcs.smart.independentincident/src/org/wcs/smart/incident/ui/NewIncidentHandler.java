@@ -27,6 +27,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.incident.ui.newwizard.NewIncidentWizard;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * New incident handler.  Opens the new incident wizard.
@@ -37,6 +38,7 @@ public class NewIncidentHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		FieldDataPerspective.openPerspective(IndIncidentListView.ID);
 		
 		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), new NewIncidentWizard());
 		wd.open();

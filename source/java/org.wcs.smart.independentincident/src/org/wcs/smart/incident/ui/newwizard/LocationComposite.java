@@ -158,11 +158,8 @@ public class LocationComposite extends AbstractIncidentComposite {
 
 	@Override
 	public void updateIncident(Waypoint incident) {
-		double x = Double.parseDouble(txtX.getText());
-		double y = Double.parseDouble(txtY.getText());
-		Projection proj = (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
 		try{
-			Coordinate z = ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+			Coordinate z = getPoint();
 			incident.setX(z.x);
 			incident.setY(z.y);
 		}catch (Exception ex){
@@ -171,6 +168,14 @@ public class LocationComposite extends AbstractIncidentComposite {
 		}
 	}
 
+	private Coordinate getPoint() throws Exception{
+		double x = Double.parseDouble(txtX.getText());
+		double y = Double.parseDouble(txtY.getText());
+		Projection proj = (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+		Coordinate z = ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+		return z;
+	}
+	
 	@Override
 	public void initFields(Waypoint incident, Session session) {
 		initializing = true;
@@ -193,8 +198,12 @@ public class LocationComposite extends AbstractIncidentComposite {
 				projs.add(defaultp);
 			}
 			cmbProjection.setInput(projs);
-			txtX.setText(String.valueOf(incident.getX()));
-			txtY.setText(String.valueOf(incident.getY()));
+			if (incident.getX() != null){
+				txtX.setText(String.valueOf(incident.getX()));
+			}
+			if (incident.getY() != null){
+				txtY.setText(String.valueOf(incident.getY()));
+			}
 		
 			cmbProjection.setSelection(new StructuredSelection(defaultp));
 		}finally{
@@ -215,6 +224,14 @@ public class LocationComposite extends AbstractIncidentComposite {
 	
 	private void selectOnMap(){
 		MapDialog md = new MapDialog(Display.getCurrent().getActiveShell());
+		
+		try{
+			Coordinate z = getPoint();
+			if (z != null){
+				md.setInitPoint(z.x, z.y);
+			}
+		}catch (Exception ex){}
+		
 		if (md.open() == MapDialog.OK){
 			if (md.getPoint() != null){
 				txtX.setText(String.valueOf(md.getPoint().getX()));
