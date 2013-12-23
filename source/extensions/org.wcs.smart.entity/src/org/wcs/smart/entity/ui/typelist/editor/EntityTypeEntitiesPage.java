@@ -210,8 +210,12 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Entity e = (Entity) ((IStructuredSelection)entityTable.getSelection()).getFirstElement();
-				entityInfoPanel.setEntity(e);
+				if (entityTable.getSelection().isEmpty()){
+					entityInfoPanel.setEntity(null);
+				}else{
+					Entity e = (Entity) ((IStructuredSelection)entityTable.getSelection()).getFirstElement();
+					entityInfoPanel.setEntity(e);
+				}
 			}
 		});
 		
@@ -239,6 +243,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 				EntityPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
+		entityTable.setSelection(new StructuredSelection(dialog.getEntity()), true);
 	}
 	
 	/*
@@ -367,8 +372,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			});
 		}catch(Exception ex){
 			EntityPlugIn.displayLog(ex.getMessage(), ex);
-		}
-		
+		}	
 	}
 	
 	/*
@@ -387,6 +391,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 				EntityPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
+		entityTable.setSelection(new StructuredSelection(toUpdate), true);
 	}
 	
 	
@@ -404,6 +409,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		}else{
 			entityInfoPanel.initEntityFields();
 		}
+		
 		entityTable.setInput(type.getEntities());
 	}
 	

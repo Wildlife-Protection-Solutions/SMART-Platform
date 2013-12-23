@@ -33,6 +33,11 @@ public class Messages extends NLS {
 	public static String Entity_XFieldName;
 	public static String Entity_YFieldName;
 	public static String EntityEditPanelComposite_IdError;
+	public static String EntityEditPanelComposite_LocationLabel;
+	public static String EntityEditPanelComposite_ProjectionError;
+	public static String EntityEditPanelComposite_ProjectionError2;
+	public static String EntityEditPanelComposite_ProjectionLabel;
+	public static String EntityEditPanelComposite_SelectOnMapLink;
 	public static String EntityEditPanelComposite_xError;
 	public static String EntityEditPanelComposite_yError;
 	public static String EntityListTable_AnyLabel;
@@ -117,6 +122,7 @@ public class Messages extends NLS {
 	public static String IdComposite_InvalidId;
 	public static String IdComposite_TypeIdDescription;
 	public static String IdComposite_TypeIdName;
+	public static String MapDialog_MapDialogTitle;
 	public static String NameIdKeyComposite_CompositeDescription;
 	public static String NameIdKeyComposite_CompositeName;
 	public static String NameIdKeyComposite_DuplicateKey;
