@@ -63,8 +63,8 @@ public class Waypoint extends UuidItem {
 	private String sourceId;
 	
 	private int id;
-	private double x;
-	private double y;
+	private Double x;
+	private Double y;
 	private Date dateTime;
 	
 	private Float direction;
@@ -112,7 +112,7 @@ public class Waypoint extends UuidItem {
 	}
 
 	@Column(name="x")
-	public double getX() {
+	public Double getX() {
 		return x;
 	}
 
@@ -121,7 +121,7 @@ public class Waypoint extends UuidItem {
 	}
 
 	@Column(name="y")
-	public double getY() {
+	public Double getY() {
 		return y;
 	}
 
