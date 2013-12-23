@@ -115,8 +115,7 @@
                   tooltip="%systempref.command.tooltip">
             </command>
             <command
-                  commandId="org.eclipse.equinox.p2.ui.sdk.install"
-                  label="%install.command.label"
+                  commandId="org.wcs.smart.update.install"
                   style="push">
             </command>
             <separator
@@ -614,6 +613,10 @@
             id="org.wcs.smart.translateItem"
             name="%tranlsate.command.name">
       </command>
+      <command
+            id="org.wcs.smart.update.install"
+            name="%install.command.label">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -770,6 +773,10 @@
       <handler
             class="org.wcs.smart.ui.TranslateNamesHandler"
             commandId="org.wcs.smart.translateItem">
+      </handler>
+      <handler
+            class="org.wcs.smart.SmartInstallNewSoftwareHandler"
+            commandId="org.wcs.smart.update.install">
       </handler>
    </extension>
    <extension
