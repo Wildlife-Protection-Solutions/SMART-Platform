@@ -22,6 +22,7 @@
 
 package org.wcs.smart.incident.ui.newwizard;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -44,8 +45,17 @@ public class MapDialog extends Dialog {
 
 	private TmpPoint point;
 	private LocationSelectComposite<TmpPoint> locationComp;
+	private TmpPoint initPoint = null;
+	
 	protected MapDialog(Shell parentShell) {
 		super(parentShell);
+	}
+	
+
+	public void setInitPoint(double x, double y){
+		initPoint = new TmpPoint();
+		initPoint.setX(x);
+		initPoint.setY(y);
 	}
 	
 	@Override
@@ -77,7 +87,9 @@ public class MapDialog extends Dialog {
 			}
 		};
 
-		
+		if (initPoint != null){
+			locationComp.setPoints(Collections.singletonList(initPoint));
+		}
 		getShell().setText(Messages.MapDialog_Title);
 		return parent;
 	}
