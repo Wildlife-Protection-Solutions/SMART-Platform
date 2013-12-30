@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.feature"
       label="SMART CyberTracker Plug-in"
-      version="2.0.1">
+      version="2.0.0">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]
