@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.wcs.smart.cybertracker.feature_2.0.1.jar" id="org.wcs.smart.cybertracker.feature" version="2.0.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature_2.0.0.jar" id="org.wcs.smart.intelligence.feature" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature_2.0.0.jar" id="org.wcs.smart.plan.feature" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <category-def name="cybertracker" label="SMART-CyberTracker Plug-in">
+      <description>
+         SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
+      </description>
+   </category-def>
+   <category-def name="intelligence" label="SMART Intelligence Plug-in">
+      <description>
+         SMART Intelligence Plug-in contains an intelligence module that allows to organize, maintain and query intelligence information.
+      </description>
+   </category-def>
+   <category-def name="planning" label="SMART Planning Plug-in">
+      <description>
+         SMART Planning Plug-in contains a plan module that allows to organize, maintain and query planning information.
+      </description>
+   </category-def>
+</site>
