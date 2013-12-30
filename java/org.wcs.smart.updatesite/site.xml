@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.cybertracker.feature_2.0.1.jar" id="org.wcs.smart.cybertracker.feature" version="2.0.1">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.intelligence.feature_2.0.0.jar" id="org.wcs.smart.intelligence.feature" version="2.0.0">
       <category name="intelligence"/>
    </feature>
    <feature url="features/org.wcs.smart.plan.feature_2.0.0.jar" id="org.wcs.smart.plan.feature" version="2.0.0">
       <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature_2.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="2.0.0">
+      <category name="cybertracker"/>
    </feature>
    <category-def name="cybertracker" label="SMART-CyberTracker Plug-in">
       <description>
