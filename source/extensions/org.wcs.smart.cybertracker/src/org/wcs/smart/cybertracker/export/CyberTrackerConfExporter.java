@@ -120,7 +120,7 @@ public class CyberTrackerConfExporter {
 		while(toCheck.size() > 0){
 			CmNode node = toCheck.remove(0);
 			if (node.getCmAttributes() != null){
-				for (CmAttribute a : node.getCmAttributes()){
+				for (final CmAttribute a : node.getCmAttributes()){
 					if (a.getAttribute().getType() == AttributeType.DATE){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
@@ -128,7 +128,7 @@ public class CyberTrackerConfExporter {
 								MessageDialog.openError(
 										Display.getDefault().getActiveShell(), 
 										Messages.CyberTrackerConfExporter_ErrorDialog, 
-										Messages.CyberTrackerConfExporter_DateAttributeExportError);		
+										MessageFormat.format(Messages.CyberTrackerConfExporter_DateAttributeExportError, new Object[]{a.getName()}));		
 							}});
 						
 						
