@@ -61,7 +61,10 @@ public interface IDefinitionPanel {
 	public void removeItem(DropItem item);
 	
 	/**
-	 * Validate the items in the drop panel
+	 * Validate the items in the drop panel.
+	 * This validates specific items in the panel; it
+	 * does not have to validate the entire query
+	 * 
 	 * @return null if no error otherwise error string
 	 */
 	public String validate();

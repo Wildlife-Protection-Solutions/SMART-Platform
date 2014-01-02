@@ -58,6 +58,7 @@ import org.wcs.smart.dataentry.dialog.composite.BooleanAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.DateAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.ListAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.NumericAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.TextAttributeInfoComposite;
@@ -251,7 +252,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);
 
-		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model, session);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.DATE, attrComposite);
 		

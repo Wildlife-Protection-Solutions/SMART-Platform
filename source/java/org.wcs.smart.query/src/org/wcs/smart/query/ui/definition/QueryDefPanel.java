@@ -145,62 +145,68 @@ public class QueryDefPanel {
 		return main;
 	}
 	
-	private Composite createComposite(Composite parent){
+	private Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		 GridLayout gl = new GridLayout(1, false);
-		 gl.marginHeight = gl.marginWidth = 0;
-		 main.setLayout(gl);
-		String[] panelIds =  QueryTypeManager.getInstance().getQueryDefinitionPanelIds(queryType);
-		 if (panelIds == null || panelIds.length == 0){
-			 main.setLayout(new GridLayout(1, false));
-			 Label l = new Label(parent, SWT.NONE);
-			 l.setText(MessageFormat.format(Messages.QueryDefPanel_QueryTypeNotSupported,new Object[]{queryType.getGuiName()}));
-		 }else if (panelIds.length == 1){
-			 IDefinitionPanel pnl = DefinitionPanelManager.getInstance().createDefinitionPanel(panelIds[0]);
-			 
-			 Composite c = pnl.createComposite(main);
-			 dropPanels.add(pnl);
-			 c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			 setQueryDefinitionPanel(pnl.getId());
-			 currentPanel = pnl.getId();
-			 
-			 pnl.initItems(parentView.getQueryProxy());
-		 }else{
-			 final TabFolder tf = new TabFolder(main, SWT.NONE);
-			 tf.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			 for (int i = 0; i < panelIds.length; i ++){
-				 TabItem item = new TabItem(tf, SWT.NONE);
-				 
-				 IDefinitionPanel pnl = DefinitionPanelManager.getInstance().createDefinitionPanel(panelIds[i]);
-				 if (pnl != null){
-					 item.setText(pnl.getGuiName());
-					 Composite comp = pnl.createComposite(tf);
-					 item.setControl(comp);
-					 item.setData(pnl);
-				 
-					 pnl.initItems(parentView.getQueryProxy());
-					 dropPanels.add(pnl);
-				 }
-				
-			 }
-			 tf.pack();
-			 tf.addSelectionListener(new SelectionAdapter() {
-				
+		GridLayout gl = new GridLayout(1, false);
+		gl.marginHeight = gl.marginWidth = 0;
+		main.setLayout(gl);
+		String[] panelIds = QueryTypeManager.getInstance()
+				.getQueryDefinitionPanelIds(queryType);
+		if (panelIds == null || panelIds.length == 0) {
+			main.setLayout(new GridLayout(1, false));
+			Label l = new Label(parent, SWT.NONE);
+			l.setText(MessageFormat.format(
+					Messages.QueryDefPanel_QueryTypeNotSupported,
+					new Object[] { queryType.getGuiName() }));
+		} else if (panelIds.length == 1) {
+			IDefinitionPanel pnl = DefinitionPanelManager.getInstance()
+					.createDefinitionPanel(panelIds[0]);
+
+			Composite c = pnl.createComposite(main);
+			dropPanels.add(pnl);
+			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			setQueryDefinitionPanel(pnl.getId());
+			currentPanel = pnl.getId();
+
+			pnl.initItems(parentView.getQueryProxy());
+		} else {
+			final TabFolder tf = new TabFolder(main, SWT.NONE);
+			tf.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			for (int i = 0; i < panelIds.length; i++) {
+				TabItem item = new TabItem(tf, SWT.NONE);
+
+				IDefinitionPanel pnl = DefinitionPanelManager.getInstance()
+						.createDefinitionPanel(panelIds[i]);
+				if (pnl != null) {
+					item.setText(pnl.getGuiName());
+					Composite comp = pnl.createComposite(tf);
+					item.setControl(comp);
+					item.setData(pnl);
+
+					pnl.initItems(parentView.getQueryProxy());
+					dropPanels.add(pnl);
+				}
+
+			}
+			tf.pack();
+			tf.addSelectionListener(new SelectionAdapter() {
+
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					TabItem[] sel = tf.getSelection();
-					if (sel.length > 0){
-						setQueryDefinitionPanel(((IDefinitionPanel)sel[0].getData()).getId());
+					if (sel.length > 0) {
+						setQueryDefinitionPanel(((IDefinitionPanel) sel[0]
+								.getData()).getId());
 					}
 				}
 			});
-			 setQueryDefinitionPanel(((IDefinitionPanel)tf.getItem(0).getData()).getId());
-			 
-			
-		 }
-		 parent.layout(true);
-		 return main;
+			setQueryDefinitionPanel(((IDefinitionPanel) tf.getItem(0).getData())
+					.getId());
+
+		}
+		parent.layout(true);
+		return main;
 	}
 	/**
 	 * Called when the panel is made visible

@@ -139,6 +139,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_CategoryNotFound;
 	public static String XmlToIncident_DataError;
 	public static String XmlToIncident_DoubleValueNotFound;
+	public static String XmlToIncident_InvalidDateString;
 	public static String XmlToIncident_ListValueNotFound;
 	public static String XmlToIncident_MultpleAttributeValues;
 	public static String XmlToIncident_NoValueFound;

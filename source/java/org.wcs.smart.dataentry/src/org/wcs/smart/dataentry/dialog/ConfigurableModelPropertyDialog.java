@@ -262,6 +262,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		if (!selection.isEmpty()) {
 			ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();
+			
+			Object currentCm = modelTreeViewer.getInput();
+			if (currentCm instanceof ConfigurableModel && currentCm.equals(cm)){
+				//selecting the currently selected cm
+				return;
+			}
+			
 			modelTreeViewer.setInput(Messages.ConfigurableModelPropertyDialog_LoadingText);
 			loadCmModelJob.cancel();
 			loadCmModelJob.modelToLoad = cm;

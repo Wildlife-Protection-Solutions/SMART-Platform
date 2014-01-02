@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.query;
 
-import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.internal.CaDataModelManagerImpl;
 import org.wcs.smart.query.internal.MultiCaDataModelManagerImpl;
 

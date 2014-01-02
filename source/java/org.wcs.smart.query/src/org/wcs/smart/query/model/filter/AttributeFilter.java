@@ -196,7 +196,7 @@ public class AttributeFilter implements IFilter {
 		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
 		}else if (attributeType == AttributeType.DATE){
-			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ 
+			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		return ""; //$NON-NLS-1$
 	}

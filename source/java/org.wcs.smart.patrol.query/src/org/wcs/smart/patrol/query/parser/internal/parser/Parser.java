@@ -677,13 +677,13 @@ public class Parser implements ParserConstants {
       jj_consume_token(DATE_STRING);
                                          date2 = token.image;
                         filter = CategoryAttributeFilter.createDateFilter(key, date1, date2);
-{if (true) return filter;}
       break;
     default:
       jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+                {if (true) return filter;}
     throw new Error("Missing return statement in function");
   }
 
