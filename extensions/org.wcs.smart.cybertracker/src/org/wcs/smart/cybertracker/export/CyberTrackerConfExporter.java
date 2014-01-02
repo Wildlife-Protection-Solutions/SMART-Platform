@@ -38,6 +38,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -108,6 +110,36 @@ public class CyberTrackerConfExporter {
 		this.currentLanguage = currentLanguage;
 	}
 
+	/*
+	 * Currently date attribute types are not supported;
+	 * here we check and inform the user
+	 */
+	private boolean validateAttributes(){
+		List<CmNode> toCheck = new ArrayList<CmNode>();
+		toCheck.addAll(configurableModel.getNodes());
+		while(toCheck.size() > 0){
+			CmNode node = toCheck.remove(0);
+			if (node.getCmAttributes() != null){
+				for (CmAttribute a : node.getCmAttributes()){
+					if (a.getAttribute().getType() == AttributeType.DATE){
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openError(
+										Display.getDefault().getActiveShell(), 
+										Messages.CyberTrackerConfExporter_ErrorDialog, 
+										Messages.CyberTrackerConfExporter_DateAttributeExportError);		
+							}});
+						
+						
+						return false;
+					}
+				}
+			}
+			
+		}
+		return true;
+	}
 	public File export(File destFolder, Object source, IProgressMonitor monitor) {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -120,6 +152,9 @@ public class CyberTrackerConfExporter {
 				configurableModel = ((DataModelWrapper) source).buildConfigurableModel(session, monitor);
 			} else {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
+				return null;
+			}
+			if (!validateAttributes()){
 				return null;
 			}
 			
