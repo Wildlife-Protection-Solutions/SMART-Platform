@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -82,6 +84,38 @@ public class CmAttributeOption extends UuidItem {
 	}
 	public void setDoubleValue(Double doubleValue) {
 		this.doubleValue = doubleValue;
+	}
+	
+	/**
+	 * Date attribute types are stored
+	 * as in the string field in the ISO8601 format
+	 * of yyyy-mm-dd.  This is a transient
+	 * function which converts the string value to 
+	 * a date.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public Date getDateValue(){
+		if (getStringValue() == null){
+			return null;
+		}
+		return java.sql.Date.valueOf(getStringValue());
+	}
+	
+	/**
+	 * This calls setStringValue formating the
+	 * date as required for SMART
+	 * @return
+	 */
+	@Transient
+	public void setDateValue(Date date){
+		if (date == null){
+			setStringValue(null);
+			return;
+		}
+		java.sql.Date tmp = new java.sql.Date(date.getTime());
+		setStringValue(tmp.toString());
 	}
 
 	@Transient

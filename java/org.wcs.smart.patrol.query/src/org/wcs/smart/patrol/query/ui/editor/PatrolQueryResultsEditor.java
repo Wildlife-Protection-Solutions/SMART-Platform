@@ -106,7 +106,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		
 		@Override
 		public void queryModified(int eventType, Object object) {
-			if (object != null && object.equals(PatrolQueryResultsEditor.this.query)){
+			if (object != null && object.equals(PatrolQueryResultsEditor.this.getQuery())){
 				if (eventType == IQueryListener.QUERY_DEFINITION_MODIFIED){
 					isDirty = true;
 					firePropertyChange(PROP_DIRTY);

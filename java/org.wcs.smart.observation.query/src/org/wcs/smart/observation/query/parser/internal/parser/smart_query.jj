@@ -475,9 +475,7 @@ IFilter DateItemExpression():
 		{
   			filter = AttributeFilter.createDateFilter(key, date1, date2);
 		}
-	)
 	|
-	(
 	  	(
 			< CAT_ATT_DATE_KEY > {key = token.image;}
 			< BETWEEN >

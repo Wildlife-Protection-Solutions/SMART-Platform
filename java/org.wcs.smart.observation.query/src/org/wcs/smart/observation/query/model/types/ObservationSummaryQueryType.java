@@ -34,6 +34,7 @@ import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationSummaryQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
+import org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel;
 import org.wcs.smart.observation.query.ui.definition.ObservationSummaryGroupByValuePanel;
 import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterPanel;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
@@ -153,6 +154,8 @@ public class ObservationSummaryQueryType implements IQueryType {
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(ObservationValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
+			}else if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+				filters = p.getQueryPart() + "|"; //$NON-NLS-1$
 			}else if (p.getId().equals(ObservationSummaryGroupByValuePanel.ID)){
 				definition = p.getQueryPart();
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){

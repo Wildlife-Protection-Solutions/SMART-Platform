@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.query.ui.definition;
 
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
 /**
  * Simple filter panel for patrol, observation and incident queries.
@@ -55,5 +57,15 @@ public class SimplePatrolFilterPanel extends FilterDefinitionPanel {
 	@Override
 	public String validate() {
 		return null;
+	}
+	
+
+	@Override
+	public void initItems(QueryProxy q){
+		super.initItems(q);
+		
+		if (q.getQuery() instanceof SimpleQuery){
+			setFilterType( ((SimpleQuery)q.getQuery()).getFilter().getFilterType() );
+		}
 	}
 }

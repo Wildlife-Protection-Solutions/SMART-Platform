@@ -71,7 +71,7 @@ public class Operator {
 	/**
 	 * The between operator
 	 */
-	public static Operator BETWEEN = new Operator("BETWEEN", "between");
+	public static Operator BETWEEN = new Operator(Messages.Operator_BetweenOp, "between"); //$NON-NLS-1$
 	
 	/**
 	 * Boolean and operator

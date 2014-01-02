@@ -54,7 +54,6 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
-import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
@@ -294,8 +293,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			ObservationSummaryQuery q = (ObservationSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
-			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 			
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
 					def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
@@ -309,8 +307,6 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			GridQueryDefinition def = q.getQueryDefinition();
 			
 			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
-//			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-//			proxy.setDropItems(ObservationValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
 			
 			DropItem valueItem = null;
 			try{

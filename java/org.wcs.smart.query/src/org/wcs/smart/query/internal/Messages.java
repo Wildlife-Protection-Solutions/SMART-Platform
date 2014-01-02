@@ -159,6 +159,7 @@ public class Messages extends NLS {
 	public static String NameCellEditor_UpdateFolderNameJob;
 	public static String NameCellEditor_UpdateQueryNameJob;
 	public static String Operator_AND;
+	public static String Operator_BetweenOp;
 	public static String Operator_Equals;
 	public static String Operator_GreaterThan;
 	public static String Operator_GreaterThanEqual;

@@ -38,10 +38,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 
@@ -277,16 +279,6 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 		return queryText.toString();
 	}
 	
-	public void setValueFilterElements(IFilter.FilterType filterType, List<DropItem> items){
-		valueFilter.setFilterType(filterType);
-		valueFilter.addItems(items);
-	}
-	
-	public void setRateFilterElements(IFilter.FilterType filterType, List<DropItem> items){
-		rateFilter.setFilterType(filterType);
-		rateFilter.addItems(items);
-	}
-	
 	public void addItem(DropItem item){
 		if (currentTarget != null){
 			currentTarget.addItem(item);
@@ -328,6 +320,33 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 		this.currentQuery = q;
 		valueFilter.initItems(q);
 		rateFilter.initItems(q);
+		
+		if (q.getQuery() instanceof SummaryQuery){
+			SummaryQuery query = (SummaryQuery)q.getQuery();
+			if (query.getQueryDefinition() != null && query.getQueryDefinition().getValueFilter() != null){
+				valueFilter.setFilterType(query.getQueryDefinition().getValueFilter().getFilterType());
+			}else{
+				valueFilter.setFilterType(FilterType.WAYPOINT);
+			}
+			if (query.getQueryDefinition() != null && query.getQueryDefinition().getRateFilter() != null){
+				rateFilter.setFilterType(query.getQueryDefinition().getRateFilter().getFilterType());
+			}else{
+				rateFilter.setFilterType(FilterType.WAYPOINT);
+			}
+		}else if (q.getQuery() instanceof GriddedQuery){
+			GriddedQuery query = (GriddedQuery)q.getQuery();
+			if (query.getQueryDefinition() != null && query.getQueryDefinition().getValueFilter() != null){
+				valueFilter.setFilterType(query.getQueryDefinition().getValueFilter().getFilterType());
+			}else{
+				valueFilter.setFilterType(FilterType.WAYPOINT);
+			}
+			if (query.getQueryDefinition() != null && query.getQueryDefinition().getRateFilter() != null){
+				rateFilter.setFilterType(query.getQueryDefinition().getRateFilter().getFilterType());
+			}else{
+				rateFilter.setFilterType(FilterType.WAYPOINT);
+			}
+		}
+		
 	}
 
 
