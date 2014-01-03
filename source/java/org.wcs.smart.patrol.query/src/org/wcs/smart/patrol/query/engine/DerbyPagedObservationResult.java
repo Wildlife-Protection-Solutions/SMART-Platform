@@ -418,8 +418,10 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		
 		if (lastResultSet != null) {
 			try {
-				lastResultSet.getStatement().close();
-				lastResultSet.close();
+				if (!lastResultSet.isClosed()){
+					lastResultSet.getStatement().close();
+					lastResultSet.close();
+				}
 			} catch (SQLException e) {
 				//nothing
 				e.printStackTrace();

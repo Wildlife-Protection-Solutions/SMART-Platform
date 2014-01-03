@@ -232,7 +232,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create">
+            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.data">
          <command
                commandId="org.wcs.smart.incident.new"
                label="%new.command.label2"

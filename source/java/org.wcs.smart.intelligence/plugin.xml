@@ -334,7 +334,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create">
+            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.other">
          <command
                commandId="org.wcs.smart.intelligence.NewIntelligence"
                label="%command.create.label"

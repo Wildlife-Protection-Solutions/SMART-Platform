@@ -561,9 +561,10 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create">
+            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.query">
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
+               id="org.wcs.smart.query.createQuery"
                label="%queryToolbar.createquery.command.label"
                style="pulldown"
                tooltip="%queryToolbar.createquery.command.toolbar">

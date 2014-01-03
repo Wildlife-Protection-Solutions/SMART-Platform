@@ -665,7 +665,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create">
+            locationURI="toolbar:org.wcs.smart.toolbar.create?after=org.wcs.smart.query.createQuery">
          <command
                commandId="org.wcs.smart.report.newReport"
                label="%reportlist.toolbar.newreport.command.name"

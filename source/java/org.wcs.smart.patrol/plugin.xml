@@ -188,7 +188,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create">
+            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.data">
          <command
                commandId="org.wcs.smart.patrol.newPatrol"
                icon="images/icons/etool16/patrol_add.png"
