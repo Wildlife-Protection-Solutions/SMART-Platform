@@ -320,22 +320,25 @@ public class EntityEditPanelComposite extends Composite{
 		cmbStatus.setInput(Entity.Status.values());
 			
 		if (etype.getType() == EntityType.Type.FIXED){
-			//Position
-			Group g = new Group(comp, SWT.NONE);
-			g.setLayout(new GridLayout(2, false));
-			g.setText(Messages.EntityEditPanelComposite_LocationLabel);
-			g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			lbl = new Label(comp, SWT.NONE);
+			lbl.setText(Messages.EntityEditPanelComposite_LocationLabel);
+			lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			((GridData)lbl.getLayoutData()).verticalIndent =8;
 			
-			lbl = new Label(g, SWT.NONE);
+			//Position
+			Composite postComp = new Composite(comp, SWT.NONE);
+			postComp.setLayout(new GridLayout(2, false));
+			postComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			lbl = new Label(postComp, SWT.NONE);
 			lbl.setText(Messages.EntityEditPanelComposite_ProjectionLabel );
 			
-			cmbProjection = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbProjection = new ComboViewer(postComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
 			cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
-			
 			cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			Composite posComp = new Composite(g, SWT.NONE);
+			Composite posComp = new Composite(postComp, SWT.NONE);
 			GridLayout gl = new GridLayout(4, false);
 			gl.marginWidth = gl.marginHeight = 0;
 			posComp.setLayout(gl);
@@ -403,7 +406,7 @@ public class EntityEditPanelComposite extends Composite{
 				}
 			});
 			
-			Link lnk = new Link(g,  SWT.NONE);
+			Link lnk = new Link(postComp,  SWT.NONE);
 			lnk.setText("<a>" + Messages.EntityEditPanelComposite_SelectOnMapLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnk.addListener(SWT.Selection, new Listener(){
 				@Override
