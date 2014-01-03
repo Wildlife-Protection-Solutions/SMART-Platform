@@ -46,6 +46,14 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class AttributeFilter implements IFilter {
+	
+	/**
+	 * Any option for attribute list items; this will only work for attribute
+	 * list item as the key is not valid for any option but could be valid
+	 * for a tree item.
+	 */
+	public static ListItem ANY_OPTION = new ListItem(null, Messages.AttributeFilter_AnyListItemOption, "list.any"); //$NON-NLS-1$
+	
 	/**
 	 * Creates a new boolean attribute filter
 	 * @param attributeIdentifier the attribute identifier in the form "attribute:b:<key>"
@@ -233,11 +241,16 @@ public class AttributeFilter implements IFilter {
 				attributeType == AttributeType.NUMERIC){
 			it.initializeData(new String[]{op.getGuiValue(), String.valueOf(value1)});
 		}else if (attributeType == AttributeType.LIST){
-			AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, (String)value1);
-			if (ali == null){
-				throw new IllegalStateException(MessageFormat.format(Messages.AttributeFilter_ListItemNotFound, new Object[]{(String)value1, attributeKey}));
+			ListItem li = null;
+			if (ANY_OPTION.getKey().equals((String)value1)){
+				li = ANY_OPTION;
+			}else{
+				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, (String)value1);
+				if (ali == null){
+					throw new IllegalStateException(MessageFormat.format(Messages.AttributeFilter_ListItemNotFound, new Object[]{(String)value1, attributeKey}));
+				}
+				li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
 			}
-			ListItem li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
 			it.initializeData(li);
 		}else if (attributeType == AttributeType.TREE){
 			AttributeTreeNode ali = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, (String)value1);

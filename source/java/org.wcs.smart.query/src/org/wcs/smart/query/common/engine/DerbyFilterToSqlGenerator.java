@@ -145,7 +145,12 @@ public class DerbyFilterToSqlGenerator {
 			String date2 = (String) filter.getValue2();			
 			return "( DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " DATE('" + date1 + "' ) " + asSql(Operator.AND) + " DATE('" + date2 + "') )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
-			return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " '" + (String)filter.getValue() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
+				//any option
+				return "( qa."+ filter.getAttributeKey()  + " is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " '" + (String)filter.getValue() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
 			return "( qa." + filter.getAttributeKey() + " >= '" + (String)filter.getValue()+ "' and qa." + filter.getAttributeKey() + "<'" + ((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		
