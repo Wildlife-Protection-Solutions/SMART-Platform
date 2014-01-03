@@ -46,6 +46,8 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
  * Query engine for patrol queries.
@@ -80,8 +82,15 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyPatrolEngine_Progress_RunningQuery, 4);
 				IFilterProcessor filterer = DerbyPatrolEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				
+				//create a date filter that caches the dates so the same
+				//dates are used for all parts of the query;
+				//otherwise different date filters will be computed
+				//for different parts of the queries
+				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+				
 				try {
-					filterer.processFilter(c, query.getFilter().getFilter(), query.getDateFilter(), 
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
 							false, false, monitor);
 					

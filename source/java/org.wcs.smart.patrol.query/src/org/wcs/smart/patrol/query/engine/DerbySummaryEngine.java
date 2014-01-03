@@ -74,8 +74,10 @@ import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
@@ -206,9 +208,16 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 						}
 					}
 					
+					//create a date filter that caches the dates so the same
+					//dates are used for all parts of the query;
+					//otherwise different date filters will be computed
+					//for different parts of the queries
+					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+					
+					
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable);
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
 					}finally{
 						filterer.dropTemporaryTables(c);
 					}
@@ -230,7 +239,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 						
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
@@ -1386,9 +1395,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			results.addValueHeader(header);
 		}
 		
+		DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+		
 		for (IGroupBy item : query.getQueryDefinition().getRowGroupByPart().getGroupBys()){
 			if (item instanceof DateGroupBy){
-				((DateGroupBy) item).setDateFilter(query.getDateFilter().getDateFilterOption());
+				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
 			List<ListItem> items = item.getItems(session);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
@@ -1406,7 +1417,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		
 		for (IGroupBy item : query.getQueryDefinition().getColumnGroupByPart().getGroupBys()){
 			if (item instanceof DateGroupBy){
-				((DateGroupBy) item).setDateFilter(query.getDateFilter().getDateFilterOption());
+				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
 			List<ListItem> items = item.getItems(session);
 			SummaryHeader[] colHeader = new SummaryHeader[items.size()];

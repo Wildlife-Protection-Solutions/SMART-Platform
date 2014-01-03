@@ -50,6 +50,8 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -77,8 +79,14 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				IFilterProcessor filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 				
+				//create a date filter that caches the dates so the same
+				//dates are used for all parts of the query;
+				//otherwise different date filters will be computed
+				//for different parts of the queries
+				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+				
 				try {			
-					filterer.processFilter(c, query.getFilter().getFilter(), query.getDateFilter(), 
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
 							true, true, monitor);
 					
