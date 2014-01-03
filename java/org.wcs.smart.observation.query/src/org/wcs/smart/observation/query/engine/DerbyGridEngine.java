@@ -52,8 +52,10 @@ import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
@@ -158,8 +160,14 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 			}
 			
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+			//create a date filter that caches the dates so the same
+			//dates are used for all parts of the query;
+			//otherwise different date filters will be computed
+			//for different parts of the queries
+			DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+			
 			try{
-				filterer.processFilter(c, filter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), 
+				filterer.processFilter(c, filter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), 
 					needsObservation, false, monitor);
 			}finally{
 				filterer.dropTemporaryTables(c);

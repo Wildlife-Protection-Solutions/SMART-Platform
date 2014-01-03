@@ -85,6 +85,7 @@ import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
@@ -95,6 +96,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	private Collection<GridResultItem> myResults;
 	
 	private PatrolGriddedQuery query;
+	private DateFilter dateFilter;
 	
 	private String dataTable;
 	private String gridTable;
@@ -122,6 +124,12 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
 
+				//create a date filter that caches the dates so the same
+				//dates are used for all parts of the query;
+				//otherwise different date filters will be computed
+				//for different parts of the queries
+				dateFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+				
 				try {
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();
@@ -231,7 +239,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
 			try{
-				filterer.processFilter(c, filter.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), 
+				filterer.processFilter(c, filter.getFilter(), dateFilter, query.getConservationAreaFilterAsFilter(), 
 					needsObservation, false, monitor);
 			}finally{
 				filterer.dropTemporaryTables(c);
@@ -619,7 +627,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = " + tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append(" join " + tableNames.get(Patrol.class) + " " + tablePrefix.get(Patrol.class) ); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		DateFilter dateFilter = query.getDateFilter();
+		
 		if (dateFilter != null ){
 			String dfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, this);
 			if (dfilter.length() > 0) {
