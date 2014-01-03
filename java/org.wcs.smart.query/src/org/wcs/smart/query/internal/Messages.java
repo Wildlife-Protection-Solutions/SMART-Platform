@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String AreaGroupBy_AreaGroupByNotFound;
 	public static String AreaGroupByItem_LoadError;
 	public static String AreaGroupByItem_LoadingAreaJobName;
+	public static String AttributeFilter_AnyListItemOption;
 	public static String AttributeFilter_AttributeNotFound;
 	public static String AttributeFilter_ListItemNotFound;
 	public static String AttributeFilter_TreeNodeNotFound;

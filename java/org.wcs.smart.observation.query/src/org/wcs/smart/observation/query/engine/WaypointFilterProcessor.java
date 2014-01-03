@@ -472,9 +472,15 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeListItem.class));
 					sql.append(".keyid ");  //$NON-NLS-1$
-					sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()));
-					sql.append("'" + ((String)attfilter.getValue()) + "'");  //$NON-NLS-1$  //$NON-NLS-2$
+					
+					if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION.getKey())){
+						sql.append (" is not null "); //$NON-NLS-1$
+					}else{
+						sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()));
+						sql.append("'" + ((String)attfilter.getValue()) + "'");  //$NON-NLS-1$  //$NON-NLS-2$
+					}
 					sql.append(") "); //$NON-NLS-1$
+					
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));

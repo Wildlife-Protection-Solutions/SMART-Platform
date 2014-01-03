@@ -49,6 +49,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -71,7 +72,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	private Attribute attribute = null;
 	
 	private ListItem currentSelection = null;
-	
+
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -93,6 +94,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 					//item is not longer active; but still in query
 					items.add(currentSelection);
 				}
+				//add the any item
+				items.add(0, AttributeFilter.ANY_OPTION);
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
@@ -109,6 +112,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 					listViewer.setInput(items.toArray(new ListItem[items.size()]));
 					if (currentSelection != null){
 						listViewer.setSelection(new StructuredSelection(currentSelection));
+					}else{
+						listViewer.setSelection(new StructuredSelection(AttributeFilter.ANY_OPTION));
 					}
 					getTargetPanel().redraw();
 				}});
@@ -191,7 +196,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 				it = (ListItem) sel.getFirstElement();
 			}
 		}
-		if (it != null && it.getUuid() != null){			
+		if (it != null && (it.getUuid() != null || it == AttributeFilter.ANY_OPTION)){			
 			query.append(it.getKey());
 		}
 		return query.toString();
@@ -227,10 +232,12 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ListItem newSelection = (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
-				if (! (currentSelection != null && currentSelection.equals(newSelection))){
-					queryChanged();	
-				}			
+				ListItem lastSelection = currentSelection;
+				
 				currentSelection = newSelection;
+				if (! (lastSelection != null && lastSelection.equals(newSelection))){
+					queryChanged();	
+				}
 			}
 		});
 		listViewer.setInput(new ListItem[]{new ListItem(Messages.AttributeListDropItem_LoadingLabel)});

@@ -395,11 +395,11 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" on " + prefix(Attribute.class) + ".uuid = " + prefix(WaypointObservationAttribute.class) + ".attribute_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				if (key.getType() == AttributeType.LIST) {
-					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(" JOIN "); //$NON-NLS-1$
 					sql.append(name(AttributeListItem.class));
 					sql.append(" l on l.uuid = " + prefix(WaypointObservationAttribute.class) + ".list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				} else if (key.getType() == AttributeType.TREE) {
-					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(" JOIN "); //$NON-NLS-1$
 					sql.append(name(AttributeTreeNode.class));
 					sql.append(" t on t.uuid = " + prefix(WaypointObservationAttribute.class) + ".tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
