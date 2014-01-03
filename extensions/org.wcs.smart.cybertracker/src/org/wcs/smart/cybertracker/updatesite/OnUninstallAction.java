@@ -58,7 +58,7 @@ public class OnUninstallAction extends ProvisioningAction {
 
 	@Override
 	public IStatus undo(Map<String, Object> parameters) {
-		return null;
+		return Status.OK_STATUS;
 	}
 
 }
