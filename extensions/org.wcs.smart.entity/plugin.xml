@@ -342,5 +342,13 @@
             name="Entity Type Editor">
       </editor>
    </extension>
+   <extension
+         point="net.refractions.udig.catalog.ServiceExtension">
+      <service
+            class="org.wcs.smart.entity.fixed.map.FixedEntityServiceExtension"
+            id="org.wcs.smart.udig.catalog.FixedEntityService"
+            name="Fixed Entity Types">
+      </service>
+   </extension>
 
 </plugin>

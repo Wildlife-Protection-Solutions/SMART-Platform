@@ -402,15 +402,16 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 	public void updatePage(Session currentSession, boolean typeModified) {
 		EntityType type = this.parentEditor.getEntityType();
 		form.setText(getEditorInput().getName());
-
+		
+		entityTable.setInput(null);
 		if (typeModified) {
 			entityTable.setEntityType(type);
 			entityInfoPanel.setEntityType(type);
 		}else{
 			entityInfoPanel.initEntityFields();
 		}
-		
 		entityTable.setInput(type.getEntities());
+		
 	}
 	
 	@Override
