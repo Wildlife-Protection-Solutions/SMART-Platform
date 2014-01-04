@@ -26,6 +26,8 @@ import java.text.DateFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -323,9 +325,14 @@ public class IncidentSummaryPage extends EditorPart {
 			btnEdit.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					ObservationWizardDialog wd = new ObservationWizardDialog(getEditorSite().getShell(),
-							new ObservationWizard(editor.getIncident()));
-					wd.open();
+					editIncident();
+				}
+			});
+			
+			observationTable.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					editIncident();
 				}
 			});
 			
@@ -334,6 +341,11 @@ public class IncidentSummaryPage extends EditorPart {
 		initData(editor.getIncident());
 	}
 	
+	private void editIncident(){
+		ObservationWizardDialog wd = new ObservationWizardDialog(getEditorSite().getShell(),
+				new ObservationWizard(editor.getIncident()));
+		wd.open();
+	}
 	private void createEdit(Composite parent, String canEdit, final String panelId){
 		if (canEdit == null){
 			Hyperlink l = toolkit.createHyperlink(parent,DialogConstants.EDIT_LINK_TEXT,SWT.NONE);

@@ -68,7 +68,7 @@ public class SmartServiceExtension implements ServiceExtension {
 	
 	private boolean isValid(URL url){
 		if (url.getProtocol().equals(PROTOCOL)){
-			if (url.getHost().equals(HOST)){
+			if (url.getHost().equals(HOST) && url.getPath().equals("/")){ //$NON-NLS-1$
 				return true;
 			}
 		}
