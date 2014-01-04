@@ -25,14 +25,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
@@ -49,13 +57,14 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-public class EntityTypeEditor extends MultiPageEditorPart  {
+public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 
 
 	public static final String ID = "org.wcs.smart.entity.editor.entitytype"; //$NON-NLS-1$
 	
 	private EntityTypeConfigurationPage configPage;
 	private EntityTypeEntitiesPage entityPage;
+	private FixedEntityMapPage fixedMapPage;
 	private EntityType entityType;
 	
 	
@@ -158,6 +167,13 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 			index = addPage(configPage, getEditorInput());
 			super.setPageText(index, Messages.EntityTypeEditor_ConfigurationPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.CONFIGURATION_ICON));
+			
+			if (  getEntityType().getType() == EntityType.Type.FIXED  ){
+				fixedMapPage = new FixedEntityMapPage(this);
+				index = addPage(fixedMapPage, getEditorInput());
+				super.setPageText(index, "Fixed Entity Positions");
+				super.setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			}
 			
 					
 		}catch (Exception ex){
@@ -299,6 +315,46 @@ public class EntityTypeEditor extends MultiPageEditorPart  {
 			EntityPlugIn.log(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return;
 		}
+	}
+
+	@Override
+	public Map getMap() {
+		if (fixedMapPage != null){
+			return fixedMapPage.getMap();
+		}
+		return null;
+	}
+
+	@Override
+	public void openContextMenu() {
+		if (fixedMapPage != null){
+			fixedMapPage.openContextMenu();
+		}
+		
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		if (fixedMapPage != null){
+			fixedMapPage.setFont(textArea);
+		}
+	}
+
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		if (fixedMapPage != null){
+			fixedMapPage.setSelectionProvider(selectionProvider);
+		}
+		
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		if (fixedMapPage != null){
+			return fixedMapPage.getStatusLineManager();
+		}
+		return null;
 	}
 	
 	

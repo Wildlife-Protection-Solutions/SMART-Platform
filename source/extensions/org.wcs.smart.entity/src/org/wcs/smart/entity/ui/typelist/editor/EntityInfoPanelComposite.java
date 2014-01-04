@@ -175,6 +175,9 @@ public class EntityInfoPanelComposite extends Composite{
 	 * opening a session.
 	 */
 	private void clearFields(){
+		if (txtId == null){
+			return;
+		}
 		txtId.setText(""); //$NON-NLS-1$
 		if (txtX != null){
 			txtX.setText(""); //$NON-NLS-1$
@@ -236,6 +239,7 @@ public class EntityInfoPanelComposite extends Composite{
 			}
 		}
 		
+		toolkit.dispose();
 		//update the entity info
 		if (entity != null){
 			initEntityFields();

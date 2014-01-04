@@ -1,0 +1,142 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.entity.fixed.map;
+
+import java.awt.RenderingHints.Key;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
+
+import org.geotools.data.DataStore;
+import org.geotools.data.DataStoreFactorySpi;
+import org.geotools.data.DataAccessFactory.Param;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.HibernateManager;
+
+/**
+ * Smart patrol data source factor.  This is a read only data source.
+ * Sources waypoints and tracks from a patrol.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
+
+	public static final Param CAUUID = new Param("cauuid", byte[].class, "Conservation Area", true);  //$NON-NLS-1$
+  
+	/* (non-Javadoc)
+	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
+	 */
+	@Override
+	public boolean canProcess(Map<String, Serializable> params) {
+		if (params.containsKey(CAUUID.key)){
+			return true;
+		}
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.geotools.data.DataAccessFactory#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return "Smart Fixed Entity Types";
+	}
+
+	/* (non-Javadoc)
+	 * @see org.geotools.data.DataAccessFactory#getDisplayName()
+	 */
+	@Override
+	public String getDisplayName() {
+		return "Fixed Entity Types";
+	}
+
+	/* (non-Javadoc)
+	 * @see org.geotools.data.DataAccessFactory#getParametersInfo()
+	 */
+	@Override
+	public Param[] getParametersInfo() {
+		return new Param[]{CAUUID };
+	}
+
+	/**
+	 * @see org.geotools.data.DataAccessFactory#isAvailable()
+	 */
+	@Override
+	public boolean isAvailable() {
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.geotools.factory.Factory#getImplementationHints()
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<Key, ?> getImplementationHints() {
+		return Collections.EMPTY_MAP;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.geotools.data.DataStoreFactorySpi#createDataStore(java.util.Map)
+	 */
+	@Override
+	public DataStore createDataStore(Map<String, Serializable> params)
+			throws IOException {
+		
+//		Session session = HibernateManager.openSession();
+//		EntityType entityType = null;
+//		try{
+//			entityType = (EntityType)session.load(EntityType.class, SmartUtils.decodeHex((String)params.get(ENTITYTYPE_UUID.key)));	
+//		}catch (Exception ex){
+//			throw new IOException(ex);
+//		}finally{
+//			session.close();
+//		}
+//		if (entityType == null ){
+//			throw new IOException("Unable to determine entity type to create entity data store.");
+//		}
+		Session session = HibernateManager.openSession();
+		ConservationArea ca = null;
+		try{
+			ca = (ConservationArea)session.load(ConservationArea.class, ((byte[])params.get(CAUUID.key)));	
+		
+		}finally{
+			session.close();
+		}
+		if (ca == null ){
+			throw new IOException("Conservation Area Not Found");
+		}
+		return new FixedEntityDataSource(ca);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.geotools.data.DataStoreFactorySpi#createNewDataStore(java.util.Map)
+	 */
+	@Override
+	public DataStore createNewDataStore(Map<String, Serializable> arg0)
+			throws IOException {
+		throw new UnsupportedOperationException("Entity Type is a read-only data store.");
+	}
+
+}

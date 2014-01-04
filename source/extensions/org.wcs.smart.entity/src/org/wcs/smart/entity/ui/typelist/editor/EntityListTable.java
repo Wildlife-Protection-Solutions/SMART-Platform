@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
@@ -154,18 +155,20 @@ public class EntityListTable extends Composite {
 	 */
 	private void createTable() {
 		
+		FormToolkit toolkit = new FormToolkit(getDisplay());
 		// ---- FILTER FIELD -----
-		Composite filtercomp = new Composite(this, SWT.NONE);
+		Composite filtercomp = toolkit.createComposite(this);
 		GridLayout gl = new GridLayout(3, false);
 		gl.marginWidth =  0;
 		filtercomp.setLayout(gl);
 		filtercomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Label l = new Label(filtercomp, SWT.NONE);
-		l.setText(Messages.EntityListTable_FilterFieldLabel);
+		Label l =toolkit.createLabel(filtercomp,Messages.EntityListTable_FilterFieldLabel);
 		l.setToolTipText(Messages.EntityListTable_FilterFieldTooltip);
 		
-		filterFieldViewer = new ComboViewer(filtercomp, SWT.NONE);
+		filterFieldViewer = new ComboViewer(filtercomp, SWT.READ_ONLY | SWT.DROP_DOWN);
+		toolkit.adapt(filterFieldViewer.getCombo());
+		
 		filterFieldViewer.setContentProvider(ArrayContentProvider.getInstance());
 		filterFieldViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -202,8 +205,7 @@ public class EntityListTable extends Composite {
 		((GridData)txtFilter.getLayoutData()).widthHint = 250;
 
 		// --- ACTIVE FILTER ---
-		final Button chActive = new Button(this, SWT.CHECK);
-		chActive.setText(Messages.EntityListTable_IncludeInactiveLabel);
+		final Button chActive = toolkit.createButton(this, Messages.EntityListTable_IncludeInactiveLabel, SWT.CHECK);
 		chActive.setSelection(false);
 		chActive.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		chActive.addSelectionListener(new SelectionAdapter(){
