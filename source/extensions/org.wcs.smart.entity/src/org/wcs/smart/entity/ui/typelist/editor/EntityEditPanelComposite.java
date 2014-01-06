@@ -274,6 +274,7 @@ public class EntityEditPanelComposite extends Composite{
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)comp.getLayoutData()).widthHint = 300;
 		
 		//ID
 		Label lbl = new Label(comp, SWT.NONE);
@@ -322,7 +323,7 @@ public class EntityEditPanelComposite extends Composite{
 		if (etype.getType() == EntityType.Type.FIXED){
 			lbl = new Label(comp, SWT.NONE);
 			lbl.setText(Messages.EntityEditPanelComposite_LocationLabel);
-			lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			((GridData)lbl.getLayoutData()).verticalIndent =8;
 			
 			//Position
@@ -337,6 +338,7 @@ public class EntityEditPanelComposite extends Composite{
 			cmbProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
 			cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
 			cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)cmbProjection.getControl().getLayoutData()).widthHint = 100;
 			
 			Composite posComp = new Composite(postComp, SWT.NONE);
 			GridLayout gl = new GridLayout(4, false);
@@ -350,7 +352,7 @@ public class EntityEditPanelComposite extends Composite{
 			txtX = new Text(posComp, SWT.BORDER);
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtX.getLayoutData()).horizontalIndent = 5;
-			((GridData)txtX.getLayoutData()).widthHint = 100;
+			((GridData)txtX.getLayoutData()).widthHint = 50;
 			cdX = new ControlDecoration(txtX, SWT.LEFT | SWT.TOP);
 			cdX.setImage(FieldDecorationRegistry.getDefault()
 					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -381,7 +383,7 @@ public class EntityEditPanelComposite extends Composite{
 			txtY = new Text(posComp, SWT.BORDER);			
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtY.getLayoutData()).horizontalIndent = 5;
-			((GridData)txtY.getLayoutData()).widthHint = 100;
+			((GridData)txtY.getLayoutData()).widthHint = 50;
 			cdY = new ControlDecoration(txtY, SWT.LEFT | SWT.TOP);
 			cdY.setImage(FieldDecorationRegistry.getDefault()
 					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());

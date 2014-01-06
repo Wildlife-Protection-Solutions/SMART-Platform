@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Collections;
 
 import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.ID;
+import net.refractions.udig.catalog.IService;
 import net.refractions.udig.core.internal.CorePlugin;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
@@ -13,19 +15,22 @@ import net.refractions.udig.project.render.ViewportModelEvent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.fixed.map.FixedEntityGeoResource;
 import org.wcs.smart.entity.fixed.map.FixedEntityService;
+import org.wcs.smart.entity.fixed.map.FixedEntityServiceExtension;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.SmartUtils;
 
-public class FixedEntityMapPage extends SmartMapEditorPart {
+public class FixedEntityMapPage extends SmartMapEditorPart implements IEntityTypeEditorPage {
 
 	private FixedEntityService entityService ;
 	private EntityTypeEditor parent;
@@ -36,14 +41,22 @@ public class FixedEntityMapPage extends SmartMapEditorPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {  
 			try {
-				String url = "smart://smartdb/entitytype/fixed/" 
-						+ SmartUtils.encodeHex(SmartDB
-								.getCurrentConservationArea()
-								.getUuid()); 
+				URL url = FixedEntityServiceExtension.createURL(SmartDB.getCurrentConservationArea());
+				
+				//find existing service
 				FixedEntityService entityService = (FixedEntityService) CatalogPlugin
-						.getDefault()
-						.getLocalCatalog()
-						.acquire(new URL(null, url, CorePlugin.RELAXED_HANDLER), monitor);
+				.getDefault()
+				.getLocalCatalog().getById(IService.class, new ID(url), monitor);
+				
+				if (entityService == null){
+					//if not found, create a new one
+					entityService = (FixedEntityService) CatalogPlugin
+							.getDefault()
+							.getLocalCatalog()
+							.acquire(url, monitor);	
+				}
+				
+				 
 				FixedEntityGeoResource geoResource = new FixedEntityGeoResource(
 						entityService, parent.getEntityType().getName(), parent
 								.getEntityType().getUuid());
@@ -91,9 +104,7 @@ public class FixedEntityMapPage extends SmartMapEditorPart {
 					e.printStackTrace();
 				}
 			}
-	    	
-			//TODO: redraw layer
-			
+			mapViewer.getRenderManager().refresh(null);
 			return Status.OK_STATUS;
 		}
 	};
@@ -138,11 +149,11 @@ public class FixedEntityMapPage extends SmartMapEditorPart {
 	public void updatePointsLayer() {
 		updateLayerJob.schedule(100);
 	}
-	
-	
-	
 
-	
+	@Override
+	public void updatePage(Session currentSession, boolean typeModified) {
+		updatePointsLayer();
+	}
 	
 }
 

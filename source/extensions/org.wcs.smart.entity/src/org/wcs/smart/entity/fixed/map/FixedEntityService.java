@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -43,6 +45,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -69,10 +73,36 @@ public class FixedEntityService extends IService {
 	private FixedEntityDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 
+	private IEntityListener entityListener = null;
 	
 	public FixedEntityService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = FixedEntityServiceExtension.createURL(this.params);
+		
+		entityListener = new IEntityListener() {
+			
+			@Override
+			public void handleEvent(int eventType, Object source) {
+				// TODO Auto-generated method stub
+				if (eventType == EntityEventManager.ENTITY_TYPE_ADDED ){
+					//add new entity type to members
+					EntityType et = (EntityType)source;
+					members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getUuid()));
+				}else if (eventType == EntityEventManager.ENTITY_TYPE_DELETED){
+					//remove from members array
+					EntityType et = (EntityType)source;
+					if (members != null){
+						for (Iterator<FixedEntityGeoResource> iterator = members.iterator(); iterator.hasNext();) {
+							FixedEntityGeoResource gr = (FixedEntityGeoResource) iterator.next();
+							if (Arrays.equals(gr.getEntityTypeUuid(), et.getUuid())){
+								iterator.remove();
+							}
+						}
+					}
+				}
+			}
+		};
+		EntityEventManager.getInstance().addListener(entityListener);
 	}
 		
 	/**
@@ -85,11 +115,14 @@ public class FixedEntityService extends IService {
 	public void refresh(EntityType entityType, IProgressMonitor monitor) throws IOException{
 		getDataStore(monitor).refresh(entityType);
 		for (IGeoResource member : resources(monitor)){
-			((FixedEntityGeoResourceInfo)member.getInfo(monitor)).computeBounds((FixedEntityGeoResource)member, monitor);
-		}
-		
+			if (((FixedEntityGeoResource)member).getEntityTypeName().equals(SmartUtils.encodeHex(entityType.getUuid()))){
+				//update the bounds
+				((FixedEntityGeoResourceInfo)member.getInfo(monitor)).computeBounds((FixedEntityGeoResource)member, monitor);
+			}
+			
+		}		
 	}	
-	
+
 	
 	/**
 	 * @see net.refractions.udig.catalog.IResolve#getStatus()
@@ -184,6 +217,9 @@ public class FixedEntityService extends IService {
 
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
+		if (entityListener != null){
+			EntityEventManager.getInstance().removeListener(entityListener);
+		}
         if (members == null)
             return;
         if (monitor == null){

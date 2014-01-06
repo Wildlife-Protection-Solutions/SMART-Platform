@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.util.SmartUtils;
 
 import net.refractions.udig.catalog.IService;
@@ -45,15 +46,16 @@ public class FixedEntityServiceExtension implements ServiceExtension {
     /**
 	 * SMART service url host
 	 */
-    private static final String HOST = "smartdb"; //$NON-NLS-1$
+    public static final String HOST = "smartdb"; //$NON-NLS-1$
     /**
      * SMART service url protocol
      */
-	private static final String PROTOCOL = "smart"; //$NON-NLS-1$
+    public static final String PROTOCOL = "smart"; //$NON-NLS-1$
     /**
      * SMART service url protocol
      */
-	private static final String PATH = "/entitytype/fixed"; //$NON-NLS-1$
+    public static final String PATH = "/entitytype/fixed"; //$NON-NLS-1$
+   
     /**
      * Service parameter for the conservation
      */
@@ -123,11 +125,29 @@ public class FixedEntityServiceExtension implements ServiceExtension {
 		if (params.get(CAUUID_KEY) == null || !(params.get(CAUUID_KEY) instanceof byte[])){
 			return null;
 		}
-		String url = PROTOCOL + "://" + HOST + PATH + SmartUtils.encodeHex((byte[])params.get(CAUUID_KEY)); //$NON-NLS-1$
+		String url = PROTOCOL + "://" + HOST + PATH + "/" + SmartUtils.encodeHex((byte[])params.get(CAUUID_KEY)); //$NON-NLS-1$ //$NON-NLS-2$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
 			return null;
 		}
+	}
+	
+	/**
+	 * Creates a url using the provided conservation area parameter
+	 * @param ca
+	 * @return
+	 */
+	public static URL createURL(ConservationArea ca){
+		if (ca == null){
+			return null;
+		}
+		String url = PROTOCOL + "://" + HOST + PATH + "/" + SmartUtils.encodeHex(ca.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		try{
+			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+		}catch (Throwable t){
+			return null;
+		}
+		
 	}
 }
