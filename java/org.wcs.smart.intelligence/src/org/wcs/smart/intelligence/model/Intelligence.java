@@ -176,7 +176,7 @@ public class Intelligence extends NamedItem {
 	 * To get full file names you must prepend this with the conservation area file store location.
 	 * </p>
 	 * <code>
-	 * ConservationArea.getFileDataStoreLocation() + File.separator + Intelligence.getPatrolDatastorePath();
+	 * ConservationArea.getFileDataStoreLocation() + File.separator + Intelligence.getIntelligenceDatastorePath();
 	 * </code>
 	 * @return the file store location for the intelligence relative to the conservation area file store
 	 */
