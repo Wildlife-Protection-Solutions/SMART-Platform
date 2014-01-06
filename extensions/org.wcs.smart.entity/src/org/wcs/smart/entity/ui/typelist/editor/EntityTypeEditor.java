@@ -96,7 +96,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
+							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, fixedMapPage}, true);
 						}});
 					
 				}
@@ -119,7 +119,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage}, false);
+							initEditor(new IEntityTypeEditorPage[]{entityPage,fixedMapPage}, false);
 						}});
 					
 				}
@@ -198,7 +198,9 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			}
 			
 			for (int i = 0; i < partsToUpdate.length; i ++){
-				partsToUpdate[i].updatePage(s, typeChanged);
+				if (partsToUpdate[i] != null){
+					partsToUpdate[i].updatePage(s, typeChanged);
+				}
 			}
 		}finally{
 			s.getTransaction().rollback();
@@ -260,8 +262,10 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			et = (EntityType) session.load(EntityType.class, uuid);
 			
 			//ensure attributes are lazily loaded
-			for (EntityAttribute att : et.getAttributes()){
-				att.getName().length();
+			if (et.getAttributes() != null){
+				for (EntityAttribute att : et.getAttributes()){
+					att.getName().length();
+				}
 			}
 		}finally{
 			session.getTransaction().rollback();

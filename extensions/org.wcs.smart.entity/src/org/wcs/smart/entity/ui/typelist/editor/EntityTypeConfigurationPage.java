@@ -844,20 +844,20 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			Session s = HibernateManager.openSession();
 			try{
 				s.saveOrUpdate(type);
-				EntityTypeEditDmAttributeDialog dia = new EntityTypeEditDmAttributeDialog(getSite().getShell(), (EntityAttribute)type);
+				EntityTypeEditDmAttributeDialog dia = new EntityTypeEditDmAttributeDialog(getSite().getShell(), (EntityAttribute)type, s);
 				if (dia.open()==EntityTypeEditDmAttributeDialog.OK){
-				
 					s.beginTransaction();
 					try{
 						((EntityAttribute) type).setName(((EntityAttribute) type).findName(SmartDB.getCurrentLanguage()));
 						s.saveOrUpdate(type);
 						s.getTransaction().commit();
-						fire = true;
 					}catch (Exception ex){
+						EntityPlugIn.displayLog("Error editing the entity type attribute.  Please close and re-open the editor." + "\n\n" + ex.getMessage(), ex);
 						s.getTransaction().rollback();
 						return;
 					}
 				}
+				fire = dia.fireEvents();
 				
 			}finally{
 				s.close();

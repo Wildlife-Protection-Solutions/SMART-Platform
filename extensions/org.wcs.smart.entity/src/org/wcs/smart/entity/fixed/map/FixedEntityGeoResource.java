@@ -55,6 +55,7 @@ public class FixedEntityGeoResource extends IGeoResource {
 	private URL url = null;
 	protected byte[] entityUuid;
 	protected String entityName;
+	private FixedEntityGeoResourceInfo info;
 	
 	public FixedEntityGeoResource(FixedEntityService service, String entityName, byte[] entityUuid){
 		this.service = service;
@@ -73,6 +74,10 @@ public class FixedEntityGeoResource extends IGeoResource {
 	
 	public String getEntityTypeName(){
 		return entityName;
+	}
+	
+	public byte[] getEntityTypeUuid(){
+		return this.entityUuid;
 	}
 	
 	/**
@@ -97,7 +102,15 @@ public class FixedEntityGeoResource extends IGeoResource {
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
-		return new FixedEntityGeoResourceInfo(this, monitor);
+		if (info == null){
+			synchronized (this) {
+				if (info == null){
+					info = new FixedEntityGeoResourceInfo(this, monitor);
+				}
+			}
+			
+		}
+		return info;
 	}
 
 	/**

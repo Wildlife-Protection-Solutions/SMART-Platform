@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -63,6 +65,7 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.ui.typelist.editor.sightings.EntityFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -82,6 +85,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 	
 	private EntityInfoPanelComposite entityInfoPanel;
 	
+	private EntityFilterComposite testComp;
 		
 	/**
 	 * Creates a new plan editor page
@@ -138,6 +142,8 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityList.setClient(main);
 		
+		testComp = new EntityFilterComposite(main);
+		testComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		// --- attribute table list
 		entityTable = new EntityListTable(main);
 		entityTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -243,6 +249,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 				EntityPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
+		ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 		entityTable.setSelection(new StructuredSelection(dialog.getEntity()), true);
 	}
 	
@@ -384,6 +391,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		}
 		Entity toUpdate = (Entity) ((IStructuredSelection)entityTable.getSelection()).getFirstElement();
 		NewEntityDialog dialog = new NewEntityDialog(getSite().getShell(), parentEditor.getEntityType(), toUpdate);
+		
 		if (dialog.open() == NewEntityDialog.OK){
 			try{
 				EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_MODIFIED, toUpdate);
@@ -391,6 +399,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 				EntityPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
+		ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 		entityTable.setSelection(new StructuredSelection(toUpdate), true);
 	}
 	

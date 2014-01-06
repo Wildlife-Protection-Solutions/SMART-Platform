@@ -66,7 +66,9 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 		entityType = (EntityType) s.merge(entityType);
 		
 		List<Entity> pnts = new ArrayList<Entity>();
-		pnts.addAll(entityType.getEntities());
+		if (entityType.getEntities() != null){
+			pnts.addAll(entityType.getEntities());
+		}
 		fIterator = pnts.iterator();
 	}
 	
@@ -127,7 +129,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 				if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
 					data[i+3] = value.getNumberValue() < 0.5 ? 0 : 1;
 				}else{
-					data[i+3] = value.getValue();
+					data[i+3] = value.getValueAsString();
 				}
 			}
 		}

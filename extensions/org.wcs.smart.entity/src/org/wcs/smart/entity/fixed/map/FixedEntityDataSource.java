@@ -115,7 +115,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
 		EntityType et = cachedTypes.get(typeName);
 		if (et == null){
-			System.out.println("i am null");
+			System.out.println("i am null" + typeName);
 			//TODO:
 			//load entity type and cache it
 		}

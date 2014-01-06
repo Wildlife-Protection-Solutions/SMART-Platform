@@ -71,7 +71,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> maxIs = q.list();
 		
-		Integer i = 1;
+		Integer i = 0;
 		if (maxIs.size() > 0){
 			String id = (String) maxIs.get(0);
 			try{
