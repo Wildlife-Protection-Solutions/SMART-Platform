@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
-import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -74,8 +73,7 @@ public class PdaUtil {
 //	}
 
 	private static String getCyberTrackerFolder(ConservationArea ca) {
-		String dir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		return dir + File.separator + SmartUtils.getDirectoryPath(ca.getUuid()) + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
+		return ca.getFileDataStoreLocation() + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
 	}
 	
 	public static File getDowloadFolder(ConservationArea ca) {
