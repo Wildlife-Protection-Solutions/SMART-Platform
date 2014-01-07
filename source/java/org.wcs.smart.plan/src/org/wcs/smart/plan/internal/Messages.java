@@ -235,6 +235,8 @@ public class Messages extends NLS {
 	public static String PlanTypeEmployeesComposite_UnavailableRangers_Label;
 	public static String PlanTypeEmployeesComposite_Unknown_Label;
 	public static String PlanTypeEmployeesComposite_VacationSickness_Label;
+	public static String RemovePlanJob_Error;
+	public static String RemovePlanJob_Title;
 	public static String ReportPlan_ErrorEditingPlanTemplate;
 	public static String RevertPlanTemplate_ConfirmDialogTitle;
 	public static String RevertPlanTemplate_Error;
