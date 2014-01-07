@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 
 /**
- * Action that is called when Intelligence plug-in is uninstalled
+ * Action that is called when Plan plug-in is uninstalled
  * 
  * @author elitvin
  * @since 3.0.0
