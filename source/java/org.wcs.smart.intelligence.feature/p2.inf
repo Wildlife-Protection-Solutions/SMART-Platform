@@ -1,0 +1,4 @@
+metaRequirements.0.namespace=org.wcs.smart.intelligence
+metaRequirements.0.name=onUninstall
+
+instructions.uninstall=org.wcs.smart.intelligence.onUninstall();
