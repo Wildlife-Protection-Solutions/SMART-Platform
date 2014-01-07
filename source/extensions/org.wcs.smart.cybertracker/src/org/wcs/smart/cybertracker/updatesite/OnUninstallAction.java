@@ -25,9 +25,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * Action that is called when CyberTracker plug-in is uninstalled
@@ -39,20 +38,8 @@ public class OnUninstallAction extends ProvisioningAction {
 
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "CyberTracker unintall",
-						"Do you want to completly remove all database records created by CyberTracker plug-in?")) {
-
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "CyberTracker unintall",
-							"TODO: Implement db tables removal.");
-				}
-
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "CyberTracker unintall",
-						"CyberTracker feature is in the process of being uninstalled!");
-			}
-		});
+		Job job = new RemoveCyberTrackerJob();
+		job.schedule();
 		return Status.OK_STATUS;
 	}
 
