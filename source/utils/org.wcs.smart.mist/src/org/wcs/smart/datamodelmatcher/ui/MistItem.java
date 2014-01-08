@@ -91,7 +91,14 @@ public class MistItem {
 		}else{
 			this.cat9 = "";
 		}
-		this.category = cat1 + (".") + cat2 + (".") + cat3 + (".") + cat4 + (".") + cat5 + (".") + cat6 + (".") + cat7 + (".") + cat8 + (".") + cat9;
+		String concated = cat1 + (".") + cat2 + (".") + cat3 + (".") + cat5 + (".") + cat6 + (".") + cat7 + (".") + cat8 + (".") + cat9;
+		
+		//strip all trailing "." 's
+		while(concated.substring(concated.length() - 1).equals(".")){
+			concated = concated.substring(0, concated.length()-1);
+		}
+		concated = concated + "|" + cat4;
+		this.category = concated;
 	}
 
 	public String getText() {

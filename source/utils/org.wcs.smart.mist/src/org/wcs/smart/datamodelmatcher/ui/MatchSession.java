@@ -145,12 +145,17 @@ public class MatchSession {
 					b5 = "FALSE";
 				}
 
+				String complete = "TRUE";
+				if(!row.getMatched()){
+					complete = "FALSE";
+				}
+				
 				String[] rowStrings = { row.getMistItem().getText(), row.getSmartItem().getText(), row.getMistItem().getCat1() , row.getMistItem().getCat2() , row.getMistItem().getCat3() , row.getMistItem().getCat4() , row.getMistItem().getCat5() , row.getMistItem().getCat6() , row.getMistItem().getCat7() , row.getMistItem().getCat8() , row.getMistItem().getCat9(),
 									s.getCategoryKey(), s.getAttr1key(), s.getAttr2key(), s.getAttr3key(), s.getAttr4key(), s.getAttr5key(),b1 , s.getText1(), s.getList1(), s.getTree1()
 									, b2, s.getText2(), s.getList2(), s.getTree2()
 									, b3,  s.getText3(), s.getList3(), s.getTree3()
 									, b4, s.getText4(), s.getList4(), s.getTree4()
-									, b5, s.getText5(), s.getList5(), s.getTree5()};
+									, b5, s.getText5(), s.getList5(), s.getTree5(), complete};
 				sessionWriter.writeNext(rowStrings);
 				//sessionWriter.writeNext(new String[]{""});
 			}
@@ -240,6 +245,11 @@ public class MatchSession {
 
 					matchRow.setSmartAttributes(list);
 					matchRow.setSmartItem(line[1]);
+					if(line[37].equals("TRUE")){
+						matchRow.setMatched(true);
+					}else{
+						matchRow.setMatched(false);
+					}
 				}
 				rows.add(matchRow);
 				line = reader.readNext();
