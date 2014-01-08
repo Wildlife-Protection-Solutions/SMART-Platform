@@ -285,7 +285,6 @@ public class DataModelMatcherDialog extends Composite {
 	    		
 	    		
 	    		ms = new MatchSession(getShell());
-
 	    		ms.setUserNamePass(startUser.getText(), startPass.getText());
 	    		
 	    		ms.setMistLocation(startMistTxtFileName.getText());
@@ -345,12 +344,15 @@ public class DataModelMatcherDialog extends Composite {
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
-	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-	            messageBox.setMessage("Do you want to save your changes?");
-	            messageBox.setText("Exiting Application");
-	            int response = messageBox.open();
-	            if (response == SWT.YES)
-	              	  ms.save();
+	    		
+	    		if(ms.isDirty()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+	    			messageBox.setMessage("Do you want to save your changes?");
+	    			messageBox.setText("Exiting Application");
+	    			int response = messageBox.open();
+	    			if (response == SWT.YES)
+	              	  	ms.save();
+	    		}
 	            enableButtons(true);
 	    	}
 	    });
@@ -547,12 +549,14 @@ public class DataModelMatcherDialog extends Composite {
 	    		MatchSessionDialog matchSession = new MatchSessionDialog(getShell(), ms);
 	    		
 	    		matchSession.open();
-	            MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-	            messageBox.setMessage("Do you want to save your changes?");
-	            messageBox.setText("Exiting Application");
-	            int response = messageBox.open();
-	            if (response == SWT.YES)
-	            	ms.save();
+	    		if(ms.isDirty()){
+	    			MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+	    			messageBox.setMessage("Do you want to save your changes?");
+	    			messageBox.setText("Exiting Application");
+	    			int response = messageBox.open();
+	    			if (response == SWT.YES)
+	    				ms.save();
+	    		}
 	            enableButtons(true);
 	            
 	    	}

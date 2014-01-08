@@ -52,7 +52,6 @@ public class MatchRow {
 	
 	public void setSmartItem(String s){
 		smartItem.setConcatKey(s);
-		matched = true;
 	}
 	
 	public void setMistItem(String s){

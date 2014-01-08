@@ -514,23 +514,23 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      
 	      //Make Attribute #1 selector
-	      attribute1 = new AttributeSelection();
+	      attribute1 = new AttributeSelection(shell);
 	      attribute1.init(codes, langSelector);
 	      attribute1.CreateAttribute(tab1Composite,1);
 	      
-	      attribute2 = new AttributeSelection();
+	      attribute2 = new AttributeSelection(shell);
 	      attribute2.init(codes, langSelector);
 	      attribute2.CreateAttribute(tab2Composite,2);
 	      
-	      attribute3 = new AttributeSelection();
+	      attribute3 = new AttributeSelection(shell);
 	      attribute3.init(codes, langSelector);
 	      attribute3.CreateAttribute(tab3Composite,3);
 	      
-	      attribute4 = new AttributeSelection();
+	      attribute4 = new AttributeSelection(shell);
 	      attribute4.init(codes, langSelector);
 	      attribute4.CreateAttribute(tab4Composite,4);
 	      
-	      attribute5 = new AttributeSelection();
+	      attribute5 = new AttributeSelection(shell);
 	      attribute5.init(codes, langSelector);
 	      attribute5.CreateAttribute(tab5Composite,5);
 	      
@@ -761,6 +761,7 @@ public class MatchSessionDialog extends Dialog {
 	public void saveCurrentMatch(){
 	
 		    ms.setDirty(true);
+		    save.setEnabled(true);
 		  	ISelection selection = viewer.getSelection();
   			if (!selection.isEmpty()) {
   				IStructuredSelection structuredSelection = (IStructuredSelection) selection;      
@@ -824,6 +825,7 @@ public class MatchSessionDialog extends Dialog {
   						getBooleanText(attribute5), getAttributeText(attribute5), getAttributeList(attribute5), getAttributeTree(attribute5));
   				
   				selected.setSmartItem(fullKey);
+  				selected.setMatched(true);
   				
   				if(autoMatch.getSelection()){
   					PerformAutoMatch();//runs before the viewer is moved down 1

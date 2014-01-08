@@ -35,10 +35,21 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -53,12 +64,24 @@ public class AttributeSelection {
 	private ComboViewer attr1;
 	private Composite value1;
 	
+	private Text valueFilter; 
+	private Button searchButton;
+	
 	private Combo value1Combo;
 	private ComboViewer value1ComboViewer;
 	private Text value1Text;
     private Tree value1Tree;
+    
+    private Shell shell;
+    
+    private AttributeSelection _self;
 	
 	
+	public AttributeSelection(Shell shell) {
+		this.shell = shell;
+		this._self = this;
+	}
+
 	public void init(String[] codes, Combo langSelector){
 		this.codes = codes;
 		this.langSelector = langSelector;
@@ -84,13 +107,8 @@ public class AttributeSelection {
 	    	  @Override
 	    	  public void selectionChanged(SelectionChangedEvent arg0) {
 	  		    	String name;
-	  		    	String lang;
-	    		  	int langIndex = langSelector.getSelectionIndex();
-	  		    	if (langIndex != -1 && langIndex < codes.length && codes != null) {
-		  				lang = (String) codes[langIndex];
-	  		    	}else{
-	  		    		lang = "";
-	  		    	}
+	  		    	String lang = getLangCode();
+	    		  	
 
 	    			ISelection selection = attr1.getSelection();
 	    	  		if (!selection.isEmpty()) {
@@ -102,9 +120,13 @@ public class AttributeSelection {
 	    	  		    }
 	    	  		    if( type.equals("NUMERIC") ){
 	    	  		    	value1Text.setText(useTotalObservations);
+	    	  		    	valueFilter.setVisible(false);
+	    	  		    	searchButton.setVisible(false);
 	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
 	    	  		    }else if( type.equals("TEXT") ){
 	    	  		    	value1Text.setText("");
+	    	  		    	valueFilter.setVisible(false);
+	    	  		    	searchButton.setVisible(false);
 	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Text;
 	    	  		    }else if( type.equals("LIST") ){
 	    	  		    	ArrayList<ListOption> options = new ArrayList<ListOption>();
@@ -119,6 +141,8 @@ public class AttributeSelection {
 		    					}
 		    					options.add(new ListOption(name, i.getKey()));
 		    				}
+	    	  		    	valueFilter.setVisible(false);
+	    	  		    	searchButton.setVisible(false);
 	    	  		    	value1ComboViewer.setInput(options);
 	    	  		    	((StackLayout)value1.getLayout()).topControl = value1ComboViewer.getControl();
 	    	  		    }else if( type.equals("TREE") ){
@@ -127,20 +151,61 @@ public class AttributeSelection {
 	    	  		    	iItem.setText("Options:");
 	    	  		    	List<TreeNodeType> list = selected.getAttributeType().getTrees();
 	    	  		    	addAttributesToTree(iItem, list, lang);
+	    	  		    	
+	    	  		    	valueFilter.setVisible(true);
+	    	  		    	searchButton.setVisible(true);
 
 	    	  		    	((StackLayout)value1.getLayout()).topControl = value1Tree;
 	    	  			}else if( type.equals("BOOLEAN") ){
+	    	  				valueFilter.setVisible(false);
+	    	  				searchButton.setVisible(false);
 	    	  				((StackLayout)value1.getLayout()).topControl = value1Combo;
 	    	  		    }
 	    	  		    value1.layout();
 	    	  		}
 	    	  }
 	      });
+	      
+	      Composite valueLine = new Composite(tab1Composite, SWT.NONE);
+	      valueLine.setLayout(new GridLayout(3,false));
+	      GridData compGD = new GridData(SWT.FILL, SWT.FILL, true, true);
+	      compGD.minimumHeight = 25;
+	      valueLine.setLayoutData(compGD);
 	      	      
-	      Label smartLabel3 = new Label(tab1Composite, SWT.NONE);
+	      Label smartLabel3 = new Label(valueLine, SWT.NONE);
 	      smartLabel3.setText("Value #" + number + ":" );
-	      smartLabel3.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
-
+	      smartLabel3.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+	      
+	      valueFilter = new Text(valueLine, SWT.BORDER);
+	      valueFilter.setText("<enter text to search the tree>");
+	      valueFilter.setVisible(false);
+	      valueFilter.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true ));
+	      
+	      valueFilter.addFocusListener(new FocusListener() {
+	    	  @Override
+	    	  public void focusGained(FocusEvent e) {
+	    		  valueFilter.setText("");
+	    		  valueFilter.removeFocusListener(this);
+	    	  }
+	    	  @Override
+	    	  public void focusLost(FocusEvent arg0) {
+	    	  }
+      
+	      });
+	      
+	      
+	      searchButton = new Button(valueLine, SWT.NONE);
+	      searchButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+	      searchButton.setText("Search");
+	      searchButton.setVisible(false);
+	      searchButton.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event arg0) {
+				SimpleSearchWindow search = new SimpleSearchWindow(shell, value1Tree, getLangCode(), valueFilter, _self);
+				search.open();
+			}
+		   });
+	      
 	      //value1 options
 	      value1 = new Composite(tab1Composite, SWT.NONE);
 	      value1.setLayout(new StackLayout());
@@ -264,7 +329,7 @@ public class AttributeSelection {
 		
 	}
 	
-	private boolean updateTree(String catKey, TreeItem ti, String prefix) {
+	public boolean updateTree(String catKey, TreeItem ti, String prefix) {
 		for(int x=0; x < ti.getItemCount(); x++){
 			TreeNodeType c = (TreeNodeType)ti.getItem(x).getData();
 			if(c != null){ 
@@ -277,6 +342,16 @@ public class AttributeSelection {
 			}
 		}
 		return false;
+	}
+	
+	String getLangCode(){
+
+		int langIndex = langSelector.getSelectionIndex();
+		if (langIndex != -1 && langIndex < codes.length && codes != null) {
+				return (String) codes[langIndex];
+		}else{
+			return "";
+		}
 	}
 
 }
