@@ -65,6 +65,8 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	private EntityTypeConfigurationPage configPage;
 	private EntityTypeEntitiesPage entityPage;
 	private FixedEntityMapPage fixedMapPage;
+	private SightingPage sightingsPage;
+	
 	private EntityType entityType;
 	
 	
@@ -96,7 +98,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, fixedMapPage}, true);
+							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, fixedMapPage, sightingsPage}, true);
 						}});
 					
 				}
@@ -119,7 +121,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage,fixedMapPage}, false);
+							initEditor(new IEntityTypeEditorPage[]{entityPage,fixedMapPage, sightingsPage}, false);
 						}});
 					
 				}
@@ -168,6 +170,12 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			super.setPageText(index, Messages.EntityTypeEditor_ConfigurationPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.CONFIGURATION_ICON));
 			
+			
+			sightingsPage = new SightingPage(this);
+			index = addPage(sightingsPage, getEditorInput());
+			super.setPageText(index, "Sightings");
+//			super.getPageImage(index, image);
+			
 			if (  getEntityType().getType() == EntityType.Type.FIXED  ){
 				fixedMapPage = new FixedEntityMapPage(this);
 				index = addPage(fixedMapPage, getEditorInput());
@@ -179,7 +187,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		}catch (Exception ex){
 			EntityPlugIn.displayLog(Messages.EntityTypeEditor_ErrorOpeningEditor + ex.getMessage(), ex);
 		}
-		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage}, true);
+		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsPage, fixedMapPage}, true);
 		
 		EntityEventManager.getInstance().addListener(listener);
 	}
