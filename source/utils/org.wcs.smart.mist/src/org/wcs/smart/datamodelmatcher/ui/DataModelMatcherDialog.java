@@ -489,8 +489,6 @@ public class DataModelMatcherDialog extends Composite {
 	    			return;
 	    		}
 	    		
-	    		int existingRows = ms.getRowCount();
-	    		
 	    		try {
 
 	    			final Shell dlgShell = new Shell(getShell(), SWT.APPLICATION_MODAL);

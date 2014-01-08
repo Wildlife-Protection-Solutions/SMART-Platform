@@ -22,8 +22,6 @@
 
 package org.wcs.smart.datamodelmatcher.ui;
 
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -31,9 +29,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -142,7 +138,7 @@ public class SimpleSearchWindow extends Dialog {
 	}
 	
 	private boolean searchTree(TreeItem ti, String pattern, String prefix) {
-		String catKey;
+
 		for(int z=0; z < ti.getItemCount(); z++){
 			TreeNodeType c = (TreeNodeType)ti.getItem(z).getData();
 			if(c != null){

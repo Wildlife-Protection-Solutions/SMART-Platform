@@ -1143,16 +1143,6 @@ public class MatchSessionDialog extends Dialog {
 	  
 		private void treeSelectionChanged() {
 			next.setEnabled(true);
-	    	
-			
-			String lang;
-			int langIndex = langSelector.getSelectionIndex();
-		    if (langIndex != -1 && langIndex < codes.length && codes != null) {
-  				lang = (String) codes[langIndex];
-		    }else{
-		    	lang = "";
-		    }
-		    
 		    
 			ArrayList<Attribute> attributeArray = new ArrayList<Attribute>();
 			Attribute blankAttribute = new Attribute("<None>" , "", new AttributeType());
