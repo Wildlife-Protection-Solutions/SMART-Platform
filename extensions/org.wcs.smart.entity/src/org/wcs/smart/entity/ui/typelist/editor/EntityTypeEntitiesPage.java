@@ -84,9 +84,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 	private EntityTypeEditor parentEditor;
 	
 	private EntityInfoPanelComposite entityInfoPanel;
-	
-	private EntityFilterComposite testComp;
-		
+			
 	/**
 	 * Creates a new plan editor page
 	 * @param editor
@@ -141,9 +139,7 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityList.setClient(main);
-		
-		testComp = new EntityFilterComposite(main);
-		testComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 		// --- attribute table list
 		entityTable = new EntityListTable(main);
 		entityTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -420,7 +416,6 @@ public class EntityTypeEntitiesPage extends EditorPart implements IEntityTypeEdi
 			entityInfoPanel.initEntityFields();
 		}
 		entityTable.setInput(type.getEntities());
-		
 	}
 	
 	@Override
