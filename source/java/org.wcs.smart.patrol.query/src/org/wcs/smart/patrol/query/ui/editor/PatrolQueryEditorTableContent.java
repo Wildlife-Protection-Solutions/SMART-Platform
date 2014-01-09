@@ -252,9 +252,10 @@ public class PatrolQueryEditorTableContent {
 		
 		// --- Query Properties ----
 		Composite queryProp = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
+		
 		layout = new GridLayout(2, false);
 		layout.marginWidth = 0;
-		layout.marginHeight = 0;
+		layout.marginHeight = 10;
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginRight = 5;
@@ -264,11 +265,12 @@ public class PatrolQueryEditorTableContent {
 		
 		dateComposite = new QueryDateFilterComposite(queryProp, PatrolQueryType.validDateFields(), IDateFilter.DATE_FILTERS);
 		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
+
 		dateComposite.adapt(toolkit);
 		
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.PatrolQueryEditorTableContent_QueryPropertiesLabel,SWT.NONE);
-		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
 		editQueryProp.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

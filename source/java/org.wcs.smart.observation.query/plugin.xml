@@ -92,7 +92,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createUnknownQuery">
+            locationURI="menu:org.wcs.smart.query.createQuery">
          <separator
                name="org.wcs.smart.patrol.observation.menu.newquery.sep3"
                visible="true">
