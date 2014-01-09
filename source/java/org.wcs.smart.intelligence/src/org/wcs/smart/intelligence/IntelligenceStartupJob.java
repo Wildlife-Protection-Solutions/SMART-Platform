@@ -102,6 +102,10 @@ public class IntelligenceStartupJob extends Job {
 					c.createStatement().execute(createSql);
 					c.createStatement().execute(alterSourceSql);
 					c.createStatement().execute(alterIntelColSql);
+					
+					c.createStatement().execute("GRANT SELECT ON smart.intelligence_source to data_entry"); //$NON-NLS-1$
+					c.createStatement().execute("GRANT SELECT ON smart.intelligence_source to manager"); //$NON-NLS-1$
+					c.createStatement().execute("GRANT SELECT ON smart.intelligence_source to analyst"); //$NON-NLS-1$
 				}
 			});
 			session.flush();
