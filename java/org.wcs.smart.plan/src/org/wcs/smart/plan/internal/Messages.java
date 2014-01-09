@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.plan.internal.messages"; //$NON-NLS-1$
+	public static String AddPlanJob_Error;
+	public static String AddPlanJob_Title;
 	public static String AdministrativePlanTarget_CategoryName;
 	public static String AdministrativePlanTarget_GuiName;
 	public static String AdministrativePlanTargetPropertyPage_Achieved_Label;
