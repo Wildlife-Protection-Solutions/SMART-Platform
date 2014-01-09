@@ -60,14 +60,21 @@ public class IntelligenceStartupJob extends Job {
 	private void checkIntelligenceSource() {
 		final boolean tables[] = {false}; //intelligence_source
 		Session session = HibernateManager.openSession();
-		//check is required table exists
+		//check if required table exists
 		try {
 			session.beginTransaction();
+			if (!DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE")) { //$NON-NLS-1$
+				//there is no intelligence tables in database
+				//this is likely if plug-in is being installed
+				//this means that no changes are required
+				return;
+			}
 			tables[0] = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_SOURCE"); //$NON-NLS-1$
 			if (tables[0])
 				return; //required table exists
 		} catch (Exception e) {
-			IntelligencePlugIn.log("Failed to obtain information about intelligence_source tables.", e); //$NON-NLS-1$
+			IntelligencePlugIn.displayLog("Failed to obtain information about intelligence_source tables.", e); //$NON-NLS-1$
+			return;
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
