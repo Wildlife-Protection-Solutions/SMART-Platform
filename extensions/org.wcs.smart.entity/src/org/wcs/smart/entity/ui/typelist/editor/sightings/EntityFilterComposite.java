@@ -27,33 +27,21 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.query.EntityFilter;
+import org.wcs.smart.entity.query.EntityFilter.EntityFilterType;
 
 public class EntityFilterComposite extends Composite{
 
-	private static final String FILTER_TEXT = "Entity Filter";
-	
-	public enum EntityFilter{
-		
-		ALL("All"),
-		ALLACTIVE("Active Only"),
-		CUSTOM("Custom");
-		
-		private String guiName;
-		private EntityFilter(String guiName){
-			this.guiName = guiName;
-		}
-		public String getGuiName(){
-			return this.guiName;
-		}
-	};
-	
+
 	private Label lblText;
-	
 	private List<Entity> entities;
 	private List<Button> topButtons;
-	
+	private Composite comp;
+	private Button btnDown ;
 	private DropDownFilter filter;
+	private static EntityFilter DEFAULT_FILTER = new EntityFilter(EntityFilterType.ALLACTIVE);
 	
 	public EntityFilterComposite(Composite parent) {
 		super(parent, SWT.BORDER);
@@ -73,11 +61,14 @@ public class EntityFilterComposite extends Composite{
 			}
 		});
 	}
-	
-	public Label getLabel(){
-		return this.lblText;
+
+	public EntityFilter getFilter(){
+		if (filter == null){
+			return DEFAULT_FILTER;
+		}else{
+			return filter.getFilter();
+		}
 	}
-	
 	public void setEntities(List<Entity> entities){
 		this.entities = entities;
 		if (filter != null){
@@ -95,7 +86,7 @@ public class EntityFilterComposite extends Composite{
 	}
 	
 	public void createComposite(){
-		Composite comp = new Composite(this, SWT.NONE);
+		comp = new Composite(this, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.horizontalSpacing = 0;
 		gl.verticalSpacing = 0;
@@ -106,16 +97,19 @@ public class EntityFilterComposite extends Composite{
 		
 		lblText = new Label(comp, SWT.NONE);
 		lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		lblText.setText(FILTER_TEXT);
+		lblText.setText("");
 		lblText.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				showOptions();	
+				if (filter != null && filter.main.isVisible()){
+					filter.hide();
+				}else{
+					showOptions();
+				}
 			}
 		});
 		
-		Button btnDown = new Button(comp, SWT.ARROW | SWT.DOWN);
-		
+		btnDown = new Button(comp, SWT.ARROW | SWT.DOWN);
 		btnDown.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -141,17 +135,23 @@ public class EntityFilterComposite extends Composite{
 	}
 
 	private void updateLabel(){
-		EntityFilter lFilter = EntityFilter.ALLACTIVE;
 		if (filter != null){
 			EntityFilter tmp = filter.getFilter();
-			if (tmp != null){
-				lFilter = tmp;
-			}
+			lblText.setText(tmp.asString());
+		}else{
+			lblText.setText(DEFAULT_FILTER.asString());			
 		}
-		lblText.setText(FILTER_TEXT + " (" + lFilter.guiName + ")");
+
 	}
 	
-	
+
+	public void adapt(FormToolkit toolkit) {
+		toolkit.adapt(this);
+		toolkit.adapt(comp, false, false);
+		toolkit.adapt(lblText, false, false);
+		toolkit.adapt(btnDown, true, true);
+		
+	}	
 	
 	
 	class DropDownFilter{
@@ -210,25 +210,26 @@ public class EntityFilterComposite extends Composite{
 		}
 		
 		public EntityFilter getFilter(){
+			
 			for (Button btn : topButtons){
 				if (btn.getSelection()){
-					return (EntityFilter) btn.getData();
+					EntityFilterType t = (EntityFilterType) btn.getData();
+					if (t == EntityFilterType.CUSTOM){
+						return new EntityFilter(t, getSelectedEntities());
+					}else{
+						return new EntityFilter(t);
+					}
 				}
 			}	
 			return null;
 		}
-		public List<Entity> getSelectedEntities(){
-			if (getFilter() == EntityFilter.CUSTOM){
-				List<Entity> selection = new ArrayList<Entity>();
-				for (Iterator<?> iterator = ((StructuredSelection)entityListViewer.getSelection()).iterator(); iterator.hasNext();) {
-					Entity entity = (Entity) iterator.next();
-					selection.add(entity);
-				}
-				return selection;
-				
-				
+		
+		private List<Entity> getSelectedEntities(){
+			List<Entity> selection = new ArrayList<Entity>();
+			for (Object x : entityListViewer.getCheckedElements()){
+				selection.add((Entity)x);
 			}
-			return null;
+			return selection;
 		}
 		
 		
@@ -239,10 +240,10 @@ public class EntityFilterComposite extends Composite{
 			top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			top.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			
-			for (EntityFilter f : EntityFilter.values()){
+			for (EntityFilterType f : EntityFilterType.values()){
 				final Button btn = new Button(top, SWT.RADIO);
 				btn.setText(f.getGuiName());
-				if (f == EntityFilter.ALLACTIVE){
+				if (f == EntityFilterType.ALLACTIVE){
 					btn.setSelection(true);
 				}
 				topButtons.add(btn);
@@ -253,7 +254,7 @@ public class EntityFilterComposite extends Composite{
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						boolean isCustom = false;
-						if (((EntityFilter)btn.getData()) == EntityFilter.CUSTOM){
+						if (((EntityFilterType)btn.getData()) == EntityFilterType.CUSTOM){
 							entityListViewer.getControl().setEnabled(true);
 							isCustom = true;
 						}else{
@@ -302,4 +303,8 @@ public class EntityFilterComposite extends Composite{
 			main = null;
 		}
 	}
+
+
+
+
 }
