@@ -23,6 +23,9 @@ package org.wcs.smart.hibernate;
 
 import java.sql.DriverManager;
 
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+
 /**
  * Database specific extensions for the derby database.
  * 
@@ -56,4 +59,18 @@ public class DerbyHibernateExtensions {
 		}
 
 	}
+
+	/**
+	 * Checks if given table exists in Derby database.
+	 * @param session
+	 * @param tableName
+	 * @return
+	 */
+	public static boolean tableExists(Session session, String tableName) {
+		String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = '"+tableName+"'"; //$NON-NLS-1$ //$NON-NLS-2$
+		SQLQuery q = session.createSQLQuery(sql);
+		Integer result = (Integer) q.uniqueResult();
+		return result != null && result > 0;
+	}
+	
 }

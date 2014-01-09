@@ -30,10 +30,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -63,11 +63,7 @@ public class IntelligenceStartupJob extends Job {
 		//check is required table exists
 		try {
 			session.beginTransaction();
-			String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'INTELLIGENCE_SOURCE'"; //$NON-NLS-1$
-			SQLQuery q = session.createSQLQuery(sql);
-			Integer result = (Integer) q.uniqueResult();
-			tables[0] = result > 0;
-			
+			tables[0] = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_SOURCE"); //$NON-NLS-1$
 			if (tables[0])
 				return; //required table exists
 		} catch (Exception e) {
