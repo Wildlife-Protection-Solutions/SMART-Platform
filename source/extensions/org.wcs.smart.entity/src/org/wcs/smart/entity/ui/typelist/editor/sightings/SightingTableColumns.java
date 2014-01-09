@@ -1,11 +1,17 @@
 package org.wcs.smart.entity.ui.typelist.editor.sightings;
 
-import org.wcs.smart.entity.ui.typelist.editor.sightings.QueryColumn.ColumnType;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.query.model.filter.date.IDateFilter;
+
 
 
 public class SightingTableColumns {
 	
-	public enum FixedColumns{
+	
+	public static IDateFilter[] SIGHTING_DATE_FILTERS = IDateFilter.DATE_FILTERS;
+	
+	
+	public static enum FixedColumns{
 		ENTITY_ID("Entity Id", ColumnType.STRING, "entity:id"),
 		CA_ID("Conservation Area Id", ColumnType.STRING,"ca:id"), //$NON-NLS-1$
 		CA_NAME("Conservation Area Name", ColumnType.STRING,"ca:name"), //$NON-NLS-1$

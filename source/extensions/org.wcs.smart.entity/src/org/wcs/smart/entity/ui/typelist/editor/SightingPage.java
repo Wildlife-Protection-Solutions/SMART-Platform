@@ -1,8 +1,12 @@
 package org.wcs.smart.entity.ui.typelist.editor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -15,10 +19,16 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.entity.query.DerbyEntitySightingEngine;
+import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.ui.typelist.editor.sightings.EntityFilterComposite;
+import org.wcs.smart.entity.ui.typelist.editor.sightings.SightingTable;
+import org.wcs.smart.entity.ui.typelist.editor.sightings.SightingTableColumns;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.ui.QueryDateFilterComposite;
 
 public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 
@@ -26,7 +36,8 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	private EntityTypeEditor parentEditor;
 	
 	private EntityFilterComposite entityFilter;
-	
+	private SightingTable sightingTable;
+	private QueryDateFilterComposite dateComp ;
 	
 	public SightingPage(EntityTypeEditor editor){
 		this.parentEditor = editor;
@@ -82,23 +93,67 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		g.setLayout(new GridLayout(2, false));
 		
 		Label l1 = toolkit.createLabel(g, "Date Filter:");
-		Label l3 = toolkit.createLabel(g, "Date Filter:");
+		
+		dateComp = new QueryDateFilterComposite(g, null, SightingTableColumns.SIGHTING_DATE_FILTERS);
+		dateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		dateComp.adapt(toolkit);
 		
 		Label l2 = toolkit.createLabel(g, "Entity Filter:");
 		
 		entityFilter = new EntityFilterComposite(g);
 		entityFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		toolkit.adapt(entityFilter);
-		toolkit.adapt(entityFilter.getLabel(), false, false);
+		entityFilter.adapt(toolkit);
+		
 		
 		Button btnRefresh = toolkit.createButton(g, "Update Table", SWT.PUSH);
-	}
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateResultsTable();
+			}
 
+		});
+		sightingTable = new SightingTable(form.getBody());
+		sightingTable.getTable().getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(sightingTable.getTable().getTable());
+	}
 	
-	private void createSightingsTable(Composite parent){
-		TableViewer sightingTable = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
+
+	private EntityQuery currentQuery;
 	
+	Job runJob = new Job("Execute Sightings Page"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			EntityQuery query = currentQuery;
+			Session session = HibernateManager.openSession();
+			try{
+				DerbyEntitySightingEngine queryEngine = new DerbyEntitySightingEngine();
+				final SightingPagedResults results = queryEngine.executeDerbyQuery(query, session, monitor);
+				
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						sightingTable.setInput(results);
+					}});
+				
+			}catch (Exception ex){
+				//TODO: do something here
+				ex.printStackTrace();
+			}finally{
+				session.close();
+			}
+			return Status.OK_STATUS;
+		}
 		
+	};
+	
+	private void updateResultsTable(){
+		currentQuery = new EntityQuery(parentEditor.getEntityType(),
+			dateComp.getDateFilter(), entityFilter.getFilter());
+		
+		runJob.cancel();
+		runJob.schedule();
 	}
 	
 	
@@ -112,6 +167,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	@Override
 	public void updatePage(Session currentSession, boolean typeModified) {
 		entityFilter.setEntities(parentEditor.getEntityType().getEntities());
+		sightingTable.setEntityType(parentEditor.getEntityType());
 	}
 
 }
