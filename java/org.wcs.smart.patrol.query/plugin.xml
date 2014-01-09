@@ -180,7 +180,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createUnknownQuery">
+            locationURI="menu:org.wcs.smart.query.createQuery">
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/observation_query.png"

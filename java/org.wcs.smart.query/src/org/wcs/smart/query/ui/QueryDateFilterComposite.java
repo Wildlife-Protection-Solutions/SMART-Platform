@@ -71,13 +71,33 @@ public class QueryDateFilterComposite extends Composite {
 	
 	private IDateFieldFilter[] fieldOps;
 	private IDateFilter[] filterOps;
+	private boolean showLabel;
+	/**
+	 * create new composite
+	 * @param parent parent composite
+	 * @param fieldOps date field options; can be null
+	 * @param filterOps date filter options 
+	 */
+	public QueryDateFilterComposite(Composite parent, 
+			IDateFieldFilter[] fieldOps, 
+			IDateFilter[] filterOps) {
+		this(parent, fieldOps, filterOps, false);
+	}
 	
 	/**
-	 * create new composite 
+	 * create new composite
+	 * @param parent parent composite
+	 * @param fieldOps date field options; can be null
+	 * @param filterOps date filter options 
+	 * @param includeLabel  if the "Date" label should be included in the 
+	 * composite
 	 */
-	public QueryDateFilterComposite(Composite parent, IDateFieldFilter[] fieldOps, IDateFilter[] filterOps) {
-		super(parent, SWT.NONE);
+	public QueryDateFilterComposite(Composite parent, 
+			IDateFieldFilter[] fieldOps, 
+			IDateFilter[] filterOps, boolean includeLabel) {
 		
+		super(parent, SWT.NONE);
+		this.showLabel = includeLabel;
 		this.fieldOps = fieldOps;
 		this.filterOps = filterOps;
 		
@@ -86,13 +106,12 @@ public class QueryDateFilterComposite extends Composite {
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
-		layout.marginTop = 10;
-		layout.marginBottom = 10;
+		layout.marginTop = 0;
+		layout.marginBottom = 0;
 		setLayout(layout);
 		
 		createComponent();
 	}
-	
 	/**
 	 * Adapts the components of the composite to the given
 	 * form toolkit.
@@ -100,9 +119,14 @@ public class QueryDateFilterComposite extends Composite {
 	 * @param toolkit
 	 */
 	public void adapt(FormToolkit toolkit){
-		toolkit.adapt(cmbDateField.getControl(), false, true);
+		if (cmbDateField != null){
+			toolkit.adapt(cmbDateField.getControl(), false, true);
+		}
+		
 		toolkit.adapt(cmbFilterOptions.getControl(), false, true);
-		toolkit.adapt(lblDateFilter, false, false);
+		if (lblDateFilter != null){
+			toolkit.adapt(lblDateFilter, false, false);
+		}
 		toolkit.adapt(lbl1, false, false);
 		toolkit.adapt(lbl2, false, false);
 		
@@ -124,23 +148,27 @@ public class QueryDateFilterComposite extends Composite {
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lblDateFilter = new Label(main, SWT.NONE);
-		lblDateFilter.setText(Messages.QueryDateFilterComposite_DateLabel);
+		if(showLabel){
+			lblDateFilter = new Label(main, SWT.NONE);
+			lblDateFilter.setText(Messages.QueryDateFilterComposite_DateLabel);
+		}
 		
-		cmbDateField = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbDateField.setContentProvider(ArrayContentProvider.getInstance());
-		cmbDateField.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element) {
-				if (element instanceof IDateFieldFilter){
-					return ((IDateFieldFilter)element).getGuiName();
+		if (fieldOps != null){
+			cmbDateField = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbDateField.setContentProvider(ArrayContentProvider.getInstance());
+			cmbDateField.setLabelProvider(new LabelProvider(){
+				@Override
+				public String getText(Object element) {
+					if (element instanceof IDateFieldFilter){
+						return ((IDateFieldFilter)element).getGuiName();
+					}
+					return super.getText(element);
 				}
-				return super.getText(element);
-			}
-		});
+			});
 	
-		cmbDateField.setInput(fieldOps);
-		cmbDateField.getCombo().select(0);
+			cmbDateField.setInput(fieldOps);
+			cmbDateField.getCombo().select(0);
+		}
 		
 		
 		cmbFilterOptions = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -217,7 +245,10 @@ public class QueryDateFilterComposite extends Composite {
 	 */
 	public DateFilter getDateFilter(){
 		IDateFilter filter = (IDateFilter)  ((IStructuredSelection)cmbFilterOptions.getSelection()).iterator().next();
-		IDateFieldFilter field = (IDateFieldFilter) ((IStructuredSelection)cmbDateField.getSelection()).iterator().next();
+		IDateFieldFilter field = null;
+		if (cmbDateField != null){
+			field = (IDateFieldFilter) ((IStructuredSelection)cmbDateField.getSelection()).iterator().next();
+		}
 		
 		if (filter instanceof CustomDateFilter){
 			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());

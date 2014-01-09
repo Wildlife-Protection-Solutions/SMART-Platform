@@ -230,7 +230,7 @@ public class QueryEditorTableContent {
 		Composite queryProp = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
 		layout = new GridLayout(2, false);
 		layout.marginWidth = 0;
-		layout.marginHeight = 0;
+		layout.marginHeight = 10;
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginRight = 5;
