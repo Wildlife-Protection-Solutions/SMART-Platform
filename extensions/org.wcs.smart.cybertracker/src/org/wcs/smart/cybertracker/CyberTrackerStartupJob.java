@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -42,6 +41,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 
@@ -90,16 +90,8 @@ public class CyberTrackerStartupJob extends Job {
 		//check is required table exists
 		try {
 			session.beginTransaction();
-			String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'CYBERTRACKER_PROPERTIES'"; //$NON-NLS-1$
-			SQLQuery q = session.createSQLQuery(sql);
-			Integer result = (Integer) q.uniqueResult();
-			tables[0] = result > 0;
-			
-			sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = 'CT_PROPERTIES_OPTION'"; //$NON-NLS-1$
-			q = session.createSQLQuery(sql);
-			result = (Integer) q.uniqueResult();
-			tables[1] = result > 0;
-			
+			tables[0] = DerbyHibernateExtensions.tableExists(session, "CYBERTRACKER_PROPERTIES"); //$NON-NLS-1$
+			tables[1] = DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_OPTION"); //$NON-NLS-1$
 			if (!tables[0] && tables[1])
 				return; //required table exists
 		} catch (Exception e) {

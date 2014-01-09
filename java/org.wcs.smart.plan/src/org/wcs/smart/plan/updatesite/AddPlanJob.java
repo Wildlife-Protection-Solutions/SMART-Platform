@@ -28,10 +28,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.plan.internal.Messages;
@@ -49,10 +49,10 @@ public class AddPlanJob extends Job {
 		//check is required table exists
 		try {
 			session.beginTransaction();
-			mark.plan = checkTableExists(session, "plan"); //$NON-NLS-1$
-			mark.plan_target = checkTableExists(session, "plan_target"); //$NON-NLS-1$
-			mark.plan_target_point = checkTableExists(session, "plan_target_point"); //$NON-NLS-1$
-			mark.patrol_plan = checkTableExists(session, "patrol_plan"); //$NON-NLS-1$
+			mark.plan = DerbyHibernateExtensions.tableExists(session, "plan"); //$NON-NLS-1$
+			mark.plan_target = DerbyHibernateExtensions.tableExists(session, "plan_target"); //$NON-NLS-1$
+			mark.plan_target_point = DerbyHibernateExtensions.tableExists(session, "plan_target_point"); //$NON-NLS-1$
+			mark.patrol_plan = DerbyHibernateExtensions.tableExists(session, "patrol_plan"); //$NON-NLS-1$
 			
 			if (mark.allSet())
 				return Status.OK_STATUS; //required table exists
@@ -261,13 +261,6 @@ public class AddPlanJob extends Job {
 			}
 		});
 		session.getTransaction().commit();
-	}
-	
-	protected boolean checkTableExists(Session session, String tableName) {
-		String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = '"+tableName+"'"; //$NON-NLS-1$ //$NON-NLS-2$
-		SQLQuery q = session.createSQLQuery(sql);
-		Integer result = (Integer) q.uniqueResult();
-		return result > 0;
 	}
 	
 	private class PlanTablesMarkers {
