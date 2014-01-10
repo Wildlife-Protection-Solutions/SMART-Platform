@@ -30,9 +30,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import net.refractions.udig.project.AdaptableFeature;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
@@ -462,21 +465,30 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		}
 		IStructuredSelection ss = (IStructuredSelection) selection;
 		Object o = ss.getFirstElement();
-		boolean update = false;
+		
+		Waypoint wp = null;
 		if (o instanceof Waypoint) {
-			update = true;
-			updateContents((Waypoint) o);
+			wp = (Waypoint)o;
 		}else if (o instanceof WaypointObservation){
-			update = true;
-			updateContents(((WaypointObservation) o).getWaypoint());
+			wp = ((WaypointObservation)o).getWaypoint();
 		}else if (o instanceof IAdaptable){
-			Waypoint wp = (Waypoint) ((IAdaptable)o).getAdapter(Waypoint.class);
-			if (wp != null){
-				update = true;
-				updateContents(wp);
+			wp = (Waypoint) ((IAdaptable)o).getAdapter(Waypoint.class);
+		}
+		
+		if (wp == null){
+			//try the AdapterManager
+			wp = (Waypoint) Platform.getAdapterManager().getAdapter(o, Waypoint.class);
+			
+			if (wp == null){
+				if (o instanceof AdaptableFeature){
+					Object delegateFeature = ((AdaptableFeature) o).getObject();
+					wp = (Waypoint) Platform.getAdapterManager().getAdapter(delegateFeature, Waypoint.class);
+				}
 			}
 		}
-		if (!update){
+		if (wp != null){
+			updateContents(wp);
+		}else{
 			clearContents();
 		}
 	}
