@@ -100,7 +100,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.fielddata.perspective">
+            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.query.QueryPerspective"
                icon="images/icons/view16/querypatrol.gif"
@@ -135,26 +135,6 @@
          <toolbar
                id="org.wcs.smart.query.queryToolbar">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
-                  label="%queryToolbar.createquery.command.label"
-                  style="pulldown"
-                  tooltip="%queryToolbar.createquery.command.toolbar">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <or>
-                        <equals
-                              value="org.wcs.smart.query.SmartQueryPerspective">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
-                        </equals>
-                     </or>
-                  </with>
-               </visibleWhen>
-            </command>
-            <command
                   commandId="org.wcs.smart.query.exportQuery"
                   label="%queryToolbar.exportquery.command.label"
                   style="push"
@@ -174,10 +154,6 @@
                   </with>
                </visibleWhen>
             </command>
-            <separator
-                  name="org.wcs.smart.query.separator2"
-                  visible="true">
-            </separator>
             <command
                   commandId="org.eclipse.ui.file.save"
                   label="%queryToolbar.savequery.command.label"

@@ -221,13 +221,20 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.fielddata.perspective">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.incident.perspective"
                icon="images/icons/obj16/incident.png"
                mnemonic="%incidentperspective.command.mnemonic2"
                style="push"
                tooltip="%incidentperspective.command.tooltip2">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
