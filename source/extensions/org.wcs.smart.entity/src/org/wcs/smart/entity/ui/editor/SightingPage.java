@@ -43,7 +43,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.ui.editor.sightings.EntityFilterComposite;
 import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn;
@@ -63,7 +63,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	private EntityFilterComposite entityFilter;
 	private SightingTable sightingTable;
 	private QueryDateFilterComposite dateComp ;
-	private EntityQuery currentQuery;
+	private EntitySightingQuery currentQuery;
 	
 	private Label lblQueryProgress;
 	
@@ -102,7 +102,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		return false;
 	}
 
-	public EntityQuery getCurrentQuery(){
+	public EntitySightingQuery getCurrentQuery(){
 		return this.currentQuery;
 	}
 	@Override
@@ -167,7 +167,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	
 	
 	private void updateResultsTable(){
-		currentQuery = new EntityQuery(parentEditor.getEntityType(),
+		currentQuery = new EntitySightingQuery(parentEditor.getEntityType(),
 			dateComp.getDateFilter(), entityFilter.getFilter());
 		currentQuery.setQueryColumns(sightingTable.getCurrentColumns());
 		
@@ -235,7 +235,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 				}
 			};
 			
-			EntityQuery query = currentQuery;
+			EntitySightingQuery query = currentQuery;
 			try{
 				final SightingPagedResults results = (SightingPagedResults) query.executeQuery(lblProgressMonitor);
 				Display.getDefault().syncExec(new Runnable(){

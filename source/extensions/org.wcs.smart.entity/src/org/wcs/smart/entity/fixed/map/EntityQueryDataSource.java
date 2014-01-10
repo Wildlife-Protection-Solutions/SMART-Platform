@@ -29,7 +29,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.query.model.QueryColumn;
 /**
  * Data source for entity sighting queries.
@@ -41,10 +41,10 @@ public class EntityQueryDataSource extends AbstractDataStore{
 	public static final String TYPENAME = "ENTITY_QUERY"; //$NON-NLS-1$
 
 	private SimpleFeatureType featureSchema;
-	private EntityQuery query;
+	private EntitySightingQuery query;
 	
 	
-	public EntityQueryDataSource(EntityQuery query){
+	public EntityQueryDataSource(EntitySightingQuery query){
 		this.query = query;
 	}
 	
@@ -53,7 +53,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		super.dispose();
 	}
 
-	public void refresh(EntityQuery query){
+	public void refresh(EntitySightingQuery query){
 		this.query = query;
 		this.featureSchema = null;
 	}

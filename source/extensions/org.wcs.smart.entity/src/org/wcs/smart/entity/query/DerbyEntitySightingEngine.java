@@ -80,13 +80,14 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 
 	private String queryDataTable;
 
-	private EntityQuery query;
+	private EntitySightingQuery query;
 	private DateFilter localDateFilter;
 	private int categoryCount;
 
-	public SightingPagedResults executeDerbyQuery(EntityQuery query,
+	public SightingPagedResults executeDerbyQuery(EntitySightingQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
+	
 		this.query = query;
 		
 		// create a date filter that caches the dates so the same
@@ -131,9 +132,17 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 					 rs.close();
 				 }
 
-				dropTemporaryTables(c, monitor.isCanceled());
+				if (monitor.isCanceled()){
+					dropTemporaryTables(c, monitor.isCanceled());
+					result.setItemCount(0);
+				}
+				
+				c.commit();
 			}
 		});
+		if (monitor.isCanceled()){
+			return null;
+		}
 		return result;
 	}
 

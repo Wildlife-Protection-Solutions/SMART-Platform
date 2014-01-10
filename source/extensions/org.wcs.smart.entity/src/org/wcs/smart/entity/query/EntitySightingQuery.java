@@ -36,7 +36,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
  * @author Emily
  *
  */
-public class EntityQuery {
+public class EntitySightingQuery {
 
 	private DateFilter dateFilter;
 	private EntityType entityType;
@@ -54,7 +54,7 @@ public class EntityQuery {
 	 * @param dateFilter date filter
 	 * @param entityFilter entity filter
 	 */
-	public EntityQuery(EntityType entityType, 
+	public EntitySightingQuery(EntityType entityType, 
 			DateFilter dateFilter, 
 			EntityFilter entityFilter){
 		

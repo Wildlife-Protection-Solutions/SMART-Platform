@@ -42,7 +42,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
-import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.EntitySightingQuery;
 
 /**
  * Service for entity sightings query.
@@ -54,7 +54,7 @@ public class EntityQueryService extends IService {
 
 	public static final String SERVICE_ID = "org.wcs.smart.entity.udig.catalog.queryEntityService"; //$NON-NLS-1$
 	
-	private EntityQuery query;
+	private EntitySightingQuery query;
 	private URL url;
 	
 	private List<EntityQueryGeoResource> members;
@@ -66,7 +66,7 @@ public class EntityQueryService extends IService {
 	
 	private IServiceInfo info = null;
 	
-	public EntityQueryService(EntityQuery query) {
+	public EntityQueryService(EntitySightingQuery query) {
 		this.query = query;
 		
 		String  url = "smart://smartdb/entitytype/query/" + query.getEntityType().getKeyId()  ; //$NON-NLS-1$
@@ -84,7 +84,7 @@ public class EntityQueryService extends IService {
 	 * @param monitor
 	 * @throws IOException
 	 */
-	public void refresh(EntityQuery newQuery ) throws IOException{
+	public void refresh(EntitySightingQuery newQuery ) throws IOException{
 		this.query = newQuery;
 		if (ds != null){
 			ds.refresh(newQuery);	

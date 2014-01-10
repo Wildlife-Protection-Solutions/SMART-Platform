@@ -63,6 +63,8 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	private Envelope bounds = null;
 
 	private boolean isDestoryed = false;
+	private boolean isLoading = false;
+	
 //	// next sort column
 //	private QueryColumn sortColumn = null;
 //	// last sort column
@@ -98,29 +100,41 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 		return super.equals(obj);
 	}
 
+	/**
+	 * Destroys the results
+	 */
 	public void destroy() {
-		// simply closing result set and deleting temporary table
+		// we cannot destory until we are finished loading
 		isDestoryed = true;
-		dropResultSet();
-		Job cleanUpJob = new CleanUpJob();
-		cleanUpJob.setSystem(true); // we don't want this job to be displayed to user
-		cleanUpJob.schedule();
+		if (isLoading){
+			return;
+		}else{
+			cleanUp();
+		}
 	}
 
 	
 	public List<SightingResultItem> getData(final int offset, final int pageSize) {
-		if (isDestoryed){
-			return null;
-		}
+		isLoading = true;
+		try{
+			if (isDestoryed){
+				return null;
+			}
 		
-		final Session session = HibernateManager.openSession();
-		// NOTE: session will not be closed on purpose!!!!
-		// as we want related ResultSet to remain opened for performance reasons
-		List<SightingResultItem> result = getNextData(session, offset, pageSize);
-		if (result == null) {
-			result = getData(session, offset, pageSize);
+			final Session session = HibernateManager.openSession();
+			// NOTE: session will not be closed on purpose!!!!
+			// as we want related ResultSet to remain opened for performance reasons
+			List<SightingResultItem> result = getNextData(session, offset, pageSize);
+			if (result == null) {
+				result = getData(session, offset, pageSize);
+			}
+			return result;
+			
+		}finally{
+			isLoading = false;
+			//check to see if we need to cleanup
+			cleanUp();
 		}
-		return result;
 	}
 
 	private List<SightingResultItem> getNextData(final Session session,
@@ -145,6 +159,18 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 //		});
 		return result;
 	}
+	
+	/*
+	 * performs the clean up tasks
+	 */
+	private void cleanUp(){
+		if (isDestoryed){
+			dropResultSet();
+			Job cleanUpJob = new CleanUpJob();
+			cleanUpJob.setSystem(true); // we don't want this job to be displayed to user
+			cleanUpJob.schedule();
+		}
+	}
 
 	@Override
 	public Envelope getEnvelope() {
@@ -157,18 +183,24 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 					@Override
 					public void execute(Connection c) throws SQLException {
-						ResultSet q = c.createStatement().executeQuery(sql);
-						try {
-							q.next();
-							double minx = q.getDouble(1);
-							double maxx = q.getDouble(2);
-							double miny = q.getDouble(3);
-							double maxy = q.getDouble(4);
+						isLoading = true;
+						try{
+							ResultSet q = c.createStatement().executeQuery(sql);
+							try {
+								q.next();
+								double minx = q.getDouble(1);
+								double maxx = q.getDouble(2);
+								double miny = q.getDouble(3);
+								double maxy = q.getDouble(4);
 
-							bounds = new Envelope(minx, maxx, miny, maxy);
-						} finally {
-							q.close();
+								bounds = new Envelope(minx, maxx, miny, maxy);
+							} finally {
+								q.close();
+							}
+						}finally{
+							isLoading = false;
 						}
+						cleanUp();
 					}
 				});
 			} finally {
@@ -299,37 +331,26 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 	private List<SightingResultItem> getData(final Session session,
 			final int offset, final int pageSize) {
-		if (isDestoryed){
-			return null;
-		}
+		
 		final List<SightingResultItem> result = new ArrayList<SightingResultItem>();
-	
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
 
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				
 //				if ((lastSortColumn == null && sortColumn != null)
 //						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn
 //								.equals(sortColumn))) {
 //					updateSortColumn(sortColumn, session, c);
 //				}
 				c.commit();
-				if (isDestoryed){
-					return;
-				}
 				lastResultSet = c.createStatement(
 						ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				if (isDestoryed){
-					return;
-				}
 				// this forces garbage collection; without this the program
 				// will fail with out of memory error when sorting
 				// on columns multiple times.
 				System.gc();
-
 				result.addAll(getResults(lastResultSet, offset, pageSize));
 //				attachObservations(result, c, session);
 			}
@@ -455,16 +476,12 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	protected List<SightingResultItem> getResults(ResultSet rs,
 			int from, int pageSize) throws SQLException {
 		List<SightingResultItem> items = new ArrayList<SightingResultItem>();
-		if (isDestoryed){
-			return items;
-		}
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
 			to = itemCount;
 		}
 		for (int x = from; x < to; x++) {
-			if (isDestoryed) return items;
 			rs.next();
 			SightingResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
@@ -578,7 +595,7 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	/**
 	 * Iterator that uses lazy approach
 	 * 
-	 * @author elitvin
+	 * @author egouge
 	 * @since 1.0.0
 	 */
 	private class LazyQueryIterator implements Iterator<SightingResultItem> {
@@ -626,6 +643,11 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 	}
 
+	/**
+	 * Job for dropping query table 
+	 * @author Emily
+	 *
+	 */
 	private class CleanUpJob extends Job {
 
 		public CleanUpJob() {
@@ -642,16 +664,13 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 					public void execute(Connection c) throws SQLException {
 						// original table
 						try {
+							c.commit();
 							if (queryTempTable != null){
-								String toDrop = queryTempTable;
-								queryTempTable = null;
 								dropResultSet();
-								System.out.println("DESTROY: " + toDrop);
-								String sql = "DROP TABLE " + toDrop; //$NON-NLS-1$
+								String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
 								c.createStatement().execute(sql);
 								QueryPlugIn.logSql(sql);
-
-								c.commit();
+								queryTempTable = null;
 							}
 						} catch (Exception ex) {
 							EntityPlugIn.log(ex.getMessage(), ex);
