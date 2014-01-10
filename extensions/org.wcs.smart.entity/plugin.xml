@@ -38,26 +38,16 @@
                id="org.wcs.smart.menu.entity"
                label="Entity">
             <command
-                  commandId="org.wcs.smart.entity.new"
+                  commandId="org.wcs.smart.entitytype.new"
                   mnemonic="n"
                   style="push"
                   tooltip="create a new entity">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
                </visibleWhen>
             </command>
             <separator
@@ -65,30 +55,20 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.entity.import"
+                  commandId="org.wcs.smart.entitytype.import"
                   mnemonic="i"
                   style="push"
                   tooltip="imports an entity type">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.entity.export"
+                  commandId="org.wcs.smart.entitytype.export"
                   mnemonic="x"
                   style="push"
                   tooltip="exports an entity type">
@@ -143,47 +123,27 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.entity.typelist">
          <command
-               commandId="org.wcs.smart.entity.delete"
+               commandId="org.wcs.smart.entitytype.delete"
                style="push"
                tooltip="Deletes the selected entity types">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.entity.new"
+               commandId="org.wcs.smart.entitytype.new"
                style="push"
                tooltip="Creates a new entity type">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
             </visibleWhen>
          </command>
          <command
@@ -196,16 +156,23 @@
             allPopups="true"
             locationURI="popup:org.wcs.smart.entity.typelist">
          <command
-               commandId="org.wcs.smart.entity.delete"
+               commandId="org.wcs.smart.entitytype.delete"
                style="push"
                tooltip="Deletes the selected Entity Types">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.wcs.smart.entity.new"
+            id="org.wcs.smart.entitytype.new"
             name="New Entity Type">
       </command>
       <command
@@ -213,38 +180,36 @@
             name="View Entity Types">
       </command>
       <command
-            id="org.wcs.smart.entity.delete"
+            id="org.wcs.smart.entitytype.delete"
             name="Delete Entity Types">
       </command>
       <command
             id="org.wcs.smart.entity.entitytypefilter"
             name="Open Entity Type Filter Dialog">
       </command>
+      <command
+            id="org.wcs.smart.entitytype.import"
+            name="Import Entity Type">
+      </command>
+      <command
+            id="org.wcs.smart.entitytype.export"
+            name="Export Entity Type">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.entity.ui.NewEntityHandler"
-            commandId="org.wcs.smart.entity.new">
+            commandId="org.wcs.smart.entitytype.new">
          <activeWhen>
             <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
                <test
                      forcePluginActivation="true"
                      property="org.wcs.smart.caSingle">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
                </test>
             </and>
          </activeWhen>
@@ -261,12 +226,18 @@
       </handler>
       <handler
             class="org.wcs.smart.entity.ui.DeleteEntityTypeHandler"
-            commandId="org.wcs.smart.entity.delete">
+            commandId="org.wcs.smart.entitytype.delete">
          <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
+            <and>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+            </and>
          </activeWhen>
       </handler>
       <handler
@@ -316,11 +287,11 @@
    <extension
          point="org.eclipse.ui.commandImages">
       <image
-            commandId="org.wcs.smart.entity.delete"
+            commandId="org.wcs.smart.entitytype.delete"
             icon="images/icons/etool16/deleteentitytype.png">
       </image>
       <image
-            commandId="org.wcs.smart.entity.new"
+            commandId="org.wcs.smart.entitytype.new"
             icon="images/icons/etool16/newentitytype.png">
       </image>
       <image

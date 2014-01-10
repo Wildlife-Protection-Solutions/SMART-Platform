@@ -85,6 +85,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.entity.EntityPermissionManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
@@ -189,7 +190,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		glayout.marginHeight = 0;
 		form.getBody().setLayout(glayout);
 		
-		if (this.parentEditor.canEdit()) {
+		if (EntityPermissionManager.canCreateEditDeleteTypes()) {
 			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.EntityTypeConfigurationPage_TranslateLabel, SWT.WRAP);
 			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -248,14 +249,16 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtStatus.getLayoutData()).widthHint = 100;
 		Hyperlink editLink = createEditLink(toolkit, leftContent);
-		editLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
+		if (editLink != null){
+			editLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
 						new StatusComposite(), parentEditor.getEntityType());
-				dialog.open();
-			}
-		});
+					dialog.open();
+				}
+			});
+		}
 		
 		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_IdLabel);
 		txtId = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
@@ -263,14 +266,16 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtId.getLayoutData()).widthHint = 100;
 		editLink = createEditLink(toolkit, leftContent);
-		editLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
+		if (editLink != null){
+			editLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
 						new IdComposite(), parentEditor.getEntityType());
-				dialog.open();
-			}
-		});
+					dialog.open();
+				}
+			});
+		}
 
 		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_NameLabel);
 		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
@@ -278,12 +283,14 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtId.getLayoutData()).widthHint = 100;
 		editLink = createEditLink(toolkit, leftContent);
-		editLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				translateName();
-			}
-		});
+		if (editLink != null){
+			editLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					translateName();
+				}
+			});
+		}
 	
 		
 		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_AttributeLabel);
@@ -455,131 +462,129 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		layout.setColumnData( colRequired.getColumn(), new ColumnWeightData( 10 ) );
 		layout.setColumnData( colPrimary.getColumn(), new ColumnWeightData( 10 ) );
 		
+		if (EntityPermissionManager.canCreateEditDeleteTypes()){
+			Composite buttonComp = toolkit.createComposite(targetContent);
+			buttonComp.setLayout(new GridLayout());
+			buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
 		
-		Composite buttonComp = toolkit.createComposite(targetContent);
-		buttonComp.setLayout(new GridLayout());
-		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
-		
-		final Button btnMoveUp = toolkit.createButton(buttonComp, Messages.EntityTypeConfigurationPage_MoveUpLabel, SWT.PUSH);
-		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		((GridData)btnMoveUp.getLayoutData()).widthHint = 100;
-		btnMoveUp.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				EntityType et = parentEditor.getEntityType();
-				ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
-				entities.addAll(et.getAttributes());
+			final Button btnMoveUp = toolkit.createButton(buttonComp, Messages.EntityTypeConfigurationPage_MoveUpLabel, SWT.PUSH);
+			btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnMoveUp.getLayoutData()).widthHint = 100;
+			btnMoveUp.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					EntityType et = parentEditor.getEntityType();
+					ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
+					entities.addAll(et.getAttributes());
 				
-				for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
-					Object type = (Object) iterator.next();
-					int i = entities.indexOf(type);
-					entities.remove(i);
-					i--;
-					if (i <=0){
-						i = 0;
-					}
-					entities.add(i, (EntityAttribute)type);
-					
-				}
-				boolean isChanged = false;
-				for (int i = 0; i < entities.size();i++){
-					if (entities.get(i).getOrder() != i+1){
-						isChanged = true;
-					}
-					entities.get(i).setOrder(i+1);
-				}
-				if (isChanged){
-					parentEditor.saveEntityType();
-				}
-			}
-		});
-		btnMoveUp.setEnabled(false);
-		
-		final Button btnMoveDown = toolkit.createButton(buttonComp, Messages.EntityTypeConfigurationPage_MoveDownLabel, SWT.PUSH);
-		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		((GridData)btnMoveDown.getLayoutData()).widthHint = 100;
-		btnMoveDown.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				EntityType et = parentEditor.getEntityType();
-				
-				ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
-				entities.addAll(et.getAttributes());
-				
-				List<?> items = ((StructuredSelection)attributeTable.getSelection()).toList();
-				for (int k = items.size() -1; k >=0; k --){
-					Object type = (Object) items.get(k);
-					int i = entities.indexOf(type);
-					entities.remove(i);
-					i++;
-					if (i >= entities.size()){
-						entities.add((EntityAttribute)type);
-					}else{
+					for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
+						Object type = (Object) iterator.next();
+						int i = entities.indexOf(type);
+						entities.remove(i);
+						i--;
+						if (i <=0){
+							i = 0;
+						}
 						entities.add(i, (EntityAttribute)type);
 					}
-					
-				}
-				boolean isChanged = false;
-				for (int i = 0; i < entities.size();i++){
-					if (entities.get(i).getOrder() != i+1){
-						isChanged = true;
+					boolean isChanged = false;
+					for (int i = 0; i < entities.size();i++){
+						if (entities.get(i).getOrder() != i+1){
+							isChanged = true;
+						}
+						entities.get(i).setOrder(i+1);
 					}
-					entities.get(i).setOrder(i+1);
+					if (isChanged){
+						parentEditor.saveEntityType();
+					}
 				}
-				if (isChanged){
-					parentEditor.saveEntityType();
-				}
-			}
-		});
-		btnMoveDown.setEnabled(false);
-		
-		Composite buttonTableComp = toolkit.createComposite(targetContent);
-		buttonTableComp.setLayout(new GridLayout(3, false));
-		buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
-		
-		Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		((GridData)btnAdd.getLayoutData()).widthHint = 100;
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addAttribute();
-			}
-		});
-		
-		final Button btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		((GridData)btnEdit.getLayoutData()).widthHint = 100;
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				editAttribute();
-			}
-		});
-		btnEdit.setEnabled(false);
-		
-		final Button btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		((GridData)btnDelete.getLayoutData()).widthHint = 100;
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteAttribute();
-			}
-		});
-		btnDelete.setEnabled(false);
-		
-		attributeTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			});
+			btnMoveUp.setEnabled(false);
 			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				btnMoveDown.setEnabled(!attributeTable.getSelection().isEmpty());
-				btnMoveUp.setEnabled(!attributeTable.getSelection().isEmpty());
-				btnEdit.setEnabled(!attributeTable.getSelection().isEmpty());
-				btnDelete.setEnabled(!attributeTable.getSelection().isEmpty());
-			}
-		});
+			final Button btnMoveDown = toolkit.createButton(buttonComp, Messages.EntityTypeConfigurationPage_MoveDownLabel, SWT.PUSH);
+			btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnMoveDown.getLayoutData()).widthHint = 100;
+			btnMoveDown.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					EntityType et = parentEditor.getEntityType();
+					
+					ArrayList<EntityAttribute> entities = new ArrayList<EntityAttribute>();
+					entities.addAll(et.getAttributes());
+					
+					List<?> items = ((StructuredSelection)attributeTable.getSelection()).toList();
+					for (int k = items.size() -1; k >=0; k --){
+						Object type = (Object) items.get(k);
+						int i = entities.indexOf(type);
+						entities.remove(i);
+						i++;
+						if (i >= entities.size()){
+							entities.add((EntityAttribute)type);
+						}else{
+							entities.add(i, (EntityAttribute)type);
+						}	
+					}
+					boolean isChanged = false;
+					for (int i = 0; i < entities.size();i++){
+						if (entities.get(i).getOrder() != i+1){
+							isChanged = true;
+						}
+						entities.get(i).setOrder(i+1);
+					}
+					if (isChanged){
+						parentEditor.saveEntityType();
+					}
+				}
+			});
+			btnMoveDown.setEnabled(false);
 		
+			Composite buttonTableComp = toolkit.createComposite(targetContent);
+			buttonTableComp.setLayout(new GridLayout(3, false));
+			buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
+		
+			Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnAdd.getLayoutData()).widthHint = 100;
+			btnAdd.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					addAttribute();
+				}
+			});
+		
+			final Button btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
+			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnEdit.getLayoutData()).widthHint = 100;
+			btnEdit.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					editAttribute();
+				}
+			});
+			btnEdit.setEnabled(false);
+			
+			final Button btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
+			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnDelete.getLayoutData()).widthHint = 100;
+			btnDelete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteAttribute();
+				}
+			});
+			btnDelete.setEnabled(false);
+			
+			attributeTable.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					btnMoveDown.setEnabled(!attributeTable.getSelection().isEmpty());
+					btnMoveUp.setEnabled(!attributeTable.getSelection().isEmpty());
+					btnEdit.setEnabled(!attributeTable.getSelection().isEmpty());
+					btnDelete.setEnabled(!attributeTable.getSelection().isEmpty());
+				}
+			});
+		}
 		scroll.setMinSize(targetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 	
@@ -588,6 +593,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 * the entity type name.
 	 */
 	private void translateName() {
+		if (!EntityPermissionManager.canCreateEditDeleteTypes()) return;
 		final EntityType toEdit = EntityTypeConfigurationPage.this.parentEditor.getEntityType();
 		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
 				getEditorSite().getShell(), toEdit);
@@ -614,6 +620,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 * Adds a new attribute to the entity type.
 	 */
 	private void addAttribute(){
+		if (!EntityPermissionManager.canCreateEditDeleteTypes()) return;
 		final List<Attribute> dmAttributes = new ArrayList<Attribute>();
 		final ArrayList<Attribute> attributeToAdd = new ArrayList<Attribute>();
 		
@@ -728,6 +735,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 * Deletes attributes from the entity type
 	 */
 	private void deleteAttribute(){
+		if (!EntityPermissionManager.canCreateEditDeleteTypes()) return;
 		final List<EntityAttribute> toDelete = new ArrayList<EntityAttribute>();
 		
 		for (Iterator<?> iterator = ((StructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
@@ -838,6 +846,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 * Edits a attribute
 	 */
 	private void editAttribute(){
+		if (!EntityPermissionManager.canCreateEditDeleteTypes()) return;
 		boolean fire = false;
 		Object type = ((StructuredSelection)attributeTable.getSelection()).getFirstElement();
 		if (type instanceof EntityAttribute){
@@ -907,12 +916,14 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent){
-		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
-		if (!this.parentEditor.canEdit()) {
-			editLink.setEnabled(false);
-			editLink.setVisible(false);
+		if (EntityPermissionManager.canCreateEditDeleteTypes()){
+			Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
+			return editLink;
+		}else{
+			//create empty label
+			toolkit.createLabel(parent, ""); //$NON-NLS-1$
+			return null;
 		}
-		return editLink;
 	}
 
 

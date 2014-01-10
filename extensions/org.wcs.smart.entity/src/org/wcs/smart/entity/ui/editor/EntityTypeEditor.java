@@ -41,6 +41,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.entity.EntityPermissionManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
@@ -64,7 +65,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	public static final String ID = "org.wcs.smart.entity.editor.entitytype"; //$NON-NLS-1$
 	
 	private EntityTypeConfigurationPage configPage;
-	private EntityTypeEntitiesPage entityPage;
+	private EntitiesPage entityPage;
 	private SightingMapPage sightingsMapPage;
 	private SightingPage sightingsPage;
 	
@@ -153,6 +154,9 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	 * @return
 	 */
 	public EntitySightingQuery getCurrentQuery(){
+		if (sightingsPage == null){
+			return null;
+		}
 		return sightingsPage.getCurrentQuery();
 	}
 	
@@ -160,20 +164,11 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	public SightingMapPage getMapPage(){
 		return this.sightingsMapPage;
 	}
-	
-	/**
-	 * 
-	 * @return <code>true</code> if current user
-	 * can modify the entity type
-	 */
-	public boolean canEdit(){
-		return true;
-	}
 
 	@Override
 	protected void createPages() {
 		try{
-			entityPage = new EntityTypeEntitiesPage(this);
+			entityPage = new EntitiesPage(this);
 			int index = addPage(entityPage, getEditorInput());
 			super.setPageText(index, Messages.EntityTypeEditor_EntitiesPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));
@@ -184,11 +179,12 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			super.setPageText(index, Messages.EntityTypeEditor_ConfigurationPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.CONFIGURATION_ICON));
 			
-			
-			sightingsPage = new SightingPage(this);
-			index = addPage(sightingsPage, getEditorInput());
-			super.setPageText(index, Messages.EntityTypeEditor_SightingsPageName);
-			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.SIGHTINGS_ICON));
+			if (EntityPermissionManager.canViewSightings()){
+				sightingsPage = new SightingPage(this);
+				index = addPage(sightingsPage, getEditorInput());
+				super.setPageText(index, Messages.EntityTypeEditor_SightingsPageName);
+				super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.SIGHTINGS_ICON));
+			}
 			
 			sightingsMapPage = new SightingMapPage(this);
 			index = addPage(sightingsMapPage, getEditorInput());
@@ -203,9 +199,10 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		EntityEventManager.getInstance().addListener(listener);
 	}
 	
+	
 	private void initEditor(IEntityTypeEditorPage[] partsToUpdate, boolean typeChanged){
 		getEntityType();
-		
+	
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{

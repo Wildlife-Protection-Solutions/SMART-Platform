@@ -243,7 +243,9 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 					@Override
 					public void run() {
 						sightingTable.setInput(results);
-						parentEditor.getMapPage().updatePage(null, false);
+						if (parentEditor.getMapPage() != null){
+							parentEditor.getMapPage().updatePage(null, false);
+						}
 					}});
 				
 			}catch (Exception ex){
