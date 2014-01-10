@@ -91,26 +91,10 @@
       <menuContribution
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.ui.internal.ShowDefaultPerspective">
-         <command
-               commandId="org.eclipse.ui.perspectives.showPerspective"
-               icon="images/icons/view16/fielddata.png"
-               id="org.wcs.smart.fielddata.perspective"
-               label="%showfielddataperspective.command.label"
-               mnemonic="%showfielddataperspectivecommand.mnemonic"
-               style="pulldown"
-               tooltip="%showfielddataperspectivecommand.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </visibleWhen>
-            <parameter
-                  name="org.eclipse.ui.perspectives.showPerspective.perspectiveId"
-                  value="org.wcs.smart.observation.FieldDataPerspective">
-            </parameter>
-         </command>
+         <separator
+               name="org.wcs.smart.perspective.fielddata"
+               visible="false">
+         </separator>
       </menuContribution>
    </extension>
    <extension

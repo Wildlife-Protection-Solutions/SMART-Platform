@@ -322,7 +322,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.fielddata.perspective">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.patrol.PatrolPerspective"
                icon="images/icons/etool16/patrol.png"
