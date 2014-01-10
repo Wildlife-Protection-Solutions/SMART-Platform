@@ -110,10 +110,24 @@ public class FixedEntityService extends IService {
 	
 	public void refresh(EntityType entityType, IProgressMonitor monitor) throws IOException{
 		getDataStore(monitor).refresh(entityType);
-		for (IGeoResource member : resources(monitor)){
+		for (final IGeoResource member : resources(monitor)){
 			if (Arrays.equals(((FixedEntityGeoResource)member).getEntityTypeUuid(), entityType.getUuid())){
 				//update the bounds
-				((FixedEntityGeoResourceInfo)member.getInfo(monitor)).computeBounds((FixedEntityGeoResource)member, monitor);
+				Job j = new Job("recompute layer bounds") {
+					
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							((FixedEntityGeoResourceInfo)member.getInfo(monitor)).computeBounds((FixedEntityGeoResource)member, monitor);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						return org.eclipse.core.runtime.Status.OK_STATUS;
+					}
+				};
+				j.setSystem(true);
+				j.schedule();
 			}
 			
 		}		

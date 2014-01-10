@@ -48,7 +48,7 @@ import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -152,7 +152,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	 * The last query from the sightings page 
 	 * @return
 	 */
-	public EntityQuery getCurrentQuery(){
+	public EntitySightingQuery getCurrentQuery(){
 		return sightingsPage.getCurrentQuery();
 	}
 	

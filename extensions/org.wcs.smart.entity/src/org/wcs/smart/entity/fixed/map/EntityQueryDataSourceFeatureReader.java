@@ -31,7 +31,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -51,7 +51,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 
 	private SimpleFeatureType ftype;
 	private Iterator<SightingResultItem> fIterator;
-	private EntityQuery  query;
+	private EntitySightingQuery  query;
 	
 	/**
 	 * Creates a new feature reader.
@@ -59,7 +59,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public EntityQueryDataSourceFeatureReader(EntityQuery query,
+	public EntityQueryDataSourceFeatureReader(EntitySightingQuery query,
 			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;
