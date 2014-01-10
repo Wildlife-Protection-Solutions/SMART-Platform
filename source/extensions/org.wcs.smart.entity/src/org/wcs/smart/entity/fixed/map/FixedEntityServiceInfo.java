@@ -25,6 +25,7 @@ import net.refractions.udig.catalog.IServiceInfo;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * Fixed Entity Service info.
@@ -34,10 +35,10 @@ import org.wcs.smart.SmartPlugIn;
 public class FixedEntityServiceInfo extends IServiceInfo{
 
 	public FixedEntityServiceInfo(FixedEntityService service){
-		this.description = "A service to provide access to locations of entities for fixed entity types";
+		this.description = Messages.FixedEntityServiceInfo_Description;
 		this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{"Entity", "Entity Type", "Fixed"};
-		this.title = "Entity Types (Fixed Only)";
+		this.keywords = new String[]{Messages.FixedEntityServiceInfo_Keyword1, Messages.FixedEntityServiceInfo_Keyword2, Messages.FixedEntityServiceInfo_Keyword3};
+		this.title = Messages.FixedEntityServiceInfo_Name;
 	}
 	
 }

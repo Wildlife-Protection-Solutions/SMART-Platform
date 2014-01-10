@@ -29,7 +29,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
@@ -230,7 +229,7 @@ public class EntityInfoPanelComposite extends Composite{
 		
 		if (etype.getAttributes() != null){
 			for (EntityAttribute ea : etype.getAttributes()){
-				Label l = toolkit.createLabel(comp, ea.getName() + ":"); //$NON-NLS-1$
+				toolkit.createLabel(comp, ea.getName() + ":"); //$NON-NLS-1$
 				
 				Text txt = toolkit.createText(comp, ""); //$NON-NLS-1$
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

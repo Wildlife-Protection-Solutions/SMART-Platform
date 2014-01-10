@@ -187,12 +187,12 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			
 			sightingsPage = new SightingPage(this);
 			index = addPage(sightingsPage, getEditorInput());
-			super.setPageText(index, "Sightings");
+			super.setPageText(index, Messages.EntityTypeEditor_SightingsPageName);
 			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.SIGHTINGS_ICON));
 			
 			sightingsMapPage = new SightingMapPage(this);
 			index = addPage(sightingsMapPage, getEditorInput());
-			super.setPageText(index, "Map");
+			super.setPageText(index, Messages.EntityTypeEditor_MapPageName);
 			super.setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 					
 		}catch (Exception ex){

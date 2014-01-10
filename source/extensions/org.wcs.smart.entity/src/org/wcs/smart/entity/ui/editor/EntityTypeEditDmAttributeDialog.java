@@ -112,17 +112,17 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		pre = new Composite(parent, SWT.NONE);
 		pre.setLayout(new GridLayout(2, false));
 		l = new Label(pre, SWT.NONE);
-		l.setText("Data Model Attribute:");
+		l.setText(Messages.EntityTypeEditDmAttributeDialog_DmAttributeLabel);
 		
 		Link lnk = new Link(pre, SWT.NONE);
-		lnk.setText("<a>" + ((EntityAttribute)item).getDmAttribute().getName() + "</a>");
+		lnk.setText("<a>" + ((EntityAttribute)item).getDmAttribute().getName() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lnk.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (!MessageDialog.openConfirm(getShell(), 
-						"Edit Attribute", 
-						MessageFormat.format("Editting the attribute ''{0}'' modifies all occurrances of this attribute in the data model.  Are you sure you want to continue?", new Object[]{((EntityAttribute)item).getDmAttribute().getName()}))){
+						Messages.EntityTypeEditDmAttributeDialog_EditDialotTitle, 
+						MessageFormat.format(Messages.EntityTypeEditDmAttributeDialog_EditConfirmMessage, new Object[]{((EntityAttribute)item).getDmAttribute().getName()}))){
 					return;
 				}
 				//edit data model attribute dialog
@@ -130,7 +130,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 				try{
 					openSession.saveOrUpdate(((EntityAttribute)item).getDmAttribute());
 					
-					List<Attribute> atts = openSession.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+					List<Attribute> atts = openSession.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 					
 					AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
 							((EntityAttribute)item).getDmAttribute(),
@@ -145,7 +145,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 					}
 					
 				}catch(Exception ex){
-					EntityPlugIn.displayLog("Error modifying attribute. Please close and reopen entity attribute dialog." + "\n\n" + ex.getMessage(), ex);
+					EntityPlugIn.displayLog(Messages.EntityTypeEditDmAttributeDialog_EditError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					openSession.getTransaction().rollback();
 				}
 					

@@ -47,10 +47,10 @@ import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * A service for fixed entity types.  A single service provides all entity
@@ -113,7 +113,7 @@ public class FixedEntityService extends IService {
 		for (final IGeoResource member : resources(monitor)){
 			if (Arrays.equals(((FixedEntityGeoResource)member).getEntityTypeUuid(), entityType.getUuid())){
 				//update the bounds
-				Job j = new Job("recompute layer bounds") {
+				Job j = new Job("recompute layer bounds") { //$NON-NLS-1$
 					
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
@@ -174,7 +174,7 @@ public class FixedEntityService extends IService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<FixedEntityGeoResource>();
-					Job j = new Job("Loading entity types") {
+					Job j = new Job(Messages.FixedEntityService_LoadingJobName) {
 						
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
@@ -199,7 +199,7 @@ public class FixedEntityService extends IService {
 					try {
 						j.join();
 					} catch (InterruptedException e) {
-						EntityPlugIn.log("Error loading fixed entity types.", e);
+						EntityPlugIn.log("Error loading fixed entity types.", e); //$NON-NLS-1$
 					}
 				}
 			}

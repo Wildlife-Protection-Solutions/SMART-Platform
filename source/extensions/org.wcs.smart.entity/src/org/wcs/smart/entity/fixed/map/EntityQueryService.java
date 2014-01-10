@@ -43,6 +43,7 @@ import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.query.EntitySightingQuery;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * Service for entity sightings query.
@@ -153,8 +154,8 @@ public class EntityQueryService extends IService {
 	protected IServiceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
 		if (info == null){
-			info = new IServiceInfo("Entity Query", "A service to provide access to the result of an entity sightings query", 
-				null, null, null, null,new String[]{"Entity", "Sightings"}, null);
+			info = new IServiceInfo(Messages.EntityQueryService_ServiceName, Messages.EntityQueryService_ServiceDescription, 
+				null, null, null, null,new String[]{Messages.EntityQueryService_Keyword1, Messages.EntityQueryService_Keyword2}, null);
 		}
 		return info;
 	}

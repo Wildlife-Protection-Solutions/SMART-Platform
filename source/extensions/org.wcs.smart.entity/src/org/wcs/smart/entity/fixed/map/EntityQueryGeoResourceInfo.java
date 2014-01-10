@@ -33,8 +33,8 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -48,7 +48,7 @@ public class EntityQueryGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public EntityQueryGeoResourceInfo( EntityQueryGeoResource resource, IProgressMonitor monitor){
-		this.title = "Sightings Query Results";
+		this.title = Messages.EntityQueryGeoResourceInfo_SightingQueryTitle;
 		computeBounds(resource, monitor);
 	}
 	
@@ -71,7 +71,7 @@ public class EntityQueryGeoResourceInfo extends IGeoResourceInfo {
 			}, null);
 			this.bounds = env;
 		} catch (IOException e) {
-			EntityPlugIn.log("Error computing bounds for entity sightings query.", e);
+			EntityPlugIn.log("Error computing bounds for entity sightings query.", e); //$NON-NLS-1$
 		}
 	}
 	

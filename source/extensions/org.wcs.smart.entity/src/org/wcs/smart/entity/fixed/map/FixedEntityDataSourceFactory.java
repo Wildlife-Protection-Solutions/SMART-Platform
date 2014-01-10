@@ -31,6 +31,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -41,7 +42,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param CAUUID = new Param("cauuid", byte[].class, "Conservation Area", true);  //$NON-NLS-1$
+	public static final Param CAUUID = new Param("cauuid", byte[].class, Messages.FixedEntityDataSourceFactory_ParameterName, true);  //$NON-NLS-1$
   
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -59,7 +60,7 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "Smart Fixed Entity Types";
+		return Messages.FixedEntityDataSourceFactory_DataSourceDescription;
 	}
 
 	/* (non-Javadoc)
@@ -67,7 +68,7 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Fixed Entity Types";
+		return Messages.FixedEntityDataSourceFactory_DataSourceName;
 	}
 
 	/* (non-Javadoc)
@@ -110,7 +111,7 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 			session.close();
 		}
 		if (ca == null ){
-			throw new IOException("Conservation Area Not Found");
+			throw new IOException(Messages.FixedEntityDataSourceFactory_CaNotFoundError);
 		}
 		return new FixedEntityDataSource(ca);
 	}
@@ -121,7 +122,7 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("Entity Type is a read-only data store.");
+		throw new UnsupportedOperationException(Messages.FixedEntityDataSourceFactory_ReadOnlyError);
 	}
 
 }

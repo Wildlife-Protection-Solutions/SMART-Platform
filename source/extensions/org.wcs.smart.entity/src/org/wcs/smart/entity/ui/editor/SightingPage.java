@@ -43,6 +43,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.ui.editor.sightings.EntityFilterComposite;
@@ -117,28 +118,28 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		glayout.verticalSpacing = 0;
 		glayout.marginHeight = 0;
 		form.getBody().setLayout(glayout);
-		form.setText("Sightings");
+		form.setText(Messages.SightingPage_SightingsLabel);
 		
 		Group g = new Group(form.getBody(), SWT.NONE);
 		toolkit.adapt(g);
-		g.setText("Filters");
+		g.setText(Messages.SightingPage_FiltersLabel);
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		g.setLayout(new GridLayout(2, false));
 		
-		Label l1 = toolkit.createLabel(g, "Date Filter:");
+		toolkit.createLabel(g, Messages.SightingPage_DateFilterLabel);
 		
 		dateComp = new QueryDateFilterComposite(g, null, SightingQueryColumn.SIGHTING_DATE_FILTERS);
 		dateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		dateComp.adapt(toolkit);
 		
-		Label l2 = toolkit.createLabel(g, "Entity Filter:");
+		toolkit.createLabel(g, Messages.SightingPage_EntityFilterLabel);
 		
 		entityFilter = new EntityFilterComposite(g);
 		entityFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		entityFilter.adapt(toolkit);
 		
 		
-		Button btnRefresh = toolkit.createButton(g, "Reload Table", SWT.PUSH);
+		Button btnRefresh = toolkit.createButton(g, Messages.SightingPage_ReloadButtonLabel, SWT.PUSH);
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -147,7 +148,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 
 		});
 		
-		lblQueryProgress = toolkit.createLabel(g, "");
+		lblQueryProgress = toolkit.createLabel(g, ""); //$NON-NLS-1$
 		lblQueryProgress.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite compSighting = toolkit.createComposite(form.getBody());
@@ -190,7 +191,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	}
 
 	
-	private Job runJob = new Job("Execute Sightings Page"){
+	private Job runJob = new Job(Messages.SightingPage_ExecuteJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -203,7 +204,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 			
 			
 			IProgressMonitor lblProgressMonitor = new ProgressMonitorWrapper(monitor) {
-				private String tName = "";
+				private String tName = ""; //$NON-NLS-1$
 				public void beginTask(String name, int totalWork) {
 					super.beginTask(name, totalWork);
 					tName = name;
@@ -218,12 +219,12 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 
 				public void subTask(String name) {
 					super.subTask(name);
-					updateLabel(tName + " (" + name + ")");
+					updateLabel(tName + " (" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				public void done(){
 					super.done();
-					updateLabel("");
+					updateLabel(""); //$NON-NLS-1$
 				}
 				private void updateLabel(final String text){
 					Display.getDefault().asyncExec(new Runnable(){

@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.entity.query;
 
-import groovy.xml.Entity;
-
 import java.util.Date;
 import java.util.HashMap;
 

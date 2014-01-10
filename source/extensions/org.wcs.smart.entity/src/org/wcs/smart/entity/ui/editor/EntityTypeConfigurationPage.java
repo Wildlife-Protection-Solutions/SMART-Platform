@@ -852,7 +852,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						s.saveOrUpdate(type);
 						s.getTransaction().commit();
 					}catch (Exception ex){
-						EntityPlugIn.displayLog("Error editing the entity type attribute.  Please close and re-open the editor." + "\n\n" + ex.getMessage(), ex);
+						EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_EditErrorDescription + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						s.getTransaction().rollback();
 						return;
 					}
