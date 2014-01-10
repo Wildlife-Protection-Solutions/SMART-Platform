@@ -120,9 +120,9 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
 		if (thisType.equals(PatrolDataSource.WAYPOINT_TYPE)){
-			return getWaypointAsFeature((PatrolWaypoint)this.fIterator.next());
+			return new PatrolFeature(getWaypointAsFeature((PatrolWaypoint)this.fIterator.next()));
 		}else if (thisType.equals(PatrolDataSource.TRACK_TYPE)){
-			return getTrackAsFeature((Track)this.fIterator.next());
+			return new PatrolFeature(getTrackAsFeature((Track)this.fIterator.next()));
 		}
 		return null;
 	}
@@ -131,7 +131,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private SimpleFeature getWaypointAsFeature(PatrolWaypoint waypoint){
 		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
 		Object data[] = new Object[7];
-		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[0] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + SmartUtils.encodeHex(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[1] = waypoint.getWaypoint().getId();
 		data[2] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
 		data[3] = waypoint.getWaypoint().getDateTime();

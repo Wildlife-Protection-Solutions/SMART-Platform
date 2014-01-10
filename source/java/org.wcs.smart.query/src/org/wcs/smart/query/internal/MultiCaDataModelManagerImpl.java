@@ -65,11 +65,13 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 
 	private DataModel dm = null;
 
+	private Integer dmDepth = null;
 	
 	/**
 	 * Clears the current data model
 	 */
 	public void clearDataModel(){
+		dmDepth = null;
 		dm = null;
 	}
 	
@@ -508,11 +510,40 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		return attributes;
 	}
 	
+	
+	@Override
+	public int getActiveDepth(){
+		if (dmDepth != null){
+			return dmDepth;
+		}
+		int numCategory = 0;
+		for (Category cat : getDataModel().getActiveCategories()) {
+			numCategory = Math.max(numCategory, getDepth(cat));
+		}
+		dmDepth = numCategory;
+		return dmDepth;
+	}
+	
+	/**
+	 * Compute the maximum category depth.
+	 * 
+	 * @param cat category
+	 * @return maximum depth
+	 */
+	private int getDepth(Category cat) {
+		int maxDepth = 0;
+		for (Category child : cat.getActiveChildren()) {
+			maxDepth = Math.max(maxDepth, getDepth(child));
+		}
+		return maxDepth + 1;
+	}
+	
 	private IRunnableWithProgress loadAndMergeDataModelJob = new IRunnableWithProgress() {
 		
 		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException,
 				InterruptedException {
+			dmDepth = null;
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{

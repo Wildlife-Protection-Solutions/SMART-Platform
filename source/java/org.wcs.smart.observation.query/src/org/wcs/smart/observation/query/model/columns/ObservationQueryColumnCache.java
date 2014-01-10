@@ -11,7 +11,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -101,12 +100,9 @@ public class ObservationQueryColumnCache {
 				}
 
 				DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+				
 				// add data model category columns
-				int numCategory = 0;
-				for (Category cat : dataModel.getActiveCategories()) {
-					numCategory = Math.max(numCategory, getDepth(cat));
-				}
-
+				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
 					cols.add(new ObservationCategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
 				}
@@ -222,20 +218,5 @@ public class ObservationQueryColumnCache {
 			copies[i] = cols[i].clone();
 		}
 		return copies;
-	}
-	
-	/**
-	 * Compute the maximum category depth.
-	 * 
-	 * @param cat category
-	 * @return maximum depth
-	 */
-	private int getDepth(Category cat) {
-		int maxDepth = 0;
-		for (Category child : cat.getActiveChildren()) {
-			maxDepth = Math.max(maxDepth, getDepth(child));
-		}
-		return maxDepth + 1;
-	}
-	
+	}	
 }
