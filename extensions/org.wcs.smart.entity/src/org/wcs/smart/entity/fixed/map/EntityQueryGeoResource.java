@@ -43,6 +43,7 @@ import org.geotools.styling.Style;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * Entity sightings query geo resource.
@@ -60,7 +61,7 @@ public class EntityQueryGeoResource  extends IGeoResource {
 		
 		URL serviceIdentifer = service.getIdentifier();
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + "sightings", CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + "sightings", CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$ //$NON-NLS-2$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
@@ -215,7 +216,7 @@ public class EntityQueryGeoResource  extends IGeoResource {
 			Style style = (Style)c.load(memento);
 			return style;
 		} catch (Exception ex) {
-			EntityPlugIn.displayLog("Error generating layer style.", ex);
+			EntityPlugIn.displayLog(Messages.EntityQueryGeoResource_StyleError, ex);
 			return null;
 		}
     }

@@ -26,13 +26,13 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.util.SmartUtils;
-
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
+
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Udig service extension for Fixed Entity Type layers

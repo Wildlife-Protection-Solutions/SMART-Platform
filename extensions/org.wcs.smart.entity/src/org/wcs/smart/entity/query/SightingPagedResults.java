@@ -25,8 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
@@ -51,8 +50,6 @@ import com.vividsolutions.jts.geom.Envelope;
  *
  */
 public class SightingPagedResults implements IObservationPagedQueryResultSet {
-
-	private Object TABLELOCK = new Object();
 	
 	private String queryTempTable;
 
@@ -405,7 +402,7 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 //	}
 
 	private String buildSortSql() {
-		return "";
+		return ""; //$NON-NLS-1$
 //		if (sortColumn == null || direction == SWT.NONE)
 //			return ""; //$NON-NLS-1$
 //
@@ -651,7 +648,7 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	private class CleanUpJob extends Job {
 
 		public CleanUpJob() {
-			super("Clean Up Query Tables");
+			super(Messages.SightingPagedResults_CleanUpJobName);
 		}
 
 		@Override

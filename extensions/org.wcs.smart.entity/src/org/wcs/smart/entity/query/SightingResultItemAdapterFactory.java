@@ -57,7 +57,7 @@ public class SightingResultItemAdapterFactory implements IAdapterFactory {
 						wp.setUuid(wpuuid);
 						return wp;	
 					} catch (Exception e) {
-						EntityPlugIn.log("Cannot adapt entity sighting feature to waypoint.", e);
+						EntityPlugIn.log("Cannot adapt entity sighting feature to waypoint.", e); //$NON-NLS-1$
 					}
 					
 					

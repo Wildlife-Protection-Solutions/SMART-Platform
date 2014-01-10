@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.editor.sightings;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn.FixedColumns;
@@ -146,7 +148,7 @@ public class SightingTable {
 		//entity attributes
 		for (EntityAttribute ea : type.getAttributes()){
 			String name = ea.getName();
-			String key = "entity:" + SmartUtils.encodeHex(ea.getUuid());
+			String key = "entity:" + SmartUtils.encodeHex(ea.getUuid()); //$NON-NLS-1$
 			ColumnType cType = ColumnType.STRING;
 			if (ea.getDmAttribute().getType() == AttributeType.LIST ||
 					ea.getDmAttribute().getType() == AttributeType.TREE ||
@@ -160,16 +162,15 @@ public class SightingTable {
 				cType = ColumnType.NUMBER;
 			}
 			
-			QueryColumn column = new SightingQueryColumn(name + " (" + ea.getEntityType().getName() + ")", key, cType);
+			QueryColumn column = new SightingQueryColumn(name + " (" + ea.getEntityType().getName() + ")", key, cType); //$NON-NLS-1$ //$NON-NLS-2$
 			cols.add(column);
 		}
 	
 		//data model category
 		int catCount = QueryDataModelManager.getInstance().getActiveDepth();
 		for(int i = 0; i < catCount; i++){
-			cols.add(new SightingQueryColumn("Observation Category " + i, "cat:" + i, ColumnType.STRING));
+			cols.add(new SightingQueryColumn(MessageFormat.format(Messages.SightingTable_ObservationCategoryLabel, new Object[]{i}), "cat:" + i, ColumnType.STRING)); //$NON-NLS-1$
 		}
-		//cols.add(new SightingQueryColumn("Observation Summary", "entity:obssum", ColumnType.STRING));
 		
 		return cols;
 	}

@@ -36,6 +36,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -107,17 +108,17 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask("Processing Query", 3);
+				monitor.beginTask(Messages.DerbyEntitySightingEngine_ProgressTaskName, 3);
 
-				monitor.subTask("Creating Temporary Table");
+				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress1);
 				createResultsTable(c);
 				monitor.worked(1);
 
-				monitor.subTask("Populating Data Table");
+				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress2);
 				populateDataTable(c);
 				monitor.worked(1);
 				
-				monitor.subTask("Adding Category Labels");
+				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress3);
 				addCategoryLabels(c, session);
 				monitor.worked(1);
 				
@@ -164,8 +165,8 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 
 	protected void populateDataTable(Connection c) throws SQLException {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" INSERT INTO " + queryDataTable + " ");
-		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_category_uuid,entity_uuid,entity_id,entity_status) ");
+		sql.append(" INSERT INTO " + queryDataTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_category_uuid,entity_uuid,entity_id,entity_status) "); //$NON-NLS-1$
 		sql.append(" SELECT "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -186,59 +187,59 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Entity.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Entity.class) + ".status "); //$NON-NLS-1$
 		
-		sql.append(" FROM ");
+		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(Waypoint.class));
-		sql.append(" join ");
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(ConservationArea.class));
-		sql.append(" on " + tablePrefix(Waypoint.class) + ".ca_uuid = " + tablePrefix(ConservationArea.class) + ".uuid");
-		sql.append(" join ");
+		sql.append(" on " + tablePrefix(Waypoint.class) + ".ca_uuid = " + tablePrefix(ConservationArea.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservation.class));
-		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_uuid");
-		sql.append(" join ");
+		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservationAttribute.class));
-		sql.append(" on " + tablePrefix(WaypointObservation.class) + ".uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".observation_uuid");
-		sql.append(" join ");
+		sql.append(" on " + tablePrefix(WaypointObservation.class) + ".uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(Entity.class));
-		sql.append(" on " + tablePrefix(Entity.class) + ".attribute_list_item_uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".list_element_uuid");
-		sql.append(" join ");
+		sql.append(" on " + tablePrefix(Entity.class) + ".attribute_list_item_uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(EntityType.class));
-		sql.append(" on " + tablePrefix(EntityType.class) + ".uuid = " + tablePrefix(Entity.class) + ".entity_type_uuid");
+		sql.append(" on " + tablePrefix(EntityType.class) + ".uuid = " + tablePrefix(Entity.class) + ".entity_type_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		sql.append(" WHERE ");
+		sql.append(" WHERE "); //$NON-NLS-1$
 		
 		DerbyFilterToSqlGenerator sqlGenerator = new DerbyFilterToSqlGenerator();
 		
 		//entity type
-		sql.append(tablePrefix(EntityType.class) + ".uuid = x'" + SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'");
+		sql.append(tablePrefix(EntityType.class) + ".uuid = x'" + SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//ca filter
-		sql.append(" AND ");
+		sql.append(" AND "); //$NON-NLS-1$
 		sql.append(sqlGenerator.asSql(query.getConservationAreaFilter(), tablePrefix(Waypoint.class)));
 
 		//date filter
 		String dFilter = sqlGenerator.toSql(localDateFilter, this);
 		if (dFilter != null && dFilter.length() > 0){
-			sql.append(" AND ");
+			sql.append(" AND "); //$NON-NLS-1$
 			sql.append(dFilter);
 		}
 		
 		//entity filter		
 		if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
-			sql.append(" AND ");
-			sql.append(tablePrefix(Entity.class) + ".status = '" + Entity.Status.ACTIVE +"' ");
+			sql.append(" AND "); //$NON-NLS-1$
+			sql.append(tablePrefix(Entity.class) + ".status = '" + Entity.Status.ACTIVE +"' "); //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (query.getEntityFilter().getType() == EntityFilterType.CUSTOM){
 			if(query.getEntityFilter().getEntities().size() > 0){
-				sql.append(" AND ");
-				sql.append(tablePrefix(Entity.class) + ".uuid IN (");
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(tablePrefix(Entity.class) + ".uuid IN ("); //$NON-NLS-1$
 			
 				for (Entity e : query.getEntityFilter().getEntities()){
-					sql.append("x'" + SmartUtils.encodeHex(e.getUuid()) + "',");
+					sql.append("x'" + SmartUtils.encodeHex(e.getUuid()) + "',"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.deleteCharAt(sql.length() - 1);
-				sql.append(")");
+				sql.append(")"); //$NON-NLS-1$
 			}else{
-				sql.append(" AND ");
-				sql.append(tablePrefix(Entity.class) + ".uuid IS NULL ");
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(tablePrefix(Entity.class) + ".uuid IS NULL "); //$NON-NLS-1$
 			}
 		}
 	
@@ -248,9 +249,9 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		//create index on entity_uuid
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + queryDataTable + "_entityuuid_idx ON ");
+		sql.append("CREATE INDEX " + queryDataTable + "_entityuuid_idx ON "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(queryDataTable);
-		sql.append("(entity_uuid)");
+		sql.append("(entity_uuid)"); //$NON-NLS-1$
 		
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
@@ -259,38 +260,38 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		//update entity values
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			sql = new StringBuilder();
-			sql.append("UPDATE " );
+			sql.append("UPDATE " ); //$NON-NLS-1$
 			sql.append(queryDataTable);
-			sql.append(" SET ");
-			sql.append("ea" + SmartUtils.encodeHex(ea.getUuid()));
-			sql.append(" = ");
+			sql.append(" SET "); //$NON-NLS-1$
+			sql.append("ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
+			sql.append(" = "); //$NON-NLS-1$
 			
 			
 			if (ea.getDmAttribute().getType() == AttributeType.TEXT || 
 					ea.getDmAttribute().getType() == AttributeType.DATE){ 
-				sql.append(" ( SELECT string_value FROM ");
+				sql.append(" ( SELECT string_value FROM "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(EntityAttributeValue.class));
-				sql.append(" WHERE ");
+				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_uuid = ");
+				sql.append(".entity_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
-				sql.append(".entity_uuid AND ");
+				sql.append(".entity_uuid AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )");
+				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				QueryPlugIn.logSql(sql.toString());
 				c.createStatement().execute(sql.toString());
 			}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN || 
 					ea.getDmAttribute().getType() == AttributeType.NUMERIC){
-				sql.append(" ( SELECT number_value FROM ");
+				sql.append(" ( SELECT number_value FROM "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(EntityAttributeValue.class));
-				sql.append(" WHERE ");
+				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_uuid = ");
+				sql.append(".entity_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
-				sql.append(".entity_uuid AND ");
+				sql.append(".entity_uuid AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )");
+				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 				QueryPlugIn.logSql(sql.toString());
 				c.createStatement().execute(sql.toString());
@@ -298,59 +299,59 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 					ea.getDmAttribute().getType() == AttributeType.TREE){
 				
 				StringBuilder sql2 = new StringBuilder();
-				sql2.append("SELECT DISTINCT  ");
+				sql2.append("SELECT DISTINCT  "); //$NON-NLS-1$
 				if(ea.getDmAttribute().getType() == AttributeType.LIST){
-					sql2.append("list_element_uuid ");
+					sql2.append("list_element_uuid "); //$NON-NLS-1$
 				}else{
 					//tree
-					sql2.append("tree_node_uuid ");
+					sql2.append("tree_node_uuid "); //$NON-NLS-1$
 				}
-				sql2.append(" FROM ");
+				sql2.append(" FROM "); //$NON-NLS-1$
 				sql2.append(tableNamePrefix(EntityAttributeValue.class));
-				sql2.append(" JOIN ");
+				sql2.append(" JOIN "); //$NON-NLS-1$
 				sql2.append( tableNamePrefix(Entity.class));
-				sql2.append(" ON " +tablePrefix(Entity.class) + ".uuid = " + tablePrefix(EntityAttributeValue.class) + ".entity_uuid");
-				sql2.append(" WHERE ");
+				sql2.append(" ON " +tablePrefix(Entity.class) + ".uuid = " + tablePrefix(EntityAttributeValue.class) + ".entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql2.append(" WHERE "); //$NON-NLS-1$
 				sql2.append( tablePrefix(Entity.class));
-				sql2.append(".entity_type_uuid = x'" + SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'");
-				sql2.append(" AND ");
+				sql2.append(".entity_type_uuid = x'" + SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql2.append(" AND "); //$NON-NLS-1$
 				sql2.append( tablePrefix(EntityAttributeValue.class));
-				sql2.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "'");
+				sql2.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				QueryPlugIn.logSql(sql2.toString());
 				ResultSet rs = c.createStatement().executeQuery(sql2.toString());
 				
-				sql.append(" ( SELECT CASE ");
+				sql.append(" ( SELECT CASE "); //$NON-NLS-1$
 				
 				try{
 					while(rs.next()){
 						byte[] uuid = rs.getBytes(1);
 						String key = Label.getDescription(uuid);
 					
-						sql.append(" when ");
+						sql.append(" when "); //$NON-NLS-1$
 						sql.append(tablePrefix(EntityAttributeValue.class));
 						if(ea.getDmAttribute().getType() == AttributeType.LIST){
-							sql.append(".list_element_uuid ");
+							sql.append(".list_element_uuid "); //$NON-NLS-1$
 						}else{
 							//tree
-							sql.append(".tree_node_uuid ");
+							sql.append(".tree_node_uuid "); //$NON-NLS-1$
 						}
-						sql.append(" = x'" + SmartUtils.encodeHex(uuid) + "' ");
+						sql.append(" = x'" + SmartUtils.encodeHex(uuid) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						sql.append("THEN '" + key + "' " );
+						sql.append("THEN '" + key + "' " ); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					
 				}finally{
 					rs.close();
 				}
-				sql.append(" ELSE NULL END  FROM ");
+				sql.append(" ELSE NULL END  FROM "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(EntityAttributeValue.class));
-				sql.append(" WHERE ");
+				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_uuid = ");
+				sql.append(".entity_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
-				sql.append(".entity_uuid AND ");
+				sql.append(".entity_uuid AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )");
+				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				QueryPlugIn.logSql(sql.toString());
 				c.createStatement().execute(sql.toString());
@@ -381,16 +382,16 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append("entity_status varchar(8)"); //$NON-NLS-1$
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
-			sql.append(", ea" + SmartUtils.encodeHex(ea.getUuid()));
+			sql.append(", ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
 			//+ " varchar(1024)"
 			if (ea.getDmAttribute().getType() == AttributeType.TEXT ||
 					ea.getDmAttribute().getType() == AttributeType.DATE ||
 					ea.getDmAttribute().getType() == AttributeType.LIST ||
 					ea.getDmAttribute().getType() == AttributeType.TREE){
-				sql.append(" varchar(1024)");
+				sql.append(" varchar(1024)"); //$NON-NLS-1$
 			}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN || 
 				ea.getDmAttribute().getType() == AttributeType.NUMERIC){
-					sql.append(" double");
+					sql.append(" double"); //$NON-NLS-1$
 			}
 		}
 		sql.append(")"); //$NON-NLS-1$
@@ -416,16 +417,16 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
-		it.setEntityId(rs.getString("entity_id"));
-		it.setEntityStatus(EntityType.Status.valueOf(rs.getString("entity_status")));
+		it.setEntityId(rs.getString("entity_id")); //$NON-NLS-1$
+		it.setEntityStatus(EntityType.Status.valueOf(rs.getString("entity_status"))); //$NON-NLS-1$
 		// build categories
-		byte[] entityUuid = rs.getBytes("entity_uuid");
+		byte[] entityUuid = rs.getBytes("entity_uuid"); //$NON-NLS-1$
 		it.setEntityUuid(entityUuid);
 		
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
-			Object x = rs.getObject("ea" + SmartUtils.encodeHex(ea.getUuid()));
-			it.setEntityAttribute("entity:" + SmartUtils.encodeHex(ea.getUuid()), x);
+			Object x = rs.getObject("ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
+			it.setEntityAttribute("entity:" + SmartUtils.encodeHex(ea.getUuid()), x); //$NON-NLS-1$
 		}
 		
 		

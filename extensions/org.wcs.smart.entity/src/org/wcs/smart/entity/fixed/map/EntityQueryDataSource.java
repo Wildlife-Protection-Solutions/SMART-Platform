@@ -29,6 +29,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.query.model.QueryColumn;
 /**
@@ -91,7 +92,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 			}
 			return null;
 		}catch (SchemaException ex){
-			throw new IOException("Could not generate feature schema for entity query.", ex);
+			throw new IOException(Messages.EntityQueryDataSource_SchemaError, ex);
 		}	
 	}
 	
@@ -106,7 +107,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		}
 		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 		
-		SimpleFeatureType type =  DataUtilities.createType(TYPENAME, sb.toString()); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(TYPENAME, sb.toString()); 
 		return type;
 	}
 }

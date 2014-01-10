@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.entity.ui.editor.sightings;
 
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -44,19 +45,19 @@ public class SightingQueryColumn extends QueryColumn{
 	 *
 	 */
 	public static enum FixedColumns{
-		ENTITY_ID("Entity Id", ColumnType.STRING, "entity:id"),
-		ENTITY_STATUS("Entity Status", ColumnType.STRING, "entity:status"),
-		CA_ID("Conservation Area Id", ColumnType.STRING,"ca:id"), //$NON-NLS-1$
-		CA_NAME("Conservation Area Name", ColumnType.STRING,"ca:name"), //$NON-NLS-1$
-		WAYPOINT_SOURCE("Waypoint Source", ColumnType.STRING,"wp:source"),  //$NON-NLS-1$
-		WAYPOINT_ID("Waypoint Id", ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
-		WAYPOINT_DATE("Waypoint Date", ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
-		WAYPOINT_TIME("Waypoint Time", ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
-		WAYPOINT_X("Waypoint X", ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
-		WAYPOINT_Y("Waypoint Y", ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
-		WAYPOINT_DIRECTION("Direction", ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
-		WAYPOINT_DISTANCE("Distance", ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
-		WAYPOINT_COMMENT("Comment", ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
+		ENTITY_ID(Messages.SightingQueryColumn_EntityIdColumnName, ColumnType.STRING, "entity:id"), //$NON-NLS-1$
+		ENTITY_STATUS(Messages.SightingQueryColumn_EntityStatusColumnName, ColumnType.STRING, "entity:status"), //$NON-NLS-1$
+		CA_ID(Messages.SightingQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id"), //$NON-NLS-1$
+		CA_NAME(Messages.SightingQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name"), //$NON-NLS-1$
+		WAYPOINT_SOURCE(Messages.SightingQueryColumn_WpSourceColumnName, ColumnType.STRING,"wp:source"),  //$NON-NLS-1$
+		WAYPOINT_ID(Messages.SightingQueryColumn_WaypointIdColumnName, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_DATE(Messages.SightingQueryColumn_WaypointDateColumnName, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
+		WAYPOINT_TIME(Messages.SightingQueryColumn_WaypointTimeColumnName, ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
+		WAYPOINT_X(Messages.SightingQueryColumn_xColumnName, ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
+		WAYPOINT_Y(Messages.SightingQueryColumn_yColumnName, ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
+		WAYPOINT_DIRECTION(Messages.SightingQueryColumn_DirectionColumnName, ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
+		WAYPOINT_DISTANCE(Messages.SightingQueryColumn_DistanceColumnName, ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
+		WAYPOINT_COMMENT(Messages.SightingQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
 		
 		private String guiName;
 		private ColumnType type;
@@ -122,12 +123,12 @@ public class SightingQueryColumn extends QueryColumn{
 			return ri.getWaypointDistance();
 		}else if (getKey().equals(FixedColumns.WAYPOINT_COMMENT.getKey())){
 			return ri.getWaypointComment();
-		}else if (getKey().startsWith("cat:")){
+		}else if (getKey().startsWith("cat:")){ //$NON-NLS-1$
 			Integer index = Integer.parseInt(getKey().substring(getKey().lastIndexOf(':')+1));
 			if (index < ri.getCategories().length){
 				return ri.getCategories()[index];
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 		Object x = ri.getEntityAttribute(getKey());
@@ -139,7 +140,7 @@ public class SightingQueryColumn extends QueryColumn{
 
 	@Override
 	public QueryColumn clone() {
-		throw new IllegalStateException("Cannot clone sighting columns.");
+		throw new IllegalStateException("Cannot clone sighting columns."); //$NON-NLS-1$
 	}
 	
 }

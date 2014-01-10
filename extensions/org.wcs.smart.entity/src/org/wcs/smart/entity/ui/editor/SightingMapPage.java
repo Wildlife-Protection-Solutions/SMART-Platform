@@ -47,6 +47,7 @@ import org.wcs.smart.entity.fixed.map.EntityQueryService;
 import org.wcs.smart.entity.fixed.map.FixedEntityGeoResource;
 import org.wcs.smart.entity.fixed.map.FixedEntityService;
 import org.wcs.smart.entity.fixed.map.FixedEntityServiceExtension;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType.Type;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -67,7 +68,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 	private IViewportModelListener initListener = null; 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
-	private Job addLayerJob = new Job("Add Entity Location Layer") {
+	private Job addLayerJob = new Job(Messages.SightingMapPage_AddEntityLayerJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {  
@@ -101,8 +102,8 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 
 				SightingMapPage.this.entityService = entityService;
 			} catch (Exception e) {
-				return new Status(IStatus.ERROR, "Unknown", IStatus.ERROR,
-						"Unknown error creating entity type map layer.", e);
+				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, IStatus.ERROR,
+						Messages.SightingMapPage_ErrorDescription, e);
 			}
 			return Status.OK_STATUS;
 
@@ -110,7 +111,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 		
 	};
 	
-	private Job addQueryReusltsJob = new Job("Adding Query Results Layer"){
+	private Job addQueryReusltsJob = new Job(Messages.SightingMapPage_AddQueryJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -125,7 +126,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 	    		getMap().sendCommandASync(command);
 	    		
 			} catch (IOException e) {
-				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, IStatus.ERROR, "Unknown error adding sightings to map", e);
+				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, IStatus.ERROR, Messages.SightingMapPage_ErrorDescriptionQuery, e);
 			}
 			
 			return Status.OK_STATUS;
@@ -133,7 +134,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 		
 	};
 	
-	private Job updateLayerJob = new Job("Updating Location Layer") {
+	private Job updateLayerJob = new Job(Messages.SightingMapPage_UpdateLayersJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {  

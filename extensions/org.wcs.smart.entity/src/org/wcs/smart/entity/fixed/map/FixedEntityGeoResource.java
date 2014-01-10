@@ -43,6 +43,7 @@ import org.geotools.styling.Style;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -219,7 +220,7 @@ public class FixedEntityGeoResource extends IGeoResource {
 			Style style = (Style)c.load(memento);
 			return style;
 		} catch (Exception ex) {
-			EntityPlugIn.displayLog("Error generating layer style.", ex);
+			EntityPlugIn.displayLog(Messages.FixedEntityGeoResource_ErrorCreatingLayerStyle, ex);
 			return null;
 		}
     }
