@@ -58,14 +58,14 @@ public class IncidentWizardPage extends WizardPage {
 	}
 	
 	public boolean canFlipToNextPage(){
-		return getErrorMessage() == null;
+		return getErrorMessage() == null && !(contents instanceof IncidentAttachmentComposite);
 	}
 	
 	@Override
 	public void createControl(Composite parent) {
 		Composite center = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
-		gl.marginWidth = 20;
+		gl.marginWidth = 15;
 		center.setLayout(gl);
 		
 		Composite x = contents.createComposite(center);
