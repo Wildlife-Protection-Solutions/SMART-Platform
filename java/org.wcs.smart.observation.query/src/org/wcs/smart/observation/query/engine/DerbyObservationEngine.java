@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -137,11 +135,12 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 
 	
 	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
-		DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+		
 		// add data model category columns
-		categoryCount = -1;
-		for (Category cat : dataModel.getActiveCategories()) {
-			categoryCount = Math.max(categoryCount, getDepth(cat));
+		categoryCount = QueryDataModelManager.getInstance().getActiveDepth();
+		if (categoryCount < 0){
+			//nothing to update
+			return;
 		}
 		
 		for (int i = 0; i <= categoryCount; i++) {
@@ -149,10 +148,7 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
-		if (categoryCount < 0){
-			//nothing to update
-			return;
-		}
+		
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
 		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
 		QueryPlugIn.logSql(sql);
@@ -313,20 +309,6 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 		} finally {
 			rs.close();
 		}
-	}
-
-	/**
-	 * Compute the maximum category depth.
-	 * 
-	 * @param cat category
-	 * @return maximum depth
-	 */
-	private int getDepth(Category cat) {
-		int maxDepth = -1;
-		for (Category child : cat.getActiveChildren()) {
-			maxDepth = Math.max(maxDepth, getDepth(child));
-		}
-		return maxDepth + 1;
 	}
 	
 	/**

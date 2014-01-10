@@ -209,4 +209,14 @@ public interface IDataModelManager {
 	 * @return
 	 */
 	public List<Attribute> getActiveAttributes(DataModel dm);
+	
+	
+	/**
+	 * Computes the depth of the active
+	 * data model category tree.
+	 * tree.
+	 * 
+	 * @return
+	 */
+	public int getActiveDepth();
 }

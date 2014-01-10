@@ -53,11 +53,13 @@ import org.wcs.smart.query.QueryPlugIn;
 public class CaDataModelManagerImpl implements IDataModelManager {
 
 	private DataModel dm = null;
+	private Integer dmDepth = null;
 	
 	/**
 	 * Clears the current data model
 	 */
 	public void clearDataModel(){
+		dmDepth = null;
 		dm = null;
 	}
 	
@@ -373,6 +375,36 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		
 	}
 	
+	@Override
+	public int getActiveDepth(){
+		if (dmDepth != null){
+			return dmDepth;
+		}
+		
+	
+		int numCategory = 0;
+		for (Category cat : getDataModel().getActiveCategories()) {
+			numCategory = Math.max(numCategory, getDepth(cat));
+		}
+		dmDepth = numCategory;
+		return dmDepth;
+	}
+	
+	/**
+	 * Compute the maximum category depth.
+	 * 
+	 * @param cat category
+	 * @return maximum depth
+	 */
+	private int getDepth(Category cat) {
+		int maxDepth = 0;
+		for (Category child : cat.getActiveChildren()) {
+			maxDepth = Math.max(maxDepth, getDepth(child));
+		}
+		return maxDepth + 1;
+	}
+	
+	
 	/*
 	 * determines if attribute in the data model
 	 * has an active category association
@@ -410,6 +442,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	private Job loadDataModelJob = new Job(Messages.CaDataModelManagerImpl_LoadDataModelJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			dmDepth = null;
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
@@ -447,4 +480,8 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		}
 	
 	};
+	
+	
+	
+	
 }

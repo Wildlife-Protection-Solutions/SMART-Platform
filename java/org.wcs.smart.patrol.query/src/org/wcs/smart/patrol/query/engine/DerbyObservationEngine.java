@@ -170,11 +170,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 
 	
 	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
-		DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+		
 		// add data model category columns
-		categoryCount = -1;
-		for (Category cat : dataModel.getActiveCategories()) {
-			categoryCount = Math.max(categoryCount, getDepth(cat));
+		categoryCount = QueryDataModelManager.getInstance().getActiveDepth();
+		if (categoryCount < 0){
+			return;			//nothing to update
 		}
 		
 		for (int i = 0; i <= categoryCount; i++) {
@@ -182,10 +182,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
-		if (categoryCount < 0){
-			//nothing to update
-			return;
-		}
+		
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
 		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
 		QueryPlugIn.logSql(sql);
@@ -420,19 +417,6 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		}
 	}
 
-	/**
-	 * Compute the maximum category depth.
-	 * 
-	 * @param cat category
-	 * @return maximum depth
-	 */
-	private int getDepth(Category cat) {
-		int maxDepth = -1;
-		for (Category child : cat.getActiveChildren()) {
-			maxDepth = Math.max(maxDepth, getDepth(child));
-		}
-		return maxDepth + 1;
-	}
 	
 	/**
 	 * Wrapper class for populating linked data (additional columns)

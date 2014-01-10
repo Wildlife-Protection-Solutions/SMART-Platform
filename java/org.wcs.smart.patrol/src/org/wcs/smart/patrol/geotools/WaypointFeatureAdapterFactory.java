@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.geotools;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.hibernate.Session;
-import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -41,8 +40,8 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == Waypoint.class) {
-			if (adaptableObject instanceof SimpleFeature){
-				SimpleFeature sf = (SimpleFeature)adaptableObject;
+			if (adaptableObject instanceof PatrolFeature){
+				PatrolFeature sf = (PatrolFeature)adaptableObject;
 				if (sf.getFeatureType().getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)){
 					String key = sf.getID();
 					String uuids = key.substring(key.lastIndexOf('.') + 1);
@@ -54,15 +53,9 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 							.log("Could not determine waypoint for uuid " + uuids, e); //$NON-NLS-1$
 						return null;
 					}
-					Session s = HibernateManager.openSession();
-					s.getTransaction().begin();
-					try {
-						Waypoint wp = (Waypoint) s.get(Waypoint.class, wpuuid);
-						return wp;
-					} finally {
-						s.getTransaction().rollback();
-						s.close();
-					}
+					Waypoint wp = new Waypoint();
+					wp.setUuid(wpuuid);
+					return wp;
 				}
 			}
 		}
