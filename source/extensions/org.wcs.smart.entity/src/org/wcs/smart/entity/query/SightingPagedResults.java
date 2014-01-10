@@ -33,11 +33,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
@@ -62,12 +64,9 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	private boolean isDestoryed = false;
 	private boolean isLoading = false;
 	
-//	// next sort column
-//	private QueryColumn sortColumn = null;
-//	// last sort column
+	private QueryColumn sortColumn = null;
+	private int sortDirection = SWT.UP;
 //	private QueryColumn lastSortColumn = null;
-//	// current direction
-//	private int direction = SWT.UP;
 //	private boolean hasSortColumns = false;
 	private DerbyEntitySightingEngine engine;
 
@@ -78,13 +77,6 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 		this.engine = engine;
 	}
 
-//	public SightingPagedResults(String queryTempTable, int itemCount,
-//			int wpCount, DerbyEntitySightingEngine engine) {
-//		this.queryTempTable = queryTempTable;
-//		this.itemCount = itemCount;
-//		this.wpCount = wpCount;
-//		this.engine = engine;
-//	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -401,12 +393,13 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 //		}
 //	}
 
+	
 	private String buildSortSql() {
-		return ""; //$NON-NLS-1$
-//		if (sortColumn == null || direction == SWT.NONE)
-//			return ""; //$NON-NLS-1$
-//
-//		String result = ""; //$NON-NLS-1$
+		if (sortColumn == null || sortDirection == SWT.NONE)
+			return ""; //$NON-NLS-1$
+		String result = ""; //$NON-NLS-1$
+		result = "order by r." + ((SightingQueryColumn)sortColumn).getDbColumn(); //$NON-NLS-1$
+		
 //		if (sortColumn instanceof FixedQueryColumn) {
 //			String key = sortColumn.getKey();
 //			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
@@ -434,10 +427,10 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 //				break;
 //			}
 //		}
-//		if (!result.isEmpty()) {
-//			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
-//		}
-//		return result;
+		if (!result.isEmpty()) {
+			result += sortDirection == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return result;
 	}
 
 	/*
@@ -449,9 +442,9 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	 */
 	public void setSorting(final QueryColumn sortColumn, int direction) {
 //		this.lastSortColumn = this.sortColumn;
-//		this.sortColumn = sortColumn;
-//		this.direction = direction;
-//		dropResultSet();
+		this.sortColumn = sortColumn;
+		this.sortDirection = direction;
+		dropResultSet();
 	}
 
 	private void dropResultSet() {

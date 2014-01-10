@@ -42,6 +42,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntityFilter.EntityFilterType;
+import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn.FixedColumns;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -364,22 +365,22 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + queryDataTable + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ca_id varchar(8),"); //$NON-NLS-1$
-		sql.append("ca_name varchar(256),"); //$NON-NLS-1$
+		sql.append(FixedColumns.CA_ID.dbColName + " varchar(8),"); //$NON-NLS-1$
+		sql.append(FixedColumns.CA_NAME.dbColName + " varchar(256),"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$ 
-		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
-		sql.append("wp_id integer,"); //$NON-NLS-1$
-		sql.append("wp_x double,"); //$NON-NLS-1$
-		sql.append("wp_y double,"); //$NON-NLS-1$
-		sql.append("wp_direction real,"); //$NON-NLS-1$
-		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_time timestamp,"); //$NON-NLS-1$
-		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_SOURCE.dbColName + " varchar(16),"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_ID.dbColName + " integer,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_X.dbColName + " double,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_Y.dbColName + " double,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_DIRECTION.dbColName + " real,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_DISTANCE.dbColName + " real,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_TIME.dbColName + " timestamp,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_COMMENT.dbColName + " varchar(4096),"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("entity_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("entity_id varchar(32), "); //$NON-NLS-1$
-		sql.append("entity_status varchar(8)"); //$NON-NLS-1$
+		sql.append(FixedColumns.ENTITY_ID.dbColName + " varchar(32), "); //$NON-NLS-1$
+		sql.append(FixedColumns.ENTITY_STATUS.dbColName + " varchar(8)"); //$NON-NLS-1$
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			sql.append(", ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
@@ -404,21 +405,20 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			Session session) throws SQLException {
 		
 		SightingResultItem it = new SightingResultItem();
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
+		it.setConservationAreaId(rs.getString(FixedColumns.CA_ID.dbColName)); 
+		it.setConservationAreaName(rs.getString(FixedColumns.CA_NAME.dbColName)); 
+		it.setSourceId(rs.getString(FixedColumns.WAYPOINT_SOURCE.dbColName)); 
 		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getDate("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getFloat("wp_direction")); //$NON-NLS-1$
-		it.setWaypointDistance(rs.getFloat("wp_distance")); //$NON-NLS-1$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-
+		it.setWaypointId(rs.getInt(FixedColumns.WAYPOINT_ID.dbColName)); 
+		it.setWaypointX(rs.getDouble(FixedColumns.WAYPOINT_X.dbColName)); 
+		it.setWaypointY(rs.getDouble(FixedColumns.WAYPOINT_Y.dbColName)); 
+		it.setWaypointDateTime(rs.getDate(FixedColumns.WAYPOINT_TIME.dbColName));
+		it.setWaypointDirection(rs.getFloat(FixedColumns.WAYPOINT_DIRECTION.dbColName)); 
+		it.setWaypointDistance(rs.getFloat(FixedColumns.WAYPOINT_DISTANCE.dbColName)); 
+		it.setWaypointComment(rs.getString(FixedColumns.WAYPOINT_COMMENT.dbColName)); 
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
-		it.setEntityId(rs.getString("entity_id")); //$NON-NLS-1$
-		it.setEntityStatus(EntityType.Status.valueOf(rs.getString("entity_status"))); //$NON-NLS-1$
+		it.setEntityId(rs.getString(FixedColumns.ENTITY_ID.dbColName));
+		it.setEntityStatus(EntityType.Status.valueOf(rs.getString(FixedColumns.ENTITY_STATUS.dbColName))); 
 		// build categories
 		byte[] entityUuid = rs.getBytes("entity_uuid"); //$NON-NLS-1$
 		it.setEntityUuid(entityUuid);

@@ -45,28 +45,30 @@ public class SightingQueryColumn extends QueryColumn{
 	 *
 	 */
 	public static enum FixedColumns{
-		ENTITY_ID(Messages.SightingQueryColumn_EntityIdColumnName, ColumnType.STRING, "entity:id"), //$NON-NLS-1$
-		ENTITY_STATUS(Messages.SightingQueryColumn_EntityStatusColumnName, ColumnType.STRING, "entity:status"), //$NON-NLS-1$
-		CA_ID(Messages.SightingQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id"), //$NON-NLS-1$
-		CA_NAME(Messages.SightingQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name"), //$NON-NLS-1$
-		WAYPOINT_SOURCE(Messages.SightingQueryColumn_WpSourceColumnName, ColumnType.STRING,"wp:source"),  //$NON-NLS-1$
-		WAYPOINT_ID(Messages.SightingQueryColumn_WaypointIdColumnName, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
-		WAYPOINT_DATE(Messages.SightingQueryColumn_WaypointDateColumnName, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
-		WAYPOINT_TIME(Messages.SightingQueryColumn_WaypointTimeColumnName, ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
-		WAYPOINT_X(Messages.SightingQueryColumn_xColumnName, ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
-		WAYPOINT_Y(Messages.SightingQueryColumn_yColumnName, ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
-		WAYPOINT_DIRECTION(Messages.SightingQueryColumn_DirectionColumnName, ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
-		WAYPOINT_DISTANCE(Messages.SightingQueryColumn_DistanceColumnName, ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
-		WAYPOINT_COMMENT(Messages.SightingQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
+		ENTITY_ID(Messages.SightingQueryColumn_EntityIdColumnName, ColumnType.STRING, "entity:id", "entity_id"), //$NON-NLS-1$ //$NON-NLS-2$
+		ENTITY_STATUS(Messages.SightingQueryColumn_EntityStatusColumnName, ColumnType.STRING, "entity:status", "entity_status"), //$NON-NLS-1$ //$NON-NLS-2$
+		CA_ID(Messages.SightingQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id", "ca_id"), //$NON-NLS-1$ //$NON-NLS-2$
+		CA_NAME(Messages.SightingQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name", "ca_name"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_SOURCE(Messages.SightingQueryColumn_WpSourceColumnName, ColumnType.STRING,"wp:source", "wp_source"),  //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_ID(Messages.SightingQueryColumn_WaypointIdColumnName, ColumnType.INTEGER,"waypoint:id", "wp_id"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_DATE(Messages.SightingQueryColumn_WaypointDateColumnName, ColumnType.DATE,"waypoint:date", "wp_time"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_TIME(Messages.SightingQueryColumn_WaypointTimeColumnName, ColumnType.TIME,"waypoint:time", "wp_time"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_X(Messages.SightingQueryColumn_xColumnName, ColumnType.NUMBER,"waypoint:x", "wp_x"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_Y(Messages.SightingQueryColumn_yColumnName, ColumnType.NUMBER, "waypoint:y", "wp_y"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_DIRECTION(Messages.SightingQueryColumn_DirectionColumnName, ColumnType.NUMBER,"waypoint:direction", "wp_direction"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_DISTANCE(Messages.SightingQueryColumn_DistanceColumnName, ColumnType.NUMBER,"waypoint:distance", "wp_distance"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_COMMENT(Messages.SightingQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment", "wp_comment"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private String guiName;
 		private ColumnType type;
 		private String key;
+		public String dbColName;
 		
-		private FixedColumns(String name, ColumnType type, String key){
+		private FixedColumns(String name, ColumnType type, String key, String colName){
 			this.guiName = name;
 			this.type = type;
 			this.key = key;
+			this.dbColName = colName;
 		}
 		
 		public String getGuiName(){
@@ -82,14 +84,21 @@ public class SightingQueryColumn extends QueryColumn{
 	}
 	
 	
+	private String dbCol;
+	
 	/**
 	 * Creates a new column
 	 * @param name name
 	 * @param key key
 	 * @param type type
 	 */
-	public SightingQueryColumn(String name, String key, ColumnType type) {
+	public SightingQueryColumn(String name, String key, ColumnType type, String dbCol) {
 		super(name, key, type);
+		this.dbCol = dbCol;
+	}
+	
+	public String getDbColumn(){
+		return this.dbCol;
 	}
 	
 
