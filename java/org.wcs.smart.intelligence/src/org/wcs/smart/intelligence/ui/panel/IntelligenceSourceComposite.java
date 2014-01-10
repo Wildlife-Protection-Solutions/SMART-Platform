@@ -105,8 +105,6 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         sourceType.setLabelProvider(new IntelligenceSourceLabelProvider());
  
         sourceType.setInput(sourceTypeList);
-        if (!sourceTypeList.isEmpty())
-        	sourceType.setSelection(new StructuredSelection(sourceTypeList.get(0)));
         sourceType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -139,6 +137,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         patrolIdDecoration.setShowHover(true);
         patrolIdDecoration.setDescriptionText(ERROR_PATROL_ID_REQUIRED);
 
+        if (!sourceTypeList.isEmpty())
+        	sourceType.setSelection(new StructuredSelection(sourceTypeList.get(0)));
         
 	}
 
