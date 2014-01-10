@@ -29,10 +29,8 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.internal.Messages;
@@ -42,6 +40,7 @@ import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn.FixedColumns
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
+import org.wcs.smart.query.common.ui.QueryTableViewerColumn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -60,13 +59,18 @@ public class SightingTable {
 	private TableViewer sightingsTable;
 	private List<QueryColumn>  currentCols;
 	
+	private QueryLazyResultsContentProvider sorter;
+	private List<QueryTableViewerColumn> tableColumns = null;
+	
 	public SightingTable(Composite composite){
 		sightingsTable = new TableViewer(composite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		
 		sightingsTable.getTable().setHeaderVisible(true);
 		sightingsTable.getTable().setLinesVisible(true);
-		sightingsTable.setContentProvider(new QueryLazyResultsContentProvider(sightingsTable));
+		sorter = new QueryLazyResultsContentProvider(sightingsTable);
+		sightingsTable.setContentProvider(sorter);
 		sightingsTable.setItemCount(0);
+		
 	}
 	
 	/**
@@ -100,24 +104,32 @@ public class SightingTable {
 	 * @param et
 	 */
 	public void setEntityType(EntityType et){
-		for (TableColumn tc : sightingsTable.getTable().getColumns()){
-			tc.dispose();
+		sightingsTable.getTable().setRedraw(false);
+		if (tableColumns != null){
+			for (QueryTableViewerColumn column : tableColumns){
+				column.getTableColumn().getColumn().dispose();
+			}
+			tableColumns = null;
+		}
+		if (sorter != null){
+			sorter.setSortColumn(null);
 		}
 		
+		tableColumns = new ArrayList<QueryTableViewerColumn>();
 		currentCols = getQueryColumns(et);
 		for (final QueryColumn col : currentCols){
-			TableViewerColumn tv = new TableViewerColumn(sightingsTable, SWT.NONE);
-			tv.getColumn().setWidth(100);
-			tv.getColumn().setText(col.getName());
-			tv.setLabelProvider(new ColumnLabelProvider(){
+			tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new ColumnLabelProvider(){
 				public String getText(Object element){
 					if (element instanceof IResultItem){
 						return asString(col.getValue((IResultItem)element), col.getType());
 					}
 					return element.toString();
 				}
-			});
+			}));
+			
 		}
+		
+		sightingsTable.getTable().setRedraw(true);
 	}
 	
 	/**
@@ -134,7 +146,7 @@ public class SightingTable {
 		
 		//fixed columns for waypoint and fixed entity attributes
 		for (FixedColumns fixed : SightingQueryColumn.FixedColumns.values()){
-			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType());
+			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType(), fixed.dbColName);
 			
 			if (SmartDB.isMultipleAnalysis()){
 				cols.add(column);	
@@ -162,14 +174,18 @@ public class SightingTable {
 				cType = ColumnType.NUMBER;
 			}
 			
-			QueryColumn column = new SightingQueryColumn(name + " (" + ea.getEntityType().getName() + ")", key, cType); //$NON-NLS-1$ //$NON-NLS-2$
+			QueryColumn column = new SightingQueryColumn(
+					name + " (" + ea.getEntityType().getName() + ")", //$NON-NLS-1$ //$NON-NLS-2$
+					key, cType, "ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$ 
 			cols.add(column);
 		}
 	
 		//data model category
 		int catCount = QueryDataModelManager.getInstance().getActiveDepth();
 		for(int i = 0; i < catCount; i++){
-			cols.add(new SightingQueryColumn(MessageFormat.format(Messages.SightingTable_ObservationCategoryLabel, new Object[]{i}), "cat:" + i, ColumnType.STRING)); //$NON-NLS-1$
+			cols.add(new SightingQueryColumn(
+					MessageFormat.format(Messages.SightingTable_ObservationCategoryLabel, new Object[]{i}), "cat:" + i,  //$NON-NLS-1$
+					ColumnType.STRING, "category_" + i));  //$NON-NLS-1$
 		}
 		
 		return cols;
