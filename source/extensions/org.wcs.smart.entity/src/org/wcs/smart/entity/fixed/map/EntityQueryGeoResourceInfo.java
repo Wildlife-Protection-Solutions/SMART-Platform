@@ -34,19 +34,21 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.entity.EntityPlugIn;
 
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Georesource Information for fixed entity types 
+ * Georesource Information for a entity sightings query.
+ *  
  * @author Emily
  * @since 1.0.0
  */
-public class FixedEntityGeoResourceInfo extends IGeoResourceInfo {
+public class EntityQueryGeoResourceInfo extends IGeoResourceInfo {
 
 	
-	public FixedEntityGeoResourceInfo( FixedEntityGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.getEntityTypeName();
+	public EntityQueryGeoResourceInfo( EntityQueryGeoResource resource, IProgressMonitor monitor){
+		this.title = "Sightings Query Results";
 		computeBounds(resource, monitor);
 	}
 	
@@ -55,7 +57,7 @@ public class FixedEntityGeoResourceInfo extends IGeoResourceInfo {
 	 * 
 	 * @param resource resource source
 	 */
-	public void computeBounds(FixedEntityGeoResource resource, IProgressMonitor monitor){
+	public void computeBounds(EntityQueryGeoResource resource, IProgressMonitor monitor){
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
@@ -69,7 +71,7 @@ public class FixedEntityGeoResourceInfo extends IGeoResourceInfo {
 			}, null);
 			this.bounds = env;
 		} catch (IOException e) {
-			SmartPlugIn.log("Could not determine bounds for smart resource: " + resource.getEntityTypeName(), e); //$NON-NLS-1$
+			EntityPlugIn.log("Error computing bounds for entity sightings query.", e);
 		}
 	}
 	

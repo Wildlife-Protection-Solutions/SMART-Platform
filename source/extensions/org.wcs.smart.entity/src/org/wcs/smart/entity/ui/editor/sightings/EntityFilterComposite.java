@@ -1,14 +1,33 @@
-package org.wcs.smart.entity.ui.typelist.editor.sightings;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.entity.ui.editor.sightings;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -31,7 +50,13 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.query.EntityFilter;
 import org.wcs.smart.entity.query.EntityFilter.EntityFilterType;
-
+/**
+ * An entity filter composite that allows users to define
+ * an entity filter.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityFilterComposite extends Composite{
 
 
@@ -43,6 +68,10 @@ public class EntityFilterComposite extends Composite{
 	private DropDownFilter filter;
 	private static EntityFilter DEFAULT_FILTER = new EntityFilter(EntityFilterType.ALLACTIVE);
 	
+	/**
+	 * Creates a new entity filter
+	 * @param parent
+	 */
 	public EntityFilterComposite(Composite parent) {
 		super(parent, SWT.BORDER);
 		
@@ -62,6 +91,10 @@ public class EntityFilterComposite extends Composite{
 		});
 	}
 
+	/**
+	 * 
+	 * @return the selected filter
+	 */
 	public EntityFilter getFilter(){
 		if (filter == null){
 			return DEFAULT_FILTER;
@@ -69,6 +102,12 @@ public class EntityFilterComposite extends Composite{
 			return filter.getFilter();
 		}
 	}
+	
+	/**
+	 * Sets the entity filter options.
+	 * 
+	 * @param entities
+	 */
 	public void setEntities(List<Entity> entities){
 		this.entities = entities;
 		if (filter != null){
@@ -85,7 +124,7 @@ public class EntityFilterComposite extends Composite{
 		}
 	}
 	
-	public void createComposite(){
+	private void createComposite(){
 		comp = new Composite(this, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.horizontalSpacing = 0;
@@ -97,7 +136,7 @@ public class EntityFilterComposite extends Composite{
 		
 		lblText = new Label(comp, SWT.NONE);
 		lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		lblText.setText("");
+		lblText.setText(""); //$NON-NLS-1$
 		lblText.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
@@ -144,13 +183,15 @@ public class EntityFilterComposite extends Composite{
 
 	}
 	
-
+	/**
+	 * Adapts the composite for the toolkit
+	 * @param toolkit
+	 */
 	public void adapt(FormToolkit toolkit) {
 		toolkit.adapt(this);
 		toolkit.adapt(comp, false, false);
 		toolkit.adapt(lblText, false, false);
 		toolkit.adapt(btnDown, true, true);
-		
 	}	
 	
 	

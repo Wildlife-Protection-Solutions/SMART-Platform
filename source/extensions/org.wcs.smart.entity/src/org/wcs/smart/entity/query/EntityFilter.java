@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.query;
 
 import java.util.List;
@@ -8,10 +29,18 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
 
+/**
+ * Filter for filtering individual entities.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityFilter implements IFilter {
 
+	/*
+	 * Filter options
+	 */
 	public enum EntityFilterType{
-		
 		ALL("All"),
 		ALLACTIVE("Active Only"),
 		CUSTOM("Custom");
@@ -25,31 +54,45 @@ public class EntityFilter implements IFilter {
 		}
 	};
 	
-	
 	private EntityFilterType type;
 	private List<Entity> customEntities;
 	
+	/**
+	 * Creates a new entity filter
+	 * @param type type of filter
+	 */
 	public EntityFilter(EntityFilterType type){
 		this.type = type;
 		customEntities = null;
 	}
 	
+	/**
+	 * Creates a new custom filter with the provided custom entity filter
+	 * list.
+	 * @param type
+	 * @param entities
+	 */
 	public EntityFilter(EntityFilterType type, List<Entity> entities){
 		this(type);
 		this.customEntities = entities;
 	}
 	
+	/**
+	 * 
+	 * @return filter type
+	 */
 	public EntityFilterType getType(){
 		return this.type;
 	}
 	
+	/**
+	 * 
+	 * @return list of custom entities to filter on 
+	 */
 	public List<Entity> getEntities(){
 		return this.customEntities;
 	}
-	public void setEntities(List<Entity> entities){
-		this.customEntities = customEntities;
-	}
-	
+		
 	@Override
 	public String asString() {
 		return type.getGuiName();
@@ -60,6 +103,11 @@ public class EntityFilter implements IFilter {
 		visitor.visit(this);
 	}
 
+	/**
+	 * Not supported.
+	 * 
+	 * @return null
+	 */
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
 		return null;

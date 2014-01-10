@@ -33,21 +33,14 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntityFilter.EntityFilterType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -55,20 +48,17 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
-import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Query engine for executing lazy queries using derby. This engines create
- * temporary tables that one to one correspond with the table that user see.
- * {@link DerbyPagedObservationResult} obtains the name of this table and is
- * responsible for all other operations (fetching/sorting/deleting tables)
+ * Query engine for executing entity sighting queries in a lazy
+ * manner.  This engine creates a temporary table of results
+ * that can feed the ui.
  * 
- * @author elitvin
+ * @author egouge
  * @since 1.0.0
  */
 public class DerbyEntitySightingEngine extends AbstractQueryEngine {
@@ -76,27 +66,35 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	static {
 		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
-		tablePrefix.put(EntityAttributeValue.class, "eav");
+		tablePrefix.put(EntityAttributeValue.class, "eav"); //$NON-NLS-1$
 	}
 
 	/**
 	 * Maps hibernate classes to database table names
 	 */
 	static {
-		tableNames.put(Entity.class, "smart.entity");
-		tableNames.put(EntityType.class, "smart.entity_type");
-		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value");
+		tableNames.put(Entity.class, "smart.entity"); //$NON-NLS-1$
+		tableNames.put(EntityType.class, "smart.entity_type"); //$NON-NLS-1$
+		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value"); //$NON-NLS-1$
 	}
 
 	private String queryDataTable;
-	private int categoryCount;
+
 	private EntityQuery query;
 	private DateFilter localDateFilter;
+	private int categoryCount;
 
 	public SightingPagedResults executeDerbyQuery(EntityQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 		this.query = query;
+		
+		// create a date filter that caches the dates so the same
+		// dates are used for all parts of the query;
+		// otherwise different date filters will be computed
+		// for different parts of the queries
+		
+
 		localDateFilter = new DateFilter( WaypointDateField.INSTANCE, new CachingDateFilter(query
 				.getDateFilter().getDateFilterOption()));
 		
@@ -108,40 +106,33 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask("Processing Query", 70);
+				monitor.beginTask("Processing Query", 3);
 
-				// create a date filter that caches the dates so the same
-				// dates are used for all parts of the query;
-				// otherwise different date filters will be computed
-				// for different parts of the queries
-				
-
+				monitor.subTask("Creating Temporary Table");
 				createResultsTable(c);
+				monitor.worked(1);
 
+				monitor.subTask("Populating Data Table");
 				populateDataTable(c);
-				// query table
-
-				//
-				// //setting waypoint count
+				monitor.worked(1);
+				
+				monitor.subTask("Adding Category Labels");
+				addCategoryLabels(c, session);
+				monitor.worked(1);
+				
+				
+				//setting waypoint count
 				ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable + ""); //$NON-NLS-1$ //$NON-NLS-2$
 				try {
 					if (rs.next()) {
 						result.setItemCount(rs.getInt(1));
-						System.out.println(rs.getInt(1));
 					}
 				 } finally {
 					 rs.close();
 				 }
-//				try{
-//					dropTable(c, queryDataTable);
-//				}catch (Exception ex){
-//					ex.printStackTrace();
-//				}
-//				System.out.println("done");
-//				createResultsTable(c);
-//				result.setItemCount(0);
-			}
 
+				dropTemporaryTables(c, monitor.isCanceled());
+			}
 		});
 		return result;
 	}
@@ -165,7 +156,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	protected void populateDataTable(Connection c) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" INSERT INTO " + queryDataTable + " ");
-		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_category_uuid,entity_uuid,entity_id) ");
+		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_category_uuid,entity_uuid,entity_id,entity_status) ");
 		sql.append(" SELECT "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -183,7 +174,8 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Entity.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Entity.class) + ".id "); //$NON-NLS-1$
+		sql.append(tablePrefix(Entity.class) + ".id, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Entity.class) + ".status "); //$NON-NLS-1$
 		
 		sql.append(" FROM ");
 		sql.append(tableNamePrefix(Waypoint.class));
@@ -245,7 +237,15 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
-		//TODO: create index on entity_uuid
+		//create index on entity_uuid
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + queryDataTable + "_entityuuid_idx ON ");
+		sql.append(queryDataTable);
+		sql.append("(entity_uuid)");
+		
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+		
 		
 		//update entity values
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
@@ -368,8 +368,8 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("entity_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("entity_id varchar(32) "); //$NON-NLS-1$
-		
+		sql.append("entity_id varchar(32), "); //$NON-NLS-1$
+		sql.append("entity_status varchar(8)"); //$NON-NLS-1$
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			sql.append(", ea" + SmartUtils.encodeHex(ea.getUuid()));
@@ -408,7 +408,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
 		it.setEntityId(rs.getString("entity_id"));
-		
+		it.setEntityStatus(EntityType.Status.valueOf(rs.getString("entity_status")));
 		// build categories
 		byte[] entityUuid = rs.getBytes("entity_uuid");
 		it.setEntityUuid(entityUuid);
@@ -420,17 +420,76 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		}
 		
 		
-//		List<String> categories = new ArrayList<String>();
-//		for (int i = 0; i < categoryCount; i++) {
-//			String category = rs.getString("category_" + i); //$NON-NLS-1$
-//			if (category == null) {
-//				break;
-//			}
-//			categories.add(category);
-//		}
-//
-//		it.setCategory(categories.toArray(new String[categories.size()]));
+		List<String> categories = new ArrayList<String>();
+		for (int i = 0; i < categoryCount; i++) {
+			String category = rs.getString("category_" + i); //$NON-NLS-1$
+			if (category == null) {
+				break;
+			}
+			categories.add(category);
+		}
+		it.setCategory(categories.toArray(new String[categories.size()]));
+		
+		
 		return it;
 	}
 
+	
+	private void addCategoryLabels(Connection c, Session session) throws SQLException {
+		
+		// add data model category columns
+		categoryCount = QueryDataModelManager.getInstance().getActiveDepth();
+		
+		if (categoryCount < 0){
+			//nothing to update
+			return;
+		}
+		
+		for (int i = 0; i <= categoryCount; i++) {
+			String sql = "ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			QueryPlugIn.logSql(sql);
+			c.createStatement().execute(sql);
+		}
+		
+		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
+		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM " + queryDataTable;  //$NON-NLS-1$
+		QueryPlugIn.logSql(sql);
+		ResultSet rs = c.createStatement().executeQuery(sql);
+		
+		try {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				if (uuid == null)
+					continue;
+				String[] names = getCategoryLabels(uuid, session);
+				int count = names.length;
+				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
+				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
+				if (statement == null) {
+					//that means that we didn't create update statement for this number of columns to update -> create one
+					StringBuilder colunms = new StringBuilder();
+					for (int j = 0; j < depth; j++) {
+						if (j > 0){
+							colunms.append(", "); //$NON-NLS-1$
+						}
+						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					sql = "UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					QueryPlugIn.logSql(sql);
+					statement = c.prepareStatement(sql);
+					
+					num2Statement.put(count, statement);
+				}
+				
+				for (int i = 0; i <  depth; i++) {
+					statement.setString(i+1, names[i]);
+				}
+				statement.setBytes( depth+1, uuid);
+				statement.executeUpdate();
+			}
+		} finally {
+			rs.close();
+		}
+	}
+	
 }

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui.typelist.editor;
+package org.wcs.smart.entity.ui.editor;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
@@ -84,7 +83,6 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author Emily
  *
  */
-
 public class EntityEditPanelComposite extends Composite{
 	
 	private Entity entity;

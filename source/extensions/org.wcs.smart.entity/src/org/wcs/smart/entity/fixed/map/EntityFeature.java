@@ -21,23 +21,23 @@
  */
 package org.wcs.smart.entity.fixed.map;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.wcs.smart.SmartPlugIn;
+import org.geotools.feature.DecoratingFeature;
+import org.opengis.feature.simple.SimpleFeature;
 
 /**
- * Fixed Entity Service info.
+ * We wrap our features in a entityfeature
+ * so we can properly adapt them to waypoint
+ * class (for the Waypoint Info view). 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class FixedEntityServiceInfo extends IServiceInfo{
-
-	public FixedEntityServiceInfo(FixedEntityService service){
-		this.description = "A service to provide access to locations of entities for fixed entity types";
-		this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{"Entity", "Entity Type", "Fixed"};
-		this.title = "Entity Types (Fixed Only)";
+/*
+ * If we don't do this we cannot tell the difference between
+ * this feature and say the patrol feature which has different
+ * adapter class for waypoint info view
+ */
+public class EntityFeature extends DecoratingFeature{
+	public EntityFeature(SimpleFeature wrapper){
+		super(wrapper);
 	}
-	
 }

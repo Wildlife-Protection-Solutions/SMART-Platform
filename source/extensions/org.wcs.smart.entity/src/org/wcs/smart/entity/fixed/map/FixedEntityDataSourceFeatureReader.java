@@ -44,7 +44,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
- * Smart area feature reader
+ * Feature Reader for reading fixed entity type entity features.
  * @author Emily
  * @since 1.0.0
  */
@@ -110,10 +110,6 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 	
 	
 	private SimpleFeature getFeature(Entity entity){
-//		sb.append("fid:String");
-//		sb.append(",id:String");
-//		sb.append(",isActive:Integer");
-		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
 		Object data[] = new Object[entityType.getAttributes().size() + 4];
 		
 		data[0] = entity.getId() + "." + SmartUtils.encodeHex(entity.getUuid()); //$NON-NLS-1$ 

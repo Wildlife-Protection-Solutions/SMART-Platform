@@ -29,14 +29,12 @@ import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
-import org.geotools.data.DataAccessFactory.Param;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Smart patrol data source factor.  This is a read only data source.
- * Sources waypoints and tracks from a patrol.
+ * Data Source Factory for fixed entity types.
  * 
  * @author Emily
  * @since 1.0.0
@@ -103,19 +101,6 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		
-//		Session session = HibernateManager.openSession();
-//		EntityType entityType = null;
-//		try{
-//			entityType = (EntityType)session.load(EntityType.class, SmartUtils.decodeHex((String)params.get(ENTITYTYPE_UUID.key)));	
-//		}catch (Exception ex){
-//			throw new IOException(ex);
-//		}finally{
-//			session.close();
-//		}
-//		if (entityType == null ){
-//			throw new IOException("Unable to determine entity type to create entity data store.");
-//		}
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = null;
 		try{

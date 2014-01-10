@@ -48,7 +48,7 @@ import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
+import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 /**
  * Delete entity type handler

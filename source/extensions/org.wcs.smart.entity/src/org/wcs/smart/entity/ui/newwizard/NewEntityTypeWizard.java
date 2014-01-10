@@ -39,8 +39,8 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityType.Status;
-import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditor;
-import org.wcs.smart.entity.ui.typelist.editor.EntityTypeEditorInput;
+import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
+import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 

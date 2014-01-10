@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import net.refractions.udig.catalog.IGeoResource;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -43,14 +41,20 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Geotools data store for SMART area layers.
+ * Data source for fixed entity type locations.  Displays
+ * the locations of all the entities.
+ * <p>Data source supports all 
+ * fixed entity type in database for a given conservation area.  Each
+ * fixed entity type represents a different type.</p>
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -69,6 +73,10 @@ public class FixedEntityDataSource extends AbstractDataStore{
 		super.dispose();
 	}
 
+	/**
+	 * Updates the schema for a given entity type
+	 * @param eType
+	 */
 	public void refresh(EntityType eType){
 		String key = SmartUtils.encodeHex(eType.getUuid());
 		//remove schemas from cache
@@ -76,7 +84,10 @@ public class FixedEntityDataSource extends AbstractDataStore{
 		cachedTypes.put(key, eType);
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Returns one type name for each fixed entity type 
+	 * for the given conservation area.
+	 * 
 	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
 	 */
 	@Override
@@ -91,33 +102,24 @@ public class FixedEntityDataSource extends AbstractDataStore{
 				for (int i = 0; i < data.size(); i++){
 					names.add(SmartUtils.encodeHex((byte[])data.get(i)));
 				}
-			
-//			List<? extends IGeoResource> members = service.resources(null);
-//			String[] x = new String[members.size()];
-//			int i = 0;
-//			for (IGeoResource r : members) {
-//				x[i++] = SmartUtils.encodeHex(((FixedEntityGeoResource) r).entityUuid);
-//			}
-//			return x;
 			return names.toArray(new String[names.size()]);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			EntityPlugIn.log("Could not determine data source type names for fixed entity types.", e);
 		}finally{
 			s.close();
 		}
 		return null;
 	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
 		EntityType et = cachedTypes.get(typeName);
 		if (et == null){
-			System.out.println("i am null" + typeName);
-			//TODO:
-			//load entity type and cache it
+			throw new IOException("Entity type not loaded.  You must load the entity type and call refresh before you can read the entities.");
+			//TODO: consider using a session to load the entity type and cache it
 		}
 		return new FixedEntityDataSourceFeatureReader(et, getSchema(typeName));
 	}
@@ -152,9 +154,9 @@ public class FixedEntityDataSource extends AbstractDataStore{
 				try{
 					EntityType entityType = (EntityType) s.load(EntityType.class, SmartUtils.decodeHex(entityTypeUuid));
 					
-					sb.append("fid:String");
-					sb.append(",id:String");
-					sb.append(",status:String");
+					sb.append("fid:String"); //$NON-NLS-1$
+					sb.append(",id:String"); //$NON-NLS-1$
+					sb.append(",status:String"); //$NON-NLS-1$
 					HashSet<String> names = new HashSet<String>();
 					for (EntityAttribute ea: entityType.getAttributes()){
 						sb.append(",");
@@ -169,26 +171,23 @@ public class FixedEntityDataSource extends AbstractDataStore{
 							cnt++;
 						}
 						sb.append(tempname);
-						sb.append(":");
+						sb.append(":"); //$NON-NLS-1$
 						if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
-							sb.append("Integer");
+							sb.append(QueryColumn.ColumnType.INTEGER.geotoolsType); //$NON-NLS-1$
 						}else if (ea.getDmAttribute().getType() == AttributeType.TEXT ||
 								ea.getDmAttribute().getType() == AttributeType.TREE ||
 								ea.getDmAttribute().getType() == AttributeType.LIST){
-							sb.append("String");
+							sb.append(QueryColumn.ColumnType.STRING.geotoolsType); //$NON-NLS-1$
 						}else if (ea.getDmAttribute().getType() == AttributeType.NUMERIC){
-							sb.append("Double");
+							sb.append(QueryColumn.ColumnType.NUMBER.geotoolsType); //$NON-NLS-1$
 						}else if (ea.getDmAttribute().getType() == AttributeType.DATE){
-							sb.append("Date");
+							sb.append(QueryColumn.ColumnType.DATE.geotoolsType); //$NON-NLS-1$
 						}
-						
-						
 					}
 					sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 					
 				}catch (Exception ex){
-					ex.printStackTrace();
-					//TODO: deal with me
+					EntityPlugIn.log("Error creating feature type for entity type uuid: " + entityTypeUuid, ex);
 				}finally{
 					s.close();
 				}
@@ -200,12 +199,10 @@ public class FixedEntityDataSource extends AbstractDataStore{
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			EntityPlugIn.log("Error creating feature type for entity type uuid: " + entityTypeUuid, e);
 		}
 		
-		
-		SimpleFeatureType type =  DataUtilities.createType(entityTypeUuid, sb.toString()); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(entityTypeUuid, sb.toString());
 		return type;
 	}
 	

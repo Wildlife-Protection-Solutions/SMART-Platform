@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui.typelist.editor;
+package org.wcs.smart.entity.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -65,7 +65,6 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.typelist.editor.sightings.EntityFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 

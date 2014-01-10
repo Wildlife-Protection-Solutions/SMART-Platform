@@ -1,0 +1,257 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.entity.ui.editor;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.widgets.Form;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.entity.query.EntityQuery;
+import org.wcs.smart.entity.query.SightingPagedResults;
+import org.wcs.smart.entity.ui.editor.sightings.EntityFilterComposite;
+import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn;
+import org.wcs.smart.entity.ui.editor.sightings.SightingTable;
+import org.wcs.smart.query.ui.QueryDateFilterComposite;
+/**
+ * Sightings editor page that allows users to perform simple queries
+ * for entity sightings.
+ * 
+ * @author Emily
+ *
+ */
+public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
+
+
+	private EntityTypeEditor parentEditor;
+	private EntityFilterComposite entityFilter;
+	private SightingTable sightingTable;
+	private QueryDateFilterComposite dateComp ;
+	private EntityQuery currentQuery;
+	
+	private Label lblQueryProgress;
+	
+	/**
+	 * Creates a new sighting page
+	 * @param editor
+	 */
+	public SightingPage(EntityTypeEditor editor){
+		this.parentEditor = editor;
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+	
+	}
+
+	@Override
+	public void doSaveAs() {
+
+	}
+
+	@Override
+	public void init(IEditorSite site, IEditorInput input)
+			throws PartInitException {
+		super.setSite(site);
+		super.setInput(input);
+	}
+
+	@Override
+	public boolean isDirty() {
+		return false;
+	}
+
+	@Override
+	public boolean isSaveAsAllowed() {
+		return false;
+	}
+
+	public EntityQuery getCurrentQuery(){
+		return this.currentQuery;
+	}
+	@Override
+	public void createPartControl(Composite parent) {
+		FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+		toolkit.setBorderStyle(SWT.BORDER);
+		
+		Form form = toolkit.createForm(parent);
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+
+		GridLayout glayout = new GridLayout();
+		glayout.verticalSpacing = 0;
+		glayout.marginHeight = 0;
+		form.getBody().setLayout(glayout);
+		form.setText("Sightings");
+		
+		Group g = new Group(form.getBody(), SWT.NONE);
+		toolkit.adapt(g);
+		g.setText("Filters");
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setLayout(new GridLayout(2, false));
+		
+		Label l1 = toolkit.createLabel(g, "Date Filter:");
+		
+		dateComp = new QueryDateFilterComposite(g, null, SightingQueryColumn.SIGHTING_DATE_FILTERS);
+		dateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		dateComp.adapt(toolkit);
+		
+		Label l2 = toolkit.createLabel(g, "Entity Filter:");
+		
+		entityFilter = new EntityFilterComposite(g);
+		entityFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		entityFilter.adapt(toolkit);
+		
+		
+		Button btnRefresh = toolkit.createButton(g, "Reload Table", SWT.PUSH);
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateResultsTable();
+			}
+
+		});
+		
+		lblQueryProgress = toolkit.createLabel(g, "");
+		lblQueryProgress.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Composite compSighting = toolkit.createComposite(form.getBody());
+		GridLayout gl = new GridLayout();
+		gl.marginHeight = 10;
+		gl.marginWidth = 0;
+		compSighting.setLayout(gl);
+		compSighting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		sightingTable = new SightingTable(compSighting);
+		sightingTable.getTable().getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(sightingTable.getTable().getTable());
+		
+		parentEditor.getSite().setSelectionProvider(sightingTable.getTable());
+	}
+
+	
+	
+	private void updateResultsTable(){
+		currentQuery = new EntityQuery(parentEditor.getEntityType(),
+			dateComp.getDateFilter(), entityFilter.getFilter());
+		currentQuery.setQueryColumns(sightingTable.getCurrentColumns());
+		
+		runJob.cancel();
+		runJob.schedule();
+	}
+	
+	
+	
+	@Override
+	public void setFocus() {
+		
+	}
+	
+
+	@Override
+	public void updatePage(Session currentSession, boolean typeModified) {
+		entityFilter.setEntities(parentEditor.getEntityType().getEntities());
+		sightingTable.setEntityType(parentEditor.getEntityType());
+	}
+
+	
+	private Job runJob = new Job("Execute Sightings Page"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					sightingTable.setInput(null);
+				}});
+			
+			
+			
+			IProgressMonitor lblProgressMonitor = new ProgressMonitorWrapper(monitor) {
+				private String tName = "";
+				public void beginTask(String name, int totalWork) {
+					super.beginTask(name, totalWork);
+					tName = name;
+					updateLabel(name);
+				}
+				
+				public void setTaskName(String name) {
+					super.setTaskName(name);
+					tName = name;
+					updateLabel(name);
+				}
+
+				public void subTask(String name) {
+					super.subTask(name);
+					updateLabel(tName + " (" + name + ")");
+				}
+				
+				public void done(){
+					super.done();
+					updateLabel("");
+				}
+				private void updateLabel(final String text){
+					Display.getDefault().asyncExec(new Runnable(){
+
+						@Override
+						public void run() {
+							lblQueryProgress.setText(text);
+						}});
+				}
+			};
+			
+			EntityQuery query = currentQuery;
+			try{
+				final SightingPagedResults results = (SightingPagedResults) query.executeQuery(lblProgressMonitor);
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						sightingTable.setInput(results);
+						parentEditor.getMapPage().updatePage(null, false);
+					}});
+				
+			}catch (Exception ex){
+				//TODO: do something here
+				ex.printStackTrace();
+			}
+			lblProgressMonitor.done();
+			return Status.OK_STATUS;
+		}
+		
+	};
+}

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.entity.ui.typelist.editor;
+package org.wcs.smart.entity.ui.editor;
 
 import java.util.Collections;
 import java.util.List;

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.util.SmartUtils;
 
 import net.refractions.udig.catalog.IService;
@@ -34,8 +35,7 @@ import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
 
 /**
- * Udig service extension for smart conservation area 
- * Area layers.
+ * Udig service extension for Fixed Entity Type layers
  * 
  * @author Emily
  * @since 1.0.0
@@ -109,8 +109,7 @@ public class FixedEntityServiceExtension implements ServiceExtension {
 		
 			return params;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			EntityPlugIn.log(e.getMessage(), e);
 		}
 		return null;
 	}
