@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.query;
 
 import java.sql.Connection;
@@ -24,9 +45,15 @@ import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Envelope;
-
+/**
+ * Paged result set for a sighting query results.
+ * @author Emily
+ *
+ */
 public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
+	private Object TABLELOCK = new Object();
+	
 	private String queryTempTable;
 
 	private int itemCount = 0;
@@ -35,6 +62,7 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 	private Envelope bounds = null;
 
+	private boolean isDestoryed = false;
 //	// next sort column
 //	private QueryColumn sortColumn = null;
 //	// last sort column
@@ -72,14 +100,19 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 	public void destroy() {
 		// simply closing result set and deleting temporary table
+		isDestoryed = true;
 		dropResultSet();
 		Job cleanUpJob = new CleanUpJob();
-		cleanUpJob.setSystem(true); // we don't want this job to be displayed to
-									// user
+		cleanUpJob.setSystem(true); // we don't want this job to be displayed to user
 		cleanUpJob.schedule();
 	}
 
+	
 	public List<SightingResultItem> getData(final int offset, final int pageSize) {
+		if (isDestoryed){
+			return null;
+		}
+		
 		final Session session = HibernateManager.openSession();
 		// NOTE: session will not be closed on purpose!!!!
 		// as we want related ResultSet to remain opened for performance reasons
@@ -92,8 +125,9 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 	private List<SightingResultItem> getNextData(final Session session,
 			final int offset, final int pageSize) {
-		if (lastResultSet == null)
+		if (lastResultSet == null){
 			return null;
+		}
 		final List<SightingResultItem> result = new ArrayList<SightingResultItem>();
 		try {
 			result.addAll(getResults(lastResultSet, offset, pageSize));
@@ -265,7 +299,9 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 	private List<SightingResultItem> getData(final Session session,
 			final int offset, final int pageSize) {
-		
+		if (isDestoryed){
+			return null;
+		}
 		final List<SightingResultItem> result = new ArrayList<SightingResultItem>();
 	
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -273,16 +309,22 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				
 //				if ((lastSortColumn == null && sortColumn != null)
 //						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn
 //								.equals(sortColumn))) {
 //					updateSortColumn(sortColumn, session, c);
 //				}
 				c.commit();
-				
+				if (isDestoryed){
+					return;
+				}
 				lastResultSet = c.createStatement(
 						ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
+				if (isDestoryed){
+					return;
+				}
 				// this forces garbage collection; without this the program
 				// will fail with out of memory error when sorting
 				// on columns multiple times.
@@ -290,7 +332,6 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 
 				result.addAll(getResults(lastResultSet, offset, pageSize));
 //				attachObservations(result, c, session);
-				
 			}
 		});
 		return result;
@@ -414,12 +455,16 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	protected List<SightingResultItem> getResults(ResultSet rs,
 			int from, int pageSize) throws SQLException {
 		List<SightingResultItem> items = new ArrayList<SightingResultItem>();
+		if (isDestoryed){
+			return items;
+		}
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
 			to = itemCount;
 		}
 		for (int x = from; x < to; x++) {
+			if (isDestoryed) return items;
 			rs.next();
 			SightingResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
@@ -598,10 +643,15 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 						// original table
 						try {
 							if (queryTempTable != null){
-								String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
+								String toDrop = queryTempTable;
+								queryTempTable = null;
+								dropResultSet();
+								System.out.println("DESTROY: " + toDrop);
+								String sql = "DROP TABLE " + toDrop; //$NON-NLS-1$
 								c.createStatement().execute(sql);
 								QueryPlugIn.logSql(sql);
-								queryTempTable = null;
+
+								c.commit();
 							}
 						} catch (Exception ex) {
 							EntityPlugIn.log(ex.getMessage(), ex);

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui.typelist.editor;
+package org.wcs.smart.entity.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;

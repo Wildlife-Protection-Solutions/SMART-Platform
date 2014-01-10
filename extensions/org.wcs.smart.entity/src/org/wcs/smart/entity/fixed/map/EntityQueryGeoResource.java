@@ -43,43 +43,38 @@ import org.geotools.styling.Style;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.util.SmartUtils;
 
 /**
- * Georesource for fixed entity types.
+ * Entity sightings query geo resource.
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class FixedEntityGeoResource extends IGeoResource {
+public class EntityQueryGeoResource  extends IGeoResource {
+
+	private EntityQueryGeoResourceInfo info;
+	private URL url;
 	
-	private URL url = null;
-	protected byte[] entityUuid;
-	protected String entityName;
-	private FixedEntityGeoResourceInfo info;
 	
-	public FixedEntityGeoResource(FixedEntityService service, String entityName, byte[] entityUuid){
+	public EntityQueryGeoResource(EntityQueryService service){
 		this.service = service;
-		this.entityName = entityName;
-		this.entityUuid = entityUuid;
-		URL serviceIdentifer = service.getIdentifier();
 		
+		URL serviceIdentifer = service.getIdentifier();
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + SmartUtils.encodeHex(entityUuid), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + "sightings", CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
-		
 	}
 	
-	
-	public String getEntityTypeName(){
-		return entityName;
+	/**
+	 * Updates the bounds of the georesource.
+	 * @param monitor
+	 */
+	public void refresh(IProgressMonitor monitor){
+		if (info != null){
+			info.computeBounds(this, monitor);
+		}
 	}
-	
-	public byte[] getEntityTypeUuid(){
-		return this.entityUuid;
-	}
-	
 	/**
 	 * @see net.refractions.udig.catalog.IResolve#getStatus()
 	 */
@@ -105,7 +100,7 @@ public class FixedEntityGeoResource extends IGeoResource {
 		if (info == null){
 			synchronized (this) {
 				if (info == null){
-					info = new FixedEntityGeoResourceInfo(this, monitor);
+					info = new EntityQueryGeoResourceInfo(this, monitor);
 				}
 			}
 			
@@ -113,6 +108,7 @@ public class FixedEntityGeoResource extends IGeoResource {
 		return info;
 	}
 
+	
 	/**
 	 * @see net.refractions.udig.catalog.IGeoResource#getIdentifier()
 	 */
@@ -149,10 +145,11 @@ public class FixedEntityGeoResource extends IGeoResource {
       
 		if (adaptee.isAssignableFrom(FeatureSource.class)
 				|| adaptee.isAssignableFrom(SimpleFeatureSource.class)) {
-			DataStore ds = ((FixedEntityService) service).getDataStore(monitor);
+			
+			DataStore ds = ((EntityQueryService) service).getDataStore(monitor);
 			if (ds != null) {
 				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
-						.getFeatureSource(SmartUtils.encodeHex(entityUuid));
+						.getFeatureSource(EntityQueryDataSource.TYPENAME);
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
@@ -200,11 +197,10 @@ public class FixedEntityGeoResource extends IGeoResource {
     			"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
     			"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
     			"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-    			"							&lt;sld:WellKnownName&gt;star&lt;/sld:WellKnownName&gt;"+ //$NON-NLS-1$
+    			"							&lt;sld:WellKnownName&gt;X&lt;/sld:WellKnownName&gt;"+ //$NON-NLS-1$
     			"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
-    			"								&lt;sld:CssParameter name=\"fill\"&gt;#00FFFF&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
+    			"								&lt;sld:CssParameter name=\"fill\"&gt;#FF0000&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
     			"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
-//    			"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
     			"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
     			"						&lt;sld:Size&gt;11.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
     			"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$

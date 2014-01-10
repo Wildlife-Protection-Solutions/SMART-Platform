@@ -53,11 +53,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * A udig service for smart
- * conservation area "area" data.
- * 
- * Service exists for a conservation area.  Each
- * area type is a separate georesource.
+ * A service for fixed entity types.  A single service provides all entity
+ * types for a given conservation area.
  * 
  * @author Emily
  * @since 1.0.0
@@ -67,7 +64,6 @@ public class FixedEntityService extends IService {
 	public static final String SERVICE_ID = "org.wcs.smart.entity.udig.catalog.fixedEntityService"; //$NON-NLS-1$
 	private Map<String, Serializable> params;
 	private URL url;
-//	private Session session = null;
 	
 	private List<FixedEntityGeoResource> members;
 	private FixedEntityDataSource ds = null;
@@ -79,11 +75,11 @@ public class FixedEntityService extends IService {
 		this.params = params;
 		this.url = FixedEntityServiceExtension.createURL(this.params);
 		
+		
+		//register listener for different entity types
 		entityListener = new IEntityListener() {
-			
 			@Override
 			public void handleEvent(int eventType, Object source) {
-				// TODO Auto-generated method stub
 				if (eventType == EntityEventManager.ENTITY_TYPE_ADDED ){
 					//add new entity type to members
 					EntityType et = (EntityType)source;
@@ -115,7 +111,7 @@ public class FixedEntityService extends IService {
 	public void refresh(EntityType entityType, IProgressMonitor monitor) throws IOException{
 		getDataStore(monitor).refresh(entityType);
 		for (IGeoResource member : resources(monitor)){
-			if (((FixedEntityGeoResource)member).getEntityTypeName().equals(SmartUtils.encodeHex(entityType.getUuid()))){
+			if (Arrays.equals(((FixedEntityGeoResource)member).getEntityTypeUuid(), entityType.getUuid())){
 				//update the bounds
 				((FixedEntityGeoResourceInfo)member.getInfo(monitor)).computeBounds((FixedEntityGeoResource)member, monitor);
 			}
@@ -170,10 +166,10 @@ public class FixedEntityService extends IService {
 						protected IStatus run(IProgressMonitor monitor) {
 							Session s = HibernateManager.openSession();
 							try{
-								Query q = s.createQuery("FROM EntityType WHERE conservationArea = :ca and type = :type");
-								q.setParameter("ca", SmartDB.getCurrentConservationArea());
-								q.setParameter("type", EntityType.Type.FIXED);
-								List data = q.list();
+								Query q = s.createQuery("FROM EntityType WHERE conservationArea = :ca and type = :type"); //$NON-NLS-1$
+								q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+								q.setParameter("type", EntityType.Type.FIXED); //$NON-NLS-1$
+								List<?> data = q.list();
 								for (int i = 0; i < data.size(); i++){
 									EntityType type = (EntityType) data.get(i);
 									members.add(new FixedEntityGeoResource(FixedEntityService.this, type.getName(), type.getUuid()));
@@ -189,8 +185,7 @@ public class FixedEntityService extends IService {
 					try {
 						j.join();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						EntityPlugIn.log("Error loading fixed entity types.", e);
 					}
 				}
 			}

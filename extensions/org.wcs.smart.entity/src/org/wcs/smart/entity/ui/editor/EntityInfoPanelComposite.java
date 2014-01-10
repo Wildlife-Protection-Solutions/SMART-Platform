@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui.typelist.editor;
+package org.wcs.smart.entity.ui.editor;
 
 import java.util.HashMap;
 
@@ -230,7 +230,7 @@ public class EntityInfoPanelComposite extends Composite{
 		
 		if (etype.getAttributes() != null){
 			for (EntityAttribute ea : etype.getAttributes()){
-				Label l = toolkit.createLabel(comp, ea.getName() + ":");
+				Label l = toolkit.createLabel(comp, ea.getName() + ":"); //$NON-NLS-1$
 				
 				Text txt = toolkit.createText(comp, ""); //$NON-NLS-1$
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

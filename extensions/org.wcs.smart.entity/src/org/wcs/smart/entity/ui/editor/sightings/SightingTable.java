@@ -1,11 +1,31 @@
-package org.wcs.smart.entity.ui.typelist.editor.sightings;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.entity.ui.editor.sightings;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -16,8 +36,9 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.typelist.editor.sightings.SightingTableColumns.FixedColumns;
+import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn.FixedColumns;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IResultItem;
@@ -25,9 +46,17 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Sightings table for displaying and managing sighting
+ * query results.
+ * 
+ * @author Emily
+ *
+ */
 public class SightingTable {
 
 	private TableViewer sightingsTable;
+	private List<QueryColumn>  currentCols;
 	
 	public SightingTable(Composite composite){
 		sightingsTable = new TableViewer(composite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
@@ -38,24 +67,43 @@ public class SightingTable {
 		sightingsTable.setItemCount(0);
 	}
 	
+	/**
+	 * Update the table contents 
+	 * @param results
+	 */
 	public void setInput(IPagedQueryResultSet results){
-		sightingsTable.setItemCount(0);
-		sightingsTable.setInput(null);
-		
-		sightingsTable.setItemCount(results.getItemCount());
-		sightingsTable.setInput(results);
+		if (sightingsTable.getTable().isDisposed()){
+			return;
+		}
+		if (results == null){
+			sightingsTable.setItemCount(0);
+			sightingsTable.setInput(null);
+		}else{
+			sightingsTable.setItemCount(results.getItemCount());
+			sightingsTable.setInput(results);
+		}
 	}
 	
+	/**
+	 * 
+	 * @return the table viewer component
+	 */
 	public TableViewer getTable(){
 		return this.sightingsTable;
 	}
 	
+	/**
+	 * Updates/sets the entity type.  This causes all columns in the table
+	 * to be disposed and recreated.
+	 * @param et
+	 */
 	public void setEntityType(EntityType et){
 		for (TableColumn tc : sightingsTable.getTable().getColumns()){
 			tc.dispose();
 		}
 		
-		for (final QueryColumn col : getQueryColumns(et)){
+		currentCols = getQueryColumns(et);
+		for (final QueryColumn col : currentCols){
 			TableViewerColumn tv = new TableViewerColumn(sightingsTable, SWT.NONE);
 			tv.getColumn().setWidth(100);
 			tv.getColumn().setText(col.getName());
@@ -69,11 +117,21 @@ public class SightingTable {
 			});
 		}
 	}
+	
+	/**
+	 * 
+	 * @return the current columns in the table
+	 */
+	public List<QueryColumn> getCurrentColumns(){
+		return this.currentCols;
+		
+	}
+	
 	private List<QueryColumn> getQueryColumns(EntityType type){
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
 		//fixed columns for waypoint and fixed entity attributes
-		for (FixedColumns fixed : SightingTableColumns.FixedColumns.values()){
+		for (FixedColumns fixed : SightingQueryColumn.FixedColumns.values()){
 			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType());
 			
 			if (SmartDB.isMultipleAnalysis()){
@@ -102,10 +160,15 @@ public class SightingTable {
 				cType = ColumnType.NUMBER;
 			}
 			
-			QueryColumn column = new SightingQueryColumn(name, key, cType);
+			QueryColumn column = new SightingQueryColumn(name + " (" + ea.getEntityType().getName() + ")", key, cType);
 			cols.add(column);
 		}
 	
+		//data model category
+		int catCount = QueryDataModelManager.getInstance().getActiveDepth();
+		for(int i = 0; i < catCount; i++){
+			cols.add(new SightingQueryColumn("Observation Category " + i, "cat:" + i, ColumnType.STRING));
+		}
 		//cols.add(new SightingQueryColumn("Observation Summary", "entity:obssum", ColumnType.STRING));
 		
 		return cols;

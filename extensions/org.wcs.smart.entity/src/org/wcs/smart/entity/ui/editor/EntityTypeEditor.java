@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui.typelist.editor;
+package org.wcs.smart.entity.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -48,6 +48,7 @@ import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.query.EntityQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -64,7 +65,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	
 	private EntityTypeConfigurationPage configPage;
 	private EntityTypeEntitiesPage entityPage;
-	private FixedEntityMapPage fixedMapPage;
+	private SightingMapPage sightingsMapPage;
 	private SightingPage sightingsPage;
 	
 	private EntityType entityType;
@@ -98,7 +99,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, fixedMapPage, sightingsPage}, true);
+							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsMapPage, sightingsPage}, true);
 						}});
 					
 				}
@@ -121,7 +122,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage,fixedMapPage, sightingsPage}, false);
+							initEditor(new IEntityTypeEditorPage[]{entityPage,sightingsMapPage, sightingsPage}, false);
 						}});
 					
 				}
@@ -145,6 +146,19 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		super.dispose();
 		
 		EntityEventManager.getInstance().removeListener(listener);
+	}
+	
+	/**
+	 * The last query from the sightings page 
+	 * @return
+	 */
+	public EntityQuery getCurrentQuery(){
+		return sightingsPage.getCurrentQuery();
+	}
+	
+	
+	public SightingMapPage getMapPage(){
+		return this.sightingsMapPage;
 	}
 	
 	/**
@@ -174,20 +188,17 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			sightingsPage = new SightingPage(this);
 			index = addPage(sightingsPage, getEditorInput());
 			super.setPageText(index, "Sightings");
-//			super.getPageImage(index, image);
+			super.setPageImage(index, EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.SIGHTINGS_ICON));
 			
-			if (  getEntityType().getType() == EntityType.Type.FIXED  ){
-				fixedMapPage = new FixedEntityMapPage(this);
-				index = addPage(fixedMapPage, getEditorInput());
-				super.setPageText(index, "Fixed Entity Positions");
-				super.setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
-			}
-			
+			sightingsMapPage = new SightingMapPage(this);
+			index = addPage(sightingsMapPage, getEditorInput());
+			super.setPageText(index, "Map");
+			super.setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 					
 		}catch (Exception ex){
 			EntityPlugIn.displayLog(Messages.EntityTypeEditor_ErrorOpeningEditor + ex.getMessage(), ex);
 		}
-		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsPage, fixedMapPage}, true);
+		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsPage, sightingsMapPage}, true);
 		
 		EntityEventManager.getInstance().addListener(listener);
 	}
@@ -331,42 +342,29 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 
 	@Override
 	public Map getMap() {
-		if (fixedMapPage != null){
-			return fixedMapPage.getMap();
-		}
-		return null;
+		return sightingsMapPage.getMap();
 	}
 
 	@Override
 	public void openContextMenu() {
-		if (fixedMapPage != null){
-			fixedMapPage.openContextMenu();
-		}
+		sightingsMapPage.openContextMenu();
 		
 	}
 
 	@Override
 	public void setFont(Control textArea) {
-		if (fixedMapPage != null){
-			fixedMapPage.setFont(textArea);
+		sightingsMapPage.setFont(textArea);
 		}
-	}
 
 	@Override
 	public void setSelectionProvider(
 			IMapEditorSelectionProvider selectionProvider) {
-		if (fixedMapPage != null){
-			fixedMapPage.setSelectionProvider(selectionProvider);
-		}
-		
+		sightingsMapPage.setSelectionProvider(selectionProvider);		
 	}
 
 	@Override
 	public IStatusLineManager getStatusLineManager() {
-		if (fixedMapPage != null){
-			return fixedMapPage.getStatusLineManager();
-		}
-		return null;
+		return sightingsMapPage.getStatusLineManager();
 	}
 	
 	
