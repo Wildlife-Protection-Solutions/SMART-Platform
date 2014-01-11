@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -157,6 +159,18 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				gd.widthHint = 300;
 				viewer.getTable().setLayoutData(gd);
 				AttributeTable.resizeColumns(viewer);
+				viewer.addDoubleClickListener(new IDoubleClickListener() {
+					@Override
+					public void doubleClick(DoubleClickEvent event) {
+						WaypointObservation wob = null;
+						if (!(((IStructuredSelection)viewer.getSelection()).isEmpty())){
+							wob = (WaypointObservation) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+						}else if (  items.size() == 1){
+							wob = items.get(0);
+						}
+						editCategory(ob.getKey(), wob);	
+					}
+				});
 				if (lnkEdit != null){
 					lnkEdit.addSelectionListener(new SelectionAdapter() {
 						@Override

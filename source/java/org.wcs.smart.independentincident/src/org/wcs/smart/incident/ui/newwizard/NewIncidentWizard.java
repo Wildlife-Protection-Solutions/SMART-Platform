@@ -63,8 +63,9 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		
 		session = HibernateManager.openSession();
 		
-		Query q = session.createQuery("SELECT max(id) FROM Waypoint WHERE sourceId = ?"); //$NON-NLS-1$
-		q.setParameter(0, IndepedentIncidentSource.KEY);
+		Query q = session.createQuery("SELECT max(id) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> maxIs = q.list();
 		if (maxIs.size() > 0){
 			newIncident.setId((Integer)maxIs.get(0) + 1);

@@ -141,7 +141,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		if (!attribute.getIsRequired()){
 			items.add(0, ""); //$NON-NLS-1$
 		}
-		cmbViewer.setInput(items.toArray(new Object[items.size()]));
+		cmbViewer.setInput(items);
 		
 		cd = new ControlDecoration(cmbViewer.getControl(), SWT.LEFT | SWT.TOP);
 		cd.setImage(FieldDecorationRegistry.getDefault()
@@ -199,6 +199,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#setValue(java.lang.Object)
 	 * @param x the observation AttributeListItem value
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setValue(Object x){
 		if (x != null & !(x instanceof AttributeListItem)){
@@ -208,6 +209,12 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		if (originalValue == null){
 			cmbViewer.setSelection(null);
 		}else{
+			if (!((List<Object>)cmbViewer.getInput()).contains(this.originalValue)){
+				//then the original value is not in the list; probably not longer active
+				//for the purpose of this particular field we wnat to add it
+				 ((List<Object>)cmbViewer.getInput()).add(this.originalValue);
+				 cmbViewer.refresh();
+			}
 			cmbViewer.setSelection(new StructuredSelection(this.originalValue));
 		}
 		validate();

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.observation.ui.input;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,9 +32,14 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -49,13 +55,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.common.attachment.AttachmentUtil;
+import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
@@ -100,7 +111,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	//bold font
 	private Font boldLabelFont = null;
 	private boolean requiresObservation = false;
-	
+	private ListViewer attachmentViewer;
 	/**
 	 * @param pageName
 	 */
@@ -176,6 +187,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		Composite header = new Composite(top, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.horizontalSpacing = gl.verticalSpacing = gl.marginBottom = gl.marginTop = gl.marginHeight = gl.marginWidth = gl.marginLeft = gl.marginRight = 0;
+		
 		header.setLayout(gl);
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -194,6 +206,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		ScrolledComposite scComp = new ScrolledComposite(top, SWT.V_SCROLL);
 		scComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)scComp.getLayoutData()).heightHint = 200;
 		
 		Composite main = new Composite(scComp, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
@@ -201,7 +214,12 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		scComp.setContent(main);
 		scComp.setExpandVertical(true);
 		scComp.setExpandHorizontal(true);
+		
 		createAttributeFields(main);
+		
+
+		
+		
 		if (!currentCategory.getIsMultiple()){
 			if (currentObservations != null && currentObservations.size() > 0){
 				WaypointObservation ob = currentObservations.iterator().next();
@@ -448,10 +466,14 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				field.clear();
 			}
 		}
+//		attViewer.setAttachment(editingOb.getAttachments());
+		attachmentViewer.setInput(editingOb.getAttachments());
+		
 		if (attributeTable != null){
 			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(wo);
 			attributeTable.refresh();
 		}
+		
 	}
 	
 	/*
@@ -496,6 +518,84 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		if (attributeFields.size() > 0){
 			attributeFields.get(0).setFocus();
 		}
+		
+		
+		//attachments
+		Label lbl = new Label(cattribute, SWT.NONE);
+		lbl.setText("Attachments:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		((GridData)lbl.getLayoutData()).verticalIndent = 2;
+		
+		Composite compAttach = new Composite(cattribute, SWT.NONE);
+		compAttach.setLayout(new GridLayout(2, false));
+		compAttach.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		attachmentViewer = new ListViewer(compAttach, SWT.BORDER);
+		attachmentViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		attachmentViewer.setContentProvider(ArrayContentProvider.getInstance());
+		attachmentViewer.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				return ((ISmartAttachment)element).getFilename();
+			}
+		});
+		attachmentViewer.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
+				if (att != null){
+					AttachmentUtil.openAttachment(att);
+				}
+			}
+		});
+		
+		Composite btnPanel = new Composite(compAttach, SWT.NONE);
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		btnPanel.setLayout(gl);
+		
+		Button btnAdd = new Button(btnPanel, SWT.PUSH);
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//open add dialog
+				FileDialog fd = new FileDialog(getShell(), SWT.MULTI);
+				
+				String file = fd.open();
+				if (file == null) {
+					return;
+				}
+				for (int i = 0; i < fd.getFileNames().length; i ++){
+					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
+					if (!f.exists()){
+						ObservationPlugIn.displayLog(MessageFormat.format("File not found.", new Object[]{f.getAbsolutePath()}), null);
+						return;
+					}
+					
+					ObservationAttachment oa = new ObservationAttachment();
+					oa.setCopyFromLocation(f);
+					oa.setFilename(f.getName());
+					oa.setObservation(editingOb);
+					editingOb.getAttachments().add(oa);
+				}
+				attachmentViewer.refresh();
+			}
+		});
+		
+		Button btnRemove = new Button(btnPanel, SWT.PUSH);
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
+				if (att != null){
+					editingOb.getAttachments().remove(att);
+//					((ObservationAttachment)att).setObservation(null);
+				}
+				attachmentViewer.refresh();
+			}
+		});
 	}
 
 	/*

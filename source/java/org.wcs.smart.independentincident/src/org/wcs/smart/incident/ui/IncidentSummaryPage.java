@@ -22,13 +22,19 @@
 package org.wcs.smart.incident.ui;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -52,6 +58,8 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.AttachmentUtil;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.internal.Messages;
@@ -62,12 +70,14 @@ import org.wcs.smart.incident.ui.newwizard.EditIncidentDialog;
 import org.wcs.smart.incident.ui.newwizard.IdComposite;
 import org.wcs.smart.incident.ui.newwizard.IncidentAttachmentComposite;
 import org.wcs.smart.incident.ui.newwizard.LocationComposite;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Incident editor summary page
@@ -174,7 +184,13 @@ public class IncidentSummaryPage extends EditorPart {
 				this.txtDistance.setText(String.valueOf(incident.getDistance()));
 			}		
 		
-			this.attachments.setInput(incident.getAttachments());
+			//include all attachments 
+			List<ISmartAttachment> allAtts = new ArrayList<ISmartAttachment>();
+			allAtts.addAll(incident.getAttachments());
+			for (WaypointObservation wo : incident.getObservations()){
+				allAtts.addAll(wo.getAttachments());
+			}
+			this.attachments.setInput(allAtts);
 			this.observationTable.setInput(incident.getObservations());
 		}finally{
 			session.close();
@@ -259,7 +275,7 @@ public class IncidentSummaryPage extends EditorPart {
 		txtComments = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtComments.setEditable(false);
 		txtComments.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)txtComments.getLayoutData()).heightHint = 100;
+		((GridData)txtComments.getLayoutData()).heightHint = 70;
 		((GridData)txtComments.getLayoutData()).widthHint = 100;
 		createEdit(right, canEdit, CommentComposite.ID);
 		
@@ -267,12 +283,33 @@ public class IncidentSummaryPage extends EditorPart {
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		attachments = new ListViewer(right);
 		attachments.setContentProvider(ArrayContentProvider.getInstance());
-		attachments.setLabelProvider(new SmartAttachmentLabelProvider());
-		attachments.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)attachments.getControl().getLayoutData()).heightHint = 100;
-		((GridData)attachments.getControl().getLayoutData()).widthHint = 100;
-		createEdit(right, canEdit, IncidentAttachmentComposite.ID);
+		attachments.setLabelProvider(new SmartAttachmentLabelProvider(){
+			
+			public String getText(Object element) {
+				if (element instanceof ObservationAttachment){
+					return "**" + super.getText(element);
+				}
+				return super.getText(element);
+			}
+		});
 		
+		attachments.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)attachments.getControl().getLayoutData()).heightHint = 70;
+		((GridData)attachments.getControl().getLayoutData()).widthHint = 100;
+		attachments.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachments.getSelection()).getFirstElement();
+				if (att != null){
+					AttachmentUtil.openAttachment(att);
+				}
+				
+			}
+		});
+		createEdit(right, canEdit, IncidentAttachmentComposite.ID);
+		toolkit.createLabel(right, ""); //$NON-NLS-1$
+		l = toolkit.createLabel(right, "** Observation Attachments");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		
 		Section observationSection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR   );
 		observationSection.setText(Messages.IncidentSummaryPage_ObservationLabel);
@@ -282,8 +319,12 @@ public class IncidentSummaryPage extends EditorPart {
 		observationTableComp.setLayout(new GridLayout(1, false));
 		observationSection.setClient(observationTableComp);
 		
+		Composite innerTable = toolkit.createComposite(observationTableComp);
+		innerTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableColumnLayout tlayout = new TableColumnLayout();
+		innerTable.setLayout(tlayout);
 		
-		observationTable = new TableViewer(observationTableComp, SWT.FULL_SELECTION | SWT.BORDER);
+		observationTable = new TableViewer(innerTable, SWT.FULL_SELECTION | SWT.BORDER);
 		observationTable.setContentProvider(ArrayContentProvider.getInstance());
 
 		observationTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -302,6 +343,7 @@ public class IncidentSummaryPage extends EditorPart {
 		    return p.getCategory().getFullCategoryName();
 		  }
 		});
+		tlayout.setColumnData(colFirstName.getColumn(), new ColumnWeightData(20));
 		
 		TableViewerColumn colAttributes = new TableViewerColumn(observationTable, SWT.NONE);
 		colAttributes.getColumn().setWidth(200);
@@ -319,6 +361,21 @@ public class IncidentSummaryPage extends EditorPart {
 			return sb.toString();
 		  }
 		});
+		tlayout.setColumnData(colAttributes.getColumn(), new ColumnWeightData(90));
+		
+		TableViewerColumn colAttachments = new TableViewerColumn(observationTable, SWT.NONE);
+		colAttachments.getColumn().setText("Attachments");
+		colAttachments.setLabelProvider(new ColumnLabelProvider() {
+		  @Override
+		  public String getText(Object element) {
+			  WaypointObservation o =  ((WaypointObservation)element);
+			  if (o.getAttachments().size() > 0){				  
+				  return MessageFormat.format("{0} file(s)", new Object[]{String.valueOf(o.getAttachments().size())});
+			  }
+			  return ""; //$NON-NLS-1$
+		  }
+		});
+		tlayout.setColumnData(colAttachments.getColumn(), new ColumnWeightData(10));
 		
 		if (canEdit == null){
 			Button btnEdit = toolkit.createButton(observationTableComp, Messages.IncidentSummaryPage_EditButtonName, SWT.PUSH);
