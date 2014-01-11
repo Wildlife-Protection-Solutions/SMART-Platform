@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.observation.ui.input;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +61,7 @@ public class AttributeTable {
 	 */
 	private static final int MAX_COLUMN_WIDTH = 200;
 
+	private static final String ATTACHMENT_COLUMN_NAME="Attachments";
 
 	/**
 	 * Creates a new attribute table.
@@ -97,6 +99,17 @@ public class AttributeTable {
 				}
 				column.setWidth( width );
 			}
+			TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
+//			column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
+			column.setText(ATTACHMENT_COLUMN_NAME);
+			column.setResizable(true);
+			column.setMoveable(false);
+			
+			int width = gc.textExtent(ATTACHMENT_COLUMN_NAME ).x + 20;
+			if (width < 60){
+				width = 60;
+			}
+			column.setWidth( width );
 		}finally{
 			gc.dispose();
 		}
@@ -208,11 +221,19 @@ public class AttributeTable {
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof WaypointObservation) {
 				WaypointObservation observation = (WaypointObservation) element;
-				Attribute attribute = columns.get(columnIndex);
-				WaypointObservationAttribute att = observation.findAttribute(attribute);
+				if (columnIndex >= columns.size() ){
+					//assume this is the attachments column
+					if (observation.getAttachments().size() > 0){
+						return MessageFormat.format("{0} files", new Object[]{String.valueOf(observation.getAttachments().size())});
+					}
+					return "";
+				}else{
+					Attribute attribute = columns.get(columnIndex);
+					WaypointObservationAttribute att = observation.findAttribute(attribute);
 				
-				if (att != null) {
-					return att.getAttributeValueAsString();
+					if (att != null) {
+						return att.getAttributeValueAsString();
+					}
 				}
 				
 			}

@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.LabelProvider;
  * @since 1.0.0
  */
 public class SmartAttachmentLabelProvider extends LabelProvider {
+	
 	public String getText(Object element) {
 		if (element instanceof ISmartAttachment){
 			return ((ISmartAttachment) element).getFilename();

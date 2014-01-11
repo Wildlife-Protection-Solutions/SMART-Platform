@@ -34,6 +34,7 @@ import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
@@ -193,11 +194,12 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 			summaryEditor= new IncidentSummaryPage(this);
 			int i = addPage(summaryEditor, getEditorInput());
 			setPageText(i, Messages.IncidentEditor_DetailsPageName);
+			setPageImage(i, IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON));
 			
 			mapPage = new IncidentMapPage(this);
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, Messages.IncidentEditor_MapPageName);
-			
+			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
 			//-- event managers --
 			IncidentEventManager.getInstance().addListener(listener);
