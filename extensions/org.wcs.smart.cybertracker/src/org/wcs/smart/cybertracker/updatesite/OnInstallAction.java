@@ -25,11 +25,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.internal.p2.engine.InstallableUnitOperand;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
-import org.eclipse.equinox.p2.metadata.IInstallableUnit;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * Action that is called when CyberTracker plug-in is installed or upgraded using update site
@@ -37,9 +33,14 @@ import org.eclipse.swt.widgets.Display;
  * @author elitvin
  * @since 2.0.0
  */
-@SuppressWarnings("restriction")
 public class OnInstallAction extends ProvisioningAction {
 
+	@Override
+	public IStatus execute(Map<String, Object> parameters) {
+		return Status.OK_STATUS;
+	}
+
+/*	
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
 		IInstallableUnit iu = (IInstallableUnit) parameters.get("iu"); //$NON-NLS-1$
@@ -60,24 +61,11 @@ public class OnInstallAction extends ProvisioningAction {
 	}
 
 	private void performUpgrade(IInstallableUnit iu, IInstallableUnit oldIu) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "CyberTracker upgrade",
-						"CyberTracker feature is in the process of being upgraded.");
-			}
-		});
 	}
 
 	private void performNewInstall(IInstallableUnit iu) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "CyberTracker intall",
-						"CyberTracker feature is in the process of being installed!");
-			}
-		});
 	}
+*/
 
 	@Override
 	public IStatus undo(Map<String, Object> parameters) {
