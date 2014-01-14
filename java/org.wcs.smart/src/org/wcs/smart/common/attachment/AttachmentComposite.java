@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -88,6 +90,17 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 				btnOpen.setEnabled(!tblAttachments.getSelection().isEmpty());
 				btnRemove.setEnabled(!tblAttachments.getSelection().isEmpty());
 				
+			}
+		});
+		tblAttachments.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				// TODO Auto-generated method stub
+				ISmartAttachment a = (ISmartAttachment) ((IStructuredSelection)tblAttachments.getSelection()).getFirstElement();
+				if (a != null){
+					AttachmentUtil.openAttachment(a);
+				}
 			}
 		});
 		

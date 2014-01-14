@@ -167,14 +167,14 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		moveNext = true;
 		List<Category> categories = searchTree.getSelectedItems();
 		if (categories.size() > 0){
-			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
-				Category category = (Category) iterator.next();
-				if (findAttributes(category).size() > 0){
-					//at least one category with attribute exists
+//			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
+//				Category category = (Category) iterator.next();
+//				if (findAttributes(category).size() > 0){
+//					//at least one category with attribute exists
 					return new AttributeWizardPage((Wizard)getWizard(), 0);
-				}
-			}
-			return new ObservationSummaryWizardPage((Wizard)getWizard());
+//				}
+//			}
+//			return new ObservationSummaryWizardPage((Wizard)getWizard());
 		}
 		return null;
     }
@@ -208,20 +208,8 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		
 		//add categories for observations without attributes
 		List<Category> categories = searchTree.getSelectedItems();
-		List<Category> emptyCategories = new ArrayList<Category>();
 		if (categories.size() > 0){
-			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
-				Category category = (Category) iterator.next();
-				if (findAttributes(category).size() == 0){
-					emptyCategories.add(category);
-					iterator.remove();
-				}
-			}
-
 			((ObservationWizard)getWizard()).setCategoriesToProcess(categories);
-			for (Category category : emptyCategories){
-				((ObservationWizard)getWizard()).setWaypointObservation(category, null);
-			}
 		}
 		
 		return true;

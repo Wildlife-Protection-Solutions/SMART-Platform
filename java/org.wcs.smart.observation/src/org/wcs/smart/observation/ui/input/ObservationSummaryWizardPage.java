@@ -52,7 +52,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -130,72 +129,54 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				}
 			});
 			
-			Link lnkEdit = null;
-			if (ob.getKey().hasAttributes()){
-				lnkEdit = new Link(lblComp, SWT.NONE);
-				lnkEdit.setText("<a>" + DialogConstants.EDIT_BUTTON_TEXT + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
-			}else{
-				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-			}
-
-			final List<WaypointObservation> items = new ArrayList<WaypointObservation>();
-			for (WaypointObservation wo :ob.getValue()){
-				if (wo.getAttributes() != null){
-					for (WaypointObservationAttribute att: wo.getAttributes()){
-						if (att.hasValue()){
-							items.add(wo);
-							break;
-						}
-					}
-				}
-			}
+			Link lnkEdit  = new Link(lblComp, SWT.NONE);
+			lnkEdit.setText("<a>" + DialogConstants.EDIT_BUTTON_TEXT + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
 			
-			if (items.size() > 0){
-				final TableViewer viewer = AttributeTable.createAttributeTable(entryComp, ob.getKey());
-				viewer.setContentProvider(ArrayContentProvider.getInstance());			
-				viewer.setInput(items.toArray());
-				GridData gd = new GridData(SWT.FILL, SWT.FILL,true, true);
-				gd.heightHint = Math.min(viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, viewer.getTable().getItemHeight()*4);
-				gd.widthHint = 300;
-				viewer.getTable().setLayoutData(gd);
-				AttributeTable.resizeColumns(viewer);
-				viewer.addDoubleClickListener(new IDoubleClickListener() {
+			final List<WaypointObservation> items = new ArrayList<WaypointObservation>();
+			items.addAll(ob.getValue());
+		
+			final TableViewer viewer = AttributeTable.createAttributeTable(
+					entryComp, ob.getKey());
+			viewer.setContentProvider(ArrayContentProvider.getInstance());
+			viewer.setInput(items.toArray());
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			gd.heightHint = Math.min(
+					viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y,
+					viewer.getTable().getItemHeight() * 4);
+			gd.widthHint = 300;
+			viewer.getTable().setLayoutData(gd);
+			AttributeTable.resizeColumns(viewer);
+			viewer.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					WaypointObservation wob = null;
+					if (!(((IStructuredSelection) viewer.getSelection())
+							.isEmpty())) {
+						wob = (WaypointObservation) ((IStructuredSelection) viewer
+								.getSelection()).getFirstElement();
+					} else if (items.size() == 1) {
+						wob = items.get(0);
+					}
+					editCategory(ob.getKey(), wob);
+				}
+			});
+			if (lnkEdit != null) {
+				lnkEdit.addSelectionListener(new SelectionAdapter() {
 					@Override
-					public void doubleClick(DoubleClickEvent event) {
+					public void widgetSelected(SelectionEvent e) {
 						WaypointObservation wob = null;
-						if (!(((IStructuredSelection)viewer.getSelection()).isEmpty())){
-							wob = (WaypointObservation) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-						}else if (  items.size() == 1){
+						if (!(((IStructuredSelection) viewer.getSelection())
+								.isEmpty())) {
+							wob = (WaypointObservation) ((IStructuredSelection) viewer
+									.getSelection()).getFirstElement();
+						} else if (items.size() == 1) {
 							wob = items.get(0);
 						}
-						editCategory(ob.getKey(), wob);	
+						editCategory(ob.getKey(), wob);
 					}
 				});
-				if (lnkEdit != null){
-					lnkEdit.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							WaypointObservation wob = null;
-							if (!(((IStructuredSelection)viewer.getSelection()).isEmpty())){
-								wob = (WaypointObservation) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-							}else if (  items.size() == 1){
-								wob = items.get(0);
-							}
-							editCategory(ob.getKey(), wob);	
-						}
-					});
-				}
-				
-			}else{
-				if (lnkEdit != null){
-					lnkEdit.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							editCategory(ob.getKey(), null);	
-						}
-					});
-				}
 			}
+
 		}
 		
 		setTitle(Messages.ObservationSummaryWizardPage_PageTitle);

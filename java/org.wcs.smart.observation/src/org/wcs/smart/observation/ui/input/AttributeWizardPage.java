@@ -94,7 +94,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	/* current categorry & attribute list */
 	private Category currentCategory;
 	private List<Attribute> catAttributes;
-		
+	private List<ObservationAttachment> currentAttachments;
+	private boolean attsModified = false;
+	
 	/* for multi-observation categories */
 	private TableViewer attributeTable = null;
 	private ArrayList<WaypointObservation> observations;
@@ -366,6 +368,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				return true;
 			}
 		}
+		if (attsModified){
+			return true;
+		}
 		return false;
 	}
 	
@@ -467,7 +472,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		}
 //		attViewer.setAttachment(editingOb.getAttachments());
-		attachmentViewer.setInput(editingOb.getAttachments());
+		currentAttachments = new ArrayList<ObservationAttachment>();
+		currentAttachments.addAll(editingOb.getAttachments());
+		attachmentViewer.setInput(currentAttachments);
+		attsModified = false;
 		
 		if (attributeTable != null){
 			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(wo);
@@ -482,6 +490,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	private void clearEditObservation(){
 		this.editingOb = null;
 		this.btnUpdate.setEnabled(false);
+		this.currentAttachments = new ArrayList<ObservationAttachment>();;
+		attachmentViewer.setInput(currentAttachments);
+		attsModified = false;
 		getWizard().getContainer().getShell().setDefaultButton(btnAdd);
 		if (attributeTable != null){
 			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(null);
@@ -522,7 +533,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		//attachments
 		Label lbl = new Label(cattribute, SWT.NONE);
-		lbl.setText("Attachments:");
+		lbl.setText(Messages.AttributeWizardPage_AttachmentsLabel);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		((GridData)lbl.getLayoutData()).verticalIndent = 2;
 		
@@ -530,8 +541,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		compAttach.setLayout(new GridLayout(2, false));
 		compAttach.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		attachmentViewer = new ListViewer(compAttach, SWT.BORDER);
+		attachmentViewer = new ListViewer(compAttach, SWT.BORDER | SWT.V_SCROLL);
 		attachmentViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)attachmentViewer.getControl().getLayoutData()).heightHint = 50;
 		attachmentViewer.setContentProvider(ArrayContentProvider.getInstance());
 		attachmentViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -539,7 +551,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		});
 		attachmentViewer.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
@@ -549,10 +560,14 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		});
 		
+		this.currentAttachments = new ArrayList<ObservationAttachment>();
+		attachmentViewer.setInput(this.currentAttachments);
+		
 		Composite btnPanel = new Composite(compAttach, SWT.NONE);
 		GridLayout gl = new GridLayout();
 		gl.marginWidth = gl.marginHeight = 0;
 		btnPanel.setLayout(gl);
+		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		Button btnAdd = new Button(btnPanel, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -569,19 +584,20 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				for (int i = 0; i < fd.getFileNames().length; i ++){
 					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
 					if (!f.exists()){
-						ObservationPlugIn.displayLog(MessageFormat.format("File not found.", new Object[]{f.getAbsolutePath()}), null);
+						ObservationPlugIn.displayLog(MessageFormat.format(Messages.AttributeWizardPage_FileNotFoundError, new Object[]{f.getAbsolutePath()}), null);
 						return;
 					}
 					
 					ObservationAttachment oa = new ObservationAttachment();
 					oa.setCopyFromLocation(f);
 					oa.setFilename(f.getName());
-					oa.setObservation(editingOb);
-					editingOb.getAttachments().add(oa);
+					currentAttachments.add(oa);
 				}
 				attachmentViewer.refresh();
+				attsModified = true;
 			}
 		});
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnRemove = new Button(btnPanel, SWT.PUSH);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -590,12 +606,13 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			public void widgetSelected(SelectionEvent e) {
 				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
 				if (att != null){
-					editingOb.getAttachments().remove(att);
-//					((ObservationAttachment)att).setObservation(null);
+					currentAttachments.remove(att);
+					attsModified = true;
 				}
 				attachmentViewer.refresh();
 			}
 		});
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 	}
 
 	/*
@@ -606,6 +623,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		WaypointObservation wo = new WaypointObservation();
 		wo.setCategory(this.currentCategory);
 		wo.setAttributes(new ArrayList<WaypointObservationAttribute>());
+		wo.setWaypoint(  ((ObservationWizard)getWizard()).getWaypoint()  );
 		
 		for (IAttributeField<?> field : attributeFields){
 			String err = field.validate();
@@ -639,8 +657,28 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 				wo.getAttributes().add(att);
 			}
-			
 		}
+
+		// update the attachments
+		wo.setAttachments(new ArrayList<ObservationAttachment>());
+		for (ObservationAttachment a : currentAttachments){
+			a.setObservation(wo);
+			wo.getAttachments().add(a);
+		}
+		if (editingOb != null){
+			for (ObservationAttachment editAtt: editingOb.getAttachments()){
+				if (editAtt.getObservation().equals(editingOb)){
+					//need to remove this attachment 
+					((ObservationWizard)getWizard()).getSession().delete(editAtt);
+				}
+			}
+			editingOb.getAttachments().clear();
+		}
+		
+		
+		//clear all fields
+		currentAttachments = new ArrayList<ObservationAttachment>();
+		attachmentViewer.setInput(currentAttachments);
 		for (IAttributeField<?> field : attributeFields){
 			field.clear();
 		}

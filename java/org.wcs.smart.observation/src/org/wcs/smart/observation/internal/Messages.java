@@ -13,14 +13,22 @@ public class Messages extends NLS {
 	public static String AttributeDMAdvisor_Error_InvalidObjectType;
 	public static String AttributeListItemDMAdvisor_DeleteError;
 	public static String AttributeListItemDMAdvisor_InvalidObjectType;
+	public static String AttributeTable_AttachmentsColumnName;
+
+	public static String AttributeTable_AttachmentsFileCountLabel;
+
 	public static String AttributeTreeNodeDMAdvisor_DeleteError;
 	public static String AttributeTreeNodeDMAdvisor_InvalidObjectType;
 	public static String AttributeWizardPage_AddObservation_Button;
+
+	public static String AttributeWizardPage_AttachmentsLabel;
 	public static String AttributeWizardPage_CannotCreateObservationError_DialogMessage;
 	public static String AttributeWizardPage_CategoryObservations_Label;
 	public static String AttributeWizardPage_DataObservations_DialogMessage;
 	public static String AttributeWizardPage_DataObservations_DialogTitle;
 	public static String AttributeWizardPage_Error_DialogTitle;
+
+	public static String AttributeWizardPage_FileNotFoundError;
 	public static String AttributeWizardPage_PageMessage;
 	public static String AttributeWizardPage_PageName;
 	public static String AttributeWizardPage_PageNumberLabel;
