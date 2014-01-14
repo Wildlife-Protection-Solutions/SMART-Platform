@@ -88,7 +88,7 @@ public class WaypointObservation extends UuidItem {
 		this.attributes = attributes;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="observation", orphanRemoval=true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="observation", orphanRemoval=false, cascade={CascadeType.ALL})
 	public List<ObservationAttachment> getAttachments() {
 		return attachments;
 	}

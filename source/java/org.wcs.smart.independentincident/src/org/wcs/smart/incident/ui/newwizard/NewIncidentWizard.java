@@ -67,7 +67,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		q.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> maxIs = q.list();
-		if (maxIs.size() > 0){
+		if (maxIs.size() > 0 && maxIs.get(0) != null ){
 			newIncident.setId((Integer)maxIs.get(0) + 1);
 		}else{
 			//start at 1

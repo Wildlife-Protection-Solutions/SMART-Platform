@@ -380,4 +380,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
     	getSession().getTransaction().rollback();
         return true;
     }
+    
+    /**
+     * 
+     * @return
+     */
+    public Waypoint getWaypoint(){
+    	return this.wp;
+    }
 }

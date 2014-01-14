@@ -187,8 +187,10 @@ public class IncidentSummaryPage extends EditorPart {
 			//include all attachments 
 			List<ISmartAttachment> allAtts = new ArrayList<ISmartAttachment>();
 			allAtts.addAll(incident.getAttachments());
-			for (WaypointObservation wo : incident.getObservations()){
-				allAtts.addAll(wo.getAttachments());
+			if (incident.getObservations() != null){
+				for (WaypointObservation wo : incident.getObservations()){
+					allAtts.addAll(wo.getAttachments());
+				}
 			}
 			this.attachments.setInput(allAtts);
 			this.observationTable.setInput(incident.getObservations());

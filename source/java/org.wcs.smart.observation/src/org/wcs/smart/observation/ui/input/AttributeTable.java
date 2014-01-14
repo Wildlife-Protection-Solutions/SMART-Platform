@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
@@ -61,7 +62,7 @@ public class AttributeTable {
 	 */
 	private static final int MAX_COLUMN_WIDTH = 200;
 
-	private static final String ATTACHMENT_COLUMN_NAME="Attachments";
+	private static final String ATTACHMENT_COLUMN_NAME=Messages.AttributeTable_AttachmentsColumnName;
 
 	/**
 	 * Creates a new attribute table.
@@ -223,10 +224,10 @@ public class AttributeTable {
 				WaypointObservation observation = (WaypointObservation) element;
 				if (columnIndex >= columns.size() ){
 					//assume this is the attachments column
-					if (observation.getAttachments().size() > 0){
-						return MessageFormat.format("{0} files", new Object[]{String.valueOf(observation.getAttachments().size())});
+					if (observation.getAttachments() != null && observation.getAttachments().size() > 0){
+						return MessageFormat.format(Messages.AttributeTable_AttachmentsFileCountLabel, new Object[]{String.valueOf(observation.getAttachments().size())});
 					}
-					return "";
+					return ""; //$NON-NLS-1$
 				}else{
 					Attribute attribute = columns.get(columnIndex);
 					WaypointObservationAttribute att = observation.findAttribute(attribute);
