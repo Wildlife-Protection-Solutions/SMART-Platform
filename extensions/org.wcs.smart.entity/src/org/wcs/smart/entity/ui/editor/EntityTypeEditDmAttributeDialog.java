@@ -22,10 +22,12 @@
 package org.wcs.smart.entity.ui.editor;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,6 +39,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -46,6 +49,8 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -60,6 +65,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 
 	private Button btnIsRequired; 
 	private Button btnIsPrimary; 
+	private Text txtKey;
 	
 	private Session openSession;
 	private boolean fireEvents;
@@ -79,10 +85,51 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		
 		Composite pre = new Composite(parent, SWT.NONE);
 		pre.setLayout(new GridLayout(2, false));
+		pre.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(pre, SWT.NONE);
+		l.setText(Messages.EntityTypeEditDmAttributeDialog_KeyLabel);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		Composite c = new Composite(pre, SWT.NONE);
+		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		txtKey = new Text(c, SWT.DEFAULT);
+		txtKey.setText(((EntityAttribute)item).getKeyId());
+		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtKey.setEditable(false);
+		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Link btnEditKey = new Link(c, SWT.NONE);
+		btnEditKey.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		btnEditKey.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (!MessageDialog
+						.openConfirm(
+								getShell(),
+								Messages.EntityTypeEditDmAttributeDialog_EditKeyDialogTitle,
+								Messages.EntityTypeEditDmAttributeDialog_EditKeyDialogWarning )) {
+					return;
+				}
+				List<EntityAttribute> siblings = new ArrayList<EntityAttribute>();
+				EntityAttribute a = (EntityAttribute)item;
+				siblings.addAll(a.getEntityType().getAttributes());
+				siblings.remove(a);
+				KeyInputDialog id = new KeyInputDialog(getShell(), a.getKeyId(), siblings);
+				int ret = id.openNoWarning();
+				if (ret != Window.CANCEL) {
+					txtKey.setText(id.getValue());
+					setDirty(true);
+				}
+			}
+		});
+		
+		l = new Label(pre, SWT.NONE);
 		l.setText(Messages.EntityTypeEditDmAttributeDialog_IsRequiredFieldName);
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		btnIsRequired = new Button(pre, SWT.CHECK);
 		btnIsRequired.setSelection(  ((EntityAttribute)item).getIsRequired());
@@ -97,7 +144,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		
 		l = new Label(pre, SWT.NONE);
 		l.setText(Messages.EntityTypeEditDmAttributeDialog_IsPrimaryFieldName);
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		btnIsPrimary = new Button(pre, SWT.CHECK);
 		btnIsPrimary.setSelection(  ((EntityAttribute)item).getIsPrimary());
@@ -108,9 +155,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 			}
 		});
 		btnIsPrimary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,1,1));
-		
-		pre = new Composite(parent, SWT.NONE);
-		pre.setLayout(new GridLayout(2, false));
+
 		l = new Label(pre, SWT.NONE);
 		l.setText(Messages.EntityTypeEditDmAttributeDialog_DmAttributeLabel);
 		
@@ -200,7 +245,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		if (!super.save()){
 			return false;
 		}
-		
+		((EntityAttribute)super.item).setKeyId(txtKey.getText());
 		((EntityAttribute)super.item).setIsRequired(btnIsRequired.getSelection());
 		((EntityAttribute)super.item).setIsPrimary(btnIsPrimary.getSelection());
 		fireEvents = true;
