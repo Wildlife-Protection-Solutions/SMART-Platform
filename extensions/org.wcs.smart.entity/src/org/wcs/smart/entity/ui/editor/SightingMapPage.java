@@ -142,16 +142,14 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 				try {
 					queryService.refresh(parentEditor.getCurrentQuery());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					EntityPlugIn.log("Error refreshing entity query layer", e);
 				}
 			}
 			if (entityService != null){				
 				try {
 					entityService.refresh(parentEditor.getEntityType(), monitor);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					EntityPlugIn.log("Error entity location layer", e);
 				}
 			}
 			mapViewer.getRenderManager().refresh(null);
@@ -211,21 +209,12 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 		
 	}
 
-	/**
-	 * Updates the incident layer
-	 */
-	public void updateFixedEntityLayer() {
-		if (parentEditor.getEntityType().getType() == Type.FIXED){
-			updateLayerJob.schedule(100);
-		}
-	}
-
 	@Override
 	public void updatePage(Session currentSession, boolean typeModified) {
 		if (queryService == null){
 			addQueryReusltsJob.schedule();
 		}
-		updateFixedEntityLayer();
+		updateLayerJob.schedule(100);
 	}
 	
 	
