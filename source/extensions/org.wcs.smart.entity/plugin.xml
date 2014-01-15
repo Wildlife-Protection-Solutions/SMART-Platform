@@ -251,6 +251,24 @@
             </test>
          </activeWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.entity.ui.ExportEntityTypeHandler"
+            commandId="org.wcs.smart.entitytype.export">
+         <activeWhen>
+            <and>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+               <with
+                     variable="activeEditorId ">
+                  <equals
+                        value="org.wcs.smart.entity.editor.entitytype">
+                  </equals>
+               </with>
+            </and>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">
@@ -302,6 +320,14 @@
       <image
             commandId="org.wcs.smart.entity.entitytypefilter"
             icon="images/icons/etool16/filterentitytype.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entitytype.export"
+            icon="images/icons/etool16/exportentitytype.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entitytype.import"
+            icon="images/icons/etool16/importentitytype.png">
       </image>
    </extension>
    <extension

@@ -103,7 +103,7 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	}
 
 	
-	public List<SightingResultItem> getData(final int offset, final int pageSize) {
+	public synchronized  List<SightingResultItem> getData(final int offset, final int pageSize) {
 		isLoading = true;
 		try{
 			if (isDestoryed){

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/entitytype" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/entitytype" 
+elementFormDefault="qualified">
+
+    <element name="EntityType" type="tns:EntityType"></element>
+    
+    <complexType name="EntityType">
+    	<sequence>
+    		<element name="names" type="tns:LabelType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="attributes" type="tns:EntityAttribute" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="keyid" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="status" type="string"></attribute>
+    	<attribute name="type" type="string"></attribute>
+    </complexType>
+
+    <complexType name="EntityAttribute">
+    	<sequence>
+    		<element name="aliases" type="tns:LabelType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    	<attribute name="keyid" type="string"></attribute>
+    	<attribute name="attributeKeyid" type="string"></attribute>
+    	<attribute name="isRequired" type="boolean"></attribute>
+    	<attribute name="isPrimary" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="LabelType">
+    	<attribute name="languageCode" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+</schema>
