@@ -78,7 +78,12 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_DeleteDialogMessage;
 	public static String EntityTypeConfigurationPage_DeleteDialogTitle;
 	public static String EntityTypeConfigurationPage_EditErrorDescription;
+	public static String EntityTypeConfigurationPage_EditKeyDialogTitle;
+	public static String EntityTypeConfigurationPage_EditKeyDialogWarning;
+	public static String EntityTypeConfigurationPage_EditKeyError;
 	public static String EntityTypeConfigurationPage_IdLabel;
+	public static String EntityTypeConfigurationPage_KeyColumnName;
+	public static String EntityTypeConfigurationPage_KeyLabel;
 	public static String EntityTypeConfigurationPage_LoadAttributeProgressName;
 	public static String EntityTypeConfigurationPage_MoveDownLabel;
 	public static String EntityTypeConfigurationPage_MoveUpLabel;
@@ -98,11 +103,14 @@ public class Messages extends NLS {
 	public static String EntityTypeEditDmAttributeDialog_EditConfirmMessage;
 	public static String EntityTypeEditDmAttributeDialog_EditDialotTitle;
 	public static String EntityTypeEditDmAttributeDialog_EditError;
+	public static String EntityTypeEditDmAttributeDialog_EditKeyDialogTitle;
+	public static String EntityTypeEditDmAttributeDialog_EditKeyDialogWarning;
 	public static String EntityTypeEditDmAttributeDialog_EditTypeMessage;
 	public static String EntityTypeEditDmAttributeDialog_EditTypeTitle;
 	public static String EntityTypeEditDmAttributeDialog_InvalidLabel;
 	public static String EntityTypeEditDmAttributeDialog_IsPrimaryFieldName;
 	public static String EntityTypeEditDmAttributeDialog_IsRequiredFieldName;
+	public static String EntityTypeEditDmAttributeDialog_KeyLabel;
 	public static String EntityTypeEditor_ConfigurationPageName;
 	public static String EntityTypeEditor_EditingSavingType;
 	public static String EntityTypeEditor_EntitiesPageName;

@@ -80,6 +80,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -100,6 +101,7 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.KeyInputDialog;
 
 /**
  * Editor page for displaying and modifying the
@@ -119,6 +121,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	private Text txtType;
 	private Text txtStatus;
 	private Text txtId;
+	private Text txtKey;
 	private Text txtName;
 	private Text txtDmAttribute;
 
@@ -291,14 +294,62 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				}
 			});
 		}
-	
 		
-		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_AttributeLabel);
-		txtDmAttribute = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
-		txtDmAttribute.setEditable(false);
-		txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)txtId.getLayoutData()).widthHint = 100;
-		toolkit.createLabel(leftContent, ""); //$NON-NLS-1$
+		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_KeyLabel);
+		txtKey = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
+		txtKey.setEditable(false);
+		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtKey.getLayoutData()).widthHint = 100;
+		editLink = createEditLink(toolkit, leftContent);
+		if (editLink != null){
+			editLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					
+					//translateName();
+					if (!MessageDialog
+							.openConfirm(
+									getSite().getShell(),
+									Messages.EntityTypeConfigurationPage_EditKeyDialogTitle,
+									Messages.EntityTypeConfigurationPage_EditKeyDialogWarning )) {
+						return;
+					}
+					
+					Session s = HibernateManager.openSession();
+					s.beginTransaction();
+					try{
+						EntityType et = parentEditor.getEntityType();
+						Query q = s.createQuery("SELECT keyId FROM EntityType where conservationArea = :ca and uuid != :uuid"); //$NON-NLS-1$
+						q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+						q.setParameter("uuid", et.getUuid()); //$NON-NLS-1$
+						List<String> items = q.list();
+						List<NamedKeyItem> siblings = new ArrayList<NamedKeyItem>();
+						for (String i : items){
+							NamedKeyItem k = new EntityType();
+							k.setKeyId(i);
+							siblings.add(k);
+						}
+						KeyInputDialog id = new KeyInputDialog(getSite().getShell(), et.getKeyId(), siblings);
+						int ret = id.openNoWarning();
+						if (ret != Window.CANCEL) {
+							parentEditor.getEntityType().setKeyId(id.getValue());
+							s.saveOrUpdate(et);
+							s.getTransaction().commit();
+							
+							EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
+						}else{
+							s.getTransaction().rollback();
+						}
+					}catch(Exception ex){
+						EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_EditKeyError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						s.getTransaction().rollback();
+					}finally{
+						s.close();
+					}
+				}
+			});
+		}
+		
 		
 		// - right
 		toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_TypeLabel);
@@ -322,6 +373,12 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		((GridData)txtDateCreated.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
+		toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_AttributeLabel);
+		txtDmAttribute = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
+		txtDmAttribute.setEditable(false);
+		txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtId.getLayoutData()).widthHint = 100;
+		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
 		summaryScroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		summaryScroll.addControlListener(new ControlAdapter() {
@@ -386,6 +443,27 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				editAttribute();
 			}
 		});
+		TableViewerColumn colNone = new TableViewerColumn(attributeTable, SWT.NONE);
+		colNone.getColumn().setResizable(false);
+		colNone.setLabelProvider(new ColumnLabelProvider(){
+			@Override
+			public String getText(Object element){
+				return ""; //$NON-NLS-1$
+			}
+		});
+		
+		
+		TableViewerColumn colKey = new TableViewerColumn(attributeTable, SWT.NONE);
+		colKey.getColumn().setText(Messages.EntityTypeConfigurationPage_KeyColumnName);
+		colKey.setLabelProvider(new ColumnLabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof EntityAttribute){
+					return ((EntityAttribute) element).getKeyId();
+				}
+				return super.getText(element);
+			}
+		});
 		
 		TableViewerColumn colAlias = new TableViewerColumn(attributeTable, SWT.NONE);
 		colAlias.getColumn().setText(Messages.EntityTypeConfigurationPage_AliasColumnName);
@@ -425,6 +503,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		
 		TableViewerColumn colRequired = new TableViewerColumn(attributeTable, SWT.NONE);
 		colRequired.getColumn().setText(Messages.EntityTypeConfigurationPage_RequiredColumnName);
+		colRequired.getColumn().setToolTipText(Messages.EntityTypeConfigurationPage_RequiredColumnName);
 		colRequired.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -441,6 +520,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		
 		TableViewerColumn colPrimary = new TableViewerColumn(attributeTable, SWT.NONE);
 		colPrimary.getColumn().setText(Messages.EntityTypeConfigurationPage_PrimaryColumnName);
+		colPrimary.getColumn().setToolTipText(Messages.EntityTypeConfigurationPage_PrimaryColumnName);
 		colPrimary.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -457,10 +537,13 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		TableColumnLayout layout = new TableColumnLayout();
 		attributeTableComp.setLayout( layout );
 		
-		layout.setColumnData( colAlias.getColumn(), new ColumnWeightData( 35 ) );
+		layout.setColumnData( colNone.getColumn(), new ColumnWeightData( 0, 0, false ) );
+		layout.setColumnData( colKey.getColumn(), new ColumnWeightData( 15 ) );
+		layout.setColumnData( colAlias.getColumn(), new ColumnWeightData( 30 ) );
 		layout.setColumnData( colAttribute.getColumn(), new ColumnWeightData( 35 ) );
 		layout.setColumnData( colRequired.getColumn(), new ColumnWeightData( 10 ) );
 		layout.setColumnData( colPrimary.getColumn(), new ColumnWeightData( 10 ) );
+		
 		
 		if (EntityPermissionManager.canCreateEditDeleteTypes()){
 			Composite buttonComp = toolkit.createComposite(targetContent);
@@ -726,7 +809,12 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			ea.setIsRequired(true);
 			ea.setIsPrimary(true);
 			ea.setOrder(et.getAttributes().size()+1);
+			
+			ea.setKeyId(NamedKeyItem.generateKey(attribute.getKeyId(), et.getAttributes()));
+			
 			et.getAttributes().add(ea);
+			
+			
 		}
 		parentEditor.saveEntityType();
 	}
@@ -894,6 +982,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		type.getNames().size();
 		txtId.setText(type.getId());
 		txtName.setText(type.getName());
+		txtKey.setText(type.getKeyId());
 		txtDmAttribute.setText(type.getDmAttribute().getName());
 		txtStatus.setText(type.getStatus().getGuiName());
 		txtType.setText(type.getType().getGuiName());

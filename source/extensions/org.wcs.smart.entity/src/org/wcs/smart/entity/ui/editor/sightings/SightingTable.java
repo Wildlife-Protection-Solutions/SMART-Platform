@@ -158,28 +158,29 @@ public class SightingTable {
 		}
 		
 		//entity attributes
-		for (EntityAttribute ea : type.getAttributes()){
-			String name = ea.getName();
-			String key = "entity:" + SmartUtils.encodeHex(ea.getUuid()); //$NON-NLS-1$
-			ColumnType cType = ColumnType.STRING;
-			if (ea.getDmAttribute().getType() == AttributeType.LIST ||
-					ea.getDmAttribute().getType() == AttributeType.TREE ||
-					ea.getDmAttribute().getType() == AttributeType.TEXT ){
-				cType = ColumnType.STRING;
-			}else if (ea.getDmAttribute().getType() == AttributeType.DATE){
-				cType = ColumnType.DATE;
-			}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
-				cType = ColumnType.BOOLEAN;
-			}else if (ea.getDmAttribute().getType() == AttributeType.NUMERIC){
-				cType = ColumnType.NUMBER;
+		if (type.getAttributes() != null){
+			for (EntityAttribute ea : type.getAttributes()){
+				String name = ea.getName();
+				String key = "entity:" + SmartUtils.encodeHex(ea.getUuid()); //$NON-NLS-1$
+				ColumnType cType = ColumnType.STRING;
+				if (ea.getDmAttribute().getType() == AttributeType.LIST ||
+						ea.getDmAttribute().getType() == AttributeType.TREE ||
+						ea.getDmAttribute().getType() == AttributeType.TEXT ){
+					cType = ColumnType.STRING;
+				}else if (ea.getDmAttribute().getType() == AttributeType.DATE){
+					cType = ColumnType.DATE;
+				}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
+					cType = ColumnType.BOOLEAN;
+				}else if (ea.getDmAttribute().getType() == AttributeType.NUMERIC){
+					cType = ColumnType.NUMBER;
+				}
+				
+				QueryColumn column = new SightingQueryColumn(
+						name + " (" + ea.getEntityType().getName() + ")", //$NON-NLS-1$ //$NON-NLS-2$
+						key, cType, "ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$ 
+				cols.add(column);
 			}
-			
-			QueryColumn column = new SightingQueryColumn(
-					name + " (" + ea.getEntityType().getName() + ")", //$NON-NLS-1$ //$NON-NLS-2$
-					key, cType, "ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$ 
-			cols.add(column);
 		}
-	
 		//data model category
 		int catCount = QueryDataModelManager.getInstance().getActiveDepth();
 		for(int i = 0; i < catCount; i++){

@@ -29,7 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
-import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
  */
 @Entity
 @Table(name="smart.entity_attribute")
-public class EntityAttribute extends NamedItem {
+public class EntityAttribute extends NamedKeyItem {
 
 	private Attribute dmAttribute;
 	private EntityType entityType;
@@ -87,7 +87,6 @@ public class EntityAttribute extends NamedItem {
 	public void setEntityType(EntityType entityType) {
 		this.entityType = entityType;
 	}
-
 
 	/**
 	 * If the attribute is required or not
