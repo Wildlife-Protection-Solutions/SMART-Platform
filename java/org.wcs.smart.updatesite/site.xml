@@ -9,7 +9,40 @@
    <feature url="features/org.wcs.smart.cybertracker.feature_2.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="2.0.0">
       <category name="cybertracker"/>
    </feature>
-   <category-def name="cybertracker" label="SMART-CyberTracker Plug-in">
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.es_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.es" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.fr_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.fr" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.hi_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.hi" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.in_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.in" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.km_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.km" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.lo_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.lo" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.ms_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.ms" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.ru_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.ru" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.th_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.th" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.vi_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.vi" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.zh_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.zh" version="2.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
       </description>
