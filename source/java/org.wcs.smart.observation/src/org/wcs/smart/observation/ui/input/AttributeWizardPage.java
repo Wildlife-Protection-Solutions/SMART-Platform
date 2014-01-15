@@ -471,7 +471,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				field.clear();
 			}
 		}
-//		attViewer.setAttachment(editingOb.getAttachments());
+
 		currentAttachments = new ArrayList<ObservationAttachment>();
 		currentAttachments.addAll(editingOb.getAttachments());
 		attachmentViewer.setInput(currentAttachments);
@@ -665,16 +665,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			a.setObservation(wo);
 			wo.getAttachments().add(a);
 		}
-		if (editingOb != null){
-			for (ObservationAttachment editAtt: editingOb.getAttachments()){
-				if (editAtt.getObservation().equals(editingOb)){
-					//need to remove this attachment 
-					((ObservationWizard)getWizard()).getSession().delete(editAtt);
-				}
-			}
-			editingOb.getAttachments().clear();
-		}
-		
 		
 		//clear all fields
 		currentAttachments = new ArrayList<ObservationAttachment>();

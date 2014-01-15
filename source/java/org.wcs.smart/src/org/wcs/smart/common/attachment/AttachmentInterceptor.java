@@ -23,9 +23,13 @@ package org.wcs.smart.common.attachment;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.EmptyInterceptor;
+import org.hibernate.Transaction;
 import org.hibernate.type.Type;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -44,13 +48,33 @@ public class AttachmentInterceptor extends EmptyInterceptor {
 
 	private static final long serialVersionUID = 2710377589619179841L;
 
+	//track files to delete; only delete
+	//after transaction has been committed
+	protected List<File> toDelete = new ArrayList<File>();
+	
+	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof ISmartAttachment);
 	}
 	
+	
+	@Override
+	public void afterTransactionCompletion(Transaction tx){
+		if (tx.wasCommitted()){
+			for (File f : toDelete){
+				try{
+					f.delete();
+				}catch (Exception ex){
+					SmartPlugIn.log("Could not delete file: " + f.toString(), ex); //$NON-NLS-1$
+				}
+			}
+			toDelete.clear();
+		}
+	}
 	/**
 	 * When a parent object is deleted it also deletes the file on disk.
 	 */
+	@Override
     public void onDelete(Object entity,
             Serializable id,
             Object[] state,
@@ -59,7 +83,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	
     	if (shouldIntercept(entity)) {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
-    		attachment.getFullFile().delete();
+    		toDelete.add(attachment.getFullFile());
     	}
     	
     }

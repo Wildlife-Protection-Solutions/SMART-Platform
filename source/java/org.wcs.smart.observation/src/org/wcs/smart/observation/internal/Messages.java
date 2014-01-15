@@ -52,6 +52,8 @@ public class Messages extends NLS {
 	public static String ObservationWizard_ConfirmCancel_DialogMessage;
 	public static String ObservationWizard_ConfirmCancel_DialogTitle;
 	public static String ObservationWizard_PageName;
+
+	public static String ObservationWizard_SaveError;
 	public static String ObservationWizardPage_PageMessage;
 	public static String ObservationWizardPage_PageName;
 	public static String ObservationWizardPage_PageTitle;
