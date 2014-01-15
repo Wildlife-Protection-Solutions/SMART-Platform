@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.observation.ui.input;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -98,8 +99,18 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		HashMap<Category, List<WaypointObservation>> obs = ((ObservationWizard)getWizard()).getAllObservations();
-		for (Iterator<Entry<Category, List<WaypointObservation>>> iterator = obs.entrySet().iterator(); iterator.hasNext();) {
-			final Entry<Category, List<WaypointObservation>> ob =  iterator.next();
+		
+		ArrayList<Category> sortedCategories = new ArrayList<Category>();
+		sortedCategories.addAll(obs.keySet());
+		Collections.sort(sortedCategories, new Comparator<Category>() {
+			@Override
+			public int compare(Category o1, Category o2) {
+				return Collator.getInstance().compare(o1.getFullCategoryName(), o2.getFullCategoryName());
+			}
+		});
+		
+		for (final Category c : sortedCategories){
+			List<WaypointObservation> observations = obs.get(c);
 			
 			final Composite entryComp = new Composite(main, SWT.BORDER);
 			entryComp.setLayout(new GridLayout(1, false));
@@ -117,7 +128,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				boldFont = new Font(Display.getCurrent(), boldFontData);
 			}
 			lbl.setFont(boldFont);
-			lbl.setText(SmartUtils.formatStringForLabel(ob.getKey().getFullCategoryName()));
+			lbl.setText(SmartUtils.formatStringForLabel(c.getFullCategoryName()));
 			lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)lbl.getLayoutData()).widthHint = 400;
 			
@@ -125,7 +136,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			lnkDelete.setText("<a>" + DialogConstants.DELETE_BUTTON_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkDelete.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e){
-					deleteCategory(ob.getKey(), entryComp);
+					deleteCategory(c, entryComp);
 				}
 			});
 			
@@ -133,10 +144,10 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			lnkEdit.setText("<a>" + DialogConstants.EDIT_BUTTON_TEXT + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
 			
 			final List<WaypointObservation> items = new ArrayList<WaypointObservation>();
-			items.addAll(ob.getValue());
+			items.addAll(observations);
 		
 			final TableViewer viewer = AttributeTable.createAttributeTable(
-					entryComp, ob.getKey());
+					entryComp, c);
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setInput(items.toArray());
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -157,7 +168,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 					} else if (items.size() == 1) {
 						wob = items.get(0);
 					}
-					editCategory(ob.getKey(), wob);
+					editCategory(c, wob);
 				}
 			});
 			if (lnkEdit != null) {
@@ -172,7 +183,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 						} else if (items.size() == 1) {
 							wob = items.get(0);
 						}
-						editCategory(ob.getKey(), wob);
+						editCategory(c, wob);
 					}
 				});
 			}

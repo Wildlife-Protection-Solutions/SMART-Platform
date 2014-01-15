@@ -66,14 +66,14 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 				for (PatrolWaypoint wp : ((PatrolLegDay) entity).getWaypoints()){
 					if (wp.getWaypoint().getAttachments() != null){
 						for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
-							att.getFullFile().delete();
+							toDelete.add(att.getFullFile());
 						}
 					}
 					if (wp.getWaypoint().getObservations() != null){
 						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 							if (wo.getAttachments()!= null){
 								for (ObservationAttachment att : wo.getAttachments()){
-									att.getFullFile().delete();
+									toDelete.add(att.getFullFile());
 								}
 							}
 						}

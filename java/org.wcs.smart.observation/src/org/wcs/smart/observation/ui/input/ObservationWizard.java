@@ -45,6 +45,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -87,13 +88,15 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
 		
-		getSession().beginTransaction();
-		getSession().update(wp);
+		session = HibernateManager.openSession(new AttachmentInterceptor());
+		session.beginTransaction();
+		session.update(wp);
+		
 		this.wp = wp;
 		if (this.wp.getObservations() != null){
 			for (WaypointObservation ob : this.wp.getObservations()){
 				//add to list
-				ob.setCategory((Category)getSession().merge(ob.getCategory()));
+				ob.setCategory((Category)session.merge(ob.getCategory()));
 				for (CategoryAttribute ca : ob.getCategory().getAttributes()){
 					ca.setAttribute((Attribute) session.merge(ca.getAttribute()));
 				}
@@ -105,7 +108,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				lst.add(ob);
 				
 				for (WaypointObservationAttribute a : ob.getAttributes()){
-					a.setAttribute((Attribute)getSession().merge(a.getAttribute()));
+					a.setAttribute((Attribute)session.merge(a.getAttribute()));
 				}
 			}
 		}
@@ -124,7 +127,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	public void setInitialCategories(List<Category> toProcess){
 		this.toProcess = new ArrayList<Category>();
 		for (Category c : toProcess){
-			this.toProcess.add((Category)getSession().load(Category.class, c.getUuid()));
+			this.toProcess.add((Category)session.load(Category.class, c.getUuid()));
 		}
 	}
 	/**
@@ -251,23 +254,17 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	}
 	
 	/**
-	 * @return a hibernate session
-	 */
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession(new AttachmentInterceptor());
-		}
-		return session;
-	}
-	
-	/**
 	 * @return the observation data model
 	 */
 	public DataModel getDataModel(){
 		if (dm == null){
-			dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), getSession());
+			dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 		}
 		return dm;
+	}
+	
+	public Session getSession(){
+		return this.session;
 	}
 	
 	/**
@@ -343,11 +340,30 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			wp.setObservations(new ArrayList<WaypointObservation>());
 		}
 		
+		for (WaypointObservation wo : wp.getObservations()){
+			//remove attachments that are not longer attached to new observations
+			for (ObservationAttachment att : wo.getAttachments()){
+				if (att.getObservation().equals(wo) && !wobservations.contains(wo)){
+					session.delete(att);
+				}
+			}
+			if (!wobservations.contains(wo)){
+				wo.getAttachments().clear();
+			}
+		}
+		
 		wp.getObservations().clear();
 		wp.getObservations().addAll(wobservations);
-
+		for (WaypointObservation wo : wp.getObservations()){
+			session.saveOrUpdate(wo);
+		}
 		//commit changes
-		getSession().getTransaction().commit();
+		try{
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			ObservationPlugIn.displayLog(Messages.ObservationWizard_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			return false;
+		}
 		
 		try{
 			WaypointEventManager.getInstance().waypointModified(wp);
@@ -377,7 +393,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
     			return false;
     		}
     	}
-    	getSession().getTransaction().rollback();
+    	session.getTransaction().rollback();
         return true;
     }
     

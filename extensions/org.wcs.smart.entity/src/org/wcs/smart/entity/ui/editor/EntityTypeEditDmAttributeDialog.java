@@ -98,7 +98,9 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		txtKey = new Text(c, SWT.DEFAULT);
-		txtKey.setText(((EntityAttribute)item).getKeyId());
+		if (((EntityAttribute)item).getKeyId() != null){
+			txtKey.setText(((EntityAttribute)item).getKeyId());
+		}
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
