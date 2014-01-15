@@ -112,6 +112,8 @@ public class AttributeNameField extends AbstractEntityComposite{
 		l.setText(Messages.AttributeNameField_NameKey);
 		txtAttributeId = new Text(main, SWT.BORDER);
 		txtAttributeId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtAttributeId.setEditable(false);
+		
 		Button btnEditKey = new Button(main, SWT.PUSH);
 		btnEditKey.setText("..."); //$NON-NLS-1$
 		btnEditKey.addSelectionListener(new SelectionAdapter() {

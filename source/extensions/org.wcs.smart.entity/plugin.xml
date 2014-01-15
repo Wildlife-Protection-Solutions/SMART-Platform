@@ -7,7 +7,7 @@
             class="org.wcs.smart.entity.ui.typelist.EntityTypeListView"
             icon="images/icons/obj16/entitytype.png"
             id="org.wcs.smart.entity.typelist"
-            name="Entity Types"
+            name="%entitytype.view.name"
             restorable="true">
       </view>
    </extension>
@@ -36,12 +36,12 @@
          <menu
                icon="images/icons/obj16/entitytype.png"
                id="org.wcs.smart.menu.entity"
-               label="Entity">
+               label="%entity.menu.label">
             <command
                   commandId="org.wcs.smart.entitytype.new"
-                  mnemonic="n"
+                  mnemonic="%newentity.command.mnemonic"
                   style="push"
-                  tooltip="create a new entity">
+                  tooltip="%newentity.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <test
@@ -56,9 +56,9 @@
             </separator>
             <command
                   commandId="org.wcs.smart.entitytype.import"
-                  mnemonic="i"
+                  mnemonic="%importentitytype.command.mnemonic"
                   style="push"
-                  tooltip="imports an entity type">
+                  tooltip="%importentitytype.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <test
@@ -69,9 +69,9 @@
             </command>
             <command
                   commandId="org.wcs.smart.entitytype.export"
-                  mnemonic="x"
+                  mnemonic="%exportentitytype.command.mnemonic"
                   style="push"
-                  tooltip="exports an entity type">
+                  tooltip="%exportentitytype.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -97,9 +97,9 @@
             <command
                   commandId="org.wcs.smart.entity.perspective"
                   icon="images/icons/obj16/entitytype.png"
-                  mnemonic="p"
+                  mnemonic="%showentities.command.mnemonic"
                   style="push"
-                  tooltip="shows the entity perspective">
+                  tooltip="%showentities.command.tooltip">
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -116,7 +116,8 @@
          <command
                commandId="org.wcs.smart.entity.perspective"
                icon="images/icons/obj16/entitytype.png"
-               style="push">
+               style="push"
+               tooltip="%openentities.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -125,7 +126,7 @@
          <command
                commandId="org.wcs.smart.entitytype.delete"
                style="push"
-               tooltip="Deletes the selected entity types">
+               tooltip="%deleteentitytype.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -137,7 +138,7 @@
          <command
                commandId="org.wcs.smart.entitytype.new"
                style="push"
-               tooltip="Creates a new entity type">
+               tooltip="%newentitytype.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -149,7 +150,7 @@
          <command
                commandId="org.wcs.smart.entity.entitytypefilter"
                style="push"
-               tooltip="Opens a dialog where you can filter the entity types.">
+               tooltip="%filter.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -158,7 +159,7 @@
          <command
                commandId="org.wcs.smart.entitytype.delete"
                style="push"
-               tooltip="Deletes the selected Entity Types">
+               tooltip="%delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -173,27 +174,27 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.entitytype.new"
-            name="New Entity Type">
+            name="%newentitycommand.name">
       </command>
       <command
             id="org.wcs.smart.entity.perspective"
-            name="View Entity Types">
+            name="%viewentities.command.name">
       </command>
       <command
             id="org.wcs.smart.entitytype.delete"
-            name="Delete Entity Types">
+            name="%deleteentities.command.name">
       </command>
       <command
             id="org.wcs.smart.entity.entitytypefilter"
-            name="Open Entity Type Filter Dialog">
+            name="%filterentities.command.name">
       </command>
       <command
             id="org.wcs.smart.entitytype.import"
-            name="Import Entity Type">
+            name="%importentitytype.command.name">
       </command>
       <command
             id="org.wcs.smart.entitytype.export"
-            name="Export Entity Type">
+            name="%exportentitytype.command.name">
       </command>
    </extension>
    <extension
@@ -310,7 +311,7 @@
             default="false"
             icon="images/icons/obj16/entitytype.png"
             id="org.wcs.smart.entity.editor.entitytype"
-            name="Entity Type Editor">
+            name="%entitytype.editor.name">
       </editor>
    </extension>
    <extension
@@ -318,7 +319,7 @@
       <service
             class="org.wcs.smart.entity.fixed.map.FixedEntityServiceExtension"
             id="org.wcs.smart.udig.catalog.FixedEntityService"
-            name="Fixed Entity Types">
+            name="%fixed.entitytype.service.name">
       </service>
    </extension>
    <extension
