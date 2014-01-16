@@ -146,6 +146,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		// --- attribute table list
 		entityTable = new EntityListTable(main);
 		entityTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)entityTable.getLayoutData()).heightHint = 200;
 		entityTable.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {

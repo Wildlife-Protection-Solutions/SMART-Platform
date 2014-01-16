@@ -142,14 +142,14 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 				try {
 					queryService.refresh(parentEditor.getCurrentQuery());
 				} catch (IOException e) {
-					EntityPlugIn.log("Error refreshing entity query layer", e);
+					EntityPlugIn.log(Messages.SightingMapPage_QueryRefreshError1, e);
 				}
 			}
 			if (entityService != null){				
 				try {
 					entityService.refresh(parentEditor.getEntityType(), monitor);
 				} catch (IOException e) {
-					EntityPlugIn.log("Error entity location layer", e);
+					EntityPlugIn.log(Messages.SightingMapPage_QueryRefreshError2, e);
 				}
 			}
 			mapViewer.getRenderManager().refresh(null);

@@ -240,6 +240,23 @@
                </test>
             </and>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <or>
+                     <instanceof
+                           value="org.wcs.smart.entity.model.EntityType">
+                     </instanceof>
+                     <instanceof
+                           value="org.wcs.smart.entity.ui.editor.EntityTypeEditorInput">
+                     </instanceof>
+                  </or>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.entity.ui.OpenFilterDialogHandler"
@@ -266,6 +283,22 @@
                         value="org.wcs.smart.entity.editor.entitytype">
                   </equals>
                </with>
+            </and>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.entity.ui.ImportEntityTypeHandler"
+            commandId="org.wcs.smart.entitytype.import">
+         <activeWhen>
+            <and>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
             </and>
          </activeWhen>
       </handler>

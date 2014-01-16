@@ -39,7 +39,7 @@ import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
-import org.wcs.smart.entity.xml.EntityTypeXmlConverter;
+import org.wcs.smart.entity.xml.EntityTypeToXmlConverter;
 import org.wcs.smart.entity.xml.EntityTypeXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -74,7 +74,7 @@ public class ExportEntityTypeHandler extends AbstractHandler {
 					try{
 						FileOutputStream fout = new FileOutputStream(exportFile);
 						try{
-							EntityTypeXmlManager.writeDataModel(EntityTypeXmlConverter.toXml(et, new SubProgressMonitor(monitor, 100)),
+							EntityTypeXmlManager.writeDataModel(EntityTypeToXmlConverter.toXml(et, new SubProgressMonitor(monitor, 100)),
 								fout);
 							monitor.worked(100);
 						}finally{

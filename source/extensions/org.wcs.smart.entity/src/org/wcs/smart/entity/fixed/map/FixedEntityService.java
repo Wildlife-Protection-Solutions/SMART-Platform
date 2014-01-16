@@ -120,7 +120,6 @@ public class FixedEntityService extends IService {
 						try {
 							((FixedEntityGeoResourceInfo)member.getInfo(monitor)).computeBounds((FixedEntityGeoResource)member, monitor);
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						return org.eclipse.core.runtime.Status.OK_STATUS;
