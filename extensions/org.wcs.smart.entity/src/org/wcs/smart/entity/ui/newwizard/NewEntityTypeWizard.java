@@ -34,6 +34,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
@@ -111,6 +112,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		
 		// fire events
 		EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newType);
+		DataModelManager.getInstance().fireChangeListeners();	//we have added a new attribute to the data model
 		
 		// open in editor
 		EntityTypeEditorInput input = new EntityTypeEditorInput(this.newType.getUuid(),this.newType.getId(), this.newType.getName());

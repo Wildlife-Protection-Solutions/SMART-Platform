@@ -281,6 +281,25 @@ public class EntityAttributeValue {
 		}
 	}
 	
+	/**
+	 * @param o
+	 * @return
+	 */
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof EntityAttributeValue){
+			return this.id.equals(((EntityAttributeValue)o).id);
+		}
+		return false;
+	}
+	
+	/**
+	 * @return
+	 */
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
 	
 	@Embeddable
 	private static class EntityAttributeValuePk implements Serializable{
@@ -313,6 +332,36 @@ public class EntityAttributeValue {
 
 		public void setEntityAttribute(EntityAttribute attribute) {
 			this.attribute = attribute;
+		}
+		
+		@Override
+		public boolean equals(Object key) {
+			if (! (key instanceof EntityAttributeValuePk)){
+				return false;
+			}
+			EntityAttributeValuePk p = (EntityAttributeValuePk)key;
+			
+			if (p.entity == null || this.entity == null ||
+				p.attribute == null || this.attribute == null ){
+				
+				if (p.entity == null && this.entity == null && 
+					p.attribute == null && this.attribute == null){
+						return true;
+				}
+				return false;
+			}
+			
+			return p.entity.equals(this.entity) &&
+					p.attribute.equals(this.attribute);
+		}
+		
+		@Override
+		public int hashCode() {
+		    int code = 0;
+		    if (entity != null) {code += entity.hashCode();}
+		    code *= 31;
+		    if (attribute != null) {code += attribute.hashCode(); }
+		    return code;
 		}
 	}
 }

@@ -43,6 +43,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
@@ -249,8 +250,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 					}});
 				
 			}catch (Exception ex){
-				//TODO: do something here
-				ex.printStackTrace();
+				EntityPlugIn.displayLog(Messages.SightingPage_QueryError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-2$
 			}
 			lblProgressMonitor.done();
 			return Status.OK_STATUS;

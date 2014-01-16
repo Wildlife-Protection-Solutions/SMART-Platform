@@ -28,10 +28,11 @@ import javax.xml.namespace.QName;
  * provided in this class.
  * 
  */
+@SuppressWarnings("nls")
 @XmlRegistry
 public class ObjectFactory {
-
-    private final static QName _EntityType_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/entitytype", "EntityType");
+    
+	private final static QName _EntityType_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/entitytype", "EntityType");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.entity.xml.model
