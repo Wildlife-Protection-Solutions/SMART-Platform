@@ -65,6 +65,7 @@ elementFormDefault="qualified">
     				<enumeration value="BOOLEAN"></enumeration>
     				<enumeration value="LIST"></enumeration>
     				<enumeration value="TREE"></enumeration>
+    				<enumeration value="DATE"></enumeration>
     			</restriction>
     		</simpleType>
     	</attribute>
