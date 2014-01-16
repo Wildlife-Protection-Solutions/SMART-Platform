@@ -45,6 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;enumeration value="Boolean"/>
  *             &lt;enumeration value="List"/>
  *             &lt;enumeration value="Tree"/>
+ *             &lt;enumeration value="Date"/>
  *           &lt;/restriction>
  *         &lt;/simpleType>
  *       &lt;/attribute>

@@ -16,10 +16,10 @@
 	
 	<dependencies>
 		<dependency>
-            		<groupId>org.apache.derby</groupId>
-            		<artifactId>derby</artifactId>
-            		<version>10.10.1.1</version>
-        	</dependency>
+        	<groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.10.1.1</version>
+        </dependency>
 <!--         <dependency> -->
 <!--             <groupId>net.sourceforge.hatbox</groupId> -->
 <!--             <artifactId>hatbox</artifactId> -->
@@ -29,17 +29,17 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>4.2.6.Final</version>
-        	</dependency>
-        	<dependency>
-            		<groupId>org.hibernate</groupId>
-            		<artifactId>hibernate-ehcache</artifactId>
-            		<version>4.2.6.Final</version>
-        	</dependency>
-        	<dependency>
-            		<groupId>org.slf4j</groupId>
-            		<artifactId>slf4j-log4j12</artifactId>
-            		<version>1.7.5</version>
-        	</dependency>		
+        </dependency>
+        <dependency>
+        	<groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <version>4.2.6.Final</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>slf4j-log4j12</artifactId>
+        	<version>1.7.5</version>
+        </dependency>		
 	</dependencies>
 
 </project>
