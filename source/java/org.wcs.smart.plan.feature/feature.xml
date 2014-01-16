@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.plan.feature"
-      label="SMART Planning Module"
+      label="Core SMART Planning Module (Required)"
       version="2.0.0">
 
    <description url="http://www.example.com/description">
