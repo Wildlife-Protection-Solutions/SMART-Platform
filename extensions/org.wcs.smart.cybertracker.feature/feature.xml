@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.cybertracker.feature"
-      label="Core SMART CyberTracker Plug-in (Required)"
+      label="Core SMART CyberTracker Module (Required)"
       version="2.0.0">
 
    <description url="http://www.example.com/description">
