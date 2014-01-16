@@ -11,6 +11,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -69,12 +70,13 @@ public class ExportEntityTypeHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.subTask(MessageFormat.format(Messages.ExportEntityTypeHandler_ExportProgress, new Object[]{et.getName()}));
+					monitor.beginTask(MessageFormat.format(Messages.ExportEntityTypeHandler_ExportProgress, new Object[]{et.getName()}), 100);
 					try{
 						FileOutputStream fout = new FileOutputStream(exportFile);
 						try{
-							EntityTypeXmlManager.writeDataModel(EntityTypeXmlConverter.toXml(et),
+							EntityTypeXmlManager.writeDataModel(EntityTypeXmlConverter.toXml(et, new SubProgressMonitor(monitor, 100)),
 								fout);
+							monitor.worked(100);
 						}finally{
 							fout.close();
 						}
@@ -88,6 +90,7 @@ public class ExportEntityTypeHandler extends AbstractHandler {
 					}catch (Exception ex){
 						EntityPlugIn.displayLog(Messages.ExportEntityTypeHandler_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					}
+					monitor.done();
 				}
 			});
 			}catch (Exception ex){
