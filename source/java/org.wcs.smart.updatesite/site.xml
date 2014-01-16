@@ -42,6 +42,75 @@
    <feature url="features/org.wcs.smart.cybertracker.feature.nl.zh_2.0.0.jar" id="org.wcs.smart.cybertracker.feature.nl.zh" version="2.0.0">
       <category name="cybertracker"/>
    </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.es_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.es" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.fr_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.fr" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.hi_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.hi" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.in_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.in" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.km_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.km" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.ms_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.ms" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.ru_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.ru" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.sw_2.0.1.jar" id="org.wcs.smart.intelligence.feature.nl.sw" version="2.0.1">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.th_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.th" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.vi_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.vi" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.zh_2.0.0.jar" id="org.wcs.smart.intelligence.feature.nl.zh" version="2.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.es_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.es" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.fr_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.fr" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.hi_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.hi" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.in_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.in" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.km_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.km" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.ms_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.ms" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.ru_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.ru" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.th_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.th" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.vi_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.vi" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.zh_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.zh" version="2.0.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.fr_2.0.0.jar" id="org.wcs.smart.fr" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.ru_2.0.0.jar" id="org.wcs.smart.ru" version="2.0.0">
+      <category name="smart"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
@@ -57,4 +126,5 @@
          SMART Planning Plug-in contains a plan module that allows to organize, maintain and query planning information.
       </description>
    </category-def>
+   <category-def name="smart" label="SMART Application Language Packs"/>
 </site>
