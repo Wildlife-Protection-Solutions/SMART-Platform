@@ -118,6 +118,13 @@
                icon="images/icons/obj16/entitytype.png"
                style="push"
                tooltip="%openentities.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -397,6 +404,16 @@
                type="org.wcs.smart.observation.model.Waypoint">
          </adapter>
       </factory>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.entity.EntityTemplateCloner"
+            id="org.wcs.smart.entity.entityCloner">
+         <require
+               id="org.wcs.smart.conservationAreaCloner">
+         </require>
+      </templateCloner>
    </extension>
 
 </plugin>
