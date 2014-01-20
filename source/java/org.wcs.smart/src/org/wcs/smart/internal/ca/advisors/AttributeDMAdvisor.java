@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.internal.ca.advisors;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -64,7 +65,7 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 			return null;
 		}else{
 			StringBuilder sb = new StringBuilder();
-			sb.append(Messages.AttributeDMAdvisor_Error_AttributeReferenced );
+			sb.append(MessageFormat.format(Messages.AttributeDMAdvisor_Error_AttributeReferenced2, new Object[]{attribute.getName()}) );
 			for (CategoryAttribute it : items){
 				sb.append(it.getCategory().getFullCategoryName() + "\n"); //$NON-NLS-1$
 			}

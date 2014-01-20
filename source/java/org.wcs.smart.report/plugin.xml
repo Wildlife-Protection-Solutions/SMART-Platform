@@ -874,7 +874,10 @@
             class="org.wcs.smart.report.ReportTemplateCloner"
             id="org.wcs.smart.reportCloner">
          <require
-               id="org.wcs.smart.queryAreaCloner">
+               id="org.wcs.smart.QueryCloner">
+         </require>
+         <require
+               id="org.wcs.smart.query.*">
          </require>
       </templateCloner>
    </extension>

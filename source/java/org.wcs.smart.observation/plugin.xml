@@ -86,6 +86,13 @@
                      value="org.wcs.smart.observation.FieldDataPerspective">
                </parameter>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution

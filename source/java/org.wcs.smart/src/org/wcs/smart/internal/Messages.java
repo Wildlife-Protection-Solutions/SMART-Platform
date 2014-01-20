@@ -108,7 +108,7 @@ public class Messages extends NLS {
 	public static String AttachmentInterceptor_Error_CannotCopyFile;
 	public static String Attribute_BooleanAttribute_False_Label;
 	public static String Attribute_BooleanAttribute_True_Label;
-	public static String AttributeDMAdvisor_Error_AttributeReferenced;
+	public static String AttributeDMAdvisor_Error_AttributeReferenced2;
 	public static String AttributeDMAdvisor_Error_NotAttribute;
 	public static String AttributeInfoPanel_Aggregations_Label;
 	public static String AttributeInfoPanel_Aggregations_ToolTip;

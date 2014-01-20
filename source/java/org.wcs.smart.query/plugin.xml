@@ -806,7 +806,7 @@
          point="org.wcs.smart.ca.templateCloner">
       <templateCloner
             class="org.wcs.smart.query.QueryTemplateCloner"
-            id="org.wcs.smart.queryAreaCloner">
+            id="org.wcs.smart.QueryCloner">
          <require
                id="org.wcs.smart.patrolCloner">
          </require>
