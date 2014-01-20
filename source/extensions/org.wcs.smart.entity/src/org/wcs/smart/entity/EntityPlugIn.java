@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.entity.internal.Messages;
 
 /**
@@ -40,6 +41,8 @@ public class EntityPlugIn extends AbstractUIPlugin {
 
 	// The shared instance
 	private static EntityPlugIn plugin;
+	
+	private EntityCaDeleteHandler deleteCaHandler;
 	
 	public static final String ENTITY_TYPE_ICON = "org.wcs.smart.entitytype.icon"; //$NON-NLS-1$
 	public static final String ENTITY_TYPE_WIZBAN = "org.wcs.smart.entitytype.wizban"; //$NON-NLS-1$
@@ -57,6 +60,11 @@ public class EntityPlugIn extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		
+		deleteCaHandler = new EntityCaDeleteHandler();
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteCaHandler,
+				EntityCaDeleteHandler.EXECUTE_ORDER);
+		
 		plugin = this;
 	}
 

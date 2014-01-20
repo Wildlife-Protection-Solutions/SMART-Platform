@@ -77,6 +77,24 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			}
 		}
 		
+		if (toDelete.size() == 0){
+			return null;
+		}
+		
+		//confirm delete
+		StringBuilder sb = new StringBuilder();
+		for (EntityTypeEditorInput in : toDelete){
+			sb.append(in.getName());
+			sb.append(", "); //$NON-NLS-1$
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.deleteCharAt(sb.length() - 1);
+		
+		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Delete", 
+				MessageFormat.format("Are you sure you want to delete the entity types: {0}?  This action cannot be undone.", new Object[]{sb.toString()}))){
+			return null;
+		}
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
 		try{
 		pmd.run(true, false, new IRunnableWithProgress() {
@@ -111,11 +129,71 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			
 			final EntityType entity = (EntityType) session.load(EntityType.class, type.getUuid());
 			if (entity == null){
+				session.getTransaction().rollback();
 				return;
 			}
 				
 			Attribute dmAttribute = entity.getDmAttribute();
 			
+			
+			//validate we can delete the entity
+			if (!DeleteManager.canDelete(entity, session)){
+				//cannot delete so rollback and exit
+				session.getTransaction().rollback();
+				return;
+			}
+				
+			//delete any attribute values associated with this entity attribute
+			if (entity.getAttributes().size() > 0){
+				Query q = session.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)"); //$NON-NLS-1$
+				q.setParameterList("toDelete", entity.getAttributes()); //$NON-NLS-1$
+				q.executeUpdate();	
+				
+				for (Iterator<EntityAttribute> iterator = entity.getAttributes().iterator(); iterator.hasNext();) {
+					final EntityAttribute type2 = (EntityAttribute) iterator.next();
+					type2.getDmAttribute().getKeyId();	//fix a hibernate bug
+					
+					iterator.remove();	//remove attribute
+			
+					//ask the user if they wish to delete the attribute 
+					//from the data if it is not used anymore
+					boolean canDeleteAttribute = false;
+					try{
+						if (DeleteManager.canDelete(type2.getDmAttribute(), session)){
+							canDeleteAttribute = true;
+						}
+					}catch (Exception ex){
+						//something is using this attribute therefore
+						//it cannot be deleted
+					}
+						
+					if (canDeleteAttribute){
+						final int[] ret = {-1};
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), 
+										Messages.DeleteEntityTypeHandler_DialogTitle, null,
+										MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteEntityAttributeMessage, new Object[]{ type2.getDmAttribute().getName() } ), 
+										MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+								ret[0] = dialog.open();
+							}});
+					
+						if (ret[0] == 0){  //YES
+							boolean deletel = DataModelManager.getInstance().validateDelete(type2.getDmAttribute(), new NullProgressMonitor(), session);
+							if (deletel){
+								DataModelManager.getInstance().fireDeleteListener(session, type2.getDmAttribute());
+								session.delete(type2.getDmAttribute());
+							}
+						}
+					}
+				}
+			}
+			session.delete(entity);
+			
+			
+			// see if user wants to delete the attribute associated with the 
+			//entity type
 			final String message = MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteAttributeConfirm,
 					new Object[]{type.getName(), dmAttribute.getName()});
 			final Boolean[] deleteAttribute = new Boolean[]{null};
@@ -143,64 +221,9 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 				}});
 			if (deleteAttribute[0] == null){
 				//cancel
-				return;
-			}
-			//validate we can delete the entity and delete it
-			if (!DeleteManager.canDelete(entity, session)){
-				//cannot delete so rollback and exit
 				session.getTransaction().rollback();
 				return;
-			}else{
-				
-				//delete any attribute values associated with this entity attribute
-				Query q = session.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)"); //$NON-NLS-1$
-				q.setParameterList("toDelete", entity.getAttributes()); //$NON-NLS-1$
-				q.executeUpdate();	
-				
-				for (Iterator<EntityAttribute> iterator = entity.getAttributes().iterator(); iterator
-						.hasNext();) {
-					final EntityAttribute type2 = (EntityAttribute) iterator.next();
-					type2.getDmAttribute().getKeyId();	//fix a hibernate bug
-					
-					iterator.remove();	//remove attribute
-					
-					//ask the user if they wish to delete the attribute 
-					//from the data if it is not used anymore
-					boolean canDeleteAttribute = false;
-					try{
-						if (DeleteManager.canDelete(type2.getDmAttribute(), session)){
-							canDeleteAttribute = true;
-						}
-					}catch (Exception ex){
-						//something is using this attribute therefore
-						//it cannot be deleted
-					}
-					
-					if (canDeleteAttribute){
-						final int[] ret = {-1};
-						Display.getDefault().syncExec(new Runnable(){
-
-							@Override
-							public void run() {
-								MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), 
-										Messages.DeleteEntityTypeHandler_DialogTitle, null,
-										MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteEntityAttributeMessage, new Object[]{ type2.getDmAttribute().getName() } ), 
-										MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-								ret[0] = dialog.open();
-							}});
-					
-						if (ret[0] == 0){  //YES
-							boolean deletel = DataModelManager.getInstance().validateDelete(type2.getDmAttribute(), new NullProgressMonitor(), session);
-							if (deletel){
-								DataModelManager.getInstance().fireDeleteListener(session, type2.getDmAttribute());
-								session.delete(type2.getDmAttribute());
-							}
-						}
-					}
-				}
-				session.delete(entity);
 			}
-			
 			//validate we can delete the attribute
 			if (deleteAttribute[0]){
 				if ( DeleteManager.canDelete(dmAttribute, session) ){
