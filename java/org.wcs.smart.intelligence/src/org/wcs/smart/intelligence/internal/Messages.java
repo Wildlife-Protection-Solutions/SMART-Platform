@@ -136,6 +136,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceAttachments_PageTitle;
 
+	public static String IntelligenceCaCloner_ProgressMessage;
+
 	public static String IntelligenceDataSource_SchemaNotSupported;
 
 	public static String IntelligenceDataSourceFactory_DataSourceDescription;
@@ -390,6 +392,8 @@ public class Messages extends NLS {
 
 	public static String ReportedIntelligenceContribution_Create_Button_Tooltip;
 
+	public static String ReportedIntelligenceContribution_ErrorDialogTitle;
+
 	public static String ReportedIntelligenceContribution_IntelligenceReported_Label;
 
 	public static String ReportedIntelligenceContribution_LoadingText;
@@ -401,6 +405,8 @@ public class Messages extends NLS {
 	public static String ReportedIntelligenceContribution_NothingReported_Label;
 
 	public static String ReportedIntelligenceContribution_Open_Button;
+
+	public static String ReportedIntelligenceContribution_PatrolSourceDoesNotExist;
 
 	public static String ReportIntelligence_Open_Template_Error;
 
@@ -433,6 +439,8 @@ public class Messages extends NLS {
 	public static String SourceTypesPropertyDialog_Language;
 
 	public static String SourceTypesPropertyDialog_Message;
+
+	public static String SourceTypesPropertyDialog_PatrolKeyInfo;
 
 	public static String SourceTypesPropertyDialog_SaveError;
 

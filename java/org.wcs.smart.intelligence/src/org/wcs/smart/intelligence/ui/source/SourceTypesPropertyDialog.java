@@ -159,7 +159,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		});
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		((GridData)composite2.getLayoutData()).heightHint = 150;
+		((GridData)composite2.getLayoutData()).heightHint = 100;
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		composite2.setLayout(tableLayout);
@@ -263,6 +263,12 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 				deleteSource();
 			}
 		});
+		
+		Label lblinfo = new Label(container, SWT.WRAP | SWT.NONE);
+		lblinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		((GridData)lblinfo.getLayoutData()).widthHint = 250;
+		lblinfo.setText(MessageFormat.format(Messages.SourceTypesPropertyDialog_PatrolKeyInfo, new Object[]{IntelligenceSource.PATROL_KEY}));
+		
 		setTitle(Messages.SourceTypesPropertyDialog_Title);
 		setMessage(Messages.SourceTypesPropertyDialog_Message);
 		return container;

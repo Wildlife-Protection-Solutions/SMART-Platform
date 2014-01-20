@@ -21,46 +21,48 @@
  */
 package org.wcs.smart.intelligence;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.ca.ConservationAreaClonerEngine;
+import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 
 /**
- * Delete handler for deleting all intelligence information attached to conservation area.
+ * Cloner that clones intelligence source options.
  * 
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class CaDeleteHandler implements ICaDeleteHandler {
+public class IntelligenceCaCloner implements IConservationAreaTemplateCloner {
 
-	/**
-	 * To be executed before the conservation area and patrol is deleted
-	 */
-	public static final int EXECUTE_ORDER = 32;
-	
-	public CaDeleteHandler() {}
+	public IntelligenceCaCloner() {
+	}
 
 	@Override
-	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.CaDeleteHandler_DeletingIntelligences);
-		deleteIntelligences(ca, session);
-		deleteIntelligenceSource(ca, session);
+	public void cloneTemplateData(ConservationAreaClonerEngine engine,
+			IProgressMonitor monitor) throws Exception {
+		monitor.subTask(Messages.IntelligenceCaCloner_ProgressMessage);
+		cloneSources(engine);
 	}
 
-	private void deleteIntelligences(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Intelligence where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-	}
 	
-
-	private void deleteIntelligenceSource(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from IntelligenceSource where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+	/*
+	 * clone patrol mandates
+	 */
+	private void cloneSources(ConservationAreaClonerEngine engine){
+		List<IntelligenceSource> sources = IntelligenceHibernateManager.getSourceTypes(engine.getTemplateCa(), engine.getSession());
+		for (IntelligenceSource s : sources){
+			IntelligenceSource clone = new IntelligenceSource();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setIsActive(s.getIsActive());
+			clone.setKeyId(s.getKeyId());
+			engine.copyLabels(s, clone);
+			
+			engine.getSession().save(clone);
+			engine.addConservationItemMapping(s,clone);
+		}
+		engine.getSession().flush();
 	}
-	
 }
