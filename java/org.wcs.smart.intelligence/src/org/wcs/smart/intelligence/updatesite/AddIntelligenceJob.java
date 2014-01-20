@@ -46,6 +46,12 @@ import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 
+/**
+ * Job removes adds intelligence related tabled to the database
+ * 
+ * @author elitvin
+ * @since 3.0.0
+ */
 public class AddIntelligenceJob extends Job {
 
 	public AddIntelligenceJob() {
