@@ -108,10 +108,10 @@ public class QueryTypeManager {
 	 * @return
 	 */
 	public String getQueryItemPanel(IQueryType qType, String definitionId){
-		if (supportedTypes == null){
-			getSupportedQueryTypes();
-		}
-		for (QueryTypeWrapper q : types){
+//		if (supportedTypes == null){
+//			getSupportedQueryTypes();
+//		}
+		for (QueryTypeWrapper q : getTypeConfigurations()){
 			if (q.queryType.getKey().equals(qType.getKey())){
 				return q.itemPanels.get(definitionId);
 			}
@@ -125,10 +125,10 @@ public class QueryTypeManager {
 	 * @return all definition panels that are supported for the query type
 	 */
 	public String[] getQueryDefinitionPanelIds(IQueryType qType){
-		if (supportedTypes == null){
-			getSupportedQueryTypes();
-		}
-		for (QueryTypeWrapper q : types){
+//		if (supportedTypes == null){
+//			getSupportedQueryTypes();
+//		}
+		for (QueryTypeWrapper q : getTypeConfigurations()){
 			if (q.queryType.getKey().equals(qType.getKey())){
 				return q.definitionPanels.toArray(new String[q.definitionPanels.size()]);
 			}
@@ -164,10 +164,27 @@ public class QueryTypeManager {
 	 */
 	public IQueryType[] getAllQueryTypes() {
 		if (this.allTypes == null){
-			readAllTypes();
+			readTypesOnly();
 		}
 		return this.allTypes;
 	}
+	
+	private void readTypesOnly(){
+		List<IQueryType> aTypes = new ArrayList<IQueryType>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
+		for (IConfigurationElement e : config) {			
+			try {
+				IQueryType qType = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
+				aTypes.add(qType);
+			} catch (CoreException e1) {
+				QueryPlugIn.log(Messages.QueryTypeManager_QueryTypeError, e1);
+			}
+			
+		}
+		this.allTypes = aTypes.toArray(new IQueryType[aTypes.size()]);
+	}
+	
 	
 	/**
 	 * Reads the query type extension point
@@ -175,52 +192,65 @@ public class QueryTypeManager {
 	 * 
 	 * @return
 	 */
-	private void readAllTypes() {
+	private void readTypeConfigurations() {
+		getAllQueryTypes();
 		
-		List<IQueryType> aTypes = new ArrayList<IQueryType>();
 		List<QueryTypeWrapper> ltypes = new ArrayList<QueryTypeWrapper>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
+		
 		for (IConfigurationElement e : config) {
 			try {
-				IQueryType qType = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
-				aTypes.add(qType);
-				
-				QueryTypeWrapper wrapper = new QueryTypeWrapper(qType);
-				IConfigurationElement defs[] = e.getChildren("DefinitionPanel"); //$NON-NLS-1$
-				for (IConfigurationElement def : defs){
-					String id = def.getAttribute("id"); //$NON-NLS-1$
-
-					if (DefinitionPanelManager.getInstance().isValid(id)){
-						wrapper.definitionPanels.add(id);
-					
-						String pid = def.getAttribute("itemPanelId"); //$NON-NLS-1$
-						wrapper.itemPanels.put(id, pid);
+				IQueryType tmp = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
+				IQueryType qType = null;
+				for (IQueryType qt: allTypes ){
+					if (qt.getKey().equals(tmp.getKey())){
+						qType = qt;
+						break;
 					}
 				}
-				ltypes.add(wrapper);
+				
+				if (qType == null){
+					QueryPlugIn.log("Query type " + tmp.getKey() + " not found.", null);
+				}else{
+				
+					QueryTypeWrapper wrapper = new QueryTypeWrapper(qType);
+					IConfigurationElement defs[] = e.getChildren("DefinitionPanel"); //$NON-NLS-1$
+					for (IConfigurationElement def : defs){
+						String id = def.getAttribute("id"); //$NON-NLS-1$
+
+						if (DefinitionPanelManager.getInstance().isValid(id)){
+							wrapper.definitionPanels.add(id);
+					
+							String pid = def.getAttribute("itemPanelId"); //$NON-NLS-1$
+							wrapper.itemPanels.put(id, pid);
+						}
+					}
+					ltypes.add(wrapper);
+				}
 			} catch (CoreException e1) {
 				QueryPlugIn.log(Messages.QueryTypeManager_QueryTypeError, e1);
 			}
 		}
-		this.allTypes = aTypes.toArray(new IQueryType[aTypes.size()]);
 		this.types = ltypes;
 	}
 	
+	private List<QueryTypeWrapper> getTypeConfigurations(){
+		if (types == null){
+			readTypeConfigurations();
+		}
+		return types;
+	}
 	/*
 	 * Determines which query types
 	 * are allowed for the current configuration.
 	 * 
 	 */
-	private void findSupportedType(){
-		if (allTypes == null){
-			readAllTypes();
-		}
-		
+	private void findSupportedType(){	
 		boolean isSingle = !SmartDB.isMultipleAnalysis();
 		
 		List<IQueryType> sTypes = new ArrayList<IQueryType>();
-		for (IQueryType qType: allTypes){
+		for (IQueryType qType: getAllQueryTypes()){
 			boolean add = false;
 			if (!isSingle && qType.supportsCrossCaQueries()){
 				add = true;

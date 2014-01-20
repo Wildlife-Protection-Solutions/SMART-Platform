@@ -321,9 +321,9 @@
          point="org.wcs.smart.ca.templateCloner">
       <templateCloner
             class="org.wcs.smart.patrol.query.PatrolQueryTemplateCloner"
-            id="org.wcs.smart.queryAreaCloner">
+            id="org.wcs.smart.PatrolQueryCloner">
          <require
-               id="org.wcs.smart.queryAreaCloner">
+               id="org.wcs.smart.QueryCloner">
          </require>
       </templateCloner>
    </extension>

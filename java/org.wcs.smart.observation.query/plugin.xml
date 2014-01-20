@@ -273,5 +273,15 @@
             propertyProvider="org.wcs.smart.observation.query.ui.ColumnQueryPropertyProvider">
       </queryproperty>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.observation.query.internal.ObservationQueryTemplateCloner"
+            id="org.wcs.smart.query.ObservationQueryCloner">
+         <require
+               id="org.wcs.smart.QueryCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>

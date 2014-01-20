@@ -253,7 +253,12 @@ public class ConservationAreaClonerEngine {
 	 */
 	public void processTemplate(IProgressMonitor monitor) throws Exception{
 		List<Cloner> cloners = getCloners();
+		
 		monitor.beginTask(Messages.ConservationAreaClonerEngine_Progress_CopyingCa, cloners.size() * 10);
+		
+		List<Cloner> allCloners = new ArrayList<Cloner>();
+		allCloners.addAll(cloners);
+		
 		
 		SmartHibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 		session = HibernateManager.openSession();
@@ -274,10 +279,25 @@ public class ConservationAreaClonerEngine {
 				boolean canProcess = true;
 				
 				for(String s : c.requirements){
-					if (!processed.contains(s)){
-						canProcess = false;
+					//if all cloners which match string s
+					List<Cloner> matches = new ArrayList<Cloner>();
+					for (Cloner tc : allCloners){
+						if (tc.id.matches(s)){
+							matches.add(tc);
+						}
+					}
+					for (Cloner tc : matches){
+						if (!processed.contains(tc.id)){
+							canProcess = false;
+							break;
+						}
+					}
+					if (!canProcess){
+						break;
 					}
 				}
+				
+				
 				if (!canProcess){
 					cloners.add(c);
 					cnt++;
