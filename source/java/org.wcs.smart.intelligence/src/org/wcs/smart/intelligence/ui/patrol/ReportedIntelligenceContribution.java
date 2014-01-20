@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui.patrol;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -28,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -236,6 +238,11 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			Session s = HibernateManager.openSession();
 			try {
 				IntelligenceSource source = IntelligenceHibernateManager.getPatrolSource(s);
+				if (source == null){
+					MessageDialog.openError(win.getShell(), Messages.ReportedIntelligenceContribution_ErrorDialogTitle, 
+							MessageFormat.format(Messages.ReportedIntelligenceContribution_PatrolSourceDoesNotExist, new Object[]{IntelligenceSource.PATROL_KEY}));
+					return;
+				}
 				wizard.getIntelligence().setSource(source);
 			} catch (Exception e) {
 				IntelligencePlugIn.displayLog(Messages.ReportedIntelligenceContribution_NoPatrolSource_Error, e);

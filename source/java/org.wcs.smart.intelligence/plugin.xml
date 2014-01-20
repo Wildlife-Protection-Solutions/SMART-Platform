@@ -764,5 +764,12 @@
             version="2.0.0">
       </action>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.intelligence.IntelligenceCaCloner"
+            id="org.wcs.smart.intelligence.IntelligenceCaCloner">
+      </templateCloner>
+   </extension>
 
 </plugin>
