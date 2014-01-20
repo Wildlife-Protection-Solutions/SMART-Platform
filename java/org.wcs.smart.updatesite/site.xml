@@ -114,6 +114,33 @@
    <feature url="features/org.wcs.smart.plan.feature.nl.sw_2.0.0.jar" id="org.wcs.smart.plan.feature.nl.sw" version="2.0.0">
       <category name="planning"/>
    </feature>
+   <feature url="features/org.wcs.smart.es_2.0.0.jar" id="org.wcs.smart.es" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.in_2.0.0.jar" id="org.wcs.smart.in" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.km_2.0.0.jar" id="org.wcs.smart.km" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.sw_2.0.1.jar" id="org.wcs.smart.sw" version="2.0.1">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.th_2.0.0.jar" id="org.wcs.smart.th" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.vi_2.0.0.jar" id="org.wcs.smart.vi" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.zh_2.0.0.jar" id="org.wcs.smart.zh" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.hi_2.0.0.jar" id="org.wcs.smart.hi" version="2.0.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.ms_2.0.0.jar" id="org.wcs.smart.ms" version="2.0.0">
+      <category name="smart"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
