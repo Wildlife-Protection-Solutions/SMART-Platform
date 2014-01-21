@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.patrol.PatrolCaDeleteHandler;
 
 /**
  * Delete handler for deleting all intelligence information attached to conservation area.
@@ -39,7 +40,7 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 	/**
 	 * To be executed before the conservation area and patrol is deleted
 	 */
-	public static final int EXECUTE_ORDER = 32;
+	public static final int EXECUTE_ORDER = PatrolCaDeleteHandler.EXECUTE_ORDER + 1;
 	
 	public CaDeleteHandler() {}
 

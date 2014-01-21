@@ -45,7 +45,7 @@
             class="org.wcs.smart.observation.model.WaypointObservation">
       </class>
       <class
-            ca_property=".observation.waypoint.conservationArea"
+            ca_property=".id.observation.waypoint.conservationArea"
             class="org.wcs.smart.observation.model.WaypointObservationAttribute">
       </class>
       <class
