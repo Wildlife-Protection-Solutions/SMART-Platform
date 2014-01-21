@@ -132,6 +132,22 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 				session.getTransaction().rollback();
 				return;
 			}
+			
+			//-- check if the entity type can be removed
+			String errorMessage = null;
+			try{
+				if (!DeleteManager.canDelete(entity, session)){
+					errorMessage = MessageFormat.format("The entity type {0} cannot be removed.", new Object[]{entity.getId()});
+				}
+			}catch (Exception ex){
+				EntityPlugIn.log(ex.getMessage(), ex);
+				errorMessage = MessageFormat.format("The entity type {0} cannot be removed." + "\n\n" + ex.getMessage(), new Object[]{entity.getId()}); //$NON-NLS-1$
+			}
+			if (errorMessage != null){
+				session.getTransaction().rollback();
+				displayMessage(errorMessage);
+				return;
+			}
 				
 			Attribute dmAttribute = entity.getDmAttribute();
 			
@@ -288,7 +304,17 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, MessageFormat.format("The entity type {0} was not deleted.", new Object[]{entity.getName()})); //$NON-NLS-1$
+						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, MessageFormat.format("The entity type {0} was not deleted.", new Object[]{entity.getName()})); 
+			}});
+	}
+	
+	private void displayMessage(final String message){
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, 
+						message); 
 			}});
 	}
 }

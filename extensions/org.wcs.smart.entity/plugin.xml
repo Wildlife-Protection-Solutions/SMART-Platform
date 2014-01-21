@@ -321,7 +321,7 @@
             class="org.wcs.smart.entity.model.EntityAttribute">
       </class>
       <class
-            ca_property=".entity.entityType.conservationArea"
+            ca_property=".id.entity.entityType.conservationArea"
             class="org.wcs.smart.entity.model.EntityAttributeValue">
       </class>
       <class

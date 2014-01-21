@@ -274,14 +274,11 @@ public class EntityListTable extends Composite {
 		
 		
 		
-		if (entityType.getAttributes() == null){
-			return;
-		}
-		
-		for (final EntityAttribute ea : entityType.getAttributes()) {
-			if (ea.getIsPrimary()) {
-				// only show primary columns in this table
-				col = createTableColumn(ea.getName(),null, new ColumnLabelProvider() {
+		if (entityType.getAttributes() != null){
+			for (final EntityAttribute ea : entityType.getAttributes()) {
+				if (ea.getIsPrimary()) {
+					// only show primary columns in this table
+					col = createTableColumn(ea.getName(),null, new ColumnLabelProvider() {
 						public String getText(Object element) {
 							if (element instanceof Entity) {
 								Entity e = (Entity) element;
@@ -293,13 +290,13 @@ public class EntityListTable extends Composite {
 							}
 							return super.getText(element);
 						}
-				});
-				if (ea.getDmAttribute().getType() == Attribute.AttributeType.LIST || 
+					});
+					if (ea.getDmAttribute().getType() == Attribute.AttributeType.LIST || 
 						ea.getDmAttribute().getType() == Attribute.AttributeType.TREE ||
 						ea.getDmAttribute().getType() == Attribute.AttributeType.TEXT ){
-					filterColumns.add(col);
+						filterColumns.add(col);
+					}
 				}
-				
 			}
 		}
 		
@@ -357,7 +354,7 @@ public class EntityListTable extends Composite {
 				return true;
 			}
 			
-			String filter = ".*" + Pattern.quote(filterText.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			String filter = Pattern.quote(filterText.toLowerCase()) + ".*"; //$NON-NLS-1$
 			
 			if (filterColumn != null){
 				return tableLabelProviders.get(filterColumn).getText(element).toLowerCase().matches(filter);
