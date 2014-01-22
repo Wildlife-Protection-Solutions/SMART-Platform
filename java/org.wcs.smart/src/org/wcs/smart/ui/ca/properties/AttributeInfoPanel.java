@@ -297,7 +297,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		lstAttributeList = new TableViewer(listComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		Table list = lstAttributeList.getTable();
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-//		((GridData)list.getLayoutData()).heightHint = 500;
+		((GridData)list.getLayoutData()).heightHint = 100;
 		((GridData)list.getLayoutData()).widthHint = 100;
 
 		lstAttributeList.setContentProvider(new ObservableListContentProvider());
