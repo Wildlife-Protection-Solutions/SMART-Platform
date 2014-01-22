@@ -48,10 +48,11 @@ public class ExportEntityTypeHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
+		
 		IEditorInput input = HandlerUtil.getActiveEditor(event).getEditorInput();
 		if (input == null || !(input instanceof EntityTypeEditorInput)){
 			return null;
-		}
+		}	
 		
 		Session s = HibernateManager.openSession();
 		try{

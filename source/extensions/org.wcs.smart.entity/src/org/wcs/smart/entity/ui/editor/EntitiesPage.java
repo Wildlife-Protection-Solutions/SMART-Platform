@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -47,6 +48,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -60,12 +62,16 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.entity.EntityCsvExporter;
+import org.wcs.smart.entity.EntityCsvImporter;
 import org.wcs.smart.entity.EntityPermissionManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.ui.ExportEntityDialog;
+import org.wcs.smart.entity.ui.importwizard.ImportEntitiesWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -87,6 +93,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 	
 	private Button btnEdit = null;
 	private Button btnDelete = null;
+	private Button btnExport = null;
 			
 	/**
 	 * Creates a new plan editor page
@@ -157,11 +164,14 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		
 		if (EntityPermissionManager.canCreateEditDeleteEntities()){
 			Composite buttonTableComp = toolkit.createComposite(main);
-			buttonTableComp.setLayout(new GridLayout(4, false));
+			buttonTableComp.setLayout(new GridLayout(6, false));
+			buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			int buttonSize = 80;
 		
 			Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			((GridData)btnAdd.getLayoutData()).widthHint = 100;
+			((GridData)btnAdd.getLayoutData()).widthHint = buttonSize;
 			btnAdd.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -171,7 +181,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		
 			btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
 			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			((GridData)btnEdit.getLayoutData()).widthHint = 100;
+			((GridData)btnEdit.getLayoutData()).widthHint = buttonSize;
 			btnEdit.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -181,7 +191,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		
 			btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
 			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			((GridData)btnDelete.getLayoutData()).widthHint = 100;
+			((GridData)btnDelete.getLayoutData()).widthHint = buttonSize;
 			btnDelete.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -190,6 +200,29 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			});
 			btnEdit.setEnabled(false);
 			btnDelete.setEnabled(false);
+			
+			Label l = toolkit.createLabel(buttonTableComp, ""); //$NON-NLS-1$
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						
+			Button btnImport = toolkit.createButton(buttonTableComp, DialogConstants.IMPORT_BUTTON_TEXT, SWT.PUSH);
+			btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnImport.getLayoutData()).widthHint = buttonSize;
+			btnImport.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					importEntities();
+				}
+			});
+
+			btnExport = toolkit.createButton(buttonTableComp, DialogConstants.EXPORT_BUTTON_TEXT, SWT.PUSH);
+			btnExport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnExport.getLayoutData()).widthHint = buttonSize;
+			btnExport.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					exportEntities();
+				}
+			});
 		}
 		
 		final Section entityDetailsSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
@@ -240,6 +273,18 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		}
 	}
 	
+	private void importEntities(){
+		EntityCsvImporter importer = new EntityCsvImporter(parentEditor.getEntityType());
+		WizardDialog wd = new WizardDialog(getSite().getShell(), new ImportEntitiesWizard(importer));
+		wd.open();
+	}
+	
+	private void exportEntities(){
+		EntityType et = parentEditor.getEntityType();
+		EntityCsvExporter exporter = new EntityCsvExporter(et);
+		ExportEntityDialog dialog = new ExportEntityDialog(getSite().getShell(), exporter);
+		dialog.open();
+	}
 	/*
 	 * Adds an entity
 	 */

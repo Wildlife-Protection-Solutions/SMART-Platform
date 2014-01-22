@@ -250,7 +250,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 					}});
 				
 			}catch (Exception ex){
-				EntityPlugIn.displayLog(Messages.SightingPage_QueryError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-2$
+				EntityPlugIn.displayLog(Messages.SightingPage_QueryError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			lblProgressMonitor.done();
 			return Status.OK_STATUS;

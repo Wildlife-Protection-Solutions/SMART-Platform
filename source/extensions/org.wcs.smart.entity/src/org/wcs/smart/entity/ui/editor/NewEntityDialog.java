@@ -70,6 +70,8 @@ public class NewEntityDialog extends TitleAreaDialog {
 		super(parentShell);
 		
 		session = HibernateManager.openSession();
+		session.beginTransaction();
+
 		this.etype = (EntityType) session.load(EntityType.class, etype.getUuid());
 		
 		if (toUpdate == null){
@@ -94,6 +96,15 @@ public class NewEntityDialog extends TitleAreaDialog {
 	
 	@Override
 	public boolean close(){
+		try{
+			//rollback any active session
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+		}catch (Exception ex){
+			EntityPlugIn.log(ex.getMessage(), ex);
+		}
+		
 		session.close();
 		return super.close();
 	}
@@ -112,7 +123,6 @@ public class NewEntityDialog extends TitleAreaDialog {
 	
 	protected boolean save(){
 		boolean isNew = newEntity.getUuid() == null;
-		session.beginTransaction();
 		try{
 			if (isNew){
 				eaComp.updateEntity();
@@ -191,6 +201,7 @@ public class NewEntityDialog extends TitleAreaDialog {
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scroll.setShowFocusedControl(true);
 		
 		eaComp = new EntityEditPanelComposite(scroll);
 		eaComp.setEntityType(etype, session);
@@ -207,7 +218,6 @@ public class NewEntityDialog extends TitleAreaDialog {
 			}
 		});
 		eaComp.setEditEntity(newEntity);
-		
 		return composite;
 	}
 
