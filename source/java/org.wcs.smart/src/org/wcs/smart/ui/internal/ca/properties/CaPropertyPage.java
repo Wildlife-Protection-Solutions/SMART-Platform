@@ -261,6 +261,11 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave(){		
+		if (!caComposite.isSameSignature(ca) ) {
+			if (!MessageDialog.openQuestion(getShell(), Messages.CaPropertyPage_SaveWarning_Title, Messages.CaPropertyPage_SaveWarning_Message)) {
+				return false;
+			}
+		}
 		
 		Session session = getSession();
 		Transaction tx = session.beginTransaction();
