@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.entity.internal.Messages;
 
 /**
  * Job removes all entity plug-in related tabled from the database
@@ -35,7 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
 public class RemoveEntityJob extends Job {
 
 	public RemoveEntityJob() {
-		super("Removing Entity tables");
+		super(Messages.RemoveEntityJob_JobName);
 	}
 
 	@Override

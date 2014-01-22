@@ -26,6 +26,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.observation.CaDeleteHandler;
 
 /**
@@ -49,11 +50,11 @@ public class EntityCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		monitor.subTask("Delete Entity Attributes");
+		monitor.subTask(Messages.EntityCaDeleteHandler_ProgressDeleteAttributes);
 		deleteEntityAttributes(ca, session);
-		monitor.subTask("Delete Entities");
+		monitor.subTask(Messages.EntityCaDeleteHandler_ProgressDeleteEntities);
 		deleteEntities(ca, session);
-		monitor.subTask("Delete Entity Types");
+		monitor.subTask(Messages.EntityCaDeleteHandler_ProgressDeleteType);
 		deleteTypes(ca, session);
 				
 	}

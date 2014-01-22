@@ -90,8 +90,8 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Delete", 
-				MessageFormat.format("Are you sure you want to delete the entity types: {0}?  This action cannot be undone.", new Object[]{sb.toString()}))){
+		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteEntityTypeHandler_ConfirmDeleteTitle, 
+				MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteMessage, new Object[]{sb.toString()}))){
 			return null;
 		}
 		
@@ -137,11 +137,11 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			String errorMessage = null;
 			try{
 				if (!DeleteManager.canDelete(entity, session)){
-					errorMessage = MessageFormat.format("The entity type {0} cannot be removed.", new Object[]{entity.getId()});
+					errorMessage = MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteError, new Object[]{entity.getId()});
 				}
 			}catch (Exception ex){
 				EntityPlugIn.log(ex.getMessage(), ex);
-				errorMessage = MessageFormat.format("The entity type {0} cannot be removed." + "\n\n" + ex.getMessage(), new Object[]{entity.getId()}); //$NON-NLS-1$
+				errorMessage = MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteError + "\n\n" + ex.getMessage(), new Object[]{entity.getId()}); //$NON-NLS-1$ 
 			}
 			if (errorMessage != null){
 				session.getTransaction().rollback();
@@ -304,7 +304,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, MessageFormat.format("The entity type {0} was not deleted.", new Object[]{entity.getName()})); 
+						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, MessageFormat.format(Messages.DeleteEntityTypeHandler_TypeDeleteError, new Object[]{entity.getName()})); 
 			}});
 	}
 	

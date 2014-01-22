@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity;
 
 import java.text.MessageFormat;
@@ -11,9 +32,17 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 
+/**
+ * Clones entity types when a conservation area is cloned.  Will not
+ * clone any entities.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 
 	private ConservationAreaClonerEngine engine;
@@ -25,7 +54,7 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		this.engine = engine;
-		monitor.beginTask("Cloning Entity Types", 10);
+		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes, 10);
 		try{
 			cloneEntityTypes(monitor);
 			monitor.worked(10);
@@ -34,13 +63,13 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void cloneEntityTypes(IProgressMonitor monitor) throws Exception{
-		
-		List<EntityType> toClone = engine.getSession().createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+		List<EntityType> toClone = engine.getSession().createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 10);
-		subMonitor.beginTask("Cloning Entity Types", toClone.size());
+		subMonitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes2, toClone.size());
 		for (EntityType et : toClone){
-			subMonitor.subTask(MessageFormat.format("Cloning {0}", new Object[]{et.getName()}));
+			subMonitor.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
 			EntityType clone = new EntityType();
 			
 			clone.setConservationArea(engine.getNewCa());
@@ -82,6 +111,6 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 		if (attributes.size() == 1){
 			return (Attribute) attributes.get(0);
 		}
-		throw new Exception(MessageFormat.format("Cloned attribute could not be found for key {0}.", new Object[]{oldAttribute.getKeyId()}));
+		throw new Exception(MessageFormat.format(Messages.EntityTemplateCloner_AttributeNotFound, new Object[]{oldAttribute.getKeyId()}));
 	}
 }

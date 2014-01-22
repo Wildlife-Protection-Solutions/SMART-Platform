@@ -178,6 +178,7 @@ public class Entity extends UuidItem {
 	
 	@Transient
 	public EntityAttributeValue findAttribute(EntityAttribute ea){
+		if (getAttributes() == null) return null;
 		for (EntityAttributeValue v : getAttributes()){
 			if (v.getEntityAttribute().equals(ea)){
 				return v;
