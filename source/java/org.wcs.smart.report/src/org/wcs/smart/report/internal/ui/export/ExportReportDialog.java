@@ -125,6 +125,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		if (!multipleFiles){
 			getShell().setText(Messages.ExportReportDialog_DialogTitleA1);
 			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + this.report.getName()); //$NON-NLS-1$

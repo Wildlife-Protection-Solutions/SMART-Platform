@@ -88,6 +88,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 			csvComposite.addFileModifyListener(new Listener() {
 				@Override
 				public void handleEvent(Event event) {
+					if (getButton(IDialogConstants.OK_ID) == null) return;
 					if (csvComposite.getFileText().length() > 0){
 						getButton(IDialogConstants.OK_ID).setEnabled(true);
 					}else{

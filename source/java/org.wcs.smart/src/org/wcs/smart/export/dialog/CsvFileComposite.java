@@ -97,11 +97,12 @@ public class CsvFileComposite extends Composite {
 			btnHasHeader.setText(hasHeaderText);
 			btnHasHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		}
-		
-		txtInfo = new Text(this, SWT.WRAP | SWT.READ_ONLY);
-		txtInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
-		((GridData)txtInfo.getLayoutData()).widthHint = 250;
-		txtInfo.setText(config.getInfo());
+		if (config.getInfo() != null){
+			txtInfo = new Text(this, SWT.WRAP | SWT.READ_ONLY);
+			txtInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+			((GridData)txtInfo.getLayoutData()).widthHint = 250;
+			txtInfo.setText(config.getInfo());
+		}
 	}
 
 	public void addFileModifyListener(Listener listener) {
@@ -110,6 +111,14 @@ public class CsvFileComposite extends Composite {
 	
 	public String getFileText() {
 		return txtFile.getText();
+	}
+	
+	/**
+	 * Sets the file name text box value
+	 * @param fileName
+	 */
+	public void setFileText(String fileName){
+		txtFile.setText(fileName);
 	}
 	
 	public boolean getHeadersSelection() {
