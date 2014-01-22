@@ -124,3 +124,5 @@ ALTER TABLE smart.intelligence
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;
+
+update smart.db_version set version = '3.0.0';
