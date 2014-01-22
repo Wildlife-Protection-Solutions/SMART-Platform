@@ -230,6 +230,12 @@ public class CaInfoComposite extends Composite {
 		return this.txtDescription.getText();
 	}
 
+	public boolean isSameSignature(ConservationArea ca) {
+		String id = getIdentifier().trim();
+		String name = getCaName().trim();
+		return id.equals(ca.getId()) && name.equals(ca.getName());
+		
+	}
 	
 	public void updateConservationArea(ConservationArea ca) {
 		ca.setId(getIdentifier().trim());

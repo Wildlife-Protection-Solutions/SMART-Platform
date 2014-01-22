@@ -250,6 +250,8 @@ public class Messages extends NLS {
 	public static String CaPropertyPage_ErrorDialogTitle;
 	public static String CaPropertyPage_LocaleToAddLabel;
 	public static String CaPropertyPage_PageName;
+	public static String CaPropertyPage_SaveWarning_Message;
+	public static String CaPropertyPage_SaveWarning_Title;
 	public static String CaPropertyPage_SupportedLanguages_Label;
 	public static String CaPropertyPage_UniqueID_Label;
 	public static String CategoryDialogPage_CreatePageTitle;
