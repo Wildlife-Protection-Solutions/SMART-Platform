@@ -91,29 +91,6 @@ public class ConservationAreaListView extends ViewPart {
 		scroll.setContent(main);
 		
 		main.setLayout(new GridLayout(1, false));
-		lblDefault = toolkit.createLabel(main, Messages.ConservationAreaListView_CaLabel, SWT.NONE);
-		
-		FontData fd = lblDefault.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(Display.getCurrent(), fd);
-		
-		lblDefault.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)lblDefault.getLayoutData()).widthHint = 100;
-		lblDefault.setFont(boldFont);
-		lblDefault.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				if (boldFont != null){
-					boldFont.dispose();
-					boldFont = null;
-				}
-			}
-		});
-		caComp = toolkit.createComposite(main, SWT.NONE);
-		caComp.setLayout(new GridLayout());
-		caComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		initCas();
 		
 		Hyperlink link = toolkit.createHyperlink(main, Messages.ConservationAreaListView_ModifyLink, SWT.NONE);
 		link.addHyperlinkListener(new HyperlinkAdapter() {
@@ -139,6 +116,30 @@ public class ConservationAreaListView extends ViewPart {
 				
 			}
 		});
+		
+		lblDefault = toolkit.createLabel(main, Messages.ConservationAreaListView_CaLabel, SWT.NONE);
+		
+		FontData fd = lblDefault.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(Display.getCurrent(), fd);
+		
+		lblDefault.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblDefault.getLayoutData()).widthHint = 100;
+		lblDefault.setFont(boldFont);
+		lblDefault.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				if (boldFont != null){
+					boldFont.dispose();
+					boldFont = null;
+				}
+			}
+		});
+		caComp = toolkit.createComposite(main, SWT.NONE);
+		caComp.setLayout(new GridLayout());
+		caComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		initCas();
 		
 		Label ll = toolkit.createLabel(main, Messages.ConservationAreaListView_CaInfo, SWT.WRAP);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
