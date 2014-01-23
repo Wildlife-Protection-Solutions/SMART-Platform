@@ -21,11 +21,18 @@
  */
 package org.wcs.smart.entity.updatesite;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Job removes all entity plug-in related tabled from the database
@@ -35,13 +42,47 @@ import org.wcs.smart.entity.internal.Messages;
  */
 public class RemoveEntityJob extends Job {
 
+	@SuppressWarnings("nls")
+	private static String[] TABLES = new String[]{
+		"DROP TABLE SMART.ENTITY",
+		"DROP TABLE SMART.ENTITY_ATTRIBUTE",
+		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE",
+		"DROP TABLE SMART.ENTITY_TYPE",
+	};
+	
 	public RemoveEntityJob() {
 		super(Messages.RemoveEntityJob_JobName);
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		return Status.OK_STATUS;
+		return dropTables();
 	}
 
+	
+	private IStatus dropTables(){
+		Session session = HibernateManager.openSession();
+		//check is required table exists
+		try {
+			session.beginTransaction();
+			session.doWork(new Work() {
+				@Override
+				public void execute(Connection connection) throws SQLException {
+					for (int i = 0; i < TABLES.length; i ++){
+						connection.createStatement().execute(TABLES[i]);
+					}	
+				}
+			});			
+			session.getTransaction().commit();
+		} catch (Exception e) {
+			EntityPlugIn.displayLog("Error un-installing entity module.  Could not remove database tables.", e);
+			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
+		} finally {
+			if (session.getTransaction().isActive()) {
+				session.getTransaction().rollback();
+			}
+			session.close();
+		}
+		return Status.OK_STATUS;
+	}
 }
