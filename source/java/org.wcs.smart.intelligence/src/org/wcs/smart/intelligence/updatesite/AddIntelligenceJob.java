@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
@@ -65,16 +66,21 @@ public class AddIntelligenceJob extends Job {
 		//check is required table exists
 		try {
 			session.beginTransaction();
-			mark.intelligence = DerbyHibernateExtensions.tableExists(session, "intelligence"); //$NON-NLS-1$
-			mark.intelligence_source = DerbyHibernateExtensions.tableExists(session, "intelligence_source"); //$NON-NLS-1$
-			mark.intelligence_point = DerbyHibernateExtensions.tableExists(session, "intelligence_point"); //$NON-NLS-1$
-			mark.intelligence_attachment = DerbyHibernateExtensions.tableExists(session, "intelligence_attachment"); //$NON-NLS-1$
-			mark.patrol_intelligence = DerbyHibernateExtensions.tableExists(session, "patrol_intelligence"); //$NON-NLS-1$
+			mark.intelligence = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE"); //$NON-NLS-1$
+			mark.intelligence_source = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_SOURCE"); //$NON-NLS-1$
+			mark.intelligence_point = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_POINT"); //$NON-NLS-1$
+			mark.intelligence_attachment = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_ATTACHMENT"); //$NON-NLS-1$
+			mark.patrol_intelligence = DerbyHibernateExtensions.tableExists(session, "PATROL_INTELLIGENCE"); //$NON-NLS-1$
 			
 			if (mark.allSet())
 				return Status.OK_STATUS; //required table exists
-		} catch (Exception e) {
-			SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, e);
+		} catch (final Exception e) {
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, e);
+				}
+			});
 			return new Status(IStatus.ERROR, IntelligencePlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
 		} finally {
 			if (session.getTransaction().isActive()) {
@@ -102,8 +108,14 @@ public class AddIntelligenceJob extends Job {
 			if (!mark.patrol_intelligence) {
 				createPatrolIntelligenceTable(session);
 			}
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, ex);
+		} catch (final Exception ex) {
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, ex);
+				}
+			});
+			return new Status(IStatus.ERROR, IntelligencePlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

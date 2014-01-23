@@ -28,12 +28,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 
 public class AddPlanJob extends Job {
@@ -49,15 +51,21 @@ public class AddPlanJob extends Job {
 		//check is required table exists
 		try {
 			session.beginTransaction();
-			mark.plan = DerbyHibernateExtensions.tableExists(session, "plan"); //$NON-NLS-1$
-			mark.plan_target = DerbyHibernateExtensions.tableExists(session, "plan_target"); //$NON-NLS-1$
-			mark.plan_target_point = DerbyHibernateExtensions.tableExists(session, "plan_target_point"); //$NON-NLS-1$
-			mark.patrol_plan = DerbyHibernateExtensions.tableExists(session, "patrol_plan"); //$NON-NLS-1$
+			mark.plan = DerbyHibernateExtensions.tableExists(session, "PLAN"); //$NON-NLS-1$
+			mark.plan_target = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET"); //$NON-NLS-1$
+			mark.plan_target_point = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET_POINT"); //$NON-NLS-1$
+			mark.patrol_plan = DerbyHibernateExtensions.tableExists(session, "PATROL_PLAN"); //$NON-NLS-1$
 			
 			if (mark.allSet())
 				return Status.OK_STATUS; //required table exists
-		} catch (Exception e) {
-			SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, e);
+		} catch (final Exception e) {
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, e);
+				}
+			});
+			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
@@ -81,8 +89,14 @@ public class AddPlanJob extends Job {
 			if (!mark.patrol_plan) {
 				createPatrolPlanTable(session);
 			}
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, ex);
+		} catch (final Exception ex) {
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, ex);
+				}
+			});
+			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
