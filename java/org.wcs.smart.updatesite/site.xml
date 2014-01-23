@@ -141,6 +141,9 @@
    <feature url="features/org.wcs.smart.ms_2.0.0.jar" id="org.wcs.smart.ms" version="2.0.0">
       <category name="smart"/>
    </feature>
+   <feature url="features/org.wcs.smart.entity.feature_1.0.0.jar" id="org.wcs.smart.entity.feature" version="1.0.0">
+      <category name="entity"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
@@ -157,4 +160,9 @@
       </description>
    </category-def>
    <category-def name="smart" label="SMART Application Language Packs"/>
+   <category-def name="entity" label="SMART Entity Plug-in">
+      <description>
+         SMART Entity Plug-in contains a entity module that allows to track idividual entities.
+      </description>
+   </category-def>
 </site>
