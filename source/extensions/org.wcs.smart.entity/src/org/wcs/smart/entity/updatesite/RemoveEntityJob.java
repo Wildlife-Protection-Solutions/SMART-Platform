@@ -28,8 +28,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -42,12 +44,11 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class RemoveEntityJob extends Job {
 
-	@SuppressWarnings("nls")
 	private static String[] TABLES = new String[]{
-		"DROP TABLE SMART.ENTITY",
-		"DROP TABLE SMART.ENTITY_ATTRIBUTE",
-		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE",
-		"DROP TABLE SMART.ENTITY_TYPE",
+		"DROP TABLE SMART.ENTITY", //$NON-NLS-1$
+		"DROP TABLE SMART.ENTITY_ATTRIBUTE", //$NON-NLS-1$
+		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
+		"DROP TABLE SMART.ENTITY_TYPE", //$NON-NLS-1$
 	};
 	
 	public RemoveEntityJob() {
@@ -74,8 +75,13 @@ public class RemoveEntityJob extends Job {
 				}
 			});			
 			session.getTransaction().commit();
-		} catch (Exception e) {
-			EntityPlugIn.displayLog("Error un-installing entity module.  Could not remove database tables.", e);
+		} catch (final Exception e) {
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(null, Messages.RemoveEntityJob_Error, e);
+				}
+			});
 			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
 		} finally {
 			if (session.getTransaction().isActive()) {
