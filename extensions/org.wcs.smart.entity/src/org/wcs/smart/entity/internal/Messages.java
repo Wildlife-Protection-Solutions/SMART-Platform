@@ -4,7 +4,9 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.entity.internal.messages"; //$NON-NLS-1$
+	public static String AddEntityJob_Error;
 	public static String AddEntityJob_JobName;
+	public static String AddEntityJob_TaskName;
 	public static String AttributeMappingWizardPage_ConfigurationSectionName;
 	public static String AttributeMappingWizardPage_DateFormatLabel;
 	public static String AttributeMappingWizardPage_DateFormatTooltip;
@@ -298,6 +300,7 @@ public class Messages extends NLS {
 	public static String NewEntityDialog_SaveErrorDialogTitle;
 	public static String NewEntityTypeWizard_ErrorSavingEntityType;
 	public static String NewEntityTypeWizard_WizardTitle;
+	public static String RemoveEntityJob_Error;
 	public static String RemoveEntityJob_JobName;
 	public static String SightingMapPage_AddEntityLayerJobName;
 	public static String SightingMapPage_AddQueryJobName;
