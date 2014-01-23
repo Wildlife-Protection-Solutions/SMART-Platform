@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.feature"
       label="Core SMART CyberTracker Module (Required)"
-      version="2.0.0">
+      version="3.0.0">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]
