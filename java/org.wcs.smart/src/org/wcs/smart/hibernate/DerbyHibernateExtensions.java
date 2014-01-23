@@ -67,7 +67,7 @@ public class DerbyHibernateExtensions {
 	 * @return
 	 */
 	public static boolean tableExists(Session session, String tableName) {
-		String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = '"+tableName+"'"; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = '"+tableName.toUpperCase()+"'"; //$NON-NLS-1$ //$NON-NLS-2$
 		SQLQuery q = session.createSQLQuery(sql);
 		Integer result = (Integer) q.uniqueResult();
 		return result != null && result > 0;
