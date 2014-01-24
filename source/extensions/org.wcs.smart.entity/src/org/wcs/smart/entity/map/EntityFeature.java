@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.fixed.map;
+package org.wcs.smart.entity.map;
 
 import org.geotools.feature.DecoratingFeature;
 import org.opengis.feature.simple.SimpleFeature;

@@ -19,9 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.fixed.map;
+package org.wcs.smart.entity.map;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
@@ -86,7 +87,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		try{
 			if (typeName.equals(TYPENAME)){
 				if (featureSchema==null){
-					featureSchema = createQuerySchema();
+					featureSchema = createQuerySchema(query.getQueryColumns());
 				}
 				return featureSchema;
 			}
@@ -96,10 +97,10 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		}	
 	}
 	
-	private SimpleFeatureType createQuerySchema() throws SchemaException {
+	public static SimpleFeatureType createQuerySchema(List<QueryColumn> columns) throws SchemaException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("fid:String"); //$NON-NLS-1$
-		for (QueryColumn col : query.getQueryColumns()){
+		for (QueryColumn col : columns){
 			sb.append(","); //$NON-NLS-1$
 			sb.append(col.getName());
 			sb.append(":"); //$NON-NLS-1$

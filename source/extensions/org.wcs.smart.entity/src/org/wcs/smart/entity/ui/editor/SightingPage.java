@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -39,8 +40,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -51,6 +55,8 @@ import org.wcs.smart.entity.ui.editor.sightings.EntityFilterComposite;
 import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn;
 import org.wcs.smart.entity.ui.editor.sightings.SightingTable;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
+import org.wcs.smart.query.ui.importexport.ExportQueryWizard;
+import org.wcs.smart.ui.properties.DialogConstants;
 /**
  * Sightings editor page that allows users to perform simple queries
  * for entity sightings.
@@ -159,9 +165,32 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		compSighting.setLayout(gl);
 		compSighting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		
+		
 		sightingTable = new SightingTable(compSighting);
 		sightingTable.getTable().getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(sightingTable.getTable().getTable());
+		
+		Hyperlink exportLink = toolkit.createHyperlink(compSighting, DialogConstants.EXPORT_BUTTON_TEXT, SWT.NONE);
+		exportLink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		exportLink.addHyperlinkListener(new IHyperlinkListener() {
+			
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				ExportQueryWizard wizard = new ExportQueryWizard(currentQuery);
+				
+				WizardDialog dialog = new WizardDialog(parentEditor.getSite().getShell(), wizard);
+				dialog.open();
+			}
+		});
 		
 		parentEditor.getSite().setSelectionProvider(sightingTable.getTable());
 	}

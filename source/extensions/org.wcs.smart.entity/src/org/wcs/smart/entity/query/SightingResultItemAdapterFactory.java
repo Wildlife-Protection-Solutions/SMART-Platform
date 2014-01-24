@@ -24,7 +24,7 @@ package org.wcs.smart.entity.query;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.entity.fixed.map.EntityQueryDataSource;
+import org.wcs.smart.entity.map.EntityQueryDataSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
 /**

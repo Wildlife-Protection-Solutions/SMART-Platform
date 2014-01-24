@@ -383,7 +383,7 @@
    <extension
          point="net.refractions.udig.catalog.ServiceExtension">
       <service
-            class="org.wcs.smart.entity.fixed.map.FixedEntityServiceExtension"
+            class="org.wcs.smart.entity.map.FixedEntityServiceExtension"
             id="org.wcs.smart.udig.catalog.FixedEntityService"
             name="%fixed.entitytype.service.name">
       </service>
@@ -398,7 +398,7 @@
          </adapter>
       </factory>
       <factory
-            adaptableType="org.wcs.smart.entity.fixed.map.EntityFeature"
+            adaptableType="org.wcs.smart.entity.map.EntityFeature"
             class="org.wcs.smart.entity.query.SightingResultItemAdapterFactory">
          <adapter
                type="org.wcs.smart.observation.model.Waypoint">
@@ -432,6 +432,15 @@
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="1.0.0">
       </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.entity.query.SightingQueryCsvExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.entity.query.SightingQueryShpExporter">
+      </Exporter>
    </extension>
 
 </plugin>

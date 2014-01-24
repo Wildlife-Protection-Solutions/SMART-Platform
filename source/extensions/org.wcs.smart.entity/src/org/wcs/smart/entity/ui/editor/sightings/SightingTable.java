@@ -200,7 +200,7 @@ public class SightingTable {
 				return Attribute.BOOLEAN_FALSE_LABEL;
 			}
 		} else if (type == ColumnType.DATE) {
-			if ((Date)value == null){
+			if (value == null){
 				return ""; //$NON-NLS-1$
 			}
 			return DateFormat.getDateInstance().format((Date) value);
