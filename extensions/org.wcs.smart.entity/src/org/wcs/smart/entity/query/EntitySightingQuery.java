@@ -21,29 +21,39 @@
  */
 package org.wcs.smart.entity.query;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
+
+
 /**
  * Entity type sighting query.
+ * <p>
+ * EntitySightingQuery objects extend Query objects but are 
+ * not hibernate objects and are not persisted to the database.
+ * This was done to be able to re-use some of the query
+ * export logic.
+ * </p>
  * 
  * @author Emily
  *
  */
-public class EntitySightingQuery {
+public class EntitySightingQuery extends Query{
 
 	private DateFilter dateFilter;
 	private EntityType entityType;
 	private EntityFilter entityFilter;
-	private ConservationAreaFilter caFilter;
 	
-	private SightingPagedResults cachedResults;
 	private List<QueryColumn> columns;
 	
 	/**
@@ -61,8 +71,9 @@ public class EntitySightingQuery {
 		this.entityType = entityType;
 		this.dateFilter = dateFilter;
 		this.entityFilter = entityFilter;
+		setName(MessageFormat.format(Messages.EntitySightingQuery_QueryName, new Object[]{entityType.getName()}));
 		
-		this.caFilter = new ConservationAreaFilter(true);
+		setConservationAreaFilter(new ConservationAreaFilter(true));
 	}
 	
 	/**
@@ -73,14 +84,7 @@ public class EntitySightingQuery {
 		return this.dateFilter;
 	}
 	
-	/**
-	 * 
-	 * @return conservation area
-	 */
-	public ConservationAreaFilter getConservationAreaFilter(){
-		return this.caFilter;
-	}
-	
+
 	/**
 	 * 
 	 * @return the entity filter
@@ -114,20 +118,12 @@ public class EntitySightingQuery {
 	}
 	
 	
-	/**
-	 * 
-	 * @return runs the query, caches the results and returns the results
-	 */
-	public Object executeQuery(IProgressMonitor monitor) throws Exception{
-		cachedResults = (SightingPagedResults) executeQueryInternal(monitor);
-		return cachedResults;
-	}
 	
 	/**
 	 * 
 	 * @return runs the query and returns the results;
 	 */
-	private Object executeQueryInternal(IProgressMonitor monitor)  throws Exception{
+	protected Object executeQueryInternal(IProgressMonitor monitor)  throws Exception{
 		DerbyEntitySightingEngine queryEngine = new DerbyEntitySightingEngine();
 		Session session = HibernateManager.openSession();
 		try{
@@ -137,19 +133,40 @@ public class EntitySightingQuery {
 		}
 		
 	}
-	
-	
-	/**
-	 * If there are results cached it returns
-	 * the cached results otherwise it runs
-	 * the query, caches the results
-	 * and then returns them.
-	 * @return 
-	 */
-	public Object getCachedResults(IProgressMonitor monitor)  throws Exception{
-		if (cachedResults == null){
-			cachedResults = (SightingPagedResults) executeQuery(monitor);
+
+	@Override
+	public IQueryType getType() {
+		return EntitySightingQueryType.INSTANCE;
+	}
+
+	@Override
+	public boolean isDefinitionEqual(Query other) {
+		if (!(other instanceof EntitySightingQuery)){
+			return false;
 		}
-		return cachedResults;
+		return entityFilter.asString().equals(((EntitySightingQuery)other).getEntityFilter().asString());
+	}
+
+	@Override
+	public void copyQuery(Query copy) {
+		EntitySightingQuery newquery = (EntitySightingQuery) copy;
+		newquery.setDateFilter(getDateFilter());
+		newquery.setConservationAreaFilter(getConservationAreaFilter());
+		newquery.setQueryColumns(getQueryColumns());
+		newquery.entityFilter = getEntityFilter();
+	}
+
+	/**
+	 * Not supported.
+	 */
+	@Override
+	public Query clone() {
+//		throw new OperationNotSupportedException("Cannot clone entity sighting queries");
+		return null;
+	}
+
+	@Override
+	public void setDateFilter(DateFilter filter) {
+		this.dateFilter = filter;
 	}
 }

@@ -215,7 +215,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		//ca filter
 		sql.append(" AND "); //$NON-NLS-1$
-		sql.append(sqlGenerator.asSql(query.getConservationAreaFilter(), tablePrefix(Waypoint.class)));
+		sql.append(sqlGenerator.asSql(query.getConservationAreaFilterAsFilter(), tablePrefix(Waypoint.class)));
 
 		//date filter
 		String dFilter = sqlGenerator.toSql(localDateFilter, this);
@@ -426,6 +426,9 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			Object x = rs.getObject("ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
+			if (x != null && ea.getDmAttribute().getType() == AttributeType.DATE){
+				x = java.sql.Date.valueOf((String)x);
+			}
 			it.setEntityAttribute("entity:" + SmartUtils.encodeHex(ea.getUuid()), x); //$NON-NLS-1$
 		}
 		

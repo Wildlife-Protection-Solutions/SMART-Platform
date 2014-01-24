@@ -19,26 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.fixed.map;
+package org.wcs.smart.entity.query;
 
-import net.refractions.udig.catalog.IServiceInfo;
+import java.io.File;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.entity.internal.Messages;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.query.common.importexport.CsvSimpleQueryExporter;
+import org.wcs.smart.query.model.Query;
 
 /**
- * Fixed Entity Service info.
+ * CSV Exporter for sightings query
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class FixedEntityServiceInfo extends IServiceInfo{
+public class SightingQueryCsvExporter extends CsvSimpleQueryExporter {
 
-	public FixedEntityServiceInfo(FixedEntityService service){
-		this.description = Messages.FixedEntityServiceInfo_Description;
-		this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{Messages.FixedEntityServiceInfo_Keyword1, Messages.FixedEntityServiceInfo_Keyword2, Messages.FixedEntityServiceInfo_Keyword3};
-		this.title = Messages.FixedEntityServiceInfo_Name;
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
+	 */
+	@Override
+	public boolean canExport(Query query) {
+		return query instanceof EntitySightingQuery;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	@Override
+	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
+		EntitySightingQuery squery = (EntitySightingQuery) query;
+		
+		super.setData((SightingPagedResults)squery.getCachedResults(monitor), 
+				squery.getQueryColumns(), file);
+		
+		super.export(monitor);
+		
 	}
 	
 }
