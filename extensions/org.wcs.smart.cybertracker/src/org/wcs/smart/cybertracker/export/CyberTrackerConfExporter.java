@@ -427,7 +427,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminare, boolean addPhoto, String label, String defaultValues) {
+	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, boolean addPhoto, String label, String defaultValues) {
 		List<Node> result = new ArrayList<Node>();
 		if (label == null)
 			label = ""; //$NON-NLS-1$
@@ -436,7 +436,7 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId id = startId;
 		for (int i = 0; i < attrList.size(); i++) {
 			CmAttribute cmAttr = attrList.get(i);
-			boolean linkToNext = terminare || i < attrList.size() - 1;
+			boolean linkToNext = terminate || i < attrList.size() - 1;
 			if (!cmAttr.isVisible()) {
 				//should NEVER happen
 				//development validation! remove throw block after testing
@@ -496,7 +496,7 @@ public class CyberTrackerConfExporter {
 				} else {
 					String nodeId = id.getNodeId();
 					id = linkToNext ? new CyberTrackerId() : null; //this id will be used for next screen
-					result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId(), label));
+					result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId(), label, terminate));
 					linkToNext = false; //for this case we track linking separately, we don't want any linking logic to be executed further for this attribute
 				}
 				break;
@@ -524,7 +524,7 @@ public class CyberTrackerConfExporter {
 				}
 			}
 		}
-		if (terminare) {
+		if (terminate) {
 			result.addAll(createLastNodes(id, startId, defaultValues, addPhoto));
 		}
 		return result;
@@ -741,7 +741,7 @@ public class CyberTrackerConfExporter {
 	 * @param nodeId
 	 * @return
 	 */
-	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label) {
+	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label, boolean terminate) {
 		List<Node> result = new ArrayList<Node>();
 		List<IAttributeTreeNodeProxy> activeTreeNodes = new ArrayList<IAttributeTreeNodeProxy>();
 		activeTreeNodes.addAll(getActiveTreeNodes(treeAttribute));
@@ -754,6 +754,9 @@ public class CyberTrackerConfExporter {
 			navControl.setTranslateNextScreenId(navId.getNodeId());
 			Control control7 = ScreensObjectFactory.getRadioMainControl(treeRootNode);
 			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
+			if (!terminate) {
+				navId = null; //we are under mutli-select and if two next screens are defined that causes stacking problem (so we need to avoid next screen for leaves)
+			}
 		}
 		result.add(treeRootNode);
 		for (IAttributeTreeNodeProxy treeNode : activeTreeNodes) {
