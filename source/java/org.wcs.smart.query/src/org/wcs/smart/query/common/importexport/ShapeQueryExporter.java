@@ -55,7 +55,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 
     protected ShapefileDataStore shapefile = null;    
     protected ArrayList<SimpleFeature> features = null;
-    private Query query;
+    protected Query query;
    
     /**
      * Creates new shapefile exporter
