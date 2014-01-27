@@ -1059,6 +1059,11 @@
             id="org.wcs.smart.autobackup"
             name="%autobackup.preferencepage.name">
       </page>
+      <page
+            class="org.eclipse.equinox.p2.ui.RepositoryManipulationPage"
+            id="org.wcs.smart.updatesites"
+            name="%updatesite.preferencepage.name">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
