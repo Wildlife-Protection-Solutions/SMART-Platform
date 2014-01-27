@@ -165,6 +165,69 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 
 
 	protected void populateDataTable(Connection c) throws SQLException {
+		
+		String lastSightingReport = null;
+		
+		//custom last sighting date filter
+		if (query.getDateFilter().getDateFilterOption() == LastSightingDateFilter.INSTANCE){
+			lastSightingReport = createTempTableName();;
+			
+			StringBuilder s = new StringBuilder();
+			s.append("CREATE TABLE "); //$NON-NLS-1$
+			s.append(lastSightingReport);
+			s.append("(last_sighting timestamp, entity char(16) for bit data)"); //$NON-NLS-1$
+			QueryPlugIn.logSql(s.toString());
+			c.createStatement().execute(s.toString());
+			
+			//find the last sighting date for each entity
+			s = new StringBuilder();
+			s.append("INSERT INTO " + lastSightingReport); //$NON-NLS-1$
+			s.append("(last_sighting, entity) "); //$NON-NLS-1$
+			s.append("SELECT "); //$NON-NLS-1$
+			s.append("max(" + tablePrefix(Waypoint.class) + ".datetime) as last_sighting,"); //$NON-NLS-1$ //$NON-NLS-2$
+			s.append(tablePrefix(Entity.class) + ".uuid"); //$NON-NLS-1$
+			s.append(" FROM "); //$NON-NLS-1$
+			s.append(tableNamePrefix(Waypoint.class));
+			s.append(" JOIN "); //$NON-NLS-1$
+			s.append(tableNamePrefix(WaypointObservation.class));
+			s.append(" ON " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			s.append(" join "); //$NON-NLS-1$
+			s.append(tableNamePrefix(WaypointObservationAttribute.class));
+			s.append(" on " + tablePrefix(WaypointObservation.class) + ".uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			s.append(" join "); //$NON-NLS-1$
+			s.append(tableNamePrefix(Entity.class));
+			s.append(" on " + tablePrefix(Entity.class) + ".attribute_list_item_uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			s.append(" join "); //$NON-NLS-1$
+			s.append(tableNamePrefix(EntityType.class));
+			s.append(" on " + tablePrefix(EntityType.class) + ".uuid = " + tablePrefix(Entity.class) + ".entity_type_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			s.append(" WHERE "); //$NON-NLS-1$
+			s.append(tablePrefix(EntityType.class) + ".uuid = x'" +SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			//entity filter		
+			if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
+				s.append(" AND "); //$NON-NLS-1$
+				s.append(tablePrefix(Entity.class) + ".status = '" + Entity.Status.ACTIVE +"' "); //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (query.getEntityFilter().getType() == EntityFilterType.CUSTOM){
+				if(query.getEntityFilter().getEntities().size() > 0){
+					s.append(" AND "); //$NON-NLS-1$
+					s.append(tablePrefix(Entity.class) + ".uuid IN ("); //$NON-NLS-1$
+				
+					for (Entity e : query.getEntityFilter().getEntities()){
+						s.append("x'" + SmartUtils.encodeHex(e.getUuid()) + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					s.deleteCharAt(s.length() - 1);
+					s.append(")"); //$NON-NLS-1$
+				}else{
+					s.append(" AND "); //$NON-NLS-1$
+					s.append(tablePrefix(Entity.class) + ".uuid IS NULL "); //$NON-NLS-1$
+				}
+			}			
+			s.append("GROUP BY " + tablePrefix(Entity.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+			QueryPlugIn.logSql(s.toString());
+			c.createStatement().execute(s.toString());
+		}
+		
+		
 		StringBuilder sql = new StringBuilder();
 		sql.append(" INSERT INTO " + queryDataTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_category_uuid,entity_uuid,entity_id,entity_status) "); //$NON-NLS-1$
@@ -206,6 +269,13 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(tableNamePrefix(EntityType.class));
 		sql.append(" on " + tablePrefix(EntityType.class) + ".uuid = " + tablePrefix(Entity.class) + ".entity_type_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
+		if (lastSightingReport != null){
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(lastSightingReport + " ll"); //$NON-NLS-1$
+			sql.append(" on ll.last_sighting = " + tablePrefix(Waypoint.class) + ".datetime"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" AND ll.entity = " + tablePrefix(Entity.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
 		sql.append(" WHERE "); //$NON-NLS-1$
 		
 		DerbyFilterToSqlGenerator sqlGenerator = new DerbyFilterToSqlGenerator();
@@ -218,11 +288,14 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(sqlGenerator.asSql(query.getConservationAreaFilterAsFilter(), tablePrefix(Waypoint.class)));
 
 		//date filter
-		String dFilter = sqlGenerator.toSql(localDateFilter, this);
-		if (dFilter != null && dFilter.length() > 0){
-			sql.append(" AND "); //$NON-NLS-1$
-			sql.append(dFilter);
+		if (lastSightingReport == null){
+			String dFilter = sqlGenerator.toSql(localDateFilter, this);
+			if (dFilter != null && dFilter.length() > 0){
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(dFilter);
+			}
 		}
+		
 		
 		//entity filter		
 		if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
@@ -323,6 +396,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				
 				sql.append(" ( SELECT CASE "); //$NON-NLS-1$
 				
+				boolean toUpdate = false;
 				try{
 					while(rs.next()){
 						byte[] uuid = rs.getBytes(1);
@@ -339,6 +413,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 						sql.append(" = x'" + SmartUtils.encodeHex(uuid) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 						
 						sql.append("THEN '" + key + "' " ); //$NON-NLS-1$ //$NON-NLS-2$
+						toUpdate = true;
 					}
 					
 				}finally{
@@ -354,8 +429,10 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				sql.append(tablePrefix(EntityAttributeValue.class));
 				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
+				if (toUpdate){
+					QueryPlugIn.logSql(sql.toString());
+					c.createStatement().execute(sql.toString());
+				}
 			}
 		}
 		

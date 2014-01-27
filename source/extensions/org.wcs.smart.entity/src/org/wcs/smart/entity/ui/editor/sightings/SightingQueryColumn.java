@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.editor.sightings;
 
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.query.LastSightingDateFilter;
 import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -35,9 +36,14 @@ import org.wcs.smart.query.model.filter.date.IDateFilter;
  * @since 1.0.0
  */
 public class SightingQueryColumn extends QueryColumn{
-	
 
-	public static IDateFilter[] SIGHTING_DATE_FILTERS = IDateFilter.DATE_FILTERS;
+	public static IDateFilter[] SIGHTING_DATE_FILTERS = new IDateFilter[IDateFilter.DATE_FILTERS.length + 1];
+	static{
+		SIGHTING_DATE_FILTERS[0] = LastSightingDateFilter.INSTANCE;
+		for (int i = 0; i < IDateFilter.DATE_FILTERS.length; i++){
+			SIGHTING_DATE_FILTERS[i+1] = IDateFilter.DATE_FILTERS[i];
+		}
+	}
 	
 	/**
 	 * Fixed columns in the entity type
