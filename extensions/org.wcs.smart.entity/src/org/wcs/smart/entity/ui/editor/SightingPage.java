@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -185,6 +186,10 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 			
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
+				if (currentQuery == null){
+					MessageDialog.openError(getSite().getShell(), Messages.SightingPage_ErrorDialogTitle, Messages.SightingPage_NothingToExport);
+					return;
+				}
 				ExportQueryWizard wizard = new ExportQueryWizard(currentQuery);
 				
 				WizardDialog dialog = new WizardDialog(parentEditor.getSite().getShell(), wizard);

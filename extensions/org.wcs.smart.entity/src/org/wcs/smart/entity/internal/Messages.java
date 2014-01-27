@@ -282,6 +282,8 @@ public class Messages extends NLS {
 	public static String ImportEntityTypeHandler_ImportProgress3;
 	public static String ImportEntityTypeHandler_XmlError;
 	public static String ImportEntityTypeHandler_XMLFileType;
+	public static String LastSightingDateFilter_LastSightingGuiLabel;
+	public static String LastSightingDateFilter_LastSightingGuiName;
 	public static String MapDialog_MapDialogTitle;
 	public static String NameIdKeyComposite_CompositeDescription;
 	public static String NameIdKeyComposite_CompositeName;
@@ -314,8 +316,10 @@ public class Messages extends NLS {
 	public static String SightingMapPage_UpdateLayersJobName;
 	public static String SightingPage_DateFilterLabel;
 	public static String SightingPage_EntityFilterLabel;
+	public static String SightingPage_ErrorDialogTitle;
 	public static String SightingPage_ExecuteJobName;
 	public static String SightingPage_FiltersLabel;
+	public static String SightingPage_NothingToExport;
 	public static String SightingPage_QueryError;
 	public static String SightingPage_ReloadButtonLabel;
 	public static String SightingPage_SightingsLabel;
