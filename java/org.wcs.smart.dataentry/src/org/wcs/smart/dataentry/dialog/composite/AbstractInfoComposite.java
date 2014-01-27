@@ -162,6 +162,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		addToParent(node);
 		
 		session.saveOrUpdate(node);
+		session.flush();
 	}
 	
 	/**
@@ -206,6 +207,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		}
 		addToParent(node);
 		session.saveOrUpdate(node);
+		session.flush();
 	}
 
 	private DataModel getDataModel() {
