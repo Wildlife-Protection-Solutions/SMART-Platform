@@ -146,7 +146,8 @@ public class EntityCsvImporter {
 		final ArrayList<String> warnings = new ArrayList<String>();
 		ArrayList<Entity> addedEntities = new ArrayList<Entity>();
 		
-		s.saveOrUpdate(entityType.getDmAttribute());
+		entityType = (EntityType) s.load(EntityType.class, entityType.getUuid());
+		
 		int totalCount = -1;
 		// read all to get the total count
 		FileReader reader = new FileReader(importFile);
@@ -262,7 +263,7 @@ public class EntityCsvImporter {
 				//remaining columns
 				entity.setAttributes(new ArrayList<EntityAttributeValue>());
 				for (EntityAttribute ea : entityType.getAttributes()){
-					s.saveOrUpdate(ea.getDmAttribute());
+					//s.saveOrUpdate(ea.getDmAttribute());
 					Integer x = configuration.getColumn(ea);
 					if (x != null){
 						Object value = parseString(ea, data[x], warnings, lineCount);
@@ -362,21 +363,22 @@ public class EntityCsvImporter {
 		
 		s.beginTransaction();
 		try{
-			s.saveOrUpdate(entityType);
-			s.saveOrUpdate(entityType.getDmAttribute());
-			
-			//add all entities
 			entityType.getEntities().addAll(addedEntities);
-			
 			//added entity types
 			for (Entity e : addedEntities){
-				entityType.getDmAttribute().getAttributeList().add(e.getAttributeListItem());
+				s.saveOrUpdate(e.getAttributeListItem());
+				s.saveOrUpdate(e);
 			}
 			
+			for (Entity e : addedEntities){
+				//s.saveOrUpdate(e);
+				entityType.getDmAttribute().getAttributeList().add(e.getAttributeListItem());
+			}
+			s.flush();
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			return false;
+			throw ex;
 		}
 		
 		EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, entityType);
