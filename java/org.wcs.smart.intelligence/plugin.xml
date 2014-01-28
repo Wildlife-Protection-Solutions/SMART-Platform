@@ -32,7 +32,7 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.intelligence.exportPdf"
+                  commandId="org.wcs.smart.intelligence.exportPdfEditor"
                   label="%pdf.command.label"
                   style="push">
             </command>
@@ -371,6 +371,26 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.intelligence.toolbar">
+            <command
+                  commandId="org.wcs.smart.intelligence.exportPdfEditor"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.intelligence.IntelligencePerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -522,6 +542,14 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.intelligence.IntelligenceEditor">
+               </equals>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf"

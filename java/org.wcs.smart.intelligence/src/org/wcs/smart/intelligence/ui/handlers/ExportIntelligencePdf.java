@@ -41,7 +41,7 @@ public class ExportIntelligencePdf extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IntelligenceEditorInput in = null;
-		if (event.getCommand().getId().equals("org.wcs.smart.intelligence.exportPdf")){ //$NON-NLS-1$
+		if (event.getCommand().getId().equals("org.wcs.smart.intelligence.exportPdfEditor")){ //$NON-NLS-1$
 			IEditorInput ein = HandlerUtil.getActiveEditor(event).getEditorInput();
 			if (ein instanceof IntelligenceEditorInput){
 				in = (IntelligenceEditorInput) ein;
