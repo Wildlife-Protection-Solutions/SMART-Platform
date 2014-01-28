@@ -122,13 +122,13 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 	@Override
 	protected boolean validateFilename(String fileName){
 		File f = new File(fileName);
-		if (f.exists()){
-			boolean ok = MessageDialog.openQuestion(getShell(), Messages.ExportEntityDialog_ExportDialogTitle, MessageFormat.format(Messages.ExportEntityDialog_FileExists, new Object[]{f.toString()}));
+		if (f.getAbsoluteFile().exists()){
+			boolean ok = MessageDialog.openQuestion(getShell(), Messages.ExportEntityDialog_ExportDialogTitle, MessageFormat.format(Messages.ExportEntityDialog_FileExists, new Object[]{f.getAbsoluteFile().toString()}));
 			if (!ok){
 				return false;
 			}
 		}
-		if (!f.getParentFile().exists()){
+		if (!f.getAbsoluteFile().getParentFile().exists()){
 			boolean ok = MessageDialog.openQuestion(getShell(), Messages.ExportEntityDialog_ExportDialogTitle, MessageFormat.format(Messages.ExportEntityDialog_DirectoryNotFound, new Object[]{f.getParent()}));
 			if (ok){
 				if (!SmartUtils.createDirectory(f.getParentFile())){

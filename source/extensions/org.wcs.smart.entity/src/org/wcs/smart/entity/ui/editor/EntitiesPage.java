@@ -379,10 +379,11 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 					}});
 				return;
 			}
+			s.flush();
 			AttributeListItem itemToDelete = e.getAttributeListItem();
 			s.update(itemToDelete.getAttribute());
 			s.delete(e);
-			
+			s.flush();
 			//at this point we should try to delete the attribute list item as well
 			errorMessage = null;
 			try{
@@ -405,9 +406,9 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			}
 						
 			//remove attribute list item
-			
 			itemToDelete.getAttribute().getAttributeList().remove(itemToDelete);
 			itemToDelete.setAttribute(null);
+			s.flush();
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
