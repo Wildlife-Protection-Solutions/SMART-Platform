@@ -19,11 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui.editor.sightings;
+package org.wcs.smart.entity.query;
 
 import org.wcs.smart.entity.internal.Messages;
-import org.wcs.smart.entity.query.LastSightingDateFilter;
-import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFilter;

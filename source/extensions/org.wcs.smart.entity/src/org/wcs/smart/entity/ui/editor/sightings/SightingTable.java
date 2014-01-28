@@ -36,7 +36,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn.FixedColumns;
+import org.wcs.smart.entity.query.SightingQueryColumn;
+import org.wcs.smart.entity.query.SightingQueryColumn.FixedColumns;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
@@ -147,7 +148,6 @@ public class SightingTable {
 		//fixed columns for waypoint and fixed entity attributes
 		for (FixedColumns fixed : SightingQueryColumn.FixedColumns.values()){
 			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType(), fixed.dbColName);
-			
 			if (SmartDB.isMultipleAnalysis()){
 				cols.add(column);	
 			}else{
@@ -176,7 +176,7 @@ public class SightingTable {
 				}
 				
 				QueryColumn column = new SightingQueryColumn(
-						name + " (" + ea.getEntityType().getName() + ")", //$NON-NLS-1$ //$NON-NLS-2$
+						ea.getEntityType().getName() + "|" + name, //$NON-NLS-1$
 						key, cType, "ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$ 
 				cols.add(column);
 			}

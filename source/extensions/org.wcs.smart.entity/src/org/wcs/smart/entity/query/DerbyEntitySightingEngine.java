@@ -42,7 +42,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntityFilter.EntityFilterType;
-import org.wcs.smart.entity.ui.editor.sightings.SightingQueryColumn.FixedColumns;
+import org.wcs.smart.entity.query.SightingQueryColumn.FixedColumns;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
