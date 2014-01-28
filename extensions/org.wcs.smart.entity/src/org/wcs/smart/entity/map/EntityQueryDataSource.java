@@ -102,7 +102,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		sb.append("fid:String"); //$NON-NLS-1$
 		for (QueryColumn col : columns){
 			sb.append(","); //$NON-NLS-1$
-			sb.append(col.getName());
+			sb.append(col.getName().replaceAll(" ", "_")); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(":"); //$NON-NLS-1$
 			sb.append(col.getType().geotoolsType);
 		}
