@@ -112,6 +112,10 @@ GRANT ALL PRIVILEGES  ON  smart.WAYPOINT TO data_entry;
 GRANT ALL PRIVILEGES  ON  smart.WAYPOINT TO manager;
 GRANT SELECT ON  smart.WAYPOINT TO analyst;
 
+GRANT ALL PRIVILEGES  ON  smart.PATROL_WAYPOINT TO data_entry;
+GRANT ALL PRIVILEGES  ON  smart.PATROL_WAYPOINT TO manager;
+GRANT SELECT ON  smart.PATROL_WAYPOINT TO analyst;
+
 GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO data_entry;
 GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO manager;
 GRANT SELECT ON  smart.observation_attachment TO analyst;
@@ -124,5 +128,13 @@ ALTER TABLE smart.intelligence
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;
+
+-- to allow data entry users to delete entities
+GRANT DELETE ON smart.cm_attribute_option to data_entry;
+GRANT DELETE ON smart.cm_attribute_list to data_entry;
+GRANT DELETE ON smart.cm_attribute_tree_node to data_entry;
+GRANT DELETE ON smart.cm_attribute_option to manager;
+GRANT DELETE ON smart.cm_attribute_list to manager;
+GRANT DELETE ON smart.cm_attribute_tree_node to manager;
 
 update smart.db_version set version = '3.0.0';
