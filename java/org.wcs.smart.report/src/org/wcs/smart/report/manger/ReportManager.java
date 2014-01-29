@@ -236,7 +236,7 @@ public class ReportManager {
 		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
-			if (((OdaDataSourceHandle)dataset.getDataSource()).getExtensionID().equals(SMART_DATASOURCE_ID)){
+			if (dataset.getDataSource() != null && ((OdaDataSourceHandle)dataset.getDataSource()).getExtensionID().equals(SMART_DATASOURCE_ID)){
 				//refresh the columns in the query
 				try{
 					DataSetUIUtil.updateColumnCache(dataset);

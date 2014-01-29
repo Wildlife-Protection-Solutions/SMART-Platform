@@ -24,6 +24,7 @@ package org.wcs.smart.data.oda.smart.impl.table;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
@@ -87,9 +88,10 @@ public abstract class SmartBirtTable {
 	
 	/**
 	 * @param ca the conservation area filter
+	 * @param currentSession the open active session
 	 * @return the values for the given conservation area
 	 */
-	public abstract List<Object> getValues(Collection<ConservationArea> cas);
+	public abstract List<Object> getValues(Collection<ConservationArea> cas, Session currentSession);
 
 	/**
 	 * Given an object returns the value for the given column

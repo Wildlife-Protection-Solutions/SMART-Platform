@@ -92,17 +92,20 @@ public class PatrolSummaryQuery extends SummaryQuery {
 	}
 	
 	@Transient
-	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor) throws Exception{
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
 		try{
 			DerbySummaryEngine engine = new DerbySummaryEngine();
-			SummaryQueryResult lastResults = engine.executeQuery(this, session, monitor);
+			SummaryQueryResult lastResults = engine.executeQuery(this, lsession, monitor);
 			return lastResults;
 		}finally{
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
 			}
 		}
 	}

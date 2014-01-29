@@ -32,6 +32,8 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.hibernate.Session;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -58,16 +60,16 @@ public class SmartTableResultSet  implements IResultSet {
 	 *            the metadata
 	 */
 	public SmartTableResultSet(SmartBirtTable table,
-			SmartTableResultSetMetadata metadata) {
-
+			SmartTableResultSetMetadata metadata, SmartConnection connection) {
+		
 		this.metadata = metadata;
 		table.openQuery();
-		this.data = table.getValues(SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		this.data = table.getValues(SmartDB.getConservationAreaConfiguration().getConservationAreas(), connection.getSession());
 		this.table = table;
-		m_maxRows = data.size();
-		
-		
+		m_maxRows = data.size();	
 	}
+	
+	
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
@@ -125,11 +127,6 @@ public class SmartTableResultSet  implements IResultSet {
 	public int getRow() throws OdaException {
 		return m_currentRowId;
 	}
-
-	
-	
-	
-
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getString(int)
 	 */

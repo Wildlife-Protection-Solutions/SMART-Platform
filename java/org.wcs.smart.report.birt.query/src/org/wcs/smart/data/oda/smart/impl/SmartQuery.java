@@ -73,7 +73,8 @@ public class SmartQuery implements IQuery {
 	
 	//dataset metadata
 	private SmartParameterMetaData pMetadata = null;
-
+	private SmartConnection connection;
+	
 	/**
 	 * Job to load the query from the database.
 	 */
@@ -98,8 +99,9 @@ public class SmartQuery implements IQuery {
 	/**
 	 * Creates a new smart query
 	 */
-	public SmartQuery() {
+	public SmartQuery(SmartConnection connection) {
 		this.queryType = null;
+		this.connection = connection;
 	}
 
 	public Query getQuery(){
@@ -201,7 +203,7 @@ public class SmartQuery implements IQuery {
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#executeQuery()
 	 */
 	public IResultSet executeQuery() throws OdaException {
-		return wrapperObject.executeQuery(this);
+		return wrapperObject.executeQuery(this, connection);
 //		IResultSet resultSet = null;
 //
 //		//create date filter

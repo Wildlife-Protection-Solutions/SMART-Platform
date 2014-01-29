@@ -103,6 +103,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 					filterer.dropTemporaryTables(c);
 					monitor.done();
 				}
+				c.commit();
 			}
 		});
 		return myResults;

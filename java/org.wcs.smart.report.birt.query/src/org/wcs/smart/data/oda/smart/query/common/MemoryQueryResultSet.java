@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
@@ -48,11 +49,13 @@ public class MemoryQueryResultSet extends AbstractQueryResultSet {
 	 * @param metadata query metadata
 	 * @param query gridded query
 	 */
-	public MemoryQueryResultSet(Query query, SimpleQueryResultSetMetadata metadata) {
+	public MemoryQueryResultSet(Query query, 
+			SimpleQueryResultSetMetadata metadata,
+			SmartConnection connection) {
 		super(metadata);
 		this.metadata = metadata;
 		try {
-			Collection<? extends IResultItem> results = (Collection<? extends IResultItem>) query.getCachedResults(new NullProgressMonitor());
+			Collection<? extends IResultItem> results = (Collection<? extends IResultItem>) query.getCachedResults(new NullProgressMonitor(), connection.getSession());
 			init(results);
 			
 		} catch (Exception e) {

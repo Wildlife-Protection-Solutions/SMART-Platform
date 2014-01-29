@@ -175,20 +175,23 @@ public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 	
 
 	@Override
-	public Object executeQueryInternal(IProgressMonitor monitor) throws Exception{
-		return getQueryResults(monitor);
+	public Object executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		return getQueryResults(monitor, session);
 	}
 	
 	@Transient
-	public Collection<PatrolQueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+	public Collection<PatrolQueryResultItem> getQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
 		try{
-			return getQueryResults(session, progressMonitor);
+			return getQueryResults(lsession, progressMonitor);
 		}finally{
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
 			}
 		}
 	}

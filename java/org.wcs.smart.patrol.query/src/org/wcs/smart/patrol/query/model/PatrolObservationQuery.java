@@ -61,17 +61,20 @@ public class PatrolObservationQuery extends ObservationQuery{
 
 
 	@Transient
-	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
 		try {
 			DerbyObservationEngine engine = new DerbyObservationEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
 			return lastResult;
 		} finally {
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
 			}
 		}
 	}

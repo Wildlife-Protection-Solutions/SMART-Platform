@@ -84,20 +84,23 @@ public class PatrolGriddedQuery extends GriddedQuery {
 	}
 
 	@Transient
-	public Collection<GridResultItem> executeQueryInternal(IProgressMonitor monitor) throws Exception{
+	public Collection<GridResultItem> executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
 		resultMetadata = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+		Session lsession = session;
+		if (lsession == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
 		try{
 			
 			DerbyGridEngine engine = new DerbyGridEngine();
-			Collection<GridResultItem> lastResults = engine.executeQuery(this, session, monitor);
+			Collection<GridResultItem> lastResults = engine.executeQuery(this, lsession, monitor);
 			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
 			return lastResults;
 		}finally{
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
 			}
 		}
 	}

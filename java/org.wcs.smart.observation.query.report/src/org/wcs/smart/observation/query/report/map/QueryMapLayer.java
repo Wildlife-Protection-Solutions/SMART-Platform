@@ -100,14 +100,11 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 		}
 		/* for historic support */
 		Query q = null;
+
+		//do not close session as assume it is managed by SmartConnection is BIRT report
 		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
-		}
+		q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
+
 		if (q == null){
 			return null;
 		}
@@ -132,10 +129,10 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 			}
 			if (q instanceof SimpleQuery) {
 				((SimpleQuery) q).setDateFilter(dateFilter);
-				q.executeQuery(new NullProgressMonitor());
+				q.executeQuery(new NullProgressMonitor(), session);
 			} else if (q instanceof GriddedQuery ){
 				((GriddedQuery)q).setDateFilter(dateFilter);
-				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor());
+				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor(), session);
 				if (data.size() <= 0){
 					add = false;
 				}

@@ -32,6 +32,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 
@@ -59,12 +60,10 @@ public class SummaryQueryResultSet implements IResultSet {
 	 *            the metadata
 	 */
 	public SummaryQueryResultSet(SummaryQuery query,
-			SummaryQueryResultSetMetadata metadata) {
-
+			SummaryQueryResultSetMetadata metadata, SmartConnection connection) {
 		this.metadata = metadata;
-
 		try {
-			results = (SummaryQueryResult) query.getCachedResults(new NullProgressMonitor());
+			results = (SummaryQueryResult) query.getCachedResults(new NullProgressMonitor(), connection.getSession());
 			m_maxRows = results.getNumDataRows();
 		} catch (Exception e) {
 			throw new RuntimeException(e);

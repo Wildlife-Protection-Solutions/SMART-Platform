@@ -90,17 +90,20 @@ public class ObservationWaypointQuery extends WaypointQuery {
 	}
 	
 	@Transient
-	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
+		Session lSession = session;
+		if (lSession == null){
+			lSession = HibernateManager.openSession();
+			lSession.beginTransaction();
+		}
 		try {
 			DerbyWaypointEngine engine = new DerbyWaypointEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lSession, progressMonitor);
 			return lastResult;
 		} finally {
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lSession.isOpen()){
+				lSession.getTransaction().commit();
+				lSession.close();
 			}
 		}
 	}

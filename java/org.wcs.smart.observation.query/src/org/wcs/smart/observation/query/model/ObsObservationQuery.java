@@ -93,17 +93,20 @@ public class ObsObservationQuery extends ObservationQuery implements IPagedQuery
 
 	
 	@Transient
-	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
+		Session lSession = session;
+		if (lSession == null){
+			lSession = HibernateManager.openSession();
+			lSession.beginTransaction();
+		}
 		try {
 			DerbyObservationEngine engine = new DerbyObservationEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lSession, progressMonitor);
 			return lastResult;
 		} finally {
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lSession.isOpen()){
+				lSession.getTransaction().commit();
+				lSession.close();
 			}
 		}
 	}

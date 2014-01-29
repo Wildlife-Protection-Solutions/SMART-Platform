@@ -81,7 +81,7 @@ public class StationTable  extends SmartBirtTable {
 		}
 	}
 	
-	private Session session = null;
+//	private Session session = null;
 	private Column[] activeColumns;
 	
 	
@@ -138,7 +138,7 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues (Collection<ConservationArea> cas) {
+	public List<Object> getValues (Collection<ConservationArea> cas, Session session) {
 		return session.createCriteria(Station.class).add(Restrictions.in("conservationArea", cas)).list(); //$NON-NLS-1$
 	}
 
@@ -155,8 +155,8 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void openQuery() {
-		session = HibernateManager.openSession();
-		session.beginTransaction();
+//		session = HibernateManager.openSession();
+//		session.beginTransaction();
 	}
 
 	/**
@@ -164,8 +164,8 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void closeQuery() {
-		session.getTransaction().commit();
-		session.close();
+//		session.getTransaction().commit();
+//		session.close();
 
 	}
 

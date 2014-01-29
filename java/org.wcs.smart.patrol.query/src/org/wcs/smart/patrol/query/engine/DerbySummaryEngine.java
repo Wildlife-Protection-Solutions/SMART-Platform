@@ -263,6 +263,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					dropTemporaryTables(c);
 					monitor.done();
 				}
+				c.commit();
 			}
 		});
 

@@ -245,6 +245,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 					dropTemporaryTables(c);
 					monitor.done();
 				}
+				c.commit();
 			}
 		});
 

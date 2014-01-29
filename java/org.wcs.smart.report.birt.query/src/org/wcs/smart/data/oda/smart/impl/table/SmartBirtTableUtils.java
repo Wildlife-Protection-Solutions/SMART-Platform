@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.report.birt.query.Activator;
 
 /**
  * Utilities for reading extension point information
@@ -36,21 +37,38 @@ import org.eclipse.core.runtime.Platform;
  * @since 1.0.0
  */
 public class SmartBirtTableUtils {
+	
+	private static SmartBirtTableUtils instance = null;
+	
 	/**
 	 * Extension point id
 	 */
 	public static final String REPORT_MAPPING_ID = "org.wcs.smart.data.oda.smart.table"; //$NON-NLS-1$
 	
+	private List<IDynamicSmartTables> cachedDynamics = null;
+	
+	public static SmartBirtTableUtils getInstance(){
+		if (instance == null){
+			instance = new SmartBirtTableUtils();
+		}
+		return instance;
+	}
 	/**
 	 * @return list of all SmartBirtTable extension point implementations
 	 * @throws Exception
 	 */
-	public static final List<SmartBirtTable> getBirtTables() throws Exception{
+	public List<SmartBirtTable> getBirtTables() throws Exception{
 		List<SmartBirtTable> items = new ArrayList<SmartBirtTable>();
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_MAPPING_ID);
 		for (int i = 0; i < config.length; i ++){
 			items.add((SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable")); //$NON-NLS-1$
+		}
+		
+		for (IDynamicSmartTables dynamic : getDynamicExtensions()){
+			for(SmartBirtTable t : dynamic.getTables()){
+				items.add(t);
+			}
 		}
 		return items;
 	}
@@ -62,7 +80,7 @@ public class SmartBirtTableUtils {
 	 * @return SmartBirtTable with given tablename
 	 * @throws Exception
 	 */
-	public static final SmartBirtTable findTable(String tableName) throws Exception{
+	public SmartBirtTable findTable(String tableName) throws Exception{
 		if (Platform.getExtensionRegistry() == null) return null;
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_MAPPING_ID);
 		for (int i = 0; i < config.length; i ++){
@@ -72,7 +90,34 @@ public class SmartBirtTableUtils {
 				return table;
 			}
 		}
+		for (IDynamicSmartTables dynamic : getDynamicExtensions()){
+			for(SmartBirtTable t : dynamic.getTables()){
+				if (t.getTableKey().equals(tableName)){
+					return t;
+				}
+			}
+		}
+		
 		return null;
+		
+	}
+	
+	private List<IDynamicSmartTables> getDynamicExtensions(){
+		if (cachedDynamics == null){
+			if (Platform.getExtensionRegistry() == null) return null;
+			
+			try{
+				cachedDynamics = new ArrayList<IDynamicSmartTables>();
+				IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDynamicSmartTables.EXTENSION_ID);
+				for (int i = 0; i < config.length; i ++){
+					IDynamicSmartTables table = (IDynamicSmartTables)config[i].createExecutableExtension("class"); //$NON-NLS-1$
+					cachedDynamics.add(table);
+				}
+			}catch (Exception ex){
+				Activator.displayLog("Could not read SMART Table Extensions", ex);
+			}
+		}
+		return cachedDynamics;
 		
 	}
 	

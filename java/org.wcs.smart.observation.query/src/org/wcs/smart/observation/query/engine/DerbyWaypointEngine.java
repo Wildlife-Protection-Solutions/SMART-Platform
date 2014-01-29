@@ -96,6 +96,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}
+				c.commit();
 			}
 
 		});

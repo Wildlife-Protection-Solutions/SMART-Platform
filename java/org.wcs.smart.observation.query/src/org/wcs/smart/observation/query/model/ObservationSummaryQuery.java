@@ -87,17 +87,20 @@ public class ObservationSummaryQuery extends SummaryQuery {
 	
 	
 	@Transient
-	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor) throws Exception{
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		Session lSession = session;
+		if (lSession == null){
+			lSession = HibernateManager.openSession();
+			lSession.beginTransaction();
+		}
 		try{
 			DerbySummaryEngine engine = new DerbySummaryEngine();
-			SummaryQueryResult lastResults = engine.executeQuery(this, session, monitor);
+			SummaryQueryResult lastResults = engine.executeQuery(this, lSession, monitor);
 			return lastResults;
 		}finally{
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
+			if (session == null && lSession.isOpen()){
+				lSession.getTransaction().commit();
+				lSession.close();
 			}
 		}
 	}

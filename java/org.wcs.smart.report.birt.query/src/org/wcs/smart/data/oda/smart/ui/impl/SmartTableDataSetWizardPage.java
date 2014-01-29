@@ -139,7 +139,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			}
 		});
 		try{
-			List<SmartBirtTable> tables = SmartBirtTableUtils.getBirtTables();
+			List<SmartBirtTable> tables = SmartBirtTableUtils.getInstance().getBirtTables();
 			Collections.sort(tables, new Comparator<SmartBirtTable>(){
 				@Override
 				public int compare(SmartBirtTable t1, SmartBirtTable t2) {
@@ -342,7 +342,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(reportTable.getTableKey());
+		dataSetDesign.setDisplayName(reportTable.getTableDisplayName());
 		dataSetDesign.setName(reportTable.getTableKey());
 	}
 

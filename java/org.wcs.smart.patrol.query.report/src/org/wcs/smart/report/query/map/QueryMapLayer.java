@@ -31,7 +31,9 @@ import net.refractions.udig.catalog.IService;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.DataSourceHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.eclipse.birt.report.model.elements.OdaDataSource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -94,8 +96,8 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 		if (!(handle instanceof OdaDataSetHandle)){
 			return null;
 		}
-		
 		String queryText = ((OdaDataSetHandle)handle).getQueryText();
+
 		byte[] quuid = SmartUtils.decodeHex(queryText.split(":")[1]); //$NON-NLS-1$
 		
 		String queryType = queryText.split(":")[0]; //$NON-NLS-1$
@@ -106,14 +108,10 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 			qtype = QueryTypeManager.getInstance().findDeprecatedQueryType(queryType);
 		}
 		Query q = null;
+		
+		//do not close session as assume it is managed by SmartConnection is BIRT report
 		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
-		}
+		q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
 		
 		IService qs = QueryServiceFactory.generateQueryService(q);
 		if (context == null){
@@ -134,12 +132,13 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 			if (Query.class.isAssignableFrom( q.getClass() )){
 				q.setDateFilter(dateFilter);
 			}
+			
 			if (q instanceof SimpleQuery) {
 				((SimpleQuery) q).setDateFilter(dateFilter);
-				q.executeQuery(new NullProgressMonitor());
+				q.executeQuery(new NullProgressMonitor(), session);
 			} else if (q instanceof PatrolGriddedQuery ){
 				((PatrolGriddedQuery)q).setDateFilter(dateFilter);
-				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor());
+				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor(), session);
 				if (data.size() <= 0){
 					add = false;
 				}
