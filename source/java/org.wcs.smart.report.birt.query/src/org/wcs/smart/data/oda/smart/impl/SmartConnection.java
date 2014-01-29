@@ -28,8 +28,10 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.data.oda.smart.internal.Messages;
+import org.wcs.smart.hibernate.HibernateManager;
 
 import com.ibm.icu.util.ULocale;
 
@@ -40,12 +42,17 @@ public class SmartConnection implements IConnection {
 	
 	private boolean m_isOpen = false;
 
+	private Session localSession;
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
 	 */
 	public void open(Properties connProperties) throws OdaException {
 		//if smart running connection is open
+		localSession = HibernateManager.openSession();
+		localSession.beginTransaction();
 		m_isOpen = true;
+		
 	}
 
 	/**
@@ -59,6 +66,12 @@ public class SmartConnection implements IConnection {
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#close()
 	 */
 	public void close() throws OdaException {
+		if (localSession != null){
+			if (localSession.getTransaction().isActive()){
+				localSession.getTransaction().rollback();
+			}
+			localSession.close();
+		}
 		m_isOpen = false;
 	}
 
@@ -67,6 +80,10 @@ public class SmartConnection implements IConnection {
 	 */
 	public boolean isOpen() throws OdaException {
 		return m_isOpen;
+	}
+	
+	public Session getSession(){
+		return this.localSession;
 	}
 
 	/**
@@ -82,9 +99,9 @@ public class SmartConnection implements IConnection {
 	public IQuery newQuery(String dataSetType) throws OdaException {
 		try {
 			if (dataSetType.equals(SmartQuery.SMART_DATASET_TYPE)) {
-				return new SmartQuery();
+				return new SmartQuery(this);
 			}else if (dataSetType.equals(SmartTableQuery.SMART_DATASET_TYPE)){
-				return new SmartTableQuery();
+				return new SmartTableQuery(this);
 			}
 			throw new OdaException(
 					MessageFormat.format(Messages.SmartConnection_Error_DatasetNotSupported,

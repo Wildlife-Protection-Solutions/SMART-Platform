@@ -121,6 +121,7 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 					dropTemporaryGridTable(c);
 					monitor.done();
 				}
+				c.commit();
 			}
 
 		});

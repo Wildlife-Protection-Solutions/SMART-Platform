@@ -119,22 +119,20 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			List<GeoSmart> layers = new ArrayList<GeoSmart>();
 			
 			BasemapDefinition def = null;
+			
+			//we do not close the session as we assume this session object
+			//is managed by the SmartConnection
 			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				byte[] uuid = null;
-				try{
-					uuid = SmartUtils.decodeHex(basemap);
-				}catch (Exception ex){
-					//eatme
-				}
-				if (uuid != null){
-					def = HibernateManager.getBasemapDefinition(session,uuid);
-				}
-			} finally {
-				session.getTransaction().commit();
-				session.close();
+			byte[] uuid = null;
+			try{
+				uuid = SmartUtils.decodeHex(basemap);
+			}catch (Exception ex){
+				//eatme
 			}
+			if (uuid != null){
+				def = HibernateManager.getBasemapDefinition(session,uuid);
+			}
+			
 			List<String> mapqueries = mapItem.getLayers();
 			List<String> mapnames = mapItem.getLayerNames();
 			List<String> mapstyles = mapItem.getLayerStyles();

@@ -118,6 +118,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}
+				c.commit();
 			}
 
 		});

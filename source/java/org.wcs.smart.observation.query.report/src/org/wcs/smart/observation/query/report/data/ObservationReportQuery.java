@@ -8,6 +8,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.ISmartQuery;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
@@ -65,7 +66,7 @@ public class ObservationReportQuery implements ISmartQuery {
 	}
 
 	@Override
-	public IResultSet executeQuery(SmartQuery smartQuery) throws OdaException {
+	public IResultSet executeQuery(SmartQuery smartQuery, SmartConnection connection) throws OdaException {
 		IResultSet resultSet = null;
 
 		//create date filter
@@ -98,15 +99,20 @@ public class ObservationReportQuery implements ISmartQuery {
 		if (smartQuery.getQuery().getType().getKey().equals(ObservationQueryType.KEY) ||
 				smartQuery.getQuery().getType().getKey().equals(ObservationWaypointQueryType.KEY)){
 			((SimpleQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
-			resultSet = new PagedQueryResultSet(smartQuery.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(smartQuery));
+			resultSet = new PagedQueryResultSet(smartQuery.getQuery(), 
+					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
+					connection);
 		}else  if (smartQuery.getQuery().getType().getKey().equals(ObservationGridQueryType.KEY)){
 			((GriddedQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
-			resultSet = new MemoryQueryResultSet(smartQuery.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(smartQuery));
+			resultSet = new MemoryQueryResultSet(smartQuery.getQuery(), 
+					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
+					connection);
 		} else if (smartQuery.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)){
 			((SummaryQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
 					(SummaryQuery) smartQuery.getQuery(),
-					new ObservationSummaryQueryResultSetMetadata((SummaryQuery) smartQuery.getQuery()));
+					new ObservationSummaryQueryResultSetMetadata((SummaryQuery) smartQuery.getQuery()),
+					connection);
 		}
 		
 		return resultSet;

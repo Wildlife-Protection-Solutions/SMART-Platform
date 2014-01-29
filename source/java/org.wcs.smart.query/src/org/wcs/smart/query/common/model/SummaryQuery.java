@@ -31,6 +31,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
@@ -134,7 +135,7 @@ public abstract class SummaryQuery extends Query {
 	
 	
 	@Transient
-	public abstract SummaryQueryResult executeQueryInternal(IProgressMonitor monitor) throws Exception;
+	public abstract SummaryQueryResult executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception;
 	
 	
 	/**

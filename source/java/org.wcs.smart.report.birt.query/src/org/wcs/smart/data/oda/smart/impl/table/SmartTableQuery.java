@@ -33,6 +33,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 
 /**
@@ -54,11 +55,14 @@ public class SmartTableQuery implements IQuery {
 
 	private SmartBirtTable table;
 	private SmartTableResultSetMetadata rMetadata = null;
+	
+	private SmartConnection connection;
 
 	/**
 	 * Creates a new smart query
 	 */
-	public SmartTableQuery() {
+	public SmartTableQuery(SmartConnection connection) {
+		this.connection = connection;
 	}
 
 	/**
@@ -71,7 +75,7 @@ public class SmartTableQuery implements IQuery {
 	 */
 	public void prepare(String queryText) throws OdaException {
 		try{
-			this.table = SmartBirtTableUtils.findTable(queryText);
+			this.table = SmartBirtTableUtils.getInstance().findTable(queryText);
 		}catch (Exception ex){
 			throw new OdaException(ex);
 		}
@@ -107,7 +111,7 @@ public class SmartTableQuery implements IQuery {
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#executeQuery()
 	 */
 	public IResultSet executeQuery() throws OdaException {
-		return new SmartTableResultSet(table, (SmartTableResultSetMetadata)getMetaData());
+		return new SmartTableResultSet(table, (SmartTableResultSetMetadata)getMetaData(), connection);
 	}
 
 	/**

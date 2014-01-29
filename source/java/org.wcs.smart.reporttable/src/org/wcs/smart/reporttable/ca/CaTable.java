@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.reporttable.internal.Messages;
@@ -129,7 +130,7 @@ public class CaTable extends SmartBirtTable {
 	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getValues(org.wcs.smart.ca.ConservationArea)
 	 */
 	@Override
-	public List<Object> getValues (Collection<ConservationArea> cas) {
+	public List<Object> getValues (Collection<ConservationArea> cas, Session session) {
 		List<Object> values = new ArrayList<Object>();
 		values.addAll(cas);
 		return values;

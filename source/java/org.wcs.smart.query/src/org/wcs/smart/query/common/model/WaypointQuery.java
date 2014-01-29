@@ -29,6 +29,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
@@ -103,11 +104,11 @@ public abstract class WaypointQuery extends SimpleQuery  implements IPagedQuery{
 		
 	
 	@Override
-	public Object executeQueryInternal(IProgressMonitor monitor) throws Exception{
-		return getPagedQueryResults(monitor);
+	public Object executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		return getPagedQueryResults(monitor, session);
 	}
 	
 	@Transient
-	public abstract IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception;
+	public abstract IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception;
 	
 }

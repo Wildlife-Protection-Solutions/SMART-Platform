@@ -19,48 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.data.oda.smart.impl;
+package org.wcs.smart.data.oda.smart.impl.table;
 
-import org.eclipse.datatools.connectivity.oda.IResultSet;
-import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
-import org.eclipse.datatools.connectivity.oda.OdaException;
+import java.util.List;
 
 /**
- * Query dataset handler for allowing queries
- * to be available in a BIRT report.
- * 
+ * Extension for providing multiple tables to the SMART table data
+ * source; that are not known until run time.
+ *  
  * @author Emily
  *
  */
-public interface ISmartQuery {
+public interface IDynamicSmartTables {
 
-	/**
-	 * Report Smart Query Extension Point
-	 */
-	public static final String SMART_QUERY_EXTENSION_ID = "org.wcs.smart.report.birt.query.queryDataset"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.data.oda.smart.table.dynamic"; //$NON-NLS-1$
 	
 	/**
-	 * Prepares the query but loading and ensure it exists.
-	 * @param smartQuery
-	 * @throws OdaException
+	 * 
+	 * @return list of all tables available
 	 */
-	public void prepare(SmartQuery smartQuery) throws OdaException;
-	
-	/**
-	 * Executes the queries and returns the result set
-	 * @param smartQuery
-	 * @return
-	 * @throws OdaException
-	 */
-	public IResultSet executeQuery(SmartQuery smartQuery, SmartConnection connetion) throws OdaException;
-	
-	/**
-	 * Return result set metadata
-	 * @param smartQuery
-	 * @return
-	 * @throws OdaException
-	 */
-	public IResultSetMetaData getMetaData(SmartQuery smartQuery) throws OdaException;
-	
-	
+	public List<SmartBirtTable> getTables(); 
 }

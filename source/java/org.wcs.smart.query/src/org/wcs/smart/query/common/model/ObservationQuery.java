@@ -29,6 +29,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
@@ -102,12 +103,12 @@ public abstract class ObservationQuery extends SimpleQuery implements IPagedQuer
 	protected abstract void initQueryColumns();
 	
 	@Override
-	public Object executeQueryInternal(IProgressMonitor monitor) throws Exception{
-		return getPagedQueryResults(monitor);
+	public Object executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		return getPagedQueryResults(monitor, session);
 	}
 	
 	@Transient
-	protected abstract IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception;
+	protected abstract IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception;
 	
 
 }

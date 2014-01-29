@@ -79,7 +79,7 @@ public class AgencyRankTable  extends SmartBirtTable {
 		}
 	}
 	
-	private Session session = null;
+//	private Session session = null;
 	private Column[] activeColumns;
 	
 	/**
@@ -135,7 +135,7 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues (Collection<ConservationArea> cas) {
+	public List<Object> getValues (Collection<ConservationArea> cas, Session session) {
 		String sql = "FROM Rank r WHERE r.agency.conservationArea in (:ca)"; //$NON-NLS-1$
 		Query q  = session.createQuery(sql);
 		q.setParameterList("ca", cas); //$NON-NLS-1$
@@ -156,8 +156,8 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void openQuery() {
-		session = HibernateManager.openSession();
-		session.beginTransaction();
+//		session = HibernateManager.openSession();
+//		session.beginTransaction();
 	}
 
 	/**
@@ -165,8 +165,8 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void closeQuery() {
-		session.getTransaction().commit();
-		session.close();
+//		session.getTransaction().commit();
+//		session.close();
 	}
 
 }

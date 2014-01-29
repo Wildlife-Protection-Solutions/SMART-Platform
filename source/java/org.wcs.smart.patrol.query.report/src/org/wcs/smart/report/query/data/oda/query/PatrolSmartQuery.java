@@ -29,6 +29,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.ISmartQuery;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
@@ -108,7 +109,7 @@ public class PatrolSmartQuery implements ISmartQuery {
 	}
 
 	@Override
-	public IResultSet executeQuery(SmartQuery query) throws OdaException {
+	public IResultSet executeQuery(SmartQuery query, SmartConnection connection) throws OdaException {
 		IResultSet resultSet = null;
 
 		//create date filter
@@ -141,18 +142,25 @@ public class PatrolSmartQuery implements ISmartQuery {
 		if (query.getQuery().getType().getKey().equals(PatrolObservationQueryType.KEY) ||
 				query.getQuery().getType().getKey().equals(PatrolWaypointQueryType.KEY)){
 			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
-			resultSet = new PagedQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
+			resultSet = new PagedQueryResultSet(query.getQuery(), 
+					(SimpleQueryResultSetMetadata)getMetaData(query), 
+					connection);
 		}else if (query.getQuery().getType().getKey().equals(PatrolQueryType.KEY)){
 			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
-			resultSet = new MemoryQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
+			resultSet = new MemoryQueryResultSet(query.getQuery(), 
+					(SimpleQueryResultSetMetadata)getMetaData(query),
+					connection);
 		}else  if (query.getQuery().getType().getKey().equals(PatrolGridQueryType.KEY)){
 			((PatrolGriddedQuery) query.getQuery()).setDateFilter(dateFilter);
-			resultSet = new MemoryQueryResultSet(query.getQuery(), (SimpleQueryResultSetMetadata)getMetaData(query));
+			resultSet = new MemoryQueryResultSet(query.getQuery(), 
+					(SimpleQueryResultSetMetadata)getMetaData(query),
+					connection);
 		} else if (query.getQuery().getType().getKey().equals(PatrolSummaryQueryType.KEY)){
 			((PatrolSummaryQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
 					(PatrolSummaryQuery) query.getQuery(),
-					new PatrolSummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery()));
+					new PatrolSummaryQueryResultSetMetadata((PatrolSummaryQuery) query.getQuery()),
+					connection);
 		}
 		
 		return resultSet;

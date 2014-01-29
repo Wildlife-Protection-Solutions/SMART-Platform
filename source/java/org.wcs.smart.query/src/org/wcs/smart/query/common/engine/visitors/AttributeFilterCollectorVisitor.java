@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.query.common.engine.visitors;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeInfo;
@@ -38,13 +38,16 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
  */
 public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 
-	private List<AttributeInfo> filters = new ArrayList<AttributeInfo>();
+	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
 
 	@Override
 	public void visit(IFilter filter) {
 		if (filter instanceof AttributeFilter){
 			AttributeFilter f = (AttributeFilter) filter;
-			filters.add(new AttributeInfo(f.getAttributeKey(),f.getAttributeType()));
+			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType());
+			if (!filters.contains(in)){
+				filters.add(in);
+			}
 			
 		}
 	}
@@ -53,7 +56,7 @@ public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 	 * 
 	 * @return list of attribute filters found
 	 */
-	public List<AttributeInfo> getAttributeInfo(){
+	public Set<AttributeInfo> getAttributeInfo(){
 		return this.filters;
 	}
 }

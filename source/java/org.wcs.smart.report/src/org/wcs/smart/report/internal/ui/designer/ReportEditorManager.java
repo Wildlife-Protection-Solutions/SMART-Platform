@@ -95,7 +95,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 						&& ne.getNewName().startsWith(
 								org.eclipse.birt.report.designer.nls.Messages
 										.getString("dataset.new.defaultName")) //$NON-NLS-1$
-						&& !ds.getDisplayName().equals(ne.getNewName())) {
+						&& (ds.getDisplayName() == null || !ds.getDisplayName().equals(ne.getNewName()))) {
 
 					try {
 						handle.setName(((OdaDataSet) ev.getTarget())

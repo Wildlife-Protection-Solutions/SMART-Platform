@@ -29,6 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -217,19 +218,33 @@ public abstract class Query extends NamedItem {
 	public abstract void setDateFilter(DateFilter filter);
 	
 	/**
+	 * @param monitor progress monitor
+	 * @param session current session; can be null if no active session
 	 * 
 	 * @return runs the query, caches the results and returns the results
 	 */
-	public Object executeQuery(IProgressMonitor monitor) throws Exception{
-		cachedResults = executeQueryInternal(monitor);
+	public Object executeQuery(IProgressMonitor monitor, Session session) throws Exception{
+		cachedResults = executeQueryInternal(monitor, session);
 		return cachedResults;
 	}
 	
 	/**
+	 * @param monitor progress monitor
+	 * 
+	 * @return runs the query, caches the results and returns the results
+	 */
+	public Object executeQuery(IProgressMonitor monitor) throws Exception{
+		return executeQuery(monitor, null);
+	}
+	
+	/**
+	 * 
+	 * @param monitor progress monitor
+	 * @param session current session; can be null if no active session
 	 * 
 	 * @return runs the query and returns the results;
 	 */
-	protected abstract Object executeQueryInternal(IProgressMonitor monitor)  throws Exception;
+	protected abstract Object executeQueryInternal(IProgressMonitor monitor, Session session)  throws Exception;
 	
 	
 	/**
@@ -237,12 +252,26 @@ public abstract class Query extends NamedItem {
 	 * the cached results otherwise it runs
 	 * the query, caches the results
 	 * and then returns them.
+	 * 
+	 * @session current session; can be null if no active session
+	 * @return 
+	 */
+	public Object getCachedResults(IProgressMonitor monitor, Session session)  throws Exception{
+		if (cachedResults == null){
+			cachedResults = executeQuery(monitor, session);
+		}
+		return cachedResults;
+	}
+	/**
+	 * If there are results cached it returns
+	 * the cached results otherwise it runs
+	 * the query, caches the results
+	 * and then returns them.
+	 * 
+	 * @session current session; can be null if no active session
 	 * @return 
 	 */
 	public Object getCachedResults(IProgressMonitor monitor)  throws Exception{
-		if (cachedResults == null){
-			cachedResults = executeQuery(monitor);
-		}
-		return cachedResults;
+		return getCachedResults(monitor, null);
 	}
 }
