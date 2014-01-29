@@ -442,5 +442,11 @@
             class="org.wcs.smart.entity.query.SightingQueryShpExporter">
       </Exporter>
    </extension>
+   <extension
+         point="org.wcs.smart.data.oda.smart.table.dynamic">
+      <DynamicTables
+            class="org.wcs.smart.entity.report.DynamicSmartTables">
+      </DynamicTables>
+   </extension>
 
 </plugin>

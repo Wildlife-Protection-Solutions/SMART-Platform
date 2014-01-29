@@ -273,7 +273,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 			
 			EntitySightingQuery query = currentQuery;
 			try{
-				final SightingPagedResults results = (SightingPagedResults) query.executeQuery(lblProgressMonitor);
+				final SightingPagedResults results = (SightingPagedResults) query.executeQuery(lblProgressMonitor, null);
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
