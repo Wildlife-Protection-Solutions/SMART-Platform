@@ -28,19 +28,6 @@
                   commandId="org.wcs.smart.cybertracker.properties"
                   label="%cybertracker.properties.command.label"
                   style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.patrol.patrolScreens"
