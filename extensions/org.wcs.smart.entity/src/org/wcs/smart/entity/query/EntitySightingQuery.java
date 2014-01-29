@@ -120,16 +120,23 @@ public class EntitySightingQuery extends Query{
 	
 	
 	/**
+	 * @param monitor
+	 * @param session can be null
 	 * 
 	 * @return runs the query and returns the results;
 	 */
-	protected Object executeQueryInternal(IProgressMonitor monitor)  throws Exception{
+	protected Object executeQueryInternal(IProgressMonitor monitor, Session session)  throws Exception{
 		DerbyEntitySightingEngine queryEngine = new DerbyEntitySightingEngine();
-		Session session = HibernateManager.openSession();
+		Session lSession = session;
+		if (lSession == null){
+			lSession = HibernateManager.openSession();
+		}
 		try{
-			return queryEngine.executeDerbyQuery(this, session, monitor);
+			return queryEngine.executeDerbyQuery(this, lSession, monitor);
 		}finally{
-			session.close();
+			if (session == null){
+				lSession.close();
+			}
 		}
 		
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query;
 
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -49,8 +50,8 @@ public class SightingQueryColumn extends QueryColumn{
 	 *
 	 */
 	public static enum FixedColumns{
-		ENTITY_ID(Messages.SightingQueryColumn_EntityIdColumnName, ColumnType.STRING, "entity:id", "entity_id"), //$NON-NLS-1$ //$NON-NLS-2$
-		ENTITY_STATUS(Messages.SightingQueryColumn_EntityStatusColumnName, ColumnType.STRING, "entity:status", "entity_status"), //$NON-NLS-1$ //$NON-NLS-2$
+		ENTITY_ID(Entity.ID_FIELD_NAME, ColumnType.STRING, "entity:id", "entity_id"), //$NON-NLS-1$ //$NON-NLS-2$
+		ENTITY_STATUS(Entity.STATUS_FIELD_NAME, ColumnType.STRING, "entity:status", "entity_status"), //$NON-NLS-1$ //$NON-NLS-2$
 		CA_ID(Messages.SightingQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id", "ca_id"), //$NON-NLS-1$ //$NON-NLS-2$
 		CA_NAME(Messages.SightingQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name", "ca_name"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_SOURCE(Messages.SightingQueryColumn_WpSourceColumnName, ColumnType.STRING,"wp:source", "wp_source"),  //$NON-NLS-1$ //$NON-NLS-2$
