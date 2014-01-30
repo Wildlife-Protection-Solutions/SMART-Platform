@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.properties;
+package org.wcs.smart.observation.ui;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -43,10 +43,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.ObservationPlugIn;
+import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -55,9 +55,9 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
+public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 
-	private PatrolOptions patrolOption = null;
+	private ObservationOptions patrolOption = null;
 	private Text txtEditTime;
 	private Button btnTrackDistanceDirection;
 	
@@ -67,9 +67,9 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param parent
 	 * @param title
 	 */
-	public PatrolOptionsPropertyPage() {
+	public ObservationOptionsPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.PatrolOptionsPropertyPage_DialogTitle);
-		patrolOption = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), getSession());
+		patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), getSession());
 	}
 	
 
@@ -203,11 +203,11 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		try{
 			edittime = Integer.parseInt(txtEditTime.getText());
 		}catch (NumberFormatException ex){
-			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTimeNotInteger, ex);
+			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTimeNotInteger, ex);
 			return false;
 		}
 		if (edittime < -1){
-			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTime, null);
+			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTime, null);
 			return false;
 		}
 		patrolOption.setEditTime(edittime);
@@ -222,7 +222,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}

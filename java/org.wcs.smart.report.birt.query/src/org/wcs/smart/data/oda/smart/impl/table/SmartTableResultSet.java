@@ -32,7 +32,6 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.hibernate.SmartDB;
 

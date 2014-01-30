@@ -19,12 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.properties.handlers;
+package org.wcs.smart.observation.ui;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.wcs.smart.patrol.internal.ui.properties.PatrolOptionsPropertyPage;
 
 /**
  * Handler for displaying patrol options dialog.
@@ -32,11 +31,11 @@ import org.wcs.smart.patrol.internal.ui.properties.PatrolOptionsPropertyPage;
  * @author Emily
  * @since 1.0.0
  */
-public class ShowPatrolOptionsHandler extends AbstractHandler {
+public class ShowOptionsHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		PatrolOptionsPropertyPage dialog = new PatrolOptionsPropertyPage();
+		ObservationOptionsPropertyPage dialog = new ObservationOptionsPropertyPage();
 		dialog.open();
 		
 		return null;

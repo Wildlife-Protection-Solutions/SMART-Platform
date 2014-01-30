@@ -206,7 +206,7 @@ public class ObservationQueryResultItem implements IResultItem{
 	/**
 	 * @param waypointDistance
 	 */
-	public void setWaypointDistance(float waypointDistance) {
+	public void setWaypointDistance(Float waypointDistance) {
 		this.waypointDistance = waypointDistance;
 	}
 	
@@ -219,7 +219,7 @@ public class ObservationQueryResultItem implements IResultItem{
 	/**
 	 * @param waypointDirection direction of observation
 	 */
-	public void setWaypointDirection(float waypointDirection) {
+	public void setWaypointDirection(Float waypointDirection) {
 		this.waypointDirection = waypointDirection;
 	}
 	

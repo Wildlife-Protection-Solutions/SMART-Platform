@@ -30,7 +30,6 @@ import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -49,17 +48,14 @@ public class PatrolTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.PatrolTemplateCloner_ProgressPatrols, 4);
+		monitor.beginTask(Messages.PatrolTemplateCloner_ProgressPatrols, 3);
 		try{
-			//	need to clone: team, mandate, options, types, transport types
+			//	need to clone: team, mandate,  types, transport types
 			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyMandates);
 			cloneMandates(engine);
 			monitor.worked(1);
 			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyTeams);
 			cloneTeams(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyOptions);
-			cloneOptions(engine);
 			monitor.worked(1);
 			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyTypes);
 			clonePatrolTypes(engine);
@@ -107,23 +103,7 @@ public class PatrolTemplateCloner implements
 		}
 		engine.getSession().flush();
 	}
-	
-	/*
-	 * clones patrol options
-	 */
-	private void cloneOptions(ConservationAreaClonerEngine engine){
-		@SuppressWarnings("unchecked")
-		List<PatrolOptions> ops = engine.getSession().createCriteria(PatrolOptions.class).add(Restrictions.eq("uuid", engine.getTemplateCa().getUuid())).list(); //$NON-NLS-1$
 
-		PatrolOptions newOp = PatrolHibernateManager.createPatrolOption(engine.getNewCa(), engine.getSession());
-		if (ops.size() > 0){
-			PatrolOptions tempOp = ops.get(0);
-			newOp.setEditTime(tempOp.getEditTime());
-			newOp.setTrackDistanceDirection(tempOp.getTrackDistanceDirection());
-		}
-		engine.getSession().save(newOp);
-		engine.getSession().flush();
-	}
 
 	/*
 	 * clone patrol types & transport types

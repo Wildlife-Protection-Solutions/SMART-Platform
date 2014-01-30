@@ -87,12 +87,17 @@ public class Messages extends NLS {
 	public static String IncidentImporter_ValidatingProgress;
 	public static String IncidentImporter_XmlIncidentNotFound;
 	public static String IncidentImporter_XmlNotFound;
+	public static String IncidentManager_IncidentTooOldToEdit;
+	public static String IncidentManager_InsufficientPrivilegesToEdit;
 	public static String IncidentMapPage_Error1;
 	public static String IncidentMapPage_Error2;
 	public static String IncidentMapPage_MapLayerName;
 	public static String IncidentPlugIn_ErrorDialogTitle;
+	public static String IncidentSummaryPage_AttachmentsColumnContent;
+	public static String IncidentSummaryPage_AttachmentsColumnName;
 	public static String IncidentSummaryPage_AttachmentsLabel;
 	public static String IncidentSummaryPage_AttributeLabel;
+	public static String IncidentSummaryPage_CannotEdit;
 	public static String IncidentSummaryPage_CategoryLabel;
 	public static String IncidentSummaryPage_CommentsLabel;
 	public static String IncidentSummaryPage_DateLabel;
@@ -103,6 +108,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_IdLabel;
 	public static String IncidentSummaryPage_LocationLabel;
 	public static String IncidentSummaryPage_LocationSeparator;
+	public static String IncidentSummaryPage_ObservationAttachmentsLabel;
 	public static String IncidentSummaryPage_ObservationLabel;
 	public static String IncidentSummaryPage_SectionDescription;
 	public static String IncidentSummaryPage_SectionLabel;

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.model;
+package org.wcs.smart.observation.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,14 +35,14 @@ import javax.persistence.Table;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.patrol_options")
-public class PatrolOptions {
+@Table(name="smart.observation_options")
+public class ObservationOptions {
 
 	private boolean trackDistanceDirection;
 	private Integer editTime;
 	private byte[] ca_uuid;
 	
-	public PatrolOptions(){}
+	public ObservationOptions(){}
 	
 	/**
 	 * 

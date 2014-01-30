@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -549,8 +547,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
 		it.setWaypointTime(rs.getTime("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getFloat("wp_direction")); //$NON-NLS-1$
-		it.setWaypointDistance(rs.getFloat("wp_distance")); //$NON-NLS-1$
+		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$

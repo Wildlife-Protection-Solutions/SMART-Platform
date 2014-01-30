@@ -47,6 +47,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -64,7 +66,6 @@ import org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
@@ -89,7 +90,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
 	
 	private Patrol patrol = null;
-	private PatrolOptions ops = null;
+	private ObservationOptions ops = null;
 	
 	private PatrolSummaryEditor summaryEditor;
 	private PatrolMapPageEditor mapPage;
@@ -204,7 +205,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 	}
 
-	public PatrolOptions getOptions(){
+	public ObservationOptions getOptions(){
 		return this.ops;
 	}
 	
@@ -231,7 +232,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			this.projections = tmp.toArray(new Projection[tmp.size()]);
 			session.getTransaction().commit();
 			if (ops == null){
-				ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 			}
 			session.close();
 		}

@@ -22,8 +22,6 @@
 package org.wcs.smart.patrol.geotools;
 
 import org.eclipse.core.runtime.IAdapterFactory;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.util.SmartUtils;
