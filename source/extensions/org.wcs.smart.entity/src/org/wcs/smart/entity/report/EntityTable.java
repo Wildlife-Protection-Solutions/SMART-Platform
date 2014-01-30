@@ -44,26 +44,27 @@ import org.wcs.smart.entity.query.SightingQueryColumn;
  */
 public class EntityTable extends SmartBirtTable {
 
+	public static final String ENTITYKEY_PREFIX = "ENTITY";
 	private EntityType et;
 	
 	public EntityTable(EntityType et) {
-		super(MessageFormat.format("Entity Type: {0}", new Object[]{et.getName()}), "ENTITY:" + et.getKeyId());
+		super(MessageFormat.format("Entity Type: {0}", new Object[]{et.getName()}),ENTITYKEY_PREFIX + ":" + et.getKeyId());
 		this.et = et;
 	}
 
 	@Override
 	public String[] getColumnNames() {
 		int add = 2;
-		if (et.getType() == EntityType.Type.TRANSIENT){
+		if (et.getType() == EntityType.Type.FIXED){
 			add = 4;
 		}
-		String[] cols = new String[et.getAttributes().size() + 4];
+		String[] cols = new String[et.getAttributes().size() + add];
 		
 		cols[0] = SightingQueryColumn.FixedColumns.ENTITY_ID.getKey();
 		cols[1] = SightingQueryColumn.FixedColumns.ENTITY_STATUS.getKey();
-		if (et.getType() == EntityType.Type.TRANSIENT){
-			cols[2] = SightingQueryColumn.FixedColumns.WAYPOINT_X.getKey();
-			cols[3] = SightingQueryColumn.FixedColumns.WAYPOINT_Y.getKey();
+		if (et.getType() == EntityType.Type.FIXED){
+			cols[2] = "entity:x"; //$NON-NLS-1$
+			cols[3] = "entity:y"; //$NON-NLS-1$
 		}
 		
 		int i = 0;
@@ -77,14 +78,14 @@ public class EntityTable extends SmartBirtTable {
 	@Override
 	public String[] getColumnLabels() {
 		int add = 2;
-		if (et.getType() == EntityType.Type.TRANSIENT){
+		if (et.getType() == EntityType.Type.FIXED){
 			add = 4;
 		}
-		String[] cols = new String[et.getAttributes().size() + 4];
+		String[] cols = new String[et.getAttributes().size() + add];
 		
 		cols[0] = Entity.ID_FIELD_NAME;
 		cols[1] = Entity.STATUS_FIELD_NAME;
-		if (et.getType() == EntityType.Type.TRANSIENT){
+		if (et.getType() == EntityType.Type.FIXED){
 			cols[2] = Entity.X_FIELD_NAME;
 			cols[3] = Entity.Y_FIELD_NAME;
 		}
@@ -100,10 +101,10 @@ public class EntityTable extends SmartBirtTable {
 	@Override
 	public int[] getColumnTypes() {
 		int add = 2;
-		if (et.getType() == EntityType.Type.TRANSIENT){
+		if (et.getType() == EntityType.Type.FIXED){
 			add = 4;
 		}
-		int[] cols = new int[et.getAttributes().size() + 4];
+		int[] cols = new int[et.getAttributes().size() + add];
 		
 		cols[0] = java.sql.Types.VARCHAR;
 		cols[1] = java.sql.Types.VARCHAR;
@@ -153,7 +154,7 @@ public class EntityTable extends SmartBirtTable {
 		}else if (index == 1){
 			return e.getStatus().getGuiName();
 		}
-		if (et.getType() == EntityType.Type.TRANSIENT){
+		if (et.getType() == EntityType.Type.FIXED){
 			if (index == 2){
 				return e.getX();
 			}else if (index == 3){
