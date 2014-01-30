@@ -40,7 +40,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -139,62 +138,6 @@ public class PatrolHibernateManager extends HibernateManager{
 		return list;
 	}
 	
-	/**
-	 * Loads the patrol options for a given conservation area.
-	 * <p>
-	 * This is executed inside a transaction so you cannot
-	 * run this inside a session with an open transaction.</p>
-	 * <p>
-	 * If patrol options does not exist, 
-	 * it will create a new one with default values.
-	 * </p>
-	 * 
-	 * @param ca conservation area 
-	 * @param s active session
-	 * @return the patrol options
-	 */
-	public static PatrolOptions getPatrolOptions(ConservationArea ca, Session s){
-		s.beginTransaction();
-		try{
-			List<PatrolOptions> ops = s.createCriteria(PatrolOptions.class).
-					add(Restrictions.eq("uuid", ca.getUuid())).list(); //$NON-NLS-1$
-			if (ops.size() > 1){
-				throw new IllegalStateException(Messages.PatrolHibernateManager_Error_ToManyPatrolOptions);
-			}
-			PatrolOptions op = null;
-			if (ops.size() == 0){
-				op = createPatrolOption(ca, s);
-			}else{
-				op = ops.get(0);
-			}
-			s.getTransaction().commit();
-			
-			return op;
-		}catch (Exception ex){
-			
-			s.getTransaction().rollback();
-			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoLoadPatrolOptions + ex.getLocalizedMessage(), ex);
-			
-		}
-		return null;
-	}
-	
-	/**
-	 * Creates new patrol options for a given conservation area and saves it to the database.
-	 * 
-	 * @param ca conservation area 
-	 * @param s active session
-	 * @return
-	 */
-	public static PatrolOptions createPatrolOption(ConservationArea ca, Session s){
-		PatrolOptions po = new PatrolOptions();
-		po.setTrackDistanceDirection(false);
-		po.setEditTime(null);
-		po.setUuid(ca.getUuid());
-		s.saveOrUpdate(po);
-		return po;
-	}
 	
 	/**
 	 * Gets all active transportation types for a given patrol type in a given

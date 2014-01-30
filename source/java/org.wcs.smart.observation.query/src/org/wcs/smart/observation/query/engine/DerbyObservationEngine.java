@@ -390,8 +390,8 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
 		it.setWpDateTime(rs.getDate("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getFloat("wp_direction")); //$NON-NLS-1$
-		it.setWaypointDistance(rs.getFloat("wp_distance")); //$NON-NLS-1$
+		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$

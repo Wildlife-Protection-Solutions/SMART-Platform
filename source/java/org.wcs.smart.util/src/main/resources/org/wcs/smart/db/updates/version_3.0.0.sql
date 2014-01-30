@@ -137,4 +137,6 @@ GRANT DELETE ON smart.cm_attribute_option to manager;
 GRANT DELETE ON smart.cm_attribute_list to manager;
 GRANT DELETE ON smart.cm_attribute_tree_node to manager;
 
+
+rename table smart.patrol_options  to observation_options;
 update smart.db_version set version = '3.0.0';

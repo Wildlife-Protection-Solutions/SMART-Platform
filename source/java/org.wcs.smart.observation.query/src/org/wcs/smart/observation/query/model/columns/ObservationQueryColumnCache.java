@@ -10,11 +10,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.GridQueryColumn;
@@ -85,6 +89,13 @@ public class ObservationQueryColumnCache {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
+				ObservationOptions obsOptions = null;
+				Session session = HibernateManager.openSession();
+				try {
+					obsOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				} finally {
+					session.close();
+				}	
 				
 				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -93,6 +104,9 @@ public class ObservationQueryColumnCache {
 					if (item == FixedQueryColumn.FixedColumns.CA_ID || 
 							item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
+					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						add = obsOptions.getTrackDistanceDirection();
 					}
 					if (add){
 						cols.add(new FixedQueryColumn(item));
@@ -161,7 +175,14 @@ public class ObservationQueryColumnCache {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				
+				//load from the database 
+				ObservationOptions obsOptions = null;
+				Session session = HibernateManager.openSession();
+				try {
+					obsOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				} finally {
+					session.close();
+				}	
 				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -170,6 +191,9 @@ public class ObservationQueryColumnCache {
 					if (item == FixedQueryColumn.FixedColumns.CA_ID ||
 							item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
+					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
+							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						add = obsOptions.getTrackDistanceDirection();
 					}
 					if (add){
 						cols.add(new FixedQueryColumn(item));

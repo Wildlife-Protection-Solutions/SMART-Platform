@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -49,6 +50,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
@@ -77,7 +79,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Incident editor summary page
@@ -172,17 +173,19 @@ public class IncidentSummaryPage extends EditorPart {
 			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
 			this.txtLocation.setText(incident.getX() + Messages.IncidentSummaryPage_LocationSeparator + incident.getY());
 		
-			if (incident.getDirection() == null){
-				this.txtDirection.setText(""); //$NON-NLS-1$
-			}else{
-				this.txtDirection.setText(String.valueOf(incident.getDirection()));
-			}
+			if (editor.getOptions().getTrackDistanceDirection()){
+				if (incident.getDirection() == null){
+					this.txtDirection.setText(""); //$NON-NLS-1$
+				}else{
+					this.txtDirection.setText(String.valueOf(incident.getDirection()));
+				}
 		
-			if (incident.getDistance() == null){
-				this.txtDistance.setText(""); //$NON-NLS-1$
-			}else{
-				this.txtDistance.setText(String.valueOf(incident.getDistance()));
-			}		
+				if (incident.getDistance() == null){
+					this.txtDistance.setText(""); //$NON-NLS-1$
+				}else{
+					this.txtDistance.setText(String.valueOf(incident.getDistance()));
+				}
+			}
 		
 			//include all attachments 
 			List<ISmartAttachment> allAtts = new ArrayList<ISmartAttachment>();
@@ -209,13 +212,13 @@ public class IncidentSummaryPage extends EditorPart {
 		
 		String canEdit = editor.canEdit();
 		if (canEdit != null){
-//			Composite warning = toolkit.createComposite(frmPatrolSummary.getBody());
-//			warning.setLayout(new GridLayout(2, false));
-//			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
-//			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
-//			lblImage.setImage(x);
-//			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-//			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
+			Composite warning = toolkit.createComposite(frmSummary.getBody());
+			warning.setLayout(new GridLayout(2, false));
+			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			lblImage.setImage(x);
+			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+			lblWarning.setText(MessageFormat.format(Messages.IncidentSummaryPage_CannotEdit, new Object[]{ canEdit }));
 		}
 		
 		Section summarySection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR   );
@@ -260,17 +263,19 @@ public class IncidentSummaryPage extends EditorPart {
 		txtLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createEdit(left, canEdit, LocationComposite.ID);
 
-		toolkit.createLabel(left, Messages.IncidentSummaryPage_DistanceLabel);
-		txtDistance = toolkit.createText(left, ""); //$NON-NLS-1$
-		txtDistance.setEditable(false);
-		txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		createEdit(left, canEdit, DistanceDirectionComposite.ID);
+		if (editor.getOptions().getTrackDistanceDirection()){
+			toolkit.createLabel(left, Messages.IncidentSummaryPage_DistanceLabel);
+			txtDistance = toolkit.createText(left, ""); //$NON-NLS-1$
+			txtDistance.setEditable(false);
+			txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			createEdit(left, canEdit, DistanceDirectionComposite.ID);
 		
-		toolkit.createLabel(left, Messages.IncidentSummaryPage_DirectionLabel);
-		txtDirection = toolkit.createText(left, ""); //$NON-NLS-1$
-		txtDirection.setEditable(false);
-		txtDirection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		createEdit(left, canEdit, DistanceDirectionComposite.ID);
+			toolkit.createLabel(left, Messages.IncidentSummaryPage_DirectionLabel);
+			txtDirection = toolkit.createText(left, ""); //$NON-NLS-1$
+			txtDirection.setEditable(false);
+			txtDirection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			createEdit(left, canEdit, DistanceDirectionComposite.ID);
+		}
 		
 		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
@@ -289,7 +294,7 @@ public class IncidentSummaryPage extends EditorPart {
 			
 			public String getText(Object element) {
 				if (element instanceof ObservationAttachment){
-					return "**" + super.getText(element);
+					return "**" + super.getText(element); //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -310,7 +315,7 @@ public class IncidentSummaryPage extends EditorPart {
 		});
 		createEdit(right, canEdit, IncidentAttachmentComposite.ID);
 		toolkit.createLabel(right, ""); //$NON-NLS-1$
-		l = toolkit.createLabel(right, "** Observation Attachments");
+		l = toolkit.createLabel(right, "**" + Messages.IncidentSummaryPage_ObservationAttachmentsLabel); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		
 		Section observationSection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR   );
@@ -366,13 +371,13 @@ public class IncidentSummaryPage extends EditorPart {
 		tlayout.setColumnData(colAttributes.getColumn(), new ColumnWeightData(90));
 		
 		TableViewerColumn colAttachments = new TableViewerColumn(observationTable, SWT.NONE);
-		colAttachments.getColumn().setText("Attachments");
+		colAttachments.getColumn().setText(Messages.IncidentSummaryPage_AttachmentsColumnName);
 		colAttachments.setLabelProvider(new ColumnLabelProvider() {
 		  @Override
 		  public String getText(Object element) {
 			  WaypointObservation o =  ((WaypointObservation)element);
 			  if (o.getAttachments().size() > 0){				  
-				  return MessageFormat.format("{0} file(s)", new Object[]{String.valueOf(o.getAttachments().size())});
+				  return MessageFormat.format(Messages.IncidentSummaryPage_AttachmentsColumnContent, new Object[]{String.valueOf(o.getAttachments().size())});
 			  }
 			  return ""; //$NON-NLS-1$
 		  }

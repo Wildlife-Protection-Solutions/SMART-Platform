@@ -36,13 +36,17 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 /**
  * Incident editor.
@@ -57,6 +61,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	private Waypoint incident = null;
 	private IncidentSummaryPage summaryEditor;
 	private IncidentMapPage mapPage;
+	private ObservationOptions ops;
 	
 	/*
 	 * Waypoint listener
@@ -144,8 +149,14 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(){
-		return null;
+		return IncidentManager.getInstance().canEdit(incident, ops);
 	}
+	
+
+	public ObservationOptions getOptions(){
+		return this.ops;
+	}
+	
 	
 	/**
 	 * Loads the incident 
@@ -163,6 +174,10 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				this.incident.getId();
 			
 				session.getTransaction().commit();
+				
+				if (ops == null){
+					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				}
 			}finally{			
 				session.close();
 			}

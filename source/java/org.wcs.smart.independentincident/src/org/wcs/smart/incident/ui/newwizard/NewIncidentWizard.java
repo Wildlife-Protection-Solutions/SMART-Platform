@@ -40,6 +40,8 @@ import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.ui.IncidentEditor;
 import org.wcs.smart.incident.ui.IncidentEditorInput;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -51,7 +53,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 
 	private Waypoint newIncident;
 	private Session session;
-	
+	private ObservationOptions ops;
 	public NewIncidentWizard(){
 		super();
 		
@@ -73,6 +75,8 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 			//start at 1
 			newIncident.setId(1);
 		}
+		
+		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 		
 	}
 
@@ -132,7 +136,9 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
     	super.addPage(new IncidentWizardPage(this, new IdComposite()));
     	super.addPage(new IncidentWizardPage(this, new DateTimeComposite()));
     	super.addPage(new IncidentWizardPage(this, new LocationComposite()));
-    	super.addPage(new IncidentWizardPage(this, new DistanceDirectionComposite()));
+    	if (ops.getTrackDistanceDirection()){
+    		super.addPage(new IncidentWizardPage(this, new DistanceDirectionComposite()));
+    	}
     	super.addPage(new IncidentWizardPage(this, new CommentComposite()));
     	super.addPage(new IncidentWizardPage(this, new IncidentAttachmentComposite()));
     	

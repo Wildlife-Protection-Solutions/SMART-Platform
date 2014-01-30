@@ -110,7 +110,7 @@ public class PatrolWaypointQuery extends WaypointQuery{
 		if (this.queryColumns != null){
 			return;
 		}
-		QueryColumn[] cols = PatrolQueryColumnCache.getInstance().getObservationQueryColumns();
+		QueryColumn[] cols = PatrolQueryColumnCache.getInstance().getWaypointQueryColumns();
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

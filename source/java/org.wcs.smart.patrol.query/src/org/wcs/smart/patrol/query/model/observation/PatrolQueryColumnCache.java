@@ -17,8 +17,8 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -96,11 +96,11 @@ public class PatrolQueryColumnCache {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
-				PatrolOptions patrolOps = null;
+				ObservationOptions patrolOps = null;
 				Session session = HibernateManager.openSession();
 				
 				try {
-					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					patrolOps = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 				} finally {
 					session.close();
 				}	
@@ -188,11 +188,11 @@ public class PatrolQueryColumnCache {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
-				PatrolOptions patrolOps = null;
+				ObservationOptions patrolOps = null;
 				Session session = HibernateManager.openSession();
 				
 				try {
-					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					patrolOps = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 				} finally {
 					session.close();
 				}	

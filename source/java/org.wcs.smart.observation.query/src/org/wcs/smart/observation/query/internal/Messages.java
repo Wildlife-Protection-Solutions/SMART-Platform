@@ -125,6 +125,11 @@ public class Messages extends NLS {
 	public static String ObservationCategoryValueItem_CategoryKeyNotFound;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
 	public static String ObservationGridQueryType_QueryName;
+	public static String ObservationQueryTemplateCloner_GridProgress;
+	public static String ObservationQueryTemplateCloner_IncidentProgress;
+	public static String ObservationQueryTemplateCloner_ObservationProgress;
+	public static String ObservationQueryTemplateCloner_SummaryProgress;
+	public static String ObservationQueryTemplateCloner_TaskName;
 	public static String ObservationQueryType_QueryName;
 	public static String ObservationSummaryQueryType_QueryName;
 	public static String ObservationWaypointQueryType_QueryName;

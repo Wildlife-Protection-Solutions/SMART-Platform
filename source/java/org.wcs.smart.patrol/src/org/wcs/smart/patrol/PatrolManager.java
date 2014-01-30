@@ -34,9 +34,10 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -70,11 +71,11 @@ public class PatrolManager {
 	/**
 	 * 
 	 * @param patrol the patrol to be edited
-	 * @param ops current patrol options {@link PatrolHibernateManager#getPatrolOptions(org.wcs.smart.ca.ConservationArea, Session)}
+	 * @param ops current patrol options {@link ObservationHibernateManager#getPatrolOptions(org.wcs.smart.ca.ConservationArea, Session)}
 	 * @return null if the patrol can be edited, otherwise a string
 	 * that described reason why can't be edited.
 	 */
-	public String canEdit(Patrol patrol, PatrolOptions ops){
+	public String canEdit(Patrol patrol, ObservationOptions ops){
 		
 		//analyst users can never edit
 		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
@@ -122,7 +123,7 @@ public class PatrolManager {
 			monitor.setTaskName(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol.getId()}));
 			
 			// ensure can edit patrol 
-			String canEdit = canEdit(patrol, PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
+			String canEdit = canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
 			if (canEdit != null){
 				throw new Exception(canEdit);
 			}

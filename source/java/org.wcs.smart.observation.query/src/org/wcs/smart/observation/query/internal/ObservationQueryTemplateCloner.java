@@ -57,18 +57,18 @@ public class ObservationQueryTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Copying Observation Queries", 4);
+		monitor.beginTask(Messages.ObservationQueryTemplateCloner_TaskName, 4);
 		try{
-			monitor.subTask("Cloning Gridded Queries");
+			monitor.subTask(Messages.ObservationQueryTemplateCloner_GridProgress);
 			cloneGriddedQuery(engine);
 			monitor.worked(1);
-			monitor.subTask("Cloning Summary Queries");
+			monitor.subTask(Messages.ObservationQueryTemplateCloner_SummaryProgress);
 			cloneSummaryQuery(engine);
 			monitor.worked(1);
-			monitor.subTask("Cloning Observation Queries");
+			monitor.subTask(Messages.ObservationQueryTemplateCloner_ObservationProgress);
 			cloneObservationQuery(engine);
 			monitor.worked(1);
-			monitor.subTask("Cloning Incident Queries");
+			monitor.subTask(Messages.ObservationQueryTemplateCloner_IncidentProgress);
 			cloneWaypointQuery(engine);
 		}finally{
 			monitor.done();

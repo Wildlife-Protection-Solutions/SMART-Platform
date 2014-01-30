@@ -46,6 +46,12 @@ public class Messages extends NLS {
 	
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;
+	public static String ObservationCloner_ProgressName;
+
+	public static String ObservationCloner_TaskName;
+
+	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
+	public static String PatrolHibernateManager_Error_ToManyPatrolOptions;
 	public static String ObservationSummaryWizardPage_PageMessage;
 	public static String ObservationSummaryWizardPage_PageName;
 	public static String ObservationSummaryWizardPage_PageTitle;
@@ -57,6 +63,20 @@ public class Messages extends NLS {
 	public static String ObservationWizardPage_PageMessage;
 	public static String ObservationWizardPage_PageName;
 	public static String ObservationWizardPage_PageTitle;
+	
+	public static String PatrolOptionsPropertyPage_DialogMessage;
+	public static String PatrolOptionsPropertyPage_DialogTitle;
+	public static String PatrolOptionsPropertyPage_DistanceDirection_DescLabel;
+	public static String PatrolOptionsPropertyPage_DistanceDirection_OpLabel;
+	public static String PatrolOptionsPropertyPage_Error_CouldNotSave;
+	public static String PatrolOptionsPropertyPage_Error_EditTime;
+	public static String PatrolOptionsPropertyPage_Error_EditTimeNotInteger;
+	public static String PatrolOptionsPropertyPage_Error_InvalidInteger;
+	public static String PatrolOptionsPropertyPage_PageName;
+	public static String PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel;
+	public static String PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel;
+	public static String PatrolOptionsPropertyPage_PatrolEditOptions_Label;
+	public static String PatrolOptionsPropertyPage_RecordDistanceDirectory_Op;
 	public static String SearchTree_AddCategories_ToolTip;
 	public static String SearchTree_ClearSelection_Tooltip;
 	public static String SearchTree_DefaultText;

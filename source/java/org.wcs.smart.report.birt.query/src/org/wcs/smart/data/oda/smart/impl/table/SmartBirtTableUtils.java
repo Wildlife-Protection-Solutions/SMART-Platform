@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.report.birt.query.Activator;
 
 /**
@@ -114,7 +115,7 @@ public class SmartBirtTableUtils {
 					cachedDynamics.add(table);
 				}
 			}catch (Exception ex){
-				Activator.displayLog("Could not read SMART Table Extensions", ex);
+				Activator.displayLog(Messages.SmartBirtTableUtils_ErrorReadingTables, ex);
 			}
 		}
 		return cachedDynamics;

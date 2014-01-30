@@ -94,22 +94,6 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.patrol.patrolOptions"
-                  icon="images/icons/etool16/patrol_option.png"
-                  label="%patrol.options.command.label"
-                  mnemonic="%patro.options.command.mnemonic"
-                  style="push"
-                  tooltip="%patrol.options.command.tooltip">
-               <visibleWhen
-                     checkEnabled="true">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
                   commandId="org.wcs.smart.patrol.patrolMandate"
                   icon="images/icons/etool16/patrol_mandate.png"
                   label="%patrol.mandates.command.label"
@@ -351,10 +335,6 @@
             name="%types.command.name">
       </command>
       <command
-            id="org.wcs.smart.patrol.patrolOptions"
-            name="%options.command.name">
-      </command>
-      <command
             id="org.wcs.smart.patrol.teamList"
             name="%teams.command.name">
       </command>
@@ -408,22 +388,6 @@
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolMandateHandler"
             commandId="org.wcs.smart.patrol.patrolMandate">
-         <activeWhen>
-            <and>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
-               </test>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
-         </activeWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolOptionsHandler"
-            commandId="org.wcs.smart.patrol.patrolOptions">
          <activeWhen>
             <and>
                <test
@@ -605,10 +569,6 @@
       </class>
       <class
             class="org.wcs.smart.patrol.model.PatrolTransportType">
-      </class>
-      <class
-            ca_property=".uuid"
-            class="org.wcs.smart.patrol.model.PatrolOptions">
       </class>
       <class
             class="org.wcs.smart.patrol.model.Team">

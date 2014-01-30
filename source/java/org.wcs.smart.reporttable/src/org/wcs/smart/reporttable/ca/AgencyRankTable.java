@@ -29,7 +29,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.reporttable.internal.Messages;
 

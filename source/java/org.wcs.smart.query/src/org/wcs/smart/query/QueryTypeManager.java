@@ -211,7 +211,7 @@ public class QueryTypeManager {
 				}
 				
 				if (qType == null){
-					QueryPlugIn.log("Query type " + tmp.getKey() + " not found.", null);
+					QueryPlugIn.log("Query type " + tmp.getKey() + " not found.", null); //$NON-NLS-1$ //$NON-NLS-2$
 				}else{
 				
 					QueryTypeWrapper wrapper = new QueryTypeWrapper(qType);
