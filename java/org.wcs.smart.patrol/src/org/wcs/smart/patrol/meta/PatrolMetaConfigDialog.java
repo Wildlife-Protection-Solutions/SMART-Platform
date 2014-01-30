@@ -28,11 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -161,6 +163,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void screenOptionChanged() {
 				setChangesMade(true);
+				StackLayout stackLayout = ((StackLayout)infoInnerPanel.getLayout());
+				updateMessage((Composite)stackLayout.topControl);
 			}
 		};
 		
@@ -212,17 +216,49 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		Object obj = selection.getFirstElement();
 
+		StackLayout stackLayout = ((StackLayout)infoInnerPanel.getLayout());
 		if (obj instanceof ScreenOptionMeta) {
 			ScreenOptionMeta meta = (ScreenOptionMeta) obj;
-			((StackLayout)infoInnerPanel.getLayout()).topControl = screenComposites.get(meta);
+			Composite cmp = screenComposites.get(meta);
+			updateMessage(cmp);
+			stackLayout.topControl = cmp;
 		} else {
-			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			stackLayout.topControl = emptyComposite;
 		}
 		infoInnerPanel.layout();
 	}
 
+	private void updateMessage(Composite editComposite) {
+		if (editComposite instanceof ScreenOptionComposite) {
+			ScreenOptionComposite soc = (ScreenOptionComposite) editComposite;
+			String msg = soc.validate();
+			if (msg != null) {
+				setMessage(msg, IMessageProvider.ERROR);
+				return;
+			}
+		}
+		setMessage(Messages.PatrolMetaConfigDialog_DialogMessage);
+	}
+	
+	private boolean validate() {
+		for (ScreenOptionMeta option : optionsToShow) {
+			Composite cmp = screenComposites.get(option);
+			if (cmp instanceof ScreenOptionComposite) {
+				ScreenOptionComposite soc = (ScreenOptionComposite) cmp;
+				if (soc.validate() != null) {
+					modelListViewer.setSelection(new StructuredSelection(option));
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	@Override
 	protected boolean performSave() {
+		if (!validate())
+			return false;
+		
 		Session session = getSession();
 		session.beginTransaction();
 		try {

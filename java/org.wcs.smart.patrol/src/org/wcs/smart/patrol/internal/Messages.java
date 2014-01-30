@@ -84,6 +84,9 @@ public class Messages extends NLS {
 	public static String EmployeeLeaderPilotComposite_Error_AtLeastOneMember;
 	public static String EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees;
 	public static String EmployeeLeaderPilotComposite_Title;
+	public static String EmployeeScreenOptionComposite_Leader_Required;
+	public static String EmployeeScreenOptionComposite_Member_Required;
+	public static String EmployeeScreenOptionComposite_Pilot_Required;
 	public static String EmployeeSelectComposite_AddEmployee_Label;
 	public static String ExportPatrolHandler_Error_CouldNotFindPatrol;
 	public static String ExportPatrolHandler_Error_ExportingPatrol;
