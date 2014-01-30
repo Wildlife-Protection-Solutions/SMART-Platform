@@ -58,4 +58,8 @@ public abstract class ScreenOptionComposite extends Composite {
 			listener.screenOptionChanged();
 		}
 	}
+	
+	public String validate() {
+		return null;
+	}
 }

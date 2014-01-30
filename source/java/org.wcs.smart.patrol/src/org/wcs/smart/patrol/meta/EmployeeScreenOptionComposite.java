@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
@@ -116,6 +117,23 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 
 	private boolean isPilotAllowed() {
 		return true;
+	}
+	
+	@Override
+	public String validate() {
+		if (!membersOption.isVisible()) {
+			if (membersOption.getUuidList().isEmpty())
+				return Messages.EmployeeScreenOptionComposite_Member_Required;
+			if (!leaderOption.isVisible()) {
+				if (leaderOption.getUuidValue() == null)
+					return Messages.EmployeeScreenOptionComposite_Leader_Required;
+			}
+			if (!pilotOption.isVisible()) {
+				if (pilotOption.getUuidValue() == null)
+					return Messages.EmployeeScreenOptionComposite_Pilot_Required;
+			}
+		}
+		return null;
 	}
 	
 	private class MemberOptionGroup extends ScreenOptionGroup {
