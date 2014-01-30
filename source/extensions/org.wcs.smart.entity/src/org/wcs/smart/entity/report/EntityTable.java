@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -44,11 +45,11 @@ import org.wcs.smart.entity.query.SightingQueryColumn;
  */
 public class EntityTable extends SmartBirtTable {
 
-	public static final String ENTITYKEY_PREFIX = "ENTITY";
+	public static final String ENTITYKEY_PREFIX = "ENTITY"; //$NON-NLS-1$
 	private EntityType et;
 	
 	public EntityTable(EntityType et) {
-		super(MessageFormat.format("Entity Type: {0}", new Object[]{et.getName()}),ENTITYKEY_PREFIX + ":" + et.getKeyId());
+		super(MessageFormat.format(Messages.EntityTable_EntityTypeTableName, new Object[]{et.getName()}),ENTITYKEY_PREFIX + Messages.EntityTable_1 + et.getKeyId());
 		this.et = et;
 	}
 
