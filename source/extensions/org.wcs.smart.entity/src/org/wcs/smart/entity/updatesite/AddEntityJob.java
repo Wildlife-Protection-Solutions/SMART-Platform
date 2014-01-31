@@ -21,20 +21,17 @@
  */
 package org.wcs.smart.entity.updatesite;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 
 /**
  * Job removes adds entity plug-in related tabled to the database
@@ -98,24 +95,42 @@ public class AddEntityJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		
 		monitor.beginTask(Messages.AddEntityJob_TaskName, 10);
+		//this must be run as Admin User
+		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		Session session = HibernateManager.openSession();
 		
-		return createDatabaseTables();
+		try{
+			String currentVersion = HibernateManager.getPlugInVersion(EntityPlugIn.PLUGIN_ID, session);
+			if (currentVersion == null){
+				return createDatabaseTables(session);
+			}else if (!currentVersion.equals(EntityPlugIn.DB_VERSION)){
+				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityJob_UnsupportedVersion, null); 
+			}
+		}catch(final Exception e){
+			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityJob_InstallError + e.getLocalizedMessage(), e);
+		}finally{
+			try{
+				session.close();
+			}catch (Exception ex){
+				//eat this
+			}
+			HibernateManager.endSessionFactory(true);
+		}
+		
+		return Status.OK_STATUS;
 		
 	}
 	
-	private IStatus createDatabaseTables(){
-		Session session = HibernateManager.openSession();
-		//check is required table exists
+	private IStatus createDatabaseTables(Session session){
+		//check is required table exists		
 		try {
 			session.beginTransaction();
-			session.doWork(new Work() {
-				@Override
-				public void execute(Connection connection) throws SQLException {
-					for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
-						connection.createStatement().execute(CREATE_TABLE_SQL[i]);
-					}	
-				}
-			});			
+			
+			for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
+				session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
+			}
+			HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION, session);
+						
 			session.getTransaction().commit();
 		} catch (final Exception e) {
 			Display.getDefault().asyncExec(new Runnable(){
@@ -124,12 +139,11 @@ public class AddEntityJob extends Job {
 					SmartPlugIn.displayLog(null, Messages.AddEntityJob_Error, e);
 				}
 			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
+			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityJob_InstallError2 + e.getLocalizedMessage(),e);
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
 			}
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

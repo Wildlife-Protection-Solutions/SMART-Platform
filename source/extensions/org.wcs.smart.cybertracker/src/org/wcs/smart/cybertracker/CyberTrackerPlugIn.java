@@ -19,6 +19,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.cybertracker"; //$NON-NLS-1$
 
+	public static final String DB_VERSION = "3.0"; //$NON-NLS-1$
 	
 	//image registry key for cybertracker dialog image
 	public static final String CT_WIZARD_BANNER = "org.wcs.smart.cybertracker.wizban"; //$NON-NLS-1$

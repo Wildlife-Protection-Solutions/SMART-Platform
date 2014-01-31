@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.entity.updatesite;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
@@ -45,6 +41,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class RemoveEntityJob extends Job {
 
 	private static String[] TABLES = new String[]{
+		
+		//delete labels
+		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_attribute)", //$NON-NLS-1$
+		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_type)",  //$NON-NLS-1$
+
 		"DROP TABLE SMART.ENTITY", //$NON-NLS-1$
 		"DROP TABLE SMART.ENTITY_ATTRIBUTE", //$NON-NLS-1$
 		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
@@ -63,17 +64,13 @@ public class RemoveEntityJob extends Job {
 	
 	private IStatus dropTables(){
 		Session session = HibernateManager.openSession();
-		//check is required table exists
+		//TODO: we may want to check that the required tables exist
 		try {
 			session.beginTransaction();
-			session.doWork(new Work() {
-				@Override
-				public void execute(Connection connection) throws SQLException {
-					for (int i = 0; i < TABLES.length; i ++){
-						connection.createStatement().execute(TABLES[i]);
-					}	
-				}
-			});			
+			for (int i = 0; i < TABLES.length; i ++){
+				session.createSQLQuery(TABLES[i]).executeUpdate();
+			}
+			HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, null, session);
 			session.getTransaction().commit();
 		} catch (final Exception e) {
 			Display.getDefault().asyncExec(new Runnable(){
@@ -82,7 +79,7 @@ public class RemoveEntityJob extends Job {
 					SmartPlugIn.displayLog(null, Messages.RemoveEntityJob_Error, e);
 				}
 			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
+			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveEntityJob_UninstallError + e.getLocalizedMessage(), e); 
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

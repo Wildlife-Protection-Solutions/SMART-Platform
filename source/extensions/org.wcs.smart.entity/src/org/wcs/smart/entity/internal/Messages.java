@@ -5,8 +5,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.entity.internal.messages"; //$NON-NLS-1$
 	public static String AddEntityJob_Error;
+	public static String AddEntityJob_InstallError;
+	public static String AddEntityJob_InstallError2;
 	public static String AddEntityJob_JobName;
 	public static String AddEntityJob_TaskName;
+	public static String AddEntityJob_UnsupportedVersion;
 	public static String AttributeMappingWizardPage_ConfigurationSectionName;
 	public static String AttributeMappingWizardPage_DateFormatLabel;
 	public static String AttributeMappingWizardPage_DateFormatTooltip;
@@ -331,8 +334,6 @@ public class Messages extends NLS {
 	public static String SightingQueryColumn_CommentColumnName;
 	public static String SightingQueryColumn_DirectionColumnName;
 	public static String SightingQueryColumn_DistanceColumnName;
-	public static String SightingQueryColumn_EntityIdColumnName;
-	public static String SightingQueryColumn_EntityStatusColumnName;
 	public static String SightingQueryColumn_WaypointDateColumnName;
 	public static String SightingQueryColumn_WaypointIdColumnName;
 	public static String SightingQueryColumn_WaypointTimeColumnName;
