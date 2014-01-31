@@ -48,34 +48,44 @@ public class AddPlanJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		final PlanTablesMarkers mark = new PlanTablesMarkers();
 		Session session = HibernateManager.openSession();
-		//check is required table exists
-		try {
-			session.beginTransaction();
-			mark.plan = DerbyHibernateExtensions.tableExists(session, "PLAN"); //$NON-NLS-1$
-			mark.plan_target = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET"); //$NON-NLS-1$
-			mark.plan_target_point = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET_POINT"); //$NON-NLS-1$
-			mark.patrol_plan = DerbyHibernateExtensions.tableExists(session, "PATROL_PLAN"); //$NON-NLS-1$
+		try{
+			String currentVersion = HibernateManager.getPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, session);
+			if (currentVersion.equals(SmartPlanPlugIn.DB_VERSION)){
+				//db version matches current version; we are ok
+				return Status.OK_STATUS;
+			}
 			
-			if (mark.allSet())
-				return Status.OK_STATUS; //required table exists
-		} catch (final Exception e) {
-			Display.getDefault().asyncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, e);
-				}
-			});
-			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
+			//check is required table exists
+			try {
+				session.beginTransaction();
+				mark.plan = DerbyHibernateExtensions.tableExists(session, "PLAN"); //$NON-NLS-1$
+				mark.plan_target = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET"); //$NON-NLS-1$
+				mark.plan_target_point = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET_POINT"); //$NON-NLS-1$
+				mark.patrol_plan = DerbyHibernateExtensions.tableExists(session, "PATROL_PLAN"); //$NON-NLS-1$
+			
+				if (mark.allSet())
+					return Status.OK_STATUS; //required table exists
+			} catch (final Exception e) {
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, e);
+					}
+				});
+				return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, Messages.AddPlanJob_Error, e); 
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
 			}
+		}
+		}finally{
 			session.close();
 		}
 
 		// need to login as admin user to create tables
 		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		session = HibernateManager.openSession();
+		session.beginTransaction();
 		try {
 			if (!mark.plan) {
 				createPlanTable(session);
@@ -88,7 +98,9 @@ public class AddPlanJob extends Job {
 			}
 			if (!mark.patrol_plan) {
 				createPatrolPlanTable(session);
-			}
+			}			
+			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION, session);
+			session.getTransaction().commit();
 		} catch (final Exception ex) {
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
@@ -96,7 +108,7 @@ public class AddPlanJob extends Job {
 					SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, ex);
 				}
 			});
-			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
+			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, Messages.AddPlanJob_Error, ex); 
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

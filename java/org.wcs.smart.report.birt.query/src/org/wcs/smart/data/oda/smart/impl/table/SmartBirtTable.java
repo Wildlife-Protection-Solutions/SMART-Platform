@@ -30,7 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 /**
  * An extension point that allows tables to be created out
  * of SMART objects and be supplied to the 
- * BIRT reporting engine vis oda dataset.
+ * BIRT reporting engine via oda dataset.
  *  
  * @author egouge
  * @since 1.0.0

@@ -86,14 +86,17 @@ public class RemoveIntelligenceJob extends Job {
 				}
 			});
 			
-		} catch (Exception e) {
-			SmartPlugIn.log(Messages.RemoveIntelligenceJob_Error, e);
-		} finally {
+			//remove from plugin table
+			HibernateManager.setPlugInVersion(IntelligencePlugIn.DB_VERSION,null, session);
 			try {
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				SmartPlugIn.log(ex.getMessage(), ex);
 			}
+			
+		} catch (Exception e) {
+			SmartPlugIn.log(Messages.RemoveIntelligenceJob_Error, e);
+		} finally {
 			try {
 				session.close();
 			} catch (Exception ex) {

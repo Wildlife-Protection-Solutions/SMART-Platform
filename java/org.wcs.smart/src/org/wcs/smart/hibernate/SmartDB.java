@@ -49,6 +49,12 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartDB {
 
+	/**
+	 * Database table that contains the plugins and associated versions
+	 * associated with the current database schema
+	 */
+	public static final String PLUGIN_VERSION_TBL = "smart.db_version"; //$NON-NLS-1$
+	
 	public static CoordinateReferenceSystem DATABASE_CRS;
 	static{
 		try {
@@ -287,4 +293,5 @@ public class SmartDB {
 		}
 		
 	}
+	
 }

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
@@ -740,4 +741,53 @@ public class HibernateManager extends SmartHibernateManager{
 			return (Projection)defaults.get(0);
 		}
 	}
+	
+	
+	/**
+	 * Reads the version for the given plugin from the database
+	 * versions table.  Will return null if plugin not found in
+	 * table.
+	 * 
+	 * @param pluginId
+	 * @param s
+	 * @return
+	 */
+	public static String getPlugInVersion(String pluginId, Session s){
+		SQLQuery query = s.createSQLQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		List<?> versions = query.list();
+		if (versions.size() == 0){
+			return null;
+		}else{
+			return (String)versions.get(0);
+		}
+	}
+	
+	/**
+	 * Updates the database versions table for the given plugin id.
+	 * 
+	 * If new version is null then it removes the record from the database versions table.
+	 * 
+	 * @param pluginId
+	 * @param newVersion
+	 * @param s
+	 */
+	public static void setPlugInVersion(String pluginId, String newVersion, Session s){
+		if (newVersion == null){
+			//delete record
+			SQLQuery query = s.createSQLQuery("DELETE FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query.executeUpdate();
+		}else{
+			String x = getPlugInVersion(pluginId, s);
+			if (x == null){
+				//insert new
+				SQLQuery query = s.createSQLQuery("INSERT INTO " + SmartDB.PLUGIN_VERSION_TBL + " (plugin_id, version) VALUES ('" + pluginId + "', '" + newVersion + "')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				query.executeUpdate();
+			}else{
+				SQLQuery query = s.createSQLQuery("UPDATE " + SmartDB.PLUGIN_VERSION_TBL + " SET version = '" + newVersion + "' WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				query.executeUpdate();
+			}
+		}
+	}
 }
+
+

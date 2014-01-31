@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 
 /**
@@ -69,6 +70,7 @@ public class RemovePlanJob extends Job {
 					
 				}
 			});
+			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);
 			
 		} catch (Exception e) {
 			SmartPlugIn.log(Messages.RemovePlanJob_Error, e);

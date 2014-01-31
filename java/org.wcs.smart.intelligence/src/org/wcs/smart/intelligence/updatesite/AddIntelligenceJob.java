@@ -63,35 +63,45 @@ public class AddIntelligenceJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		final IntelligenceTablesMarkers mark = new IntelligenceTablesMarkers();
 		Session session = HibernateManager.openSession();
-		//check is required table exists
-		try {
-			session.beginTransaction();
-			mark.intelligence = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE"); //$NON-NLS-1$
-			mark.intelligence_source = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_SOURCE"); //$NON-NLS-1$
-			mark.intelligence_point = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_POINT"); //$NON-NLS-1$
-			mark.intelligence_attachment = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_ATTACHMENT"); //$NON-NLS-1$
-			mark.patrol_intelligence = DerbyHibernateExtensions.tableExists(session, "PATROL_INTELLIGENCE"); //$NON-NLS-1$
-			
-			if (mark.allSet())
-				return Status.OK_STATUS; //required table exists
-		} catch (final Exception e) {
-			Display.getDefault().asyncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, e);
-				}
-			});
-			return new Status(IStatus.ERROR, IntelligencePlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
+		try{
+			String dbVersion = HibernateManager.getPlugInVersion(IntelligencePlugIn.PLUGIN_ID, session);
+			if (dbVersion.equals(IntelligencePlugIn.DB_VERSION)){
+				//database version matches expeted version 
+				return Status.OK_STATUS;
 			}
+			
+			//check is required table exists & create
+			//currently there is no upgrade required
+			try {
+				session.beginTransaction();
+				mark.intelligence = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE"); //$NON-NLS-1$
+				mark.intelligence_source = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_SOURCE"); //$NON-NLS-1$
+				mark.intelligence_point = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_POINT"); //$NON-NLS-1$
+				mark.intelligence_attachment = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_ATTACHMENT"); //$NON-NLS-1$
+				mark.patrol_intelligence = DerbyHibernateExtensions.tableExists(session, "PATROL_INTELLIGENCE"); //$NON-NLS-1$
+				if (mark.allSet())
+					return Status.OK_STATUS; //required table exists
+			} catch (final Exception e) {
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, e);
+					}
+				});
+				return new Status(IStatus.ERROR, IntelligencePlugIn.PLUGIN_ID, 1, "", null); //$NON-NLS-1$
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
+		}finally{
 			session.close();
 		}
 
 		// need to login as admin user to create tables
 		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		session = HibernateManager.openSession();
+		session.beginTransaction();
 		try {
 			if (!mark.intelligence_source) {
 				createIntelligenceSourceTable(session);
@@ -108,8 +118,9 @@ public class AddIntelligenceJob extends Job {
 			if (!mark.patrol_intelligence) {
 				createPatrolIntelligenceTable(session);
 			}
-			
-			updateVersion(session);
+			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION, session);
+
+			session.getTransaction().commit();
 			
 		} catch (final Exception ex) {
 			Display.getDefault().asyncExec(new Runnable(){
@@ -133,22 +144,8 @@ public class AddIntelligenceJob extends Job {
 		return Status.OK_STATUS;
 	}
 
-	private void updateVersion(Session session){
-		session.beginTransaction();
 
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				String sql = "UPDATE smart.db_version set version = ? where plugin_id=?"; //$NON-NLS-1$
-				PreparedStatement ps = c.prepareStatement(sql);
-				ps.setString(1, IntelligencePlugIn.DB_VERSION);
-				ps.setString(2, IntelligencePlugIn.PLUGIN_ID);
-				ps.execute();
-			}});
-		session.getTransaction().commit();
-	}
 	private void createIntelligenceTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -199,11 +196,9 @@ public class AddIntelligenceJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.intelligence to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 
 	private void createIntelligenceSourceTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -230,14 +225,6 @@ public class AddIntelligenceJob extends Job {
 		});
 		session.flush();
 
-//		Display.getDefault().syncExec(new Runnable() {
-//			@Override
-//			public void run() {
-//				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "test",
-//						"start");
-//			}
-//		});
-//		
 		List<ConservationArea> areas = HibernateManager.getConservationAreas(session);
 		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
 		Properties prop = new Properties();
@@ -250,18 +237,10 @@ public class AddIntelligenceJob extends Job {
 			createSource(session, ca, "Informant", "informant", uuidGenerator); //$NON-NLS-1$ //$NON-NLS-2$
 			createSource(session, ca, "CET", "cet", uuidGenerator); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		session.getTransaction().commit();
-//		Display.getDefault().syncExec(new Runnable() {
-//			@Override
-//			public void run() {
-//				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "test",
-//						"done");
-//			}
-//		});
+
 	}
 
 	private void createIntelligencePointTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -286,11 +265,9 @@ public class AddIntelligenceJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.intelligence_point to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 
 	private void createIntelligenceAttachementTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -314,11 +291,9 @@ public class AddIntelligenceJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.intelligence_attachment to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 
 	private void createPatrolIntelligenceTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -348,7 +323,6 @@ public class AddIntelligenceJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.patrol_intelligence to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 
 	private void createSource(Session s, final ConservationArea ca, final String name, final String keyId, UUIDGenerator uuidGenerator) {

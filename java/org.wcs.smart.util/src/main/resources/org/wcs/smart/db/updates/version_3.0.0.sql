@@ -123,14 +123,6 @@ GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO manager;
 GRANT SELECT ON  smart.observation_attachment TO analyst;
 
 
---  ** Addition of Creator UUID for Intelligence PlugIn **
-ALTER TABLE smart.intelligence ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
-ALTER TABLE smart.intelligence 
-	ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid)
-	REFERENCES smart.employee (uuid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
-;
 
 --  ** UPDATES To Permissions To Allow data-entry users add/delete ENTITIES
 GRANT DELETE ON smart.cm_attribute_option to data_entry;
@@ -290,6 +282,28 @@ GRANT ALL PRIVILEGES ON smart.obs_gridded_query to analyst;
 ALTER TABLE smart.db_version ADD COLUMN plugin_id VARCHAR(512);
 UPDATE smart.db_version SET plugin_id = 'org.wcs.smart';
 ALTER TABLE smart.db_version ALTER COLUMN plugin_id  NOT NULL;
+ALTER TABLE smart.db_version ADD PRIMARY KEY (plugin_id);
+
+
+
+
+
+--  ** INTELLIGENCE PLUGIN UPDATES **
+ALTER TABLE smart.intelligence ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
+ALTER TABLE smart.intelligence 
+	ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid)
+	REFERENCES smart.employee (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+insert into smart.db_version (plugin_id, version) values ('org.wcs.smart.intelligence', '3.0');
+-- additional updates to intelligence plugin source fields are done in the SmartUpdaters30 java script
+-- as uuids need to be generated
+
+
+-- ** PLAN PLUGIN UPDATES **
+insert into smart.db_version (plugin_id, version) values ('org.wcs.smart.plan', '3.0');
+
 
 -- ** VERSION UDATE **
 update smart.db_version set version = '3.0.0' where plugin_id = 'org.wcs.smart';
