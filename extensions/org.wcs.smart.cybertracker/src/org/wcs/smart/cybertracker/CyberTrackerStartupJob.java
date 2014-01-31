@@ -143,6 +143,7 @@ public class CyberTrackerStartupJob extends Job {
 					}
 				}
 			});
+			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION, session);
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to create CyberTracker plugin tables.", ex)); //$NON-NLS-1$

@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -73,6 +74,7 @@ public class RemoveCyberTrackerJob extends Job {
 				}
 				
 			});
+			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
 			
 		} catch (Exception e) {
 			SmartPlugIn.log(Messages.RemoveCyberTrackerTablesJob_Error, e);
