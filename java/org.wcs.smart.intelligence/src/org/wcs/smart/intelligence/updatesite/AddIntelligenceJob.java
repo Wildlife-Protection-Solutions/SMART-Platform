@@ -108,6 +108,9 @@ public class AddIntelligenceJob extends Job {
 			if (!mark.patrol_intelligence) {
 				createPatrolIntelligenceTable(session);
 			}
+			
+			updateVersion(session);
+			
 		} catch (final Exception ex) {
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
@@ -130,6 +133,20 @@ public class AddIntelligenceJob extends Job {
 		return Status.OK_STATUS;
 	}
 
+	private void updateVersion(Session session){
+		session.beginTransaction();
+
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				String sql = "UPDATE smart.db_version set version = ? where plugin_id=?"; //$NON-NLS-1$
+				PreparedStatement ps = c.prepareStatement(sql);
+				ps.setString(1, IntelligencePlugIn.DB_VERSION);
+				ps.setString(2, IntelligencePlugIn.PLUGIN_ID);
+				ps.execute();
+			}});
+		session.getTransaction().commit();
+	}
 	private void createIntelligenceTable(Session session) {
 		session.beginTransaction();
 		session.doWork(new Work() {

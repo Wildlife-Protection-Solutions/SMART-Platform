@@ -190,7 +190,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
 		Session s = HibernateManager.openSession();
 		try{
-			SQLQuery q = s.createSQLQuery("SELECT * FROM smart.db_version"); //$NON-NLS-1$
+			SQLQuery q = s.createSQLQuery("SELECT version FROM smart.db_version WHERE plugin_id = ?"); //$NON-NLS-1$
+			q.setParameter(0, SmartPlugIn.PLUGIN_ID);
 			@SuppressWarnings("rawtypes")
 			List results = q.list();
 			if (results.size() > 0){
