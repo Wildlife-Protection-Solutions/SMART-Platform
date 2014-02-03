@@ -46,9 +46,9 @@ public class RemoveEntityJob extends Job {
 		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_attribute)", //$NON-NLS-1$
 		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_type)",  //$NON-NLS-1$
 
+		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
 		"DROP TABLE SMART.ENTITY", //$NON-NLS-1$
 		"DROP TABLE SMART.ENTITY_ATTRIBUTE", //$NON-NLS-1$
-		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
 		"DROP TABLE SMART.ENTITY_TYPE", //$NON-NLS-1$
 	};
 	
