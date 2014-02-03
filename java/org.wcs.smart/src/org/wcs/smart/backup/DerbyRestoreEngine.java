@@ -22,6 +22,11 @@
 package org.wcs.smart.backup;
 
 import java.io.File;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +43,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.UserNamePasswordDialog;
@@ -205,6 +211,22 @@ public class DerbyRestoreEngine {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoFilestoreInBackupFile);
 		}
 		
+		/* get database versions */
+		HashMap<String, String> versions = new HashMap<String, String>();
+		Session s = HibernateManager.openSession();
+		try{
+			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			for (Object x : tmpversions){
+				String pluginid = (String) ((Object[])x)[0];
+				String version = (String) ((Object[])x)[1];
+				versions.put(pluginid, version);
+			}
+		}finally{
+			s.close();
+		}
+		
+		
+		
 		/* shut down the database */
 		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ShutDown);
 		HibernateManager.endSessionFactory(true);
@@ -213,7 +235,7 @@ public class DerbyRestoreEngine {
 		/* connect to the extractedDb and verify version */
 		SmartHibernateManager.setDatabaseParameter(extractedDb.getAbsolutePath());
 		try{
-			SmartPlugIn.versionCheck();
+			validateConfiguration(versions);
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true);
 			String cleanUpErr = cleanUp(new File[] { temp });
@@ -339,6 +361,90 @@ public class DerbyRestoreEngine {
 
 		monitor.worked(1);
 
+	}
+
+	/**
+	 * Validates the version of the backup database against what is currently
+	 * in the system.  Throws an exception if there are missing plugins, extra plugins 
+	 * or inconsistant versions.
+	 * 
+	 * 	@param versions the system plugins and associated versions
+	 * 	@throws Exception
+ 	*/
+	private static void validateConfiguration(HashMap<String, String> versions) throws Exception {
+		Session s;
+		s = HibernateManager.openSession();
+		try{
+			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			List<String> missingFromBackup = new ArrayList<String>();
+			List<String> missingFromSystem = new ArrayList<String>();
+			List<String> versionError = new ArrayList<String>();
+			List<String> all = new ArrayList<String>();
+			
+			for (Object x : tmpversions){
+				String pluginid = (String) ((Object[])x)[0];
+				String version = (String) ((Object[])x)[1];
+				if (versions.get(pluginid) == null){
+					missingFromSystem.add(pluginid);
+				}else if (!versions.get(pluginid).equals(version)){
+					versionError.add(MessageFormat.format(Messages.DerbyRestoreEngine_VersionError, new Object[]{pluginid, versions.get(pluginid), version}));
+				}
+				all.add(pluginid);
+			}
+			for (Iterator<String> iterator = versions.keySet().iterator(); iterator.hasNext();) {
+				String system = (String) iterator.next();
+				if (!all.contains(system)){
+					missingFromBackup.add(system);
+				}
+				
+			}
+			
+			if (missingFromBackup.size() > 0 || missingFromSystem.size() > 0 || versionError.size() > 0){
+				StringBuilder sb = new StringBuilder();
+				sb.append(Messages.DerbyRestoreEngine_ConfigurationError);
+				if (missingFromBackup.size() > 0){
+					StringBuilder tmp = new StringBuilder();
+					for (String x : missingFromBackup){
+						tmp.append(x);
+						tmp.append(", "); //$NON-NLS-1$
+					}
+					tmp.deleteCharAt(tmp.length() - 1);
+					tmp.deleteCharAt(tmp.length() - 1);
+					
+					sb.append("\n"); //$NON-NLS-1$
+					sb.append(MessageFormat.format(Messages.DerbyRestoreEngine_MissingPlugins, new Object[]{tmp.toString()}));
+				}
+				if (missingFromSystem.size() > 0){
+					StringBuilder tmp = new StringBuilder();
+					for (String x : missingFromSystem){
+						tmp.append(x);
+						tmp.append(", "); //$NON-NLS-1$
+					}
+					tmp.deleteCharAt(tmp.length() - 1);
+					tmp.deleteCharAt(tmp.length() - 1);
+					
+					sb.append("\n"); //$NON-NLS-1$
+					sb.append(MessageFormat.format(Messages.DerbyRestoreEngine_ExtraPlugins, new Object[]{tmp.toString()}));
+					
+				}
+				if (versionError.size() > 0){
+					StringBuilder tmp = new StringBuilder();
+					for (String x : versionError){
+						tmp.append(x);
+						tmp.append(", "); //$NON-NLS-1$
+					}
+					tmp.deleteCharAt(tmp.length() - 1);
+					tmp.deleteCharAt(tmp.length() - 1);
+					
+					sb.append("\n"); //$NON-NLS-1$
+					sb.append(MessageFormat.format(Messages.DerbyRestoreEngine_InconsistentVersions, new Object[]{tmp.toString()}));
+					
+				}
+				throw new Exception(sb.toString());
+			}
+		}finally{
+			s.close();
+		}
 	}
 
 	private static String cleanUp(File[] dirs) {
