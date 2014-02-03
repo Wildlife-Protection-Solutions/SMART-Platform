@@ -474,6 +474,7 @@ public class Messages extends NLS {
 	public static String DerbyBackupEngine_ProgressMessage;
 	public static String DerbyRestoreEngine_BackupExtractionError;
 	public static String DerbyRestoreEngine_ButtonText;
+	public static String DerbyRestoreEngine_ConfigurationError;
 	public static String DerbyRestoreEngine_Error_CouldNotCleanup;
 	public static String DerbyRestoreEngine_Error_CouldNotCreateTempBackup;
 	public static String DerbyRestoreEngine_Error_CouldNotCreateTempCopy;
@@ -485,8 +486,11 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_Error_NoFilestoreInBackupFile;
 	public static String DerbyRestoreEngine_Error_RestoreFailedCouldNotRevert;
 	public static String DerbyRestoreEngine_Error_RestoreFailedRevertSuccessful;
+	public static String DerbyRestoreEngine_ExtraPlugins;
+	public static String DerbyRestoreEngine_InconsistentVersions;
 	public static String DerbyRestoreEngine_InvalidUserDialogMessage;
 	public static String DerbyRestoreEngine_InvalidUserDialogTitle;
+	public static String DerbyRestoreEngine_MissingPlugins;
 	public static String DerbyRestoreEngine_Progress_CleanUp;
 	public static String DerbyRestoreEngine_Progress_ExtractingBackup;
 	public static String DerbyRestoreEngine_Progress_MovingFiles;
@@ -496,6 +500,7 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_RestoreDialogMessage;
 	public static String DerbyRestoreEngine_RestoreDialogTitle;
 	public static String DerbyRestoreEngine_UserValidationError;
+	public static String DerbyRestoreEngine_VersionError;
 	public static String DerbyRestoreEngine_Warning_Dialog_Message;
 	public static String DerbyRestoreEngine_Warning_Dialog_Title;
 	public static String DialogConstants_AddButton_Label;
