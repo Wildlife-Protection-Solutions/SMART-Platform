@@ -21,47 +21,29 @@
  */
 package org.wcs.smart.internal.ca.export;
 
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 /**
- * Conservation area data exporter that
- * includes the conservation area folder
- * in the filestore in the export. 
+ * Exports the db_versions table in the CA Export 
  * 
- * @author egouge
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class DataStoreDataExporter implements ICaDataExporter {
+public class PlugInConfigurationExporter implements ICaDataExporter {
 
-	public DataStoreDataExporter() {
-	}
-
-	/**
-	 * <p>Copies the conservation area folder from the filestore
-	 * to the export</p>
-	 * 
-	 * @see org.wcs.smart.ca.export.ICaDataExporter#exportData(org.wcs.smart.ca.export.ICaDataExportEngine, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	public static final String CONFIG_TABLE_NAME = "db_versions"; //$NON-NLS-1$
+	
 	@Override
 	public void exportData(ICaDataExportEngine exportEngine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.DataStoreDataExporter_progress, 1);
-		File filestore = new File(exportEngine.getExportLocation() + File.separator + CaExporter.FILESTORE_DIR);
-		SmartUtils.createDirectory(filestore);
-		File filestoreLocation = new File(exportEngine.getConservationArea().getFileDataStoreLocation());
-		if (filestoreLocation.exists()){
-			FileUtils.copyDirectory(filestoreLocation, filestore);
-		}
-		monitor.worked(1);
+		monitor.beginTask(Messages.PlugInConfigurationExporter_ExportingVersions, 1);
+		exportEngine.writeQuery(CONFIG_TABLE_NAME, "SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
 		monitor.done();
-
+		
 	}
 
 }

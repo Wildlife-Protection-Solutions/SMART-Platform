@@ -62,8 +62,11 @@ public class DerbyHibernateExtensions {
 
 	/**
 	 * Checks if given table exists in Derby database.
+	 * 
+	 * Assumes the table schema is SMART.
+	 * 
 	 * @param session
-	 * @param tableName
+	 * @param tableName the name of the table without the schema
 	 * @return
 	 */
 	public static boolean tableExists(Session session, String tableName) {

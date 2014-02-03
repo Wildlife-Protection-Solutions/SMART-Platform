@@ -220,6 +220,7 @@ public class Messages extends NLS {
 	public static String CaImporter_Error_SystemRestored;
 	public static String CaImporter_Error_TableDataFiles;
 	public static String CaImporter_Error_TableInfo;
+	public static String CaImporter_ExtraDataWarning;
 	public static String CaImporter_InvalidExportVersion;
 	public static String CaImporter_Progress_BackupCurrent;
 	public static String CaImporter_Progress_CleanUp;
@@ -229,6 +230,9 @@ public class Messages extends NLS {
 	public static String CaImporter_Progress_ScanningTable;
 	public static String CaImporter_Progress_UnzippingFile;
 	public static String CaImporter_Progress_ValidatingCaImport;
+	public static String CaImporter_ValidatingPluginProgressMessage;
+	public static String CaImporter_VersionError;
+	public static String CaImporter_WarningDialogTitle;
 	public static String CaInfoComposite_Description_Tooltip;
 	public static String CaInfoComposite_DescriptionLabel;
 	public static String CaInfoComposite_Designation_Tooltip;
@@ -431,6 +435,7 @@ public class Messages extends NLS {
 	public static String DataModelXmlToSmartConverter_Error_AggregationNotFound;
 	public static String DataModelXmlToSmartConverter_Error_AttributeTypeNotFound;
 	public static String DataModelXmlToSmartConverter_Error_CategoryAttributeNotFound;
+	public static String DataStoreDataExporter_progress;
 	public static String DateFilter_Custom;
 	public static String DateFilter_Last30Days;
 	public static String DateFilter_Last60Days;
@@ -765,6 +770,7 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_Key_Label;
 	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
+	public static String PlugInConfigurationExporter_ExportingVersions;
 	public static String ProjectionDialog_DialogMessage;
 	public static String ProjectionDialog_DialogTitle;
 	public static String ProjectionDialog_Error_LoadProjectionMessage;

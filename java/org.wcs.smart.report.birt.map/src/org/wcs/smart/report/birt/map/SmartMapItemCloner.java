@@ -87,17 +87,18 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 					ExtendedItem it = (ExtendedItem)element;
 					@SuppressWarnings("unchecked")
 					List<Object> mapLayerQueries = (List<Object>) it.getProperty(it.getRoot(), "org.wcs.smart.birt.map.layers"); //$NON-NLS-1$
-					
-					for (int i = 0; i < mapLayerQueries.size(); i ++){
-						String queryText = (String)mapLayerQueries.get(i);
-						String bits[] = queryText.split(":"); //$NON-NLS-1$
-						String queryUuid = bits[1];
-						UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
-						if (newQueryReferences != null){
-							mapLayerQueries.set(i, (Object)(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid()))); //$NON-NLS-1$
-						}else{
-							//new query reference cannot be found; 
-							throw new Exception(MessageFormat.format(Messages.SmartMapItemCloner_CloneError, new Object[]{report.getName()}));
+					if (mapLayerQueries != null){
+						for (int i = 0; i < mapLayerQueries.size(); i ++){
+							String queryText = (String)mapLayerQueries.get(i);
+							String bits[] = queryText.split(":"); //$NON-NLS-1$
+							String queryUuid = bits[1];
+							UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
+							if (newQueryReferences != null){
+								mapLayerQueries.set(i, (Object)(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid()))); //$NON-NLS-1$
+							}else{
+								//new query reference cannot be found; 
+								throw new Exception(MessageFormat.format(Messages.SmartMapItemCloner_CloneError, new Object[]{report.getName()}));
+							}
 						}
 					}
 				}
