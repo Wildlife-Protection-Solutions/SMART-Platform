@@ -32,11 +32,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
@@ -44,12 +47,16 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.CaExporter;
+import org.wcs.smart.internal.ca.export.PlugInConfigurationExporter;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Responsible for importing and exported conservation area.
@@ -83,7 +90,7 @@ public class CaImporter {
 			throw new IOException(Messages.CaImporter_Error_CouldNotFindImportFile + f.getAbsolutePath());
 		}
 		
-		monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 4);
+		monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 5);
 		
 		//TODO: consider doing a disk space check to ensure enough disk space for this operation
 		monitor.subTask(Messages.CaImporter_Progress_BackupCurrent);
@@ -105,10 +112,19 @@ public class CaImporter {
 			byte[] cauuid = validateConservationAreaInfo(dir, session);
 			monitor.worked(1);
 			
+			monitor.subTask(Messages.CaImporter_ValidatingPluginProgressMessage);
+			if (!validatePlugInConfiguration(dir, session)){
+				return;
+			}
+			monitor.worked(1);
+			
 			try{
 				processDatabaseFiles(dir, session, monitor);
 			}catch (Exception ex){
 				try{
+					try{
+						session.close();
+					}catch (Exception ex2){}
 					HibernateManager.endSessionFactory(true);
 					restoreBackup(dbBackup);
 				}catch (Exception e){
@@ -140,7 +156,9 @@ public class CaImporter {
 			}
 			
 			try{
-				session.close();
+				if (session.isOpen()){
+					session.close();
+				}
 			}catch (Exception ex){
 				SmartPlugIn.log(Messages.CaImporter_Error_CouldNotCloseSession, ex);
 			}
@@ -237,6 +255,82 @@ public class CaImporter {
 	}
 	
 	/**
+	 * Validates that the plugin version are consistent:
+	 * <p>
+	 * Checks that the software as the same version
+	 * of all the plugins included in the backup.
+	 * </p><p>
+	 * If a plugin is missing from the software and included in the backup
+	 * then the user is warned that they the related plugin data
+	 * will not be imported and not included in future exports.
+	 * </p><p>
+	 * If a plugin has a different version from the software
+	 * users will be unable to import.  They must update
+	 * their systems first.
+	 * </p>
+	 * 
+	 * 
+	 * @param dir directory for conservation area information file
+	 * @param session
+	 * @throws Exception
+	 */
+	private boolean validatePlugInConfiguration(File dir, Session session) throws Exception{
+		File caInfo = new File(new File(dir, CaExporter.DATABASE_DIR), PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
+		
+		HashMap<String, String> versions = new HashMap<String, String>();
+		CSVReader reader = new CSVReader(new FileReader(caInfo));
+		try{
+			String[] data= reader.readNext();
+			while(data != null){
+				versions.put(data[0], data[1]);
+				data= reader.readNext();
+			}
+		}finally{
+			reader.close();
+		}
+		
+		session.beginTransaction();
+		try{
+			final StringBuilder warnings = new StringBuilder();
+			for (Entry<String, String> e : versions.entrySet()){
+				String requiredVersion = HibernateManager.getPlugInVersion(e.getKey(), session);
+				if (requiredVersion == null){
+					//plugin not found; warn user
+					warnings.append(e.getKey());
+					warnings.append(", "); //$NON-NLS-1$
+				}else if (  !requiredVersion.equals(e.getValue()) ){
+					//versions don't match; don't allow user to 
+					throw new Exception(MessageFormat.format(Messages.CaImporter_VersionError, new Object[]{e.getKey(), requiredVersion, e.getValue()}));
+				}
+			}
+			
+			
+			if (warnings.length() > 0){
+				final boolean[] x = new boolean[]{true};
+				warnings.deleteCharAt(warnings.length() - 1);
+				warnings.deleteCharAt(warnings.length() - 1);
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						String msg = MessageFormat.format(Messages.CaImporter_ExtraDataWarning, new Object[]{warnings.toString()});
+						if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.CaImporter_WarningDialogTitle, msg)){
+							x[0] = false;
+						}
+						
+					}});
+				if (!x[0]){
+					return false;
+				}
+			}
+			
+		}finally{
+			session.getTransaction().commit();
+			reader.close();
+		}
+		return true;
+	}
+	
+	/**
 	 * Creates a temporary directory and unzip the
 	 * file to created directory.
 	 * 
@@ -265,6 +359,20 @@ public class CaImporter {
 		HashMap<String, List<String>> keys = getTableConstraints(session);
 		
 		HashMap<String, List<TableInfo>> tables = scanTables(dir);
+		//for each table check to ensure the table exists in the database
+		//if it does not exist we cannot import it
+		Set<String> allTables = new HashSet<String>();
+		allTables.addAll(tables.keySet());
+		for (String tableName : allTables){
+			String table = tableName;
+			if (table.indexOf('.') >= 0){
+				table = table.substring(table.indexOf('.')+1);
+			}
+			if (!DerbyHibernateExtensions.tableExists(session, table)){
+				tables.remove(tableName);
+			}
+		}
+		
 		
 		Set<String> processed = new HashSet<String>();
 		
@@ -460,6 +568,7 @@ public class CaImporter {
 				reader.close();
 			}
 		}
+
 		return map;
 	}
 

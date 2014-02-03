@@ -104,28 +104,28 @@ public class CaExporter {
 		
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		monitor.beginTask(Messages.CaExporter_ProgressExportCA, exporters.size() + 2);
+		monitor.beginTask(Messages.CaExporter_ProgressExportCA, (exporters.size() + 2) * 10);
 		try{
 			File tempDir = SmartUtils.createTemporaryDirectory();
 			try{
 				/* write a conservation area info file */
 				writeConservationAreaInfo(tempDir, ca);
 				if (monitor.isCanceled()) return;
-				monitor.worked(1);
+				monitor.worked(10);
 			
 				/* run through the exporters exporting data */
 				
 				ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
 				for (ICaDataExporter exporter: exporters){
 					if (monitor.isCanceled()) return;
-					exporter.exportData(engine, new SubProgressMonitor(monitor, 1));
-					monitor.worked(1);
+					exporter.exportData(engine, new SubProgressMonitor(monitor, 10));
+					monitor.worked(10);
 				}
 			
 				/* zip up files */
 				if (monitor.isCanceled()) return;
-				ZipUtil.createZip(tempDir.listFiles(), destFile, new SubProgressMonitor(monitor,1));
-				monitor.worked(1);
+				ZipUtil.createZip(tempDir.listFiles(), destFile, new SubProgressMonitor(monitor,10));
+				monitor.worked(10);
 			}finally{
 				try{
 					FileUtils.deleteDirectory(tempDir);

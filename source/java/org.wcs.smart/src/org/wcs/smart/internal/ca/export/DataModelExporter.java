@@ -53,6 +53,7 @@ public class DataModelExporter implements ICaDataExporter {
 		exportAttAggMapTable(exportEngine);
 		exportAggregationTable(exportEngine);
 		monitor.worked(1);
+		monitor.done();
 	}
 
 	private void exportAttAggMapTable(ICaDataExportEngine exportEngine) throws Exception{

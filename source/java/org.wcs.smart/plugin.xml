@@ -1011,6 +1011,9 @@
       <exporter
             caExporter="org.wcs.smart.internal.ca.export.DataModelExporter">
       </exporter>
+      <exporter
+            caExporter="org.wcs.smart.internal.ca.export.PlugInConfigurationExporter">
+      </exporter>
    </extension>
    <extension
          point="org.eclipse.ui.installationPages">
