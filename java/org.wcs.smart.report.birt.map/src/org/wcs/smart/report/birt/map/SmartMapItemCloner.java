@@ -92,12 +92,17 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 							String queryText = (String)mapLayerQueries.get(i);
 							String bits[] = queryText.split(":"); //$NON-NLS-1$
 							String queryUuid = bits[1];
-							UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
-							if (newQueryReferences != null){
-								mapLayerQueries.set(i, (Object)(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid()))); //$NON-NLS-1$
-							}else{
-								//new query reference cannot be found; 
-								throw new Exception(MessageFormat.format(Messages.SmartMapItemCloner_CloneError, new Object[]{report.getName()}));
+							try{
+								UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
+							
+								if (newQueryReferences != null){
+									mapLayerQueries.set(i, (Object)(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid()))); //$NON-NLS-1$
+								}else{
+									//new query reference cannot be found; 
+									throw new Exception(MessageFormat.format(Messages.SmartMapItemCloner_CloneError, new Object[]{report.getName()}));
+								}
+							}catch (Exception ex){
+								//map query is not a uuid item so we can skip it
 							}
 						}
 					}
