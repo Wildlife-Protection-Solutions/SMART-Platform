@@ -268,7 +268,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/waypoint_query.png"
+               icon="images/icons/obj16/patrol_query.png"
                label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                style="push"
                tooltip="%querytoolbar.createquery.menu.newpatrolquery.command.tooltip">

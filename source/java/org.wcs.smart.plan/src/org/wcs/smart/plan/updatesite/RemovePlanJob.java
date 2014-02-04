@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.plan.updatesite;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
@@ -43,6 +39,12 @@ import org.wcs.smart.plan.internal.Messages;
  */
 public class RemovePlanJob extends Job {
 
+	private static final String[] TABLES = new String[]{
+		"patrol_plan",  //$NON-NLS-1$
+		"plan_target_point",  //$NON-NLS-1$
+		"plan_target",  //$NON-NLS-1$
+		"plan"}; //$NON-NLS-1$
+	
 	public RemovePlanJob() {
 		super(Messages.RemovePlanJob_Title);
 	}
@@ -52,38 +54,30 @@ public class RemovePlanJob extends Job {
 		final Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			session.doWork(new Work() {
-				@Override
-				public void execute(Connection c) throws SQLException {
-					try {
-						//delete labels
-						c.createStatement().execute("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)"); //$NON-NLS-1$
-
-						//delete actual tables
-						c.createStatement().execute("DROP TABLE smart.patrol_plan"); //$NON-NLS-1$
-						c.createStatement().execute("DROP TABLE smart.plan_target_point"); //$NON-NLS-1$
-						c.createStatement().execute("DROP TABLE smart.plan_target"); //$NON-NLS-1$
-						c.createStatement().execute("DROP TABLE smart.plan"); //$NON-NLS-1$
-					} catch (final Exception ex) {
-						SmartPlugIn.log(Messages.RemovePlanJob_Error, ex);
-					}
-					
-				}
-			});
-			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);
-			
-		} catch (Exception e) {
-			SmartPlugIn.log(Messages.RemovePlanJob_Error, e);
-		} finally {
-			try {
-				session.getTransaction().commit();
-			} catch (Exception ex) {
-				SmartPlugIn.log(ex.getMessage(), ex);
+			if (DerbyHibernateExtensions.tableExists(session, "plan")){ //$NON-NLS-1$
+				session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)").executeUpdate(); //$NON-NLS-1$
 			}
+			for (String table : TABLES){
+				if (DerbyHibernateExtensions.tableExists(session, table)){
+					session.createSQLQuery("DROP TABLE SMART." + table); //$NON-NLS-1$
+				}
+			}		
+			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);
+			session.getTransaction().commit();
+
+		} catch (Exception e) {
+			try{
+				session.getTransaction().rollback();
+			}catch (Exception ex){
+				SmartPlanPlugIn.log(ex.getMessage(), ex);	
+			}
+			SmartPlanPlugIn.displayLog(Messages.RemovePlanJob_Error, e);
+			return new Status(Status.ERROR,SmartPlanPlugIn.PLUGIN_ID,e.getMessage());
+		} finally {
 			try {
 				session.close();
 			} catch (Exception ex) {
-				SmartPlugIn.log(ex.getMessage(), ex);
+				SmartPlanPlugIn.log(ex.getMessage(), ex);
 			}
 		}
 		

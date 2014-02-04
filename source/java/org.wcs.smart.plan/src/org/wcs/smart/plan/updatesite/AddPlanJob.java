@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
@@ -50,7 +49,7 @@ public class AddPlanJob extends Job {
 		Session session = HibernateManager.openSession();
 		try{
 			String currentVersion = HibernateManager.getPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, session);
-			if (currentVersion.equals(SmartPlanPlugIn.DB_VERSION)){
+			if (currentVersion != null && currentVersion.equals(SmartPlanPlugIn.DB_VERSION)){
 				//db version matches current version; we are ok
 				return Status.OK_STATUS;
 			}
@@ -66,10 +65,10 @@ public class AddPlanJob extends Job {
 				if (mark.allSet())
 					return Status.OK_STATUS; //required table exists
 			} catch (final Exception e) {
-				Display.getDefault().asyncExec(new Runnable(){
+				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, e);
+						SmartPlanPlugIn.displayLog(Messages.AddPlanJob_Error, e);
 					}
 				});
 				return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, Messages.AddPlanJob_Error, e); 
@@ -102,10 +101,10 @@ public class AddPlanJob extends Job {
 			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION, session);
 			session.getTransaction().commit();
 		} catch (final Exception ex) {
-			Display.getDefault().asyncExec(new Runnable(){
+			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, Messages.AddPlanJob_Error, ex);
+					SmartPlanPlugIn.displayLog(Messages.AddPlanJob_Error, ex);
 				}
 			});
 			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, Messages.AddPlanJob_Error, ex); 

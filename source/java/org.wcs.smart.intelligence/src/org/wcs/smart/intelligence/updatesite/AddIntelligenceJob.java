@@ -65,8 +65,8 @@ public class AddIntelligenceJob extends Job {
 		Session session = HibernateManager.openSession();
 		try{
 			String dbVersion = HibernateManager.getPlugInVersion(IntelligencePlugIn.PLUGIN_ID, session);
-			if (dbVersion.equals(IntelligencePlugIn.DB_VERSION)){
-				//database version matches expeted version 
+			if (dbVersion != null && dbVersion.equals(IntelligencePlugIn.DB_VERSION)){
+				//database version matches expected version 
 				return Status.OK_STATUS;
 			}
 			
@@ -82,7 +82,7 @@ public class AddIntelligenceJob extends Job {
 				if (mark.allSet())
 					return Status.OK_STATUS; //required table exists
 			} catch (final Exception e) {
-				Display.getDefault().asyncExec(new Runnable(){
+				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, e);
@@ -123,7 +123,7 @@ public class AddIntelligenceJob extends Job {
 			session.getTransaction().commit();
 			
 		} catch (final Exception ex) {
-			Display.getDefault().asyncExec(new Runnable(){
+			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, ex);
