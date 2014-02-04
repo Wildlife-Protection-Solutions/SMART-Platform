@@ -97,17 +97,32 @@ public class AddEntityJob extends Job {
 		monitor.beginTask(Messages.AddEntityJob_TaskName, 10);
 		//this must be run as Admin User
 		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		Session session = HibernateManager.openSession();
+		Session session = HibernateManager.openSession();	
 		
 		try{
 			String currentVersion = HibernateManager.getPlugInVersion(EntityPlugIn.PLUGIN_ID, session);
 			if (currentVersion == null){
 				return createDatabaseTables(session);
 			}else if (!currentVersion.equals(EntityPlugIn.DB_VERSION)){
-				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityJob_UnsupportedVersion, null); 
+				//TODO: figure out what to do here, because this will install the new 
+				//version anyways
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						EntityPlugIn.displayLog(Messages.AddEntityJob_UnsupportedVersion, null);
+					}
+				});
 			}
 		}catch(final Exception e){
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityJob_InstallError + e.getLocalizedMessage(), e);
+			//TODO: figure out what to do here, because this will install the new 
+			//version anyways
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					EntityPlugIn.displayLog(Messages.AddEntityJob_InstallError + e.getLocalizedMessage(), e);
+				}
+			});
+
 		}finally{
 			try{
 				session.close();
@@ -133,7 +148,7 @@ public class AddEntityJob extends Job {
 						
 			session.getTransaction().commit();
 		} catch (final Exception e) {
-			Display.getDefault().asyncExec(new Runnable(){
+			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					SmartPlugIn.displayLog(null, Messages.AddEntityJob_Error, e);

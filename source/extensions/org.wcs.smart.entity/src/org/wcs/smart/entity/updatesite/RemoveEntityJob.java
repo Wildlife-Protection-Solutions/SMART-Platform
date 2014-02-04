@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -40,16 +41,18 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class RemoveEntityJob extends Job {
 
-	private static String[] TABLES = new String[]{
-		
-		//delete labels
+	private static String[] SQL = new String[]{
 		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_attribute)", //$NON-NLS-1$
+		"", //$NON-NLS-1$
+		"", //$NON-NLS-1$
 		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_type)",  //$NON-NLS-1$
-
-		"DROP TABLE SMART.ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
-		"DROP TABLE SMART.ENTITY", //$NON-NLS-1$
-		"DROP TABLE SMART.ENTITY_ATTRIBUTE", //$NON-NLS-1$
-		"DROP TABLE SMART.ENTITY_TYPE", //$NON-NLS-1$
+	};
+	
+	private static String[] TABLES = new String[]{
+		"ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
+		"ENTITY", //$NON-NLS-1$
+		"ENTITY_ATTRIBUTE", //$NON-NLS-1$
+		"ENTITY_TYPE", //$NON-NLS-1$
 	};
 	
 	public RemoveEntityJob() {
@@ -64,16 +67,25 @@ public class RemoveEntityJob extends Job {
 	
 	private IStatus dropTables(){
 		Session session = HibernateManager.openSession();
-		//TODO: we may want to check that the required tables exist
 		try {
 			session.beginTransaction();
+			for (int i = 0; i < SQL.length; i ++){
+				if (SQL[i].equals("")) continue; //$NON-NLS-1$
+				
+				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+					session.createSQLQuery(SQL[i]).executeUpdate();
+				}
+			}
+			
 			for (int i = 0; i < TABLES.length; i ++){
-				session.createSQLQuery(TABLES[i]).executeUpdate();
+				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+				}
 			}
 			HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, null, session);
 			session.getTransaction().commit();
 		} catch (final Exception e) {
-			Display.getDefault().asyncExec(new Runnable(){
+			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					SmartPlugIn.displayLog(null, Messages.RemoveEntityJob_Error, e);
