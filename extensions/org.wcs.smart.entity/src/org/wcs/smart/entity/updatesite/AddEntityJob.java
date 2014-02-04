@@ -112,6 +112,7 @@ public class AddEntityJob extends Job {
 						EntityPlugIn.displayLog(Messages.AddEntityJob_UnsupportedVersion, null);
 					}
 				});
+				return new Status(Status.ERROR, EntityPlugIn.PLUGIN_ID, Messages.AddEntityJob_UnsupportedVersion);
 			}
 		}catch(final Exception e){
 			//TODO: figure out what to do here, because this will install the new 
@@ -122,7 +123,7 @@ public class AddEntityJob extends Job {
 					EntityPlugIn.displayLog(Messages.AddEntityJob_InstallError + e.getLocalizedMessage(), e);
 				}
 			});
-
+			return new Status(Status.ERROR, EntityPlugIn.PLUGIN_ID, Messages.AddEntityJob_InstallError, e);
 		}finally{
 			try{
 				session.close();
