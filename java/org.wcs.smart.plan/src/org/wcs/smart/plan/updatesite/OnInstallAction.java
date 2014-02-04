@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 
 /**
  * Action that is called when Plan plug-in is installed
@@ -40,6 +41,11 @@ public class OnInstallAction extends ProvisioningAction {
 	public IStatus execute(Map<String, Object> parameters) {
 		Job job = new AddPlanJob();
 		job.schedule();
+		try{
+			job.join();
+		}catch(InterruptedException ex){
+			SmartPlanPlugIn.log(ex.getLocalizedMessage(), ex);
+		}
 		return Status.OK_STATUS;
 	}
 

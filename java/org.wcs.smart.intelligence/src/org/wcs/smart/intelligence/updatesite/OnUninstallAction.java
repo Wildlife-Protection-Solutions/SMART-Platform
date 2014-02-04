@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 
 /**
  * Action that is called when Intelligence plug-in is uninstalled
@@ -40,6 +41,11 @@ public class OnUninstallAction extends ProvisioningAction {
 	public IStatus execute(Map<String, Object> parameters) {
 		Job job = new RemoveIntelligenceJob();
 		job.schedule();
+		try{
+			job.join();
+		}catch(InterruptedException ex){
+			IntelligencePlugIn.log(ex.getLocalizedMessage(), ex);
+		}
 		return Status.OK_STATUS;
 	}
 
