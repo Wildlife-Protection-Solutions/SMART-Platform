@@ -799,5 +799,11 @@
             id="org.wcs.smart.intelligence.IntelligenceCaCloner">
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="intelligence">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

@@ -164,5 +164,11 @@
          </activeWhen>
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="incidents">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

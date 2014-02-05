@@ -881,4 +881,10 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="reports">
+      </FilestoreDirectory>
+   </extension>
 </plugin>
