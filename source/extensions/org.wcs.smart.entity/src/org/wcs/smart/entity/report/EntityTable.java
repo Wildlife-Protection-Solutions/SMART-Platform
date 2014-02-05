@@ -109,7 +109,7 @@ public class EntityTable extends SmartBirtTable {
 		
 		cols[0] = java.sql.Types.VARCHAR;
 		cols[1] = java.sql.Types.VARCHAR;
-		if (et.getType() == EntityType.Type.TRANSIENT){
+		if (et.getType() == EntityType.Type.FIXED){
 			cols[2] = java.sql.Types.DOUBLE;
 			cols[3] = java.sql.Types.DOUBLE;
 		}
