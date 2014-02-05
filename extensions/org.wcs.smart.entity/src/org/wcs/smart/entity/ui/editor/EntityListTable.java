@@ -96,6 +96,11 @@ public class EntityListTable extends Composite {
 		createTable();
 	}
 
+	@Override
+	public boolean setFocus() {
+		return entityTable.getTable().setFocus();
+	}
+	
 	/**
 	 * Sets the entity table input.
 	 * 

@@ -257,11 +257,6 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		return false;
 	}
 	
-	@Override
-	public void setFocus() {
-		configPage.setFocus();
-	}
-	
 	/**
 	 * loads the plan from the database populating all 
 	 * lazy fields from the database.
