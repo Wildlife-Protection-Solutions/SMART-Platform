@@ -34,6 +34,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 
@@ -119,6 +120,11 @@ public class GridAnalysisEngine<T> {
 		if (transform != null){
 			ls = (LineString)JTS.transform(ls, transform);
 		}
+		if (ls == null || ls.getCoordinates() == null){
+			//something happened during the transform; we cannot do anything
+			QueryPlugIn.log("Error occurred rasterizing linestring. (" + ls.toText() + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
+		}
 		
 		//find ls envelope
 		Envelope env = ls.getEnvelopeInternal();
@@ -141,6 +147,7 @@ public class GridAnalysisEngine<T> {
 		//process linestring 
 		//if there are duplicate points they cause problems for
 		//intersector so we will remove them
+
 		List<Coordinate> datapnts = new ArrayList<Coordinate>();
 		// remove duplicates
 		Coordinate cdata[] = ls.getCoordinates();
