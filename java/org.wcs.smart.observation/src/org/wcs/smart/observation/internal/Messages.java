@@ -9,6 +9,8 @@ public class Messages extends NLS {
 	public static String AttachmentCellEditor_TableCell_Label;
 	public static String AttachmentDialog_DialogMessage;
 	public static String AttachmentDialog_DialogTitle;
+
+	public static String AttachmentDialog_ObservationAttachmentLbl;
 	public static String AttributeDMAdvisor_Error_AttributeNotDeletable;
 	public static String AttributeDMAdvisor_Error_InvalidObjectType;
 	public static String AttributeListItemDMAdvisor_DeleteError;

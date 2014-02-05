@@ -88,10 +88,11 @@ public class SmartStartUp {
 	 * It will exit the program if an error occurs which trying
 	 * to load the conservation areas.
 	 * 
-	 * 
+	 * @param includeCcaa if the ccaa conservation area should be included
+	 * in the results
 	 * @return list of conservation areas in the database
 	 */
-	public static List<Object> getConservationAreas(){
+	public static List<Object> getConservationAreas(boolean includeCcaa){
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			//log error message and exit
@@ -105,7 +106,7 @@ public class SmartStartUp {
 				List<Object> results = new ArrayList<Object>();
 				results.addAll(HibernateManager.getConservationAreas(session));
 				
-				if (results.size() > 1){
+				if (results.size() > 1 && includeCcaa){
 					List<?> tmp = session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", ConservationArea.MULTIPLE_CA)).list(); //$NON-NLS-1$
 					if (tmp.size() > 0){
 						results.add(Messages.SmartStartUp_AnalysisLoginSepeartor);

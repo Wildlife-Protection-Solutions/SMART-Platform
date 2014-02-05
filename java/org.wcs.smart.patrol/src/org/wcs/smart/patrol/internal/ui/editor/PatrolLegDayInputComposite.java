@@ -941,10 +941,19 @@ public class PatrolLegDayInputComposite {
 			}
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
-			if (wp.getAttachments() == null || wp.getAttachments().size() == 0) {
+			int wpCnt = 0;
+			for (WaypointObservation wo : wp.getObservations()){
+				if (wo.getAttachments() != null){
+					wpCnt += wo.getAttachments().size();
+				}
+			}
+			if (wp.getAttachments() != null){
+				wpCnt += wp.getAttachments().size();
+			}
+			if (wpCnt == 0 ) {
 				return Messages.PatrolLegDayInputComposite_NoAttachmentments_ColumnLabel;
 			} else {
-				return MessageFormat.format(Messages.PatrolLegDayInputComposite_AttachmentColumnLabel, new Object[]{wp.getAttachments().size() });
+				return MessageFormat.format(Messages.PatrolLegDayInputComposite_AttachmentColumnLabel, new Object[]{wpCnt});
 			}
 		}
 
