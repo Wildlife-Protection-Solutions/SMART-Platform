@@ -61,9 +61,6 @@ public class AddPlanJob extends Job {
 				mark.plan_target = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET"); //$NON-NLS-1$
 				mark.plan_target_point = DerbyHibernateExtensions.tableExists(session, "PLAN_TARGET_POINT"); //$NON-NLS-1$
 				mark.patrol_plan = DerbyHibernateExtensions.tableExists(session, "PATROL_PLAN"); //$NON-NLS-1$
-			
-				if (mark.allSet())
-					return Status.OK_STATUS; //required table exists
 			} catch (final Exception e) {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
