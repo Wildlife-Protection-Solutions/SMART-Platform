@@ -30,7 +30,10 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.Layer;
+import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.render.IViewportModelListener;
+import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -75,6 +78,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private IGeoResource pointResource;
 	private String styleSld = null;
 	
+	private IViewportModelListener initListener;
+	
 	/**
 	 * Creates a new map page
 	 * @param e parent editor
@@ -95,7 +100,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap(), true);
+		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
 		loadDefaultLayers.schedule();
 		
 		addPointsLayer();
@@ -147,6 +152,19 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				}
 			};
 			getMap().sendCommandASync(command);
+			
+			//zoom to extent when map displayed
+			initListener = new IViewportModelListener() {
+				@Override
+				public void changed(ViewportModelEvent event) {
+					if (getMap() != null){
+						getMap().getViewportModel().removeViewportModelListener(initListener);
+						getMap().sendCommandASync(new ZoomExtentCommand());
+					}
+					
+				}
+			};
+    		getMap().getViewportModel().addViewportModelListener(initListener);
 			
         } catch (Exception exception) {
 			IncidentPlugIn.displayLog(Messages.IncidentMapPage_Error1, exception);

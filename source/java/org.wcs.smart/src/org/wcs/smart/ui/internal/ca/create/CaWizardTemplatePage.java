@@ -169,7 +169,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 				final List<Object> cas = new ArrayList<Object>();
 				Exception error = null;
 				try {
-					cas.addAll(SmartStartUp.getConservationAreas());
+					cas.addAll(SmartStartUp.getConservationAreas(false));
 				} catch (final Exception ex) {
 					error = ex;
 				}

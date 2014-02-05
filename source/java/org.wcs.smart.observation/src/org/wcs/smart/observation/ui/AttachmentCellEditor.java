@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
  * Cell editor for editing attachments for a given waypoint.
@@ -115,10 +116,23 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		if (value == null){
 			return;
 		}
-		String text = Messages.AttachmentCellEditor_NoAttachment_Label;
-		if ( ((Waypoint)value).getAttachments() != null && ((Waypoint)value).getAttachments().size() > 0){
-			text = MessageFormat.format(Messages.AttachmentCellEditor_TableCell_Label, new Object[]{((Waypoint)value).getAttachments().size()});
+		int wpCnt = 0;
+		Waypoint wp = (Waypoint)value;
+		for (WaypointObservation wo : wp.getObservations()){
+			if (wo.getAttachments() != null){
+				wpCnt += wo.getAttachments().size();
+			}
 		}
+		if (wp.getAttachments() != null){
+			wpCnt += wp.getAttachments().size();
+		}
+		String text;
+		if (wpCnt == 0 ) {
+			text = Messages.AttachmentCellEditor_NoAttachment_Label;
+		} else {
+			text = MessageFormat.format(Messages.AttachmentCellEditor_TableCell_Label, new Object[]{wpCnt});
+		}
+		
 		getDefaultLabel().setText( text);  
     }
 	

@@ -210,7 +210,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		scComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)scComp.getLayoutData()).heightHint = 200;
 		
-		Composite main = new Composite(scComp, SWT.NONE);
+		final Composite main = new Composite(scComp, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		
 		scComp.setContent(main);
@@ -219,9 +219,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		createAttributeFields(main);
 		
-
-		
-		
 		if (!currentCategory.getIsMultiple()){
 			if (currentObservations != null && currentObservations.size() > 0){
 				WaypointObservation ob = currentObservations.iterator().next();
@@ -229,9 +226,14 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		}else{
 			//create button panel
-			Composite buttons= new Composite(main, SWT.NONE);
+			Composite buttons= new Composite(top, SWT.NONE);
 			buttons.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-			buttons.setLayout(new GridLayout(2, false));
+			GridLayout gl2 = new GridLayout(2, false);
+			gl2.marginWidth = gl2.marginHeight = 0;
+			buttons.setLayout(gl2);
+			
+			Label l = new Label(buttons, SWT.SEPARATOR | SWT.HORIZONTAL);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			btnUpdate = new Button(buttons, SWT.PUSH);
 			btnUpdate.setText(Messages.AttributeWizardPage_UpdateObsButton);

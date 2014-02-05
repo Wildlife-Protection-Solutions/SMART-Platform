@@ -432,7 +432,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 					});
 					final List<Object> cas = new ArrayList<Object>();
 					try{
-						cas.addAll(SmartStartUp.getConservationAreas());
+						cas.addAll(SmartStartUp.getConservationAreas(true));
 					}catch (final Exception ex){
 						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 							public void run(){

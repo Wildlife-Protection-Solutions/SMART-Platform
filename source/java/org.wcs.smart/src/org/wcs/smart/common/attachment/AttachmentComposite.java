@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,7 +50,15 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Represents file attachment ui component
+ * Represents file attachment ui component.
+ * 
+ * The attachment composite has the ability to display two
+ * sets of the attachments.  The "main" attachments which can be
+ * added to and removed, and another set of "other" attachments which
+ * can only be viewed.  This supports displaying all attachments associated
+ * with a waypoint (the waypoint and observation attachments), but only 
+ * allows uers to modify the waypoint attachments.  Use the
+ * initOtherAttachments function to set the "other" attachments.
  * 
  * @author Emily
  * @author elitvin
@@ -59,6 +68,10 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 
 	private TableViewer tblAttachments;
 	private ArrayList<T> attachments = new ArrayList<T>();
+	private List<ISmartAttachment> other = new ArrayList<ISmartAttachment>();
+	
+	private List<ISmartAttachment> all = new ArrayList<ISmartAttachment>();
+	
 	private Button btnRemove;
 	private Button btnOpen;
 
@@ -82,21 +95,39 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		((GridData)tblAttachments.getTable().getLayoutData()).heightHint = 100;
 		((GridData)tblAttachments.getTable().getLayoutData()).widthHint = 200;
 		tblAttachments.setContentProvider(ArrayContentProvider.getInstance());
-		tblAttachments.setLabelProvider(new SmartAttachmentLabelProvider());
+		tblAttachments.setLabelProvider(new SmartAttachmentLabelProvider(){
+			public String getText(Object element) {
+				if (element instanceof ISmartAttachment){
+					String text = ""; //$NON-NLS-1$
+					if (other.contains(element)){
+						text = "**"; //$NON-NLS-1$
+					}
+					text += super.getText(element);
+					return text;
+				}
+				return super.getText(element);
+			}
+		});
 		tblAttachments.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				boolean empty = true;
+				for (Iterator<?> iterator = ((StructuredSelection)tblAttachments.getSelection()).iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					if (attachments.contains(type)){
+						empty = false;
+					}
+					
+				}
 				btnOpen.setEnabled(!tblAttachments.getSelection().isEmpty());
-				btnRemove.setEnabled(!tblAttachments.getSelection().isEmpty());
+				btnRemove.setEnabled(!empty);
 				
 			}
 		});
 		tblAttachments.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				// TODO Auto-generated method stub
 				ISmartAttachment a = (ISmartAttachment) ((IStructuredSelection)tblAttachments.getSelection()).getFirstElement();
 				if (a != null){
 					AttachmentUtil.openAttachment(a);
@@ -131,7 +162,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 					attachments.add(wpa);
 				}
 				fireAttachmentsChangeListeners();
-				tblAttachments.refresh();
+				refreshTable();
 			}
 		});
 		
@@ -145,11 +176,13 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 				if (!sel.isEmpty()) {
 					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 						ISmartAttachment type = (ISmartAttachment) iterator.next();
-						attachments.remove(type);
+						if (attachments.contains(type)){
+							attachments.remove(type);
+						}
 					}
 					fireAttachmentsChangeListeners();
 				}
-				tblAttachments.refresh();
+				refreshTable();
 			}
 		});
 		btnRemove.setEnabled(false);
@@ -167,7 +200,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		});
 		btnOpen.setEnabled(false);
 		
-		tblAttachments.setInput(this.attachments);
+		tblAttachments.setInput(all);
 		tblAttachments.refresh();
 	}
 	
@@ -175,8 +208,23 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 	
 	public void initAttachments(List<T> init){
 		this.attachments.addAll(init);
+		refreshTable();
+	}
+	
+	private void refreshTable(){
+		all.clear();
+		all.addAll(this.attachments);
+		all.addAll(this.other);
+		
 		tblAttachments.refresh();
 	}
+	
+	public void initOtherAttachments(List<ISmartAttachment> init){
+		other.clear();
+		this.other.addAll(init);
+		refreshTable();
+	}
+	
 	/**
 	 * @return all attachments selected by the user
 	 */
