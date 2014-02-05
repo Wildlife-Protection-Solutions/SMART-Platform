@@ -89,7 +89,7 @@ public class RemoveIntelligenceJob extends Job {
 			}
 	
 			//remove from plugin table
-			HibernateManager.setPlugInVersion(IntelligencePlugIn.DB_VERSION,null, session);
+			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, null, session);
 			try {
 				session.getTransaction().commit();
 			} catch (Exception ex) {
