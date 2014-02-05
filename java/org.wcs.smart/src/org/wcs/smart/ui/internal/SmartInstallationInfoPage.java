@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.internal;
 
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
@@ -32,8 +33,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.about.InstallationPage;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -112,7 +116,25 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		}else{
 			sb.append(defaultl.getLabel());
 		}
-
+		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(Messages.SmartInstallationInfoPage_DbPluginVersions);
+		sb.append(SmartUtils.LINE_SEPARATOR);
+		Session s = HibernateManager.openSession();
+		try{
+			List<?> data = s.createSQLQuery("SELECT plugin_id, version FROM " +SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			for (Object x : data){
+				Object[] z = (Object[])x;
+				sb.append("  " + (String)z[0] + ": " + (String)z[1]);  //$NON-NLS-1$//$NON-NLS-2$
+				sb.append(SmartUtils.LINE_SEPARATOR);
+			}
+				
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+			sb.append(ex.getLocalizedMessage());
+		}finally{
+			s.close();
+		}
 
 		txt.setText(sb.toString());
 	}

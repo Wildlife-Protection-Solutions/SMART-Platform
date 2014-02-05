@@ -856,6 +856,7 @@ public class Messages extends NLS {
 	public static String SmartFilterDialog_Reset_Button;
 	public static String SmartGeoResourceInfo_Error_ComputingBounds;
 	public static String SmartInstallationInfoPage_DBLocation_Label;
+	public static String SmartInstallationInfoPage_DbPluginVersions;
 	public static String SmartInstallationInfoPage_DefaultLang_Label;
 	public static String SmartInstallationInfoPage_FilestoreLocation_Label;
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
