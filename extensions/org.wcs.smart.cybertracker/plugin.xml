@@ -152,5 +152,11 @@
             version="2.0.0">
       </action>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="Cybertracker">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>
