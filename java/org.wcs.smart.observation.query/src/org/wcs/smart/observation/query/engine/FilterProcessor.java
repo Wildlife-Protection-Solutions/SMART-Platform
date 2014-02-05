@@ -208,7 +208,38 @@ public class FilterProcessor implements IFilterProcessor {
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM " ); //$NON-NLS-1$
 		usedTables.add(Waypoint.class);
+		
+		//this is done to improve derby performance; otherwise performance is very slow
+		sql.append ("(SELECT * FROM "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
+		boolean innerwhere = true;
+		if (caFilter != null) {
+			String filter = ObservationFilterToSqlGenerator.INSTANCE.toSql(caFilter, engine);
+			if (filter.length() > 0) {
+				if (innerwhere){
+					sql.append(" WHERE "); //$NON-NLS-1$
+					innerwhere = false;
+				}
+				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		
+		if (dateFilter != null) {
+			String filter = ObservationFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				if (innerwhere){
+					sql.append(" WHERE "); //$NON-NLS-1$
+					innerwhere = false;
+				}else{
+					sql.append(" and "); //$NON-NLS-1$
+				}
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(filter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+		sql.append(") " + prefix(Waypoint.class));
+		sql.append(" ");
 		
 		if (populateObservation || 
 				observationFilterVisitor.hasAttributeFilter() || 
