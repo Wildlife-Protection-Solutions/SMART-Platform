@@ -238,8 +238,8 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" ) "); //$NON-NLS-1$
 			}
 		}
-		sql.append(") " + prefix(Waypoint.class));
-		sql.append(" ");
+		sql.append(") " + prefix(Waypoint.class)); //$NON-NLS-1$
+		sql.append(" "); //$NON-NLS-1$
 		
 		if (populateObservation || 
 				observationFilterVisitor.hasAttributeFilter() || 
