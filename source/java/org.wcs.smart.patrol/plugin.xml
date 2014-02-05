@@ -762,5 +762,11 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="patrol">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

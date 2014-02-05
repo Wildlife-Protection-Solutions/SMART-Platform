@@ -24,30 +24,28 @@ package org.wcs.smart.internal.ca.in;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
@@ -59,13 +57,19 @@ import org.wcs.smart.util.ZipUtil;
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
- * Responsible for importing and exported conservation area.
- *  
- * @author egouge
- * @since 1.0.0
+ * Conservation importer.
+ * 
+ * @author Emily
+ *
  */
 public class CaImporter {
 
+	/**
+	 * Export code extension point
+	 */
+	private static final String IMPORT_EXTENSION_ID = "org.wcs.smart.ca.import"; //$NON-NLS-1$
+	
+	
 	/**
 	 * Imports conservation area data from a conservation 
 	 * area backup file.
@@ -90,13 +94,16 @@ public class CaImporter {
 			throw new IOException(Messages.CaImporter_Error_CouldNotFindImportFile + f.getAbsolutePath());
 		}
 		
-		monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 5);
+		List<ICaDataImporter> importers = getImportExtensions();
 		
-		//TODO: consider doing a disk space check to ensure enough disk space for this operation
+		monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 50 + importers.size() * 10);
+		
+		//TODO: consider doing a disk space check to ensure
+		//enough disk space for this operation
 		monitor.subTask(Messages.CaImporter_Progress_BackupCurrent);
 		HibernateManager.endSessionFactory(true);
 		File dbBackup = backup();
-		monitor.worked(1);
+		monitor.worked(10);
 		
 		monitor.subTask(Messages.CaImporter_Progress_UnzippingFile);
 		File dir = unzipFile(f);
@@ -106,20 +113,24 @@ public class CaImporter {
 		
 		Session session = HibernateManager.openSession();
 		try{
-			monitor.worked(1);
+			monitor.worked(10);
 			
 			monitor.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
 			byte[] cauuid = validateConservationAreaInfo(dir, session);
-			monitor.worked(1);
+			monitor.worked(10);
 			
 			monitor.subTask(Messages.CaImporter_ValidatingPluginProgressMessage);
 			if (!validatePlugInConfiguration(dir, session)){
 				return;
 			}
-			monitor.worked(1);
+			monitor.worked(10);
 			
+			
+			CaImportEngine engine = new CaImportEngine(session, dir, cauuid);
 			try{
-				processDatabaseFiles(dir, session, monitor);
+				for (ICaDataImporter importer : getImportExtensions()){
+					importer.importData(engine, new SubProgressMonitor(monitor, 10));
+				}
 			}catch (Exception ex){
 				try{
 					try{
@@ -132,16 +143,7 @@ public class CaImporter {
 				}
 				throw new Exception(Messages.CaImporter_Error_SystemRestored + ex.getLocalizedMessage(), ex);
 			}
-			
-			try{
-				monitor.worked(2);
-				monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 4);				
-				importFileStore(dir, cauuid, monitor);
-				monitor.worked(3);
-			}catch (Exception ex){
-				throw new Exception(Messages.CaImporter_Error_FilestoreNotImported, ex);
-			}
-			
+			monitor.worked(10);			
 		}finally{
 			monitor.subTask(Messages.CaImporter_Progress_CleanUp);
 			try{
@@ -164,9 +166,12 @@ public class CaImporter {
 			}
 			/* disconnect from admin user */
 			HibernateManager.endSessionFactory(true);
+			monitor.done();
 		}
 		
 	}
+	
+	
 	
 	/**
 	 * Creates a copy of the existing smart database as a restore point.
@@ -345,282 +350,19 @@ public class CaImporter {
 	}
 	
 	/**
-	 * Processes all database files, loading them into the database
-	 * one at a time.
-	 * 
-	 * @param dir source directory for database tables
-	 * @param session database connection 
-	 * @param monitor progress monitor
-	 * @throws Exception
+	 * @return list of ca data exporter extension points
 	 */
-	private void processDatabaseFiles(File dir, Session session, IProgressMonitor monitor) throws Exception{
-		
-		monitor.subTask(Messages.CaImporter_Progress_ScanningTable);
-		HashMap<String, List<String>> keys = getTableConstraints(session);
-		
-		HashMap<String, List<TableInfo>> tables = scanTables(dir);
-		//for each table check to ensure the table exists in the database
-		//if it does not exist we cannot import it
-		Set<String> allTables = new HashSet<String>();
-		allTables.addAll(tables.keySet());
-		for (String tableName : allTables){
-			String table = tableName;
-			if (table.indexOf('.') >= 0){
-				table = table.substring(table.indexOf('.')+1);
+	private List<ICaDataImporter> getImportExtensions(){
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<ICaDataImporter> items = new ArrayList<ICaDataImporter>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IMPORT_EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				items.add((ICaDataImporter)e.createExecutableExtension("caImporter")); //$NON-NLS-1$
 			}
-			if (!DerbyHibernateExtensions.tableExists(session, table)){
-				tables.remove(tableName);
-			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
 		}
-		
-		
-		Set<String> processed = new HashSet<String>();
-		
-		Queue<String> tablesToProcess = new LinkedList<String>();
-		tablesToProcess.addAll(tables.keySet());
-		
-		
-		monitor.beginTask(Messages.CaImporter_Progress_processingTables, tablesToProcess.size());
-
-		String last = "";  		//used as a check here so we don't go on forever //$NON-NLS-1$
-		while(tablesToProcess.size() > 0){
-			String tableName = tablesToProcess.poll();
-			if (last.equals(tableName)){
-				throw new Exception(Messages.CaImporter_Error_CirculateTableDependencies);
-			}
-			monitor.subTask(tableName);
-			List<String> requires = keys.get(tableName);
-			boolean exportTable = false;
-			if (requires == null || requires.size() == 0){
-				exportTable = true;
-			}else{
-				boolean canProcess = true;
-				for (String tab : requires){
-					if (!tab.equals(tableName) && !processed.contains(tab)){
-						canProcess = false;
-						break;
-					}
-				}
-				if (canProcess){
-					exportTable = true;
-				}
-			}
-			
-			if (exportTable){
-				List<TableInfo> infos = tables.get(tableName);
-				if (infos == null) throw new Exception(Messages.CaImporter_Error_TableInfo + tableName);
-				for (TableInfo info : infos){
-					if (!info.getDataFile().exists()) throw new Exception(MessageFormat.format(Messages.CaImporter_Error_TableDataFiles, new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
-					importData(session,tableName, info.getColumns(), info.getDataFile() );
-					processed.add(tableName);
-				}
-				monitor.worked(1);
-				last = ""; //$NON-NLS-1$
-			}else{
-				tablesToProcess.add(tableName);
-				last = tableName;
-			}
-		}
+		return items;
 	}
-	
-	/**
-	 * Imports the data from the file store to the 
-	 *
-	 * @param dir the source directory
-	 * @param cauuid the conservation area uuid
-	 * @param monitor progress monitor
-	 * @throws IOException
-	 */
-	private void importFileStore(File dir, byte[] cauuid, IProgressMonitor monitor) throws IOException{
-		monitor.setTaskName(Messages.CaImporter_Progress_ImportingFileStore);
-		File sourceFile = new File(dir, CaExporter.FILESTORE_DIR);
-		
-		
-		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(cauuid);
-		File destLocation = new File(filestore);
-		if (!destLocation.exists()){
-			destLocation.mkdir();
-		}
-		if (sourceFile.isDirectory()){
-			FileUtils.copyDirectory(sourceFile, destLocation);
-		}
-	}
-
-	
-	/**
-	 * Imports all data from a given file into the database.
-	 * 
-	 * @param session database connection
-	 * @param tableName table to import data into
-	 * @param columns list of columns of data in the file
-	 * @param dataFile the data file
-	 * @throws Exception
-	 */
-	private void importData(Session session, String tableName, 
-			String columns, File dataFile) throws Exception{
-		String bits[] = tableName.split("\\."); //$NON-NLS-1$
-		StringBuilder query = new StringBuilder();
-		query.append("CALL SYSCS_UTIL.SYSCS_IMPORT_DATA("); //$NON-NLS-1$
-		query.append("'" + bits[0] + "',"); //schema //$NON-NLS-1$ //$NON-NLS-2$
-		query.append("'" + bits[1] + "',"); //table //$NON-NLS-1$ //$NON-NLS-2$
-		query.append("'" + columns + "'," ); //columns //$NON-NLS-1$ //$NON-NLS-2$
-		query.append("NULL,"); //column indexes //$NON-NLS-1$
-		query.append("'" + dataFile.getCanonicalPath() + "',"); //filename //$NON-NLS-1$ //$NON-NLS-2$
-		query.append("NULL,"); //column delimiter //$NON-NLS-1$
-		query.append("NULL,"); //character delimiter //$NON-NLS-1$
-		query.append("'utf-8',"); //codeset //$NON-NLS-1$
-		query.append("0"); //replace //$NON-NLS-1$
-		query.append(")");  //$NON-NLS-1$
-		
-		SQLQuery sqlQuery = session.createSQLQuery(query.toString());		
-		sqlQuery.executeUpdate();
-	}
-	
-	
-	/**
-	 * Determines the foreign key constraints in the database. 
-	 *  
-	 * @param session hibernate session
-	 * @return a map from a table name to a list of other 
-	 * tables with foreign keys related to it
-	 */
-	private HashMap<String, List<String>> getTableConstraints(Session session){
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT g.schemaname || '.' || c.tablename as sourcetable, "); //$NON-NLS-1$
-		sql.append("h.schemaname || '.' || f.tablename as requiredtable "); //$NON-NLS-1$
-		sql.append("FROM "); //$NON-NLS-1$
-		sql.append("SYS.SYSFOREIGNKEYS a,  "); //$NON-NLS-1$
-		sql.append("SYS.SYSCONSTRAINTS b, "); //$NON-NLS-1$
-		sql.append("SYS.SYSTABLES c, "); //$NON-NLS-1$
-		sql.append("SYS.SYSCONSTRAINTS e, "); //$NON-NLS-1$
-		sql.append("SYS.SYSTABLES f, "); //$NON-NLS-1$
-		sql.append("SYS.SYSSCHEMAS g, "); //$NON-NLS-1$
-		sql.append("SYS.SYSSCHEMAS h "); //$NON-NLS-1$
-		sql.append("WHERE a.constraintid = b.constraintid "); //$NON-NLS-1$
-		sql.append("AND b.tableid = c.tableid "); //$NON-NLS-1$
-		sql.append("AND e.constraintid = a.keyconstraintid "); //$NON-NLS-1$
-		sql.append("AND f.tableid = e.tableid "); //$NON-NLS-1$
-		sql.append("AND g.schemaid = f.schemaid "); //$NON-NLS-1$
-		sql.append("AND h.schemaid = c.schemaid"); //$NON-NLS-1$
-		
-		HashMap<String, List<String>> results = new HashMap<String, List<String>>();
-		@SuppressWarnings("unchecked")
-		List<Object[]> data = session.createSQLQuery(sql.toString()).list();
-		for (Object[] d : data){
-			String source = (String) d[0];
-			String req = (String)d[1];
-			
-			List<String> requires = results.get(source);
-			if (requires == null){
-				requires = new ArrayList<String>();
-				results.put(source, requires);
-			}
-			requires.add(req);
-		}
-		return results;
-	}
-	
-	/**
-	 * Scans the directory/database for all table definition 
-	 * files (*.def).
-	 * 
-	 * <p>
-	 * Note: it is possible for a single table to have multiple 
-	 * export files.  This occurs when multiple hibernate classes
-	 * are mapped to a single table in the database.
-	 * </p>
-	 * @param dir the root directory of the conservation area 
-	 * backup file.
-	 * 
-	 * @return map of tableNames to list of tableInfo for all def files
-	 * found in the directory
-	 * 
-	 * @throws Exception
-	 */
-	private HashMap<String, List<TableInfo>> scanTables(File dir) throws Exception{
-		File dataFileDir = new File(dir, CaExporter.DATABASE_DIR);
-		//list all .def file
-		String files[] = dataFileDir.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return (name.endsWith(".def")); //$NON-NLS-1$
-			}
-		});
-		
-		//read info in files
-		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
-		for (int i = 0; i < files.length; i++){
-			BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])));
-			try{
-				String tablename = reader.readLine().toUpperCase();
-				String columns = reader.readLine();
-				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
-				
-				List<TableInfo> tablefiles = map.get(tablename);
-				if (tablefiles  == null){
-					tablefiles = new ArrayList<TableInfo>();
-					map.put(tablename, tablefiles);
-				}
-				tablefiles.add(new TableInfo(tablename, columns, 
-						new File(dataFileDir,data + ".dat"))); //$NON-NLS-1$
-			}finally{
-				reader.close();
-			}
-		}
-
-		return map;
-	}
-
-	/**
-	 * Internal class for tracking table information
-	 * include the table name, list of columns to import,
-	 * and the data file location.
-	 * 
-	 * @author egouge
-	 * @since 1.0.0
-	 */
-	class TableInfo{
-
-
-		private String tableName;
-		private String columns;
-		private File dataFile;
-		
-		/**
-		 * @param tableName the table name
-		 * @param columns the table columns
-		 * @param dataFile the data file
-		 */
-		public TableInfo(String tableName, String columns, File dataFile){
-			this.tableName = tableName;
-			this.columns = columns;
-			this.dataFile = dataFile;
-		}
-		
-		/**
-		 * @return the table name
-		 */
-		public String getTableName() {
-			return tableName;
-		}
-
-		/**
-		 * @return the columns of data in 
-		 * the data file
-		 */
-		public String getColumns() {
-			return columns;
-		}
-
-		/**
-		 * @return the data file
-		 */
-		public File getDataFile() {
-			return dataFile;
-		}
-	}
-
-	
 }
-

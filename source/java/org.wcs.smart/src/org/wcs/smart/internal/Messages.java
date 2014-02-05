@@ -214,7 +214,7 @@ public class Messages extends NLS {
 	public static String CaImporter_Error_CleanUpFailed;
 	public static String CaImporter_Error_CouldNotCloseSession;
 	public static String CaImporter_Error_CouldNotFindImportFile;
-	public static String CaImporter_Error_FilestoreNotImported;
+	public static String CaImporter_Error_FilestoreNotImported1;
 	public static String CaImporter_Error_ImportErrorBackupNoRestored;
 	public static String CaImporter_Error_NoCaIdentifierFound;
 	public static String CaImporter_Error_SystemRestored;
