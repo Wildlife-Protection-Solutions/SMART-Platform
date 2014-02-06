@@ -103,7 +103,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     		
     		if (attachment.getCopyFromLocation() != null){
     		
-    			File f = new File(getFilePath(attachment));
+    			File f = new File(getAttachmentDirectory(attachment));
     			if (!f.exists()){
     				SmartUtils.createDirectory(f);
     			}
@@ -132,7 +132,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	return true;
     }
 
-    protected String getFilePath(ISmartAttachment attachment) {
+    protected String getAttachmentDirectory(ISmartAttachment attachment) {
     	return attachment.getDatastoreFolderPath();
     }
     

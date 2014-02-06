@@ -10,6 +10,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -176,6 +177,10 @@ public class PatrolToXmlConverter {
 	private static WaypointObservationType convertObservation (WaypointObservation observation){
 		WaypointObservationType xml = new WaypointObservationType();
 		xml.setCategoryKey(observation.getCategory().getHkey());
+		
+		for (ObservationAttachment attach : observation.getAttachments()){
+			xml.getAttachments().add(attach.getFilename());
+		}
 		
 		for (WaypointObservationAttribute att : observation.getAttributes()){
 			WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();

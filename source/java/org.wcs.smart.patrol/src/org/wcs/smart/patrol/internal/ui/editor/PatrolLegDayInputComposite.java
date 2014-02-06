@@ -942,9 +942,11 @@ public class PatrolLegDayInputComposite {
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			int wpCnt = 0;
-			for (WaypointObservation wo : wp.getObservations()){
-				if (wo.getAttachments() != null){
-					wpCnt += wo.getAttachments().size();
+			if (wp.getObservations() != null){
+				for (WaypointObservation wo : wp.getObservations()){
+					if (wo.getAttachments() != null){
+						wpCnt += wo.getAttachments().size();
+					}
 				}
 			}
 			if (wp.getAttachments() != null){
