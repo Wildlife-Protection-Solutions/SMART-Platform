@@ -25,6 +25,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 
+import net.refractions.udig.catalog.URLUtils;
+
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
@@ -68,7 +71,9 @@ public class ExportIntelligenceJob extends Job {
 		Intelligence intelligence = null;
 		try{
 			intelligence = (Intelligence) session.load(Intelligence.class, uuid);
-			outputFile = File.createTempFile(intelligence.getName() + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
+			String tmp = URLUtils.cleanFilename(intelligence.getName());
+			tmp = String.format("%-3s",tmp).replace(' ', '_'); //$NON-NLS-1$
+			outputFile = File.createTempFile(tmp + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile.deleteOnExit();
 			
 			reportParameters.put(ReportIntelligence.UUID, SmartUtils.encodeHex(intelligence.getUuid()));

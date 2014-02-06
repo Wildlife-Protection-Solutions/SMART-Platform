@@ -169,7 +169,7 @@ public class Messages extends NLS {
 	public static String PlanHibernateManager_SavePlan_Error;
 	public static String PlanIdNameDescComposite_Description;
 	public static String PlanIdNameDescComposite_IdExists_Error;
-	public static String PlanIdNameDescComposite_InvalidId_Error;
+	public static String PlanIdNameDescComposite_InvalidId_Error1;
 	public static String PlanIdNameDescComposite_InvalidName_Error;
 	public static String PlanIdNameDescComposite_Message;
 	public static String PlanIdNameDescComposite_Name;
