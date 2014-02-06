@@ -25,18 +25,21 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointType;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -142,7 +145,17 @@ public class IncidentExporter {
 			}
 			monitor.worked(1);
 
-			for (WaypointAttachment att : incident.getAttachments()) {
+			//add waypoint & observation attachments
+			List<ISmartAttachment> all = new ArrayList<ISmartAttachment>();
+			if (incident.getAttachments() != null){
+				all.addAll(incident.getAttachments());
+			}
+			for (WaypointObservation wo : incident.getObservations()){
+				if (wo.getAttachments() != null){
+					all.addAll(wo.getAttachments());
+				}
+			}
+			for (ISmartAttachment att : all) {
 				File attFile = att.getFullFile();
 				zout.putNextEntry(new ZipEntry(IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 
@@ -155,8 +168,11 @@ public class IncidentExporter {
 					inStream.close();
 				}
 			}
-			// close
+			
+			
+
 		} finally {
+			// close
 			zout.close();
 		}
         monitor.worked(1);

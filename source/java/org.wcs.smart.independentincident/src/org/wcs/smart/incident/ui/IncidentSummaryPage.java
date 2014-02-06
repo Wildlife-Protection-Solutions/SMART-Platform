@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -74,6 +77,7 @@ import org.wcs.smart.incident.ui.newwizard.IncidentAttachmentComposite;
 import org.wcs.smart.incident.ui.newwizard.LocationComposite;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
@@ -195,6 +199,18 @@ public class IncidentSummaryPage extends EditorPart {
 					allAtts.addAll(wo.getAttachments());
 				}
 			}
+			Collections.sort(allAtts, new Comparator<ISmartAttachment>() {
+
+				@Override
+				public int compare(ISmartAttachment a, ISmartAttachment b) {
+					if (a.getClass().equals(b.getClass())){
+						return Collator.getInstance().compare(a.getFilename(), b.getFilename());
+					}else if (a instanceof WaypointAttachment){
+						return -1;
+					}
+					return 1;
+				}
+			});
 			this.attachments.setInput(allAtts);
 			this.observationTable.setInput(incident.getObservations());
 		}finally{

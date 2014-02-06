@@ -32,6 +32,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
@@ -86,9 +87,13 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		((IncidentWizardPage)this.getPages()[this.getPageCount()-1]).updateIncident(newIncident);
 		
 		//save to db
+		//close and reopen with attachment interceptor
+		session.close();
+		
+		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		try{
-			session.save(newIncident);
+			session.saveOrUpdate(newIncident);
 			session.getTransaction().commit();
 		}catch(Exception ex){
 			session.getTransaction().rollback();
