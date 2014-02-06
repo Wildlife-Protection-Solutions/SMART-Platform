@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import net.refractions.udig.catalog.URLUtils;
+
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
@@ -74,7 +76,7 @@ public class ExportPlanJob extends Job {
 		Plan plan = null;
 		try{
 			plan = (Plan) session.load(Plan.class, planUuid);
-			this.outputFile = File.createTempFile(plan.getId() + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
+			this.outputFile = File.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile.deleteOnExit();
 			
 			reportParameters.put(ReportPlan.PLAN_UUID, SmartUtils.encodeHex(plan.getUuid()));

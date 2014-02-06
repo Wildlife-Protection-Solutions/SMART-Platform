@@ -183,8 +183,8 @@ public class PlanIdNameDescComposite extends PlanComposite {
 			return false;
 		}else if(id.getText() == null || !idIsSimple){
 			idDecoration.show();
-			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_InvalidId_Error);
-			setErrorMessage(Messages.PlanIdNameDescComposite_InvalidId_Error);
+			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_InvalidId_Error1);
+			setErrorMessage(Messages.PlanIdNameDescComposite_InvalidId_Error1);
 			return false;
 		}else{
 		}
