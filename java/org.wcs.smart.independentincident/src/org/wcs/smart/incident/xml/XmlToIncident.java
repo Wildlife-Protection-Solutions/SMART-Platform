@@ -41,6 +41,7 @@ import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.incident.xml.model.WaypointObservationType;
 import org.wcs.smart.incident.xml.model.WaypointType;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -160,20 +161,18 @@ public class XmlToIncident {
 		
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
-				incident.setAttachments(new ArrayList<WaypointAttachment>());
+				ob.setAttachments(new ArrayList<ObservationAttachment>());
 				for ( String filename : xml.getAttachments()){
-					WaypointAttachment att = new WaypointAttachment();
+					ObservationAttachment att = new ObservationAttachment();
 					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
 					if (!f.exists()){
 						warnings.add(MessageFormat.format(
 								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.getAbsolutePath()}));
-								
 					}else{
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
-					
-						incident.getAttachments().add(att);
-						att.setWaypoint(incident);
+						ob.getAttachments().add(att);
+						att.setObservation(ob);
 					}
 				}
 			}
