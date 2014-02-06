@@ -389,6 +389,19 @@
                   </with>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.intelligence.report.IntelligenceReportPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
          </toolbar>
       </menuContribution>
    </extension>
