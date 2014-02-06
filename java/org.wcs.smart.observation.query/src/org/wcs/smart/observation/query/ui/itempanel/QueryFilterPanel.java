@@ -178,7 +178,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			
 			if (SmartDB.isMultipleAnalysis()){
-				input.put(QueryFilterContentProvider.ROOT_NODES,new QueryFilterContentProvider.RootNodeType[]{RootNodeType.DATA_MODEL_FILTERS, RootNodeType.OTHER_ITEMS}); 
+				input.put(QueryFilterContentProvider.ROOT_NODES,new QueryFilterContentProvider.RootNodeType[]{RootNodeType.GENERAL_FILTERS ,RootNodeType.DATA_MODEL_FILTERS, RootNodeType.OTHER_ITEMS}); 
 			}else{
 				input.put(QueryFilterContentProvider.ROOT_NODES,QueryFilterContentProvider.RootNodeType.values());				
 			}
