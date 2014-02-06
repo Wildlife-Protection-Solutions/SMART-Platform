@@ -25,6 +25,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -32,8 +33,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -161,25 +163,35 @@ public class PatrolExporter {
 			monitor.worked(1);
 
 			/* add all attachments */
+			List<ISmartAttachment> allAttach = new ArrayList<ISmartAttachment>();
 			for (PatrolLeg leg : patrol.getLegs()) {
 				for (PatrolLegDay legday : leg.getPatrolLegDays()) {
 					for (PatrolWaypoint wp : legday.getWaypoints()) {
-						for (WaypointAttachment att : wp.getWaypoint().getAttachments()) {
-							File attFile = att.getFullFile();
-							zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
-
-							inStream = new FileInputStream(attFile);
-							try {
-								while ((bytesRead = inStream.read(buffer)) > 0) {
-									zout.write(buffer, 0, bytesRead);
-								}
-							} finally {
-								inStream.close();
+						if (wp.getWaypoint().getAttachments() != null){
+							allAttach.addAll(wp.getWaypoint().getAttachments());
+						}
+						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+							if (wo.getAttachments() != null){
+								allAttach.addAll(wo.getAttachments());
 							}
 						}
 					}
 				}
 			}
+			for (ISmartAttachment att : allAttach){
+				File attFile = att.getFullFile();
+				zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
+
+				inStream = new FileInputStream(attFile);
+				try {
+					while ((bytesRead = inStream.read(buffer)) > 0) {
+						zout.write(buffer, 0, bytesRead);
+					}
+				} finally {
+					inStream.close();
+				}
+			}
+			
 			// close
 		} finally {
 			zout.close();

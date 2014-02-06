@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/patrol" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/patrol"
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.1/patrol" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.1/patrol"
 elementFormDefault="qualified">
 
   	
@@ -119,7 +119,11 @@ elementFormDefault="qualified">
 
     <complexType name="WaypointObservationType">
     	<sequence>
-    		<element name="attributes" type="tns:WaypointObservationAttributeType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="attributes"
+    			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="attachments" type="string" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="categoryKey" type="string"></attribute>
     </complexType>

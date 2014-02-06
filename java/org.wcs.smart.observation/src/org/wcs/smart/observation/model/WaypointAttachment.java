@@ -108,8 +108,37 @@ public class WaypointAttachment extends UuidItem implements ISmartAttachment {
 	}
 	
 	@Transient
+	private String datastoreFolderPath = null;
+	/**
+	 * Sets directory location where the attachment should be stored.  This
+	 * does not have to be set.  If not set then getDatastoreFolderPath will
+	 * lookup the path from the waypoint and source.  
+	 * <p>This function is provided to deal with issues when saving waypoints.  In
+	 * some cases the waypoints are saved before the encompassing object (ex. patrol waypoint)
+	 * so the datastore folder path cannot be computed using standard process.  It
+	 * can be set manually here to allow objects to be saved.</p>
+	 * 
+	 * @param path this is the path not including the CAUUID 
+	 */
+	public void setDatastoreFolderExtension(String path){
+		StringBuilder sb = new StringBuilder();
+		sb.append(SmartDB.getCurrentConservationArea().getFileDataStoreLocation());
+		sb.append(File.separator);
+		sb.append(path);
+		
+		this.datastoreFolderPath = sb.toString();
+	}
+	
+	/**
+	 * @return the full path to where the file should be stored in the 
+	 * database.
+	 */
+	@Transient
 	@Override
 	public String getDatastoreFolderPath() {
+		if (datastoreFolderPath != null){
+			return datastoreFolderPath;
+		}
 		if (getWaypoint() != null ){
 			if (getWaypoint().getSource() == null){
 				ObservationPlugIn.log("No attachment information found for waypoint attachment " + SmartUtils.encodeHex(getUuid()), null); //$NON-NLS-1$

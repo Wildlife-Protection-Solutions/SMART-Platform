@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -366,6 +367,26 @@ public class XmlToPatrolConverter {
 	private WaypointObservation convertWaypointObservation(WaypointObservationType xml, Waypoint parent ){
 		WaypointObservation ob = new WaypointObservation();
 		ob.setWaypoint(parent);
+		
+		if (attachmentLocation != null){
+			if (xml.getAttachments().size() > 0){
+				ob.setAttachments(new ArrayList<ObservationAttachment>());
+				for ( String filename : xml.getAttachments()){
+					ObservationAttachment att = new ObservationAttachment();
+					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
+					if (!f.exists()){
+						warnings.add(MessageFormat.format(
+								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.getAbsolutePath()}));
+					}else{
+						att.setCopyFromLocation(f);
+						att.setFilename(filename);
+						ob.getAttachments().add(att);
+						att.setObservation(ob);
+					}
+				}
+			}
+		}
+		
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_CategoryNotFound,

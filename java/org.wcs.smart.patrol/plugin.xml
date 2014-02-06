@@ -209,6 +209,37 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.patrol.ui.PatrolListView">
          <command
+               commandId="org.wcs.smart.patrol.newPatrol"
+               icon="images/icons/etool16/patrol_add.png"
+               label="%patroltoolbar.newpatrol.command.label"
+               mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
+               style="push"
+               tooltip="%patroltoolbar.newpatrol.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+         <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
                icon="images/icons/etool16/patrol_delete.png"
                label="%patrollist.delete.command.label"

@@ -35,6 +35,9 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -43,6 +46,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.patrol.model.Team;
@@ -361,9 +365,15 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		
 		session.saveOrUpdate(patrol);
+		
 
 		if (saveWaypoints){
 			session.flush();
+			
+			
+			
+				
+				
 			//save all the waypoints as well
 			if (patrol.getLegs() != null) {
 				for (PatrolLeg pl : patrol.getLegs()) {
@@ -371,6 +381,20 @@ public class PatrolHibernateManager extends HibernateManager{
 						for (PatrolLegDay pld : pl.getPatrolLegDays()) {
 							if (pld.getWaypoints() != null) {
 								for (PatrolWaypoint wp: pld.getWaypoints()){
+									//update all the waypoint attachments directory
+									for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+										wa.setDatastoreFolderExtension(
+												((PatrolWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(patrol)); 
+									}
+									for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+										if (wo.getAttachments() != null){
+											for (ObservationAttachment wa : wo.getAttachments()){
+												wa.setDatastoreFolderExtension(
+													((PatrolWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(patrol));
+											}
+										}
+									}
+									
 									session.saveOrUpdate(wp.getWaypoint());
 									session.saveOrUpdate(wp);
 								}

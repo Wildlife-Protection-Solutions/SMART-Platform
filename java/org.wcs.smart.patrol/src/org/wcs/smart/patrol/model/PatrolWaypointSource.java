@@ -61,9 +61,20 @@ public class PatrolWaypointSource implements IWaypointSource {
 		return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
 	}
 
+	public String getDatastoreFileLocation(Patrol p){
+		StringBuilder sb = new StringBuilder();
+		sb.append(Patrol.PATROL_FILESTORE_LOC);
+		sb.append(File.separator);
+		sb.append(SmartUtils.getDirectoryPath(p.getUuid()));
+		sb.append(File.separator);
+		return sb.toString();
+	}
+	
 	@Override
 	public String getDatastoreFileLocation(final Waypoint wp) {
-
+		if (wp.getUuid() == null){
+			return null;
+		}
 		//need to determine the patrol this waypoint is associated
 		//with; do in a different thread so we can have our own database
 		//connection
@@ -92,6 +103,7 @@ public class PatrolWaypointSource implements IWaypointSource {
 			j.join();
 		} catch (InterruptedException e) {
 			SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + SmartUtils.encodeHex(wp.getUuid()), null);
+			return null;
 		}
 			
 		StringBuilder sb = new StringBuilder();
