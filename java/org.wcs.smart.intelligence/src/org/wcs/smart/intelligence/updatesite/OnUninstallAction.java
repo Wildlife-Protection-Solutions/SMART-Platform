@@ -21,12 +21,8 @@
  */
 package org.wcs.smart.intelligence.updatesite;
 
-import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 
 /**
@@ -35,10 +31,10 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
  * @author elitvin
  * @since 3.0.0
  */
-public class OnUninstallAction extends ProvisioningAction {
+public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	public IStatus execute(Map<String, Object> parameters) {
+	protected void performRemove() {
 		Job job = new RemoveIntelligenceJob();
 		job.schedule();
 		try{
@@ -46,12 +42,6 @@ public class OnUninstallAction extends ProvisioningAction {
 		}catch(InterruptedException ex){
 			IntelligencePlugIn.log(ex.getLocalizedMessage(), ex);
 		}
-		return Status.OK_STATUS;
-	}
-
-	@Override
-	public IStatus undo(Map<String, Object> parameters) {
-		return Status.OK_STATUS;
 	}
 
 }
