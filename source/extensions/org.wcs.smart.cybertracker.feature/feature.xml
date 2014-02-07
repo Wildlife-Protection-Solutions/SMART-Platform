@@ -16,11 +16,9 @@
       [Enter License Description here.]
    </license>
 
-   <plugin
-         id="org.wcs.smart.cybertracker"
-         download-size="0"
-         install-size="0"
+   <includes
+         id="org.wcs.smart.cybertracker.core.feature"
          version="0.0.0"
-         unpack="false"/>
+         optional="true"/>
 
 </feature>
