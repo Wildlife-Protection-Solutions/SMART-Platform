@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -408,13 +407,6 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * loading the conservation areas.
 	 */
 	private void startup(){
-		try{
-			SmartStartUp.initDb();
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
-			handleButtonCancelWidgetSelected();
-			return;
-		}
 		try {
 			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
 			
@@ -463,7 +455,9 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				}
 			};
 			
-			job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+			//this job won't be run until after the plugin starts anywyas
+			//so we don't need this rule
+//			job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 			job.schedule();
 		
 		} catch (Exception ex) {

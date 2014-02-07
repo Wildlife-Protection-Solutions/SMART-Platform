@@ -39,6 +39,7 @@ import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.internal.Messages;
@@ -610,6 +611,10 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		public CleanUpJob() {
 			super(Messages.DerbyQueryResult_CleanUpJob_Title);
 		}
+		
+		public boolean belongsTo(Object family){
+			return family == SmartWorkbenchWindowAdvisor.SHUTDOWN_JOB_FAMILY;
+		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -651,7 +656,6 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			}catch (Exception ex){
 				QueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
 			} finally {
-				
 				try{
 					session.getTransaction().commit();
 				}catch (Exception ex){

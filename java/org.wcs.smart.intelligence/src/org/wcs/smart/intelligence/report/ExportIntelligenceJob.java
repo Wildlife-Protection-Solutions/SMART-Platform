@@ -27,7 +27,6 @@ import java.util.HashMap;
 
 import net.refractions.udig.catalog.URLUtils;
 
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;

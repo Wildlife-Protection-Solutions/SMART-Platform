@@ -93,12 +93,6 @@ public class SmartStartUp {
 	 * @return list of conservation areas in the database
 	 */
 	public static List<Object> getConservationAreas(boolean includeCcaa){
-		//check that the database exists
-		if (!SmartDB.dbExists()){
-			//log error message and exit
-			throw new IllegalStateException(
-				MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
-		}
 		try{
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
@@ -119,10 +113,35 @@ public class SmartStartUp {
 				session.close();
 			}
 		}catch (Exception ex){
+			throw new IllegalStateException(Messages.SmartStartUp_ConnectError + ex.getLocalizedMessage(), ex);
+		}
+	}
+	
+	/**
+	 * Gets a list of conservation areas from the database.  
+	 * 
+	 * It will exit the program if an error occurs which trying
+	 * to load the conservation areas.
+	 * 
+	 * @param includeCcaa if the ccaa conservation area should be included
+	 * in the results
+	 * @return list of conservation areas in the database
+	 */
+	public static void connectToDb() throws Exception{
+		//check that the database exists
+		if (!SmartDB.dbExists()){
+			//log error message and exit
+			throw new Exception(
+				MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
+		}
+		try{
+			Session session = HibernateManager.openSession();
+			session.close();
+		}catch (Exception ex){
 			if (checkAlreadyRunning(ex)){
-				throw new IllegalStateException(Messages.SmartStartUp_MultiConnectError);
+				throw new Exception(Messages.SmartStartUp_MultiConnectError);
 			}else{
-				throw new IllegalStateException(Messages.SmartStartUp_ConnectError + ex.getLocalizedMessage(), ex);
+				throw new Exception(Messages.SmartStartUp_ConnectError + ex.getLocalizedMessage(), ex);
 			}
 		}
 	}
