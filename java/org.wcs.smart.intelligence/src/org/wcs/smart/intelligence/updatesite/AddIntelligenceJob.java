@@ -79,8 +79,6 @@ public class AddIntelligenceJob extends Job {
 				mark.intelligence_point = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_POINT"); //$NON-NLS-1$
 				mark.intelligence_attachment = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_ATTACHMENT"); //$NON-NLS-1$
 				mark.patrol_intelligence = DerbyHibernateExtensions.tableExists(session, "PATROL_INTELLIGENCE"); //$NON-NLS-1$
-				if (mark.allSet())
-					return Status.OK_STATUS; //required table exists
 			} catch (final Exception e) {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
