@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 
 /**
  * Action that is called when CyberTracker plug-in is uninstalled
@@ -40,6 +41,11 @@ public class OnUninstallAction extends ProvisioningAction {
 	public IStatus execute(Map<String, Object> parameters) {
 		Job job = new RemoveCyberTrackerJob();
 		job.schedule();
+		try{
+			job.join();
+		}catch(InterruptedException ex){
+			CyberTrackerPlugIn.log(ex.getLocalizedMessage(), ex);
+		}
 		return Status.OK_STATUS;
 	}
 

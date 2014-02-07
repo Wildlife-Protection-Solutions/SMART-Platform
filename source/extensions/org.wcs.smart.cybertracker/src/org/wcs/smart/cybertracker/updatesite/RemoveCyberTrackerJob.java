@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.cybertracker.updatesite;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -31,7 +29,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -57,40 +54,23 @@ public class RemoveCyberTrackerJob extends Job {
 		final List<ConservationArea> caList = HibernateManager.getConservationAreas(session);
 		session.beginTransaction();
 		try {
-			session.doWork(new Work() {
-				@Override
-				public void execute(Connection c) throws SQLException {
-					try {
-						c.createStatement().execute("DROP TABLE smart.ct_properties_option"); //$NON-NLS-1$
-
-						//clean filestore
-						for (ConservationArea ca : caList) {
-							FileUtils.deleteDirectory(PdaUtil.getDowloadFolder(ca));
-						}
-					} catch (final Exception ex) {
-						SmartPlugIn.log(Messages.RemoveCyberTrackerTablesJob_Error, ex);
-					}
-					
-				}
-				
-			});
+			session.createSQLQuery("DROP TABLE smart.ct_properties_option").executeUpdate(); //$NON-NLS-1$
+			//clean filestore
+			for (ConservationArea ca : caList) {
+				FileUtils.deleteDirectory(PdaUtil.getDowloadFolder(ca));
+			}
 			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
+			session.getTransaction().commit();
 			
 		} catch (Exception e) {
 			SmartPlugIn.log(Messages.RemoveCyberTrackerTablesJob_Error, e);
 		} finally {
-			try {
-				session.getTransaction().commit();
-			} catch (Exception ex) {
-				SmartPlugIn.log(ex.getMessage(), ex);
-			}
 			try {
 				session.close();
 			} catch (Exception ex) {
 				SmartPlugIn.log(ex.getMessage(), ex);
 			}
 		}
-		//TODO: clean up filestore
 		return Status.OK_STATUS;
 	}
 	
