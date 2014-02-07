@@ -21,24 +21,20 @@
  */
 package org.wcs.smart.entity.updatesite;
 
-import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.entity.EntityPlugIn;
 
 /**
  * Action that is called when Entity plug-in is uninstalled
  * 
  * @author elitvin
- * @since 2.0.0
+ * @since 1.0.0
  */
-public class OnUninstallAction extends ProvisioningAction {
+public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	public IStatus execute(Map<String, Object> parameters) {
+	protected void performRemove() {
 		Job job = new RemoveEntityJob();
 		job.schedule();
 		try{
@@ -46,12 +42,6 @@ public class OnUninstallAction extends ProvisioningAction {
 		}catch(InterruptedException ex){
 			EntityPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
-		return Status.OK_STATUS;	//always return ok status to plugin is deregistered
-	}
-
-	@Override
-	public IStatus undo(Map<String, Object> parameters) {
-		return Status.OK_STATUS;
 	}
 
 }
