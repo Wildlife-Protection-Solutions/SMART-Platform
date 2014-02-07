@@ -59,6 +59,7 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_TransportTypeLabel;
 	public static String CyberTrackerCaDeleteHandler_DeleteProperties;
 	public static String CyberTrackerCaDeleteHandler_DeleteRegistryKey;
+	public static String CyberTrackerConfExporter_AttributeTypeNotSupported;
 	public static String CyberTrackerConfExporter_DateAttributeExportError;
 	public static String CyberTrackerConfExporter_DefaultValue_List_Error;
 	public static String CyberTrackerConfExporter_DefaultValue_Tree_Error;

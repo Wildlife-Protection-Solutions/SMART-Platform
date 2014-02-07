@@ -396,6 +396,10 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 								return;
 							}
 						}
+					}catch (Exception ex){
+						CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, 
+								Messages.CyberTrackerExportDialog_Error_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						return;
 					} finally {
 						PdaUtil.deleteTempDirectory(tempDir);
 						monitor.done();
@@ -409,7 +413,8 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 			});
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_ExportError, e);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, 
+					Messages.CyberTrackerExportDialog_Error_ExportError , e); 
 		}
 	}
 
