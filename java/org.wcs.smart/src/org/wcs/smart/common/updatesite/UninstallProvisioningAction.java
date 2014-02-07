@@ -7,8 +7,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.p2.engine.InstallableUnitOperand;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 
 
 /**
@@ -34,22 +32,8 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 		}
 		if (upgradeTo == null) {
 			// We have an unistallation, not an upgrade
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Uninstall 3.0.0",
-							"OnUninstallAction - removing");
-				}
-			});
 			performRemove();
 		} else {
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Uninstall 3.0.0",
-							"OnUninstallAction - upgrading");
-				}
-			});
 			performUpgrade();
 		}
 		return Status.OK_STATUS;
