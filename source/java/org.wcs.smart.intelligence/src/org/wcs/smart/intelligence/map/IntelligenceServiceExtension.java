@@ -95,10 +95,10 @@ public class IntelligenceServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(INTEL_UUID_KEY) == null || !(params.get(INTEL_UUID_KEY) instanceof String)){
-			return null;
+		String url = "smart://smartdb/intelligence/" ; //$NON-NLS-1$
+		if (!(params.get(INTEL_UUID_KEY) == null || !(params.get(INTEL_UUID_KEY) instanceof String))){
+			url += (String)params.get(INTEL_UUID_KEY);
 		}
-		String url = "smart://smartdb/intelligence/" + (String)params.get(INTEL_UUID_KEY); //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

@@ -108,12 +108,14 @@ public class IntelligenceDataSourceFactory implements DataStoreFactorySpi{
 		Session session = HibernateManager.openSession();
 		Intelligence intel = null;
 		try{
-			intel = (Intelligence)session.load(Intelligence.class, SmartUtils.decodeHex((String)params.get(INTELL_UUID.key)));
-			if (intel == null ){
-				throw new IOException(Messages.IntelligenceDataSourceFactory_IntelNotFound);
+			String uuid = (String)params.get(INTELL_UUID.key);
+			if (uuid != null){
+				intel = (Intelligence)session.load(Intelligence.class, SmartUtils.decodeHex(uuid));
+				if (intel != null ){
+					//load lazy items
+					intel.getPoints().size();
+				}
 			}
-			//load lazy items
-			intel.getPoints().size();
 		}catch (Exception ex){
 			throw new IOException(ex);
 		}finally{
