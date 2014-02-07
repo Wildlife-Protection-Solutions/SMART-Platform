@@ -140,7 +140,7 @@ public class CyberTrackerConfExporter {
 		}
 		return true;
 	}
-	public File export(File destFolder, Object source, IProgressMonitor monitor) {
+	public File export(File destFolder, Object source, IProgressMonitor monitor) throws Exception {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
@@ -186,7 +186,7 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
-	private File performExport(File file, IProgressMonitor monitor) {
+	private File performExport(File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
 		ctUtil = new CyberTrackerUtil(ctProperties, currentLanguage);
@@ -282,7 +282,7 @@ public class CyberTrackerConfExporter {
 		return new File(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME); //$NON-NLS-1$
 	}
 
-	private List<Node> buildCategoryNodes(CmNode node, Map<CmNode, CyberTrackerId> keyMap, Integer level) {
+	private List<Node> buildCategoryNodes(CmNode node, Map<CmNode, CyberTrackerId> keyMap, Integer level) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (node == null)
 			return result;
@@ -309,7 +309,7 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 
-	private List<Node> buildAttributeNodes(CmNode cmNode, Map<CmNode, CyberTrackerId> keyMap) {
+	private List<Node> buildAttributeNodes(CmNode cmNode, Map<CmNode, CyberTrackerId> keyMap) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (cmNode.isGroup())
 			return result;
@@ -427,7 +427,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, boolean addPhoto, String label, String defaultValues) {
+	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, boolean addPhoto, String label, String defaultValues) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (label == null)
 			label = ""; //$NON-NLS-1$
@@ -510,7 +510,9 @@ public class CyberTrackerConfExporter {
 				break;
 			}
 			default:
-				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
+				throw new Exception(
+						MessageFormat.format(
+								Messages.CyberTrackerConfExporter_AttributeTypeNotSupported, new Object[]{attribute.getType().name(), attribute.getName()}));
 			}
 
 			//tracking navigation for non-tree or float trees attributes (tree attributes are handle separately)
