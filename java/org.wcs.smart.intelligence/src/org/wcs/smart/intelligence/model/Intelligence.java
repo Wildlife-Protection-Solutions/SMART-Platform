@@ -88,7 +88,7 @@ public class Intelligence extends NamedItem {
         this.receivedDate = receivedDate;
     }
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="source_uuid", referencedColumnName="uuid")
 	public IntelligenceSource getSource() {
 		return source;
