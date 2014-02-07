@@ -69,7 +69,10 @@ public class IntelligencePointsMapLayer implements IBirtMapLayerManager {
 			return null;
 		}
 		
-		String uuid = (String) context.getParameterValue(ReportIntelligence.UUID);
+		String uuid = null;
+		if(context != null){
+			uuid = (String) context.getParameterValue(ReportIntelligence.UUID);
+		}
 		
 		Map<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(IntelligenceDataSourceFactory.INTELL_UUID.key, uuid);
