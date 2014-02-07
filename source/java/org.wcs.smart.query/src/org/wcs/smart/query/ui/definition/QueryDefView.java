@@ -199,8 +199,12 @@ public class QueryDefView extends ViewPart {
 	 * Clears the current query
 	 */
 	public void clearQuery(){
-		currentPanel.clear();
-		QueryEventManager.getInstance().fireQueryDefinitionModified(current.getQuery());
+		if (currentPanel != null){
+			currentPanel.clear();
+		}
+		if (current != null){
+			QueryEventManager.getInstance().fireQueryDefinitionModified(current.getQuery());
+		}
 	}
 
 
