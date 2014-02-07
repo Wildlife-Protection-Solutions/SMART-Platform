@@ -74,6 +74,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class HibernateManager extends SmartHibernateManager{
 
+	
 	/**
 	 * 
 	 * @return the language for the given code associated with the conservation area

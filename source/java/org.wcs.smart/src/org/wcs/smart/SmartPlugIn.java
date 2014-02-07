@@ -30,7 +30,9 @@ import net.refractions.udig.catalog.IService;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.ui.Policy;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -46,6 +48,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.startup.SmartStartUp;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -172,11 +175,42 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		configureP2Policy(ProvisioningUI.getDefaultUI().getPolicy());
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
-		
+
+		//lock on the plugin start mutex until the
+		//database has been initialized
+		//We don't want anything running until after we have done these checks
+		IJobManager manager = Job.getJobManager();
+		try {
+			manager.beginRule(SmartPlugIn.PLUGIN_START_MUTEX, null);
+			initializeDatabase();
+		} finally {
+			manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		}
 		// add delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
 	}
 
+	private void initializeDatabase(){
+		boolean exit = false;
+		try{
+			SmartStartUp.initDb();
+		}catch (Exception ex){			
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
+			exit = true;
+		}
+		
+		try{
+			SmartStartUp.connectToDb();	
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
+			exit= true;
+		}
+		
+		if (exit){
+			System.exit(1);
+		}
+	}
+	
 	/**
 	 * Checks the current database version against the expected version.  If an excpetion
 	 * is thrown, the calling function should terminate the application.

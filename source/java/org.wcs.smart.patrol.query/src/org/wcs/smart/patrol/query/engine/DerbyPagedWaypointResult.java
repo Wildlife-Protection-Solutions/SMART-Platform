@@ -37,6 +37,7 @@ import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
@@ -305,6 +306,12 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 			super(Messages.DerbyQueryResult_CleanUpJob_Title);
 		}
 
+		
+		@Override
+		public boolean belongsTo(Object family){
+			return family == SmartWorkbenchWindowAdvisor.SHUTDOWN_JOB_FAMILY;
+		}
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final Session session = HibernateManager.openSession();

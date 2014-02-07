@@ -71,7 +71,8 @@ public class ObservationSimpleFilterPanel extends FilterDefinitionPanel {
 		if (query instanceof SimpleQuery){
 			setFilterType( ((SimpleQuery)query).getFilter().getFilterType() );
 		}else if (query instanceof GriddedQuery){
-			if ( ((GriddedQuery)query).getQueryDefinition() != null){
+			if ( ((GriddedQuery)query).getQueryDefinition() != null &&
+					((GriddedQuery)query).getQueryDefinition().getValueFilter() != null){
 				setFilterType( ((GriddedQuery)query).getQueryDefinition().getValueFilter().getFilterType() );
 			}else{
 				setFilterType(FilterType.WAYPOINT);

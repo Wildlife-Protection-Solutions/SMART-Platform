@@ -25,6 +25,8 @@ import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.tool.info.internal.InfoView2;
 
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.ui.IPartListener2;
@@ -51,6 +53,12 @@ import org.wcs.smart.ui.map.MapView;
  */
 public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
+	/**
+	 * A job family jobs can join that must be finished before the hibernate
+	 * session factory is closed;
+	 */
+	public static final String SHUTDOWN_JOB_FAMILY = "org.wcs.smart.shut.job.family";
+	
 	private IPartListener2 partListener = null;
 
 	private PerspectiveEditorTracker perspectiveTracker = null;
@@ -74,6 +82,12 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		
 		@Override
 		public void postShutdown(IWorkbench workbench) {
+			try {
+				Job.getJobManager().join(SHUTDOWN_JOB_FAMILY, null);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
 			//close database connection
 			HibernateManager.endSessionFactory(false);
 			
