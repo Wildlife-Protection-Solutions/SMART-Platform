@@ -24,7 +24,9 @@ Require-Bundle: org.eclipse.ui,
  net.refractions.udig.style.sld;bundle-version="1.2.0",
  org.eclipse.ui.forms;bundle-version="3.5.100",
  org.eclipse.equinox.p2.ui;bundle-version="2.1.1",
- org.eclipse.equinox.p2.ui.sdk;bundle-version="1.0.200"
+ org.eclipse.equinox.p2.ui.sdk;bundle-version="1.0.200",
+ org.eclipse.equinox.p2.metadata;bundle-version="2.1.0",
+ org.eclipse.equinox.p2.engine;bundle-version="2.1.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
@@ -40,6 +42,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.common.attachment,
  org.wcs.smart.common.control,
  org.wcs.smart.common.filter,
+ org.wcs.smart.common.updatesite,
  org.wcs.smart.export,
  org.wcs.smart.export.config,
  org.wcs.smart.export.dialog,
