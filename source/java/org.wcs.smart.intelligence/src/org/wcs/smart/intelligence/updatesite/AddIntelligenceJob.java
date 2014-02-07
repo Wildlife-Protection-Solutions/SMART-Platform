@@ -352,8 +352,8 @@ public class AddIntelligenceJob extends Job {
 		public boolean patrol_intelligence = false;
 
 		
-		public boolean allSet() {
-			return intelligence && intelligence_source && intelligence_point && intelligence_attachment && patrol_intelligence;
-		}
+//		public boolean allSet() {
+//			return intelligence && intelligence_source && intelligence_point && intelligence_attachment && patrol_intelligence;
+//		}
 	}
 }

@@ -291,8 +291,8 @@ public class AddPlanJob extends Job {
 		public boolean plan_target_point = false;
 		public boolean patrol_plan = false;
 		
-		public boolean allSet() {
-			return plan && plan_target && plan_target_point && patrol_plan;
-		}
+//		public boolean allSet() {
+//			return plan && plan_target && plan_target_point && patrol_plan;
+//		}
 	}
 }
