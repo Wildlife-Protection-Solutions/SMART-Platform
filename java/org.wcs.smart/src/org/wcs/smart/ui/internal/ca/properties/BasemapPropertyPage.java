@@ -43,11 +43,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.map.internal.BasemapInterceptor;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -74,6 +76,14 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 
 	}
 
+	@Override 
+	public Session getSession(){
+		if (session == null || !session.isOpen()){
+			session = HibernateManager.openSession(new BasemapInterceptor());
+		}
+		return session;
+	}
+	
 	@Override
 	public boolean close(){
 		if (changesMade){
