@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.StringReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +61,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.ui.WorkbenchException;
@@ -70,6 +70,7 @@ import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -180,8 +181,7 @@ public class MapSettings {
 			// creates the map settings and the list of layers settings 
 			List<LayerRegister> layerRegisterList = createLayerRegisterList(userLevel, map.getLayersInternal());
 
-			URI id = map.getID();		
-			java.net.URI uri = new java.net.URI(id.toString());
+			java.net.URI uri = new java.net.URI(map.getID().toString());
 			String name = map.getName();
 			BrewerPalette colorPalette = map.getColorPalette();
 			ColourScheme colourScheme = map.getColourScheme();
@@ -612,16 +612,32 @@ public class MapSettings {
 		try{
 			MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee().getSmartUserLevel() ); 
 			
-			GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
-			Gson gson = gsonBuilder.create();
-			String jsonMap = gson.toJson(mapRegister);
-			this.baseMap.setMapDef(jsonMap);
-			 
 			Session s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();
+				
+				List<File> currentFiles = getFilesToDelete(s);
+			
+				GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
+				Gson gson = gsonBuilder.create();
+				String jsonMap = gson.toJson(mapRegister);
+				this.baseMap.setMapDef(jsonMap);
+				List<File> newFiles = getFilesToDelete(s);
+			
+				for (File f : newFiles){
+					currentFiles.remove(f);
+				}
+			
+			
+			
 				s.saveOrUpdate(this.baseMap);
 				s.getTransaction().commit();
+				
+				//need to delete remaining currentFiles
+				for (File f : currentFiles){
+					f.delete();
+				}
+				
 				//these layers are now a part of the basemap and should be flagged as such
 				List<ILayer> backgroundlayers = new ArrayList<ILayer>();
 				backgroundlayers.addAll(map.getLayersInternal());
@@ -728,5 +744,49 @@ public class MapSettings {
 		String fileStorePathWithoutPoint  = fileStorePath.substring(1);// removes the point
 		
 		return filePath.contains(fileStorePathWithoutPoint);
+	}
+	
+	/**
+	 * Delete any files associated with the map settings
+	 */
+	public ArrayList<File> getFilesToDelete(Session activeSession){
+		// get map definition selected
+		if (this.baseMap.getMapDef() == null){
+			return new ArrayList<File>();
+		}
+		String jsonMap = this.baseMap.getMapDef();
+		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
+		Gson gson = gsonBuilder.create();
+		final MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
+		
+		ArrayList<File> toDelete = new ArrayList<File>();
+		
+		for (LayerRegister basemapLayer : userMap.getLayerList()) {
+			URI uri = basemapLayer.getURI();
+			if (uri.getScheme().equals(SMARTBM_FILE_PROTOCOL)){
+				//TODO: verify that this layer is not used in any other basemaps
+				List<?> others = activeSession.createCriteria(BasemapDefinition.class)
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+						.add(Restrictions.ilike("mapDef", "%" + uri.toString() + "%")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						.add(Restrictions.ne("uuid", baseMap.getUuid())).list(); //$NON-NLS-1$
+				if(others.size() > 0){
+					//this is used by another layer leave it
+					continue;
+				}
+				
+				File fileStoreDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), MAP_DIRECTORY);
+    			File path = new File(fileStoreDirectory, uri.getSchemeSpecificPart());
+    			if (path.exists()){
+    				//this is a file; we should remove it
+    				File[] files = createSourceFileList(path.getAbsolutePath());
+    				for (File ff : files){
+    					toDelete.add(ff);
+    				}
+				}
+			}
+			
+		}
+
+		return toDelete;
 	}
 }
