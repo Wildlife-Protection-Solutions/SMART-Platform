@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
@@ -81,7 +82,23 @@ public class SaveMapHandler extends AbstractHandler {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					MapSettings settings = MapSettings.getInstance(mapDef);
-					settings.save(map);
+					try{
+						settings.save(map);
+					}catch (final Exception ex){
+						
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(null, Messages.MapSettings_Error_SaveBasemap + "\n\n" +  ex.getLocalizedMessage(), ex);		 //$NON-NLS-1$
+							}});
+						
+						return Status.OK_STATUS;
+					}
+					
+					//update the current map to reference the settings
+					//this will update the layers to point to the
+					//filestore
+					settings.applyTo(map);
 					Display.getDefault().asyncExec(new Runnable(){
 
 						@Override

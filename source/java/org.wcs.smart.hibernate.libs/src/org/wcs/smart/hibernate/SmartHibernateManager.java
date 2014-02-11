@@ -154,6 +154,10 @@ public class SmartHibernateManager {
 	
 	/**
 	 * Users are required to close the session when they are done with it.
+	 * <p>
+	 * Note you ensure that the current thread session is closed; otherwise
+	 * this will not close it to re-open it with the correct interceptor.
+	 * </p> 
 	 * @param interceptor a session interceptor
 	 * @return
 	 */
@@ -162,6 +166,7 @@ public class SmartHibernateManager {
 			createSessionFactory();
 		}
 		Session session = (Session) sessionMapsThreadLocal.get();
+		
 		if (session == null || !session.isOpen() ){
 			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
 			sessionMapsThreadLocal.set(session);
