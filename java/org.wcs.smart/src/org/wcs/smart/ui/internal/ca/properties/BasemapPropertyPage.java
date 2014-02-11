@@ -125,6 +125,10 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
+		//make sure we close any existing open session to
+		//ensure the basemap interceptor session is opened
+		HibernateManager.openSession().close();	
+		
 		setTitle(Messages.BasemapPropertyPage_PageName);
 		setMessage(Messages.BasemapPropertyPage_Dialog_Message);
 
@@ -232,6 +236,8 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				
 				getSession().delete(toDelete);
+				getSession().flush();
+				
 				basemaps.remove(toDelete);
 				lstBasemaps.refresh();
 				setChangesMade(true);

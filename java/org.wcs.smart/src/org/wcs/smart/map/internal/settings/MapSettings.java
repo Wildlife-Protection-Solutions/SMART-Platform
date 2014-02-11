@@ -24,6 +24,7 @@ package org.wcs.smart.map.internal.settings;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
@@ -56,6 +57,7 @@ import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.ui.palette.ColourScheme;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -139,6 +141,7 @@ public class MapSettings {
 
 	/* the basemap definition being used */
 	private BasemapDefinition baseMap = null;
+	private List<File> tmpImportedFiles = null;
 	
 	private MapSettings(){
 		// singleton
@@ -607,17 +610,24 @@ public class MapSettings {
 	 * @return list of layers in the saved basemap; only return layers
 	 * saved in the basemap; null if error occurs
 	 */
-	public synchronized void save(final Map map) {
-		
+	public synchronized void save(final Map map) throws Exception{
+		tmpImportedFiles = new ArrayList<File>();
 		try{
-			MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee().getSmartUserLevel() ); 
-			
 			Session s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();
-				
+				//this point is where files are copied into the filestore
+				//so if an error happens after this point we get files in the filestore
+				//that may never get references to a basemap and not removed.
+				MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee().getSmartUserLevel() ); 
+			
+				//when overwriting and existing file; this gets the
+				//files currently in the basemap; below we
+				//get the new files then delete any that don't eixst
+				//in the new map
 				List<File> currentFiles = getFilesToDelete(s);
 			
+				//set the basemap property
 				GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
 				Gson gson = gsonBuilder.create();
 				String jsonMap = gson.toJson(mapRegister);
@@ -627,9 +637,7 @@ public class MapSettings {
 				for (File f : newFiles){
 					currentFiles.remove(f);
 				}
-			
-			
-			
+				
 				s.saveOrUpdate(this.baseMap);
 				s.getTransaction().commit();
 				
@@ -642,17 +650,26 @@ public class MapSettings {
 				List<ILayer> backgroundlayers = new ArrayList<ILayer>();
 				backgroundlayers.addAll(map.getLayersInternal());
 				map.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, backgroundlayers);
-			}catch (Exception ex){
+			}catch (final Exception ex){
 				if (s.getTransaction().isActive()){
 					s.getTransaction().rollback();
 				}
-				SmartPlugIn.displayLog(null, Messages.MapSettings_Error_SaveBasemap + ex.getLocalizedMessage(), ex);
+				//try to remove any imported files
+				try{
+					for (File f : tmpImportedFiles){
+						f.delete();
+					}
+				}catch (Exception ex2){
+					SmartPlugIn.log("Error cleaning up filestore after import error.", ex2); //$NON-NLS-1$
+				}
+				throw ex;
+				
 			}finally{
 				s.close();
+				tmpImportedFiles.clear();
 			}
 		} catch (Exception e) {
-			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
-		
+			throw e;		
 		} 
 	}
 
@@ -674,23 +691,59 @@ public class MapSettings {
 		java.net.URI trgUri = null;
 		try {
 			String srcPath = srcUri.getPath();
+			String fileName = new File(srcPath).getName();
+			
 			if (!containsFileStoreDirectory(srcPath, fileStoreDirectory.getAbsolutePath())) {
 
 				// copies the file to filestore directory
 				File[] srcFileList = createSourceFileList(srcPath);
+			
+				//ensure we are not going to overwrite any files
+				int index = -1;
+				for (int i = 0; i < srcFileList.length; i++) {
+					String targetName = srcFileList[i].getName();
+					
+					String rootName = FilenameUtils.getBaseName(targetName);
+					String extension = FilenameUtils.getExtension(targetName);
+					
+					File trgFile = null;
+					if (index >= 0){
+						trgFile = new File(fileStoreDirectory,createFileName(rootName, index, extension));
+					}else{
+						trgFile = new File(fileStoreDirectory,targetName);
+					}
+					
+					while(trgFile.exists()){
+						index++;
+						trgFile = new File(fileStoreDirectory,createFileName(rootName, index, extension));
+					}
+				}
 
 				for (int i = 0; i < srcFileList.length; i++) {
 					
 					String targetName = srcFileList[i].getName();
-
-					File trgFile = new File(fileStoreDirectory,targetName);
+					File trgFile = null;
+					if (index >= 0){
+						String rootName = FilenameUtils.getBaseName(targetName);
+						String extension = FilenameUtils.getExtension(targetName);
+						trgFile = new File(fileStoreDirectory, createFileName(rootName, index, extension));
+					}else{
+						trgFile = new File(fileStoreDirectory,targetName);
+					}
 					
 					if (!srcFileList[i].getCanonicalFile().equals(trgFile.getCanonicalFile())){
 						FileUtils.copyFile(srcFileList[i], trgFile);
+						tmpImportedFiles.add(trgFile);
 					}
 				}
+				if (index >=0 ){
+					//update uri name
+					String rootName = FilenameUtils.getBaseName(fileName);
+					String extension = FilenameUtils.getExtension(fileName);
+					fileName = createFileName(rootName, index, extension);
+				}
 			}	 
-			String fileName = new File(srcPath).getName();
+			
 			
 			//create a custom uri that uses smartbm protocol 
 			//this allows the file to be relative
@@ -704,6 +757,9 @@ public class MapSettings {
 		return trgUri;
 	}
 	
+	private String createFileName(String rawFileName, int postFix, String extension){
+		return rawFileName + "_" + postFix + (extension.length() > 0 ? "." + extension : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
 	
 	/**
 	 * Creates the list of source layers based on the srcPath
@@ -738,12 +794,12 @@ public class MapSettings {
 	 * @param filePath
 	 * @param fileStorePath
 	 * @return true if filestore Path is part of filePath
+	 * @throws IOException 
 	 */
-	private boolean containsFileStoreDirectory(final String filePath, final String fileStorePath) {
-
-		String fileStorePathWithoutPoint  = fileStorePath.substring(1);// removes the point
-		
-		return filePath.contains(fileStorePathWithoutPoint);
+	private boolean containsFileStoreDirectory(final String filePath, final String fileStorePath) throws IOException {
+		File file = new File(filePath);
+		File store = new File(fileStorePath);
+		return (file.getCanonicalPath().startsWith(store.getCanonicalPath()));		
 	}
 	
 	/**

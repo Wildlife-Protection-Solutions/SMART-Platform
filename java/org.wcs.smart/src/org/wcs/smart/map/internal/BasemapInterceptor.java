@@ -81,7 +81,6 @@ public class BasemapInterceptor extends EmptyInterceptor {
             Object[] state,
             String[] propertyNames,
             Type[] types) {
-    	
     	if (shouldIntercept(entity)) {
     		BasemapDefinition basemap = (BasemapDefinition) entity;
     		MapSettings ms = MapSettings.getInstance(basemap);
