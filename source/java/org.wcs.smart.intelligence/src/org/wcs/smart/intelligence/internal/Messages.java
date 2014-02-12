@@ -424,6 +424,10 @@ public class Messages extends NLS {
 
 	public static String SmartIntelligenceDatasetMetadata_DatasetName;
 
+	public static String SourceDeleteAdvisor_IntelligenceDeleteError;
+
+	public static String SourceDeleteAdvisor_InvalidObjectType;
+
 	public static String SourceTypesPropertyDialog_CannotDelete_Error;
 
 	public static String SourceTypesPropertyDialog_DefaultName;
