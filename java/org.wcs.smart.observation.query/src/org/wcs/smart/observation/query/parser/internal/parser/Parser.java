@@ -499,28 +499,29 @@ public class Parser implements ParserConstants {
   String key = null;
   String date1 = null;
   String date2 = null;
+  Operator op = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ATT_DATE_KEY:
       jj_consume_token(ATT_DATE_KEY);
                                           key = token.image;
-      jj_consume_token(BETWEEN);
+      op = DateOp();
       jj_consume_token(DATE_STRING);
                                           date1 = token.image;
       jj_consume_token(K_AND);
       jj_consume_token(DATE_STRING);
                                          date2 = token.image;
-                        filter = AttributeFilter.createDateFilter(key, date1, date2);
+                        filter = AttributeFilter.createDateFilter(key, date1, date2, op);
       break;
     case CAT_ATT_DATE_KEY:
       jj_consume_token(CAT_ATT_DATE_KEY);
                                               key = token.image;
-      jj_consume_token(BETWEEN);
+      op = DateOp();
       jj_consume_token(DATE_STRING);
                                           date1 = token.image;
       jj_consume_token(K_AND);
       jj_consume_token(DATE_STRING);
                                          date2 = token.image;
-                        filter = CategoryAttributeFilter.createDateFilter(key, date1, date2);
+                        filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
       break;
     default:
       jj_la1[17] = jj_gen;
@@ -650,6 +651,28 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
+  final public Operator DateOp() throws ParseException {
+  String fulltoken = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case BETWEEN:
+      jj_consume_token(BETWEEN);
+                fulltoken = token.image;
+      break;
+    case K_NOT:
+      jj_consume_token(K_NOT);
+                   fulltoken = token.image;
+      jj_consume_token(BETWEEN);
+                     fulltoken = fulltoken + " " + token.image;
+      break;
+    default:
+      jj_la1[22] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    {if (true) return Operator.parseOperator(fulltoken);}
+    throw new Error("Missing return statement in function");
+  }
+
   /** Generated Token Manager. */
   public ParserTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -659,7 +682,7 @@ public class Parser implements ParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[22];
+  final private int[] jj_la1 = new int[23];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -669,13 +692,13 @@ public class Parser implements ParserConstants {
       jj_la1_init_2();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x40100,0x40100,0x0,0x40100,0x0,0x0,0x400,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x280,};
+      jj_la1_0 = new int[] {0x40100,0x40100,0x0,0x40100,0x0,0x0,0x400,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x280,0x4000100,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x243fff,0x243fff,0x20000000,0x243fff,0x2000,0x7c00000,0x0,0x7c00000,0xd0000000,0x0,0xd0000000,0x0,0x0,0x241fff,0x208,0x104,0x201ffe,0x1040,0x200082,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x243fff,0x243fff,0x20000000,0x243fff,0x2000,0x7c00000,0x0,0x7c00000,0xd0000000,0x0,0xd0000000,0x0,0x0,0x241fff,0x208,0x104,0x201ffe,0x1040,0x200082,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x0,0x7,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x0,0x7,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -689,7 +712,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -703,7 +726,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -713,7 +736,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -723,7 +746,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -732,7 +755,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -741,7 +764,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -797,7 +820,7 @@ public class Parser implements ParserConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 22; i++) {
+    for (int i = 0; i < 23; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

@@ -61,7 +61,10 @@ public class FixedQueryColumn extends QueryColumn {
 			this.guiName = name;
 			this.type = type;
 			this.key = key;
-			
+		}
+		
+		public String getKey(){
+			return this.key;
 		}
 	}
 	

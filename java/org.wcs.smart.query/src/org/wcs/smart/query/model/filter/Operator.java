@@ -74,6 +74,11 @@ public class Operator {
 	public static Operator BETWEEN = new Operator(Messages.Operator_BetweenOp, "between"); //$NON-NLS-1$
 	
 	/**
+	 * The not between operator
+	 */
+	public static Operator NOT_BETWEEN = new Operator(Messages.Operator_NotBetweenOp, "not between"); //$NON-NLS-1$
+	
+	/**
 	 * Boolean and operator
 	 */
 	public static Operator AND = new Operator(Messages.Operator_AND, "and"); //$NON-NLS-1$
@@ -98,7 +103,10 @@ public class Operator {
 	 * Valid boolean operators
 	 */
 	public static Operator[] BOOLEANS_OPS = {AND, OR, NOT};
-	
+	/**
+	 * Valid date operators
+	 */
+	public static Operator[] DATE_OPS = {BETWEEN, NOT_BETWEEN};
 	/**
 	 * Parses an operator from the string value 
 	 * @param value the string value
@@ -121,6 +129,11 @@ public class Operator {
 		for (int i = 0; i < BOOLEANS_OPS.length; i ++){
 			if (BOOLEANS_OPS[i].asSmartValue().equalsIgnoreCase(value)){
 				return BOOLEANS_OPS[i];
+			}
+		}
+		for (int i = 0; i < DATE_OPS.length; i ++){
+			if (DATE_OPS[i].asSmartValue().equalsIgnoreCase(value)){
+				return DATE_OPS[i];
 			}
 		}
 		return null;

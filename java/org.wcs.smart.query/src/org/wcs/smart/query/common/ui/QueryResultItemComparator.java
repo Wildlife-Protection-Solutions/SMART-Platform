@@ -130,7 +130,7 @@ public class QueryResultItemComparator extends ViewerComparator implements IQuer
 				compare = SmartUtils.nullDoubleComparator;
 			}
 		}else if (type == ColumnType.STRING){
-			compare = SmartUtils.nullStringComparator;
+			compare = SmartUtils.nullStringCaseInsensitiveComparator;
 		}
 		if (compare != null){
 			return compare.compare(data1, data2);

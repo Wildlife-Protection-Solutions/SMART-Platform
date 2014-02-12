@@ -46,6 +46,7 @@ import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -186,7 +187,11 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 				key = key.replace(data[0], data[1]);
 			}
-			result = "order by r."+key; //$NON-NLS-1$
+			if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
+			}else{
+				result = "order by r."+key; //$NON-NLS-1$
+			}
 		}
 		
 		if (!result.isEmpty()) {
