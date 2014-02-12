@@ -825,5 +825,12 @@
             primary="true">
       </toc>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.intelligence.SourceDeleteAdvisor"
+            class="org.wcs.smart.intelligence.model.IntelligenceSource">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>

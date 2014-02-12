@@ -346,27 +346,27 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 	}
 	
 	private void deleteSource(){
-		IntelligenceSource mandate = (IntelligenceSource) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-		if (mandate == null){
+		IntelligenceSource source = (IntelligenceSource) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		if (source == null){
 			return;
 		}
-		if (!MessageDialog.openConfirm(getShell(), Messages.SourceTypesPropertyDialog_Delete, MessageFormat.format(Messages.SourceTypesPropertyDialog_DeleteConfirmation, new Object[]{mandate.getName()}))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.SourceTypesPropertyDialog_Delete, MessageFormat.format(Messages.SourceTypesPropertyDialog_DeleteConfirmation, new Object[]{source.getName()}))){
 			return;
 		}
 		try{
-			if (mandate.getUuid() != null){
-				if (DeleteManager.canDelete(mandate, getSession())){
-					sourceTypes.remove(mandate);
-					toDelete.add(mandate);
+			if (source.getUuid() != null){
+				if (DeleteManager.canDelete(source, getSession())){
+					sourceTypes.remove(source);
+					toDelete.add(source);
 					setChangesMade(true);
 				}
 			}else{
-				sourceTypes.remove(mandate);
+				sourceTypes.remove(source);
 			}
 				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
-					MessageFormat.format(Messages.SourceTypesPropertyDialog_CannotDelete_Error + "\n\n" + ex.getLocalizedMessage(), new Object[]{mandate.getName()}), ex); //$NON-NLS-1$
+					MessageFormat.format(Messages.SourceTypesPropertyDialog_CannotDelete_Error + "\n\n" + ex.getLocalizedMessage(), new Object[]{source.getName()}), ex); //$NON-NLS-1$
 		}	
 		
 		tableViewer.refresh();
