@@ -29,6 +29,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -36,10 +38,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -87,9 +92,27 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		pre.setLayout(new GridLayout(2, false));
 		pre.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = new Label(pre, SWT.NONE);
-		l.setText(Messages.EntityTypeEditDmAttributeDialog_KeyLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		final Label keyLabel = new Label(pre, SWT.NONE);
+		keyLabel.setText(Messages.EntityTypeEditDmAttributeDialog_KeyLabel);
+		keyLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		final ToolTip tt = new ToolTip(getShell(), SWT.ICON_INFORMATION);
+		tt.setAutoHide(false);
+		tt.setMessage(Messages.EntityTypeEditDmAttributeDialog_KeyTooltip);
+		Listener mouseOver = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (event.type == SWT.MouseEnter){
+					tt.setLocation(keyLabel.toDisplay(event.x+10, event.y+10));
+					tt.setVisible(true);
+				}else if (event.type == SWT.MouseExit){
+					tt.setVisible(false);
+				}
+			};
+		};
+		keyLabel.addListener(SWT.MouseEnter, mouseOver);
+		keyLabel.addListener(SWT.MouseExit, mouseOver);
+
 		
 		Composite c = new Composite(pre, SWT.NONE);
 		c.setLayout(new GridLayout(2, false));
@@ -129,9 +152,10 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 			}
 		});
 		
-		l = new Label(pre, SWT.NONE);
+		Label l = new Label(pre, SWT.NONE);
 		l.setText(Messages.EntityTypeEditDmAttributeDialog_IsRequiredFieldName);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		l.setToolTipText(Messages.EntityTypeEditDmAttributeDialog_RequiredTooltip);
 		
 		btnIsRequired = new Button(pre, SWT.CHECK);
 		btnIsRequired.setSelection(  ((EntityAttribute)item).getIsRequired());
@@ -147,6 +171,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		l = new Label(pre, SWT.NONE);
 		l.setText(Messages.EntityTypeEditDmAttributeDialog_IsPrimaryFieldName);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		l.setToolTipText(Messages.EntityTypeEditDmAttributeDialog_PrimaryTooltip);
 		
 		btnIsPrimary = new Button(pre, SWT.CHECK);
 		btnIsPrimary.setSelection(  ((EntityAttribute)item).getIsPrimary());
@@ -160,6 +185,8 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 
 		l = new Label(pre, SWT.NONE);
 		l.setText(Messages.EntityTypeEditDmAttributeDialog_DmAttributeLabel);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		l.setToolTipText(Messages.EntityTypeEditDmAttributeDialog_DmAttributeTooltip);
 		
 		Link lnk = new Link(pre, SWT.NONE);
 		lnk.setText("<a>" + ((EntityAttribute)item).getDmAttribute().getName() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
