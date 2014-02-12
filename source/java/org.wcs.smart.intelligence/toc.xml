@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toc label="SMART Intelligence Help">
+      <topic href="html/Intelligence.html#Intelligence" label="Intelligence Perspective">
+         <topic href="html/Intelligence.html#CreateIntel" label="Creating Intelligence Records">
+         </topic>
+         <topic href="html/Intelligence.html#QueryIntel" label="Quering Intelligence Records">
+         </topic>
+      </topic>
+</toc>
