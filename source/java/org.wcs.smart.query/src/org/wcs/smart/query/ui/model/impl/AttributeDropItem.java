@@ -116,6 +116,7 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 			if (type == AttributeType.DATE){
 				this.currentValue = initd[0];
 				this.currentValue2 = initd[1];
+				this.currentOp = initd[2];
 			}else{
 				this.currentOp = initd[0];
 				this.currentValue = initd[1];
@@ -162,7 +163,7 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 		}else if (type == AttributeType.DATE){
 			querypart.append(this.key);
 			querypart.append( " "); //$NON-NLS-1$
-			querypart.append( Operator.BETWEEN.asSmartValue() );
+			querypart.append(Operator.DATE_OPS[operators.getSelectionIndex()].asSmartValue());
 			querypart.append( " "); //$NON-NLS-1$
 			querypart.append(new Date(SmartUtils.getDate(dtime1).getTime()).toString());
 			querypart.append( " "); //$NON-NLS-1$
@@ -197,7 +198,7 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
 		lblAttribute = new Label(main, SWT.NONE);
-		if (type == AttributeType.TEXT || type == AttributeType.NUMERIC) {
+		if (type == AttributeType.TEXT || type == AttributeType.NUMERIC ) {
 			operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 			operators.addModifyListener(new ModifyListener() {
 				@Override
@@ -254,8 +255,23 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 				operators.select(index);
 			}
 		}else if (type == AttributeType.DATE){
-			Label l = new Label(main, SWT.NONE);
-			l.setText(Operator.BETWEEN.getGuiValue());
+			operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+			operators.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					if (currentOp != null
+							&& currentOp.equals(operators.getText())) {
+						// no change
+					} else {
+						currentOp = operators.getText();
+						queryChanged();
+					}
+				}
+			});
+			FontData fd = (operators.getFont().getFontData()[0]);
+			fd.setHeight(fd.getHeight() - 1);
+			smallerFont = new Font(Display.getCurrent(), fd);
+			operators.setFont(smallerFont);
 			
 			dtime1 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
 			dtime1.addListener(SWT.Selection, new Listener(){
@@ -278,6 +294,17 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 						currentValue2 = newValue;
 					}
 				}});
+			
+			Operator[] options = Operator.DATE_OPS;
+			int index = 0;
+			for (int i = 0; i < options.length; i++) {
+				operators.add(options[i].getGuiValue());
+				if (currentOp != null
+						&& currentOp.equals(options[i].getGuiValue())) {
+					index = i;
+				}
+			}
+			operators.select(index);
 		}
 		
 		initDrag(main);

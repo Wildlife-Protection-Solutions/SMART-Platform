@@ -67,52 +67,14 @@ public class NotExpression implements IFilter {
 	
 	@Override
 	public void accept(IFilterVisitor visitor) {
+		visitor.visit(filter);
 		visitor.visit(this);
 	}
 	
 	public IFilter getFilter(){
 		return this.filter;
 	}
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
-//	 */
-//	@Override
-//	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
-//		return "NOT ( " + filter.asSql(tableMapping, filterTables) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-//	}
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()
-//	 */
-//	@Override
-//	public boolean hasEmployeeFilter() {
-//		return filter.hasEmployeeFilter();
-//	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()
-//	 */
-//	@Override
-//	public boolean hasCategoryFilter() {
-//		return filter.hasCategoryFilter();
-//	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#hasAttributeFilter()
-//	 */
-//	@Override
-//	public boolean hasAttributeFilter() {
-//		return filter.hasAttributeFilter();
-//	}
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#getAttributeFilters(java.util.HashSet)
-//	 */
-//	@Override
-//	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
-//		filter.getAttributeFilters(attributes);
-//	}
-//
-//
+
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception{
 		DropItem[] its1 = filter.getDropItems(session);
@@ -125,14 +87,5 @@ public class NotExpression implements IFilter {
 		
 		return results;
 	}
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#getChildren()
-//	 */
-//	@Override
-//	public List<IFilter> getChildren() {
-//		List<IFilter> kids = new ArrayList<IFilter>();
-//		kids.add(filter);
-//		return kids;
-//	}
+
 }

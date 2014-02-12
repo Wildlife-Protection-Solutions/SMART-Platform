@@ -95,8 +95,8 @@ public class AttributeFilter implements IFilter {
 	 * @param date2 the second date
 	 * @return
 	 */
-	public static AttributeFilter createDateFilter(String attributeIdentifier, String date1, String date2){
-		return new AttributeFilter(attributeIdentifier, Operator.BETWEEN, date1, date2);
+	public static AttributeFilter createDateFilter(String attributeIdentifier, String date1, String date2, Operator op){
+		return new AttributeFilter(attributeIdentifier, op, date1, date2);
 	}
 	
 	/**
@@ -259,7 +259,7 @@ public class AttributeFilter implements IFilter {
 			}
 			it.initializeData(ali);
 		}else if (attributeType == AttributeType.DATE){
-			it.initializeData(new String[]{(String)value1, (String)value2});
+			it.initializeData(new String[]{(String)value1, (String)value2, op.getGuiValue()});
 		}
 	}
 	

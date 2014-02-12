@@ -143,7 +143,7 @@ public class DerbyFilterToSqlGenerator {
 		}else if (filter.getAttributeType() == AttributeType.DATE){
 			String date1 = (String) filter.getValue();
 			String date2 = (String) filter.getValue2();			
-			return "( DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " DATE('" + date1 + "' ) " + asSql(Operator.AND) + " DATE('" + date2 + "') )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+			return "( qa." + filter.getAttributeKey() + " is not null AND DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " DATE('" + date1 + "' ) " + asSql(Operator.AND) + " DATE('" + date2 + "') )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
 			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
 				//any option
@@ -309,6 +309,8 @@ public class DerbyFilterToSqlGenerator {
 			return "not"; //$NON-NLS-1$
 		}else if (op == Operator.BETWEEN){
 			return "between"; //$NON-NLS-1$
+		}else if (op == Operator.NOT_BETWEEN){
+			return "not between"; //$NON-NLS-1$
 		}
 		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_OperatorNotSupported, new Object[]{op.getGuiValue()}));
 	}

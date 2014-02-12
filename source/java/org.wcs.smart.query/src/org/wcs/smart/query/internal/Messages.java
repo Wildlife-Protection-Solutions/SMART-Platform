@@ -159,6 +159,7 @@ public class Messages extends NLS {
 	public static String NameCellEditor_CouldNotSaveQueryName;
 	public static String NameCellEditor_UpdateFolderNameJob;
 	public static String NameCellEditor_UpdateQueryNameJob;
+	public static String Operator_1;
 	public static String Operator_AND;
 	public static String Operator_BetweenOp;
 	public static String Operator_Equals;
@@ -167,6 +168,7 @@ public class Messages extends NLS {
 	public static String Operator_LessThan;
 	public static String Operator_LessThanEqual;
 	public static String Operator_NOT;
+	public static String Operator_NotBetweenOp;
 	public static String Operator_NotEqual;
 	public static String Operator_OR;
 	public static String Operator_StrContains;

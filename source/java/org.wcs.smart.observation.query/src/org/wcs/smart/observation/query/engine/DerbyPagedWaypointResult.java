@@ -45,6 +45,7 @@ import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -178,11 +179,20 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
+			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey() )){
+				key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
+			}
 			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 				key = key.replace(data[0], data[1]);
 			}
-			result = "order by r."+key; //$NON-NLS-1$
+			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				result = "order by r."+key; //$NON-NLS-1$
+			}
 		}
 		
 		if (!result.isEmpty()) {

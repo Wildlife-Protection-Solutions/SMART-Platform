@@ -462,35 +462,37 @@ IFilter DateItemExpression():
   String key = null;
   String date1 = null;
   String date2 = null;
+  Operator op = null;
 }
 {
 	(
 		(
 			< ATT_DATE_KEY > {key = token.image;}
-			< BETWEEN >
+			op = DateOp()
 			< DATE_STRING >  {date1 = token.image;}
 			< K_AND >
 			< DATE_STRING > {date2 = token.image;}
 		)
 		{
-  			filter = AttributeFilter.createDateFilter(key, date1, date2);
+  			filter = AttributeFilter.createDateFilter(key, date1, date2, op);
 		}
 	|
 	  	(
 			< CAT_ATT_DATE_KEY > {key = token.image;}
-			< BETWEEN >
+			op = DateOp()
 			< DATE_STRING >  {date1 = token.image;}
 			< K_AND >
 			< DATE_STRING > {date2 = token.image;}
 		)
 		{
-  			filter = CategoryAttributeFilter.createDateFilter(key, date1, date2);
+  			filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
 		}
 	)
 	{
 		return filter;
 	}
 }
+
 
 IFilter StringExpression():
 {
@@ -582,5 +584,21 @@ Operator BooleanOp() :
   )
   {
     return Operator.parseOperator(token.image);
+  }
+}
+
+Operator DateOp() :
+{
+  String fulltoken = null;
+}
+{
+  (
+   < BETWEEN > {fulltoken = token.image;}
+  |
+  	< K_NOT > {fulltoken = token.image;}
+  	< BETWEEN > {fulltoken = fulltoken + " " + token.image;}
+ )
+  {
+    return Operator.parseOperator(fulltoken);
   }
 }

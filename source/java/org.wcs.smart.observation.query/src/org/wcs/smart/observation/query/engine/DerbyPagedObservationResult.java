@@ -51,6 +51,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -186,6 +187,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				//add the sort columns
 				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
 				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+				c.commit();
 				hasSortColumns = true;
 			}
 			String key = sortColumn.getKey();
@@ -212,6 +214,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			case TEXT:
 			case LIST:
 			case TREE:
+			case DATE:
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryTempTable);
@@ -238,6 +241,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				c.createStatement().execute(sql.toString());
 				break;
 			case TEXT:
+			case DATE:
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryTempTable);
@@ -365,16 +369,25 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
+			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey() )){
+				key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
+			}
 			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 				key = key.replace(data[0], data[1]);
 			}
-			result = "order by r."+key; //$NON-NLS-1$
+			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				result = "order by r."+key; //$NON-NLS-1$
+			}
 		}
 		if (sortColumn instanceof ObservationCategoryQueryColumn) {
 			String key = sortColumn.getKey();
 			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			result = "order by r."+key; //$NON-NLS-1$
+			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (sortColumn instanceof ObservationAttributeQueryColumn) {
 			String key = sortColumn.getKey();
@@ -385,8 +398,11 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				case INTEGER:
 					result = "order by sortKeyDbl"; //$NON-NLS-1$
 					break;
+				case DATE:
+					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
+					break;
 				default:
-					result = "order by sortKeyTxt"; //$NON-NLS-1$
+					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
 					break;
 			}
 		}

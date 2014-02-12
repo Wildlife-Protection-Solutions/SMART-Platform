@@ -75,8 +75,11 @@ public class FixedQueryColumn extends QueryColumn {
 		private FixedColumns(String name, ColumnType type, String key){
 			this.guiName = name;
 			this.type = type;
-			this.key = key;
-			
+			this.key = key;	
+		}
+		
+		public String getKey(){
+			return this.key;
 		}
 	}
 	
