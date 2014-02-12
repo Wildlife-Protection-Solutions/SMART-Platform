@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toc label="Ayuda SMART del Plan">
+      <topic href="html/Plan.html#Plans" label="Perspectiva del Plan">
+         <topic href="html/Plan.html#DevelopingPlans" label="Planes en Desarrollo">
+         </topic>
+         <topic href="html/Plan.html#LinkPatrolPlan" label="Vincular Patrullajes a Planes">
+         </topic>
+         <topic href="html/Plan.html#validatePlan" label="Validar Planes">
+         </topic>
+      </topic>
+</toc>
