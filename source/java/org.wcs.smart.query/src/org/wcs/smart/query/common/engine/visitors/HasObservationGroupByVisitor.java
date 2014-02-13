@@ -27,7 +27,8 @@ import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**
- * Visitor for group bys that determine if categories are used in any group by clause.
+ * Visitor for group bys that determine if categories or attributes
+ * are used in any group by clause.
  * 
  * @author Emily
  *
@@ -36,13 +37,15 @@ public class HasObservationGroupByVisitor implements IGroupByVisitor {
 
 
 	private boolean hasCategory = false;
+	private boolean hasAttribute = false;
 	
 	@Override
 	public void visit(IGroupBy item) {
-		if (hasCategory) return;
+		if (hasCategory && hasAttribute) return;
 		if (item instanceof CategoryGroupBy){
 			hasCategory = true;
 		}else if (item instanceof AttributeGroupBy){
+			hasAttribute = true;
 			if (((AttributeGroupBy) item).getCategoryHkey() != null){
 				hasCategory = true;
 			}
@@ -55,6 +58,14 @@ public class HasObservationGroupByVisitor implements IGroupByVisitor {
 	 */
 	public boolean hasCategory(){
 		return this.hasCategory;
+	}
+	
+	/**
+	 * 
+	 * @return true if group by contains a attribute
+	 */
+	public boolean hasAttribute(){
+		return this.hasAttribute;
 	}
 
 }
