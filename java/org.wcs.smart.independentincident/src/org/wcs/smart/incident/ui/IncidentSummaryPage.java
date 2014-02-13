@@ -196,7 +196,9 @@ public class IncidentSummaryPage extends EditorPart {
 			allAtts.addAll(incident.getAttachments());
 			if (incident.getObservations() != null){
 				for (WaypointObservation wo : incident.getObservations()){
-					allAtts.addAll(wo.getAttachments());
+					if (wo.getAttachments() != null) {
+						allAtts.addAll(wo.getAttachments());
+					}
 				}
 			}
 			Collections.sort(allAtts, new Comparator<ISmartAttachment>() {
@@ -392,7 +394,7 @@ public class IncidentSummaryPage extends EditorPart {
 		  @Override
 		  public String getText(Object element) {
 			  WaypointObservation o =  ((WaypointObservation)element);
-			  if (o.getAttachments().size() > 0){				  
+			  if (o.getAttachments() != null && o.getAttachments().size() > 0){				  
 				  return MessageFormat.format(Messages.IncidentSummaryPage_AttachmentsColumnContent, new Object[]{String.valueOf(o.getAttachments().size())});
 			  }
 			  return ""; //$NON-NLS-1$
