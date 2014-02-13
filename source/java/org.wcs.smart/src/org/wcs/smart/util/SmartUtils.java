@@ -89,7 +89,12 @@ public class SmartUtils {
 	}
 	
 	
-	public static NullComparator nullStringComparator = new NullComparator();
+	public static NullComparator nullStringCaseInsensitiveComparator = new NullComparator(new Comparator<String>() {
+		@Override
+		public int compare(String o1, String o2) {
+			return o1.compareToIgnoreCase(o2);
+		}
+	});
 	
 	public static NullComparator nullIntegerComparator = new NullComparator(new Comparator<Integer>() {
 		@Override
