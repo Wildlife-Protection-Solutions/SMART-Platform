@@ -160,15 +160,15 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 					
 					HasObservationValueVisitor vv = new HasObservationValueVisitor();
 					query.getQueryDefinition().getValuePart().visit(vv);
-					needsObservationValue = vv.hasCategory();
+					needsObservationValue = vv.hasCategory() || vv.hasAttribute();
 					
 					if(!needsObservationValue){
 						HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor();
 						query.getQueryDefinition().getColumnGroupByPart().visit(cv);
-						needsObservationValue = cv.hasCategory();
+						needsObservationValue = cv.hasCategory() || cv.hasAttribute();
 						if (!needsObservationValue){
 							query.getQueryDefinition().getRowGroupByPart().visit(cv);
-							needsObservationValue = cv.hasCategory();
+							needsObservationValue = cv.hasCategory() || cv.hasAttribute();
 						}
 						
 					}
