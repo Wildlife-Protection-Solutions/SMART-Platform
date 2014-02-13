@@ -119,6 +119,40 @@
                visible="false">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.changeuserpassword">
+         <separator
+               name="org.wcs.smart.query.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.file.export"
+               id="x"
+               label="%file.exportmap.command.label"
+               style="push"
+               tooltip="%file.exportmap.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.observation.FieldDataPerspective">
+                     </equals>
+                  </with>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator3"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
