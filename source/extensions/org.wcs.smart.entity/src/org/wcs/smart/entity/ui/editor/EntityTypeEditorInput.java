@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.ui.editor;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -88,6 +90,17 @@ public class EntityTypeEditorInput implements IEditorInput {
 	@Override
 	public String getToolTipText() {
 		return Messages.EntityTypeEditorInput_EntityTypeEditorTooltip;
+	}
+	
+	public int hashCode() {
+		return Arrays.hashCode(uuid);
+	}
+
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof EntityTypeEditorInput){
+			return Arrays.equals(this.uuid, ((EntityTypeEditorInput)obj).uuid);
+		}
+		return false;
 	}
 
 }

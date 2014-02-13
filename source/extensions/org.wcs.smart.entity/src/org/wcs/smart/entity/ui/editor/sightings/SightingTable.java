@@ -197,7 +197,7 @@ public class SightingTable {
 			return ""; //$NON-NLS-1$
 		}
 		if (type == ColumnType.BOOLEAN) {
-			if ((Boolean) value) {
+			if ((Double) value >= 0.5) {
 				return Attribute.BOOLEAN_TRUE_LABEL;
 			} else {
 				return Attribute.BOOLEAN_FALSE_LABEL;
