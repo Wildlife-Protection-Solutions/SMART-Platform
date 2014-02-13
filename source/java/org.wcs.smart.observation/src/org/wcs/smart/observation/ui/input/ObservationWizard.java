@@ -342,6 +342,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		
 		for (WaypointObservation wo : wp.getObservations()){
 			//remove attachments that are not longer attached to new observations
+			if (wo.getAttachments() == null){
+				wo.setAttachments(new ArrayList<ObservationAttachment>());
+			}
 			for (ObservationAttachment att : wo.getAttachments()){
 				if (att.getObservation().equals(wo) && !wobservations.contains(wo)){
 					session.delete(att);
