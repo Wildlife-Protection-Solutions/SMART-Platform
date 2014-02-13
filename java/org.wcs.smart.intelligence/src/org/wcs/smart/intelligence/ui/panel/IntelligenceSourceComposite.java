@@ -35,9 +35,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -62,6 +64,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	private static final String ERROR_PATROL_ID_REQUIRED = Messages.IntelligenceSource_Error_PatrolIdRequired;
 
 	private static final int DECORATION_MARGIN = 2;
+	private static final int NO_SOURCE_ERR_IMAGE_SIZE = 32;
 	
     private ComboViewer sourceType;
     private List<IntelligenceSource> sourceTypeList;
@@ -86,9 +89,27 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 		} finally {
 			s.close();
 		}
+
 		setMessage(Messages.IntelligenceSource_Message);
-		createControls();
-		validate();
+		if (!sourceTypeList.isEmpty()) {
+			createControls();
+			validate();
+		} else {
+			createNoSourceControls();
+		}
+	}
+
+	private void createNoSourceControls() {
+        GridLayout layout = new GridLayout(1, false);
+        layout.marginLeft = NO_SOURCE_ERR_IMAGE_SIZE;
+		this.setLayout(layout);
+        this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		
+        Label sourceLabel = new Label(this, SWT.NONE);
+        sourceLabel.setText(Messages.IntelligenceSourceComposite_NoSources_Error);
+
+        ControlDecoration labelDecoration = new ControlDecoration(sourceLabel, SWT.LEFT);
+        labelDecoration.setImage(new Image(Display.getDefault(), Display.getDefault().getSystemImage(SWT.ICON_ERROR).getImageData().scaledTo(NO_SOURCE_ERR_IMAGE_SIZE, NO_SOURCE_ERR_IMAGE_SIZE)));
 	}
 
 	private void createControls() {
@@ -183,10 +204,12 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     } 
 
     private IntelligenceSource getSelectedSourceType() {
-		ISelection sourceSelection = sourceType.getSelection();
-		if (sourceSelection instanceof IStructuredSelection) {
-			return (IntelligenceSource)((IStructuredSelection)sourceSelection).getFirstElement();
-		}
+    	if (sourceType != null) {
+    		ISelection sourceSelection = sourceType.getSelection();
+    		if (sourceSelection instanceof IStructuredSelection) {
+    			return (IntelligenceSource)((IStructuredSelection)sourceSelection).getFirstElement();
+    		}
+    	}
 		return null;
     }
 

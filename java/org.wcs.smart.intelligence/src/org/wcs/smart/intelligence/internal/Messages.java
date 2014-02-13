@@ -334,6 +334,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceSource_PatrolId_Label;
 
+	public static String IntelligenceSourceComposite_NoSources_Error;
+
 	public static String IntelligenceSourceComposite_SourceLoad_Error;
 
 	public static String IntelligenceStartupJob_Title;
