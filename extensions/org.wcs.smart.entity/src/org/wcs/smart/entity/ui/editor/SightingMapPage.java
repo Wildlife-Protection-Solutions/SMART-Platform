@@ -30,8 +30,11 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.ID;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
+import net.refractions.udig.project.internal.commands.AddLayerCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.DeleteLayerCommand;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 
@@ -111,6 +114,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 		
 	};
 	
+	private Layer queryLayer;
 	private Job addQueryReusltsJob = new Job(Messages.SightingMapPage_AddQueryJobName){
 
 		@Override
@@ -123,7 +127,8 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 	    		AddLayersCommand command = new AddLayersCommand(layers);
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
-	    		getMap().sendCommandASync(command);
+	    		getMap().sendCommandSync(command);
+	    		queryLayer = command.getLayers().get(0);
 	    		
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, IStatus.ERROR, Messages.SightingMapPage_ErrorDescriptionQuery, e);
@@ -138,13 +143,31 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {  
-			if (queryService != null){
-				try {
-					queryService.refresh(parentEditor.getCurrentQuery());
-				} catch (IOException e) {
-					EntityPlugIn.log(Messages.SightingMapPage_QueryRefreshError1, e);
+			if (parentEditor.getCurrentQuery() == null){
+				if (queryLayer != null){
+					if (getMap().getLayersInternal().contains(queryLayer)){
+						DeleteLayerCommand delete = new DeleteLayerCommand(queryLayer);
+						getMap().sendCommandSync(delete);
+					}
+				}
+			}else{		
+				if (queryService != null){
+					try {
+						queryService.refresh(parentEditor.getCurrentQuery());
+						if (queryLayer != null){
+							//add back the query layer
+							AddLayerCommand add = new AddLayerCommand(queryLayer);
+							getMap().sendCommandSync(add);
+						}
+					
+					} catch (IOException e) {
+						EntityPlugIn.log(Messages.SightingMapPage_QueryRefreshError1, e);
+					}
+				}else{
+					addQueryReusltsJob.schedule();
 				}
 			}
+			
 			if (entityService != null){				
 				try {
 					entityService.refresh(parentEditor.getEntityType(), monitor);
@@ -211,9 +234,6 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 
 	@Override
 	public void updatePage(Session currentSession, boolean typeModified) {
-		if (queryService == null){
-			addQueryReusltsJob.schedule();
-		}
 		updateLayerJob.schedule(100);
 	}
 	
