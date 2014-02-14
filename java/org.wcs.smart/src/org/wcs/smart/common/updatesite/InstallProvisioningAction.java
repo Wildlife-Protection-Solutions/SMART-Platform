@@ -12,6 +12,11 @@ import org.eclipse.equinox.p2.metadata.IInstallableUnit;
  * Action that is called when some plug-in is being installed.
  * Class contains logic that allows to distinguish if this is plug-in fresh install or upgrade.
  * 
+ * Plugins should extend InstallProvisioningAction only if there 
+ * is a difference in install and upgrade otherwise they should extend
+ * ProvisioningAction directly. If you extend InstallProvisioningAction you 
+ * will have to implement both performUpgrade() and performNewInstall() to do the same item. 
+
  * @author elitvin
  * @since 3.0.0
  */

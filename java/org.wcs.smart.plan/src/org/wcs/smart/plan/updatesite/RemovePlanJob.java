@@ -59,7 +59,7 @@ public class RemovePlanJob extends Job {
 			}
 			for (String table : TABLES){
 				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createSQLQuery("DROP TABLE SMART." + table); //$NON-NLS-1$
+					session.createSQLQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 				}
 			}		
 			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);

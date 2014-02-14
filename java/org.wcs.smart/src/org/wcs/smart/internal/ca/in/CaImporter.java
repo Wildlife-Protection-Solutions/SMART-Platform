@@ -317,7 +317,7 @@ public class CaImporter {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						String msg = MessageFormat.format(Messages.CaImporter_ExtraDataWarning, new Object[]{warnings.toString()});
+						String msg = MessageFormat.format(Messages.CaImporter_ExtraDataWarning + "\n\n" + Messages.CaImporter_ExtraDataWarning2 + "\n\n" + Messages.CaImporter_ExtraDataWarning3, new Object[]{warnings.toString()});  //$NON-NLS-1$//$NON-NLS-2$
 						if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.CaImporter_WarningDialogTitle, msg)){
 							x[0] = false;
 						}
