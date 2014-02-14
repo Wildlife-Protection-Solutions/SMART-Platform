@@ -306,6 +306,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		policy.setGroupByCategory(true);
 		policy.setShowDrilldownRequirements(true);
 		policy.setRestartPolicy(Policy.RESTART_POLICY_PROMPT);
+		//this causes problems in udig as it doesn't seem to be run
+		//in display thread
+//		policy.setRestartPolicy(Policy.RESTART_POLICY_FORCE);
 	}
 	
 	public static void log(int status, String message, Throwable t){

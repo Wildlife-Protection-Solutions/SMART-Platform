@@ -33,7 +33,6 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 
@@ -79,7 +78,10 @@ public class AddPlanJob extends Job {
 		}
 
 		// need to login as admin user to create tables
-		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		//this must be run as Admin User
+		//AND only admin users should be able to install plugins in the first place.
+		//so we shouldn't need to do this
+		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
@@ -112,8 +114,6 @@ public class AddPlanJob extends Job {
 			if (session.isOpen()) {
 				session.close();
 			}
-			// disconnect from admin user
-			HibernateManager.endSessionFactory(true);
 		}
 
 		return Status.OK_STATUS;

@@ -119,6 +119,14 @@
             <command
                   commandId="org.wcs.smart.update.install"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.separator1"
