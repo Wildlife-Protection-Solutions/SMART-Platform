@@ -144,8 +144,6 @@ public class Messages extends NLS {
 
 	public static String IntelligenceDataSourceFactory_DataSourceName;
 
-	public static String IntelligenceDataSourceFactory_IntelNotFound;
-
 	public static String IntelligenceDataSourceFactory_ReadOnlySource;
 
 	public static String IntelligenceDataSourceFactory_UuidParameterName;
@@ -337,8 +335,6 @@ public class Messages extends NLS {
 	public static String IntelligenceSourceComposite_NoSources_Error;
 
 	public static String IntelligenceSourceComposite_SourceLoad_Error;
-
-	public static String IntelligenceStartupJob_Title;
 
     public static String IntelligenceViewFilter_NameFilterName;
 

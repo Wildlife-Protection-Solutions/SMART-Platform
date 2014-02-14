@@ -23,6 +23,8 @@ package org.wcs.smart.intelligence.map;
 
 import java.io.IOException;
 
+import net.refractions.udig.catalog.IGeoResourceInfo;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -34,8 +36,6 @@ import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
 
 import com.vividsolutions.jts.geom.Envelope;
-
-import net.refractions.udig.catalog.IGeoResourceInfo;
 
 /**
  * Intelligence geo resource info 
