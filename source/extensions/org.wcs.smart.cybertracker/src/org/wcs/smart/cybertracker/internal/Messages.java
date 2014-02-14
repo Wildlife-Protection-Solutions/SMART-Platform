@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.internal.messages"; //$NON-NLS-1$
+	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String CTPatrolTableCellLabelProvider_Armed_No;
 	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
 	public static String CTPatrolTableCellLabelProvider_Tooltip_Error;

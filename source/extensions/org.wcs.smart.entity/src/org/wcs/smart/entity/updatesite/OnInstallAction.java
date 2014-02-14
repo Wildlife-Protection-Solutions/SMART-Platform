@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 
 /**
@@ -40,6 +41,7 @@ public class OnInstallAction extends ProvisioningAction {
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
 		Job job = new AddEntityJob();
+		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		job.schedule();
 		try{
 			job.join();

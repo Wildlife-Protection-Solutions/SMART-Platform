@@ -31,7 +31,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 
 /**
  * Job removes adds entity plug-in related tabled to the database
@@ -95,8 +94,11 @@ public class AddEntityJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		
 		monitor.beginTask(Messages.AddEntityJob_TaskName, 10);
+
 		//this must be run as Admin User
-		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		//AND only admin users should be able to install plugins in the first place.
+		//so we shouldn't need to do this
+		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		Session session = HibernateManager.openSession();	
 		
 		try{
@@ -130,7 +132,6 @@ public class AddEntityJob extends Job {
 			}catch (Exception ex){
 				//eat this
 			}
-			HibernateManager.endSessionFactory(true);
 		}
 		
 		return Status.OK_STATUS;
