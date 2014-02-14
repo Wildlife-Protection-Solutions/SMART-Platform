@@ -229,7 +229,6 @@ public class Messages extends NLS {
 	public static String CaImporter_Progress_ImportingCa;
 	public static String CaImporter_Progress_ImportingFileStore;
 	public static String CaImporter_Progress_processingTables;
-	public static String CaImporter_Progress_ScanningTable;
 	public static String CaImporter_Progress_UnzippingFile;
 	public static String CaImporter_Progress_ValidatingCaImport;
 	public static String CaImporter_ValidatingPluginProgressMessage;	
