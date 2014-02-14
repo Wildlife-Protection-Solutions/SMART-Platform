@@ -135,25 +135,28 @@ public class EntityInfoPanelComposite extends Composite{
 	 * opening a session.
 	 */
 	public void initEntityFields(){
+		if (attributeToUi == null){
+			//widgets not yet created
+			return;
+		}
 		if (entity == null){
 			clearFields();
 			return;
 		}
-		if (attributeToUi != null){
-			txtId.setText(entity.getId());
-			if (txtX != null){
-				if ( entity.getX() != null){
-					txtX.setText(String.valueOf(entity.getX()));
-				}else{
-					txtX.setText(""); //$NON-NLS-1$
-				}
+		
+		txtId.setText(entity.getId());
+		if (txtX != null){
+			if ( entity.getX() != null){
+				txtX.setText(String.valueOf(entity.getX()));
+			}else{
+				txtX.setText(""); //$NON-NLS-1$
 			}
-			if (txtY != null){
-				if ( entity.getY() != null){
-					txtY.setText(String.valueOf(entity.getY()));
-				}else{
-					txtY.setText(""); //$NON-NLS-1$
-				}
+		}
+		if (txtY != null){
+			if ( entity.getY() != null){
+				txtY.setText(String.valueOf(entity.getY()));
+			}else{
+				txtY.setText(""); //$NON-NLS-1$
 			}
 		}
 		

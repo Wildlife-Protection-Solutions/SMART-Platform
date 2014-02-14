@@ -66,8 +66,6 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 	
 	private QueryColumn sortColumn = null;
 	private int sortDirection = SWT.UP;
-//	private QueryColumn lastSortColumn = null;
-//	private boolean hasSortColumns = false;
 	private DerbyEntitySightingEngine engine;
 
 	
