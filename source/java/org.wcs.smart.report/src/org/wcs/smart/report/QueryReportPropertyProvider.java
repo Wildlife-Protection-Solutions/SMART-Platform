@@ -29,7 +29,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
-
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportQuery;
 
