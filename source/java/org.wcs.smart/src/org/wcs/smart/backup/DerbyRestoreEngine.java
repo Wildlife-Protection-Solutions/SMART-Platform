@@ -225,8 +225,6 @@ public class DerbyRestoreEngine {
 			s.close();
 		}
 		
-		
-		
 		/* shut down the database */
 		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ShutDown);
 		HibernateManager.endSessionFactory(true);
@@ -249,9 +247,10 @@ public class DerbyRestoreEngine {
 			throw ex;
 		}finally{
 			HibernateManager.endSessionFactory(true);	
+			//restore database parameter to main db
+			SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		}
-		//restore database parameter to main db
-		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+
 		
 		/* create a copy of the current files incase something goes wrong */
 		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_MovingFiles);
@@ -411,7 +410,7 @@ public class DerbyRestoreEngine {
 					tmp.deleteCharAt(tmp.length() - 1);
 					tmp.deleteCharAt(tmp.length() - 1);
 					
-					sb.append("\n"); //$NON-NLS-1$
+					sb.append("\n\n"); //$NON-NLS-1$
 					sb.append(MessageFormat.format(Messages.DerbyRestoreEngine_MissingPlugins, new Object[]{tmp.toString()}));
 				}
 				if (missingFromSystem.size() > 0){
@@ -423,7 +422,7 @@ public class DerbyRestoreEngine {
 					tmp.deleteCharAt(tmp.length() - 1);
 					tmp.deleteCharAt(tmp.length() - 1);
 					
-					sb.append("\n"); //$NON-NLS-1$
+					sb.append("\n\n"); //$NON-NLS-1$
 					sb.append(MessageFormat.format(Messages.DerbyRestoreEngine_ExtraPlugins, new Object[]{tmp.toString()}));
 					
 				}
@@ -436,7 +435,7 @@ public class DerbyRestoreEngine {
 					tmp.deleteCharAt(tmp.length() - 1);
 					tmp.deleteCharAt(tmp.length() - 1);
 					
-					sb.append("\n"); //$NON-NLS-1$
+					sb.append("\n\n"); //$NON-NLS-1$
 					sb.append(MessageFormat.format(Messages.DerbyRestoreEngine_InconsistentVersions, new Object[]{tmp.toString()}));
 					
 				}

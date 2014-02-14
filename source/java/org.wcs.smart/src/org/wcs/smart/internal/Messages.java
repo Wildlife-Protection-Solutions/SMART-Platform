@@ -221,6 +221,8 @@ public class Messages extends NLS {
 	public static String CaImporter_Error_TableDataFiles;
 	public static String CaImporter_Error_TableInfo;
 	public static String CaImporter_ExtraDataWarning;
+	public static String CaImporter_ExtraDataWarning2;
+	public static String CaImporter_ExtraDataWarning3;
 	public static String CaImporter_InvalidExportVersion;
 	public static String CaImporter_Progress_BackupCurrent;
 	public static String CaImporter_Progress_CleanUp;
@@ -230,7 +232,7 @@ public class Messages extends NLS {
 	public static String CaImporter_Progress_ScanningTable;
 	public static String CaImporter_Progress_UnzippingFile;
 	public static String CaImporter_Progress_ValidatingCaImport;
-	public static String CaImporter_ValidatingPluginProgressMessage;
+	public static String CaImporter_ValidatingPluginProgressMessage;	
 	public static String CaImporter_VersionError;
 	public static String CaImporter_WarningDialogTitle;
 	public static String CaInfoComposite_Description_Tooltip;
@@ -436,6 +438,7 @@ public class Messages extends NLS {
 	public static String DataModelXmlToSmartConverter_Error_AttributeTypeNotFound;
 	public static String DataModelXmlToSmartConverter_Error_CategoryAttributeNotFound;
 	public static String DataStoreDataExporter_progress;
+	public static String DatastoreImporter_ImportFilestore;
 	public static String DateFilter_Custom;
 	public static String DateFilter_Last30Days;
 	public static String DateFilter_Last60Days;

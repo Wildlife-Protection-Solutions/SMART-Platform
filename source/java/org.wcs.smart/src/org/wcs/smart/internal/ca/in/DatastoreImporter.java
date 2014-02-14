@@ -55,7 +55,7 @@ public class DatastoreImporter implements ICaDataImporter {
 	public void importData(ICaDataImportEngine engine, IProgressMonitor monitor)
 			throws Exception {
 		try{
-			monitor.beginTask("Importing filestore", 1);	
+			monitor.beginTask(Messages.DatastoreImporter_ImportFilestore, 1);	
 			importFileStore(engine.getImportDataDirectory(), engine.getConservationAreaUuid(), monitor);
 			monitor.worked(1);
 		}catch (Exception ex){
