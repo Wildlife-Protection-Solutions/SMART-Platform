@@ -88,7 +88,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				//if this editor matches the incident being modified
 				//we need to reload values
 				if ((source instanceof Waypoint &&
-						((Waypoint)source).equals(source) ) ||
+						((Waypoint)source).equals(incident) ) ||
 						(source instanceof IncidentEditorInput &&
 								Arrays.equals(((IncidentEditorInput)source).getUuid(), incident.getUuid()))) {
 					
@@ -100,7 +100,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				//if this editor matches the item deleted we need to
 				//close the editor
 				if ((source instanceof Waypoint &&
-						((Waypoint)source).equals(source) ) ||
+						((Waypoint)source).equals(incident) ) ||
 						(source instanceof IncidentEditorInput &&
 								Arrays.equals(((IncidentEditorInput)source).getUuid(), incident.getUuid()))) {
 					

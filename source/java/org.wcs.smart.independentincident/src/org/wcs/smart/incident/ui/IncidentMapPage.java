@@ -76,7 +76,6 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private FeatureStore<SimpleFeatureType,SimpleFeature> store;
 	private Layer pointLayer = null;
 	private IGeoResource pointResource;
-	private String styleSld = null;
 	
 	private IViewportModelListener initListener;
 	
@@ -226,9 +225,6 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	 * @return
 	 */
 	private String getStylingConfig() {
-		if (styleSld != null){
-			return styleSld;
-		}
 		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
 		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
 		"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
