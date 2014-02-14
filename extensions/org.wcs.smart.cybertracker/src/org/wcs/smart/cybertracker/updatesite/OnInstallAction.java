@@ -25,7 +25,10 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 
 /**
  * Action that is called when CyberTracker plug-in is installed or upgraded using update site
@@ -37,35 +40,16 @@ public class OnInstallAction extends ProvisioningAction {
 
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
-		return Status.OK_STATUS;
-	}
-
-/*	
-	@Override
-	public IStatus execute(Map<String, Object> parameters) {
-		IInstallableUnit iu = (IInstallableUnit) parameters.get("iu"); //$NON-NLS-1$
-		IInstallableUnit upgradeFrom = null;
-		Object operand = parameters.get("operand"); //$NON-NLS-1$
-		try {
-			if (operand instanceof InstallableUnitOperand)
-				upgradeFrom = ((InstallableUnitOperand) operand).first();
+		Job job = new AddCyberTrackerJob();
+		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		job.schedule();
+		try{
+			job.join();
+		}catch(InterruptedException ex){
+			CyberTrackerPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
-		catch (Throwable e) {
-			// Ignore class not found in case InstallableUnitOperand is missing
-		}
-		if (upgradeFrom != null)
-			performUpgrade(iu, upgradeFrom);
-		else
-			performNewInstall(iu);
-		return Status.OK_STATUS;
+		return Status.OK_STATUS;	//always return ok status to plugin is registered; users should uninstall and re-install if error occurs
 	}
-
-	private void performUpgrade(IInstallableUnit iu, IInstallableUnit oldIu) {
-	}
-
-	private void performNewInstall(IInstallableUnit iu) {
-	}
-*/
 
 	@Override
 	public IStatus undo(Map<String, Object> parameters) {
