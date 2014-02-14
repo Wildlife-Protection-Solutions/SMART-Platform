@@ -96,17 +96,17 @@
                <command
                      commandId="org.wcs.smart.intelligence.revertTemplate"
                      style="push"
-                     tooltip="Reverts intelligence template to default">
+                     tooltip="%command.reverttemplate.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.intelligence.exportTemplate"
                      style="push"
-                     tooltip="Exports intelligence template">
+                     tooltip="%command.exporttemplate.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.intelligence.importTemplate"
                      style="push"
-                     tooltip="Imports intelligence template">
+                     tooltip="%command.importtemplate.tooltip">
                </command>
             </menu>
             <separator
@@ -453,15 +453,15 @@
       </command>
       <command
             id="org.wcs.smart.intelligence.revertTemplate"
-            name="Revert to Default Template">
+            name="%command.revertdefaulttemplate.name">
       </command>
       <command
             id="org.wcs.smart.intelligence.exportTemplate"
-            name="Export Intelligence Template ...">
+            name="%command.exporttemplate.name">
       </command>
       <command
             id="org.wcs.smart.intelligence.importTemplate"
-            name="Import Intelligence Template ...">
+            name="%command.importtemplate.name">
       </command>
    </extension>
    <extension
