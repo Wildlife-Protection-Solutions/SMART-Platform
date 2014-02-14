@@ -34,9 +34,9 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 
