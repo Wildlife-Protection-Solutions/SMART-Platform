@@ -165,6 +165,7 @@ public class EntitySightingQuery extends Query{
 
 	/**
 	 * Not supported.
+	 * @return null
 	 */
 	@Override
 	public Query clone() {

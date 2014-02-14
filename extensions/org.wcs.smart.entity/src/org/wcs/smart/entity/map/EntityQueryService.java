@@ -42,8 +42,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
-import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.query.EntitySightingQuery;
 
 /**
  * Service for entity sightings query.
@@ -62,7 +62,6 @@ public class EntityQueryService extends IService {
 	private EntityQueryDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 
-	private IEntityListener entityListener = null;
 	private EntityQueryGeoResource geoResource;
 	
 	private IServiceInfo info = null;
@@ -170,9 +169,6 @@ public class EntityQueryService extends IService {
 
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
-		if (entityListener != null){
-			EntityEventManager.getInstance().removeListener(entityListener);
-		}
         if (members == null)
             return;
         if (monitor == null){
