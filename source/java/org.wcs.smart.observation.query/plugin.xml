@@ -100,9 +100,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/observation_query.png"
-               label="New Observation Query"
+               label="%command.label.newobservation"
                style="pulldown"
-               tooltip="creates a new observation query that queries all observations">
+               tooltip="%command.tooltip.newobservation">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationobservation">
@@ -111,9 +111,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/waypoint_query.png"
-               label="New Incident Query"
+               label="%command.label.newincident"
                style="push"
-               tooltip="creates a new incident query that queries all observations">
+               tooltip="%command.tooltip.newincident">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationwaypoint">
@@ -122,9 +122,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/summary_query.png"
-               label="New Summary Query"
+               label="%command.label.newsummary"
                style="push"
-               tooltip="creates a new summary query that queries all observations">
+               tooltip="%command.tooltip.newsummary">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationsummary">
@@ -133,9 +133,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/gridded_query.png"
-               label="New Gridded Query"
+               label="%command.label.newgrid"
                style="push"
-               tooltip="creates a new grid query that queries all observations">
+               tooltip="%command.tooltip.newgrid">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationgrid">
@@ -156,9 +156,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/observation_query.png"
-               label="New Observation Query"
+               label="%command.label.newobservation"
                style="pulldown"
-               tooltip="creates a new observation query that queries all observations">
+               tooltip="%command.tooltip.newobservation">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationobservation">
@@ -167,9 +167,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/waypoint_query.png"
-               label="New Incident Query"
+               label="%command.label.newincident"
                style="push"
-               tooltip="creates a new incident query that queries all observations">
+               tooltip="%command.tooltip.newincident">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationwaypoint">
@@ -178,9 +178,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/summary_query.png"
-               label="New Summary Query"
+               label="%command.label.newsummary"
                style="push"
-               tooltip="creates a new summary query that queries all observations">
+               tooltip="%command.tooltip.newsummary">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationsummary">
@@ -189,9 +189,9 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                icon="images/icons/obj16/gridded_query.png"
-               label="New Gridded Query"
+               label="%command.label.newgrid"
                style="push"
-               tooltip="creates a new grid query that queries all observations">
+               tooltip="%command.tooltip.newgrid">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="observationgrid">
@@ -209,19 +209,19 @@
             class="org.wcs.smart.observation.query.ui.SimpleQueryEditor"
             default="false"
             id="org.wcs.smart.observation.editor.simple"
-            name="Query Editor">
+            name="%editor.name.simple">
       </editor>
       <editor
             class="org.wcs.smart.observation.query.ui.ObservationSummaryQueryEditor"
             default="false"
             id="org.wcs.smart.observation.editor.summary"
-            name="Query Editor">
+            name="%editor.name.summary">
       </editor>
       <editor
             class="org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor"
             default="false"
             id="org.wcs.smart.observation.editor.gridded"
-            name="Query Editor">
+            name="%editor.name.gridded">
       </editor>
    </extension>
    <extension

@@ -361,7 +361,7 @@
       </command>
       <command
             id="org.wcs.smart.patrol.patrolScreens"
-            name="Patrol Screens Configuration">
+            name="%command.name.screenconfiguration">
       </command>
    </extension>
    <extension
