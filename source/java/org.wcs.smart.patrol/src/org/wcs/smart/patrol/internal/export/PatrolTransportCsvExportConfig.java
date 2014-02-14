@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.internal.export;
 import org.wcs.smart.export.config.AbstractCsvExportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
-
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SmartUtils;

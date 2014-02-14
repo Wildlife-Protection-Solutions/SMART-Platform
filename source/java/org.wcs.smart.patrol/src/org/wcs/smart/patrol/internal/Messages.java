@@ -535,7 +535,6 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Team_Label;
 	public static String PatrolSummaryEditor_TransportType_Label;
 	public static String PatrolTemplateCloner_ProgressCopyMandates;
-	public static String PatrolTemplateCloner_ProgressCopyOptions;
 	public static String PatrolTemplateCloner_ProgressCopyTeams;
 	public static String PatrolTemplateCloner_ProgressCopyTypes;
 	public static String PatrolTemplateCloner_ProgressPatrols;
