@@ -25,9 +25,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
@@ -61,7 +59,6 @@ import org.wcs.smart.report.birt.map.internal.Messages;
 public class StyleCellEditor extends DialogCellEditor {
 
 	private Layer layer;
-	private IService qs;
 	private Map map;
 	
 	private ColumnLabelProvider lblProvider;
@@ -122,10 +119,6 @@ public class StyleCellEditor extends DialogCellEditor {
 
 			SmartOpenStyleEditorAction action = new SmartOpenStyleEditorAction(layer);
 			action.run();
-			
-			if (qs != null) {
-				CatalogPlugin.getDefault().getLocalCatalog().remove(qs);
-			}
 			
 			if (action.getSelectedStyle() == null){
 				return null;
