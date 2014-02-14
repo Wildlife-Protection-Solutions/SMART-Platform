@@ -24,8 +24,8 @@ package org.wcs.smart.query.model;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
+import org.wcs.smart.query.ui.model.IDropItemFactory;
 /**
  * Query type extension point.
  * 
