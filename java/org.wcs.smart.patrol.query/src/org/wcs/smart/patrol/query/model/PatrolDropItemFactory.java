@@ -124,16 +124,16 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 			
 		}else if (source instanceof AreaType){
-			if (queryItemPanelId == SummaryFilterPanel.ID){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
 			}
 		}else if (source instanceof Area){
-			if (queryItemPanelId == SummaryFilterPanel.ID){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 			}
 		}else if (source instanceof AllCategory){
-			if (queryItemPanelId == SummaryFilterPanel.ID ||
-					queryItemPanelId == GriddedFilterPanel.ID){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ||
+					queryItemPanelId.equals(GriddedFilterPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
 		}else if (source instanceof IExtensionOption){
