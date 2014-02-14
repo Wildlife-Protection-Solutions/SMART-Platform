@@ -116,13 +116,13 @@ public class GridAnalysisEngine<T> {
 	 * 
 	 */
 	public void rasterizeLinestring(LineString ls) throws Exception {
-
+		LineString orig = ls;
 		if (transform != null){
 			ls = (LineString)JTS.transform(ls, transform);
 		}
 		if (ls == null || ls.getCoordinates() == null){
 			//something happened during the transform; we cannot do anything
-			QueryPlugIn.log("Error occurred rasterizing linestring. (" + ls.toText() + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
+			QueryPlugIn.log("Error occurred rasterizing linestring. Linestring or coordinates is null after transform. (" + orig.toText() + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		
