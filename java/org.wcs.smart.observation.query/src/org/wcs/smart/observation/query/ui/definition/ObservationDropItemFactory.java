@@ -100,16 +100,16 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 			
 		}else if (source instanceof AreaType){
-			if (queryItemPanelId == SummaryFilterPanel.ID){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
 			}
 		}else if (source instanceof Area){
-			if (queryItemPanelId == SummaryFilterPanel.ID){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 			}
 		}else if (source instanceof AllCategory){
-			if (queryItemPanelId == SummaryFilterPanel.ID ||
-					queryItemPanelId == GriddedItemPanel.ID){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ||
+					queryItemPanelId.equals(GriddedItemPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
 		}else if (source instanceof QueryFilterContentProvider.GeneralItems){
