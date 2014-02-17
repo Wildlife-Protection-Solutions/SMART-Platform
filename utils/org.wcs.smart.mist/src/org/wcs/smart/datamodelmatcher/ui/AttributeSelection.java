@@ -86,7 +86,7 @@ public class AttributeSelection {
 	public void CreateAttribute(Composite tab1Composite, int number){
 	      Label smartLabel2 = new Label(tab1Composite, SWT.NONE);
 	      smartLabel2.setText("Attribute #" + number + ":" );
-	      smartLabel2.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+	      smartLabel2.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 	      
 	      attr1 =  new ComboViewer (tab1Composite, SWT.READ_ONLY);
 	      attr1.setContentProvider(ArrayContentProvider.getInstance());
@@ -164,18 +164,18 @@ public class AttributeSelection {
 	      
 	      Composite valueLine = new Composite(tab1Composite, SWT.NONE);
 	      valueLine.setLayout(new GridLayout(3,false));
-	      GridData compGD = new GridData(SWT.FILL, SWT.FILL, true, true);
+	      GridData compGD = new GridData(SWT.FILL, SWT.TOP, true, false);
 	      compGD.minimumHeight = 25;
 	      valueLine.setLayoutData(compGD);
 	      	      
 	      Label smartLabel3 = new Label(valueLine, SWT.NONE);
 	      smartLabel3.setText("Value #" + number + ":" );
-	      smartLabel3.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+	      smartLabel3.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true));
 	      
 	      valueFilter = new Text(valueLine, SWT.BORDER);
 	      valueFilter.setText("<enter text to search the tree>");
 	      valueFilter.setVisible(false);
-	      valueFilter.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true ));
+	      valueFilter.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true ));
 	      
 	      valueFilter.addFocusListener(new FocusListener() {
 	    	  @Override
@@ -191,7 +191,7 @@ public class AttributeSelection {
 	      
 	      
 	      searchButton = new Button(valueLine, SWT.NONE);
-	      searchButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+	      searchButton.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 	      searchButton.setText("Search");
 	      searchButton.setVisible(false);
 	      searchButton.addListener(SWT.Selection, new Listener() {
@@ -209,7 +209,7 @@ public class AttributeSelection {
 	      
 	      value1Combo = new Combo(value1, SWT.DROP_DOWN | SWT.SIMPLE | SWT.READ_ONLY);
 	      value1Combo.setItems(new String[]{"TRUE", "FALSE"});
-	      value1Combo.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+	      value1Combo.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 
 	      value1ComboViewer =  new ComboViewer (value1, SWT.READ_ONLY);
 	      value1ComboViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -223,7 +223,7 @@ public class AttributeSelection {
 	      
 	      
 	      value1Text = new Text(value1, SWT.BORDER | SWT.SINGLE);
-	      GridData gridtxt1Data = new GridData(SWT.LEFT, SWT.TOP, false, false);
+	      GridData gridtxt1Data = new GridData(SWT.LEFT, SWT.FILL, true, true);
 	      gridtxt1Data.heightHint = 20;
 	      value1Text.setLayoutData(gridtxt1Data);
 	      value1Text.setText(useTotalObservations);
