@@ -49,8 +49,12 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static Activator getDefault() {
 		return plugin;
+		
+		
 	}
 
+	
+	
 	/**
 	 * Returns an image descriptor for the image file at the given plug-in
 	 * relative path
@@ -78,6 +82,8 @@ public class Activator extends AbstractUIPlugin {
 		Activator.context = bundleContext;
 		PreferenceInitializer.migratePreferences();
 		getPreferenceStore().addPropertyChangeListener(getPreferenceListener());
+		
+		configureP2Policy(ProvisioningUI.getDefaultUI().getPolicy());
 	}
 
 	private IPropertyChangeListener getPreferenceListener() {
@@ -103,6 +109,17 @@ public class Activator extends AbstractUIPlugin {
 		return getProvisioningUI().getSession().getProvisioningAgent();
 	}
 
+	private void configureP2Policy(Policy policy) {
+		// policy.setRepositoriesVisible(false);
+		policy.setShowLatestVersionsOnly(true);
+		policy.setGroupByCategory(true);
+		policy.setShowDrilldownRequirements(true);
+		policy.setRestartPolicy(Policy.RESTART_POLICY_PROMPT);
+		// this causes problems in udig as it doesn't seem to be run
+		// in display thread
+		// policy.setRestartPolicy(Policy.RESTART_POLICY_FORCE);
+	}
+	
 	public void stop(BundleContext bundleContext) throws Exception {
 		plugin = null;
 		getPreferenceStore().removePropertyChangeListener(preferenceListener);
