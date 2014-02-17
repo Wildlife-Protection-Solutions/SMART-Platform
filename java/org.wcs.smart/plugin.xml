@@ -109,6 +109,10 @@
                   style="push"
                   tooltip="%changeuserpass.command.tooltip">
             </command>
+            <separator
+                  name="org.wcs.smart.file.separator3"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.systemPref"
                   label="%systempref.command.label"
@@ -116,20 +120,8 @@
                   style="push"
                   tooltip="%systempref.command.tooltip">
             </command>
-            <command
-                  commandId="org.wcs.smart.update.install"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
             <separator
-                  name="org.wcs.smart.separator1"
+                  name="org.wcs.smart.file.separator1"
                   visible="true">
             </separator>
             <command
@@ -149,7 +141,8 @@
                </visibleWhen>
             </command>
             <separator
-                  name="org.wcs.smart.file.separator1">
+                  name="org.wcs.smart.file.separator2"
+                  visible="true">
             </separator>
             <command
                   commandId="org.wcs.smart.logout"
@@ -634,10 +627,6 @@
             id="org.wcs.smart.translateItem"
             name="%tranlsate.command.name">
       </command>
-      <command
-            id="org.wcs.smart.update.install"
-            name="%install.command.label">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -794,10 +783,6 @@
       <handler
             class="org.wcs.smart.ui.TranslateNamesHandler"
             commandId="org.wcs.smart.translateItem">
-      </handler>
-      <handler
-            class="org.wcs.smart.SmartInstallNewSoftwareHandler"
-            commandId="org.wcs.smart.update.install">
       </handler>
    </extension>
    <extension
@@ -1080,11 +1065,6 @@
             class="org.wcs.smart.ui.internal.preference.AutoBackupPerferencePage"
             id="org.wcs.smart.autobackup"
             name="%autobackup.preferencepage.name">
-      </page>
-      <page
-            class="org.eclipse.equinox.p2.ui.RepositoryManipulationPage"
-            id="org.wcs.smart.updatesites"
-            name="%updatesite.preferencepage.name">
       </page>
    </extension>
    <extension
