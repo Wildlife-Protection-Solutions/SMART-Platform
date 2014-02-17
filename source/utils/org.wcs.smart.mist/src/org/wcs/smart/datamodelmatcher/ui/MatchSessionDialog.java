@@ -53,7 +53,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
@@ -61,6 +63,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tracker;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
@@ -140,6 +143,7 @@ public class MatchSessionDialog extends Dialog {
 	
 	  public int open() {
 
+          Display display = shell.getDisplay();
           
           GridLayout layout = new GridLayout(1, false);
 		  shell.setLayout(layout);
@@ -163,13 +167,13 @@ public class MatchSessionDialog extends Dialog {
   	    
   	      
   	      //left
-  	      Composite left = new Composite(main, SWT.None);
+  	      final Composite left = new Composite(main, SWT.None);
 		  GridLayout llayout = new GridLayout(3, false);
 	      left.setLayout(llayout);
 	    
 	      GridData leftGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      left.setLayoutData(leftGridData);
-	      	      
+	      
   	    
 	      //left - content
 	      // define the TableViewer---------------------------------------------------------------------------------
@@ -195,7 +199,7 @@ public class MatchSessionDialog extends Dialog {
 	   // define layout for the viewer
 	      GridData tgridData = new GridData(SWT.FILL,SWT.FILL, true, true,3,0);
 	      //tgridData.widthHint = 510;
-	      tgridData.heightHint = 500;
+	      tgridData.heightHint = 350;
 	      viewer.getControl().setLayoutData(tgridData);
 	      
 	      viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -209,7 +213,24 @@ public class MatchSessionDialog extends Dialog {
 
 	   // end Viewer---------------------------------------------------------------------------------
 	      
-
+	      
+	      //Mid-Left composite - full listing of Mist names
+	      final Composite midLeft = new Composite(left, SWT.BORDER);
+		  GridLayout trlayout = new GridLayout(2, false);
+	      midLeft.setLayout(trlayout);
+	      
+	      Device device = Display.getCurrent();
+	      Color topColor = new Color (device, 255, 235, 235);
+	      midLeft.setBackground(topColor);
+	    
+	      GridData midLeftGridData = new GridData(SWT.FILL,SWT.CENTER, true, false,3,0);
+	      //midLeftGridData.widthHint = 510;
+	      midLeft.setLayoutData(midLeftGridData);
+	    
+	      
+	      
+	      //---------------------------------------------------------------------
+	      //Left save session buttons etc.
 	      Composite bottomLeft = new Composite(left, SWT.None);
 	      GridLayout btmleftLayout = new GridLayout(3, false);
 	      bottomLeft.setLayout(btmleftLayout);
@@ -220,7 +241,7 @@ public class MatchSessionDialog extends Dialog {
 	      totalMatched = new Label(bottomLeft, SWT.READ_ONLY);
 	      totalMatched.setText("Matched: " + ms.getNumMatched().toString() + " of " + ms.getNumTotal().toString() );
 	      GridData totalGridData = new GridData(SWT.FILL,SWT.FILL, false, false);
-	      totalGridData.widthHint = 115;
+	      totalGridData.widthHint = 120;
 	      totalMatched.setLayoutData(totalGridData);
 	      
 	      done = new Button(bottomLeft, SWT.NONE);
@@ -263,23 +284,34 @@ public class MatchSessionDialog extends Dialog {
 	      GridData rightGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      right.setLayoutData(rightGridData);
 
+
 	      
-	      //Top Right composite
-	      Composite topRight = new Composite(right, SWT.BORDER);
-		  GridLayout trlayout = new GridLayout(2, false);
-	      topRight.setLayout(trlayout);
+	      /*
+	      topRight.addListener(SWT.MouseDown, new Listener() {
+
+	          public void handleEvent(Event e) {
+
+	            Tracker tracker = new Tracker(topRight.getParent(), SWT.RESIZE | SWT.DOWN|SWT.UP);
+	            tracker.setStippled(true);
+	            Rectangle rect = topRight.getBounds();
+	            tracker.setRectangles(new Rectangle[] { rect });
+	            if (tracker.open()) {
+	              Rectangle after = tracker.getRectangles()[0];
+	              topRight.setBounds(after);
+	            }
+	            tracker.dispose();
+	            shell.pack();
+
+	          }
+	        });
+	      */
 	      
-	      Device device = Display.getCurrent();
-	      Color topColor = new Color (device, 255, 235, 235);
-	      topRight.setBackground(topColor);
-	    
-	      GridData topRightGridData = new GridData(SWT.FILL,SWT.CENTER, true, false);
-	      topRight.setLayoutData(topRightGridData);
 	      
+	        
 	      //Top Right elements---------------------------------------------
-	      Label mistLabel = new Label(topRight, SWT.NONE);
+	      Label mistLabel = new Label(midLeft, SWT.NONE);
 	      mistLabel.setBackground(topColor);
-	      mistLabel.setText("MIST Observation:" );
+	      mistLabel.setText("MIST Observation Details:" );
 	      FontData fontData = mistLabel.getFont().getFontData()[0];
 	      Font font = new Font(getParent().getDisplay(), new FontData(fontData.getName(), fontData
 	    		    .getHeight(), SWT.BOLD));
@@ -289,11 +321,11 @@ public class MatchSessionDialog extends Dialog {
 
  
 	      
-	      Label mistLabel1 = new Label(topRight, SWT.NONE);
+	      Label mistLabel1 = new Label(midLeft, SWT.NONE);
 	      mistLabel1.setBackground(topColor);
 	      mistLabel1.setText("Observation Group:" );
 	      
-	      mistText1 = new Text(topRight, SWT.NONE);
+	      mistText1 = new Text(midLeft, SWT.NONE);
 	      mistText1.setBackground(topColor);
 	      GridData m1 = new GridData(SWT.FILL,SWT.CENTER, true, false);
 	      m1.widthHint = 250;
@@ -301,84 +333,83 @@ public class MatchSessionDialog extends Dialog {
 	      
 	      mistText1.setEnabled(false);
 	      
-	      Label mistLabel2 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      Label mistLabel2 = new Label(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistLabel2.setBackground(topColor);
 	      mistLabel2.setText("Observation:" );
 	      
-	      mistText2 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText2 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText2.setBackground(topColor);
 	      mistText2.setLayoutData(m1);
 	      mistText2.setEnabled(false);
 	      
-	      Label mistLabel3 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      Label mistLabel3 = new Label(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistLabel3.setBackground(topColor);
 	      mistLabel3.setText("Observation Code:" );
 	      
-	      mistText3 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText3 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText3.setBackground(topColor);
 	      mistText3.setLayoutData(m1);
 	      mistText3.setEnabled(false);
 	      
-	      Label mistLabel4 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      Label mistLabel4 = new Label(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistLabel4.setBackground(topColor);
 	      mistLabel4.setText("Item:" );
 	      
-	      mistText4 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText4 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText4.setBackground(topColor);
 	      mistText4.setLayoutData(m1);
 	      mistText4.setEnabled(false);
 	      
-	      Label mistLabel5 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      Label mistLabel5 = new Label(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistLabel5.setBackground(topColor);
 	      mistLabel5.setText("Subcode 1:" );
 	      
-	      mistText5 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText5 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText5.setBackground(topColor);
 	      mistText5.setLayoutData(m1);
 	      mistText5.setEnabled(false);
 	      
-	      Label mistLabel6 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      Label mistLabel6 = new Label(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistLabel6.setBackground(topColor);
 	      mistLabel6.setText("Subcode 2:" );
 	      
-	      mistText6 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText6 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText6.setBackground(topColor);
 	      mistText6.setLayoutData(m1);
 	      mistText6.setEnabled(false);
 	      
-	      Label mistLabel7 = new Label(topRight, SWT.NONE | SWT.READ_ONLY);
+	      Label mistLabel7 = new Label(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistLabel7.setBackground(topColor);
 	      mistLabel7.setText("Subcode 3:" );
 	      
-	      mistText7 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText7 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText7.setBackground(topColor);
 	      mistText7.setLayoutData(m1);
 	      mistText7.setEnabled(false);
 	      
-	      Label mistLabel8 = new Label(topRight, SWT.NONE );
+	      Label mistLabel8 = new Label(midLeft, SWT.NONE );
 	      mistLabel8.setBackground(topColor);
 	      mistLabel8.setText("Subcode 4:" );
 	      
-	      mistText8 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText8 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText8.setBackground(topColor);
 	      mistText8.setLayoutData(m1);
 	      mistText8.setEnabled(false);
 	      
-	      Label mistLabel9 = new Label(topRight, SWT.NONE);
+	      Label mistLabel9 = new Label(midLeft, SWT.NONE);
 	      mistLabel9.setBackground(topColor);
 	      mistLabel9.setText("Subcode 5:" );
 	      
-	      mistText9 = new Text(topRight, SWT.NONE | SWT.READ_ONLY);
+	      mistText9 = new Text(midLeft, SWT.NONE | SWT.READ_ONLY);
 	      mistText9.setBackground(topColor);
 	      mistText9.setLayoutData(m1);
 	      mistText9.setEnabled(false);
 	      //end of Top Right elements--------------------------------------
 	      	      
 	      
-	      
 	      //bottom Right composite
 	      
-	      Composite bottomRight = new Composite(right, SWT.BORDER);
+	      final Composite bottomRight = new Composite(right, SWT.BORDER);
 		  GridLayout brlayout = new GridLayout(2, false);
 		  bottomRight.setLayout(brlayout);
 
@@ -386,7 +417,27 @@ public class MatchSessionDialog extends Dialog {
 	      GridData bottomRightGridData = new GridData(SWT.FILL,SWT.FILL, true, true);
 	      bottomRight.setLayoutData(bottomRightGridData);
 
-	      bottomRight.setSize (420, 380);
+	      //bottomRight.setSize (420, 380);
+	      
+	      /*
+	      bottomRight.addListener(SWT.MouseDown, new Listener() {
+
+	          public void handleEvent(Event e) {
+
+	            Tracker tracker = new Tracker(bottomRight.getParent(), SWT.RESIZE | SWT.DOWN|SWT.UP);
+	            tracker.setStippled(true);
+	            Rectangle rect = bottomRight.getBounds();
+	            tracker.setRectangles(new Rectangle[] { rect });
+	            if (tracker.open()) {
+	              Rectangle after = tracker.getRectangles()[0];
+	              bottomRight.setBounds(after);
+	            }
+	            tracker.dispose();
+	          }
+	        });
+*/
+	      
+
 
 	      //Bottom Right elements---------------------------------------------
 	      //top line spacing, label and language drop down
@@ -591,8 +642,7 @@ public class MatchSessionDialog extends Dialog {
 	      
   	      shell.pack();
           shell.open();
-          Display display = shell.getDisplay();
-          
+   
           
 	      
           while (!shell.isDisposed()) {
