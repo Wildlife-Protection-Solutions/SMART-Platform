@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.org.wcs.smart.p2.licenseManager">
+   <implementation class="org.wcs.smart.p2.SimpleLicenseManager"/>
+   <service>
+      <provide interface="org.eclipse.equinox.p2.ui.LicenseManager"/>
+   </service>
+</scr:component>
