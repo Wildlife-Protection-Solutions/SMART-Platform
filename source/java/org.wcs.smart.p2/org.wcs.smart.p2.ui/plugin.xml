@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.eclipse.equinox.p2.ui.RepositoryManipulationPage"
+            id="org.wcs.smart.p2.ui.SitesPreferencePage"
+            name="Available Software Sites">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.p2.ui.install"
+            name="Install New Plugins ...">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.p2.ui.InstallNewSoftwareHandler"
+            commandId="org.wcs.smart.p2.ui.install">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.installationPages">
+      <page
+            class="org.wcs.smart.p2.ui.InstalledSoftwarePage"
+            id="10.org.wcs.smart.p2.ui.InstalledSoftwarePage"
+            name="Installed Plugins">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.smart.file.separator1">
+         <command
+               commandId="org.wcs.smart.p2.ui.install"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+</plugin>
