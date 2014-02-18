@@ -2,14 +2,16 @@
 <feature
       id="org.wcs.smart.birtfeature"
       label="SMART Birt Feature"
-      version="2.0.0"
-      provider-name="org.wcs.smart">
+      version="3.0.0"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
+   <description>
       The BIRT requirements to support the SMART reporting module
    </description>
 
-   <copyright url="http://www.example.com/copyright">
+   <copyright>
       Copyright (C) 2012 Wildlife Conservation Society
    </copyright>
 

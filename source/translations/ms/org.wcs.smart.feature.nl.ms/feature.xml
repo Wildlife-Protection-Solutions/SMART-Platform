@@ -2,19 +2,17 @@
 <feature
       id="org.wcs.smart.ms"
       label="SMART Malay Language Pack"
-      version="2.0.0">
+      version="2.0.0"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
-      Complete malay language pack includes required BIRT language fragements and eclipse fragments.
+   <description>
+      Malay language pack for core SMART features.  This includes the BIRT and Eclipse language packs.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
-
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
-   </license>
 
    <plugin
          id="org.wcs.smart.intelligence.nl_ms"

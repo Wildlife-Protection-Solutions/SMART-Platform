@@ -2,19 +2,17 @@
 <feature
       id="org.wcs.smart.plan.feature.nl.hi"
       label="Plan Hindi Language Pack"
-      version="2.0.0">
+      version="3.0.0"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      Hindi translations for the Planning plugin.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
-
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
-   </license>
 
    <plugin
          id="org.wcs.smart.plan.nl_hi"

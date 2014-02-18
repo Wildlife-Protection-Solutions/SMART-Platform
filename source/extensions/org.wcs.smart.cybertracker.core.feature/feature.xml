@@ -3,14 +3,18 @@
       id="org.wcs.smart.cybertracker.core.feature"
       label="SMART CyberTracker Module"
       version="3.0.0"
-      plugin="org.wcs.smart.cybertracker">
+      plugin="org.wcs.smart.cybertracker"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      Adds support for mobile data collection using Cybertracker enabled
+devices.  See http://http://www.cybertracker.org/ for more information
+on Cybertracker.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
    <license url="http://www.example.com/license">

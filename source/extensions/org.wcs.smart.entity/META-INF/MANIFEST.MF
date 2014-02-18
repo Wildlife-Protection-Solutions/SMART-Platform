@@ -7,15 +7,15 @@ Bundle-Activator: org.wcs.smart.entity.EntityPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart;bundle-version="2.0.1",
- org.wcs.smart.observation;bundle-version="3.0.0",
+ org.wcs.smart,
+ org.wcs.smart.observation,
  org.eclipse.ui.forms,
- net.refractions.udig.style.sld;bundle-version="1.2.0",
- org.wcs.smart.query;bundle-version="3.0.0",
- org.eclipse.equinox.p2.engine;bundle-version="2.1.1",
- org.wcs.smart.report.birt.query;bundle-version="2.0.0",
- org.wcs.smart.report.birt.map;bundle-version="2.0.1",
- org.wcs.smart.p2;bundle-version="1.0.0"
+ net.refractions.udig.style.sld,
+ org.wcs.smart.query,
+ org.eclipse.equinox.p2.engine,
+ org.wcs.smart.report.birt.query,
+ org.wcs.smart.report.birt.map,
+ org.wcs.smart.p2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.entity.model,

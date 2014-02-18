@@ -2,15 +2,17 @@
 <feature
       id="org.wcs.smart.intelligence.core.feature"
       label="SMART Intelligence Module"
-      version="2.0.0"
-      plugin="org.wcs.smart.intelligence">
+      version="3.0.0"
+      plugin="org.wcs.smart.intelligence"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      This plugin allows for tracking of intelligence related records and associating those records with patrols.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
    <license url="http://www.example.com/license">
