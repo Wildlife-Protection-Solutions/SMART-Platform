@@ -3,14 +3,16 @@
       id="org.wcs.smart.independentincident.feature"
       label="Core SMART Independent Incident Module (Required)"
       version="1.0.0"
-      plugin="org.wcs.smart">
+      plugin="org.wcs.smart"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      Allows for the addition of incidents that are not associated with any other form of data entry (eg not associated with patrols).
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
    <license url="http://www.example.com/license">

@@ -2,21 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART BIRT Map Item
 Bundle-SymbolicName: org.wcs.smart.report.birt.map;singleton:=true
-Bundle-Version: 2.0.1
+Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.report.birt.map.SmartMapItemPlugIn
-Require-Bundle: org.eclipse.birt.report.designer.ui;bundle-version="3.7.2";visibility:=reexport,
- org.eclipse.birt.report.engine;bundle-version="3.7.2";visibility:=reexport,
- org.eclipse.birt.data;bundle-version="3.7.2";visibility:=reexport,
- org.eclipse.birt.report.designer.ui.views;bundle-version="3.7.2";visibility:=reexport,
- org.eclipse.ui.forms;bundle-version="3.5.100",
+Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
+ org.eclipse.birt.report.engine;visibility:=reexport,
+ org.eclipse.birt.data;visibility:=reexport,
+ org.eclipse.birt.report.designer.ui.views;visibility:=reexport,
+ org.eclipse.ui.forms,
  org.eclipse.core.runtime,
- org.eclipse.jface.databinding;bundle-version="1.5.0";visibility:=reexport,
- org.eclipse.core.databinding;bundle-version="1.4.0";visibility:=reexport,
- net.refractions.udig.style.sld;bundle-version="1.2.0",
- eu.udig.style.advanced;bundle-version="1.0.2",
- net.refractions.udig.mapgraphic;bundle-version="1.2.0",
- org.wcs.smart.report;bundle-version="2.0.0",
- org.wcs.smart;bundle-version="2.0.0";visibility:=reexport,
+ org.eclipse.jface.databinding;visibility:=reexport,
+ org.eclipse.core.databinding;visibility:=reexport,
+ net.refractions.udig.style.sld,
+ eu.udig.style.advanced,
+ net.refractions.udig.mapgraphic,
+ org.wcs.smart.report,
+ org.wcs.smart;visibility:=reexport,
  org.wcs.smart.query
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

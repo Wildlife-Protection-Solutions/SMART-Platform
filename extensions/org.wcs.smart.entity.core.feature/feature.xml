@@ -3,14 +3,17 @@
       id="org.wcs.smart.entity.core.feature"
       label="SMART Entity Module"
       version="1.0.0"
-      plugin="org.wcs.smart.entity">
+      plugin="org.wcs.smart.entity"
+      license-feature="org.wcs.smart.smart_feature"
+      license-feature-version="3.0.0">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      Provides additional features for tracking individual entities
+and their associated properties over time and space.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
    <license url="http://www.example.com/license">
