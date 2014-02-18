@@ -8,9 +8,8 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.fielddata.dataseparater">
+            locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.fielddata?before=org.wcs.smart.fielddata">
          <menu
-               icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.patrol"
                label="%patrol.menu.label"
                mnemonic="%patrol.menu.mnemonic">
