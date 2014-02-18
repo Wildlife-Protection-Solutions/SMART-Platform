@@ -118,7 +118,7 @@ public class EntityTable extends SmartBirtTable {
 		for (EntityAttribute ea : et.getAttributes()){
 			AttributeType et = ea.getDmAttribute().getType();
 			if (et == AttributeType.BOOLEAN){
-				cols[i+add]=java.sql.Types.BOOLEAN;
+				cols[i+add]=java.sql.Types.VARCHAR;
 			}else if (et == AttributeType.DATE){
 				cols[i+add]=java.sql.Types.DATE;
 			}else if (et == AttributeType.LIST ||
@@ -164,11 +164,13 @@ public class EntityTable extends SmartBirtTable {
 			index = index - 2;
 		}
 		EntityAttributeValue eav = e.findAttribute(et.getAttributes().get(index-2));
+		
 		if (eav == null){
 			return null;
 		}
 		if (eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.LIST ||
-				eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.TREE ){
+				eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.TREE ||
+				eav.getEntityAttribute().getDmAttribute().getType() == AttributeType.BOOLEAN){
 			return eav.getValueAsString();
 		}
 		return eav.getValue();
