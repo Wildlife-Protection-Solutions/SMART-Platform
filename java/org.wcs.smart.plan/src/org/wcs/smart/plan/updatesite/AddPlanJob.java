@@ -120,7 +120,6 @@ public class AddPlanJob extends Job {
 	}
 
 	private void createPlanTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -183,11 +182,9 @@ public class AddPlanJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.plan to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 
 	private void createPlanTargetTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -218,11 +215,9 @@ public class AddPlanJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.plan_target to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 
 	private void createPatrolPlanTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -252,12 +247,10 @@ public class AddPlanJob extends Job {
 				c.createStatement().execute("GRANT SELECT ON smart.patrol_plan to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 		
 	}
 
 	private void createPlanTargetPointTable(Session session) {
-		session.beginTransaction();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -282,7 +275,6 @@ public class AddPlanJob extends Job {
 				c.createStatement().execute("GRANT ALL PRIVILEGES ON smart.plan_target_point to analyst"); //$NON-NLS-1$
 			}
 		});
-		session.getTransaction().commit();
 	}
 	
 	private class PlanTablesMarkers {

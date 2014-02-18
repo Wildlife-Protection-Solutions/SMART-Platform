@@ -1,10 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.p2;
-
-import java.io.IOException;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 import org.eclipse.equinox.p2.core.IAgentLocation;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.engine.IProfileRegistry;
@@ -17,11 +35,16 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+
+
 /**
- * The activator class controls the plug-in life cycle
+ * The plugin activator for managing p2 interactions.
+ * 
+ *<p>This is similar to the org.eclipse.equinox.p2.ui.sdk plugin
+ *with modifications for SMART specific requirements.</p>
+ * 
  */
 public class Activator extends AbstractUIPlugin {
 
@@ -31,10 +54,8 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 
-	
 	private static BundleContext context;
 	private ScopedPreferenceStore preferenceStore;
-
 	private IPropertyChangeListener preferenceListener;
 
 	
@@ -48,12 +69,8 @@ public class Activator extends AbstractUIPlugin {
 	 * @return the instance
 	 */
 	public static Activator getDefault() {
-		return plugin;
-		
-		
+		return plugin;	
 	}
-
-	
 	
 	/**
 	 * Returns an image descriptor for the image file at the given plug-in
@@ -127,7 +144,7 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static IStatus getNoSelfProfileStatus() {
-		return new Status(IStatus.WARNING, PLUGIN_ID, "Could not locate the running profile instance. The eclipse.p2.data.area and eclipse.p2.profile properties may not be set correctly in this application's config.ini file.");
+		return new Status(IStatus.WARNING, PLUGIN_ID, "Could not locate the running profile instance. The eclipse.p2.data.area and eclipse.p2.profile properties may not be set correctly in this application's config.ini file."); //$NON-NLS-1$
 	}
 
 	void updateWithPreferences(Policy policy) {
@@ -158,13 +175,13 @@ public class Activator extends AbstractUIPlugin {
 		getContext().ungetService(ref);
 		return location;
 	}
-
-	public void savePreferences() {
-		if (preferenceStore != null)
-			try {
-				preferenceStore.save();
-			} catch (IOException e) {
-				StatusManager.getManager().handle(new Status(IStatus.ERROR, PLUGIN_ID, 0, "Error saving update preferences", e), StatusManager.LOG | StatusManager.SHOW);
-			}
-	}
+//
+//	public void savePreferences() {
+//		if (preferenceStore != null)
+//			try {
+//				preferenceStore.save();
+//			} catch (IOException e) {
+//				StatusManager.getManager().handle(new Status(IStatus.ERROR, PLUGIN_ID, 0, "Error saving update preferences", e), StatusManager.LOG | StatusManager.SHOW);
+//			}
+//	}
 }

@@ -22,8 +22,8 @@
 package org.wcs.smart.cybertracker.updatesite;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
  * Action that is called when CyberTracker plug-in is uninstalled

@@ -33,6 +33,10 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
          id="org.wcs.smart.udig-feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.wcs.smart.p2.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.wcs.smart.hibernate.libs"
          download-size="0"

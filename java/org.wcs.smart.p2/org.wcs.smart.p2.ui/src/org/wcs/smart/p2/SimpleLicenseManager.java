@@ -21,11 +21,12 @@ import org.eclipse.equinox.p2.ui.LicenseManager;
 import org.osgi.service.prefs.Preferences;
 
 /**
+ * Copied from org.eclipse.equinox.internal.p2.ui.sdk.prefs.SimpleLicenseManager
+ * 
  * SimpleLicenseManager is a license manager that keeps track of 
  * IInstallableUnit licenses using their UUID.  The licenses ids
  * are stored in the profile's preferences.
  * 
- * @since 3.6
  */
 public class SimpleLicenseManager extends LicenseManager {
 	java.util.Set<String> accepted = new HashSet<String>();

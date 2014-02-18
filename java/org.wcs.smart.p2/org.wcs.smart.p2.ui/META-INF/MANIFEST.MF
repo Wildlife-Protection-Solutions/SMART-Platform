@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: P2 GUI
+Bundle-Name: SMART P2 Configuration PlugIn
 Bundle-SymbolicName: org.wcs.smart.p2;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0
 Bundle-Activator: org.wcs.smart.p2.Activator
 Require-Bundle: org.eclipse.ui;bundle-version="3.6.0",
  org.eclipse.core.runtime,

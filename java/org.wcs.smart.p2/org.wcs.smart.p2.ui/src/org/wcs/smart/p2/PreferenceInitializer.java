@@ -21,9 +21,11 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
+import org.wcs.smart.p2.internal.Messages;
 
 /**
- * @since 3.4
+ * Copied from org.eclipse.equinox.internal.p2.ui.sdk.prefs.PreferenceInitializer
+ * and them modified for local customizations
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -32,7 +34,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		try {
 			if (pref.keys().length == 0) {
 				// migrate preferences from instance scope to profile scope
-				Preferences oldPref = new InstanceScope().getNode(Activator.PLUGIN_ID);
+				Preferences oldPref = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
 				// don't migrate everything.  Some of the preferences moved to
 				// another bundle.
 				pref.put(PreferenceConstants.PREF_OPEN_WIZARD_ON_ERROR_PLAN, oldPref.get(PreferenceConstants.PREF_OPEN_WIZARD_ON_ERROR_PLAN, MessageDialogWithToggle.PROMPT));
@@ -40,7 +42,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 				pref.flush();
 			}
 		} catch (BackingStoreException e) {
-			StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, 0, "Error accessing preferences.", e), StatusManager.LOG);
+			StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, 0, Messages.PreferenceInitializer_PreferenceError, e), StatusManager.LOG);
 		}
 	}
 
@@ -48,7 +50,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
-		Preferences node = new DefaultScope().getNode("org.eclipse.equinox.p2.ui.sdk"); //$NON-NLS-1$
+		Preferences node = DefaultScope.INSTANCE.getNode("org.wcs.smart.p2"); //$NON-NLS-1$
 		// default values
 		node.putBoolean(PreferenceConstants.PREF_SHOW_LATEST_VERSION, true);
 		node.put(PreferenceConstants.PREF_OPEN_WIZARD_ON_ERROR_PLAN, MessageDialogWithToggle.PROMPT);
