@@ -22,7 +22,7 @@
 package org.wcs.smart.plan.updatesite;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.common.updatesite.UninstallProvisioningAction;
+import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 
 /**

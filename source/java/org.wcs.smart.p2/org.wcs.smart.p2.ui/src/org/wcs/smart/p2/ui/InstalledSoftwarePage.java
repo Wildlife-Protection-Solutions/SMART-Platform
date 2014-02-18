@@ -1,3 +1,36 @@
+/*******************************************************************************
+ *  Copyright (c) 2008, 2011 IBM Corporation and others.
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ * 
+ *  Contributors:
+ *     IBM Corporation - initial API and implementation
+ *     Sonatype, Inc. - ongoing development
+ *******************************************************************************/
+
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.p2.ui;
 
 import org.eclipse.core.runtime.IStatus;
@@ -16,6 +49,7 @@ import org.eclipse.equinox.p2.ui.ICopyable;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -30,14 +64,23 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISourceProvider;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.about.InstallationPage;
 import org.eclipse.ui.menus.AbstractContributionFactory;
-import org.eclipse.ui.services.ISourceProviderService;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.p2.internal.Messages;
+import org.wcs.smart.ui.UserNamePasswordDialog;
 
+/**
+ * Modified version of the org.eclipse.equinox.p2.ui.sdk installed software pages.
+ * 
+ * @author Emily
+ *
+ */
 public class InstalledSoftwarePage extends InstallationPage implements ICopyable {
 
 	private static final int UPDATE_ID = IDialogConstants.CLIENT_ID;
@@ -66,7 +109,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 				ProvUI.reportStatus(status, StatusManager.LOG);
 			Text text = new Text(parent, SWT.WRAP | SWT.READ_ONLY);
 			text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			text.setText(ProvUIMessages.InstalledSoftwarePage_NoProfile);
+			text.setText(""); //$NON-NLS-1$
 			setControl(text);
 			return;
 		}
@@ -107,51 +150,19 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 	public void createPageButtons(Composite parent) {
 		if (profileId == null)
 			return;
-//		// For the update action, we create a custom selection provider that will interpret no
-//		// selection as checking for updates to everything.
-//		// We also override the run method to close the containing dialog
-//		// if we successfully try to resolve.  This is done to ensure that progress
-//		// is shown properly.
-//		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=236495
-//		UpdateAction updateAction = new UpdateAction(getProvisioningUI(), new ISelectionProvider() {
-//			public void addSelectionChangedListener(ISelectionChangedListener listener) {
-//				installedIUGroup.getStructuredViewer().addSelectionChangedListener(listener);
-//			}
-//
-//			public ISelection getSelection() {
-//				StructuredViewer viewer = installedIUGroup.getStructuredViewer();
-//				ISelection selection = viewer.getSelection();
-//				if (selection.isEmpty()) {
-//					final Object[] all = ((IStructuredContentProvider) viewer.getContentProvider()).getElements(viewer.getInput());
-//					return new StructuredSelection(all);
-//				}
-//				return selection;
-//			}
-//
-//			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-//				installedIUGroup.getStructuredViewer().removeSelectionChangedListener(listener);
-//			}
-//
-//			public void setSelection(ISelection selection) {
-//				installedIUGroup.getStructuredViewer().setSelection(selection);
-//			}
-//		}, profileId, true) {
-//			public void run() {
-//				super.run();
-//				if (getReturnCode() == Window.OK)
-//					getPageContainer().closeModalContainers();
-//			}
-//		};
-//		updateAction.setSkipSelectionPage(true);
-//		updateButton = createButton(parent, UPDATE_ID, updateAction.getText());
-//		updateButton.setData(BUTTON_ACTION, updateAction);
+
 		
-//		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
-        if (true){
-			// Uninstall action
-			Action uninstallAction = new UninstallAction(getProvisioningUI(), installedIUGroup.getStructuredViewer(), profileId) {
+		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
+ 			// Uninstall action
+			Action uninstallAction = new UninstallAction(getProvisioningUI(), 
+					installedIUGroup.getStructuredViewer(), profileId) {
 				public void run() {
+					if (!confirmUninstall()){
+						return;
+					}
+					
 					super.run();
+					
 					if (getReturnCode() == Window.OK)
 						getPageContainer().closeModalContainers();
 				}
@@ -205,7 +216,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 	}
 
 	private IUColumnConfig[] getColumnConfig() {
-		return new IUColumnConfig[] {new IUColumnConfig(ProvUIMessages.ProvUI_NameColumnTitle, IUColumnConfig.COLUMN_NAME, ILayoutConstants.DEFAULT_PRIMARY_COLUMN_WIDTH), new IUColumnConfig(ProvUIMessages.ProvUI_VersionColumnTitle, IUColumnConfig.COLUMN_VERSION, ILayoutConstants.DEFAULT_SMALL_COLUMN_WIDTH), new IUColumnConfig(ProvUIMessages.ProvUI_IdColumnTitle, IUColumnConfig.COLUMN_ID, ILayoutConstants.DEFAULT_COLUMN_WIDTH), new IUColumnConfig(ProvUIMessages.ProvUI_ProviderColumnTitle, IUColumnConfig.COLUMN_PROVIDER, ILayoutConstants.DEFAULT_COLUMN_WIDTH)};
+		return new IUColumnConfig[] {new IUColumnConfig("", IUColumnConfig.COLUMN_NAME, ILayoutConstants.DEFAULT_PRIMARY_COLUMN_WIDTH), new IUColumnConfig("", IUColumnConfig.COLUMN_VERSION, ILayoutConstants.DEFAULT_SMALL_COLUMN_WIDTH), new IUColumnConfig("", IUColumnConfig.COLUMN_ID, ILayoutConstants.DEFAULT_COLUMN_WIDTH), new IUColumnConfig("", IUColumnConfig.COLUMN_PROVIDER, ILayoutConstants.DEFAULT_COLUMN_WIDTH)}; //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-1$
 	}
 
 	private int getDefaultWidth(Control control) {
@@ -231,6 +242,32 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 		clipboard.dispose();
 	}
 
+	protected boolean confirmUninstall(){
+		if (!MessageDialog.openConfirm(getShell(), Messages.InstalledSoftwarePage_DialogTitle, Messages.InstalledSoftwarePage_ConfirmDelete)){
+			return false;
+		}
+		
+		//Require user to re-enter their username/password
+		UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
+				Messages.InstalledSoftwarePage_DialogTitle,
+				Messages.InstalledSoftwarePage_UserNamePassordConfirm,
+				Messages.InstalledSoftwarePage_ButtonName);
+		if (dialog.open() == Window.CANCEL){
+			return false;
+		}
+		
+		if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
+			&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)){
+			
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
+					Messages.InstalledSoftwarePage_ErrordialogTitle, 
+					Messages.InstalledSoftwarePage_InvalidUserName);
+			return false;
+		}
+		return true;
+	}
+	
+	
 	protected void buttonPressed(int buttonId) {
 		switch (buttonId) {
 			case UPDATE_ID :

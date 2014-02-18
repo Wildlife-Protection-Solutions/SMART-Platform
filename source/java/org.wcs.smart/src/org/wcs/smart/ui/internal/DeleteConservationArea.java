@@ -41,6 +41,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.UserNamePasswordDialog;
 
 /**
  * 

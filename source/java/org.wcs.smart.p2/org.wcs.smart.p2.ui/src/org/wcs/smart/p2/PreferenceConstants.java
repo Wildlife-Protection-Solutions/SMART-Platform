@@ -11,7 +11,7 @@
 package org.wcs.smart.p2;
 
 /**
- * @since 3.4
+ * Copied from org.eclipse.equinox.internal.p2.ui.sdk.prefs.PreferenceConstants
  */
 public class PreferenceConstants {
 	public static final String PREF_PAGE_PROVISIONING = "org.eclipse.equinox.internal.p2.ui.sdk.ProvisioningPreferencePage"; //$NON-NLS-1$

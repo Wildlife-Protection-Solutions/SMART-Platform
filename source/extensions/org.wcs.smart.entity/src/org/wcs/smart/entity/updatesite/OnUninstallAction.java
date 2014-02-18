@@ -22,8 +22,8 @@
 package org.wcs.smart.entity.updatesite;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
  * Action that is called when Entity plug-in is uninstalled

@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.wcs.smart.p2.Activator;
+import org.wcs.smart.p2.internal.Messages;
 
 /**
  * PreloadingRepositoryHandler provides background loading of
@@ -66,7 +67,7 @@ abstract class PreloadingRepositoryHandler extends AbstractHandler {
 		}
 		if (profile == null) {
 			// Inform the user nicely
-			MessageDialog.openInformation(null, "Software Updates", "Cannot complete the request.  This installation has not been configured properly for Software Updates.  See the error log for details.");
+			MessageDialog.openInformation(null, Messages.PreloadingRepositoryHandler_SoftwareUpdates, Messages.PreloadingRepositoryHandler_CannotCompleteRequest);
 			// Log the detailed message
 			StatusManager.getManager().handle(Activator.getNoSelfProfileStatus());
 		} else {
