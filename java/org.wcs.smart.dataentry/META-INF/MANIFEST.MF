@@ -6,7 +6,7 @@ Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.dataentry.DataentryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart
+ org.wcs.smart;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.dataentry,

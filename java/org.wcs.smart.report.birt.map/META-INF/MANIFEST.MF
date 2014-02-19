@@ -9,15 +9,12 @@ Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
  org.eclipse.birt.data;visibility:=reexport,
  org.eclipse.birt.report.designer.ui.views;visibility:=reexport,
  org.eclipse.ui.forms,
- org.eclipse.core.runtime,
  org.eclipse.jface.databinding;visibility:=reexport,
  org.eclipse.core.databinding;visibility:=reexport,
  net.refractions.udig.style.sld,
- eu.udig.style.advanced,
  net.refractions.udig.mapgraphic,
- org.wcs.smart.report,
- org.wcs.smart;visibility:=reexport,
- org.wcs.smart.query
+ org.wcs.smart.report;bundle-version="3.0.0",
+ org.wcs.smart;bundle-version="3.0.0";visibility:=reexport
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: org.wcs.smart
