@@ -4,13 +4,11 @@ Bundle-Name: SMART P2 Configuration PlugIn
 Bundle-SymbolicName: org.wcs.smart.p2;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.p2.Activator
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.equinox.p2.ui,
+Require-Bundle: org.eclipse.equinox.p2.ui,
  org.eclipse.compare;resolution:=optional,
- org.wcs.smart,
+ org.wcs.smart;bundle-version="3.0.0",
  org.eclipse.equinox.p2.core,
- org.eclipse.equinox.p2.engine,
+ org.eclipse.equinox.p2.engine;visibility:=reexport,
  org.eclipse.equinox.p2.metadata,
  org.eclipse.equinox.p2.operations
 Bundle-ActivationPolicy: lazy

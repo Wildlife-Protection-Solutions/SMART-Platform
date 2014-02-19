@@ -5,18 +5,10 @@ Bundle-SymbolicName: org.wcs.smart;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Localization: plugin
 Bundle-Activator: org.wcs.smart.SmartPlugIn
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.core.databinding,
- org.eclipse.core.databinding.beans,
- org.eclipse.core.databinding.observable,
- org.eclipse.core.databinding.property,
+Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.jface.databinding,
  com.ibm.icu,
- org.eclipse.core.expressions;bundle-version="3.4.300",
- org.wcs.smart.hibernate.libs;visibility:=reexport,
- net.refractions.udig.libs;bundle-version="1.3.2";visibility:=reexport,
- net.refractions.udig.project;bundle-version="1.3.1";visibility:=reexport,
+ org.wcs.smart.hibernate.libs;bundle-version="3.0.0";visibility:=reexport,
  net.refractions.udig.project.ui;bundle-version="1.3.1";visibility:=reexport,
  net.refractions.udig.catalog.ui;bundle-version="1.3.0",
  net.refractions.udig.tool.default;bundle-version="1.3.0";visibility:=reexport,

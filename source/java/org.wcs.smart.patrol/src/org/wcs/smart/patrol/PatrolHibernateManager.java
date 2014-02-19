@@ -366,14 +366,9 @@ public class PatrolHibernateManager extends HibernateManager{
 		
 		session.saveOrUpdate(patrol);
 		
-
 		if (saveWaypoints){
 			session.flush();
-			
-			
-			
-				
-				
+		
 			//save all the waypoints as well
 			if (patrol.getLegs() != null) {
 				for (PatrolLeg pl : patrol.getLegs()) {
@@ -381,10 +376,12 @@ public class PatrolHibernateManager extends HibernateManager{
 						for (PatrolLegDay pld : pl.getPatrolLegDays()) {
 							if (pld.getWaypoints() != null) {
 								for (PatrolWaypoint wp: pld.getWaypoints()){
-									//update all the waypoint attachments directory
-									for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-										wa.setDatastoreFolderExtension(
-												((PatrolWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(patrol)); 
+									if (wp.getWaypoint().getAttachments() != null){
+										//update all the waypoint attachments directory
+										for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+											wa.setDatastoreFolderExtension(
+												((PatrolWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(patrol));
+										}
 									}
 									for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 										if (wo.getAttachments() != null){

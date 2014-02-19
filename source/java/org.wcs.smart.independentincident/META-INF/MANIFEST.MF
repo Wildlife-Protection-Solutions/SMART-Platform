@@ -5,12 +5,8 @@ Bundle-SymbolicName: org.wcs.smart.independentincident;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: org.wcs.smart.incident.IncidentPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.wcs.smart.observation,
- net.refractions.udig.ui,
- net.refractions.udig.project.ui,
- org.wcs.smart,
+Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
+ org.wcs.smart.observation;bundle-version="3.0.0",
  org.eclipse.ui.forms,
  net.refractions.udig.style.sld
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

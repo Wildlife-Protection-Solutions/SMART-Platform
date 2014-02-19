@@ -5,9 +5,7 @@ Bundle-SymbolicName: org.wcs.smart.observation;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.observation.ObservationPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.wcs.smart,
+Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
  org.eclipse.ui.forms
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
