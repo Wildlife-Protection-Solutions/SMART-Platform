@@ -90,15 +90,16 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
+		
 		session.update(wp);
 		
 		this.wp = wp;
 		if (this.wp.getObservations() != null){
 			for (WaypointObservation ob : this.wp.getObservations()){
 				//add to list
-				ob.setCategory((Category)session.merge(ob.getCategory()));
+				ob.setCategory((Category)session.load(Category.class, ob.getCategory().getUuid()));
 				for (CategoryAttribute ca : ob.getCategory().getAttributes()){
-					ca.setAttribute((Attribute) session.merge(ca.getAttribute()));
+					ca.setAttribute((Attribute) session.load(Attribute.class, ca.getAttribute().getUuid()));
 				}
 				List<WaypointObservation> lst = observations.get(ob.getCategory());
 				if (lst == null) {
@@ -107,9 +108,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				}
 				lst.add(ob);
 				
-				for (WaypointObservationAttribute a : ob.getAttributes()){
-					a.setAttribute((Attribute)session.merge(a.getAttribute()));
-				}
+//				for (WaypointObservationAttribute a : ob.getAttributes()){
+//					a.setAttribute((Attribute)session.merge(a.getAttribute()));
+//				}
 			}
 		}
 		this.workingObservations.putAll(observations);
