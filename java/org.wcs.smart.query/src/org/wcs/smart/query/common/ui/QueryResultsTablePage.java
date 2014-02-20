@@ -159,12 +159,12 @@ public class QueryResultsTablePage  extends EditorPart  {
 	
 	/**
 	 * Updates the table with the new results and ensure
-	 * it is displayed.
+	 * it is displayed.  Null if query was cancelled and nothing to display
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(IPagedQueryResultSet results, IProgressMonitor monitor){
-		content.setTableData(results, monitor);
+	public void updateAndShowTable(IPagedQueryResultSet results){
+		content.setTableData(results);
 	}
 	
 	/**

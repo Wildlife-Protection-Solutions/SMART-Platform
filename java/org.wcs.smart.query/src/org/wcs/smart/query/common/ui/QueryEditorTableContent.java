@@ -117,9 +117,9 @@ public class QueryEditorTableContent {
 	 * Updates the results table data.  This
 	 * runs in the display thread.
 	 * 
-	 * @param items new results
+	 * @param items new results; null if query cancelled and nothing to display
 	 */
-	public void setTableData(final IPagedQueryResultSet items, final IProgressMonitor monitor) {
+	public void setTableData(final IPagedQueryResultSet items) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -128,7 +128,7 @@ public class QueryEditorTableContent {
 					//window closed nothing to update
 					return;
 				}
-				if (monitor.isCanceled()) {
+				if (items == null) {
 					showCancelled();
 				} else {
 					if (infoSection != null){

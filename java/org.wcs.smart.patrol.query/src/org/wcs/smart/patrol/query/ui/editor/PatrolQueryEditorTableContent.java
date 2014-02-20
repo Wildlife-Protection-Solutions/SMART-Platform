@@ -130,7 +130,7 @@ public class PatrolQueryEditorTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final Collection<PatrolQueryResultItem> items, final IProgressMonitor monitor) {
+	public void setTableData(final Collection<PatrolQueryResultItem> items) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -139,7 +139,7 @@ public class PatrolQueryEditorTableContent {
 					//window closed nothing to update
 					return;
 				}
-				if (monitor.isCanceled()){
+				if (items == null ){
 					showCancelled();
 				}else{
 					lblNumResults.setText(String.valueOf(items.size()));

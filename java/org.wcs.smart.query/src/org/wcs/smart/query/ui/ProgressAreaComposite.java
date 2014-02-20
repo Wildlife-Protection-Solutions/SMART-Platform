@@ -118,6 +118,7 @@ public class ProgressAreaComposite extends Composite {
 	public void showCancelled(){
 		lblStatus.setText(Messages.ProgressAreaComposite_QueryCancelledStatus);
 		progresBar.setEnabled(false);
+		progresBar.setSelection(0);
 		btnCancel.setEnabled(false);
 	}
 
@@ -208,6 +209,7 @@ public class ProgressAreaComposite extends Composite {
 							if (progresBar.isDisposed()){
 								return;
 							}
+							setEnabled(true);
 							progresBar.setMinimum(0);
 							progresBar.setMaximum(totalWork);
 							progresBar.setSelection(0);
@@ -218,6 +220,7 @@ public class ProgressAreaComposite extends Composite {
 
 				}
 			};
+			
 			return internalMonitor;
 	}
 	

@@ -153,9 +153,8 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(Collection<PatrolQueryResultItem> results, 
-			IProgressMonitor monitor){
-		content.setTableData(results, monitor);
+	public void updateAndShowTable(Collection<PatrolQueryResultItem> results){
+		content.setTableData(results);
 	}
 	
 	/**

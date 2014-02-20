@@ -163,6 +163,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 				SummaryQueryResult results = (SummaryQueryResult) getQuery().executeQuery(mymonitor);
 				
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					resultsArea.updateAndShowTable(null);
 					return Status.CANCEL_STATUS;
 				}
 				resultsArea.updateAndShowTable(results);
