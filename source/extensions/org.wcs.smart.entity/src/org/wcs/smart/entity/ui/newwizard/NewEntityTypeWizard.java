@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.newwizard;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +39,7 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityType.Status;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
@@ -65,7 +67,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		newType.setCreator(SmartDB.getCurrentEmployee());
 		newType.setDateCreated(new Date());
 		newType.setStatus(Status.ACTIVE);
-		
+		newType.setAttributes(new ArrayList<EntityAttribute>());
 		//set initial id
 		session = HibernateManager.openSession();
 		Query q = session.createQuery("SELECT max(id) FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
