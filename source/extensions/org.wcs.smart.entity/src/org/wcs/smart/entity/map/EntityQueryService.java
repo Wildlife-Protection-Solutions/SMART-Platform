@@ -40,8 +40,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.entity.event.EntityEventManager;
-import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 
