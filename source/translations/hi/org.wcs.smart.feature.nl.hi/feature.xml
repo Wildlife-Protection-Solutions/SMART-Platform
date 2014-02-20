@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.hi"
       label="SMART Hindi Language Pack"
-           version="2.0.0"
+      version="3.0.0"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
 
@@ -13,7 +13,6 @@
    <copyright>
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
-
 
    <plugin
          id="org.wcs.smart.intelligence.nl_hi"
@@ -185,14 +184,6 @@
 
    <plugin
          id="org.eclipse.birt.data.nl_hi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.nl_hi"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -688,14 +679,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ltk.ui.refactoring.nl_hi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.osgi.nl_hi"
          download-size="0"
          install-size="0"
@@ -869,6 +852,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
    <plugin
          id="org.wcs.smart.patrol.query.nl_hi"
          download-size="0"
@@ -884,4 +868,5 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
 </feature>

@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.sw"
       label="SMART Swahili Language Pack"
-     version="2.0.0"
+      version="3.0.0"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
 
@@ -184,14 +184,6 @@
 
    <plugin
          id="org.eclipse.birt.data.nl_sw"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.nl_sw"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -648,14 +640,6 @@
 
    <plugin
          id="org.eclipse.jface.text.nl_sw"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ltk.ui.refactoring.nl_sw"
          download-size="0"
          install-size="0"
          version="0.0.0"
