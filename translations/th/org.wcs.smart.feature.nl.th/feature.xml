@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.th"
       label="SMART Thai Language Pack"
-      version="2.0.0"
+      version="3.0.0"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
 
@@ -29,7 +29,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-         
+
    <plugin
          id="org.wcs.smart.dataentry.nl_th"
          download-size="0"
@@ -37,7 +37,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-         
+
    <plugin
          id="org.wcs.smart.patrol.nl_th"
          download-size="0"
@@ -263,14 +263,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ltk.ui.refactoring.nl_th"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.swt.nl_th"
          download-size="0"
          install-size="0"
@@ -381,5 +373,5 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-         
+
 </feature>
