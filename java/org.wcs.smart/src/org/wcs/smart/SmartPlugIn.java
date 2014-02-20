@@ -198,12 +198,13 @@ public class SmartPlugIn extends AbstractUIPlugin {
 			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
 			exit = true;
 		}
-		
-		try{
-			SmartStartUp.connectToDb();	
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
-			exit= true;
+		if (!exit){
+			try{
+				SmartStartUp.connectToDb();	
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
+				exit= true;
+			}
 		}
 		
 		if (exit){
