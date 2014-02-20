@@ -1018,7 +1018,7 @@ public class PatrolLegDayInputComposite {
 			PatrolWaypoint wp = add.getWaypoint();
 			wp.setPatrolLegDay(patrolLegDate);
 			
-			wp.getWaypoint().setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(0)));
+			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(patrolLegDate.getDate(), false));
 			
 			patrolLegDate.getWaypoints().add(wp);
 			
