@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.newwizard;
 
 import java.net.URL;
@@ -10,10 +31,16 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.QueryTypeGroup;
+import org.wcs.smart.query.model.QueryCategory;
 import org.wcs.smart.query.ui.QueryTypeLabelProvider;
-
+/**
+ * New query wizard
+ * 
+ * @author Emily
+ *
+ */
 public class NewQueryWizard extends Wizard implements IPageChangingListener {
 
 	private ListHelpWizardPage queryGroupPage;
@@ -21,11 +48,16 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 	
 	private IQueryType queryType = null;
 	
+	public NewQueryWizard(){
+		super();
+		super.setWindowTitle(Messages.NewQueryWizard_NewQueryWizardTitle);
+	}
+	
 	@Override
 	public boolean performFinish() {
 		Object x = queryTypePage.getSelection();
 		if (x == null || ! (x instanceof IQueryType)){
-			MessageDialog.openError(getShell(), "Error", "A valid query type must be selected.");
+			MessageDialog.openError(getShell(), Messages.NewQueryWizard_ErrorDialogTitle, Messages.NewQueryWizard_ErrorMessage);
 		}
 		queryType = (IQueryType) x;
 		return true;
@@ -38,13 +70,13 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 	@Override
 	public void addPages() {
 		((WizardDialog) getContainer()).addPageChangingListener(this);
-		queryGroupPage = new ListHelpWizardPage("QUERYGROUP") {
+		queryGroupPage = new ListHelpWizardPage("QUERYGROUP") { //$NON-NLS-1$
 
 			@Override
 			public void updateHelpPage() {
-				QueryTypeGroup group = (QueryTypeGroup) getSelection();
+				QueryCategory group = (QueryCategory) getSelection();
 				if (group == null){
-					helpPage.setText("");
+					helpPage.setText(""); //$NON-NLS-1$
 				}else{
 					helpPage.setText(group.getHtmlDescription());
 				}
@@ -54,16 +86,16 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 		
 		
 		
-		queryTypePage = new ListHelpWizardPage("QUERYTYPE") {
+		queryTypePage = new ListHelpWizardPage("QUERYTYPE") { //$NON-NLS-1$
 			@Override
 			public void updateHelpPage() {
 				IQueryType group = (IQueryType) getSelection();
 				if (group == null){
-					helpPage.setText("");
+					helpPage.setText(""); //$NON-NLS-1$
 				}else{
 					URL url = group.getDescription();
 					if (url == null){
-						helpPage.setText("");
+						helpPage.setText(""); //$NON-NLS-1$
 					}else{
 						helpPage.setUrl(url.toString());
 					}
@@ -76,17 +108,18 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 	}
 	
 	@Override
-	 public void createPageControls(Composite pageContainer) {
-		 super.createPageControls(pageContainer);
-		 queryGroupPage.setOptions(QueryTypeManager.getInstance().getQueryGroups(),new LabelProvider(){
-				public String getText(Object element){
-					return ((QueryTypeGroup)element).getName();
-				}
-			});
-		 
-		 queryGroupPage.setMessage("Select the general type of data you are interesting in querying");
-		queryTypePage.setMessage("Select type of query you wish to perform");
-	 }
+	public void createPageControls(Composite pageContainer) {
+		super.createPageControls(pageContainer);
+		queryGroupPage.setOptions(QueryTypeManager.getInstance()
+				.getQueryGroups(), new LabelProvider() {
+			public String getText(Object element) {
+				return ((QueryCategory) element).getName();
+			}
+		});
+
+		queryGroupPage.setMessage(Messages.NewQueryWizard_DataQuery);
+		queryTypePage.setMessage(Messages.NewQueryWizard_QueryType);
+	}
 	
 	
 	
@@ -95,16 +128,13 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 	 */
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		
 		if (event.getCurrentPage() == queryGroupPage ) {
-			QueryTypeGroup group = (QueryTypeGroup) queryGroupPage.getSelection();
+			QueryCategory group = (QueryCategory) queryGroupPage.getSelection();
 			if (group == null){
 				event.doit = false;
 				return;
 			}
 			queryTypePage.setOptions(group.getTypes(), new QueryTypeLabelProvider());
 		}
-		
-		
 	}
 }

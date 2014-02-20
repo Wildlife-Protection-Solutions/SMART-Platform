@@ -46,13 +46,13 @@
    </extension>
    <extension
          point="org.wcs.smart.query.queryType">
-      <QueryTypeGroup
-            html_description="&lt;p&gt;Queries patrol specific data offering patrol attributes as filters and summary items.&lt;/p&gt;"
+      <QueryCategory
+            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Patrol Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Patrol queries query the patrol data providing patrol attributes in addition to data model items as filters and summary options.&lt;/p&gt;&lt;/p&gt;"
             id="org.wcs.smart.patrol.query.group.PatrolQueries"
             name="Patrol Queries">
-      </QueryTypeGroup>
+      </QueryCategory>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.patrol.query.group.PatrolQueries"
+            QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
             class="org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.SimplePatrolFilterPanel"
@@ -63,7 +63,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.patrol.query.group.PatrolQueries"
+            QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
             class="org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.SimplePatrolFilterPanel"
@@ -74,7 +74,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.patrol.query.group.PatrolQueries"
+            QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
             class="org.wcs.smart.patrol.query.model.types.PatrolQueryType">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.SimplePatrolFilterPanel"
@@ -85,7 +85,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.patrol.query.group.PatrolQueries"
+            QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
             class="org.wcs.smart.patrol.query.model.types.PatrolGridQueryType">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.PatrolGriddedQueryDefinitionPanel"
@@ -100,7 +100,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.patrol.query.group.PatrolQueries"
+            QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
             class="org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.PatrolSummaryGroupByValuePanel"
@@ -194,7 +194,7 @@
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.query.createquery.patrolquery"
-               label="Patrol Queries ..."
+               label="Patrol Queries"
                tooltip="creates queries related to patrol attributes ">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
@@ -259,7 +259,7 @@
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.query.newquery.patrolqueries"
-               label="Patrol Queries ..."
+               label="Patrol Queries"
                tooltip="creates queries related to patrol attributes ">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"

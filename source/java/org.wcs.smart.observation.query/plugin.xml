@@ -18,13 +18,13 @@
    </extension>
    <extension
          point="org.wcs.smart.query.queryType">
-      <QueryTypeGroup
-            html_description="&lt;p&gt;Queries that query across all data sources in the system.  These queries only provide data model items as filters and summary options.&lt;/p&gt;"
+      <QueryCategory
+            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;All Data Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;All data queries, query all observation data sources in the database (includes patrols, independent incidents or observation data from other plugins). Only data model items are available for filters and summary options.&lt;/p&gt;"
             id="org.wcs.smart.observation.query.group.AllData"
             name="All Data Queries">
-      </QueryTypeGroup>
+      </QueryCategory>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
+            QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
@@ -35,7 +35,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
+            QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
@@ -46,7 +46,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
+            QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationGridQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationGriddedQueryDefinitionPanel"
@@ -61,7 +61,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
-            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
+            QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSummaryGroupByValuePanel"

@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
@@ -45,6 +44,7 @@ import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -228,16 +228,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 	
 	@Override
 	public URL getDescription() {
-		IPath path = new Path("src/org/wcs/smart/patrol/query/model/types/patrolsummary.html");
-		URL fileInPlugin = FileLocator.find(PatrolQueryPlugIn.getDefault().getBundle(), path, null);
-		URL page;
-		try {
-			page = FileLocator.toFileURL(fileInPlugin);
-			return page;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		IPath path = new Path("src/org/wcs/smart/patrol/query/model/types/patrolsummary.html"); //$NON-NLS-1$
+		return QueryPlugIn.findHelpURL(path, PatrolQueryPlugIn.getDefault().getBundle());
 	}
 }

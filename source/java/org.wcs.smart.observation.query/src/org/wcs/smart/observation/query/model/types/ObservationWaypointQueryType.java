@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
@@ -36,6 +38,7 @@ import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.SimpleQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -196,6 +199,7 @@ public class ObservationWaypointQueryType implements IQueryType {
 	}
 
 	public URL getDescription() {
-		return null;
+		IPath path = new Path("src/org/wcs/smart/observation/query/model/types/incident.html"); //$NON-NLS-1$
+		return QueryPlugIn.findHelpURL(path, ObservationQueryPlugIn.getDefault().getBundle());
 	}
 }
