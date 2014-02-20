@@ -19,6 +19,7 @@
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="QueryType"/>
+            <element ref="QueryTypeGroup"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -49,7 +50,7 @@
 
    <element name="QueryType">
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
+     	 <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="DefinitionPanel"/>
          </sequence>
          <attribute name="class" type="string" use="required">
@@ -62,10 +63,20 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="QueryTypeGroup" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.query.queryType/@name"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
-   <element name="DefinitionPanel">
+  <element name="DefinitionPanel">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -84,6 +95,38 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.wcs.smart.query.queryItemPanel/QueryItemPanel/@id"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+   
+   <element name="QueryTypeGroup">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="html_description" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -27,11 +27,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -141,19 +138,7 @@ public class QueryTypeDialog extends TitleAreaDialog {
 	}
 	
 	
-	private class QueryTypeLabelProvider extends LabelProvider implements ITableLabelProvider{
-
-		@Override
-		public String getColumnText(Object element, int columnIndex) {
-			return ((IQueryType)element).getGuiName();
-		}
-			
-		@Override
-		public Image getColumnImage(Object element, int columnIndex) {
-			return ((IQueryType)element).getImage();
-		}
-		
-	}
+	
 
 
 }

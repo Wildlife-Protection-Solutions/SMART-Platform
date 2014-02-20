@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
+import java.net.URL;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -96,7 +97,7 @@ public interface IQueryType {
 	 * @param query the query object to update
 	 * @param components the drop panel components that define the new query definition
 	 */
-	public void  updateQueryDefinition(Query query, List<IDefinitionPanel> components);
+	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components);
 	
 	/**
 	 * Determines if the provided components create a valid query
@@ -106,5 +107,11 @@ public interface IQueryType {
 	 * @return null if query is valid otherwise error string
 	 */
 	public String validateQuery(List<IDefinitionPanel> components);
+	
+	/**
+	 * 
+	 * @return a description of the query type
+	 */
+	public URL getDescription();
 	
 }

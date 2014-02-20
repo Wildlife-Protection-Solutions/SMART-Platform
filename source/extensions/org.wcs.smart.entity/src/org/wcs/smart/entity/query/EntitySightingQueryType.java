@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.entity.query;
 
+import java.net.URL;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -117,4 +118,7 @@ public class EntitySightingQueryType implements IQueryType {
 		return null;
 	}
 
+	public URL getDescription() {
+		return null;
+	}
 }

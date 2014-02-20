@@ -354,6 +354,17 @@
                   id="org.wcs.smart.menu.query.newquery"
                   label="%menu.query.menu.newquery.name"
                   mnemonic="%menu.query.menu.newquery.mnemonic">
+               <command
+                     commandId="org.wcs.smart.query.createUnknownQuery"
+                     id="org.wcs.smart.query.wizard"
+                     label="Open Query Wizard"
+                     style="push"
+                     tooltip="Opens a query wizard to guide you through the query options">
+               </command>
+               <separator
+                     name="org.wcs.smart.query.newquery.separator"
+                     visible="true">
+               </separator>
             </menu>
             <separator
                   name="org.wcs.smart.query.separator8"
@@ -562,6 +573,20 @@
                </or>
             </visibleWhen>
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.createQuery">
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               id="org.wcs.smart.query.createunknown.wizard"
+               label="Open Query Wizard"
+               style="push">
+         </command>
+         <separator
+               name="org.wcs.smart.query.createunknown.separator"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension

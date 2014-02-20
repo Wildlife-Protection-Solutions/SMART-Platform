@@ -24,8 +24,14 @@ package org.wcs.smart.patrol.query.model.types;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
@@ -197,4 +203,42 @@ public class PatrolWaypointQueryType implements IQueryType {
 				PatrolEndDateField.INSTANCE};
 	}
 
+	@Override
+	public URL getDescription() {
+		List<IPath> searchPaths = new ArrayList<IPath>();
+		
+		//build list of suffixes for loading resource bundles
+		String nl = Locale.getDefault().toString();
+		while (true) {
+			searchPaths.add(new Path("src/org/wcs/smart/patrol/query/model/types/patrolincident_" + nl + ".html"));
+			int lastSeparator = nl.lastIndexOf('_');
+			if (lastSeparator == -1)
+				break;
+			nl = nl.substring(0, lastSeparator);
+		}
+		searchPaths.add(new Path("src/org/wcs/smart/patrol/query/model/types/patrolincident.html"));
+		for (IPath path : searchPaths){
+			URL fileInPlugin = FileLocator.find(PatrolQueryPlugIn.getDefault().getBundle(), path, null);
+			
+			
+			if (fileInPlugin != null){
+				PatrolQueryPlugIn.log("url: " +fileInPlugin.toExternalForm(), null);
+				try {
+					URL page = FileLocator.toFileURL(fileInPlugin);
+					
+					if (page != null){
+						PatrolQueryPlugIn.log("url: " + page.toExternalForm(), null);		
+						IPath t2 = new Path("src/org/wcs/smart/patrol/query/model/types/");
+						URL p2 = FileLocator.toFileURL(FileLocator.find(PatrolQueryPlugIn.getDefault().getBundle(), t2, null));
+						PatrolQueryPlugIn.log("url: " + p2.toExternalForm(), null);
+						return page;
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
 }
