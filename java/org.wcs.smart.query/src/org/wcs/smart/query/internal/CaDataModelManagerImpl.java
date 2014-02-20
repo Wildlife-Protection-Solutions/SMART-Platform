@@ -447,9 +447,13 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 			session.beginTransaction();
 			try{
 				dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+				
 				//load into memory; no-lazy loading here.
 				for (Category cat: dm.getCategories()){
 					visitCategory(cat);
+				}
+				for (Category cat: dm.getActiveCategories()){
+					cat.getName();
 				}
 				for (Attribute att: dm.getAttributes()){
 					att.getAggregations().size();
