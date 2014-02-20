@@ -109,8 +109,10 @@ public interface IQueryType {
 	public String validateQuery(List<IDefinitionPanel> components);
 	
 	/**
+	 * This url is currently used in the new query wizard.  
 	 * 
-	 * @return a description of the query type
+	 * @return a url link to a html page that contains
+	 * a description of the query type; can return null
 	 */
 	public URL getDescription();
 	

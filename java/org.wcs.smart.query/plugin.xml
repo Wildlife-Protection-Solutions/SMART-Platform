@@ -357,7 +357,7 @@
                <command
                      commandId="org.wcs.smart.query.createUnknownQuery"
                      id="org.wcs.smart.query.wizard"
-                     label="Open Query Wizard"
+                     label="New Query Wizard ..."
                      style="push"
                      tooltip="Opens a query wizard to guide you through the query options">
                </command>
@@ -580,7 +580,7 @@
          <command
                commandId="org.wcs.smart.query.createUnknownQuery"
                id="org.wcs.smart.query.createunknown.wizard"
-               label="Open Query Wizard"
+               label="New Query Wizard ..."
                style="push">
          </command>
          <separator

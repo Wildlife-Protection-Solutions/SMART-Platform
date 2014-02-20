@@ -1,17 +1,24 @@
 package org.wcs.smart.query;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
@@ -309,10 +316,55 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static void logSql(String sql) {
 		if (!LOG_QUERY)
 			return;
-		
 		int status = IStatus.INFO;
 		getDefault().getLog().log(
 				new Status(status, PLUGIN_ID, IStatus.OK, sql, null));
+	}
+	
+	/**
+	 * Finds the given path in the given bundle.  Unpacks the specific
+	 * page as well as the entire directly so html image references
+	 * are maintained.
+	 * 
+	 * @param htmlPage
+	 * @param bundle
+	 * @return
+	 */
+	public static URL findHelpURL(IPath htmlPage, Bundle bundle ){
+
+		List<IPath> searchPaths = new ArrayList<IPath>();
+		
+		//build list of suffixes for loading resource bundles
+		String nl = Locale.getDefault().toString();
+		String suffix = htmlPage.getFileExtension();
+		String prefix = htmlPage.removeFileExtension().toString();
+
+		while (true) {
+			searchPaths.add(new Path(prefix + "_" + nl + "." + suffix)); //$NON-NLS-1$ //$NON-NLS-2$
+			int lastSeparator = nl.lastIndexOf('_');
+			if (lastSeparator == -1)
+				break;
+			nl = nl.substring(0, lastSeparator);
+		}
+		searchPaths.add(htmlPage);
+		for (IPath path : searchPaths){
+			URL fileInPlugin = FileLocator.find(bundle, path, null);
+			
+			if (fileInPlugin != null){
+				try {
+					URL page = FileLocator.toFileURL(fileInPlugin);
+					if (page != null){
+						//unpack entire bundle to ensure any relative images are included
+						IPath t2 = htmlPage.removeLastSegments(1);
+						FileLocator.toFileURL(FileLocator.find(bundle, t2, null));
+						return page;
+					}
+				} catch (IOException e) {
+					QueryPlugIn.log("Could not load patrol type help page.", e); //$NON-NLS-1$
+				}
+			}
+		}
+		return null;
 	}
 
 }

@@ -98,6 +98,8 @@ public class CreateUnknownQueryHandler extends AbstractHandler {
 	private void createUnknownQuery(final ExecutionEvent event){
 		NewQueryWizard w = new NewQueryWizard();
 		WizardDialog d = new WizardDialog(HandlerUtil.getActiveShell(event), w);
+		d.setMinimumPageSize(650,200);
+		
 		if (d.open() != IDialogConstants.OK_ID){
 			return;
 		}

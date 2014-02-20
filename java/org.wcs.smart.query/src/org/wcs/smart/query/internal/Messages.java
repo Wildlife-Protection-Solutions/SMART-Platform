@@ -159,6 +159,11 @@ public class Messages extends NLS {
 	public static String NameCellEditor_CouldNotSaveQueryName;
 	public static String NameCellEditor_UpdateFolderNameJob;
 	public static String NameCellEditor_UpdateQueryNameJob;
+	public static String NewQueryWizard_DataQuery;
+	public static String NewQueryWizard_ErrorDialogTitle;
+	public static String NewQueryWizard_ErrorMessage;
+	public static String NewQueryWizard_NewQueryWizardTitle;
+	public static String NewQueryWizard_QueryType;
 	public static String Operator_AND;
 	public static String Operator_BetweenOp;
 	public static String Operator_Equals;
@@ -354,6 +359,7 @@ public class Messages extends NLS {
 	public static String GridTiffImageExporter_FileNotFound;
 	public static String GridTiffImageExporter_QueryError;
 	public static String GridTiffImageExporter_TiffExporterName;
+	public static String ListHelpWizardPage_PageTitle;
 	public static String ShapeQueryExporter_ExporterName;
 	public static String SimpleQueryExporter_Error_ExportFailed;
 	public static String SimpleQueryExporter_Error_QueryNotRun;

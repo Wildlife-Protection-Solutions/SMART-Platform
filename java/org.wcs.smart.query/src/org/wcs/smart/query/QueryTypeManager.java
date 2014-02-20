@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.QueryTypeGroup;
+import org.wcs.smart.query.model.QueryCategory;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 /**
  * Manages the query type extension. Loads all query types
@@ -44,7 +44,7 @@ public class QueryTypeManager {
 
 	private static final String QUERYTYPE_EXTNAME = "QueryType"; //$NON-NLS-1$
 
-	private static final String QUERYTYPEGROUP_EXTNAME = "QueryTypeGroup"; //$NON-NLS-1$
+	private static final String QUERYTYPEGROUP_EXTNAME = "QueryCategory"; //$NON-NLS-1$
 
 	private static QueryTypeManager instance = null;
 	
@@ -52,7 +52,7 @@ public class QueryTypeManager {
 	private IQueryType[] supportedTypes;
 	private List<QueryTypeWrapper> types;
 	
-	private List<QueryTypeGroup> groups;
+	private List<QueryCategory> groups;
 	
 	private QueryTypeManager(){
 		
@@ -171,14 +171,14 @@ public class QueryTypeManager {
 	}
 	
 	
-	public List<QueryTypeGroup> getQueryGroups(){
+	public List<QueryCategory> getQueryGroups(){
 		return this.groups;
 	}
 	
 	
 	private void readTypesOnly(){
 		List<IQueryType> aTypes = new ArrayList<IQueryType>();
-		groups = new ArrayList<QueryTypeGroup>();
+		groups = new ArrayList<QueryCategory>();
 		
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
@@ -187,7 +187,7 @@ public class QueryTypeManager {
 				String id = e.getAttribute("id"); //$NON-NLS-1$
 				String name = e.getAttribute("name"); //$NON-NLS-1$
 				String help = e.getAttribute("html_description"); //$NON-NLS-1$
-				QueryTypeGroup g = new QueryTypeGroup(id, name, help);
+				QueryCategory g = new QueryCategory(id, name, help);
 				groups.add(g);
 			}else if (e.getName().equals(QUERYTYPE_EXTNAME)){
 				try {
@@ -195,7 +195,7 @@ public class QueryTypeManager {
 					aTypes.add(qType);
 					
 					String id = e.getAttribute(QUERYTYPEGROUP_EXTNAME);
-					for (QueryTypeGroup g : groups){
+					for (QueryCategory g : groups){
 						if (g.getId().equals(id)){
 							g.addQueryType(qType);
 						}

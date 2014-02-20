@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.newwizard;
 
 import java.util.List;
@@ -20,7 +41,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.query.internal.Messages;
 
+/**
+ * Page in the query wizard that contains a list
+ * of items on the left and a browser on the right
+ * for displaying information about the selected list item
+ * 
+ * @author Emily
+ *
+ */
 public abstract class ListHelpWizardPage extends WizardPage {
 
 	private TableViewer options = null;
@@ -30,6 +60,11 @@ public abstract class ListHelpWizardPage extends WizardPage {
 		super(pageName);
 	}
 
+	/**
+	 * Sets the list options and their label provider
+	 * @param data
+	 * @param lblProvider
+	 */
 	public void setOptions (List<?> data, LabelProvider lblProvider){
 		if (options != null){
 			options.setInput(data);
@@ -80,13 +115,22 @@ public abstract class ListHelpWizardPage extends WizardPage {
 				
 			}
 		});
-		main.setWeights(new int[]{40,60});
-		setTitle("New Query Wizard");
+		main.setWeights(new int[]{35,65});
+		setTitle(Messages.ListHelpWizardPage_PageTitle);
 		super.setControl(main);
 	}
 
+	/**
+	 * 
+	 * @return the current selected item
+	 */
 	public Object getSelection(){
 		return ((StructuredSelection)options.getSelection()).getFirstElement();
 	}
+	
+	/**
+	 * Updates the browser with the help page associated with the current
+	 * selection
+	 */
 	public abstract void updateHelpPage();
 }
