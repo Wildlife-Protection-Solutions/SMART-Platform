@@ -19,9 +19,9 @@
    <extension
          point="org.wcs.smart.query.queryType">
       <QueryCategory
-            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;All Data Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;All data queries, query all observation data sources in the database (includes patrols, independent incidents or observation data from other plugins). Only data model items are available for filters and summary options.&lt;/p&gt;"
+            html_description="%querycategory.html_description"
             id="org.wcs.smart.observation.query.group.AllData"
-            name="All Data Queries">
+            name="%querycategory.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
@@ -104,8 +104,8 @@
             locationURI="menu:org.wcs.smart.query.createQuery?after=org.wcs.smart.query.createunknown.separator">
          <menu
                id="org.wcs.smart.query.createquery.alldata"
-               label="All Data Queries ..."
-               tooltip="queries across all observations irregarless of their source ">
+               label="%menu.query.alldata.name"
+               tooltip="%menu.query.alldata.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/observation_query.png"
@@ -157,8 +157,8 @@
             locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
          <menu
                id="org.wcs.smart.menu.query.newquery.alldata"
-               label="All Data Queries ..."
-               tooltip="queries across all observations irregarless of their source ">
+               label="%menu.query.alldata.name"
+               tooltip="%menu.query.alldata.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/observation_query.png"
