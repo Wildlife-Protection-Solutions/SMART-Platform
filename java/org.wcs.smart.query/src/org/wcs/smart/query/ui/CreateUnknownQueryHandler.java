@@ -25,6 +25,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -33,6 +34,7 @@ import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.query.ui.newwizard.NewQueryWizard;
 
 /**
  * Query handler that prompt the user for the type of query they
@@ -91,19 +93,19 @@ public class CreateUnknownQueryHandler extends AbstractHandler {
 			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
 	}
+
 	
 	private void createUnknownQuery(final ExecutionEvent event){
-
-		QueryTypeDialog dialog = new QueryTypeDialog(HandlerUtil.getActiveShell(event));
-		if (dialog.open() != IDialogConstants.OK_ID){
-			return ;
+		NewQueryWizard w = new NewQueryWizard();
+		WizardDialog d = new WizardDialog(HandlerUtil.getActiveShell(event), w);
+		if (d.open() != IDialogConstants.OK_ID){
+			return;
 		}
-		IQueryType type = dialog.getSelectedQueryType();
+		IQueryType type = w.getSelectedQueryType();
 		if (type == null){
 			return ;
 		}
 		createQuery(type);
-		
 	}
 }
 

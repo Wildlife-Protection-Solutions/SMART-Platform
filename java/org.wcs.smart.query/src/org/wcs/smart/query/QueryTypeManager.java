@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.QueryTypeGroup;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 /**
  * Manages the query type extension. Loads all query types
@@ -41,11 +42,17 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  */
 public class QueryTypeManager {
 
+	private static final String QUERYTYPE_EXTNAME = "QueryType"; //$NON-NLS-1$
+
+	private static final String QUERYTYPEGROUP_EXTNAME = "QueryTypeGroup"; //$NON-NLS-1$
+
 	private static QueryTypeManager instance = null;
 	
 	private IQueryType[] allTypes;
 	private IQueryType[] supportedTypes;
 	private List<QueryTypeWrapper> types;
+	
+	private List<QueryTypeGroup> groups;
 	
 	private QueryTypeManager(){
 		
@@ -108,9 +115,6 @@ public class QueryTypeManager {
 	 * @return
 	 */
 	public String getQueryItemPanel(IQueryType qType, String definitionId){
-//		if (supportedTypes == null){
-//			getSupportedQueryTypes();
-//		}
 		for (QueryTypeWrapper q : getTypeConfigurations()){
 			if (q.queryType.getKey().equals(qType.getKey())){
 				return q.itemPanels.get(definitionId);
@@ -125,9 +129,6 @@ public class QueryTypeManager {
 	 * @return all definition panels that are supported for the query type
 	 */
 	public String[] getQueryDefinitionPanelIds(IQueryType qType){
-//		if (supportedTypes == null){
-//			getSupportedQueryTypes();
-//		}
 		for (QueryTypeWrapper q : getTypeConfigurations()){
 			if (q.queryType.getKey().equals(qType.getKey())){
 				return q.definitionPanels.toArray(new String[q.definitionPanels.size()]);
@@ -169,17 +170,42 @@ public class QueryTypeManager {
 		return this.allTypes;
 	}
 	
+	
+	public List<QueryTypeGroup> getQueryGroups(){
+		return this.groups;
+	}
+	
+	
 	private void readTypesOnly(){
 		List<IQueryType> aTypes = new ArrayList<IQueryType>();
+		groups = new ArrayList<QueryTypeGroup>();
+		
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
-		for (IConfigurationElement e : config) {			
-			try {
-				IQueryType qType = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
-				aTypes.add(qType);
-			} catch (CoreException e1) {
-				QueryPlugIn.log(Messages.QueryTypeManager_QueryTypeError, e1);
+		for (IConfigurationElement e : config) {	
+			if (e.getName().equals(QUERYTYPEGROUP_EXTNAME)){
+				String id = e.getAttribute("id"); //$NON-NLS-1$
+				String name = e.getAttribute("name"); //$NON-NLS-1$
+				String help = e.getAttribute("html_description"); //$NON-NLS-1$
+				QueryTypeGroup g = new QueryTypeGroup(id, name, help);
+				groups.add(g);
+			}else if (e.getName().equals(QUERYTYPE_EXTNAME)){
+				try {
+					IQueryType qType = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
+					aTypes.add(qType);
+					
+					String id = e.getAttribute(QUERYTYPEGROUP_EXTNAME);
+					for (QueryTypeGroup g : groups){
+						if (g.getId().equals(id)){
+							g.addQueryType(qType);
+						}
+					}
+					
+				} catch (CoreException e1) {
+					QueryPlugIn.log(Messages.QueryTypeManager_QueryTypeError, e1);
+				}
 			}
+			
 			
 		}
 		this.allTypes = aTypes.toArray(new IQueryType[aTypes.size()]);
@@ -200,6 +226,10 @@ public class QueryTypeManager {
 				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
 		
 		for (IConfigurationElement e : config) {
+			 if (!e.getName().equals(QUERYTYPE_EXTNAME)){
+				 //not a query type so we don't care
+				 continue;
+			 }
 			try {
 				IQueryType tmp = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
 				IQueryType qType = null;

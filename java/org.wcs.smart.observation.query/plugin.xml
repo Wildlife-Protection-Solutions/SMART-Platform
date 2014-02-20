@@ -18,7 +18,13 @@
    </extension>
    <extension
          point="org.wcs.smart.query.queryType">
+      <QueryTypeGroup
+            html_description="&lt;p&gt;Queries that query across all data sources in the system.  These queries only provide data model items as filters and summary options.&lt;/p&gt;"
+            id="org.wcs.smart.observation.query.group.AllData"
+            name="All Data Queries">
+      </QueryTypeGroup>
       <QueryType
+            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
@@ -29,6 +35,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
+            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
@@ -39,6 +46,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
+            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationGridQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationGriddedQueryDefinitionPanel"
@@ -53,6 +61,7 @@
          </DefinitionPanel>
       </QueryType>
       <QueryType
+            QueryTypeGroup="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSummaryGroupByValuePanel"
@@ -92,115 +101,109 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery">
-         <separator
-               name="org.wcs.smart.patrol.observation.menu.newquery.sep3"
-               visible="true">
-         </separator>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/observation_query.png"
-               label="%command.label.newobservation"
-               style="pulldown"
-               tooltip="%command.tooltip.newobservation">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationobservation">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/waypoint_query.png"
-               label="%command.label.newincident"
-               style="push"
-               tooltip="%command.tooltip.newincident">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationwaypoint">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/summary_query.png"
-               label="%command.label.newsummary"
-               style="push"
-               tooltip="%command.tooltip.newsummary">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationsummary">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/gridded_query.png"
-               label="%command.label.newgrid"
-               style="push"
-               tooltip="%command.tooltip.newgrid">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationgrid">
-            </parameter>
-         </command>
-         <separator
-               name="org.wcs.smart.patrol.observation.menu.newquery.sep4"
-               visible="true">
-         </separator>
+            locationURI="menu:org.wcs.smart.query.createQuery?after=org.wcs.smart.query.createunknown.separator">
+         <menu
+               id="org.wcs.smart.query.createquery.alldata"
+               label="All Data Queries ..."
+               tooltip="queries across all observations irregarless of their source ">
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/observation_query.png"
+                  label="%command.label.newobservation"
+                  style="pulldown"
+                  tooltip="%command.tooltip.newobservation">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationobservation">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/waypoint_query.png"
+                  label="%command.label.newincident"
+                  style="push"
+                  tooltip="%command.tooltip.newincident">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationwaypoint">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/summary_query.png"
+                  label="%command.label.newsummary"
+                  style="push"
+                  tooltip="%command.tooltip.newsummary">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationsummary">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/gridded_query.png"
+                  label="%command.label.newgrid"
+                  style="push"
+                  tooltip="%command.tooltip.newgrid">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationgrid">
+               </parameter>
+            </command>
+         </menu>
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query.newquery">
-         <separator
-               name="org.wcs.smart.patrol.observation.menu.newquery.sep2"
-               visible="true">
-         </separator>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/observation_query.png"
-               label="%command.label.newobservation"
-               style="pulldown"
-               tooltip="%command.tooltip.newobservation">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationobservation">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/waypoint_query.png"
-               label="%command.label.newincident"
-               style="push"
-               tooltip="%command.tooltip.newincident">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationwaypoint">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/summary_query.png"
-               label="%command.label.newsummary"
-               style="push"
-               tooltip="%command.tooltip.newsummary">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationsummary">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               icon="images/icons/obj16/gridded_query.png"
-               label="%command.label.newgrid"
-               style="push"
-               tooltip="%command.tooltip.newgrid">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="observationgrid">
-            </parameter>
-         </command>
-         <separator
-               name="org.wcs.smart.patrol.observation.menu.newquery.sep1"
-               visible="true">
-         </separator>
+            locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
+         <menu
+               id="org.wcs.smart.menu.query.newquery.alldata"
+               label="All Data Queries ..."
+               tooltip="queries across all observations irregarless of their source ">
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/observation_query.png"
+                  label="%command.label.newobservation"
+                  style="pulldown"
+                  tooltip="%command.tooltip.newobservation">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationobservation">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/waypoint_query.png"
+                  label="%command.label.newincident"
+                  style="push"
+                  tooltip="%command.tooltip.newincident">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationwaypoint">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/summary_query.png"
+                  label="%command.label.newsummary"
+                  style="push"
+                  tooltip="%command.tooltip.newsummary">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationsummary">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/gridded_query.png"
+                  label="%command.label.newgrid"
+                  style="push"
+                  tooltip="%command.tooltip.newgrid">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="observationgrid">
+               </parameter>
+            </command>
+         </menu>
       </menuContribution>
    </extension>
    <extension

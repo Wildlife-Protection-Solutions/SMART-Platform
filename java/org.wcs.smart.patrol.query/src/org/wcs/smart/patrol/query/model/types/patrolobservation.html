@@ -1,0 +1,41 @@
+<html>
+<style>
+p{
+	font-family:Verdana;
+	font-size:12px;
+}
+</style>
+<body>
+<p>
+Observation queries are used to display details of raw patrol observations.
+<p>
+These queries display the raw observation records which meet the requirements of the filters. 
+No summarizing takes place (ie. no totals, amounts, aggregations, etc.).  The resulting table
+includes all the patrol attributes associated with the observation as well as all the data
+model category and attribute information associated with the observation. 
+</p>
+<p>
+ Queries can be viewed in a table or on a map. 
+ When displayed on a map if more than one observation is present at a waypoint then multiple mapping points will exist in that location. 
+</p>
+<img src="patrolobservation.png"/>
+
+<p><b>Incident vs Observation</b></p>
+<p>
+An observation is a single item observed and consists of exactly one category from 
+the datamodel and all its associated attributes.  An incident is a collection of observations
+that occur at the same point and same time (a Waypoint).
+</p>
+<p><b>Incident vs Observation Filters</b></p>
+<p>
+Observation queries support both incident filters and observation filters.  Observation filters only
+consider the individual observations when filtering data.  As a result you cannot query across
+categories.
+Incident filters look at all observations at a given incident when filtering data.  This allows you to query across categories.
+ </p>
+ <p>Observation filters will return only the observations that match the filter.  Incident filters
+ will return all observations at any incident that matches the filter.</p>
+
+</body>
+</html> 
+ 

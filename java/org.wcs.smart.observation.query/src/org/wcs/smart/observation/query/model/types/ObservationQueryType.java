@@ -24,6 +24,7 @@ package org.wcs.smart.observation.query.model.types;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -196,5 +197,9 @@ public class ObservationQueryType implements IQueryType {
 	 */
 	public static IDateFieldFilter[] validDateFields(){
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
+	}
+	
+	public URL getDescription() {
+		return null;
 	}
 }
