@@ -23,7 +23,6 @@ package org.wcs.smart.query.common.engine;
 
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 
@@ -264,14 +263,21 @@ public class DerbyFilterToSqlGenerator {
 		if (bits == null){
 			return ""; //$NON-NLS-1$
 		}
+//		if (bits.length == 1){
+//			f = " ( " +field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){ 
+//			f = " ( " + field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' and " + field  + " <= '" + (new Timestamp(bits[1].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+//		}else if (bits.length == 2){
+//			f = " ( " + field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' and " + field  + " < '" + (new Timestamp(bits[1].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+//		}
+//		
 		if (bits.length == 1){
-			f = " ( " +field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			f = " ( cast(" +field + " as date) >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){ 
-			f = " ( " + field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' and " + field  + " <= '" + (new Timestamp(bits[1].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' and cast(" + field  + " as date) <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
-			f = " ( " + field + " >= '" + (new Timestamp(bits[0].getTime())).toString() + "' and " + field  + " < '" + (new Timestamp(bits[1].getTime())).toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' and cast(" + field  + " as date) < '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
-
 		return f;
 	}
 	
