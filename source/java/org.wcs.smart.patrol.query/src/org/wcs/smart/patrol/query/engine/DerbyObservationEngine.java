@@ -88,8 +88,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 							query.getConservationAreaFilterAsFilter(), 
 							true, true, monitor);
 					
+					if (monitor.isCanceled()) return;
 					populateTemporaryTableExtra(c, session, monitor);
 					
+					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
 					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$

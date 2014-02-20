@@ -232,12 +232,15 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					}
 					
-					sumResults.setData(
-							computeSummaryValues(c, session, 
-									allGroupBy, 
-									query.getQueryDefinition().getValuePart(),
-									query.getConservationAreaFilterAsFilter(),
-									monitor));
+					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
+							allGroupBy, query.getQueryDefinition().getValuePart(),
+							query.getConservationAreaFilterAsFilter(),monitor);
+					
+					if (monitor.isCanceled() || data == null){
+						return ;
+					}
+					sumResults.setData(data);
+					
 					
 					monitor.worked(1);
 				} finally {
@@ -331,6 +334,9 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			}
 			
 			monitor.worked(1);
+			if (monitor.isCanceled()){
+				return null;
+			}
 		}
 		return results;
 		

@@ -93,7 +93,9 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
 							false, false, monitor);
-					
+					if (monitor.isCanceled()){
+						return;
+					}
 					monitor.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
 					myResults = getResults(c, session);
 					

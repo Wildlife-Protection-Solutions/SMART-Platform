@@ -97,12 +97,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			try {
 				IPagedQueryResultSet results = (IPagedQueryResultSet) getQuery().executeQuery(mymonitor);
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					page1.updateAndShowTable(null);
 					return Status.CANCEL_STATUS;
 				}
-				page1.updateAndShowTable(results, mymonitor);
+				page1.updateAndShowTable(results);
 			} catch (Exception ex) {
 				QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);
-				page1.updateAndShowTable(null, mymonitor);
+				page1.updateAndShowTable(null);
 			}
 			page2.refresh();
 			return Status.OK_STATUS;

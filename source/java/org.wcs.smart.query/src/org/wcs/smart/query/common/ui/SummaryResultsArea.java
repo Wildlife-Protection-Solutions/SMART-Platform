@@ -129,26 +129,32 @@ public class SummaryResultsArea extends Composite{
 		stackComposite.layout();
 		
 	}
+	
+	/**
+	 * if results are null we show cancelled message
+	 * @param results
+	 */
 	public void updateAndShowTable(final SummaryQueryResult results){
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
-				((StackLayout)stackComposite.getLayout()).topControl = tableComp;
-				stackComposite.layout();
+				if (results == null){
+					showProgressArea();
+					progressComp.showCancelled();
+				}else{
+					((StackLayout)stackComposite.getLayout()).topControl = tableComp;
+					stackComposite.layout();
 				
-				if (resultsTable != null){
-					resultsTable.dispose();
-					resultsTable = null;
+					if (resultsTable != null){
+						resultsTable.dispose();
+						resultsTable = null;
+					}
+					resultsTable = new SummaryResultTable(tableComp, results, toolkit);
+					resultsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					tableComp.layout();
 				}
-				resultsTable = new SummaryResultTable(tableComp, results, toolkit);
-				resultsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-				tableComp.layout();
-				
 			}
-			
 		});
-		
-		
 	}
 	
 	public IProgressMonitor createProgressMonitor(){

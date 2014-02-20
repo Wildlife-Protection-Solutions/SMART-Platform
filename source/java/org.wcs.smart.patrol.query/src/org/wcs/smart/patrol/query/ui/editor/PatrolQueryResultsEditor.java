@@ -90,12 +90,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			try {
 				Collection<PatrolQueryResultItem> results = (Collection<PatrolQueryResultItem>) getQuery().executeQuery(mymonitor);
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					page1.updateAndShowTable(null);
 					return Status.CANCEL_STATUS;
 				}
-				page1.updateAndShowTable(results, mymonitor);
+				page1.updateAndShowTable(results);
 			} catch (Exception ex) {
 				QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_ErrorRunningQuery, ex);
-				page1.updateAndShowTable(new ArrayList<PatrolQueryResultItem>(), mymonitor);
+				page1.updateAndShowTable(new ArrayList<PatrolQueryResultItem>());
 			}
 			page2.refresh();
 			return Status.OK_STATUS;
