@@ -47,7 +47,7 @@
    <extension
          point="org.wcs.smart.query.queryType">
       <QueryCategory
-            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Patrol Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Patrol queries query the patrol data providing patrol attributes in addition to data model items as filters and summary options.&lt;/p&gt;&lt;/p&gt;"
+            html_description="%patrol.querycategory.html_description"
             id="org.wcs.smart.patrol.query.group.PatrolQueries"
             name="Patrol Queries">
       </QueryCategory>
@@ -194,8 +194,8 @@
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.query.createquery.patrolquery"
-               label="Patrol Queries"
-               tooltip="creates queries related to patrol attributes ">
+               label="%patrolquery.menu.label"
+               tooltip="%patrolquery.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/observation_query.png"
@@ -259,8 +259,8 @@
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.query.newquery.patrolqueries"
-               label="Patrol Queries"
-               tooltip="creates queries related to patrol attributes ">
+               label="%patrolquery1.menu.label"
+               tooltip="%patrolquery1.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/observation_query.png"
