@@ -53,6 +53,18 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 		super.setWindowTitle(Messages.NewQueryWizard_NewQueryWizardTitle);
 	}
 	
+    /*
+     * (non-Javadoc) Method declared on IWizard.
+     */
+    public boolean canFinish() {
+    	if (getContainer().getCurrentPage() == queryTypePage){
+    		if (queryTypePage.getSelection() != null){
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
 	@Override
 	public boolean performFinish() {
 		Object x = queryTypePage.getSelection();

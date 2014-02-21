@@ -106,15 +106,20 @@ public abstract class ListHelpWizardPage extends WizardPage {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				if (getWizard().canFinish()){
-					//finish
-				}else if (isPageComplete()){
-					//getWizard().getContainer()
-					//TODO MOVE NEXT
+				if (!getWizard().canFinish()){
+					getWizard().getContainer().showPage(getNextPage());
 				}
 				
 			}
 		});
+		options.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				setPageComplete(getSelection() != null);
+			}
+		});
+		
+		setPageComplete(false);
 		main.setWeights(new int[]{35,65});
 		setTitle(Messages.ListHelpWizardPage_PageTitle);
 		super.setControl(main);
