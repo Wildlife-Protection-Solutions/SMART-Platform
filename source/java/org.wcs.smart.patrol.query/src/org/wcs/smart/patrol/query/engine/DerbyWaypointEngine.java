@@ -61,9 +61,12 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 	
 	
 	public IPagedQueryResultSet executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+
+		if (query.getDateFilter() == null){
+			return null;
+		}
+		
 		queryDataTable = createTempTableName();
-		
-		
 		final DerbyPagedWaypointResult result = new DerbyPagedWaypointResult(queryDataTable, this);
 		
 		session.doWork(new Work() {

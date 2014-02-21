@@ -74,9 +74,14 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			final PatrolQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
-		queryDataTable = createTempTableName();
 		
+		if (query.getDateFilter() == null){
+			return null;
+		}
+		
+		queryDataTable = createTempTableName();
 		myResults = null;
+
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
