@@ -62,9 +62,10 @@ public class DerbyObservationEngine extends DerbyObservationQueryEngine {
 	private int categoryCount;
 	
 	public DerbyPagedObservationResult executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+		if (query.getDateFilter() == null){
+			return null;
+		}
 		queryDataTable = createTempTableName();
-		
-		
 		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable, this);
 		
 		session.doWork(new Work() {
