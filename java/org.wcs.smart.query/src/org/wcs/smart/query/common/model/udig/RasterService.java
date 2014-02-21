@@ -53,6 +53,7 @@ import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.geotiff.GeoTiffFormatFactorySpi;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.styling.Style;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridQueryResultMetadata;
@@ -60,8 +61,6 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.util.SmartUtils;
-
-
 
 /**
  * This service maintains the raster file associated to the query result.
@@ -153,8 +152,25 @@ public class RasterService extends AbstractRasterService {
 	private File createRaster() throws Exception {
 		
 		RasterBuilder rb = new RasterBuilder();
-		
 		rb.setFileName(rasterFileName);
+		
+		if (query.getDateFilter() == null){
+			//no date filter; build an empty raster -> we need this for styling
+			rb.setRasterDimensions(1,1);
+				
+			// sets the envelope based in the map bound
+			rb.setEnvelope(new Envelope2D(SmartDB.DATABASE_CRS,0,0,1,1));
+			GridResultItem gi = new GridResultItem();
+			gi.setTileX(0);
+			gi.setTileY(0);
+			gi.setValue(0);
+			
+			GridQueryResultMetadata md = new GridQueryResultMetadata(0,0,0,0,0,0);
+			rb.setTable(Collections.singletonList(gi),md);
+			rb.setGridCellSize(1);
+			rb.build();
+			return rb.getResult();	
+		}
 		
 		GridQueryResultMetadata metadata = query.getResultMetadata();
 		if (metadata == null){
@@ -215,7 +231,7 @@ public class RasterService extends AbstractRasterService {
 				}
 				return info;
 			}
-						 
+
 			 @Override
 			 public Style style( IProgressMonitor monitor ) {
 				double minValue = 0;
@@ -285,7 +301,6 @@ public class RasterService extends AbstractRasterService {
 //        		QueryPlugIn.displayLog(message, ex);
         		return null;
         	}
-        	
         	if (this.rasterFile == null){
         		this.message = new Exception(Messages.RasterService_QueryNotRunErr);
         		return null;
@@ -313,7 +328,7 @@ public class RasterService extends AbstractRasterService {
 	 */
 	public void refresh(IProgressMonitor monitor) throws Exception{
 		//clean up old files
-		cleanTemporaDirectory();
+		cleanTemporaryDirectory();
 		
 		//remove any services
 		ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
@@ -384,13 +399,13 @@ public class RasterService extends AbstractRasterService {
     		geoResources = null;
     	}
         
-        cleanTemporaDirectory();
+        cleanTemporaryDirectory();
 	}
 
 	/**
 	 * Removes all rester files that were created in the temporal directory
 	 */
-	private void cleanTemporaDirectory() {
+	private void cleanTemporaryDirectory() {
 		
 		File tempDirectory = QueryPlugIn.getDefault().getQueryTempDirectory();
 		if(tempDirectory.exists()){
