@@ -3,6 +3,7 @@
       id="org.wcs.smart.plan.core.feature"
       label="SMART Plan Module"
       version="3.0.0"
+      provider-name="org.wcs.smart"
       plugin="org.wcs.smart.plan"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
