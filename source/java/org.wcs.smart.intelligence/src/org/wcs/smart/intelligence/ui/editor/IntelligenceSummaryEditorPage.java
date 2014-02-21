@@ -49,6 +49,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.AttachmentUtil;
@@ -134,6 +135,8 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 
 		form.getBody().setLayout(new GridLayout(1, true));
 
+		
+		
 		if (canEdit()){
 			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.IntelligenceEditor_Translate_Link, SWT.WRAP);
 			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
@@ -150,8 +153,11 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 			});
 		}
 
+		ScrolledForm main = toolkit.createScrolledForm(form.getBody());
+		main.getBody().setLayout(new GridLayout(1, true));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite content = toolkit.createComposite(form.getBody(), SWT.NONE);
+		Composite content = toolkit.createComposite(main.getBody(), SWT.NONE);
 		GridLayout leftLayout = new GridLayout(3, false);
 		leftLayout.verticalSpacing = 10;
 		content.setLayout(leftLayout);
