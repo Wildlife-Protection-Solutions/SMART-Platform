@@ -49,6 +49,7 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
@@ -172,8 +173,8 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 					resultPage.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
-					if (ex.getCause() != null){
-						message += ex.getCause().getLocalizedMessage();
+					if (ex.getCause() != null && ex.getCause().getCause()== Grid.GRID_TO_BIG_EXCEPTION){
+						message += ex.getCause().getCause().getLocalizedMessage();
 					}else{
 						message += ex.getLocalizedMessage();
 					}
