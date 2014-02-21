@@ -3,6 +3,7 @@
       id="org.wcs.smart.intelligence.feature.nl.hi"
       label="Intelligence Hindi Language Pack"
       version="3.0.0"
+      provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
 

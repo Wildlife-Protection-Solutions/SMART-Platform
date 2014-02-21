@@ -2,9 +2,11 @@
 <feature
       id="org.wcs.smart.plan.feature.nl.fr"
       label="Plan French Language Pack"
-     version="3.0.0"
+      version="3.0.0"
+      provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.0.0">
+      license-feature-version="3.0.0"
+      exclusive="true">
 
    <description>
       French translations for the Planning plugin.
