@@ -3,6 +3,7 @@
       id="org.wcs.smart.cybertracker.feature.nl.th"
       label="SMART CyberTracker Thai Language Pack"
       version="3.0.0"
+      provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
 

@@ -13,3 +13,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.cybertracker.model,
  org.wcs.smart.cybertracker.updatesite
+Bundle-Vendor: org.wcs.smart
