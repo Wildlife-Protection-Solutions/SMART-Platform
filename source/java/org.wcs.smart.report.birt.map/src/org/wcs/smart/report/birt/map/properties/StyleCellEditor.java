@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
@@ -119,6 +120,8 @@ public class StyleCellEditor extends DialogCellEditor {
 
 			SmartOpenStyleEditorAction action = new SmartOpenStyleEditorAction(layer);
 			action.run();
+			
+			CatalogPlugin.getDefault().getLocalCatalog().remove(layer.getGeoResource().service(null));
 			
 			if (action.getSelectedStyle() == null){
 				return null;
