@@ -40,6 +40,7 @@ import org.wcs.smart.upgrade.CustomProgressMonitor;
 import org.wcs.smart.upgrade.UpgradeDialog;
 import org.wcs.smart.upgrade.UpgradeSmartEngine;
 import org.wcs.smart.upgrade.ZipUtil;
+import org.wcs.smart.upgrade.v200.SmartUpgrader;
 
 /**
  * Tool for upgrading to SMART 3.0.0.
@@ -47,7 +48,7 @@ import org.wcs.smart.upgrade.ZipUtil;
  * @author elitvin
  * @since 2.0.0
  */
-public class SmartUpdater30 {
+public class SmartUpdater300 {
 
 	private static final String TARGET_VERSION = "3.0.0"; //$NON-NLS-1$
 	private static final byte[] MULTIPLE_CA = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -59,7 +60,7 @@ public class SmartUpdater30 {
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}catch (Exception ex){}
 		 
 		
-		new UpgradeDialog("2.0.0 or 2.0.1", TARGET_VERSION, new UpgradeDialog.IUpgradeAction() { //$NON-NLS-1$
+		new UpgradeDialog("1.1.2, 1.1.3, 2.0.1, 2.0.2", TARGET_VERSION, new UpgradeDialog.IUpgradeAction() { //$NON-NLS-1$
 			@Override
 			public File performUpgrade(File file, CustomProgressMonitor pm) throws Exception{
 				return performDbUpgrade(file, pm);
@@ -109,30 +110,15 @@ public class SmartUpdater30 {
 		Connection c = null;
 		c = getConnection(databaseFile);
 		c.setAutoCommit(false);
-			
-		try{
-			UpgradeSmartEngine.checkVersion("2.0.0", c); //$NON-NLS-1$
-			
-			
-			InputStream in = SmartUpdater30.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v300/version_3.0.0.sql"); //$NON-NLS-1$
-			UpgradeSmartEngine.runScript(c, in);
-			
-			in = SmartUpdater30.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v300/intelligence_source_pre.sql"); //$NON-NLS-1$
-			UpgradeSmartEngine.runScript(c, in);			
-
-			List<CaData> areas = getConservationAreas(c);
-			for (CaData ca : areas) {
-				createSource(c, ca, "Patrol", "patrol"); //$NON-NLS-1$ //$NON-NLS-2$
-				createSource(c, ca, "Public", "public"); //$NON-NLS-1$ //$NON-NLS-2$
-				createSource(c, ca, "Informant", "informant"); //$NON-NLS-1$ //$NON-NLS-2$
-				createSource(c, ca, "CET", "cet"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			
-			in = SmartUpdater30.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v300/intelligence_source_post.sql"); //$NON-NLS-1$
-			UpgradeSmartEngine.runScript(c, in);			
 		
-			UpgradeSmartEngine.checkVersion("3.0.0", c); //$NON-NLS-1$
-			c.commit();
+		try{
+			String x = UpgradeSmartEngine.getVersion(c);
+			if (x.equals("1.1.2")){
+				SmartUpgrader.upgrade112To200(c);
+				upgrade200To300(c);
+			}else if (x.equals("2.0.0")){
+				upgrade200To300(c);
+			}
 			
 			pm.setNote("Creating backup file "); //$NON-NLS-1$
 			ZipUtil.createZip(backupLocation.listFiles(), newBackupFile);
@@ -148,6 +134,31 @@ public class SmartUpdater30 {
 		
 	}
 
+	public static void upgrade200To300(Connection c) throws Exception {
+		
+		UpgradeSmartEngine.checkVersion("2.0.0", c); //$NON-NLS-1$
+		
+		InputStream in = SmartUpdater300.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v300/version_3.0.0.sql"); //$NON-NLS-1$
+		UpgradeSmartEngine.runScript(c, in);
+		
+		in = SmartUpdater300.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v300/intelligence_source_pre.sql"); //$NON-NLS-1$
+		UpgradeSmartEngine.runScript(c, in);			
+
+		List<CaData> areas = getConservationAreas(c);
+		for (CaData ca : areas) {
+			createSource(c, ca, "Patrol", "patrol"); //$NON-NLS-1$ //$NON-NLS-2$
+			createSource(c, ca, "Public", "public"); //$NON-NLS-1$ //$NON-NLS-2$
+			createSource(c, ca, "Informant", "informant"); //$NON-NLS-1$ //$NON-NLS-2$
+			createSource(c, ca, "CET", "cet"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		in = SmartUpdater300.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v300/intelligence_source_post.sql"); //$NON-NLS-1$
+		UpgradeSmartEngine.runScript(c, in);			
+	
+		UpgradeSmartEngine.checkVersion2("3.0.0", c); //$NON-NLS-1$
+		c.commit();
+	}
+	
 	private static Connection getConnection(File databaseFile) throws Exception{
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";  //$NON-NLS-1$
 		Class.forName(driver).newInstance();

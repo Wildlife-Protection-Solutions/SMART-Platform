@@ -190,6 +190,13 @@ public class UpgradeSmartEngine {
 
 	}
 	
+	/**
+	 * For pre-smart 3.0.0 where the db_version has no plugin id field
+	 * @param version
+	 * @param c
+	 * @return
+	 * @throws Exception
+	 */
 	public static boolean checkVersion(String version, Connection c) throws Exception{
 		ResultSet rs = c.createStatement().executeQuery("SELECT * FROM smart.db_version");
 		try {
@@ -207,6 +214,70 @@ public class UpgradeSmartEngine {
 		}
 	}
 
+	/**
+	 * For smart 3.0.0 and later when the db_version has a plugin id field
+	 * @param version
+	 * @param c
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean checkVersion2(String version, Connection c) throws Exception{
+		ResultSet rs = c.createStatement().executeQuery("SELECT version FROM smart.db_version where plugin_id = 'org.wcs.smart'");
+		try {
+			rs.next();
+			String dbVersion = rs.getString(1);
+
+			if (dbVersion.trim().equals(version)) {
+				return true;
+			} else {
+				throw new Exception("Invalid database version.  Got "
+						+ dbVersion + " excepected " + version);
+			}
+		} finally {
+			rs.close();
+		}
+	}
+	
+	/**
+	 * For smart 2.0.0 and earlier when the db_version doesn't have a plugin id field
+	 * @param version
+	 * @param c
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getVersion(Connection c) throws Exception{
+		ResultSet rs = c.createStatement().executeQuery("SELECT version FROM smart.db_version");
+		try {
+			if (!rs.next()){
+				return null;
+			}
+			String dbVersion = rs.getString(1);
+			return dbVersion.trim();
+		} finally {
+			rs.close();
+		}
+	}
+	
+	/**
+	 * For smart 3.0.0 and later when the db_version has a plugin id field
+	 * @param version
+	 * @param c
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getVersion2(Connection c) throws Exception{
+		ResultSet rs = c.createStatement().executeQuery("SELECT version FROM smart.db_version where plugin_id = 'org.wcs.smart'");
+		try {
+			if (!rs.next()){
+				return null;
+			}
+			String dbVersion = rs.getString(1);
+			return dbVersion.trim();
+		} finally {
+			rs.close();
+		}
+	}
+	
 	/**
 	 * Connects to database
 	 * @param dbFile

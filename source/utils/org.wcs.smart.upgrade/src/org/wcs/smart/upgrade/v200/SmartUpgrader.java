@@ -108,27 +108,7 @@ public class SmartUpgrader {
 		c.setAutoCommit(false);
 			
 		try{
-			UpgradeSmartEngine.checkVersion("1.1.2", c);
-			
-			
-			InputStream in = SmartUpgrader.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/version_2.0.0.sql");
-			UpgradeSmartEngine.runScript(c, in);
-			
-			in = SmartUpgrader.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/smart-tables-dataentry.sql");
-			UpgradeSmartEngine.runScript(c, in);			
-			
-			//generate keys for required new fields
-			KeyGenerator kg = new KeyGenerator();
-			kg.generateKeys(c, "smart.patrol_mandate");
-			kg.generateKeys(c, "smart.team");
-			kg.generateKeys(c, "smart.patrol_transport");
-						
-			pm.setNote("Creating backup file ");
-			ZipUtil.createZip(backupLocation.listFiles(), newBackupFile);
-			pm.setProgress(100);
-			
-			
-			UpgradeSmartEngine.checkVersion("2.0.0", c);
+			upgrade112To200(c);
 			c.commit();
 			
 		}catch (Exception ex){
@@ -139,6 +119,25 @@ public class SmartUpgrader {
 		}
 		return newBackupFile;
 		
+	}
+	
+	public static void upgrade112To200(Connection c) throws Exception {
+		UpgradeSmartEngine.checkVersion("1.1.2", c);
+		
+		InputStream in = SmartUpgrader.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/version_2.0.0.sql");
+		UpgradeSmartEngine.runScript(c, in);
+		
+		in = SmartUpgrader.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/smart-tables-dataentry.sql");
+		UpgradeSmartEngine.runScript(c, in);			
+		
+		//generate keys for required new fields
+		KeyGenerator kg = new KeyGenerator();
+		kg.generateKeys(c, "smart.patrol_mandate");
+		kg.generateKeys(c, "smart.team");
+		kg.generateKeys(c, "smart.patrol_transport");
+		
+		UpgradeSmartEngine.checkVersion("2.0.0", c);
+		c.commit();
 	}
 	
 	private static Connection getConnection(File databaseFile) throws Exception{
