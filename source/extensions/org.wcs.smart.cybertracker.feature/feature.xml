@@ -8,7 +8,9 @@
       license-feature-version="3.0.0">
 
    <description>
-      Adds support for mobile data collection using Cybertracker enabled devices.  See http://http://www.cybertracker.org/ for more information on Cybertracker.
+      Adds support for mobile data collection using Cybertracker enabled
+devices.  See http://www.cybertracker.org/ for more information
+on Cybertracker.
    </description>
 
    <copyright>
