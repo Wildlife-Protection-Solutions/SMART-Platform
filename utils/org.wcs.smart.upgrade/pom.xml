@@ -6,13 +6,11 @@
 	<groupId>org.wcs.smart</groupId>
 	<artifactId>SmartUpgradeCore</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1.2</version>
+	<version>3.0.0</version>
 
 	<properties>
 		<package.dir>${project.build.directory}/../Target/${project.name}.${version}</package.dir>
 		<package.dir.lib>${project.build.directory}/../Target/${project.name}.${version}/lib</package.dir.lib>
-		<source.db.version>1.0.5</source.db.version>
-		<target.db.version>1.1.0</target.db.version>
 	</properties>
 	
 	<build>
@@ -22,6 +20,7 @@
         	<directory>src/</directory>
         	<includes>
           		<include>**/*.gif</include>
+          		<include>**/*.sql</include>
         	</includes>
       		</resource>
       
@@ -34,7 +33,15 @@
       				<configuration>
         				<outputDirectory>${package.dir.lib}</outputDirectory>
       				</configuration>
-    			</plugin>
+    		</plugin>
+    		<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-eclipse-plugin</artifactId>
+ 				<configuration>
+ 					<addVersionToProjectName>true</addVersionToProjectName>
+ 				</configuration>
+ 			</plugin>
+ 				
 			<plugin>
         			<groupId>org.apache.maven.plugins</groupId>
         			<artifactId>maven-dependency-plugin</artifactId>
@@ -100,14 +107,6 @@
                        							<token>%CP2%</token>
                        							<value>;lib/${project.build.finalName}.jar</value>
                    						</replacement>      
-                   						<replacement>
-                       							<token>%TARGETVERSION%</token>
-                       							<value>${target.db.version}</value>
-                   						</replacement>             
-                   						<replacement>
-                       							<token>%SOURCEVERSION%</token>
-                       							<value>${source.db.version}</value>
-                   						</replacement>
                						</replacements>
            					</configuration>
                				</execution>
@@ -126,15 +125,26 @@
                    						<replacement>
                        							<token>%CP2%</token>
                        							<value>:lib/${project.build.finalName}.jar</value>
-                   						</replacement>
+                   						</replacement>  
+               						</replacements>
+           					</configuration>
+               				</execution>
+               				<execution>
+               					<id>mac</id>
+                   				<phase>package</phase>
+                   				<goals><goal>replace</goal></goals>                   
+                   				<configuration>
+                   					<file>upgradeSmart.command</file>
+               						<outputFile>${package.dir}/upgradeSmart.command</outputFile>
+               						<replacements>
                    						<replacement>
-                       							<token>%TARGETVERSION%</token>
-                       							<value>${target.db.version}</value>
-                   						</replacement>             
+                       							<token>%CP1%</token>
+                       							<valueFile>${package.dir}/cp.linux</valueFile>
+                   						</replacement>      
                    						<replacement>
-                       							<token>%SOURCEVERSION%</token>
-                       							<value>${source.db.version}</value>
-                   						</replacement>    
+                       							<token>%CP2%</token>
+                       							<value>:lib/${project.build.finalName}.jar</value>
+                   						</replacement>  
                						</replacements>
            					</configuration>
                				</execution>
