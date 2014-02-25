@@ -105,7 +105,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		lblMulti = new Label(parent, SWT.NONE);
 		lblMulti.setText(Messages.CmAttributeInfoComposite_Option_Multiselect);
 		btnMulti = new Button(parent, SWT.CHECK);
-		btnMulti.setText(Messages.CmAttributeInfoComposite_Option_Multi_Checkbox);
 		btnMulti.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

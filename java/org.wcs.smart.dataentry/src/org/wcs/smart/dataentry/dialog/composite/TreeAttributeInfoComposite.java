@@ -75,7 +75,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	@Override
 	protected void createTypeSpecificControls(Composite container) {
 		createIsVisibleControl(container);
-		createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, Messages.CmAttributeInfoComposite_Option_Flatten_Checkbox);
+		createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, ""); //$NON-NLS-1$
 		createDefaultControl(container);
 		createTreeControl(container);	
 		createRenameButton(container);

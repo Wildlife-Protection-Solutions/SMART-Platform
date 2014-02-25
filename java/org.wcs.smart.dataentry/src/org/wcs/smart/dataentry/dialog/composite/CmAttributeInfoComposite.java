@@ -112,7 +112,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	protected abstract void createTypeSpecificControls(Composite container);
 	
 	protected Button createIsVisibleControl(Composite container) {
-		return createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, Messages.CmAttributeInfoComposite_Option_IsVisible, Messages.CmAttributeInfoComposite_Option_Visible_Checkbox);
+		return createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, Messages.CmAttributeInfoComposite_Option_IsVisible, ""); //$NON-NLS-1$
 	}
 	
 	protected Button createBooleanControl(Composite parent, final String optionId, String text, String cbText) {
