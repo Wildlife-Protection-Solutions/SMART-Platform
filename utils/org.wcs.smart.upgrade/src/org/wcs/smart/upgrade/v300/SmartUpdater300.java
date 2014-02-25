@@ -121,6 +121,8 @@ public class SmartUpdater300 {
 			}else if (x.equals("2.0.0")){
 				pm.setNote("Upgrading from 2.x.x to 3.x.x");
 				upgrade200To300(c);
+			}else{
+				throw new Exception("This upgrade script does not support upgrading from version " + x + ".");
 			}
 			
 			pm.setNote("Creating backup file "); //$NON-NLS-1$
