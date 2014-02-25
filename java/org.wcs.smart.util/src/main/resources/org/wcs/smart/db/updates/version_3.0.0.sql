@@ -305,5 +305,14 @@ insert into smart.db_version (plugin_id, version) values ('org.wcs.smart.intelli
 insert into smart.db_version (plugin_id, version) values ('org.wcs.smart.plan', '3.0');
 
 
+-- ** CYBERTRACKER UPDATES **
+-- this works from upgrading from CT2.0.X to 3.0.0; does not work for upgrading from CT1.1.1 
+insert into smart.db_version(version,plugin_id)
+select '3.0', 'org.wcs.smart.cybertracker'
+FROM 
+(select a.tablename, b.schemaname from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid
+WHERE a.tablename='CT_PROPERTIES_OPTION' and b.schemaname='SMART') foo;
+
 -- ** VERSION UDATE **
 update smart.db_version set version = '3.0.0' where plugin_id = 'org.wcs.smart';
+
