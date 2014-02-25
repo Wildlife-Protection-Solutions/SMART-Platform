@@ -1,3 +1,5 @@
+
+--  ** UPDATES FOR NEW OBSERVATION TYPES **
 CREATE TABLE smart.patrol_waypoint
 (
 	WP_UUID CHAR(16) for bit data NOT NULL,
@@ -112,11 +114,181 @@ GRANT ALL PRIVILEGES  ON  smart.WAYPOINT TO data_entry;
 GRANT ALL PRIVILEGES  ON  smart.WAYPOINT TO manager;
 GRANT SELECT ON  smart.WAYPOINT TO analyst;
 
+GRANT ALL PRIVILEGES  ON  smart.PATROL_WAYPOINT TO data_entry;
+GRANT ALL PRIVILEGES  ON  smart.PATROL_WAYPOINT TO manager;
+GRANT SELECT ON  smart.PATROL_WAYPOINT TO analyst;
+
 GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO data_entry;
 GRANT ALL PRIVILEGES  ON  smart.observation_attachment TO manager;
 GRANT SELECT ON  smart.observation_attachment TO analyst;
 
 
+
+--  ** UPDATES To Permissions To Allow data-entry users add/delete ENTITIES
+GRANT DELETE ON smart.cm_attribute_option to data_entry;
+GRANT DELETE ON smart.cm_attribute_list to data_entry;
+GRANT DELETE ON smart.cm_attribute_tree_node to data_entry;
+GRANT DELETE ON smart.cm_attribute_option to manager;
+GRANT DELETE ON smart.cm_attribute_list to manager;
+GRANT DELETE ON smart.cm_attribute_tree_node to manager;
+
+
+-- ** GENERALIZING PATROL OPTIONS table
+RENAME table smart.patrol_options to observation_options;
+
+
+-- ** ADD the query tables necessary for new QUERY TYPES
+CREATE TABLE smart.obs_waypoint_query
+(
+	UUID CHAR(16) FOR BIT DATA NOT NULL,
+	CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL,
+	QUERY_FILTER VARCHAR(32672),
+	CA_FILTER VARCHAR(32672),
+	CA_UUID CHAR(16) FOR BIT DATA NOT NULL,
+	FOLDER_UUID CHAR(16) FOR BIT DATA,
+	COLUMN_FILTER VARCHAR(32672),
+	SHARED BOOLEAN DEFAULT false NOT NULL,
+	ID VARCHAR(6) NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+
+CREATE TABLE smart.obs_summary_query
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	CREATOR_UUID CHAR(16) for bit data NOT NULL,
+	CA_FILTER VARCHAR(32672),
+	QUERY_DEF VARCHAR(32672),
+	FOLDER_UUID CHAR(16) for bit data,
+	SHARED BOOLEAN NOT NULL,
+	CA_UUID CHAR(16) for bit data NOT NULL,
+	ID VARCHAR(6) NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+
+CREATE TABLE smart.obs_gridded_query
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	CREATOR_UUID CHAR(16) for bit data NOT NULL,
+	QUERY_FILTER VARCHAR(32672),
+	CA_FILTER VARCHAR(32672),
+	QUERY_DEF VARCHAR(32672),
+	FOLDER_UUID CHAR(16) for bit data,
+	SHARED BOOLEAN NOT NULL,
+	CA_UUID CHAR(16) for bit data NOT NULL,
+	ID VARCHAR(6) NOT NULL,
+	CRS_DEFINITION VARCHAR(32672) NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+CREATE TABLE smart.obs_observation_query
+(
+	UUID CHAR(16) FOR BIT DATA NOT NULL,
+	CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL,
+	QUERY_FILTER VARCHAR(32672),
+	CA_FILTER VARCHAR(32672),
+	CA_UUID CHAR(16) FOR BIT DATA NOT NULL,
+	FOLDER_UUID CHAR(16) FOR BIT DATA,
+	COLUMN_FILTER VARCHAR(32672),
+	SHARED BOOLEAN DEFAULT false NOT NULL,
+	ID VARCHAR(6) NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+
+ALTER TABLE smart.obs_waypoint_query
+	ADD constraint obswaypoint_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+		
+ALTER TABLE smart.obs_waypoint_query
+	ADD constraint obs_waypoint_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+		
+ALTER TABLE smart.obs_waypoint_query
+	ADD constraint obs_waypoint_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+		
+ALTER TABLE smart.obs_observation_query
+	ADD constraint obsobservation_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+		
+ALTER TABLE smart.obs_observation_query
+	ADD constraint obs_observation_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+		
+ALTER TABLE smart.obs_observation_query
+	ADD constraint obs_observation_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+
+ALTER TABLE smart.obs_summary_query
+	ADD constraint obs_summary_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+		
+ALTER TABLE smart.obs_summary_query
+	ADD constraint obs_summary_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+
+ALTER TABLE smart.obs_summary_query
+	ADD constraint obs_summary_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+
+ALTER TABLE smart.obs_gridded_query
+	ADD constraint obs_gridded_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+			
+ALTER TABLE smart.obs_gridded_query
+	ADD constraint obs_gridded_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+
+ALTER TABLE smart.obs_gridded_query
+	ADD constraint obs_gridded_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT;
+
+GRANT ALL PRIVILEGES ON smart.obs_observation_query to manager;
+GRANT ALL PRIVILEGES ON smart.obs_waypoint_query to manager;
+GRANT ALL PRIVILEGES ON smart.obs_summary_query to manager;
+GRANT ALL PRIVILEGES ON smart.obs_gridded_query to manager;
+GRANT ALL PRIVILEGES ON smart.obs_observation_query to analyst;
+GRANT ALL PRIVILEGES ON smart.obs_waypoint_query to analyst;
+GRANT ALL PRIVILEGES ON smart.obs_summary_query to analyst;
+GRANT ALL PRIVILEGES ON smart.obs_gridded_query to analyst;
+
+-- ** MODIFY VERSION TABLE To SUPPORT PLUGINS
+ALTER TABLE smart.db_version ADD COLUMN plugin_id VARCHAR(512);
+UPDATE smart.db_version SET plugin_id = 'org.wcs.smart';
+ALTER TABLE smart.db_version ALTER COLUMN plugin_id  NOT NULL;
+ALTER TABLE smart.db_version ADD PRIMARY KEY (plugin_id);
+
+
+
+
+
+--  ** INTELLIGENCE PLUGIN UPDATES **
 ALTER TABLE smart.intelligence ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
 ALTER TABLE smart.intelligence 
 	ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid)
@@ -124,5 +296,14 @@ ALTER TABLE smart.intelligence
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;
+insert into smart.db_version (plugin_id, version) values ('org.wcs.smart.intelligence', '3.0');
+-- additional updates to intelligence plugin source fields are done in the SmartUpdaters30 java script
+-- as uuids need to be generated
 
-update smart.db_version set version = '3.0.0';
+
+-- ** PLAN PLUGIN UPDATES **
+insert into smart.db_version (plugin_id, version) values ('org.wcs.smart.plan', '3.0');
+
+
+-- ** VERSION UDATE **
+update smart.db_version set version = '3.0.0' where plugin_id = 'org.wcs.smart';
