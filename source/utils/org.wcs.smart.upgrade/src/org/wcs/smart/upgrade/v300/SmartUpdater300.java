@@ -117,6 +117,10 @@ public class SmartUpdater300 {
 			if (x.equals("1.1.2")){
 				pm.setNote("Upgrading from 1.x.x to 3.x.x");
 				SmartUpgrader.upgrade112To200(c);
+
+				//--upgrade ct plugin (this only applies to this upgrade process because previous versions fixed the tables on startup
+				upgradeCt111to200(c);
+				
 				upgrade200To300(c);
 			}else if (x.equals("2.0.0")){
 				pm.setNote("Upgrading from 2.x.x to 3.x.x");
@@ -136,6 +140,22 @@ public class SmartUpdater300 {
 			c.close();
 		}
 		return newBackupFile;
+		
+	}
+	
+	public static void upgradeCt111to200(Connection c) throws Exception{
+		
+		String sql = "select count(*) from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid WHERE a.tablename='CYBERTRACKER_PROPERTIES' and b.schemaname='SMART'";
+		ResultSet rs = c.createStatement().executeQuery(sql);
+		rs.next();
+		int cnt = rs.getInt(1);
+		rs.close();
+		
+		if (cnt > 0){
+			// ct is installed and needs to be updated
+			InputStream in = SmartUpdater300.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/ct_11x_200.sql"); //$NON-NLS-1$
+			UpgradeSmartEngine.runScript(c, in);
+		}
 		
 	}
 
