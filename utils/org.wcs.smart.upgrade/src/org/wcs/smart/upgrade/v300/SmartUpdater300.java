@@ -112,11 +112,14 @@ public class SmartUpdater300 {
 		c.setAutoCommit(false);
 		
 		try{
+			pm.setNote("Determining source version");
 			String x = UpgradeSmartEngine.getVersion(c);
 			if (x.equals("1.1.2")){
+				pm.setNote("Upgrading from 1.x.x to 3.x.x");
 				SmartUpgrader.upgrade112To200(c);
 				upgrade200To300(c);
 			}else if (x.equals("2.0.0")){
+				pm.setNote("Upgrading from 2.x.x to 3.x.x");
 				upgrade200To300(c);
 			}
 			
