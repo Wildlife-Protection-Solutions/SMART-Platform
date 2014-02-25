@@ -24,6 +24,8 @@ package org.wcs.smart.patrol.meta;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -45,7 +47,8 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 
 	private class BooleanScreenOptionGroup extends ScreenOptionGroup {
 
-		private Button btnArmed;
+		private Button btnYes;
+		private Button btnNo;
 		
 		public BooleanScreenOptionGroup(Composite parent, ScreenOption option) {
 			super(parent, option);
@@ -53,14 +56,38 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 
 		@Override
 		protected void createDefaultControl(Group group) {
-			btnArmed = new Button(group, SWT.CHECK);
-			btnArmed.setText(Messages.ArmedScreenOptionComposite_ArmedOption);
-			btnArmed.setEnabled(!getModel().isVisible());
-			btnArmed.setSelection(Boolean.TRUE.equals(getModel().getBooleanValue()));
-			btnArmed.addSelectionListener(new SelectionAdapter() {
+			Composite container = new Composite(group, SWT.NONE);
+			GridLayout gd = new GridLayout(2, false);
+			gd.marginBottom=0;
+			gd.marginHeight = 0;
+			gd.marginLeft = 0;
+			gd.marginRight = 0;
+			gd.marginTop = 0;
+			gd.marginWidth = 0;
+			container.setLayout(gd);
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			
+			btnYes = new Button(container, SWT.RADIO);
+			btnYes.setText(Messages.ArmedScreenOptionComposite_Armed_Yes);
+			btnYes.setEnabled(!getModel().isVisible());
+			btnYes.setSelection(Boolean.TRUE.equals(getModel().getBooleanValue()));
+			btnYes.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					getModel().setBooleanValue(btnArmed.getSelection());
+					getModel().setBooleanValue(true);
+					fireScreenOptionListeners();
+				}
+			});
+			
+			btnNo = new Button(container, SWT.RADIO);
+			btnNo.setText(Messages.ArmedScreenOptionComposite_Armed_No);
+			btnNo.setEnabled(!getModel().isVisible());
+			btnNo.setSelection(!Boolean.TRUE.equals(getModel().getBooleanValue()));
+			btnNo.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					getModel().setBooleanValue(false);
 					fireScreenOptionListeners();
 				}
 			});
@@ -70,7 +97,8 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 		protected void onBtnDisplayPageClick() {
 			boolean visible = getBtnDisplayPage().getSelection();
 			getModel().setVisible(visible);
-			btnArmed.setEnabled(!visible);
+			btnYes.setEnabled(!visible);
+			btnNo.setEnabled(!visible);
 			fireScreenOptionListeners();
 		}
 		
