@@ -355,8 +355,9 @@ public class QueryPlugIn extends AbstractUIPlugin {
 					URL page = FileLocator.toFileURL(fileInPlugin);
 					if (page != null){
 						//unpack entire bundle to ensure any relative images are included
-						IPath t2 = htmlPage.removeLastSegments(1);
-						FileLocator.toFileURL(FileLocator.find(bundle, t2, null));
+						URL url = new URL(fileInPlugin.getProtocol(), fileInPlugin.getHost(), 
+								fileInPlugin.getPort(), path.removeLastSegments(1).toString());
+						FileLocator.toFileURL(url);
 						return page;
 					}
 				} catch (IOException e) {
