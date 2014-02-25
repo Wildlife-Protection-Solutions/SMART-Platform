@@ -24,7 +24,8 @@ public class Messages extends NLS {
 	public static String ArmedComposite_OpNo;
 	public static String ArmedComposite_OpYes;
 	public static String ArmedComposite_Title;
-	public static String ArmedScreenOptionComposite_ArmedOption;
+	public static String ArmedScreenOptionComposite_Armed_No;
+	public static String ArmedScreenOptionComposite_Armed_Yes;
 	public static String CommentComposite_Comments_Label;
 	public static String CommentComposite_PatrolCommentTooLongErrorMessage;
 	public static String CommentComposite_Title;
