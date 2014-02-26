@@ -176,21 +176,17 @@ public class SmartPlugIn extends AbstractUIPlugin {
 //		configureP2Policy(ProvisioningUI.getDefaultUI().getPolicy());
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
 
-		//lock on the plugin start mutex until the
-		//database has been initialized
-		//We don't want anything running until after we have done these checks
-		IJobManager manager = Job.getJobManager();
-		try {
-			manager.beginRule(SmartPlugIn.PLUGIN_START_MUTEX, null);
-			initializeDatabase();
-		} finally {
-			manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);
-		}
-		// add delete handler
+//		//lock on the plugin start mutex until the
+//		//database has been initialized
+//		//We don't want anything running until after the splash screen
+		//has initialized the Database.  See initializeDatabase for code
+		//that unlocks this rule
+		Job.getJobManager().beginRule(SmartPlugIn.PLUGIN_START_MUTEX, null);
+
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
 	}
 
-	private void initializeDatabase(){
+	public static void initializeDatabase(){
 		boolean exit = false;
 		try{
 			SmartStartUp.initDb();
@@ -210,6 +206,16 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		if (exit){
 			System.exit(1);
 		}
+		
+		//the database is now initialized we can release the rule
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				IJobManager manager = Job.getJobManager();
+				manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);		
+			}});
+		
 	}
 	
 	/**
@@ -217,7 +223,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * is thrown, the calling function should terminate the application.
 	 *  
 	 * @return
-	 * @throws exception if the version are inccorect
+	 * @throws exception if the version are incorrect
 	 */
 	public static void versionCheck() throws Exception{
 		boolean isokay = false;
