@@ -206,14 +206,14 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		if (exit){
 			System.exit(1);
 		}
-		
-		//the database is now initialized we can release the rule
 		Display.getDefault().syncExec(new Runnable(){
 
 			@Override
 			public void run() {
 				IJobManager manager = Job.getJobManager();
-				manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);		
+				if (manager.currentRule() == SmartPlugIn.PLUGIN_START_MUTEX){
+					manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);
+				}
 			}});
 		
 	}
