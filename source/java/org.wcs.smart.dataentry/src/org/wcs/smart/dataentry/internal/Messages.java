@@ -72,6 +72,10 @@ public class Messages extends NLS {
 	public static String NumericAttributeInfoComposite_ErrorDialogTitle;
 	public static String RenameListDialog_DialogMessage;
 	public static String RenameTreeDialog_DialogMessage;
+	public static String ShowConfigurableModelHandler_LoadDataModel;
+	public static String ShowConfigurableModelHandler_LoadDataModel_Error;
+	public static String ShowConfigurableModelHandler_NoDmDialog_Message;
+	public static String ShowConfigurableModelHandler_NoDmDialog_Title;
 	public static String TranslatableNameComposite_Button_Translate;
 	public static String TreeAttributeInfoComposite_RenameButton;
 	public static String TreeAttributeInfoComposite_valueLabel;

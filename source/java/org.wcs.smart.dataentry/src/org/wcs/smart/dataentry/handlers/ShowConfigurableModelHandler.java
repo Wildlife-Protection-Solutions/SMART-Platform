@@ -21,13 +21,26 @@
  */
 package org.wcs.smart.dataentry.handlers;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelPropertyDialog;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPageHandler;
 
 /**
  * Handler for "Show Configurable Model" command.
@@ -40,9 +53,52 @@ public class ShowConfigurableModelHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
-		Dialog dialog = new ConfigurableModelPropertyDialog(shell);
-		dialog.open();
+		DataModelProgressMonitorDialog pd = new DataModelProgressMonitorDialog(shell);
+		pd.run();
+		if (pd.isEmptyDataModel() && MessageDialog.openQuestion(shell, Messages.ShowConfigurableModelHandler_NoDmDialog_Title, Messages.ShowConfigurableModelHandler_NoDmDialog_Message)) {
+			ShowDataModelPropertyPageHandler handler = new ShowDataModelPropertyPageHandler();
+			return handler.execute(event);
+		} else {
+			Dialog dialog = new ConfigurableModelPropertyDialog(shell);
+			dialog.open();
+		}
 		return null;
 	}
 
+	/*
+	 * progress monitor dialog for loading data model.
+	 */
+	private class DataModelProgressMonitorDialog extends ProgressMonitorDialog {
+
+		private DataModel dm;
+		
+		public DataModelProgressMonitorDialog(Shell shell) {
+			super(shell);
+		}
+
+		public void run() {
+			final Session session = HibernateManager.openSession();
+			try {
+				super.run(true, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						monitor.beginTask(Messages.ShowConfigurableModelHandler_LoadDataModel, 0);
+						session.beginTransaction();
+						dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					}});
+			} catch (Exception ex) {
+				SmartPlugIn.displayLog(getShell(), Messages.ShowConfigurableModelHandler_LoadDataModel_Error, ex);
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+				session.close();
+			}
+		}
+		
+		public boolean isEmptyDataModel() {
+			return dm == null || dm.getCategories() == null || dm.getCategories().size() == 0;
+		}
+	}
+	
 }
