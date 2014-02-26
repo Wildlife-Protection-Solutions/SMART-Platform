@@ -22,6 +22,7 @@
 package org.wcs.smart.splashHandlers;
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,12 +37,17 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -129,6 +135,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		// Create UI
 		createUI();		
+		splash.getDisplay().readAndDispatch();
 		
 		// Create UI listeners
 		createUIListeners();
@@ -291,20 +298,42 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
 		layout.marginLeft = 135;
 		layout.marginRight = 5;
+		layout.marginTop = 90;
 		fCompositeLogin.setLayout(layout);		
+		
+		//version label
+		Label lblVersion = new Label(fCompositeLogin, SWT.RIGHT);
+		lblVersion.setText(MessageFormat.format(Messages.InteractiveSplashHandler_VersionLabel, new Object[]{System.getProperty("org.wcs.smart.version")})); //$NON-NLS-1$
+		lblVersion.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
+		final Color blue = new Color(lblVersion.getDisplay(), 50, 74,115);
+		lblVersion.setForeground(blue);
+		
+		FontData fd = lblVersion.getFont().getFontData()[0];
+		fd.setHeight(fd.getHeight()+2);
+		fd.setStyle(SWT.BOLD);
+		final Font versionFont = new Font(lblVersion.getDisplay(),fd);
+		
+		lblVersion.setFont(versionFont);
+		lblVersion.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				//ensure items are disposed of properly
+				versionFont.dispose();
+				blue.dispose();
+			}
+		});
 		
 		Composite spanner = new Composite(fCompositeLogin, SWT.NONE);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		data.horizontalSpan = F_COLUMN_COUNT;
 		spanner.setLayoutData(data);
-		
+
 		
 		progressLabel = new Label(fCompositeLogin, SWT.RIGHT);
 		progressLabel.setText("Progress Label"); //$NON-NLS-1$
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		progressLabel.setLayoutData(data);
 		progressLabel.setVisible(true);// false
-
 		
 		Label lblLabel = new Label(fCompositeLogin, SWT.NONE);
 		lblLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -408,7 +437,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void startup(){
 		try {
-			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
+			progressLabel.setText(Messages.InteractiveSplashHandler_intiDbProcess);
 			
 			Job job = new Job(Messages.InteractiveSplashHandler_Progress_LoadingCa) {
 				
@@ -420,8 +449,20 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 						public void run() {
 							//disable controls while we reload conservation area
 							enableControls(false);
+							progressLabel.setText(Messages.InteractiveSplashHandler_intiDbProcess);
 						}
 					});
+					
+					SmartPlugIn.initializeDatabase();
+					
+					
+					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
+						}
+					});
+					
 					final List<Object> cas = new ArrayList<Object>();
 					try{
 						cas.addAll(SmartStartUp.getConservationAreas(true));
@@ -458,7 +499,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			//this job won't be run until after the plugin starts anywyas
 			//so we don't need this rule
 //			job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
-			job.schedule();
+			job.schedule(50);
 		
 		} catch (Exception ex) {
 			SmartPlugIn.displayLogExit(Messages.InteractiveSplashHandler_Error_Initialization, ex);

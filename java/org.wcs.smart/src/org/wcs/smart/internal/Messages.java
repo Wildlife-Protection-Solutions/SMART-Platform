@@ -726,11 +726,13 @@ public class Messages extends NLS {
 	public static String InteractiveSplashHandler_Error_Initialization;
 	public static String InteractiveSplashHandler_Error_LoginFailed;
 	public static String InteractiveSplashHandler_Exit_Button;
+	public static String InteractiveSplashHandler_intiDbProcess;
 	public static String InteractiveSplashHandler_Login_Button;
 	public static String InteractiveSplashHandler_Password_Label;
 	public static String InteractiveSplashHandler_Progress_LoadingCa;
 	public static String InteractiveSplashHandler_Progress_ValidatingUser;
 	public static String InteractiveSplashHandler_Username_Label;
+	public static String InteractiveSplashHandler_VersionLabel;
 	public static String KeyInputDialog_DialogTitle;
 	public static String KeyInputDialog_EditKeyWarning;
 	public static String LanguageSelectionDialog_Dialog_Title;
