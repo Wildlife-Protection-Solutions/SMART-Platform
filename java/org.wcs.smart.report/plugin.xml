@@ -548,15 +548,19 @@
                   style="push"
                   tooltip="%report.menu.newreport.command.tooltip">
             </command>
+            <separator
+                  name="org.wcs.smart.report.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.report.exportReport"
+                  style="push">
+            </command>
             <command
                   commandId="org.wcs.smart.report.importReport"
                   mnemonic="%report.menu.importreport.command.mnemonic"
                   style="push"
                   tooltip="%report.menu.importreport.command.tooltip">
-            </command>
-            <command
-                  commandId="org.wcs.smart.report.exportReport"
-                  style="push">
             </command>
             <separator
                   name="org.wcs.smart.report.separator3"

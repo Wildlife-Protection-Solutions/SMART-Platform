@@ -55,19 +55,6 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.entitytype.import"
-                  mnemonic="%importentitytype.command.mnemonic"
-                  style="push"
-                  tooltip="%importentitytype.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
                   commandId="org.wcs.smart.entitytype.export"
                   mnemonic="%exportentitytype.command.mnemonic"
                   style="push"
@@ -88,6 +75,19 @@
                            value="manager">
                      </test>
                   </or>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.entitytype.import"
+                  mnemonic="%importentitytype.command.mnemonic"
+                  style="push"
+                  tooltip="%importentitytype.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
                </visibleWhen>
             </command>
             <separator
