@@ -39,12 +39,12 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.patrol.importPatrol"
-                  icon="images/icons/etool16/patrol_import.png"
-                  label="%patrol.importpatrols.command.label"
-                  mnemonic="%patrol.importpatrols.command.mnemonic"
+                  commandId="org.wcs.smart.patrol.exportPatrol"
+                  icon="images/icons/etool16/patrol_export.png"
+                  label="%patrol.export.command.label"
+                  mnemonic="%patrol.export.command.mnemonic"
                   style="push"
-                  tooltip="%patrol.importpatrols.command.tooltip">
+                  tooltip="%patrol.export.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -64,12 +64,12 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.patrol.exportPatrol"
-                  icon="images/icons/etool16/patrol_export.png"
-                  label="%patrol.export.command.label"
-                  mnemonic="%patrol.export.command.mnemonic"
+                  commandId="org.wcs.smart.patrol.importPatrol"
+                  icon="images/icons/etool16/patrol_import.png"
+                  label="%patrol.importpatrols.command.label"
+                  mnemonic="%patrol.importpatrols.command.mnemonic"
                   style="push"
-                  tooltip="%patrol.export.command.tooltip">
+                  tooltip="%patrol.importpatrols.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>

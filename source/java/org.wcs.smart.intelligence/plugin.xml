@@ -31,6 +31,10 @@
                   </or>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.intelligence.separator3"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.intelligence.exportPdfEditor"
                   label="%pdf.command.label"
@@ -82,6 +86,22 @@
                   </or>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.intelligence.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.intelligence.EditIntelligenceSources"
+                  label="%sourceedit.command.label"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
+            </command>
             <menu
                   label="%template.menu.label">
                <command
@@ -109,22 +129,6 @@
                      tooltip="%command.importtemplate.tooltip">
                </command>
             </menu>
-            <separator
-                  name="org.wcs.smart.intelligence.separator1"
-                  visible="true">
-            </separator>
-            <command
-                  commandId="org.wcs.smart.intelligence.EditIntelligenceSources"
-                  label="%sourceedit.command.label"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
             <separator
                   name="org.wcs.smart.intelligence.separator2"
                   visible="true">
@@ -724,11 +728,11 @@
       </image>
       <image
             commandId="org.wcs.smart.intelligence.export"
-            icon="images/etool16/import_intel.png">
+            icon="images/etool16/export_intel.png">
       </image>
       <image
             commandId="org.wcs.smart.intelligence.import"
-            icon="images/etool16/export_intel.png">
+            icon="images/etool16/import_intel.png">
       </image>
       <image
             commandId="org.wcs.smart.intelligence.exportPdf"

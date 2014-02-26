@@ -127,10 +127,10 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.independentincident.import"
-                  mnemonic="%import.command.mnemonic"
+                  commandId="org.wcs.smart.independentincident.export"
+                  mnemonic="%export.command.mnemonic"
                   style="push"
-                  tooltip="%import.command.tooltip">
+                  tooltip="%export.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -150,10 +150,10 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.independentincident.export"
-                  mnemonic="%export.command.mnemonic"
+                  commandId="org.wcs.smart.independentincident.import"
+                  mnemonic="%import.command.mnemonic"
                   style="push"
-                  tooltip="%export.command.tooltip">
+                  tooltip="%import.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>

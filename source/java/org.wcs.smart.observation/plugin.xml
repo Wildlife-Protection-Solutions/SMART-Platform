@@ -77,7 +77,7 @@
             </separator>
             <separator
                   name="org.wcs.smart.fielddata.dataseparater2"
-                  visible="true">
+                  visible="false">
             </separator>
             <command
                   commandId="org.wcs.smart.observation.options"
@@ -91,6 +91,10 @@
                   </test>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.fielddata.dataseparater4"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.eclipse.ui.perspectives.showPerspective"
                   icon="images/icons/view16/fielddata.png"

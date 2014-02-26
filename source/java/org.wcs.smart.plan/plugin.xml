@@ -35,6 +35,10 @@
                   </or>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.plan.separator3"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.plan.exportPdfEditor"
                   style="push">
