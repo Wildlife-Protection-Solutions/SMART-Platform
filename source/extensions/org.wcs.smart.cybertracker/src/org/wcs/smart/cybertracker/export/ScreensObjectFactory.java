@@ -80,7 +80,7 @@ public class ScreensObjectFactory {
     	</Root>
 	</Screens>
 	 */
-	public Screens createScreens(List<Node> screenNodes, CyberTrackerProperties properties) {
+	public Screens createScreens(List<Node> screenNodes, CyberTrackerProperties properties, String appName) {
 		Screens screens = new Screens();
 		Screens.Root root = new Screens.Root();
 		screens.setRoot(root);
@@ -97,11 +97,11 @@ public class ScreensObjectFactory {
 		a1Node.setName("Application"); //$NON-NLS-1$
 		a1Node.setDataClass("TctSequence"); //$NON-NLS-1$
 		if (properties != null) {
-			a1Node.setName(properties.getApplicationName());
+			a1Node.setName(appName);
 			Node.Data a1Data = new Node.Data();
 			a1Node.setData(a1Data);
 			a1Data.setDownloadTargetKey(PdaUtil.getRegistryKey(SmartDB.getCurrentConservationArea()));
-			a1Data.setName(properties.getApplicationName());
+			a1Data.setName(appName);
 			a1Data.setForceTitleBar(ctBooleanValue(properties.isUseTitleBar()));
 			a1Data.setBigTitle(ctBooleanValue(properties.isUseLargeTitles()));
 			a1Data.setBigScroller(ctBooleanValue(properties.isLargeScrollBars()));

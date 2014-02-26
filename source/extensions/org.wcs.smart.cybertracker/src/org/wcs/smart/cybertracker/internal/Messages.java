@@ -191,8 +191,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_6;
 	public static String CyberTrackerPropertiesDialog_7;
 	public static String CyberTrackerPropertiesDialog_9;
-	public static String CyberTrackerPropertiesDialog_AppName;
-	public static String CyberTrackerPropertiesDialog_AppName_Tooltip;
 	public static String CyberTrackerPropertiesDialog_AutoNext;
 	public static String CyberTrackerPropertiesDialog_AutoNext_Tooltip;
 	public static String CyberTrackerPropertiesDialog_DataNotValid;
@@ -205,7 +203,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Message;
-	public static String CyberTrackerPropertiesDialog_NameInvalid;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
 	public static String CyberTrackerPropertiesDialog_ShowEdit;
 	public static String CyberTrackerPropertiesDialog_ShowEdit_Tooltip;

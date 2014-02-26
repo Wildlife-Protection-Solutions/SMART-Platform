@@ -70,7 +70,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 	private CyberTrackerProperties ctProperties;
 	
-	private Text txtAppName;
 	private Button btnAutoNext;
 
 	private Button btnUseTitleBar;
@@ -107,7 +106,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     private Button btnLock100;
     private Button btnUseMapOnSkip;
 	
-    private ControlDecoration appNameDecoration;
     private ControlDecoration exitPinDecoration;
     
     private ControlDecoration sightingAccuracyDecoration;
@@ -169,39 +167,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		fieldmapTab.setControl(fieldmapContainer);
 		
 		
-		
-		Label lblAppName = new Label(generalContainer, SWT.NONE);
-		lblAppName.setText(Messages.CyberTrackerPropertiesDialog_AppName);
-		lblAppName.setToolTipText(Messages.CyberTrackerPropertiesDialog_AppName_Tooltip);
-		lblAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		txtAppName = new Text(generalContainer, SWT.BORDER);
-		txtAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtAppName.setToolTipText(Messages.CyberTrackerPropertiesDialog_AppName_Tooltip);
-		if (ctProperties.getApplicationName() != null)
-			txtAppName.setText(ctProperties.getApplicationName());
-		txtAppName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isAppNameValid()) {
-					appNameDecoration.hide();
-				} else {
-					appNameDecoration.show();
-				}
-				setChangesMade(true);
-			}
-		});
-		
-		
-
-		appNameDecoration = new ControlDecoration(txtAppName, SWT.LEFT);
-		appNameDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		appNameDecoration.setShowHover(true);
-		appNameDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_NameInvalid, CyberTrackerProperties.APPLICATION_NAME_MAX_LENTH));
-		appNameDecoration.hide();
-		
-	
 		Label lblUseTitleBar = new Label(generalContainer, SWT.NONE);
 		lblUseTitleBar.setText(Messages.CyberTrackerPropertiesDialog_3);
 		lblUseTitleBar.setToolTipText(Messages.CyberTrackerPropertiesDialog_4);
@@ -897,17 +862,14 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		}
 	}
 	
-	private boolean isAppNameValid() {
-    	return txtAppName != null && txtAppName.getText() != null && !txtAppName.getText().isEmpty() && txtAppName.getText().length() <= CyberTrackerProperties.APPLICATION_NAME_MAX_LENTH;
-	}
-	
 	private boolean isFileNameDecorationValid() {
 		return new File(txtFileName.getText()).isFile();
 	}
 
 	private boolean validate() {
-		return isAppNameValid() && isStorageTimeValid() && isExitPinValid() &&
-				isSigtingAccuracyValid() && isSigtingFixCountValid() && isTrackTimerValid() && isSkipButtonTimeoutValid() && isTrackAccuracyValid();
+		return isStorageTimeValid() && isExitPinValid() &&
+				isSigtingAccuracyValid() && isSigtingFixCountValid() && 
+				isTrackTimerValid() && isSkipButtonTimeoutValid() && isTrackAccuracyValid();
 	}
 	
 	
@@ -918,7 +880,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);
 			return false;
 		}
-		ctProperties.setApplicationName(txtAppName.getText());
 		ctProperties.setAutoNext(btnAutoNext.getSelection());
 		
 		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());

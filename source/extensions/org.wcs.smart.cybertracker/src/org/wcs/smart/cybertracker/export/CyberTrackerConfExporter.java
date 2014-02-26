@@ -83,6 +83,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerConfExporter {
 
+	private static final String DEFAULT_DATAMODEL_EXPORT_NAME = "SMART Data Model"; //$NON-NLS-1$
+	
 	private static final String NODE_DEPTH_RESULT_PREFIX = "node"; //$NON-NLS-1$
 	private static final String NODE_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
 	
@@ -150,6 +152,7 @@ public class CyberTrackerConfExporter {
 				configurableModel = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
 			} else if (source instanceof DataModelWrapper) {
 				configurableModel = ((DataModelWrapper) source).buildConfigurableModel(session, monitor);
+				configurableModel.setName(DEFAULT_DATAMODEL_EXPORT_NAME);
 			} else {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
 				return null;
@@ -212,7 +215,7 @@ public class CyberTrackerConfExporter {
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
-		Screens screens = screensFactory.createScreens(screenNodes, ctProperties);
+		Screens screens = screensFactory.createScreens(screenNodes, ctProperties, configurableModel.getName());
 		monitor.worked(5);
 
 		try {

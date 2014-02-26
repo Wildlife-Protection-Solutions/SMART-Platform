@@ -39,11 +39,6 @@ public class CyberTrackerProperties extends UuidItem {
 	public static final int STORAGE_TIME_MAX_VALUE = 365;
 	public static final int STORAGE_TIME_DEFAULT_VALUE = 30;
 
-	/**
-	 * Maximum length of application name field
-	 */
-	public static final int APPLICATION_NAME_MAX_LENTH = 256;
-
 	public static final int EXIT_PIN_MIN_VALUE = 1;
 	public static final int EXIT_PIN_MAX_VALUE = 99999999;
 	
@@ -101,8 +96,6 @@ public class CyberTrackerProperties extends UuidItem {
 	public static final int SKIP_BUTTON_TIMEOUT_MAX_VALUE = Integer.MAX_VALUE;
 	
 	//default properties
-	private static final String  applicationName = "SMART"; //$NON-NLS-1$
-	
 	private static final boolean largeScrollBars = false;
 	private static final boolean kioskMode = false;
 	private static final int exitPin = 1234;
@@ -244,14 +237,6 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setSkipButtonTimeout(int skipButtonTimeout) {
 		getOption(OptionID.SKIP_BUTTON_TIMEOUT).setIntegerValue(skipButtonTimeout);
-	}
-	
-	
-	public String getApplicationName() {
-		return getStringValue(OptionID.APP_NAME, applicationName);
-	}
-	public void setApplicationName(String applicationName) {
-		getOption(OptionID.APP_NAME).setStringValue(applicationName);
 	}
 	
 	
