@@ -190,15 +190,25 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		boolean exit = false;
 		try{
 			SmartStartUp.initDb();
-		}catch (Exception ex){			
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
+		}catch (final Exception ex){	
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);		
+				}});
+			
 			exit = true;
 		}
 		if (!exit){
 			try{
 				SmartStartUp.connectToDb();	
-			}catch (Exception ex){
-				SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
+			}catch (final Exception ex){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);		
+					}});
+				
 				exit= true;
 			}
 		}
