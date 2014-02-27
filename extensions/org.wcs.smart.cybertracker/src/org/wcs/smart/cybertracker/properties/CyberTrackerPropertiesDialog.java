@@ -87,6 +87,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private Button btnShowEdit;
 	private Button btnShowGPS;
 	private Button btnKioskMode;
+	private Button btnCanPause;
 	private Text txtExitPin;
 
 	private Text txtSightingAccuracy;
@@ -306,6 +307,25 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		btnKioskMode.setToolTipText(Messages.CyberTrackerPropertiesDialog_KioskMode_Tooltip);
 		btnKioskMode.setSelection(ctProperties.isKioskMode());
 		btnKioskMode.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+
+
+		Label lblCanPause = new Label(generalContainer, SWT.NONE);
+		lblCanPause.setText(Messages.CyberTrackerPropertiesDialog_CanPause);
+		lblCanPause.setToolTipText(Messages.CyberTrackerPropertiesDialog_CanPause_Tooltip);
+
+		btnCanPause = new Button(generalContainer, SWT.CHECK);
+		btnCanPause.setToolTipText(Messages.CyberTrackerPropertiesDialog_CanPause_Tooltip);
+		btnCanPause.setSelection(ctProperties.isCanPause());
+		btnCanPause.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setChangesMade(true);
@@ -884,6 +904,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
+		ctProperties.setCanPause(btnCanPause.getSelection());
 		ctProperties.setExitPin(Integer.valueOf(txtExitPin.getText()));
 		
 			

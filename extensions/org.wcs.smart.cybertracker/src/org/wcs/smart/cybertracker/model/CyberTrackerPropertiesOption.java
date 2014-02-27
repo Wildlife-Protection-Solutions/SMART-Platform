@@ -77,6 +77,7 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 		USE_MAP_ON_SKIP,
 		
 		AUTO_NEXT,
+		CAN_PAUSE,
 		SHOW_EDIT,
 		SHOW_GPS,
 		STORAGE_TIME;

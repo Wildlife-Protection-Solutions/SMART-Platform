@@ -98,6 +98,7 @@ public class CyberTrackerProperties extends UuidItem {
 	//default properties
 	private static final boolean largeScrollBars = false;
 	private static final boolean kioskMode = true;
+	private static final boolean canPause = true;
 	private static final int exitPin = 1234;
 	
 	private static final double sightingAccuracy = 20.0;
@@ -191,6 +192,12 @@ public class CyberTrackerProperties extends UuidItem {
 		getOption(OptionID.KIOSK_MODE).setBooleanValue(kioskMode);
 	}
 	
+	public boolean isCanPause() {
+		return getBooleanValue(OptionID.CAN_PAUSE, canPause);
+	}
+	public void setCanPause(boolean canPause) {
+		getOption(OptionID.CAN_PAUSE).setBooleanValue(canPause);
+	}
 	
 	public boolean isLargeScrollBars() {
 		return getBooleanValue(OptionID.LARGE_SCROLL_BARS, largeScrollBars);
