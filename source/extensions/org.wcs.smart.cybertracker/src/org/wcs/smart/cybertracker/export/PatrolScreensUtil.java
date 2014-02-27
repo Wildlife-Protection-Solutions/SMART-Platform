@@ -302,7 +302,7 @@ public class PatrolScreensUtil {
 			if (i.hasNext())
 				defaults.append(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 		}
-		addTaskNode(id, result, elements, startId, dmRootId, ctProps.getWaypointTimer(), defaults.toString());
+		addTaskNode(id, result, elements, startId, dmRootId, ctProps, defaults.toString());
 		result.rootId = id;
 		return result;
 	}
@@ -533,7 +533,9 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 
-	private void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, Integer timer, String defaultValues) {
+	private void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps, String defaultValues) {
+		boolean canPause = ctProps.isCanPause();
+		
 		CyberTrackerId resumeId = new CyberTrackerId();
 		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
 		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
@@ -551,8 +553,15 @@ public class PatrolScreensUtil {
 		control2.setShowNext("False"); //$NON-NLS-1$
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(startId.getNodeId());
+
+		List<String> nextTaskOptions = new ArrayList<String>();
+		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
+		nextTaskOptions.add(Messages.PatrolScreens_EndPatrol);
+		if (canPause) {
+			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
+		}
 		
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_NewObservation, Messages.PatrolScreens_EndPatrol, Messages.PatrolScreens_PausePatrol);
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions.toArray(new String[nextTaskOptions.size()]));
 		List<String> values = ctUtil.listItemIds(ids);
 		String trElements = ctUtil.translateElements(ids);
 		//custom translate links logic
@@ -562,7 +571,9 @@ public class PatrolScreensUtil {
 		// "End Patrol" leads to confirmation screen
 		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
 		// "Pause Patrol (Rest)" leads to "Paused" screen
-		links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
+		if (canPause) {
+			links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
+		}
 		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
 		if (defaultValues != null && !defaultValues.isEmpty()) {
 			//adding default values
@@ -582,9 +593,11 @@ public class PatrolScreensUtil {
 			control2.setShowGPS("True"); //$NON-NLS-1$
 		}
 		
-		addGpsConfiguration(node, timer);
+		addGpsConfiguration(node, ctProps.getWaypointTimer());
 		container.screenNodes.add(node);
-		container.screenNodes.add(resumeNode);
+		if (canPause) {
+			container.screenNodes.add(resumeNode);
+		}
 		container.screenNodes.add(confirmNode);
 	}
 
