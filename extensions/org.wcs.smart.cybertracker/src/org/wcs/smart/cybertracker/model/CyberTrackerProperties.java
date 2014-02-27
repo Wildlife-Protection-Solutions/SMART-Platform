@@ -97,12 +97,12 @@ public class CyberTrackerProperties extends UuidItem {
 	
 	//default properties
 	private static final boolean largeScrollBars = false;
-	private static final boolean kioskMode = false;
+	private static final boolean kioskMode = true;
 	private static final int exitPin = 1234;
 	
-	private static final double sightingAccuracy = 49.0;
-	private static final int sightingFixCount = 1;
-	private static final int waypointTimer = 0; //aka Track Timer 
+	private static final double sightingAccuracy = 20.0;
+	private static final int sightingFixCount = 10;
+	private static final int waypointTimer = 300; //aka Track Timer 
 	private static final int gpsTimeZone = 0; //GMT/UTC time offset
     private static final int skipButtonTimeout = 3;
     
@@ -116,9 +116,9 @@ public class CyberTrackerProperties extends UuidItem {
 	private static final boolean resetOnSync = false;
 	private static final boolean resetOnNext = true;
 	
-	private static final double trackAccuracy = 49.0;
+	private static final double trackAccuracy = 20.0;
 	
-	private static final boolean useGpsTime = false;
+	private static final boolean useGpsTime = true;
 	private static final boolean manualGps = false;
 	private static final boolean allowSkipManualGps = true;
 	
