@@ -574,6 +574,7 @@ public class PatrolScreensUtil {
 		
 		CyberTrackerProperties properties = ctUtil.getCtProperties();
 		control2 = ScreensObjectFactory.getNavigationControl(node);
+		control2.setShowBack("False"); //$NON-NLS-1$
 		if (properties.isShowEdit()) {
 			control2.setShowEdit("True"); //$NON-NLS-1$
 		}
