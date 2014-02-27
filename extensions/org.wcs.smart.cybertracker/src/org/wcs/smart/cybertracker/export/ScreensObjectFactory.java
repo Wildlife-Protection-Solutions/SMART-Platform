@@ -222,7 +222,7 @@ public class ScreensObjectFactory {
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
-		controls.getControl().add(withNumbers ? createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_NUMBERS, "True") : createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_DEFAULT, null)); //$NON-NLS-1$
+		controls.getControl().add(withNumbers ? createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_NUMBERS, null) : createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_DEFAULT, null));
 		controls.getControl().add(createControl11());
 		data.setControls(controls);
 		node.setData(data);
