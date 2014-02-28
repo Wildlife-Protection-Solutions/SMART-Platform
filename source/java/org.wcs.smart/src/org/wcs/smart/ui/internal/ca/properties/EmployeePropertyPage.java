@@ -182,7 +182,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		nameFilter = new EmployeeNameFilter();
 		activeFilter = new EmployeeActiveFilter();
 		
-		txtFilter = new FilterComposite(container, SWT.BORDER);
+		txtFilter = new FilterComposite(container, SWT.NONE);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		txtFilter.addChangeListener(new ChangeListener() {	
 			@Override
