@@ -122,7 +122,17 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 	 		typeViewer.setInput(patrolTypes);
 	 		PatrolType.Type type = getPatrolType(typeOption);
 	 		if (type == null && !patrolTypes.isEmpty()) {
-	 			type = patrolTypes.get(0).getType();
+	 			//try to GROUND as default if possible
+	 			for (PatrolType item : patrolTypes) {
+	 				if (PatrolType.Type.GROUND.equals(item.getType())) {
+	 					type = PatrolType.Type.GROUND;
+	 					break;
+	 				}
+	 			}
+	 			//if no ground present use first available as default
+	 			if (type == null) {
+	 				type = patrolTypes.get(0).getType();
+	 			}
 	 			typeOption.setStringValue(type.name());
 	 		}
 	 		if (type != null) {
