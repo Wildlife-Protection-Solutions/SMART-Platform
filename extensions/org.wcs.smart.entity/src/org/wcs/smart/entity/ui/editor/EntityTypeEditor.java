@@ -31,10 +31,14 @@ import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -200,30 +204,46 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	}
 	
 	
-	private void initEditor(IEntityTypeEditorPage[] partsToUpdate, boolean typeChanged){
-		getEntityType();
-	
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.saveOrUpdate(entityType);
-			entityType.getName();
-			entityType.getDmAttribute().getName();
-			if (entityType.getAttributes() != null){
-				entityType.getAttributes().size();
-			}
-			
-			for (int i = 0; i < partsToUpdate.length; i ++){
-				if (partsToUpdate[i] != null){
-					partsToUpdate[i].updatePage(s, typeChanged);
-				}
-			}
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
-		}
+	private void initEditor(final IEntityTypeEditorPage[] partsToUpdate, final  boolean typeChanged){
 		
-		setPartName(entityType.getLabel());
+	
+		Job loadEntity = new Job("load entity"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				getEntityType();
+				
+				final Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					s.saveOrUpdate(entityType);
+					entityType.getName();
+					entityType.getDmAttribute().getName();
+					if (entityType.getAttributes() != null){
+						entityType.getAttributes().size();
+					}
+					Display.getDefault().syncExec(new Runnable(){
+
+						@Override
+						public void run() {
+							for (int i = 0; i < partsToUpdate.length; i ++){
+								if (partsToUpdate[i] != null){
+									partsToUpdate[i].updatePage(s, typeChanged);
+								}
+							}
+							setPartName(entityType.getLabel());							
+						}});
+
+				}finally{
+					s.getTransaction().rollback();
+					s.close();
+				}
+				return Status.OK_STATUS;
+			}};
+		loadEntity.setSystem(true);
+		loadEntity.schedule();
+
+		
 		setTitleImage(EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON));
 		
 	}
@@ -263,7 +283,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	 * 
 	 * Will always get a new object.
 	 */
-	public EntityType loadEntityType(){
+	private EntityType loadEntityType(){
 		byte[] uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
 		
 		EntityType et = null;

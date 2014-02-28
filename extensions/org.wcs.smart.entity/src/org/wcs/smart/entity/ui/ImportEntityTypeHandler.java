@@ -297,7 +297,7 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 			btnBrowse.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
+					FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 					
 					String ext = "xml"; //$NON-NLS-1$
 					String name= Messages.ImportEntityTypeHandler_XMLFileType;
