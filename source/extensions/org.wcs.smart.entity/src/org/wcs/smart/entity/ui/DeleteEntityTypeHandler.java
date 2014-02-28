@@ -137,11 +137,11 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			String errorMessage = null;
 			try{
 				if (!DeleteManager.canDelete(entity, session)){
-					errorMessage = MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteError, new Object[]{entity.getId()});
+					errorMessage = MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteError, new Object[]{entity.getName()});
 				}
 			}catch (Exception ex){
 				EntityPlugIn.log(ex.getMessage(), ex);
-				errorMessage = MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteError + "\n\n" + ex.getMessage(), new Object[]{entity.getId()}); //$NON-NLS-1$ 
+				errorMessage = MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteError + "\n\n" + ex.getMessage(), new Object[]{entity.getName()}); //$NON-NLS-1$ 
 			}
 			if (errorMessage != null){
 				session.getTransaction().rollback();

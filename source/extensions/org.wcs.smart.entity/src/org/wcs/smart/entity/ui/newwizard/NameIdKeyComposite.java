@@ -60,7 +60,6 @@ import org.wcs.smart.util.SmartUtils.RegExLevel;
 public class NameIdKeyComposite extends AbstractEntityComposite{
 
 	private Text txtName;
-	private IdComposite txtId;
 	private Text txtKey;
 	
 	private List<NamedKeyItem> sharedKeys;
@@ -77,11 +76,9 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 
 	@Override
 	public String validate() {
-		String error = txtId.validate();
-		if (error != null){
-			return error;
+		if (txtName.getText().trim().length() == 0){
+			return Messages.NameIdKeyComposite_NameRequiredMessage;
 		}
-		
 		if (!SmartUtils.isSimpleString(txtName.getText().trim(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Entity.NAME_MAX_LENGTH, 0)){
 			return MessageFormat.format(Messages.NameIdKeyComposite_NameError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});
 		}
@@ -100,10 +97,6 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 	public Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
-		
-		txtId = new IdComposite();
-		Composite idComp = txtId.createComposite(main);
-		idComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
 		// NAME
 		Label l = new Label(main, SWT.NONE);
@@ -155,7 +148,6 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 	
 	@Override
 	public void updateEntityType(EntityType entityType) {
-		txtId.updateEntityType(entityType);
 		entityType.setName(txtName.getText().trim());
 		entityType.setKeyId(txtKey.getText().trim());
 		
@@ -165,8 +157,6 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 
 	@Override
 	public void initFields(EntityType entityType, Session session) {
-		txtId.initFields(entityType, session);
-		
 		if (entityType.getKeyId() != null){
 			txtKey.setText(entityType.getKeyId());
 			txtKey.setData(entityType.getKeyId());

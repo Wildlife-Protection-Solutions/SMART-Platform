@@ -207,7 +207,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	private void initEditor(final IEntityTypeEditorPage[] partsToUpdate, final  boolean typeChanged){
 		
 	
-		Job loadEntity = new Job("load entity"){
+		Job loadEntity = new Job("load entity"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -321,7 +321,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask(MessageFormat.format(Messages.EntityTypeEditor_SaveProgress, new Object[]{et.getId()}), 0);
+				monitor.beginTask(MessageFormat.format(Messages.EntityTypeEditor_SaveProgress, new Object[]{et.getName()}), 0);
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();

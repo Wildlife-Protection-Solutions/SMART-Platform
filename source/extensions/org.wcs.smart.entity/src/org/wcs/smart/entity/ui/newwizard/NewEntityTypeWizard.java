@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.entity.ui.newwizard;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -33,7 +31,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -68,31 +65,8 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		newType.setDateCreated(new Date());
 		newType.setStatus(Status.ACTIVE);
 		newType.setAttributes(new ArrayList<EntityAttribute>());
-		//set initial id
+
 		session = HibernateManager.openSession();
-		Query q = session.createQuery("SELECT max(id) FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		List<?> maxIs = q.list();
-		
-		Integer i = 0;
-		if (maxIs.size() > 0){
-			String id = (String) maxIs.get(0);
-			try{
-				i = Integer.parseInt(id.replaceAll("[^0-9]", "")); //$NON-NLS-1$ //$NON-NLS-2$
-			}catch (Exception ex){
-				//eat me
-			}
-			if (i <=0 ){
-				i = 1;
-			}else{
-				i++;
-			}
-		}
-		
-		DecimalFormat entityIdFormat = new DecimalFormat("000000"); //$NON-NLS-1$
-		newType.setId(entityIdFormat.format(i));
-		
-		
 	}
 
 	@Override
@@ -117,7 +91,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		DataModelManager.getInstance().fireChangeListeners();	//we have added a new attribute to the data model
 		
 		// open in editor
-		EntityTypeEditorInput input = new EntityTypeEditorInput(this.newType.getUuid(),this.newType.getId(), this.newType.getName());
+		EntityTypeEditorInput input = new EntityTypeEditorInput(this.newType.getUuid(),this.newType.getKeyId(), this.newType.getName());
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityTypeEditor.ID);
 		} catch (PartInitException e) {

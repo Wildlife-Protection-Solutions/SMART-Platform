@@ -37,9 +37,8 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class EntityTypeFilter  {
 
-	private static StringFilterComposite.TextField ENTITYTYPE_ID_FILTER = new StringFilterComposite.TextField(Messages.EntityTypeFilter_IDFieldName, "e.id"); //$NON-NLS-1$
 	private static StringFilterComposite.TextField ENTITYTYPE_NAME_FILTER = new StringFilterComposite.TextField(Messages.EntityTypeFilter_NameFieldName, "lbl.value");  //$NON-NLS-1$
-	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {ENTITYTYPE_ID_FILTER, ENTITYTYPE_NAME_FILTER};
+	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {ENTITYTYPE_NAME_FILTER};
 	
 	private EntityType.Type[] types = null;
 	private EntityType.Status[] status = null;
@@ -84,7 +83,7 @@ public class EntityTypeFilter  {
 	public void setDefaults(){
 		this.strFilter = null;
 		this.stringComparator = null;
-		this.searchField = ENTITYTYPE_ID_FILTER;
+		this.searchField = ENTITYTYPE_NAME_FILTER;
 		
 		this.types = null;
 		this.status = new EntityType.Status[]{EntityType.Status.ACTIVE};
@@ -135,7 +134,7 @@ public class EntityTypeFilter  {
 	 */
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
-		str.append("SELECT e.uuid, e.id, e.name "); //$NON-NLS-1$
+		str.append("SELECT e.uuid, e.keyId, e.name "); //$NON-NLS-1$
 		str.append("FROM EntityType e "); //$NON-NLS-1$
 		str.append(", Label lbl "); //$NON-NLS-1$
 		

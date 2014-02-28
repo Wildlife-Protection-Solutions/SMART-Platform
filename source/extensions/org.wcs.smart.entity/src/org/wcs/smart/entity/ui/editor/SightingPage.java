@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.ui.editor;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
@@ -126,7 +128,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		glayout.verticalSpacing = 0;
 		glayout.marginHeight = 0;
 		form.getBody().setLayout(glayout);
-		form.setText(Messages.SightingPage_SightingsLabel);
+		form.setText(MessageFormat.format(Messages.SightingPage_SightingPageName, new Object[]{getEditorInput().getName()}));
 		
 		Section sec = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.CLIENT_INDENT);		
 		sec.setText(Messages.SightingPage_FiltersLabel);
@@ -183,6 +185,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		toolkit.adapt(sightingTable.getTable().getTable());
 		
 		Hyperlink exportLink = toolkit.createHyperlink(compSighting, DialogConstants.EXPORT_BUTTON_TEXT, SWT.NONE);
+		exportLink.setToolTipText(Messages.SightingPage_ExportTooltip);
 		exportLink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		exportLink.addHyperlinkListener(new IHyperlinkListener() {
 			

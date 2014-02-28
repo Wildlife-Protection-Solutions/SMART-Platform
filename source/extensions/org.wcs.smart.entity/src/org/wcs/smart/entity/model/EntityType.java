@@ -82,7 +82,6 @@ public class EntityType extends NamedKeyItem{
 	}
 	
 	private ConservationArea ca;
-	private String id;
 	private Date dateCreated;
 	private Employee creator;
 	private Status status;
@@ -117,19 +116,6 @@ public class EntityType extends NamedKeyItem{
 	 */
 	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
-	}
-
-	/**
-	 * type id
-	 * @return
-	 */
-	@Column(name="id")
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	/**
@@ -226,8 +212,8 @@ public class EntityType extends NamedKeyItem{
 	@Transient
 	public String getLabel(){
 		if (getName() != null){
-			return getName() + " [" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			return getName(); 
 		}
-		return "[" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getKeyId();
 	}
 }

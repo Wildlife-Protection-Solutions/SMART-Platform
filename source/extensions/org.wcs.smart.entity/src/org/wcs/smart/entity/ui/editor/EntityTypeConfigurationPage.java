@@ -63,6 +63,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -92,7 +93,6 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.newwizard.IdComposite;
 import org.wcs.smart.entity.ui.newwizard.StatusComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -120,7 +120,6 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	private Text txtCreatedBy;
 	private Text txtType;
 	private Text txtStatus;
-	private Text txtId;
 	private Text txtKey;
 	private Text txtName;
 	private Text txtDmAttribute;
@@ -246,11 +245,13 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		((GridLayout)rightContent.getLayout()).marginLeft = 20;
 		
 		//left
-		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_StatusLabel);
+		Label l = toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_StatusLabel);
+		l.setToolTipText(Messages.EntityTypeConfigurationPage_StatusTooltip);
 		txtStatus = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStatus.setEditable(false);
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtStatus.getLayoutData()).widthHint = 100;
+		
 		Hyperlink editLink = createEditLink(toolkit, leftContent);
 		if (editLink != null){
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -262,29 +263,13 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				}
 			});
 		}
-		
-		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_IdLabel);
-		txtId = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
-		txtId.setEditable(false);
-		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)txtId.getLayoutData()).widthHint = 100;
-		editLink = createEditLink(toolkit, leftContent);
-		if (editLink != null){
-			editLink.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					EntityTypeEditPropertyDialog dialog = new EntityTypeEditPropertyDialog(getSite().getShell(),
-						new IdComposite(), parentEditor.getEntityType());
-					dialog.open();
-				}
-			});
-		}
 
-		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_NameLabel);
+		l = toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_NameLabel);
+		l.setToolTipText(Messages.EntityTypeConfigurationPage_NameTooltip);
 		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)txtId.getLayoutData()).widthHint = 100;
+		
 		editLink = createEditLink(toolkit, leftContent);
 		if (editLink != null){
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -295,11 +280,12 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			});
 		}
 		
-		toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_KeyLabel);
+		l = toolkit.createLabel(leftContent, Messages.EntityTypeConfigurationPage_KeyLabel);
 		txtKey = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtKey.getLayoutData()).widthHint = 100;
+		l.setToolTipText(Messages.EntityTypeConfigurationPage_KeyTooltip);
 		editLink = createEditLink(toolkit, leftContent);
 		if (editLink != null){
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -373,11 +359,11 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		((GridData)txtDateCreated.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
-		toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_AttributeLabel);
+		l=toolkit.createLabel(rightContent, Messages.EntityTypeConfigurationPage_AttributeLabel);
+		l.setToolTipText(Messages.EntityTypeConfigurationPage_AttributeTooltip);
 		txtDmAttribute = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtDmAttribute.setEditable(false);
 		txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)txtId.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
 		summaryScroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -977,10 +963,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 */
 	public void updatePage(Session currentSession, boolean typeChanged) {
 		EntityType type = this.parentEditor.getEntityType();
-		form.setText(getPartName());
+		form.setText(MessageFormat.format(Messages.EntityTypeConfigurationPage_PageName, new Object[]{getEditorInput().getName()}));
 		
 		type.getNames().size();
-		txtId.setText(type.getId());
 		txtName.setText(type.getName());
 		txtKey.setText(type.getKeyId());
 		txtDmAttribute.setText(type.getDmAttribute().getName());
@@ -990,7 +975,6 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));
 		
 		attributeTable.setInput(type.getAttributes());			
-		form.setText(getEditorInput().getName());
 		
 		if (type.getAttributes() != null){
 			type.getAttributes().size();
@@ -1018,7 +1002,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 
 	@Override
 	public void setFocus() {
-		txtId.setFocus();
+		txtName.setFocus();
 	}
 
 }

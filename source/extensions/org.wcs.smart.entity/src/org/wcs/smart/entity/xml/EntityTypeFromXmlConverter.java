@@ -45,7 +45,6 @@ public class EntityTypeFromXmlConverter {
 		entityType.setDateCreated(new Date());
 		
 		entityType.setEntities(new ArrayList<Entity>());
-		entityType.setId(xml.getId());
 		entityType.setKeyId(xml.getKeyid());
 		importNames(xml.getNames(), entityType, session, true);
 		entityType.setStatus(EntityType.Status.valueOf(xml.getStatus()));
