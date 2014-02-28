@@ -203,7 +203,7 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 								DataModelManager.getInstance().fireChangeListeners();
 								
 								//open 
-								EntityTypeEditorInput input = new EntityTypeEditorInput(newType.getUuid(), newType.getId(), newType.getName());
+								EntityTypeEditorInput input = new EntityTypeEditorInput(newType.getUuid(), newType.getKeyId(), newType.getName());
 								FieldDataPerspective.openPerspective(EntityTypeListView.ID);
 								try {
 									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityTypeEditor.ID);

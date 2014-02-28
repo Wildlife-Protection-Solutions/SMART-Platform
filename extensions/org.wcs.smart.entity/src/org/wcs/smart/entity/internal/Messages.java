@@ -62,6 +62,7 @@ public class Messages extends NLS {
 	public static String DmAttributeListItemDeleteAdvisor_CannotDeleteAttributeAssociation;
 	public static String DmAttributeListItemDeleteAdvisor_CannotDeleteEntityAssociation;
 	public static String DmAttributeListItemDeleteAdvisor_InvalidObject;
+	public static String EntitiesPage_PageName;
 	public static String Entity_ActiveStatusLabel;
 	public static String Entity_IDFieldName;
 	public static String Entity_InActiveStatusLabel;
@@ -130,6 +131,7 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_AliasColumnName;
 	public static String EntityTypeConfigurationPage_AttributeLabel;
 	public static String EntityTypeConfigurationPage_AttributeLabels;
+	public static String EntityTypeConfigurationPage_AttributeTooltip;
 	public static String EntityTypeConfigurationPage_CreateByLabel;
 	public static String EntityTypeConfigurationPage_DataModelAttributeNameColumnName;
 	public static String EntityTypeConfigurationPage_DataModeUpdateJobName;
@@ -145,13 +147,15 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_EditKeyDialogTitle;
 	public static String EntityTypeConfigurationPage_EditKeyDialogWarning;
 	public static String EntityTypeConfigurationPage_EditKeyError;
-	public static String EntityTypeConfigurationPage_IdLabel;
 	public static String EntityTypeConfigurationPage_KeyColumnName;
 	public static String EntityTypeConfigurationPage_KeyLabel;
+	public static String EntityTypeConfigurationPage_KeyTooltip;
 	public static String EntityTypeConfigurationPage_LoadAttributeProgressName;
 	public static String EntityTypeConfigurationPage_MoveDownLabel;
 	public static String EntityTypeConfigurationPage_MoveUpLabel;
 	public static String EntityTypeConfigurationPage_NameLabel;
+	public static String EntityTypeConfigurationPage_NameTooltip;
+	public static String EntityTypeConfigurationPage_PageName;
 	public static String EntityTypeConfigurationPage_PrimaryColumnName;
 	public static String EntityTypeConfigurationPage_PrimaryNoLabel;
 	public static String EntityTypeConfigurationPage_PrimaryYesLabel;
@@ -160,6 +164,7 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_RequiredYesLabel;
 	public static String EntityTypeConfigurationPage_SaveError;
 	public static String EntityTypeConfigurationPage_StatusLabel;
+	public static String EntityTypeConfigurationPage_StatusTooltip;
 	public static String EntityTypeConfigurationPage_SummarySectionName;
 	public static String EntityTypeConfigurationPage_TranslateLabel;
 	public static String EntityTypeConfigurationPage_TypeLabel;
@@ -197,7 +202,6 @@ public class Messages extends NLS {
 	public static String EntityTypeEntitiesPage_EntityDeleteError;
 	public static String EntityTypeEntitiesPage_EntityDetailsSectionTitle;
 	public static String EntityTypeEntitiesPage_EntityListSectionTitle;
-	public static String EntityTypeFilter_IDFieldName;
 	public static String EntityTypeFilter_NameFieldName;
 	public static String EntityTypeFilterDialog_DialogMessage;
 	public static String EntityTypeFilterDialog_DialogTitle;
@@ -258,12 +262,6 @@ public class Messages extends NLS {
 	public static String FixedEntityServiceInfo_Keyword2;
 	public static String FixedEntityServiceInfo_Keyword3;
 	public static String FixedEntityServiceInfo_Name;
-	public static String IdComposite_IdLabel;
-	public static String IdComposite_IdRequired;
-	public static String IdComposite_IdTooltip;
-	public static String IdComposite_InvalidId;
-	public static String IdComposite_TypeIdDescription;
-	public static String IdComposite_TypeIdName;
 	public static String ImportEntitiesWizard_ErrorDialogTitle;
 	public static String ImportEntitiesWizard_ErrorMesg;
 	public static String ImportEntitiesWizard_FileNotFoundError;
@@ -304,6 +302,7 @@ public class Messages extends NLS {
 	public static String NameIdKeyComposite_KeyTooltip;
 	public static String NameIdKeyComposite_NameError;
 	public static String NameIdKeyComposite_NameLabel;
+	public static String NameIdKeyComposite_NameRequiredMessage;
 	public static String NameIdKeyComposite_NameTooltip;
 	public static String NewEntityDialog_DialogTitle;
 	public static String NewEntityDialog_EditDialogTitle;
@@ -327,12 +326,13 @@ public class Messages extends NLS {
 	public static String SightingPage_EntityFilterLabel;
 	public static String SightingPage_ErrorDialogTitle;
 	public static String SightingPage_ExecuteJobName;
+	public static String SightingPage_ExportTooltip;
 	public static String SightingPage_FiltersLabel;
 	public static String SightingPage_NothingToExport;
 	public static String SightingPage_QueryError;
 	public static String SightingPage_QueryResultSectionTitle;
 	public static String SightingPage_ReloadButtonLabel;
-	public static String SightingPage_SightingsLabel;
+	public static String SightingPage_SightingPageName;
 	public static String SightingPagedResults_CleanUpJobName;
 	public static String SightingQueryColumn_CaIdColumnName;
 	public static String SightingQueryColumn_CaNameColumnName;

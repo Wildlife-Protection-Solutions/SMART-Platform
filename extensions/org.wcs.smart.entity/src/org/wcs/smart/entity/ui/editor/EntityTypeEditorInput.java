@@ -38,19 +38,19 @@ import org.wcs.smart.entity.internal.Messages;
 public class EntityTypeEditorInput implements IEditorInput {
 
 	private byte[] uuid;
-	private String id;
+	private String key;
 	private String name;
 	
 	/**
 	 * Creates a new input
 	 * 
 	 * @param entityType uuid
-	 * @param id the id
+	 * @param key the id
 	 * @param name the name
 	 */
-	public EntityTypeEditorInput(byte[] uuid, String id, String name){
+	public EntityTypeEditorInput(byte[] uuid, String key, String name){
 		this.uuid = uuid;
-		this.id = id;
+		this.key = key;
 		this.name = name;
 	}
 	
@@ -79,7 +79,7 @@ public class EntityTypeEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
-		return name + " [" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return name ;
 	}
 
 	@Override

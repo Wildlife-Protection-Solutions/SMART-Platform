@@ -17,7 +17,6 @@ elementFormDefault="qualified">
     		<element name="dmAttribute" type="tns:DataModelAttribute"></element>
     	</sequence>
     	<attribute name="keyid" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
     	<attribute name="status" type="string"></attribute>
     	<attribute name="type" type="string"></attribute>
     </complexType>

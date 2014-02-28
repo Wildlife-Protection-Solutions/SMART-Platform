@@ -41,8 +41,7 @@ public class EntityTypeToXmlConverter {
 	public static org.wcs.smart.entity.xml.model.EntityType toXml(EntityType entityType, IProgressMonitor monitor){
 		monitor.beginTask(MessageFormat.format(Messages.EntityTypeToXmlConverter_Progress1, new Object[]{entityType.getName()}), entityType.getAttributes().size() + 1);
 		org.wcs.smart.entity.xml.model.EntityType xml = new org.wcs.smart.entity.xml.model.EntityType();
-		
-		xml.setId(entityType.getId());
+
 		xml.setKeyid(entityType.getKeyId());
 		xml.setStatus(entityType.getStatus().name());
 		xml.setType(entityType.getType().name());

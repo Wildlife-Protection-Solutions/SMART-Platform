@@ -78,7 +78,6 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 			
 			clone.setDmAttribute(findNewAttribute(et.getDmAttribute()));
 			
-			clone.setId(et.getId());
 			clone.setKeyId(et.getKeyId());
 			engine.copyLabels(et, clone);
 			clone.setStatus(et.getStatus());
