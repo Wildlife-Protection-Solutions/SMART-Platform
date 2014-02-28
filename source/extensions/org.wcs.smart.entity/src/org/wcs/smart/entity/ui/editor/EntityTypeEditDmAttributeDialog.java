@@ -118,7 +118,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		txtKey = new Text(c, SWT.DEFAULT);
+		txtKey = new Text(c, SWT.BORDER | SWT.READ_ONLY);
 		if (((EntityAttribute)item).getKeyId() != null){
 			txtKey.setText(((EntityAttribute)item).getKeyId());
 		}
@@ -141,7 +141,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 				EntityAttribute a = (EntityAttribute)item;
 				siblings.addAll(a.getEntityType().getAttributes());
 				siblings.remove(a);
-				KeyInputDialog id = new KeyInputDialog(getShell(), a.getKeyId(), siblings);
+				KeyInputDialog id = new KeyInputDialog(getShell(), txtKey.getText(), siblings);
 				int ret = id.openNoWarning();
 				if (ret != Window.CANCEL) {
 					txtKey.setText(id.getValue());

@@ -92,6 +92,12 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 	}
 
 	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(csvComposite.getFileText().length() > 0);
+	}
+	
+	@Override
 	public Control createDialogArea(Composite parent) {
 		Composite comp = (Composite) super.createDialogArea(parent);
 		Composite fileComp = super.createFileComposite(comp, true);

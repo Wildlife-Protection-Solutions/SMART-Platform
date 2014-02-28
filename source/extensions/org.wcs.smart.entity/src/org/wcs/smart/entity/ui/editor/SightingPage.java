@@ -36,7 +36,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -46,6 +45,7 @@ import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -128,12 +128,17 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		form.getBody().setLayout(glayout);
 		form.setText(Messages.SightingPage_SightingsLabel);
 		
-		Group g = new Group(form.getBody(), SWT.NONE);
-		toolkit.adapt(g);
-		g.setText(Messages.SightingPage_FiltersLabel);
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setLayout(new GridLayout(2, false));
+		Section sec = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.CLIENT_INDENT);		
+		sec.setText(Messages.SightingPage_FiltersLabel);
+		sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		sec.setLayout(new GridLayout());
 		
+		
+		Composite g = toolkit.createComposite(sec);
+		g.setLayout(new GridLayout(2, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		sec.setClient(g);
 		toolkit.createLabel(g, Messages.SightingPage_DateFilterLabel);
 		
 		dateComp = new QueryDateFilterComposite(g, null, SightingQueryColumn.SIGHTING_DATE_FILTERS);
@@ -159,14 +164,19 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		lblQueryProgress = toolkit.createLabel(g, ""); //$NON-NLS-1$
 		lblQueryProgress.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Composite compSighting = toolkit.createComposite(form.getBody());
+		sec = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.CLIENT_INDENT);		
+		sec.setText(Messages.SightingPage_QueryResultSectionTitle);
+		sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sec.setLayout(new GridLayout());
+			
+		Composite compSighting = toolkit.createComposite(sec);
 		GridLayout gl = new GridLayout();
 		gl.marginHeight = 10;
 		gl.marginWidth = 0;
 		compSighting.setLayout(gl);
 		compSighting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
+		sec.setClient(compSighting);
 		
 		sightingTable = new SightingTable(compSighting);
 		sightingTable.getTable().getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

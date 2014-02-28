@@ -330,6 +330,7 @@ public class Messages extends NLS {
 	public static String SightingPage_FiltersLabel;
 	public static String SightingPage_NothingToExport;
 	public static String SightingPage_QueryError;
+	public static String SightingPage_QueryResultSectionTitle;
 	public static String SightingPage_ReloadButtonLabel;
 	public static String SightingPage_SightingsLabel;
 	public static String SightingPagedResults_CleanUpJobName;
