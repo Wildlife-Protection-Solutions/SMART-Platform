@@ -257,7 +257,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 
 		//search filter field
 		final AttributeNameFilter viewerFilter = new AttributeNameFilter();
-		txtFilter = new FilterComposite(compAddExisting, SWT.BORDER);
+		txtFilter = new FilterComposite(compAddExisting, SWT.NONE);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtFilter.addChangeListener(new ChangeListener() {	
 			@Override

@@ -173,12 +173,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-//		configureP2Policy(ProvisioningUI.getDefaultUI().getPolicy());
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
 
-//		//lock on the plugin start mutex until the
-//		//database has been initialized
-//		//We don't want anything running until after the splash screen
+		//lock on the plugin start mutex until the
+		//database has been initialized
+		//We don't want anything running until after the splash screen
 		//has initialized the Database.  See initializeDatabase for code
 		//that unlocks this rule
 		Job.getJobManager().beginRule(SmartPlugIn.PLUGIN_START_MUTEX, null);

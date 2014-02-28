@@ -114,9 +114,9 @@ public class FilterComposite extends Composite {
 	 * @param style
 	 */
 	public FilterComposite(Composite parent, int style) {
-		super(parent, style | SWT.BORDER);
+		super(parent, style | SWT.NONE);
 		
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(1, false);
 		layout.marginBottom = 0;
 		layout.marginLeft = 0;
 		layout.marginHeight = 0;
@@ -125,13 +125,29 @@ public class FilterComposite extends Composite {
 		layout.marginWidth = 0;
 		setLayout(layout);
 		
+		
+		
 		if (useNativeSearchField(this)){
 			txtFilter = new Text(this, SWT.SINGLE | SWT.SEARCH | SWT.ICON_CANCEL);
-			txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		}else{
-			txtFilter = new Text(this, SWT.SINGLE);
+			Composite tmp = new Composite(this, SWT.BORDER);
+			GridLayout layout1 = new GridLayout(2, false);
+			layout1.marginBottom = 0;
+			layout1.marginLeft = 0;
+			layout1.marginHeight = 0;
+			layout1.marginRight = 0;
+			layout1.marginTop = 0;
+			layout1.marginWidth = 0;
+			tmp.setLayout(layout1);
+			tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						
+			tmp.setBackground(parent.getDisplay().getSystemColor(
+					SWT.COLOR_LIST_BACKGROUND));
+			
+			txtFilter = new Text(tmp, SWT.SINGLE);
 			txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			createClearTextNew(this);
+			createClearTextNew(tmp);
 		}
 		
 		super.setBackground(txtFilter.getBackground());
