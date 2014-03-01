@@ -29,6 +29,8 @@ import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -554,6 +556,15 @@ public class CyberTrackerConfExporter {
 			throw new IllegalArgumentException("Cannot add a flat tree screen without any items to display"); //$NON-NLS-1$
 		}
 		List<IAttributeTreeNodeProxy> finalTreeNodes = listFinalTreeNodes(activeTreeNodes);
+		Collections.sort(finalTreeNodes, new Comparator<IAttributeTreeNodeProxy>() {
+			@Override
+			public int compare(IAttributeTreeNodeProxy arg0, IAttributeTreeNodeProxy arg1) {
+				String n0 = arg0.getName();
+				if (n0 == null)
+					return -1;
+				return n0.compareTo(arg1.getName());
+			}
+		});
 		
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		for (IAttributeTreeNodeProxy treeNode : finalTreeNodes) {
