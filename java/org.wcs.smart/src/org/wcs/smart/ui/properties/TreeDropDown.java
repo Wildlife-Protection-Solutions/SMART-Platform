@@ -82,7 +82,7 @@ public class TreeDropDown{
 	public TreeDropDown(Shell parent){
 		
 		
-		main = new Shell(parent, SWT.SINGLE | SWT.BORDER | SWT.NO_FOCUS);
+		main = new Shell(parent, SWT.SINGLE | SWT.BORDER | SWT.NO_FOCUS | SWT.NO_TRIM);
 
 		main.addTraverseListener(new TraverseListener() {
 			@Override
