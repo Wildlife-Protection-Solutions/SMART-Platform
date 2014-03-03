@@ -45,7 +45,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolTip;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -192,11 +194,25 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 		lnk.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!MessageDialog.openConfirm(getShell(), 
+				if (!MessageDialog.openQuestion(getShell(), 
 						Messages.EntityTypeEditDmAttributeDialog_EditDialotTitle, 
 						MessageFormat.format(Messages.EntityTypeEditDmAttributeDialog_EditConfirmMessage, new Object[]{((EntityAttribute)item).getDmAttribute().getName()}))){
 					return;
 				}
+				
+				try{
+					String canEdit = DataModelManager.getInstance().canEdit(((EntityAttribute)item).getDmAttribute(), openSession);
+					if (canEdit != null){
+						if (!MessageDialog.openQuestion(getShell(), Messages.EntityTypeEditDmAttributeDialog_WarningTitle, 
+								Messages.EntityTypeEditDmAttributeDialog_AttributeError + "\n\n" + canEdit + "\n\n" + Messages.EntityTypeEditDmAttributeDialog_ContinueLabel)){   //$NON-NLS-1$ //$NON-NLS-2$
+							return;
+						}
+					}
+				}catch (Exception ex){
+					SmartPlugIn.displayLog(getParentShell(), Messages.EntityTypeEditDmAttributeDialog_CannotEditError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+					return;
+				}
+				
 				//edit data model attribute dialog
 				openSession.beginTransaction();
 				try{
