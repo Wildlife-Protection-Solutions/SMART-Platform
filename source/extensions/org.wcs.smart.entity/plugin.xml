@@ -454,5 +454,11 @@
             maplayer="org.wcs.smart.entity.report.FixedEntityMapLayer">
       </MapLayer>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.datamodel.editAdvisor">
+      <EditAdvisor
+            advisor="org.wcs.smart.entity.internal.DmAttributeEditAdvisor">
+      </EditAdvisor>
+   </extension>
 
 </plugin>

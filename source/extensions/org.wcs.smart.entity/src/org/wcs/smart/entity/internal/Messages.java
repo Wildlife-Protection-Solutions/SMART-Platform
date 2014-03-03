@@ -59,6 +59,7 @@ public class Messages extends NLS {
 	public static String DmAttributeDeleteAdvisor_CannotDeleteAttributeAssociation;
 	public static String DmAttributeDeleteAdvisor_CannotDeleteAttributeEtAssociation;
 	public static String DmAttributeDeleteAdvisor_InvalidType;
+	public static String DmAttributeEditAdvisor_CannotEditAttribute;
 	public static String DmAttributeListItemDeleteAdvisor_CannotDeleteAttributeAssociation;
 	public static String DmAttributeListItemDeleteAdvisor_CannotDeleteEntityAssociation;
 	public static String DmAttributeListItemDeleteAdvisor_InvalidObject;
