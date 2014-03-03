@@ -24,7 +24,10 @@ package org.wcs.smart.ca.datamodel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -58,7 +61,7 @@ public class DataModelManager {
 	 */
 	private List<IDataModelListener> changeListeners = new ArrayList<IDataModelListener>();
 	private List<IDataModelItemListener> itemChangeListeners = new ArrayList<IDataModelItemListener>();
-
+	private List<IDmEditAdvisor> editAdvisors = null;
 	
 	/**
 	 * Creates a new data model manager
@@ -307,4 +310,67 @@ public class DataModelManager {
 		return true;
 	}
 	
+	/**
+	 * Uses the org.wcs.smart.ca.datamodel.editAdvisor extension point to determine
+	 * if a category should be edited.  
+	 * @param c
+	 * @param session
+	 * @return null or the reason it should not be edited
+	 * @throws Exception
+	 */
+	public String canEdit(Category c, Session session) throws Exception{
+		//find all extension points for the given class
+		List<IDmEditAdvisor> items = getEditAdvisors();
+		for (IDmEditAdvisor i : items){
+			String msg = i.canEdit(c, session);
+			if (msg != null){
+				return msg;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Uses the org.wcs.smart.ca.datamodel.editAdvisor extension point to determine
+	 * if a attribute should be edited.  
+	 * @param c
+	 * @param session
+	 * @return null or the reason it should not be editted
+	 * @throws Exception
+	 */
+	public String canEdit(Attribute att, Session session) throws Exception{
+		//find all extension points for the given class
+		List<IDmEditAdvisor> items = getEditAdvisors();
+		for (IDmEditAdvisor i : items){
+			String msg = i.canEdit(att, session);
+			if (msg != null){
+				return msg;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Loads the data model edit advisors and caches the 
+	 * classes.
+	 * @return
+	 * @throws CoreException
+	 */
+	private List<IDmEditAdvisor> getEditAdvisors() throws CoreException{
+		if (editAdvisors != null){
+			return editAdvisors;
+		}
+		
+		//find all extension points for the given class
+		editAdvisors = new ArrayList<IDmEditAdvisor>();
+		if (Platform.getExtensionRegistry() != null){
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDmEditAdvisor.EXTENSION_ID);
+					
+			for (IConfigurationElement e : config) {
+				//matching type add this for processing
+				editAdvisors.add((IDmEditAdvisor)e.createExecutableExtension("advisor")); //$NON-NLS-1$
+			}
+		}
+		return editAdvisors;
+	}
 }

@@ -6,6 +6,7 @@
  <extension-point id="org.wcs.smart.ca.templateCloner" name="SMART Conservation Area Template Cloner" schema="schema/org.wcs.smart.ca.templateCloner.exsd"/>
  <extension-point id="org.wcs.smart.ca.filestoredir" name="Filestore Contribution" schema="schema/org.wcs.smart.ca.filestoredir.exsd"/>
  <extension-point id="org.wcs.smart.ca.import" name="Conservation Area Data Importer" schema="schema/org.wcs.smart.ca.import.exsd"/>
+ <extension-point id="org.wcs.smart.ca.datamodel.editAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"

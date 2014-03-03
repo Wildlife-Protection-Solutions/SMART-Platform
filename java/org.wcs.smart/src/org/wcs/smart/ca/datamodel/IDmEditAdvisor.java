@@ -21,22 +21,39 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import org.hibernate.Session;
+
 /**
- * 
- * Listener plugins can implement and register
- * with the DataModelManager that will notify them
- * of changes to the data model.
+ * <p>
+ * Data model edit advisors.
+ * </p>
+ * <p>
+ * Plugins can implement this extension point to advise the data model editor
+ * when categories or attributes should not be modified.  It will not prevent the
+ * user from modifying the category/attribute however a warning message is displayed
+ * to the users.
+ * </p>
  * 
  * @author Emily
  *
  */
-public interface IDataModelListener {
+public interface IDmEditAdvisor {
 
+	public static final String EXTENSION_ID = "org.wcs.smart.ca.datamodel.editAdvisor"; //$NON-NLS-1$
+	
 	/**
-	 * This method is called when the
-	 * data model is saved to the database.
-	 * <p>it is called after the the data model as been saved and the current 
-	 * transaction committed.</p>
+	 * 
+	 * @param attribute  the attribute to be modified
+	 * @param session current session
+	 * @return reason item should not be edited or null if no issues
 	 */
-	void modified();
+	public String canEdit(Attribute attribute, Session session);
+	
+	/**
+	 * 
+	 * @param category  the category to be modified
+	 * @param session current session
+	 * @return reason item should not be edited or null if no issues
+	 */
+	public String canEdit(Category category, Session session);
 }
