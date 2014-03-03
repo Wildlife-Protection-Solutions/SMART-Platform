@@ -83,7 +83,10 @@ public class TreeEditorField  {
 			if (event.widget.isDisposed()){
 				return;
 			}
-			if (!(event.widget == btnDownArrow || event.widget == txtText || event.widget == tree.getTreeViewer().getControl() || event.widget == tree.getTreeViewer().getControl().getParent())){
+			if (!(event.widget == btnDownArrow || 
+				  event.widget == txtText || 
+				  event.widget == tree.getTreeViewer().getControl() || 
+				  event.widget == tree.getTreeViewer().getControl().getParent())){
 				if (tree.isVisible()){
 					tree.hide();
 				}
