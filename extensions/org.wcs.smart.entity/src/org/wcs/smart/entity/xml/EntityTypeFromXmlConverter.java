@@ -141,11 +141,9 @@ public class EntityTypeFromXmlConverter {
 		}
 		
 		/* Attribute List */
+		a.setAttributeList(new ArrayList<AttributeListItem>());
 		if (xml.getValues() != null){
 			List<ListNode> items = xml.getValues();
-			if (items.size() > 0){
-				a.setAttributeList(new ArrayList<AttributeListItem>());
-			}
 			for (int i = 0; i < items.size(); i ++){
 				ListNode item = items.get(i);
 				AttributeListItem newItem = new AttributeListItem();
