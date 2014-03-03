@@ -169,6 +169,9 @@ public class Messages extends NLS {
 	public static String EntityTypeConfigurationPage_SummarySectionName;
 	public static String EntityTypeConfigurationPage_TranslateLabel;
 	public static String EntityTypeConfigurationPage_TypeLabel;
+	public static String EntityTypeEditDmAttributeDialog_AttributeError;
+	public static String EntityTypeEditDmAttributeDialog_CannotEditError;
+	public static String EntityTypeEditDmAttributeDialog_ContinueLabel;
 	public static String EntityTypeEditDmAttributeDialog_DmAttributeLabel;
 	public static String EntityTypeEditDmAttributeDialog_DmAttributeTooltip;
 	public static String EntityTypeEditDmAttributeDialog_EditConfirmMessage;
@@ -185,6 +188,7 @@ public class Messages extends NLS {
 	public static String EntityTypeEditDmAttributeDialog_KeyTooltip;
 	public static String EntityTypeEditDmAttributeDialog_PrimaryTooltip;
 	public static String EntityTypeEditDmAttributeDialog_RequiredTooltip;
+	public static String EntityTypeEditDmAttributeDialog_WarningTitle;
 	public static String EntityTypeEditor_ConfigurationPageName;
 	public static String EntityTypeEditor_EditingSavingType;
 	public static String EntityTypeEditor_EntitiesPageName;
