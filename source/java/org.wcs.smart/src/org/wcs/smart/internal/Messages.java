@@ -396,11 +396,16 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_AddCategory_Button;
 	public static String DataModelPropertyPage_AddCategory_Tooltip;
 	public static String DataModelPropertyPage_ApplyingUpdates;
+	public static String DataModelPropertyPage_AttributeWarningMessage;
+	public static String DataModelPropertyPage_CannotEditAttribute;
+	public static String DataModelPropertyPage_CannotEditoCategory;
+	public static String DataModelPropertyPage_CategoryWarningMessage;
 	public static String DataModelPropertyPage_Close_DialogMessage;
 	public static String DataModelPropertyPage_Close_DialogTitle;
 	public static String DataModelPropertyPage_Confirm_DeleteAttribute;
 	public static String DataModelPropertyPage_ConfirmDeleteCatAtt_DialogMessage;
 	public static String DataModelPropertyPage_ConfirmDeleteCategory_DialogMessage;
+	public static String DataModelPropertyPage_ContinueLabel;
 	public static String DataModelPropertyPage_Delete_DialogTitle;
 	public static String DataModelPropertyPage_Delete_Tooltip;
 	public static String DataModelPropertyPage_DeleteErrorDialogTitle;
@@ -408,6 +413,7 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_Dialog_Title;
 	public static String DataModelPropertyPage_Disable_Tooltip;
 	public static String DataModelPropertyPage_Edit_Tooltip;
+	public static String DataModelPropertyPage_EditWarningTitle;
 	public static String DataModelPropertyPage_Error_Edit;
 	public static String DataModelPropertyPage_Error_SavingDataModel;
 	public static String DataModelPropertyPage_Error_Unknown;

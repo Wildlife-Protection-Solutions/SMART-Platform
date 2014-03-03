@@ -755,6 +755,18 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private void editElement(){
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
+			try{
+				String canEdit = DataModelManager.getInstance().canEdit((Category)o, session);
+				if (canEdit != null){
+					if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_EditWarningTitle, Messages.DataModelPropertyPage_CategoryWarningMessage + "\n\n" + canEdit + "\n\n" + Messages.DataModelPropertyPage_ContinueLabel)){  //$NON-NLS-1$ //$NON-NLS-2$
+						return;
+					}
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(getParentShell(), Messages.DataModelPropertyPage_CannotEditoCategory + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+				return;
+			}
+			
 			List<Category> siblings = null;
 			if (((Category) o).getParent() != null){
 				siblings = ((Category) o).getParent().getChildren();
@@ -769,6 +781,19 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			refreshTree();
 		}else if (o instanceof CategoryAttribute){
+			try{
+				String canEdit = DataModelManager.getInstance().canEdit(((CategoryAttribute)o).getAttribute(), session);
+				if (canEdit != null){
+					if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_EditWarningTitle, Messages.DataModelPropertyPage_AttributeWarningMessage + "\n\n" + canEdit + "\n\n" + Messages.DataModelPropertyPage_ContinueLabel)){  //$NON-NLS-1$ //$NON-NLS-2$
+						return;
+					}
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(getParentShell(), Messages.DataModelPropertyPage_CannotEditAttribute + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+				return;
+			}
+
+			
 			//warn that this affects everywhere this attribute is used.
 			
 			Set<CategoryAttribute> usages = ((DataModel)viewer.getInput()).findAttribute(((CategoryAttribute)o).getAttribute());
