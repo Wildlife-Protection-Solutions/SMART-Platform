@@ -92,7 +92,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 	Text detailsArea;
 	InstalledIUGroup installedIUGroup;
 	String profileId;
-	Button updateButton, uninstallButton, propertiesButton;
+	Button uninstallButton, propertiesButton;
 	ProvisioningUI ui;
 
 	/* (non-Javadoc)
@@ -203,9 +203,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 	}
 
 	void updateEnablement() {
-		if (updateButton == null || updateButton.isDisposed())
-			return;
-		Button[] buttons = {updateButton, uninstallButton, propertiesButton};
+		Button[] buttons = {uninstallButton, propertiesButton};
 		for (int i = 0; i < buttons.length; i++) {
 			Action action = (Action) buttons[i].getData(BUTTON_ACTION);
 			if (action == null || !action.isEnabled())
@@ -270,9 +268,6 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 	
 	protected void buttonPressed(int buttonId) {
 		switch (buttonId) {
-			case UPDATE_ID :
-				((Action) updateButton.getData(BUTTON_ACTION)).run();
-				break;
 			case UNINSTALL_ID :
 				((Action) uninstallButton.getData(BUTTON_ACTION)).run();
 				break;
