@@ -53,7 +53,7 @@ public class CmNode extends NamedItem {
 	private List<CmNode> children;
 	private List<CmAttribute> cmAttributes;
 	private boolean photoAllowed = false;
-	private boolean photoRequired = false;
+	private boolean photoRequired = true;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -124,7 +124,7 @@ public class CmNode extends NamedItem {
 		return photoAllowed;
 	}
 	public void setPhotoAllowed(Boolean photoAllowed) {
-		this.photoAllowed = Boolean.TRUE.equals(photoAllowed);
+		this.photoAllowed = Boolean.TRUE.equals(photoAllowed); //null <==> false
 	}
 	
 	@Column(name = "photo_required")
@@ -132,7 +132,7 @@ public class CmNode extends NamedItem {
 		return photoRequired;
 	}
 	public void setPhotoRequired(Boolean photoRequired) {
-		this.photoRequired = Boolean.TRUE.equals(photoRequired);
+		this.photoRequired = !Boolean.FALSE.equals(photoRequired); //null <==> true
 	}
 	
 	@Transient
