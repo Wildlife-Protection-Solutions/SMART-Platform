@@ -88,11 +88,8 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 				updateComplete();
 			}
 		});
-		
-		
-		if (((CsvImportEngine)wizard.getImportEngine()).getConfiguration().getAvailableColumns() != null){
-			ops.setColumnNames(((CsvImportEngine)wizard.getImportEngine()).getConfiguration().getAvailableColumns());
-		}
+		ops.setConfigData(((CsvImportEngine)wizard.getImportEngine()).getConfiguration());
+
 		setPageComplete(false);
 		
 		super.setTitle(Messages.ImportGpxWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
@@ -160,11 +157,15 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 
 	@Override
 	public boolean init() {
-		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
-		if (ops != null){
-			ops.setColumnNames(config.getAvailableColumns());
-			ops.validate();
-			updateComplete();
+		if (ops != null) {
+			CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
+			String opsFile = ops.getConfigFileName();
+			if (opsFile == null || !opsFile.equals(config.getFilename())) {
+				//reset columns only if file changed
+				ops.setConfigData(config);
+				ops.validate();
+				updateComplete();
+			}
 		}
 		return true;
 	}

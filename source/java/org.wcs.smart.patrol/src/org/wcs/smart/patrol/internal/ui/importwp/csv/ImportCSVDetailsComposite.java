@@ -91,6 +91,8 @@ public class ImportCSVDetailsComposite extends Composite{
 	private ControlDecoration cdTime;
 	private ControlDecoration cdDateFormat;
 	private List<Listener> changeListeners = new ArrayList<Listener>();
+	
+	private String configFileName;
 		
 	public ImportCSVDetailsComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -270,13 +272,17 @@ public class ImportCSVDetailsComposite extends Composite{
 		validate();
 	}
 
-	public void setColumnNames(CsvHeader[] columnNames){
-		cmbColumnSelectorX.setInput(columnNames);
-		cmbColumnSelectorY.setInput(columnNames);
-		cmbColumnSelectorDate.setInput(columnNames);
-		cmbColumnSelectorTime.setInput(columnNames);
-		cmbColumnSelectorId.setInput(columnNames);
-		cmbColumnSelectorComments.setInput(columnNames);
+	public void setConfigData(CSVImportConfiguration config) {
+		CsvHeader[] columnNames = config.getAvailableColumns();
+		if (columnNames != null) {
+			cmbColumnSelectorX.setInput(columnNames);
+			cmbColumnSelectorY.setInput(columnNames);
+			cmbColumnSelectorDate.setInput(columnNames);
+			cmbColumnSelectorTime.setInput(columnNames);
+			cmbColumnSelectorId.setInput(columnNames);
+			cmbColumnSelectorComments.setInput(columnNames);
+		}
+		configFileName = config.getFilename();
 	}
 	
 	/**
@@ -435,6 +441,9 @@ public class ImportCSVDetailsComposite extends Composite{
 		return cd;
 	}
 
+	public String getConfigFileName() {
+		return configFileName;
+	}
 }
 
 

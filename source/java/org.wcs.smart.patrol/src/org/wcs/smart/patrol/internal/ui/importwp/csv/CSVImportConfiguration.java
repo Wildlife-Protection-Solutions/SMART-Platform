@@ -270,6 +270,9 @@ public class CSVImportConfiguration {
 	}
 
 
+	public String getFilename() {
+		return filename;
+	}
 	public void setFileName(String file) {
 		this.filename = file;
 	}
