@@ -344,13 +344,13 @@ public class CyberTrackerConfExporter {
 					toShow.remove(0); //as we just added a node for it
 					List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
 					for (int i = 0; i < multiIds.size(); i++) {
-						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhotoAllowed(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
+						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhotoAllowed(), cmNode.isPhotoRequired(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					result.addAll(createLastNodes(nextId, startId, recordDefaultValues(invisibleList), cmNode.isPhotoAllowed()));
+					result.addAll(createLastNodes(nextId, startId, recordDefaultValues(invisibleList), cmNode.isPhotoAllowed(), cmNode.isPhotoRequired()));
 					return result;
 				}
 			}
-			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhotoAllowed(), null, recordDefaultValues(invisibleList));
+			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhotoAllowed(), cmNode.isPhotoRequired(), null, recordDefaultValues(invisibleList));
 		}
 		return result;
 		
@@ -432,7 +432,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, boolean addPhoto, String label, String defaultValues) throws Exception {
+	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, boolean addPhoto, boolean photoRequired, String label, String defaultValues) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (label == null)
 			label = ""; //$NON-NLS-1$
@@ -532,7 +532,7 @@ public class CyberTrackerConfExporter {
 			}
 		}
 		if (terminate) {
-			result.addAll(createLastNodes(id, startId, defaultValues, addPhoto));
+			result.addAll(createLastNodes(id, startId, defaultValues, addPhoto, photoRequired));
 		}
 		return result;
 	}
@@ -843,10 +843,10 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto) {
+	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto, boolean photoRequired) {
 		List<Node> nodeList = new ArrayList<Node>();
 		if (addPhoto) {
-			Node photoNode = screensFactory.createPhoto(id.getNodeId(), Messages.CyberTrackerExporter_ScreenTitle_Photo);
+			Node photoNode = screensFactory.createPhoto(id.getNodeId(), Messages.CyberTrackerExporter_ScreenTitle_Photo, photoRequired);
 			id = linkToNext(photoNode);
 			nodeList.add(photoNode);
 		}

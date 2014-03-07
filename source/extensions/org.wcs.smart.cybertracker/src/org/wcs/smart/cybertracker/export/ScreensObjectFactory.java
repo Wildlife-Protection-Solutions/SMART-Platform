@@ -399,7 +399,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public Node createPhoto(String id, String name) {
+	public Node createPhoto(String id, String name, boolean required) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -416,7 +416,7 @@ public class ScreensObjectFactory {
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl11());
-		controls.getControl().add(createPhotoControl12());
+		controls.getControl().add(createPhotoControl12(required));
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -756,7 +756,7 @@ public class ScreensObjectFactory {
 		innerControls.getControl().add(createMsgTextControl13(text));
 		control.setControls(innerControls);
 		control.setStretch("True"); //$NON-NLS-1$
-		control.setStretch("False"); //$NON-NLS-1$
+		control.setProportional("False"); //$NON-NLS-1$
 		return control;
 	}
 
@@ -831,7 +831,7 @@ public class ScreensObjectFactory {
 	    <Translate__Element>{82D16C8E-776E-4E8B-A459-6EBF62E50076}</Translate__Element>   <!-- this is PHOTO_ID -->
 	 </Control>
 	 */
-	private Control createPhotoControl12() {
+	private Control createPhotoControl12(boolean required) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{02F601F3-28BD-4D1F-A9DD-CAA71ABC25FC}"); //$NON-NLS-1$
 		control.setId(12);
@@ -842,6 +842,7 @@ public class ScreensObjectFactory {
 		control.setHeight(264);
 		control.setTranslateFont("Arial,12,B"); //$NON-NLS-1$
 		control.setTranslateElement(ICyberTrackerConstants.PHOTO);
+		control.setRequired(required ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		return control;
 	}
 	
