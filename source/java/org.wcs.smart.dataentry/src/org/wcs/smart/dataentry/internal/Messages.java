@@ -26,6 +26,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
 	public static String CmNodeInfoComposite_Key;
 	public static String CmNodeInfoComposite_PhotoAllowed;
+	public static String CmNodeInfoComposite_PhotoRequired;
 	public static String CmTemplateCloner_AttributeNotFoundError;
 	public static String CmTemplateCloner_CategoryNotFoundErrpr;
 	public static String CmTemplateCloner_CopyConfigModelName;

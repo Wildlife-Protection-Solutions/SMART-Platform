@@ -54,6 +54,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Label lblKey;
 
 	private Button btnPhoto;
+	private Button btnPhotoRequired;
 	private boolean isGroup;
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
@@ -113,9 +114,23 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
+				btnPhotoRequired.setEnabled(getSourceObject().isPhotoAllowed());
 				fireModelChanged();
 			}
 		});
+
+		
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmNodeInfoComposite_PhotoRequired);
+		btnPhotoRequired = new Button(container, SWT.CHECK);
+		btnPhotoRequired.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().setPhotoRequired(btnPhotoRequired.getSelection());
+				fireModelChanged();
+			}
+		});
+		
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -129,6 +144,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						lblKey.setText(n.getCategory().getKeyId());
 					if (btnPhoto != null)
 						btnPhoto.setSelection(n.isPhotoAllowed());
+					if (btnPhotoRequired != null) {
+						btnPhotoRequired.setSelection(n.isPhotoRequired());
+						btnPhotoRequired.setEnabled(n.isPhotoAllowed());
+					}
 					CmNodeInfoComposite.this.layout(true, true);
 				}
 			}
