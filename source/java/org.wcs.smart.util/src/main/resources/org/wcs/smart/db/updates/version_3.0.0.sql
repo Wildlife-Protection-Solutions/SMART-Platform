@@ -286,6 +286,8 @@ ALTER TABLE smart.db_version ADD PRIMARY KEY (plugin_id);
 
 
 
+-- ** "photo required" option support **
+ALTER TABLE smart.CM_NODE ADD COLUMN photo_required BOOLEAN;
 
 
 --  ** INTELLIGENCE PLUGIN UPDATES **
