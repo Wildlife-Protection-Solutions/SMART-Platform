@@ -17,15 +17,12 @@ package org.wcs.smart.ca;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.geotools.referencing.CRS;
-import org.hibernate.annotations.GenericGenerator;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -39,13 +36,11 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  */
 @Entity
 @Table(name="smart.ca_projection")
-public class Projection {
+public class Projection extends UuidItem {
 
 	public static final int MAX_NAME_LENGTH = 1024;
 	public static final int MAX_DEF_LENGTH = 32672;
 
-	private byte[] uuid;
-	
 	private ConservationArea ca;
 	private String name;
 	private String definition;
@@ -60,21 +55,6 @@ public class Projection {
 		
 	}
 
-	/**
-	 * 
-	 * @return the uuid for the list element
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
 	/**
 	 * 
 	 * @return the conservation area associated
