@@ -5,7 +5,7 @@
       version="3.0.0"
       provider-name="org.wcs.smart">
 
-   <description url="http://www.smartconservationsoftware.org">
+   <description url="http://www.smartconservationtools.org">
       The main SMART feature that includes all the core SMART modules.
    </description>
 
