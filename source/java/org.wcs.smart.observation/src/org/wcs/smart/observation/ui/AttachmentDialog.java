@@ -79,9 +79,11 @@ public class AttachmentDialog extends TitleAreaDialog {
 		}
 		
 		List<ISmartAttachment> obs = new ArrayList<ISmartAttachment>();
-		for (WaypointObservation o : waypoint.getObservations()){
-			if (o.getAttachments() != null){
-				obs.addAll(o.getAttachments());
+		if (waypoint.getObservations() != null) {
+			for (WaypointObservation o : waypoint.getObservations()){
+				if (o.getAttachments() != null){
+					obs.addAll(o.getAttachments());
+				}
 			}
 		}
 		attachmentComposite.initOtherAttachments(obs);
