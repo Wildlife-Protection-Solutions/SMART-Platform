@@ -118,9 +118,11 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		}
 		int wpCnt = 0;
 		Waypoint wp = (Waypoint)value;
-		for (WaypointObservation wo : wp.getObservations()){
-			if (wo.getAttachments() != null){
-				wpCnt += wo.getAttachments().size();
+		if (wp.getObservations() != null) {
+			for (WaypointObservation wo : wp.getObservations()){
+				if (wo.getAttachments() != null){
+					wpCnt += wo.getAttachments().size();
+				}
 			}
 		}
 		if (wp.getAttachments() != null){
