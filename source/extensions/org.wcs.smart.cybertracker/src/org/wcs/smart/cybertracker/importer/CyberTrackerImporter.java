@@ -111,8 +111,13 @@ public class CyberTrackerImporter {
 			//move processed files to storage
 			File storageFolder = PdaUtil.getStorageFolder(ca);
 			for (final File file : cxtDataFolder.listFiles()) {
-				if (file.isFile())
-					FileUtils.moveFileToDirectory(file, storageFolder, true);
+				if (file.isFile() && file.getName().toLowerCase().endsWith(".ctx")) { //$NON-NLS-1$
+					if (patrols.isEmpty()) {
+						FileUtils.forceDelete(file);
+					} else {
+						FileUtils.moveFileToDirectory(file, storageFolder, true);
+					}
+				}
 			}
 			
 			return patrols;
