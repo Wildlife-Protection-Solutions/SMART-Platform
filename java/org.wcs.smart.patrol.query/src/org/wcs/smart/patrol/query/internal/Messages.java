@@ -102,6 +102,7 @@ public class Messages extends NLS {
 	public static String PatrolFilter_StationNotFound;
 	public static String PatrolFilter_TeamNotFound;
 	public static String PatrolFilter_TransportTypeNotFound;
+	public static String PatrolFilterTreeItem_PatrolFiltersTreeItem;
 	public static String PatrolGriddedQueryDefinitionPanel_CRSError;
 	public static String PatrolGriddedQueryDefinitionPanel_GridSizeError1;
 	public static String PatrolGriddedQueryDefinitionPanel_GridSizeError2;
@@ -119,6 +120,7 @@ public class Messages extends NLS {
 	public static String PatrolGroupByDropItem_Error_LoadingListItems;
 	public static String PatrolGroupByDropItem_FiltersLabel;
 	public static String PatrolGroupByDropItem_IncludedLabel;
+	public static String PatrolGroupByTreeItem_PatrolGroupBys;
 	public static String PatrolIdDropItem_LoadIdsJobName;
 	public static String PatrolListDropItem_ErrorLoadingItems;
 	public static String PatrolListDropItem_LoadingJobName;
@@ -181,6 +183,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryGroupByValuePanel_GroupByPanelTitle;
 	public static String PatrolSummaryGroupByValuePanel_ValueError;
 	public static String PatrolSummaryQueryType_SummaryQueryTypeName;
+	public static String PatrolValueTreeItem_PatrolValuesNodeLabel;
 	public static String PatrolWaypointQueryType_WaypointQueryTypeName;
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_LoadingObservationColumnJobName;
@@ -203,6 +206,7 @@ public class Messages extends NLS {
 	public static String QueryFilterContentProvider_OperatoresLabel;
 	public static String QueryFilterContentProvider_PatrolFiltersLabel;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
+	public static String QueryFilterPanel_TreeNodeLabel;
 	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
 	public static String QueryGeoResource_ServiceError;
@@ -227,6 +231,7 @@ public class Messages extends NLS {
 	public static String SimplePatrolFilterPanel_PanelTitle;
 	public static String SimpleQuery_DropItemParseError;
 	public static String SummaryFilterPanel_RefreshTreeJobName;
+	public static String SummaryFilterPanel_TreeNodeLabel;
 	public static String SummaryQuery_CannotGroupByAttribute;
 	public static String SummaryQuery_CannotGroupByCategory;
 	public static String SummaryQuery_DefaultQueryName;

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *
@@ -19,20 +20,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model.udig;
+package org.wcs.smart.patrol.query.ui.itempanel;
 
-import java.io.IOException;
-
-import net.refractions.udig.catalog.IService;
-
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 
 /**
- * Smart query service
+ * Tree content provider for patrol options.  This simply takes
+ * an array of objects as input and returns them as the
+ * root elements.  There are no children.
+ * 
  * @author Emily
  *
  */
-public abstract class IQueryService extends IService{
+public class PatrolOptionContentProvider implements ITreeContentProvider {
 
-	public abstract void refresh(IProgressMonitor monitor) throws IOException;
+	private Object[] ops;
+	
+	@Override
+	public void dispose() {
+	}
+
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.ops = (Object[])newInput;
+	}
+
+	@Override
+	public Object[] getElements(Object inputElement) {
+		return ops;
+	}
+
+	@Override
+	public Object[] getChildren(Object parentElement) {
+		return null;
+	}
+
+	@Override
+	public Object getParent(Object element) {
+		return null;
+	}
+
+	@Override
+	public boolean hasChildren(Object element) {
+		return false;
+	}
+
+	
+	
 }

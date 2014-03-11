@@ -19,20 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model.udig;
-
-import java.io.IOException;
-
-import net.refractions.udig.catalog.IService;
-
-import org.eclipse.core.runtime.IProgressMonitor;
+package org.wcs.smart.query.common.ui.itempanel;
 
 /**
- * Smart query service
+ * Node for the ItemTreeNodeTree which wraps a sub-item with it's parent item.
+ * This is so we know what content provider and label provider to use to get the
+ * children and labe.
+ * 
  * @author Emily
- *
+ * 
  */
-public abstract class IQueryService extends IService{
+public class WrappedTreeNode {
 
-	public abstract void refresh(IProgressMonitor monitor) throws IOException;
+	ItemTreeNode parent;
+	Object item;
+
+	public WrappedTreeNode(ItemTreeNode parent, Object item) {
+		this.parent = parent;
+		this.item = item;
+	}
+
+	public boolean equals(Object other) {
+		if (other instanceof WrappedTreeNode) {
+			return ((WrappedTreeNode) other).item.equals(item);
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return item.hashCode();
+	}
 }
+

@@ -33,22 +33,16 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.dialogs.FilteredTree;
-import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
@@ -58,8 +52,14 @@ import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
-import org.wcs.smart.patrol.query.ui.itempanel.QueryFilterContentProvider.RootNodeType;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
+import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 
 /**
@@ -76,6 +76,8 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 	private Composite main = null;
 	private TreeViewer filterTreeViewer;
 	
+	private AreaTreeNode areaNode;
+	
 	/*
 	 * listener for refreshing areas
 	 */
@@ -83,12 +85,14 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		@Override
 		public void areasUpdated(AreaType type) {
 			//clear areas from content provider & refresh tree
-			((QueryFilterContentProvider)filterTreeViewer.getContentProvider()).clearAreas();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					filterTreeViewer.refresh();
-				}});
+			if (areaNode != null){
+				areaNode.clearAreas();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						filterTreeViewer.refresh();
+					}});
+			}
 		}
 	};
 	
@@ -110,40 +114,18 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			}
 		});
 		
-		// search tree
-		final PatternFilter patternFilter = new PatternFilter() {
-			protected boolean isChildMatch(Viewer viewer, Object element) {
-				Object parent = ((ITreeContentProvider) ((TreeViewer) viewer)
-						.getContentProvider()).getParent(element);
-				if (parent != null) {
-					return (isLeafMatch(viewer, parent) ? true : isChildMatch(
-							viewer, parent));
-				}
-				return false;
-			}
+		List<ItemTreeNode> nodes = new ArrayList<ItemTreeNode>();
+		nodes.add(new PatrolFilterTreeItem());
+		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
+		if (!SmartDB.isMultipleAnalysis()){
+			areaNode = new AreaTreeNode(Messages.QueryFilterPanel_TreeNodeLabel);
+			nodes.add(areaNode);
+		}
+		nodes.add(new OperatorsTreeNode());
+		
+		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE, nodes);
+		filterTreeViewer = tree.getTreeViewer();
 
-			@Override
-			protected boolean isLeafMatch(Viewer viewer, Object element) {
-				String labelText = ((LabelProvider) ((TreeViewer) viewer)
-						.getLabelProvider()).getText(element);
-				if (labelText == null) {
-					return false;
-				}
-				return (wordMatches(labelText) ? true : isChildMatch(viewer,
-						element));
-			}
-		};
-
-		FilteredTree fTree = new FilteredTree(main, SWT.H_SCROLL
-				| SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		fTree.setBackground(Display.getDefault()
-				.getSystemColor(SWT.COLOR_WHITE));
-		filterTreeViewer = fTree.getViewer();
-		filterTreeViewer.getTree().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
-		filterTreeViewer.setLabelProvider(new QueryFilterLabelProvider());
-		filterTreeViewer.setContentProvider(new QueryFilterContentProvider(
-				filterTreeViewer));
 		filterTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -165,7 +147,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 	}
 	
 	private void addItem(){
-		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
+		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 	
 	@Override
@@ -191,26 +173,27 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
+
+			List<Operator> ops = new ArrayList<Operator>();
+			ops.add(Operator.NOT);
+			ops.add(Operator.BRACKETS);
+			
+			input.put(OperatorsTreeNode.KEY, ops);
+			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			
 			if (SmartDB.isMultipleAnalysis()){
-				input.put(QueryFilterContentProvider.ROOT_NODES,new QueryFilterContentProvider.RootNodeType[]{RootNodeType.PATROL_FILTERS, RootNodeType.DATA_MODEL_FILTERS, RootNodeType.OTHER_ITEMS}); 
-				
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.SHARED_PATROL_FILTER_OPTIONS));
 				options.addAll(findContributedPatrolQueryOptions());
-				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, options.toArray());
+				input.put(PatrolFilterTreeItem.KEY, options.toArray());
 			}else{
-				input.put(QueryFilterContentProvider.ROOT_NODES,QueryFilterContentProvider.RootNodeType.values());
-				
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_FILTER_OPTIONS));
 				options.addAll(findContributedPatrolQueryOptions());
-				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, options.toArray());
+				input.put(PatrolFilterTreeItem.KEY, options.toArray());
 			}
-			input.put(QueryFilterContentProvider.RootNodeType.DATA_MODEL_FILTERS, QueryDataModelManager.getInstance().getDataModel());
 
 			Display.getDefault().asyncExec(new Runnable(){
-
 				@Override
 				public void run() {
 					filterTreeViewer.setInput(input);

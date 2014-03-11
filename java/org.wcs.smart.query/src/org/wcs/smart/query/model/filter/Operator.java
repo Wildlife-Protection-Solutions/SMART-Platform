@@ -92,6 +92,11 @@ public class Operator {
 	public static Operator NOT = new Operator(Messages.Operator_NOT, "not"); //$NON-NLS-1$
 
 	/**
+	 * Brackets items 
+	 */
+	public static Operator BRACKETS = new Operator("( )", "()"); //$NON-NLS-1$ //$NON-NLS-2$
+	
+	/**
 	 * Valid numeric operators
 	 */
 	public static Operator[] NUMERIC_OPS = {EQUALS, LESSTHAN, LESSTHANEQUALS, GREATERTHAN, GREATERTHANEQUALS, NOTEQUALS};

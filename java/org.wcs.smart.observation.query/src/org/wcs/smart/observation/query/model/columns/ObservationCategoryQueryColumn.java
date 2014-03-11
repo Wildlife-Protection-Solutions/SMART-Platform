@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.observation.query.model.columns;
 
+import java.text.MessageFormat;
+
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.IResultItem;
@@ -45,8 +48,8 @@ public class ObservationCategoryQueryColumn extends CategoryQueryColumn{
 	 * @param name the name
 	 * @param level the level in the data model this column represents
 	 */
-	public ObservationCategoryQueryColumn(String name, int level){
-		super(name,level);
+	public ObservationCategoryQueryColumn(int level){
+		super(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, new Object[]{level}),level);
 	}
 	
 
@@ -80,7 +83,7 @@ public class ObservationCategoryQueryColumn extends CategoryQueryColumn{
 	 */
 	@Override
 	public QueryColumn clone() {
-		ObservationCategoryQueryColumn newColumn = new ObservationCategoryQueryColumn(super.getName(), level);
+		ObservationCategoryQueryColumn newColumn = new ObservationCategoryQueryColumn(level);
 		return newColumn;
 	}
 
