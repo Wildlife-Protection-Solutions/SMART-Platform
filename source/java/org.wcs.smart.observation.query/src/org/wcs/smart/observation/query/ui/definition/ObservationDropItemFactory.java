@@ -41,16 +41,15 @@ import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
 import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
 import org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel;
-import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider;
-import org.wcs.smart.observation.query.ui.itempanel.QueryFilterContentProvider.GeneralItems;
-import org.wcs.smart.observation.query.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
-import org.wcs.smart.observation.query.ui.itempanel.SummaryQueryContentProvider;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.AllCategory;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -90,8 +89,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			return items;
 		}
 		
-		if (source instanceof QueryFilterContentProvider.OtherItems) {
-			items = createOtherDropItem((QueryFilterContentProvider.OtherItems)source);
+		if (source instanceof Operator) {
+			items = createOtherDropItem((Operator)source);
 		} else if (source instanceof IDateGroupBy) {
 			items = new DropItem[]{createDateGroupByDropItem(
 							(IDateGroupBy) source)};
@@ -107,16 +106,16 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 			}
-		}else if (source instanceof AllCategory){
+		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ||
 					queryItemPanelId.equals(GriddedItemPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
-		}else if (source instanceof QueryFilterContentProvider.GeneralItems){
-			items = new DropItem[]{createWaypointSourceFilterDropItem((QueryFilterContentProvider.GeneralItems)source)};
-		}else if (source instanceof SummaryQueryContentProvider.RootNode){
-			if (((SummaryQueryContentProvider.RootNode) source).getType() == SummaryQueryContentProvider.NodeType.WAYPOINT_SOURCE_GROUPBY){
+		}else if (source instanceof GeneralContentProvider.GeneralItems){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createWaypointSourceGroupByDropItem()};
+			}else{
+				items = new DropItem[]{createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItems)source)};
 			}
 		}
 		return items;
@@ -126,8 +125,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem createWaypointSourceGroupByDropItem(){
 		return new WaypointSourceGroupByDropItem();
 	}
-	public DropItem createWaypointSourceFilterDropItem(QueryFilterContentProvider.GeneralItems source){
-		if (source == GeneralItems.WAYPOINT_SOURCE){
+	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItems source){
+		if (source == GeneralContentProvider.GeneralItems.WAYPOINT_SOURCE){
 			return new WaypointSourceFilterDropItem();
 		}
 		throw new IllegalStateException(MessageFormat.format(Messages.ObservationDropItemFactory_QueryItemNotSupported, new Object[]{source.guiName}));
@@ -207,10 +206,10 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	 * @param other
 	 * @return an array of drop items of the associated type
 	 */
-	private DropItem[] createOtherDropItem(QueryFilterContentProvider.OtherItems other){
-		if (other == QueryFilterContentProvider.OtherItems.BRACKETS){
+	private DropItem[] createOtherDropItem(Operator other){
+		if (other == Operator.BRACKETS){
 			return createBracketIems();
-		}else if (other == QueryFilterContentProvider.OtherItems.NOT){
+		}else if (other == Operator.NOT){
 			return new DropItem[]{ createNotDropItem() };
 		}
 		return null;
@@ -293,14 +292,14 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			ObservationSummaryQuery q = (ObservationSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
-			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
+			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def == null || def.getValueFilter() == null || def.getValueFilter().getFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 			
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-					def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-					def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
+					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.VALUE.name(), //$NON-NLS-1$
-					def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
+					def == null || def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
 			
 		}else if(proxy.getQuery().getType().getKey().equalsIgnoreCase(ObservationGridQueryType.KEY)){
 			ObservationGriddedQuery q = (ObservationGriddedQuery) proxy.getQuery();

@@ -56,14 +56,14 @@ import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
-import org.wcs.smart.patrol.query.ui.itempanel.QueryFilterContentProvider;
-import org.wcs.smart.patrol.query.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.AllCategory;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -101,8 +101,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			return items;
 		}
 		
-		if (source instanceof QueryFilterContentProvider.OtherItems) {
-			items = createOtherDropItem((QueryFilterContentProvider.OtherItems)source);
+		if (source instanceof Operator) {
+			items = createOtherDropItem((Operator)source);
 		
 		} else if (source instanceof PatrolValueOption) {
 			items = new DropItem[]{createPatrolValueDropItem(
@@ -131,7 +131,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 			}
-		}else if (source instanceof AllCategory){
+		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ||
 					queryItemPanelId.equals(GriddedFilterPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
@@ -278,10 +278,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @param other
 	 * @return an array of drop items of the associated type
 	 */
-	private DropItem[] createOtherDropItem(QueryFilterContentProvider.OtherItems other){
-		if (other == QueryFilterContentProvider.OtherItems.BRACKETS){
+	private DropItem[] createOtherDropItem(Operator other){
+		if (other == Operator.BRACKETS){
 			return createBracketIems();
-		}else if (other == QueryFilterContentProvider.OtherItems.NOT){
+		}else if (other == Operator.NOT){
 			return new DropItem[]{ createNotDropItem() };
 		}
 		return null;
@@ -365,15 +365,15 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
 			
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-					def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-					def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
+					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), //$NON-NLS-1$
-					def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
+					def == null || def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
 			
 		}else if(proxy.getQuery().getType().getClass().equals(PatrolGridQueryType.class)){
 			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();

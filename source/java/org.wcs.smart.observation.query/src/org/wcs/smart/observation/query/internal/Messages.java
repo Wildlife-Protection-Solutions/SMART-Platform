@@ -79,6 +79,8 @@ public class Messages extends NLS {
 	public static String QueryFilterContentProvider_NotLabel;
 	public static String QueryFilterContentProvider_OperatoresLabel;
 	public static String QueryFilterContentProvider_WaypointSourceName;
+	public static String QueryFilterPanel_AreaFilters;
+	public static String QueryFilterPanel_GeneralFilters;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
@@ -94,6 +96,8 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_ServiceName;
 	public static String SimplePatrolFilterPanel_PanelTitle;
 	public static String SimpleQuery_DropItemParseError;
+	public static String SummaryFilterPanel_AreaGroupBy;
+	public static String SummaryFilterPanel_GeneralItemGroupBy;
 	public static String SummaryFilterPanel_RefreshTreeJobName;
 	public static String SummaryQuery_DefaultQueryName;
 	public static String SummaryQueryContentProvider_AreaGroupByLabel;

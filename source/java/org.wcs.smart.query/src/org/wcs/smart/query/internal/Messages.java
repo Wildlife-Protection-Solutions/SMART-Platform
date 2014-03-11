@@ -57,8 +57,12 @@ public class Messages extends NLS {
 	public static String ConservationAreaFilterPanel_FilterCaOp;
 	public static String ConservationAreaFilterPanel_IncludeAllCaOp;
 	public static String CreateUnknownQueryHandler_ErrorLoadingQueryView;
+	public static String DataModelTreeNode_DataModelFiltersLabel;
+	public static String DataModelTreeNode_DmGroupByLabel;
+	public static String DataModelTreeNode_DmValuesLabel;
 	public static String DateGroupBy_GroupByNoSupported;
 	public static String DateGroupBy_InvalidFilter;
+	public static String DateTreeNode_TreeNodeLabel;
 	public static String DayDateGroupBy_GroupByDayName;
 	public static String DefinitionPanelManager_QueryEditingPanelError;
 	public static String DefinitionPanelManager_QueryItemPanelError;
@@ -95,6 +99,9 @@ public class Messages extends NLS {
 	public static String FilterDropTargetPanel_FilterTypeLabel;
 	public static String FilterDropTargetPanel_observationtooltip;
 	public static String FilterDropTargetPanel_waypointtooltip;
+	public static String FiltersDataModelContentProvider_AttributesLabel;
+	public static String FiltersDataModelContentProvider_CategoriesLabel;
+	public static String FiltersDataModelContentProvider_LoadingLabel;
 	public static String FilterValidator_AttributeListItemNotFound;
 	public static String FilterValidator_AttributeNotFound;
 	public static String FilterValidator_AttributeTreeNodeNotFound;
@@ -153,6 +160,7 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_CouldNotImportError;
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_Title;
+	public static String ItemTreeNodeTree_Loading;
 	public static String MonthDateGroupBy_MonthGroupByName;
 	public static String MultiCaDataModelManagerImpl_MergeError;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;
@@ -178,6 +186,7 @@ public class Messages extends NLS {
 	public static String Operator_StrContains;
 	public static String Operator_StrEquals;
 	public static String Operator_StrNotContains;
+	public static String OperatorsTreeNode_OperatorsLabel;
 	public static String PatrolQueryOptions_DateOp_Last30;
 	public static String PatrolQueryOptions_DateOpAll;
 	public static String PatrolQueryOptions_DateOpCurrentMonth;
@@ -259,6 +268,16 @@ public class Messages extends NLS {
 	public static String SaveQueryDialog_NewDialogMessage;
 	public static String SaveQueryDialog_PageTitle;
 	public static String ShowQueryPersepctiveHandler_QueryPerspectiveError;
+	public static String SummaryDataModelContentProvider_AttributesCategoryLabel;
+	public static String SummaryDataModelContentProvider_AttributesValueLabel;
+	public static String SummaryDataModelContentProvider_CategoryGroupByLabel;
+	public static String SummaryDataModelContentProvider_CategoryValueLabel;
+	public static String SummaryDataModelContentProvider_CouldNotLoadItems;
+	public static String SummaryDataModelContentProvider_CouldNotLoadTree;
+	public static String SummaryDataModelContentProvider_CountLabel;
+	public static String SummaryDataModelContentProvider_LoadingListItemsJobName;
+	public static String SummaryDataModelContentProvider_LoadingText;
+	public static String SummaryDataModelContentProvider_LoadingTreeJobName;
 	public static String SummaryValueGroupByPanel_ColumnHeadersHeader;
 	public static String SummaryValueGroupByPanel_ColumnHeadersTooltip;
 	public static String SummaryValueGroupByPanel_GroupBySectionHeader;
@@ -268,6 +287,8 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_ValuesSectionHeader;
 	public static String SummaryValueGroupByPanel_ValuesSectionTooltip;
 	public static String TranslateNamesHandler_LoadQueryError;
+	public static String TreeNodeGroupValueContentProvider_GroupByOptionsLabel;
+	public static String TreeNodeGroupValueContentProvider_ValuesOptionsLabel;
 	public static String ValueRateFilterDeifnitionPanel_PanelTitle;
 	public static String WaypointDateField_WaypointDateFieldName;
 	public static String YearDateGroupBy_GroupByYearLabel;

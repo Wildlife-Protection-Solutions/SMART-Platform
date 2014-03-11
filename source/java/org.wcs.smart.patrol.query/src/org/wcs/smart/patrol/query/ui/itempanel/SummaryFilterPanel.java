@@ -33,20 +33,19 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.dialogs.FilteredTree;
-import org.eclipse.ui.dialogs.PatternFilter;
+import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
@@ -55,6 +54,16 @@ import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.DateTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
+import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.IDateGroupBy;
+import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
  * Panel for displaying summary value
@@ -69,6 +78,25 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 	
 	private TreeViewer filterTreeViewer;
 	private Composite main;
+	private AreaTreeNode areaTreeNode;
+	
+	/*
+	 * listener for refreshing areas
+	 */
+	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
+		@Override
+		public void areasUpdated(AreaType type) {
+			//clear areas from content provider & refresh tree
+			if (areaTreeNode != null){
+				areaTreeNode.clearAreas();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						filterTreeViewer.refresh();
+					}});
+			}
+		}
+	};
 	
 	public  SummaryFilterPanel(){
 	}
@@ -79,33 +107,33 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		GridLayout gl = new GridLayout();
 		gl.marginWidth = gl.marginHeight = 0;
 		main.setLayout(gl);
-		//search tree
-		final PatternFilter patternFilter = new PatternFilter(){			
-			protected boolean isChildMatch(Viewer viewer, Object element) {
-				Object parent = ((ITreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
-				if (parent != null) {
-					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
-				}
-				return false;
-			}
-			@Override
-			protected boolean isLeafMatch(Viewer viewer, Object element) {
-				String labelText = ((LabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
-				if (labelText == null) {
-					return false;
-				}
-				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
-			}
-		};
-
 		
-		FilteredTree fTree = new FilteredTree(main,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		filterTreeViewer = fTree.getViewer();
-		filterTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		filterTreeViewer.setLabelProvider(new SummaryQueryLabelProvider());
-		filterTreeViewer.setContentProvider(new SummaryQueryContentProvider());
-		filterTreeViewer.addDoubleClickListener(new IDoubleClickListener() {			
+		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		main.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+			}
+		});
+		
+		
+		List<ItemTreeNode> groupbynodes = new ArrayList<ItemTreeNode>();
+		groupbynodes.add(new PatrolGroupByTreeItem());
+		groupbynodes.add(new DateTreeNode());
+		if (!SmartDB.isMultipleAnalysis()){
+			areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
+			groupbynodes.add(areaTreeNode);
+		}
+		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
+		
+		List<ItemTreeNode> valuenodes = new ArrayList<ItemTreeNode>();
+		valuenodes.add(new PatrolValueTreeItem());
+		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
+		
+		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);
+		filterTreeViewer = tree.getTreeViewer();
+
+		filterTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				addItem();
@@ -121,13 +149,12 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 				addItem();
 			}
 		});
-		
 		refreshPanel();
 		return main;
 	}
 	
 	private void addItem(){
-		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
+		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 	
 	@Override
@@ -143,27 +170,32 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			
+			
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
+			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
+			
+			List<IDateGroupBy> dates = new ArrayList<IDateGroupBy>();
+			dates.add(DayDateGroupBy.INSTANCE);
+			dates.add(MonthDateGroupBy.INSTANCE);
+			dates.add(YearDateGroupBy.INSTANCE);
+			input.put(DateTreeNode.KEY, dates);
+			
 			
 			if (SmartDB.isMultipleAnalysis()){
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.SHARED_PATROL_GROUBY_OPTIONS));
 				options.addAll(findContributedPatrolGroupByOptions());
-				
-				input.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, options);
+				input.put(PatrolGroupByTreeItem.KEY, options.toArray());
 			}else{
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_GROUBY_OPTIONS));
 				options.addAll(findContributedPatrolGroupByOptions());
-				input.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, options);
+				input.put(PatrolGroupByTreeItem.KEY, options.toArray());
 				
 			}
-			input.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
-			input.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS,
-					
-					PatrolQueryOptions.DATE_GROUBY_OPS);
-			input.put(SummaryQueryContentProvider.NodeType.DATAMODEL_VALUES, QueryDataModelManager.getInstance().getDataModel());
-			
+			input.put(PatrolValueTreeItem.KEY, PatrolValueOption.values());
+
 			Display.getDefault().asyncExec(new Runnable(){
 
 				@Override

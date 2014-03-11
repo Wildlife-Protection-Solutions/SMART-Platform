@@ -19,20 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model.udig;
+package org.wcs.smart.query.common.ui.itempanel;
 
-import java.io.IOException;
-
-import net.refractions.udig.catalog.IService;
-
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.graphics.Image;
 
 /**
- * Smart query service
+ * Interface for adding a node to at ItemTreeNodeTree.
+ * 
  * @author Emily
  *
  */
-public abstract class IQueryService extends IService{
+public interface ItemTreeNode {
 
-	public abstract void refresh(IProgressMonitor monitor) throws IOException;
+	/**
+	 * The node name
+	 * @return
+	 */
+	public String getName();
+	/**
+	 * The node image
+	 * @return
+	 */
+	public Image getImage();
+	/**
+	 * the node content provider
+	 * @return
+	 */
+	public ITreeContentProvider getContentProvider();
+	/**
+	 * The node label provider
+	 * @return
+	 */
+	public ILabelProvider getLabelProvider();
+	/**
+	 * The input key for the node.  This key
+	 * is used to set the input for the content provider.
+	 * @return
+	 */
+	public String getKey();
 }

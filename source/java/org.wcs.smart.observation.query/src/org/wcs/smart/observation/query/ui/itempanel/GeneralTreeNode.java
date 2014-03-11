@@ -19,20 +19,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model.udig;
+package org.wcs.smart.observation.query.ui.itempanel;
 
-import java.io.IOException;
-
-import net.refractions.udig.catalog.IService;
-
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
 
 /**
- * Smart query service
+ * Tree node for general items
+ * 
  * @author Emily
  *
  */
-public abstract class IQueryService extends IService{
+public class GeneralTreeNode implements ItemTreeNode {
 
-	public abstract void refresh(IProgressMonitor monitor) throws IOException;
+	public static final String KEY = "general"; //$NON-NLS-1$
+	
+	private GeneralContentProvider provider;
+	private String name;
+	
+	public GeneralTreeNode(String name){
+		this.name = name;
+	}
+	
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public Image getImage() {
+		return null;
+	}
+
+	@Override
+	public ITreeContentProvider getContentProvider() {
+		if (provider == null){
+			provider = new GeneralContentProvider();
+		}
+		return provider;
+	}
+
+	@Override
+	public ILabelProvider getLabelProvider() {
+		return GeneralContentProvider.LABELPROVIDER;
+	}
+
+	@Override
+	public String getKey() {
+		return KEY;
+	}
+
 }
