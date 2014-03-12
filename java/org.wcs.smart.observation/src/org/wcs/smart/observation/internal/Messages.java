@@ -52,6 +52,12 @@ public class Messages extends NLS {
 
 	public static String ObservationCloner_TaskName;
 
+	public static String ObservationOptionsPropertyPage_Projection_LoadError;
+
+	public static String ObservationOptionsPropertyPage_ViewProjectionDescr;
+
+	public static String ObservationOptionsPropertyPage_ViewProjectionGroupTitle;
+
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
 	public static String PatrolHibernateManager_Error_ToManyPatrolOptions;
 	public static String ObservationSummaryWizardPage_PageMessage;

@@ -22,9 +22,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 
 /**
@@ -146,4 +154,22 @@ public class Projection extends UuidItem {
 		this.crs = crs;
 		this.definition = crs.toWKT();
 	}
+	
+	public static Point transform(double x, double y, Projection targetProjection) {
+		Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
+		if (targetProjection == null)
+			return point;
+		try {
+			CoordinateReferenceSystem targetCrs = targetProjection.getCrs();
+			if (!SmartDB.DATABASE_CRS.getCoordinateSystem().equals(targetCrs)){
+				MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, targetCrs);
+				Point p = (Point) JTS.transform(point, transform);
+				return p;
+			}
+		} catch (Exception e) {
+			SmartPlugIn.log("Failed while converting to view projection's CRS", e); //$NON-NLS-1$
+		}
+		return point;
+	}
+	
 }

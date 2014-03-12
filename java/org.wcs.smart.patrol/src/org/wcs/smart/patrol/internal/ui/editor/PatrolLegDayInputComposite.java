@@ -85,7 +85,9 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
@@ -120,6 +122,7 @@ public class PatrolLegDayInputComposite {
 	private Label lblTotalHours;
 
 	private TableViewer observationTable;
+	private ObservationOptions observationOptions;
 	
 	private WizardDialog dialog = null;
 	private PatrolDayEditor editor;
@@ -185,8 +188,9 @@ public class PatrolLegDayInputComposite {
 	}
 
 	
-	public PatrolLegDayInputComposite(PatrolDayEditor editor){
+	public PatrolLegDayInputComposite(PatrolDayEditor editor, ObservationOptions observationOptions){
 		this.editor = editor;
+		this.observationOptions = observationOptions;
 	}
 
 	public void refreshObservationTable(){
@@ -910,9 +914,9 @@ public class PatrolLegDayInputComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(wp.getX());
+			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(wp.getY());
+			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getY());
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());

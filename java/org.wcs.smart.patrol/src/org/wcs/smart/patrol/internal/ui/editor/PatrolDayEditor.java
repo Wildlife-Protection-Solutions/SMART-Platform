@@ -50,6 +50,9 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -105,6 +108,11 @@ public class PatrolDayEditor extends EditorPart {
 	public void createPartControl(Composite parent) {
 		
 		Session session = HibernateManager.openSession();	
+		ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+		if (observationOptions.getViewProjection() != null) {
+			observationOptions.getViewProjection().getDefinition(); //load lazy items
+		}
+
 		session.beginTransaction();
 		session.update(editor.getPatrol());
 		frmSummary = toolkit.createScrolledForm(parent);
@@ -135,6 +143,7 @@ public class PatrolDayEditor extends EditorPart {
 			//find all patrol legs for this day
 			List<PatrolLeg> legs = editor.getPatrol().getLegs();		
 			ArrayList<PatrolLegDay> plds = new ArrayList<PatrolLegDay>();
+
 			for (PatrolLeg leg: legs){
 				for (PatrolLegDay day : leg.getPatrolLegDays()){
 					if (SmartUtils.getDatePart(day.getDate(), false).equals(  SmartUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
@@ -161,7 +170,7 @@ public class PatrolDayEditor extends EditorPart {
 				
 			}else if (plds.size() == 1){
 				children = new PatrolLegDayInputComposite[1];
-				PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this);
+				PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, observationOptions);
 				comp.createComposite(frmSummary.getBody(), toolkit);
 				comp.setData((PatrolLegDay)plds.get(0));
 				children[0] = comp;
@@ -205,7 +214,7 @@ public class PatrolDayEditor extends EditorPart {
 					});
 					
 					sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
-					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this);
+					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, observationOptions);
 					Composite comp2 = comp.createComposite(sec, toolkit);
 					comp.setData(pld);
 					sec.setClient(comp2);
