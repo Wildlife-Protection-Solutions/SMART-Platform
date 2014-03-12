@@ -289,6 +289,14 @@ ALTER TABLE smart.db_version ADD PRIMARY KEY (plugin_id);
 -- ** "photo required" option support **
 ALTER TABLE smart.CM_NODE ADD COLUMN photo_required BOOLEAN;
 
+-- ** Projection Selection for Data Entry **
+ALTER TABLE smart.observation_options ADD COLUMN view_projection_uuid CHAR(16) for bit data;
+CREATE TRIGGER smart.view_projection_cleanup
+  AFTER DELETE ON smart.ca_projection
+  REFERENCING OLD AS OLD
+  FOR EACH ROW MODE DB2SQL
+  update smart.observation_options SET VIEW_PROJECTION_UUID = NULL where CA_UUID = OLD.CA_UUID AND VIEW_PROJECTION_UUID = OLD.UUID
+;
 
 --  ** INTELLIGENCE PLUGIN UPDATES **
 ALTER TABLE smart.intelligence ADD COLUMN creator_uuid CHAR(16) FOR BIT DATA;
