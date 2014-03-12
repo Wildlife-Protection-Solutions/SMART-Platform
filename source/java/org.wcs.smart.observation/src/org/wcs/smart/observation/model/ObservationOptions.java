@@ -23,8 +23,13 @@ package org.wcs.smart.observation.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.wcs.smart.ca.Projection;
 
 /**
  * Class to track patrol
@@ -40,6 +45,7 @@ public class ObservationOptions {
 
 	private boolean trackDistanceDirection;
 	private Integer editTime;
+	private Projection viewProjection;
 	private byte[] ca_uuid;
 	
 	public ObservationOptions(){}
@@ -93,4 +99,14 @@ public class ObservationOptions {
 	public void setEditTime(Integer editTime){
 		this.editTime = editTime;
 	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="view_projection_uuid", referencedColumnName="uuid")
+	public Projection getViewProjection() {
+		return viewProjection;
+	}
+	public void setViewProjection(Projection viewProjection) {
+		this.viewProjection = viewProjection;
+	}
+
 }

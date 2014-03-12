@@ -63,10 +63,12 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.ui.newwizard.CommentComposite;
 import org.wcs.smart.incident.ui.newwizard.DateTimeComposite;
@@ -75,7 +77,9 @@ import org.wcs.smart.incident.ui.newwizard.EditIncidentDialog;
 import org.wcs.smart.incident.ui.newwizard.IdComposite;
 import org.wcs.smart.incident.ui.newwizard.IncidentAttachmentComposite;
 import org.wcs.smart.incident.ui.newwizard.LocationComposite;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -83,6 +87,8 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Incident editor summary page
@@ -175,7 +181,9 @@ public class IncidentSummaryPage extends EditorPart {
 			this.txtIncidentId.setText(String.valueOf(incident.getId()));
 			this.txtDate.setText(DateFormat.getDateInstance().format(incident.getDateTime()));
 			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
-			this.txtLocation.setText(incident.getX() + Messages.IncidentSummaryPage_LocationSeparator + incident.getY());
+			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			Point p = Projection.transform(incident.getX(), incident.getY(), observationOptions.getViewProjection());
+			this.txtLocation.setText(p.getX() + Messages.IncidentSummaryPage_LocationSeparator + p.getY());
 		
 			if (editor.getOptions().getTrackDistanceDirection()){
 				if (incident.getDirection() == null){
