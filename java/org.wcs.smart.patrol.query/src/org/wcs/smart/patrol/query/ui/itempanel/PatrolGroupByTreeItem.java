@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
@@ -76,8 +77,8 @@ public class PatrolGroupByTreeItem implements ItemTreeNode{
 		public String getText(Object element){
 			if (element instanceof PatrolQueryOptions.PatrolQueryOption){
 				return ((PatrolQueryOptions.PatrolQueryOption) element).getGuiName();
-			}else if (element instanceof IGroupByPatrolContribution){
-				return ((IGroupByPatrolContribution) element).getOption().getName();
+			}else if (element instanceof IExtensionOption){
+				return ((IExtensionOption) element).getName();
 			}
 			return super.getText(element);
 		}
@@ -85,8 +86,8 @@ public class PatrolGroupByTreeItem implements ItemTreeNode{
 		public Image getImage(Object element){
 			if (element instanceof PatrolQueryOptions.PatrolQueryOption){
 				return ((PatrolQueryOptions.PatrolQueryOption) element).getImage();
-			}else if (element instanceof IGroupByPatrolContribution){
-				return ((IGroupByPatrolContribution) element).getOption().getImage();
+			}else if (element instanceof IExtensionOption){
+				return ((IExtensionOption) element).getImage();
 			}
 			return super.getImage(element);
 		}
