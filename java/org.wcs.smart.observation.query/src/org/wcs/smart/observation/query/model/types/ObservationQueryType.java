@@ -37,7 +37,6 @@ import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.SimpleQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
-import org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -45,6 +44,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -146,7 +146,7 @@ public class ObservationQueryType implements IQueryType {
 	@Override
 	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
 		for (IDefinitionPanel p : components){
-			if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+			if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				((ObservationQuery)query).setQueryFilter(p.getQueryPart());
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
@@ -168,7 +168,7 @@ public class ObservationQueryType implements IQueryType {
 				return panelError;
 			}
 			
-			if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+			if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				filters = p.getQueryPart();
 			}
 			

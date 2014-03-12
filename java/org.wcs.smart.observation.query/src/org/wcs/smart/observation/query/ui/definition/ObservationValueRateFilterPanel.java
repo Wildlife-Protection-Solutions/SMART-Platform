@@ -32,7 +32,7 @@ import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.QueryFilter;
-import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 
@@ -56,7 +56,7 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 	}
 	
 	@Override
-	protected FilterDefinitionPanel createFilterPanel(PanelType type) {
+	protected BasicFilterDefintionPanel createFilterPanel(PanelType type) {
 		return new ObservationSimpleFilterPanel(ID + "." + type.name()); //$NON-NLS-1$
 	}
 	

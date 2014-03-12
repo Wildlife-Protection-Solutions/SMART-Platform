@@ -27,7 +27,7 @@
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationQueryType">
          <DefinitionPanel
-               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.observation.query.filterPanel">
          </DefinitionPanel>
          <DefinitionPanel
@@ -38,7 +38,7 @@
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType">
          <DefinitionPanel
-               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.observation.query.filterPanel">
          </DefinitionPanel>
          <DefinitionPanel
@@ -49,11 +49,11 @@
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
             class="org.wcs.smart.observation.query.model.types.ObservationGridQueryType">
          <DefinitionPanel
-               id="org.wcs.smart.observation.query.ObservationGriddedQueryDefinitionPanel"
+               id="org.wcs.smart.query.common.definition.grid"
                itemPanelId="org.wcs.smart.observation.query.GriddedItemPanel">
          </DefinitionPanel>
          <DefinitionPanel
-               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.observation.query.filterPanel">
          </DefinitionPanel>
          <DefinitionPanel
@@ -68,7 +68,7 @@
                itemPanelId="org.wcs.smart.observation.query.summaryItemPanel">
          </DefinitionPanel>
          <DefinitionPanel
-               id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
+               id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.observation.query.filterPanel">
          </DefinitionPanel>
          <DefinitionPanel
@@ -78,18 +78,6 @@
    </extension>
    <extension
          point="org.wcs.smart.query.queryDefinitionPanel">
-      <QueryDefinitionPanel
-            id="org.wcs.smart.observation.query.ObservationGriddedQueryDefinitionPanel"
-            isMultiCa="true"
-            isSingleCa="true"
-            panel="org.wcs.smart.observation.query.ui.definition.ObservationGriddedQueryDefinitionPanel">
-      </QueryDefinitionPanel>
-      <QueryDefinitionPanel
-            id="org.wcs.smart.observation.query.ObservationSimpleFilterPanel"
-            isMultiCa="true"
-            isSingleCa="true"
-            panel="org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel">
-      </QueryDefinitionPanel>
       <QueryDefinitionPanel
             id="org.wcs.smart.observation.query.ObservationSummaryGroupByValuePanel"
             isMultiCa="true"

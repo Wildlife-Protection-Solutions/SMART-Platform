@@ -53,6 +53,8 @@ import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
+import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
@@ -286,13 +288,13 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		if (proxy.getQuery() instanceof SimpleQuery){
 			
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-			proxy.setDropItems(ObservationSimpleFilterPanel.ID, asDropItems(queryFilter, session));
+			proxy.setDropItems(BasicFilterDefintionPanel.ID, asDropItems(queryFilter, session));
 					
 		}else if (proxy.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)){
 			ObservationSummaryQuery q = (ObservationSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
-			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def == null || def.getValueFilter() == null || def.getValueFilter().getFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
+			proxy.setDropItems(BasicFilterDefintionPanel.ID, def == null || def.getValueFilter() == null || def.getValueFilter().getFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 			
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
 					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
@@ -305,7 +307,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			ObservationGriddedQuery q = (ObservationGriddedQuery) proxy.getQuery();
 			GridQueryDefinition def = q.getQueryDefinition();
 			
-			proxy.setDropItems(ObservationSimpleFilterPanel.ID, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+			proxy.setDropItems(BasicFilterDefintionPanel.ID, def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
 			
 			DropItem valueItem = null;
 			try{
@@ -314,7 +316,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 				ObservationQueryPlugIn.log(ex.getMessage(), ex);
 				valueItem = new ErrorDropItem(ex.getMessage());
 			}
-			proxy.setDropItems(ObservationGriddedQueryDefinitionPanel.VALUE_PANEL_ID,
+			proxy.setDropItems(BasicGridDefinitionPanel.ID + BasicGridDefinitionPanel.VALUE_PANEL_SUFFIX,
 					Collections.singletonList(valueItem));
 					
 			

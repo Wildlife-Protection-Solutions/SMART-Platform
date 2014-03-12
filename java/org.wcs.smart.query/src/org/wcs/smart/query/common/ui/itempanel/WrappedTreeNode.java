@@ -31,10 +31,10 @@ package org.wcs.smart.query.common.ui.itempanel;
  */
 public class WrappedTreeNode {
 
-	ItemTreeNode parent;
+	IItemTreeNode parent;
 	Object item;
 
-	public WrappedTreeNode(ItemTreeNode parent, Object item) {
+	public WrappedTreeNode(IItemTreeNode parent, Object item) {
 		this.parent = parent;
 		this.item = item;
 	}

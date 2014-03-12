@@ -35,16 +35,16 @@ import org.eclipse.swt.graphics.Image;
 
 public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 
-	private List<ItemTreeNode> roots;
+	private List<IItemTreeNode> roots;
 	private String msg = null;
 	
-	public ItemTreeNodeContentProvider(List<ItemTreeNode> roots){
+	public ItemTreeNodeContentProvider(List<IItemTreeNode> roots){
 		this.roots = roots;
 	}
 	
 	@Override
 	public void dispose() {
-		for (ItemTreeNode n : roots){
+		for (IItemTreeNode n : roots){
 			n.getContentProvider().dispose();
 		}
 	}
@@ -53,7 +53,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		msg = null;
 		if (newInput == null){
-			for (ItemTreeNode n : roots){
+			for (IItemTreeNode n : roots){
 				n.getContentProvider().inputChanged(viewer, oldInput, newInput);
 			}
 		}else if (newInput instanceof String){
@@ -61,7 +61,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 		}else{
 			Map<String, Object> keys = (Map<String, Object>) newInput;
 			
-			for (ItemTreeNode n : roots){
+			for (IItemTreeNode n : roots){
 				n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
 			}
 		}
@@ -70,7 +70,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (msg == null){
-			return roots.toArray(new ItemTreeNode[roots.size()]);
+			return roots.toArray(new IItemTreeNode[roots.size()]);
 		}else{
 			return new String[]{msg};
 		}
@@ -79,10 +79,10 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		Object[] kids = null;
-		ItemTreeNode parent = null;
-		if (parentElement instanceof ItemTreeNode){
-			kids = ((ItemTreeNode)parentElement).getContentProvider().getElements(null);
-			parent = (ItemTreeNode) parentElement;
+		IItemTreeNode parent = null;
+		if (parentElement instanceof IItemTreeNode){
+			kids = ((IItemTreeNode)parentElement).getContentProvider().getElements(null);
+			parent = (IItemTreeNode) parentElement;
 		}else if (parentElement instanceof WrappedTreeNode){
 			kids = ((WrappedTreeNode)parentElement).parent.getContentProvider().getChildren(((WrappedTreeNode)parentElement).item);
 			parent = ((WrappedTreeNode)parentElement).parent;
@@ -100,7 +100,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof ItemTreeNode){
+		if (element instanceof IItemTreeNode){
 			return null;
 		}else if (element instanceof WrappedTreeNode){
 			Object p = ((WrappedTreeNode) element).parent.getContentProvider().getParent(element);
@@ -116,7 +116,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		if (msg != null) return false;
-		if (element instanceof ItemTreeNode){
+		if (element instanceof IItemTreeNode){
 			return true;
 		}else if (element instanceof WrappedTreeNode){
 			return ((WrappedTreeNode) element).parent.getContentProvider().hasChildren(((WrappedTreeNode) element).item);
@@ -153,8 +153,8 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 		 */
 		@Override 
 		public Image getImage(Object element) {
-			if (element instanceof ItemTreeNode){
-				return ((ItemTreeNode) element).getImage();
+			if (element instanceof IItemTreeNode){
+				return ((IItemTreeNode) element).getImage();
 			}else if (element instanceof WrappedTreeNode){
 				return ((WrappedTreeNode) element).parent.getLabelProvider().getImage(((WrappedTreeNode) element).item);
 			}
@@ -168,8 +168,8 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 		 */
 		@Override
 		public String getText(Object element) {
-			if (element instanceof ItemTreeNode){
-				return ((ItemTreeNode) element).getName();
+			if (element instanceof IItemTreeNode){
+				return ((IItemTreeNode) element).getName();
 			}else if (element instanceof WrappedTreeNode){
 				return ((WrappedTreeNode) element).parent.getLabelProvider().getText(((WrappedTreeNode) element).item);
 			}

@@ -19,25 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.ui.definition;
+package org.wcs.smart.query.common.ui.itempanel;
 
-import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.graphics.Image;
+
 /**
- * Simple filter panel for patrol, observation and incident queries.
+ * Interface for adding a node to at ItemTreeNodeTree.
+ * 
  * @author Emily
  *
  */
-public class SimplePatrolFilterPanel extends BasicFilterDefintionPanel {
-	
-	private String id = ID;
-	
-	public SimplePatrolFilterPanel(String customId){
-		this.id = customId;
-	}
+public interface IItemTreeNode {
 
-	@Override
-	public String getId() {
-		return id;
-	}
-
+	/**
+	 * The node name
+	 * @return
+	 */
+	public String getName();
+	/**
+	 * The node image
+	 * @return
+	 */
+	public Image getImage();
+	/**
+	 * the node content provider
+	 * @return
+	 */
+	public ITreeContentProvider getContentProvider();
+	/**
+	 * The node label provider
+	 * @return
+	 */
+	public ILabelProvider getLabelProvider();
+	/**
+	 * The input key for the node.  This key
+	 * is used to set the input for the content provider.
+	 * @return
+	 */
+	public String getKey();
 }

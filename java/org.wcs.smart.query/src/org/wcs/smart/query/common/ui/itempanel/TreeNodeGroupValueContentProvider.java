@@ -46,8 +46,8 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 
-	private List<ItemTreeNode> groupbys;
-	private List<ItemTreeNode> values;
+	private List<IItemTreeNode> groupbys;
+	private List<IItemTreeNode> values;
 	
 	private String msg = null;
 	private List<RootNode> roots;
@@ -73,8 +73,8 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	 * @param groupbys
 	 * @param values
 	 */
-	public TreeNodeGroupValueContentProvider(List<ItemTreeNode> groupbys, 
-			List<ItemTreeNode> values){
+	public TreeNodeGroupValueContentProvider(List<IItemTreeNode> groupbys, 
+			List<IItemTreeNode> values){
 		this.groupbys = groupbys;
 		this.values = values;
 		
@@ -89,10 +89,10 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	
 	@Override
 	public void dispose() {
-		for (ItemTreeNode n : groupbys){
+		for (IItemTreeNode n : groupbys){
 			n.getContentProvider().dispose();
 		}
-		for (ItemTreeNode n : values){
+		for (IItemTreeNode n : values){
 			n.getContentProvider().dispose();
 		}
 	}
@@ -101,10 +101,10 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		msg = null;
 		if (newInput == null){
-			for (ItemTreeNode n : groupbys){
+			for (IItemTreeNode n : groupbys){
 				n.getContentProvider().inputChanged(viewer, oldInput, newInput);
 			}
-			for (ItemTreeNode n : values){
+			for (IItemTreeNode n : values){
 				n.getContentProvider().inputChanged(viewer, oldInput, newInput);
 			}
 		}else if (newInput instanceof String){
@@ -112,10 +112,10 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		}else{
 			Map<String, Object> keys = (Map<String, Object>) newInput;
 			
-			for (ItemTreeNode n : groupbys){
+			for (IItemTreeNode n : groupbys){
 				n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
 			}
-			for (ItemTreeNode n : values){
+			for (IItemTreeNode n : values){
 				n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
 			}
 		}
@@ -134,7 +134,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		Object[] kids = null;
-		ItemTreeNode parent = null;
+		IItemTreeNode parent = null;
 		if (parentElement instanceof RootNode){
 			if (parentElement == RootNode.VALUES_OPS){
 				kids = values.toArray(new Object[values.size()]);
@@ -142,9 +142,9 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 				kids = groupbys.toArray(new Object[groupbys.size()]);
 			}
 			return kids;
-		}else if (parentElement instanceof ItemTreeNode){
-			kids = ((ItemTreeNode)parentElement).getContentProvider().getElements(null);
-			parent = (ItemTreeNode) parentElement;
+		}else if (parentElement instanceof IItemTreeNode){
+			kids = ((IItemTreeNode)parentElement).getContentProvider().getElements(null);
+			parent = (IItemTreeNode) parentElement;
 		}else if (parentElement instanceof WrappedTreeNode){
 			kids = ((WrappedTreeNode)parentElement).parent.getContentProvider().getChildren(((WrappedTreeNode)parentElement).item);
 			parent = ((WrappedTreeNode)parentElement).parent;
@@ -162,7 +162,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof ItemTreeNode){
+		if (element instanceof IItemTreeNode){
 			if (values.contains(element)){
 				return RootNode.VALUES_OPS;
 			}else if (groupbys.contains(element)){
@@ -182,7 +182,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		if (msg != null) return false;
-		if (element instanceof ItemTreeNode ||
+		if (element instanceof IItemTreeNode ||
 				element instanceof RootNode){
 			return true;
 		}else if (element instanceof WrappedTreeNode){
@@ -219,8 +219,8 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		 */
 		@Override 
 		public Image getImage(Object element) {
-			if (element instanceof ItemTreeNode){
-				return ((ItemTreeNode) element).getImage();
+			if (element instanceof IItemTreeNode){
+				return ((IItemTreeNode) element).getImage();
 			}else if (element instanceof RootNode){
 				return ((RootNode) element).image;
 			}else if (element instanceof WrappedTreeNode){
@@ -236,8 +236,8 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		 */
 		@Override
 		public String getText(Object element) {
-			if (element instanceof ItemTreeNode){
-				return ((ItemTreeNode) element).getName();
+			if (element instanceof IItemTreeNode){
+				return ((IItemTreeNode) element).getName();
 			}else if (element instanceof RootNode){
 				return ((RootNode) element).name;
 			}else if (element instanceof WrappedTreeNode){

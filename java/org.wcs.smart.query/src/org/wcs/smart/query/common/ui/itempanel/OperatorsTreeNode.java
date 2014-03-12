@@ -36,7 +36,7 @@ import org.wcs.smart.query.model.filter.Operator;
  * @author Emily
  *
  */
-public class OperatorsTreeNode implements ItemTreeNode{
+public class OperatorsTreeNode implements IItemTreeNode{
 
 	public static final String KEY = "filteroperators"; //$NON-NLS-1$
 	

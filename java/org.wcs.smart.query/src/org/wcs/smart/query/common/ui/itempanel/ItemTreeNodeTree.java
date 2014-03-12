@@ -45,8 +45,8 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class ItemTreeNodeTree extends Composite {
 
-	private List<ItemTreeNode> nodes;
-	private List<ItemTreeNode> values;
+	private List<IItemTreeNode> nodes;
+	private List<IItemTreeNode> values;
 	
 	private TreeViewer filterTreeViewer;
 
@@ -58,7 +58,7 @@ public class ItemTreeNodeTree extends Composite {
 	 * @param nodes
 	 */
 	public ItemTreeNodeTree(Composite parent, int style,
-			List<ItemTreeNode> nodes) {
+			List<IItemTreeNode> nodes) {
 		super(parent, style);
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -81,7 +81,7 @@ public class ItemTreeNodeTree extends Composite {
 	 * @param values
 	 */
 	public ItemTreeNodeTree(Composite parent, int style,
-			List<ItemTreeNode> groupbys, List<ItemTreeNode> values) {
+			List<IItemTreeNode> groupbys, List<IItemTreeNode> values) {
 		super(parent, style);
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;

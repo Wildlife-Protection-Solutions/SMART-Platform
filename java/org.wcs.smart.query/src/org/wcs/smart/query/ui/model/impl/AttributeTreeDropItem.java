@@ -51,7 +51,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.TreeDropDownViewer;
-import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -264,8 +264,8 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 	
 	private TreeDropDownViewer getTreeEditor(){
 		IDefinitionPanel pnl = getTargetPanel();
-		if (pnl instanceof FilterDefinitionPanel){
-			return ((FilterDefinitionPanel)pnl).getTreeEditor();
+		if (pnl instanceof BasicFilterDefintionPanel){
+			return ((BasicFilterDefintionPanel)pnl).getTreeEditor();
 		}
 		return null;
 	}

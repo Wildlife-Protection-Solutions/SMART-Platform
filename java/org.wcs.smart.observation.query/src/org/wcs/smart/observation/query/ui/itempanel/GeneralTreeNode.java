@@ -24,7 +24,7 @@ package org.wcs.smart.observation.query.ui.itempanel;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
  * Tree node for general items
@@ -32,7 +32,7 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
  * @author Emily
  *
  */
-public class GeneralTreeNode implements ItemTreeNode {
+public class GeneralTreeNode implements IItemTreeNode {
 
 	public static final String KEY = "general"; //$NON-NLS-1$
 	

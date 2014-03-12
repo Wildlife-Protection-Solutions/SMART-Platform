@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
@@ -76,8 +76,8 @@ public class GriddedItemPanel extends AbstractQueryItemPanel{
 		gl.marginWidth = gl.marginHeight = 0;
 		main.setLayout(gl);
 		
-		List<ItemTreeNode> groupbynodes = new ArrayList<ItemTreeNode>();
-		List<ItemTreeNode> valuenodes = new ArrayList<ItemTreeNode>();
+		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
+		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);
