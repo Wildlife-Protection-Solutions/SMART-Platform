@@ -21,28 +21,15 @@
  */
 package org.wcs.smart.observation.query.ui.definition;
 
-import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
-import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
-import org.wcs.smart.query.ui.definition.FilterDefinitionPanel;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 /**
  * Simple filter panel for observation and incident queries.
  * @author Emily
  *
  */
-public class ObservationSimpleFilterPanel extends FilterDefinitionPanel {
-	
-	public static String ID  = "org.wcs.smart.observation.query.ObservationSimpleFilterPanel"; //$NON-NLS-1$
+public class ObservationSimpleFilterPanel extends BasicFilterDefintionPanel {
 	
 	private String id = ID;
-	
-	public ObservationSimpleFilterPanel(){
-		
-	}
 	
 	public ObservationSimpleFilterPanel(String customId){
 		this.id = customId;
@@ -51,40 +38,6 @@ public class ObservationSimpleFilterPanel extends FilterDefinitionPanel {
 	@Override
 	public String getId() {
 		return id;
-	}
-
-	@Override
-	public String getGuiName() {
-		return Messages.SimplePatrolFilterPanel_PanelTitle;
-	}
-
-	@Override
-	public String validate() {
-		return null;
-	}
-	
-	@Override
-	public void initItems(QueryProxy q){
-		super.initItems(q);
-		
-		Query query = q.getQuery();
-		if (query instanceof SimpleQuery){
-			setFilterType( ((SimpleQuery)query).getFilter().getFilterType() );
-		}else if (query instanceof GriddedQuery){
-			if ( ((GriddedQuery)query).getQueryDefinition() != null &&
-					((GriddedQuery)query).getQueryDefinition().getValueFilter() != null){
-				setFilterType( ((GriddedQuery)query).getQueryDefinition().getValueFilter().getFilterType() );
-			}else{
-				setFilterType(FilterType.WAYPOINT);
-			}
-		}else if (query instanceof ObservationSummaryQuery){
-			if ( ((ObservationSummaryQuery)query).getQueryDefinition() != null && 
-					((ObservationSummaryQuery)query).getQueryDefinition().getValueFilter() != null){
-				setFilterType( ((ObservationSummaryQuery)query).getQueryDefinition().getValueFilter().getFilterType() );
-			}else{
-				setFilterType(FilterType.WAYPOINT);
-			}
-		}
 	}
 	
 }

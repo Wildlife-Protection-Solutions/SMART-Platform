@@ -50,7 +50,7 @@ import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
@@ -110,7 +110,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		
 		
 		
-		List<ItemTreeNode> nodes = new ArrayList<ItemTreeNode>();
+		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
 		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		if (!SmartDB.isMultipleAnalysis()){

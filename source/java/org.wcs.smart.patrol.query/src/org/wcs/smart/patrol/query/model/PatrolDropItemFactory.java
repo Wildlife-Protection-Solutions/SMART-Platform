@@ -67,6 +67,7 @@ import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -359,7 +360,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 		if (proxy.getQuery() instanceof SimpleQuery){
 			
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-			proxy.setDropItems(SimplePatrolFilterPanel.ID, asDropItems(queryFilter, session));
+			proxy.setDropItems(BasicFilterDefintionPanel.ID, asDropItems(queryFilter, session));
 					
 		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
 			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();

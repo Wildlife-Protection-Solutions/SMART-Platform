@@ -27,7 +27,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.ui.definition.AbstractGridDefinitionPanel;
+import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 
@@ -37,7 +37,7 @@ import org.wcs.smart.query.ui.model.DropItem;
  *
  */
 public class PatrolGriddedQueryDefinitionPanel extends
-		AbstractGridDefinitionPanel {
+		BasicGridDefinitionPanel {
 
 	public static final String ID = "org.wcs.smart.patrol.query.PatrolGriddedQueryDefinitionPanel"; //$NON-NLS-1$
 	
@@ -53,90 +53,12 @@ public class PatrolGriddedQueryDefinitionPanel extends
 	}
 
 	@Override
-	public String getGuiName() {
-		return Messages.GriddedQueryDefinitionComposite_GridValueDefinitionSectionHeader;
-	}
-
-	@Override
-	public ListDefinitionPanel createValueListPanel() {
-		return new ListDefinitionPanel(false) {
-			@Override
-			public String validate() {
-				if (items.size() != 1){
-					return Messages.PatrolGriddedQueryDefinitionPanel_ValueRequiredError;
-				}
-				return null;
-			}
-			@Override
-			public String getId() {
-				return VALUE_PANEL_ID;
-			}
-			
-			@Override
-			public String getGuiName() {
-				return Messages.PatrolGriddedQueryDefinitionPanel_ValuePanelTitle;
-			}
-		};
-	}
-
-	@Override
-	public void initItems(QueryProxy q) {
-		super.initItems(q);
-		
-		isInitializing = true;
-		try{
-			PatrolGriddedQuery gridQuery = (PatrolGriddedQuery)q.getQuery();
-			txtGridSize.setText(String.valueOf(gridQuery.getGridSize()));
-			try {
-				selectProjection(gridQuery.getCoordinateReferenceSystem());
-			} catch (Exception e) {
-				PatrolQueryPlugIn.log(e.getMessage(), e);
-			}
-		}finally{
-			isInitializing = false;
-		}
-		
-		
-	}
-	
-	@Override
-	public CoordinateReferenceSystem getDefaultProjection() {
-		try {
-			return ((PatrolGriddedQuery)currentQuery.getQuery()).getCoordinateReferenceSystem();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
 	public String validate() {
 		//update the simple value rate filter panel
 		((SimpleValueRateFilterPanel)currentQuery.getQueryDefinitionPanel().findQueryDefinitionPanel(SimpleValueRateFilterPanel.ID)).updateFilterPanel(hasRate());
+		return super.validate();
 		
-		String error = lstValues.validate();
-		if (error != null){
-			return error;
-		}
-		try{
-			double x = getGridSize();
-			if (x <= 0){
-				return Messages.PatrolGriddedQueryDefinitionPanel_GridSizeError1;
-			}
-		}catch (Exception ex){
-			return Messages.PatrolGriddedQueryDefinitionPanel_GridSizeError2 + ex.getMessage();
-		}
-		if (getCrs() == null){
-			return Messages.PatrolGriddedQueryDefinitionPanel_CRSError;
-		}
-		return null;
 	}
-
-	@Override
-	public String getQueryPart() {
-		return lstValues.getQueryPart() + "|" + getGridSize(); //$NON-NLS-1$
-	}
-	
 	/**
 	 * 
 	 * @return true if one of the values has an encounter rate

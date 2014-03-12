@@ -30,7 +30,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
  * Patrol group by options.
@@ -38,7 +38,7 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
  * @author Emily
  *
  */
-public class PatrolGroupByTreeItem implements ItemTreeNode{
+public class PatrolGroupByTreeItem implements IItemTreeNode{
 
 	public static final String KEY = "patrolgroupby"; //$NON-NLS-1$
 	

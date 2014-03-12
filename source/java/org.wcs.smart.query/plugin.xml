@@ -69,6 +69,18 @@
             isSingleCa="false"
             panel="org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel">
       </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.common.definition.grid"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.common.definition.filter"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel">
+      </QueryDefinitionPanel>
    </extension>
    <extension
          point="org.eclipse.ui.views">

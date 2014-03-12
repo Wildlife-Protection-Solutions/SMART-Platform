@@ -37,8 +37,6 @@ import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
-import org.wcs.smart.observation.query.ui.definition.ObservationGriddedQueryDefinitionPanel;
-import org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel;
 import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -47,6 +45,8 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
+import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -154,12 +154,12 @@ public class ObservationGridQueryType implements IQueryType {
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(ObservationValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
-			}else if (p.getId().equals(ObservationGriddedQueryDefinitionPanel.ID)){
+			}else if (p.getId().equals(BasicGridDefinitionPanel.ID)){
 				definition = p.getQueryPart();
-				if (((ObservationGriddedQueryDefinitionPanel)p).getCrs() != null){
-					summary.setCrsDefinition(((ObservationGriddedQueryDefinitionPanel)p).getCrs().toWKT());
+				if (((BasicGridDefinitionPanel)p).getCrs() != null){
+					summary.setCrsDefinition(((BasicGridDefinitionPanel)p).getCrs().toWKT());
 				}
-			}else if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+			}else if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				filters = p.getQueryPart() + "|"; //$NON-NLS-1$
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
@@ -186,9 +186,9 @@ public class ObservationGridQueryType implements IQueryType {
 			
 			if (p.getId().equals(ObservationValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
-			}else if (p.getId().equals(ObservationGriddedQueryDefinitionPanel.ID)){
+			}else if (p.getId().equals(BasicGridDefinitionPanel.ID)){
 				definition = p.getQueryPart();
-			}else if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+			}else if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				filters = p.getQueryPart() + "|"; //$NON-NLS-1$
 			}
 			

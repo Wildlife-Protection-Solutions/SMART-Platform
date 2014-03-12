@@ -37,7 +37,6 @@ import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationSummaryQueryEditor;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
-import org.wcs.smart.observation.query.ui.definition.ObservationSimpleFilterPanel;
 import org.wcs.smart.observation.query.ui.definition.ObservationSummaryGroupByValuePanel;
 import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterPanel;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
@@ -48,6 +47,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -134,7 +134,7 @@ public class ObservationSummaryQueryType implements IQueryType {
 						if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 							items = new DropItem[]{ createAreaGroupByDropItem((Area)source) };
 						}else {
-							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };
+							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 						}
 					}
 					return items;					
@@ -158,7 +158,7 @@ public class ObservationSummaryQueryType implements IQueryType {
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(ObservationValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
-			}else if (p.getId().equals(ObservationSimpleFilterPanel.ID)){
+			}else if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				filters = p.getQueryPart() + "|"; //$NON-NLS-1$
 			}else if (p.getId().equals(ObservationSummaryGroupByValuePanel.ID)){
 				definition = p.getQueryPart();

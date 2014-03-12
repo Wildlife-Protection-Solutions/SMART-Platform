@@ -51,7 +51,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DateTreeNode;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
@@ -110,7 +110,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			}
 		});
 		
-		List<ItemTreeNode> groupbynodes = new ArrayList<ItemTreeNode>();
+		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
 		groupbynodes.add(new GeneralTreeNode(Messages.SummaryFilterPanel_GeneralItemGroupBy));
 		groupbynodes.add(new DateTreeNode());
 		if (!SmartDB.isMultipleAnalysis()){
@@ -119,7 +119,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		}
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
 		
-		List<ItemTreeNode> valuenodes = new ArrayList<ItemTreeNode>();
+		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);

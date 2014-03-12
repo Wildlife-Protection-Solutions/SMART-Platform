@@ -33,7 +33,7 @@ import org.wcs.smart.query.internal.Messages;
  * @author Emily
  *
  */
-public class DataModelTreeNode implements ItemTreeNode{
+public class DataModelTreeNode implements IItemTreeNode{
 
 	public static final String KEY = "datamodel"; //$NON-NLS-1$
 	

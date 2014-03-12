@@ -29,7 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
  * Patrol values options.
@@ -37,7 +37,7 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
  * @author Emily
  *
  */
-public class PatrolValueTreeItem implements ItemTreeNode{
+public class PatrolValueTreeItem implements IItemTreeNode{
 
 	public static final String KEY = "patrolvalues"; //$NON-NLS-1$
 	

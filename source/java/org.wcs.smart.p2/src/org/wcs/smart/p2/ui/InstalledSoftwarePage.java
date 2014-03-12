@@ -103,7 +103,8 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IProvHelpContextIds.INSTALLED_SOFTWARE);
 
 		profileId = getProvisioningUI().getProfileId();
-		if (profileId == null) {
+		if (profileId == null || ProvUI.getProvisioningEventBus(getProvisioningUI().getSession()) == null) {//the second || is to make it work in the development env. 
+			profileId = null;
 			IStatus status = getProvisioningUI().getPolicy().getNoProfileChosenStatus();
 			if (status != null)
 				ProvUI.reportStatus(status, StatusManager.LOG);

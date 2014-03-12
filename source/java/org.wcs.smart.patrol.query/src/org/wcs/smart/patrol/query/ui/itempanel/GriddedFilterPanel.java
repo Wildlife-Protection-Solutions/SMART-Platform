@@ -44,7 +44,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
@@ -77,8 +77,8 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 		gl.marginWidth = gl.marginHeight = 0;
 		main.setLayout(gl);
 		
-		List<ItemTreeNode> groupbynodes = new ArrayList<ItemTreeNode>();
-		List<ItemTreeNode> valuenodes = new ArrayList<ItemTreeNode>();
+		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
+		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
 		valuenodes.add(new PatrolValueTreeItem());
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
 		

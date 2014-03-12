@@ -29,7 +29,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
  * Patrol filter items.
@@ -37,7 +37,7 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNode;
  * @author Emily
  *
  */
-public class PatrolFilterTreeItem implements ItemTreeNode{
+public class PatrolFilterTreeItem implements IItemTreeNode{
 
 	public static final String KEY = "patrolfilter"; //$NON-NLS-1$
 	

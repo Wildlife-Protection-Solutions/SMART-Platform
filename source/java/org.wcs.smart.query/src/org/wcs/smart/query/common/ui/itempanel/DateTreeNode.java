@@ -37,7 +37,7 @@ import org.wcs.smart.query.model.filter.date.IDateGroupBy;
  * @author Emily
  *
  */
-public class DateTreeNode implements ItemTreeNode {
+public class DateTreeNode implements IItemTreeNode {
 
 	public static final String KEY ="dategroupby"; //$NON-NLS-1$
 

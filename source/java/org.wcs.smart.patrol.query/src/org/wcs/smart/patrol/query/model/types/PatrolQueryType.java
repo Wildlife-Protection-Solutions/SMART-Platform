@@ -38,13 +38,13 @@ import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
-import org.wcs.smart.patrol.query.ui.definition.SimplePatrolFilterPanel;
 import org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
+import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -149,7 +149,7 @@ public class PatrolQueryType implements IQueryType {
 	@Override
 	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
 		for (IDefinitionPanel p : components){
-			if (p.getId().equals(SimplePatrolFilterPanel.ID)){
+			if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				((PatrolQuery)query).setQueryFilter(p.getQueryPart());
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
@@ -171,7 +171,7 @@ public class PatrolQueryType implements IQueryType {
 				return panelError;
 			}
 			
-			if (p.getId().equals(SimplePatrolFilterPanel.ID)){
+			if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				filters = p.getQueryPart();
 			}
 			

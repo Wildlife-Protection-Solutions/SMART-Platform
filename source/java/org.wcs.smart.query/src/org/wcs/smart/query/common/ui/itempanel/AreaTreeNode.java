@@ -47,7 +47,7 @@ import org.wcs.smart.query.QueryPlugIn;
  * @author Emily
  *
  */
-public class AreaTreeNode implements ItemTreeNode{
+public class AreaTreeNode implements IItemTreeNode{
 
 	private static final String KEY = "area"; //$NON-NLS-1$
 

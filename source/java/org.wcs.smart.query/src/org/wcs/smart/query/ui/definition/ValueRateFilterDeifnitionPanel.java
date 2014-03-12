@@ -61,11 +61,11 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 	
 	public enum PanelType{VALUE,RATE};
 	
-	protected FilterDefinitionPanel valueFilter = null;
-	protected FilterDefinitionPanel rateFilter = null;
+	protected BasicFilterDefintionPanel valueFilter = null;
+	protected BasicFilterDefintionPanel rateFilter = null;
 	
 	private QueryProxy currentQuery;
-	private FilterDefinitionPanel currentTarget = null;
+	private BasicFilterDefintionPanel currentTarget = null;
 	
 	private SashForm main ;
 	private Composite right;
@@ -234,7 +234,7 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 		return main;
 	}
 	
-	protected abstract FilterDefinitionPanel createFilterPanel(PanelType type );
+	protected abstract BasicFilterDefintionPanel createFilterPanel(PanelType type );
 	
 	
 	/**
@@ -258,7 +258,7 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 	}
 	protected abstract  void copyValueFilterToRateFilter();
 
-	private void setCurrent(FilterDefinitionPanel target){
+	private void setCurrent(BasicFilterDefintionPanel target){
 		this.currentTarget = target;
 		left.redraw();
 		right.redraw();
