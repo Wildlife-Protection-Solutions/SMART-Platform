@@ -20,7 +20,6 @@ public class Messages extends NLS {
 	public static String CmAttributeInfoComposite_Option_IsVisible;
 	public static String CmAttributeInfoComposite_Option_Multiselect;
 	public static String CmAttributeInfoComposite_Option_Numeric;
-	public static String CmAttributeInfoComposite_Option_Numeric_Checkbox;
 	public static String CmNodeInfoComposite_Category;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;

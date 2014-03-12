@@ -165,7 +165,6 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Option_Numeric);
 		final Button btnBool = new Button(parent, SWT.CHECK);
-		btnBool.setText(Messages.CmAttributeInfoComposite_Option_Numeric_Checkbox);
 		btnBool.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
