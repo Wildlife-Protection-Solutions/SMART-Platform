@@ -462,11 +462,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
 							}});
 						
-					}catch (Exception ex){
+					}catch (final Exception ex){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
+								SmartPlugIn.displayLog(pmd.getShell(),Messages.DataModelPropertyPage_Error_XmlExport, ex);
 							}});
 					}
 				}
