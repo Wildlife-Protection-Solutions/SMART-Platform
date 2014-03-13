@@ -86,8 +86,8 @@ public class SmartPointLabelProvider extends LabelProvider {
 		}
 		if (transform == null || transformCrs != destCrs){
 			try {
-				transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, transformCrs);
 				transformCrs = destCrs;
+				transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, transformCrs);
 			} catch (FactoryException e) {
 				SmartPlugIn.log(e.getMessage(),e);
 			}
