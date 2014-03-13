@@ -1,0 +1,153 @@
+package org.wcs.smart.entity.query.ui.itempanel;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.common.ui.itempanel.FiltersDataModelContentProvider;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
+import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode.Type;
+
+public class EntityTypeFilterContentProvider implements ITreeContentProvider{
+
+	private List<EntityType> types = null;
+	private Viewer viewer = null;
+	
+	@Override
+	public void dispose() {
+		
+	}
+
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.viewer = viewer;
+	}
+
+	@Override
+	public Object[] getElements(Object inputElement) {
+		if (types == null){
+			loadTypes();
+			return new String[]{"Loading..."};
+		}
+		return types.toArray();
+	}
+
+	@Override
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof EntityType){
+			Object[] x = new Object[((EntityType) parentElement).getAttributes().size() + 1];
+			x[0] = ((EntityType) parentElement).getDmAttribute();
+			for (int i = 0; i < ((EntityType) parentElement).getAttributes().size() ; i ++){
+				x[i+1]=((EntityType) parentElement).getAttributes().get(i);
+			}
+			return x;
+		}
+		return null;
+	}
+
+	@Override
+	public Object getParent(Object element) {
+		if (element instanceof EntityAttribute){
+			return ((EntityAttribute) element).getEntityType();
+		}
+		return null;
+	}
+
+	@Override
+	public boolean hasChildren(Object element) {
+		if (element instanceof EntityType){
+			return true;
+		}
+		return false;
+	}
+	
+	private void loadTypes(){
+		Job j = new Job("Load Entity Types"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
+				try {
+					Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat");
+					q.setParameter("ca", SmartDB.getCurrentConservationArea());
+					q.setParameter("stat", EntityType.Status.ACTIVE);
+					
+					List<EntityType> items = q.list();
+					List<EntityType> tmp = new ArrayList<EntityType>();
+					for (EntityType t : items){
+						tmp.add(t);
+						t.getDmAttribute().getName();
+						for (EntityAttribute ea : t.getAttributes()){
+							ea.getName();
+							ea.getDmAttribute().getType();
+						}
+					}
+					types = tmp;
+				} finally {
+					session.getTransaction().rollback();
+					session.close();
+				}
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						//TODO: figure out how to only refresh this node which is a wrapped object
+						//viewer.refresh(at);
+						viewer.refresh();
+					}
+				});
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+	}
+	
+	public static final LabelProvider lblProvider = new LabelProvider(){
+		@Override
+		public String getText(Object element){
+			if (element instanceof EntityType){
+				return ((EntityType) element).getName();
+			}else if (element instanceof EntityAttribute){
+				return ((EntityAttribute) element).getName();
+			}else if (element instanceof Attribute){
+				return ((Attribute) element).getName();
+			}
+			return super.getText(element);
+		}
+		
+		@Override
+		public Image getImage(Object element){
+			if (element instanceof EntityType){
+				return EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON);
+			}else if (element instanceof EntityAttribute){
+				return ((EntityAttribute) element).getDmAttribute().getType().getImage();
+			}else if (element instanceof Attribute){
+				return ((Attribute) element).getType().getImage();
+			}
+			return super.getImage(element);
+		}
+		
+	};
+
+}
+
+
