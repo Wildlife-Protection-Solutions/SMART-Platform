@@ -51,7 +51,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 /**
- * Converts a databsae data-model to the xml represnetation 
+ * Converts a database data-model to the xml representation 
  * of the data model.
  * 
  * @author egouge
