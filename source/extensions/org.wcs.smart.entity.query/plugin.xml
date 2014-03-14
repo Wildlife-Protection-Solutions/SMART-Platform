@@ -6,7 +6,7 @@
       <QueryCategory
             html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Entity Type Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Entity Type queries provide the ability to query observations based on entity type attributes in addition to the observaiton details.  A single entity type can be selected for each query.  The attributes associated with the selected entity types are then available for filtering and grouping and are included in the results tables where appropriate.&lt;/p&gt;"
             id="org.wcs.smart.entity.query.group.EntityQuery"
-            name="Entity Observation Query">
+            name="Entity Queries">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
@@ -105,6 +105,21 @@
             isSingleCa="true"
             panel="org.wcs.smart.entity.query.ui.definition.EntitySummaryGroupByValuePanel">
       </QueryDefinitionPanel>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.entity.query.model.EntityObservationQuery">
+      </class>
+      <class
+            class="org.wcs.smart.entity.query.model.EntityGriddedQuery">
+      </class>
+      <class
+            class="org.wcs.smart.entity.query.model.EntityWaypointQuery">
+      </class>
+      <class
+            class="org.wcs.smart.entity.query.model.EntitySummaryQuery">
+      </class>
    </extension>
 
 </plugin>

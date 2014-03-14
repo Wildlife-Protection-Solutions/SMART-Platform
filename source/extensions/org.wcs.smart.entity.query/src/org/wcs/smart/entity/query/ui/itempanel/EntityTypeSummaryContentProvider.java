@@ -274,61 +274,11 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 			return getAttributeTreeChildren(parent);
 		}else if (raw instanceof Attribute && 
 				((Attribute)raw).getType() == AttributeType.LIST){
-			return getAttributeListChildren(parent);
+			if (type == Type.VALUE){
+				return getAttributeListChildren(parent);
+			}
 		}
 		return null;
-//		
-//		Object[] kids = provider.getChildren(  parent.getObject() );
-//		
-//		if (kids == null){ return null; }
-//		
-//		Object[] results = new Object[kids.length];
-//		
-//		int cnt = 0;
-//		
-//		for (int i = 0; i < kids.length; i ++){
-//			boolean add = false;
-//			if (parent.isValue()){
-//				if (kids[i] instanceof Attribute){
-//					if (((Attribute)kids[i]).getType() == AttributeType.NUMERIC ||
-//						((Attribute)kids[i]).getType() == AttributeType.TREE ||
-//						((Attribute)kids[i]).getType() == AttributeType.LIST){
-//						add = true;
-//					}
-//				}else if (kids[i] instanceof CategoryAttribute){
-//					if (((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.NUMERIC ||
-//							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE ||
-//							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.LIST){
-//						add = true;
-//					}
-//				}else if (kids[i] instanceof Category){
-//					add = true;
-//				}
-//			}else{
-//				if (kids[i] instanceof Attribute){
-//					if (( (Attribute)kids[i]).getType() == AttributeType.LIST ||
-//							( (Attribute)kids[i]).getType() == AttributeType.TREE){
-//						add = true;
-//					}
-//				}else if (kids[i] instanceof CategoryAttribute){
-//					if (( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.LIST ||
-//							( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE){
-//						add = true;
-//					}
-//				}else if (kids[i] instanceof Category){
-//					add = true;
-//				}
-//			}
-//			if (add){
-//				results[cnt++] = new SummaryDmObject(kids[i], parent.isValue());
-//			}
-//		}
-//		//assume data model
-//		if (cnt == 0){
-//			return null;
-//		}else{
-//			return Arrays.copyOf(results, cnt);
-//		}
 	}
 	
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){
@@ -343,16 +293,13 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 				try{
 					
 					List<AttributeTreeNode> nodes = null;
-					Attribute att = null;
-					if (parent.getObject() instanceof Attribute){
-						att = (Attribute) parent.getObject();
-					}else if (parent.getObject() instanceof EntityAttribute){
-						att = ((EntityAttribute)parent.getObject()).getDmAttribute();
-					}
 					
-					if (att != null){
+					if (parent.getObject() instanceof EntityAttribute){
+						Attribute att = ((EntityAttribute)parent.getObject()).getDmAttribute();
+						
 						att = QueryDataModelManager.getInstance().getAttribute(session, att);
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(att, session);
+						
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
 						node.getAttribute().getName();
@@ -383,7 +330,11 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 		Object[] results = new Object[kids.size()];
 		int index = 0;
 		for (AttributeTreeNode kid : kids){
-			results[index++] = new SummaryDmObject(kid, null, parent.isValue());
+			if (parent.getObject() instanceof AttributeTreeNode){
+				results[index++] = new SummaryDmObject(kid, parent.getObject2(), parent.isValue());
+			}else{
+				results[index++] = new SummaryDmObject(kid, parent.getObject(), parent.isValue());
+			}
 		}
 		return results;
 	}
@@ -399,20 +350,10 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 				session.beginTransaction();
 				try{
 					List<AttributeListItem> nodes = null;
-					Attribute att = null;
-					if (parent.getObject() instanceof Attribute){
-						att = (Attribute) parent.getObject();
-					}else if (parent.getObject() instanceof EntityAttribute){
-						att = ((EntityAttribute)parent.getObject()).getDmAttribute();
-					}
-					if (att != null){
+					
+					if (parent.getObject() instanceof EntityAttribute){
+						Attribute att = ((EntityAttribute)parent.getObject()).getDmAttribute();
 						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(att, session);
-						for(AttributeListItem it : nodes){
-							it.getAttribute().getName();
-						}
-					}else if (parent.getObject() instanceof CategoryAttribute ){
-						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
 						for(AttributeListItem it : nodes){
 							it.getAttribute().getName();
 						}
@@ -441,13 +382,9 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 		}
 		Object[] results = new Object[kids.size()];
 		int index = 0;
-		Object obj2 = parent.getObject2();
-		if (parent.getObject() instanceof CategoryAttribute){
-			obj2 = ((CategoryAttribute) parent.getObject()).getCategory();
-		}
 		
 		for (AttributeListItem kid : kids){
-			results[index++] = new SummaryDmObject(kid, obj2, parent.isValue());
+			results[index++] = new SummaryDmObject(kid, parent.getObject(), parent.isValue());
 		}
 		return results;
 	}
@@ -527,6 +464,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 						for (EntityAttribute ea : t.getAttributes()){
 							ea.getName();
 							ea.getDmAttribute().getType();
+							ea.getDmAttribute().getAggregations().size();
 						}
 					}
 					types = tmp;
