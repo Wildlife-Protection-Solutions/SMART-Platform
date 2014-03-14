@@ -6,7 +6,9 @@
          <meta.schema plugin="org.wcs.smart" id="org.wcs.smart.ca.datamodel.editAdvisor" name="DataModel Edit Advisor"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         This extension points allows plugins to provide warnings when editing data model categories or attributes.  You cannot prevent the category/attribute from being modified but you can provide a warning to the user about the effects of modifying the value.
+
+For example this is used by the entity tracker plugin to warn users that modifying an attribute that is linked to an entity type may cause errors in the entity tracker plugin.
       </documentation>
    </annotation>
 
