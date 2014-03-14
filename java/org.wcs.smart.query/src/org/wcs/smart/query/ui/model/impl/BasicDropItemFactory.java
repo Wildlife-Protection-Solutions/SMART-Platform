@@ -26,11 +26,13 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -165,6 +167,91 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		
 		return items;
 	}
+	
+	
+	/**
+	 * Creates anew attribute value drop item
+	 * @param att
+	 * @return
+	 */
+	public DropItem createAttributeValueDropItem(Attribute att){
+		return new AttributeValueDropItem(att);
+	}
+	
+	/**
+	 * Creates a new category attribute value drop item
+	 * @param catatt
+	 * @return
+	 */
+	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
+		return new AttributeValueDropItem(catatt);
+	}
+	
+	/**
+	 * Creates a new attribute list drop item
+	 * @param item
+	 * @return
+	 */
+	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
+		return new AttributeListValueDropItem(item);
+	}
+	
+	/**
+	 * Creates a new attribute list item associated with a category
+	 * @param item
+	 * @param cat
+	 * @return
+	 */
+	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
+		return new AttributeListValueDropItem(item,cat);
+	}
+	
+	/**
+	 * Creates a new attribute tree node drop item
+	 * @param item
+	 * @return
+	 */
+	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
+		return new AttributeTreeValueDropItem(item);
+	}
+	
+	/**
+	 * Creates a new attribute tree node associated with a category
+	 * @param item
+	 * @param cat
+	 * @return
+	 */
+	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
+		return new AttributeTreeValueDropItem(item,cat);
+	}
+	
+	/**
+	 * Creates a category value drop item
+	 * @param cat
+	 * @return
+	 */
+	public DropItem createCategoryValueDropItem(Category cat){
+		if (cat == null){
+			return new CategoryValueDropItem();
+		}
+		return new CategoryValueDropItem(cat);
+	}
+	
+	
+	/**
+	 * Creates one of the other query drop items
+	 * @param other
+	 * @return an array of drop items of the associated type
+	 */
+	public DropItem[] createOtherDropItem(Operator other){
+		if (other == Operator.BRACKETS){
+			return createBracketIems();
+		}else if (other == Operator.NOT){
+			return new DropItem[]{ createNotDropItem() };
+		}
+		return null;
+	}
+	
 
 	/**
 	 * Does nothing; needs to be overwritten

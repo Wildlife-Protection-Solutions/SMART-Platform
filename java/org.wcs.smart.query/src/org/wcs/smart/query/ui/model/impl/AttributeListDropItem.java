@@ -63,8 +63,8 @@ import org.wcs.smart.query.ui.model.ListItem;
  */
 public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	
-	private String text;
-	private String key;
+	protected String text;
+	protected String key;
 	private Label lblAttribute;
 	private ComboViewer listViewer;
 
@@ -89,13 +89,13 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 				for (AttributeListItem item : litems){
 					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
 				}
-				
+				//add the any item
+				items.add(0, AttributeFilter.ANY_OPTION);				
 				if (currentSelection != null && !items.contains(currentSelection)){
 					//item is not longer active; but still in query
 					items.add(currentSelection);
 				}
-				//add the any item
-				items.add(0, AttributeFilter.ANY_OPTION);
+
 			}finally{
 				s.getTransaction().rollback();
 				s.close();

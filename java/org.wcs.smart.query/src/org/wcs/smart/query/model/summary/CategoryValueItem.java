@@ -21,12 +21,17 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
  * A category value item that represents computing
@@ -36,7 +41,18 @@ import org.wcs.smart.query.ui.model.DropItem;
  * @author egouge
  * @since 1.0.0
  */
-public abstract class CategoryValueItem implements IValueItem {
+public class CategoryValueItem implements IValueItem {
+	
+	/**
+	 * Creates a new category value item of the form
+	 * "category:sum:<hkey>"
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static CategoryValueItem createItem(String key){
+		return new CategoryValueItem(key);
+	}
 	
 	private String key;
 	protected String categoryHkey;
@@ -118,7 +134,24 @@ public abstract class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public abstract DropItem asDropItem(Session session) throws Exception;
+	public DropItem asDropItem(Session session) throws Exception{
+		try{
+			if (categoryHkey == null){
+				return BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+			}
+			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+			if (category == null){
+				throw new Exception(MessageFormat.format(Messages.CategoryValueItem_categorynotfound, new Object[]{categoryHkey}));
+			}
+			category.getFullCategoryName();		//cache this
+			DropItem di = BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			return di;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
+		}
+		
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getInitializeData()

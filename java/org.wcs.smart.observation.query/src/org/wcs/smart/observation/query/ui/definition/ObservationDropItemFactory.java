@@ -57,11 +57,7 @@ import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 /**
  * Drop item factory for observation queries
@@ -134,88 +130,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		throw new IllegalStateException(MessageFormat.format(Messages.ObservationDropItemFactory_QueryItemNotSupported, new Object[]{source.guiName}));
 	}
 	
-	/**
-	 * Creates anew attribute value drop item
-	 * @param att
-	 * @return
-	 */
-	public DropItem createAttributeValueDropItem(Attribute att){
-		return new AttributeValueDropItem(att);
-	}
 	
-	/**
-	 * Creates a new category attribute value drop item
-	 * @param catatt
-	 * @return
-	 */
-	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
-		return new AttributeValueDropItem(catatt);
-	}
-	
-	/**
-	 * Creates a new attribute list drop item
-	 * @param item
-	 * @return
-	 */
-	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
-		return new AttributeListValueDropItem(item);
-	}
-	
-	/**
-	 * Creates a new attribute list item associated with a category
-	 * @param item
-	 * @param cat
-	 * @return
-	 */
-	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
-		return new AttributeListValueDropItem(item,cat);
-	}
-	
-	/**
-	 * Creates a new attribute tree node drop item
-	 * @param item
-	 * @return
-	 */
-	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
-		return new AttributeTreeValueDropItem(item);
-	}
-	
-	/**
-	 * Creates a new attribute tree node associated with a category
-	 * @param item
-	 * @param cat
-	 * @return
-	 */
-	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
-		return new AttributeTreeValueDropItem(item,cat);
-	}
-	
-	/**
-	 * Creates a category value drop item
-	 * @param cat
-	 * @return
-	 */
-	public DropItem createCategoryValueDropItem(Category cat){
-		if (cat == null){
-			return new CategoryValueDropItem();
-		}
-		return new CategoryValueDropItem(cat);
-	}
-	
-	
-	/**
-	 * Creates one of the other query drop items
-	 * @param other
-	 * @return an array of drop items of the associated type
-	 */
-	private DropItem[] createOtherDropItem(Operator other){
-		if (other == Operator.BRACKETS){
-			return createBracketIems();
-		}else if (other == Operator.NOT){
-			return new DropItem[]{ createNotDropItem() };
-		}
-		return null;
-	}
 	
 	/*
 	 * Creates a drop item from a SummaryDmObject

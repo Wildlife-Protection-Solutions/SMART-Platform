@@ -109,7 +109,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	 * Return the gui name
 	 */
 	public String getGuiName(){
-		return "Filters";
+		return Messages.BasicFilterDefintionPanel_FiltersPanelName;
 	}
 	
 	/**

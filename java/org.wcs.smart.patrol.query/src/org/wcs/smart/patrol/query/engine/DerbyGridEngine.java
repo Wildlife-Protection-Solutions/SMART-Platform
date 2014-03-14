@@ -68,8 +68,6 @@ import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.CombinedValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AddCellMerger;
@@ -86,6 +84,8 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.query.model.summary.AttributeValueItem;
+import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
@@ -273,8 +273,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		if(value instanceof PatrolValueItem ){
 			return computePatrolValue(c, (PatrolValueItem)value, gridDef);
 		}else{
-			if(value instanceof PatrolAttributeValueItem ){
-				PatrolAttributeValueItem tmp = (PatrolAttributeValueItem)value;
+			if(value instanceof AttributeValueItem ){
+				AttributeValueItem tmp = (AttributeValueItem)value;
 				
 				String strAggValue = "number_value"; //$NON-NLS-1$
 				strAgg = tmp.getAggregation().getName();
@@ -413,8 +413,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
 				QueryPlugIn.logSql(sql.toString());
 				rs = c.createStatement().executeQuery(sql.toString());
-			}else if(value instanceof PatrolCategoryValueItem){
-				PatrolCategoryValueItem tmp = (PatrolCategoryValueItem)value;
+			}else if(value instanceof CategoryValueItem){
+				CategoryValueItem tmp = (CategoryValueItem)value;
 				strAgg = "count"; //$NON-NLS-1$
 				
 				double minX = gridDef.getOriginX();

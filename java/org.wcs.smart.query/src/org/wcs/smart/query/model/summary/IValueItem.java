@@ -55,7 +55,7 @@ public interface IValueItem {
 	public String asString();
 
 	/**
-	 * Give a hibernate connection returns the 
+	 * Given a hibernate connection returns the 
 	 * human readable representation of the name
 	 * for the value item.  This is displayed in the
 	 * results table.
@@ -66,7 +66,7 @@ public interface IValueItem {
 	public String getName(Session session);
 	
 	/**
-	 * Give a hibernate connection returns the 
+	 * Given a hibernate connection returns the 
 	 * full human readable representation of the name
 	 * for the value item. 
 	 * <p>This may be the same as the name or it may contain

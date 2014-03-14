@@ -172,11 +172,17 @@ public class QueryTypeManager {
 	
 	
 	public List<QueryCategory> getQueryGroups(){
+		if (this.groups == null){
+			readTypesOnly();
+		}
 		return this.groups;
 	}
 	
 	
-	private void readTypesOnly(){
+	private synchronized void readTypesOnly(){
+		if (allTypes != null){
+			return;
+		}
 		List<IQueryType> aTypes = new ArrayList<IQueryType>();
 		groups = new ArrayList<QueryCategory>();
 		

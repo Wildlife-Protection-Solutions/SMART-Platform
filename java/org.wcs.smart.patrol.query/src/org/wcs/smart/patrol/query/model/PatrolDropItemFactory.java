@@ -44,13 +44,8 @@ import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
-import org.wcs.smart.patrol.query.ui.definition.SimplePatrolFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeListValueDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeTreeValueDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.CategoryValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
@@ -200,92 +195,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 				break;
 			}
 		}
-		return item;
-			
-			
-	}
-	
-	/**
-	 * Creates anew attribute value drop item
-	 * @param att
-	 * @return
-	 */
-	public DropItem createAttributeValueDropItem(Attribute att){
-		return new AttributeValueDropItem(att);
-	}
-	
-	/**
-	 * Creates a new category attribute value drop item
-	 * @param catatt
-	 * @return
-	 */
-	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
-		return new AttributeValueDropItem(catatt);
-	}
-	
-	/**
-	 * Creates a new attribute list drop item
-	 * @param item
-	 * @return
-	 */
-	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
-		return new AttributeListValueDropItem(item);
-	}
-	
-	/**
-	 * Creates a new attribute list item associated with a category
-	 * @param item
-	 * @param cat
-	 * @return
-	 */
-	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
-		return new AttributeListValueDropItem(item,cat);
-	}
-	
-	/**
-	 * Creates a new attribute tree node drop item
-	 * @param item
-	 * @return
-	 */
-	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
-		return new AttributeTreeValueDropItem(item);
-	}
-	
-	/**
-	 * Creates a new attribute tree node associated with a category
-	 * @param item
-	 * @param cat
-	 * @return
-	 */
-	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
-		return new AttributeTreeValueDropItem(item,cat);
-	}
-	
-	/**
-	 * Creates a category value drop item
-	 * @param cat
-	 * @return
-	 */
-	public DropItem createCategoryValueDropItem(Category cat){
-		if (cat == null){
-			return new CategoryValueDropItem();
-		}
-		return new CategoryValueDropItem(cat);
-	}
-	
-	
-	/**
-	 * Creates one of the other query drop items
-	 * @param other
-	 * @return an array of drop items of the associated type
-	 */
-	private DropItem[] createOtherDropItem(Operator other){
-		if (other == Operator.BRACKETS){
-			return createBracketIems();
-		}else if (other == Operator.NOT){
-			return new DropItem[]{ createNotDropItem() };
-		}
-		return null;
+		return item;		
 	}
 	
 	/*

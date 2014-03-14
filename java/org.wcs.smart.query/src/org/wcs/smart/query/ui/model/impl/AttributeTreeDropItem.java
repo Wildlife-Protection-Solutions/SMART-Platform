@@ -63,8 +63,8 @@ import org.wcs.smart.query.ui.model.IFilterDropItem;
  */
 public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 	
-	private String text;
-	private String key;
+	protected String text;
+	protected String key;
 	private Label lblAttribute;
 	private Label lblitem;
 
