@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.observation" id="org.wcs.smart.observation.ObservationSource" name="Observation Source"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         Provides details about observation sources.
       </documentation>
    </annotation>
 
