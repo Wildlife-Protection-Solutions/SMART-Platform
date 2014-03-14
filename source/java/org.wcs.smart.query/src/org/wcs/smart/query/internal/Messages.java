@@ -17,6 +17,8 @@ public class Messages extends NLS {
 	public static String AreaGroupBy_AreaGroupByNotFound;
 	public static String AreaGroupByItem_LoadError;
 	public static String AreaGroupByItem_LoadingAreaJobName;
+	public static String AreaTreeNode_jobname;
+	public static String AreaTreeNode_LoadingTest;
 	public static String AttributeFilter_AnyListItemOption;
 	public static String AttributeFilter_AttributeNotFound;
 	public static String AttributeFilter_ListItemNotFound;
@@ -36,8 +38,19 @@ public class Messages extends NLS {
 	public static String AttributeTreeGroupByDropItem_IncludedLabel;
 	public static String AttributeTreeGroupByDropItem_TreeLevelLabel;
 	public static String AttributeValueDropItem_NoAggregationOptionFound;
+	public static String AttributeValueItem_attributenotfound;
+	public static String AttributeValueItem_categorynotfound;
 	public static String AttributeValueItem_InvalidTreeorItemNode;
+	public static String AttributeValueItem_listitemnotfound;
 	public static String AttributeValueItem_NonNumericAttributeInvalid;
+	public static String AttributeValueItem_treenodenotfound;
+	public static String BasicFilterDefintionPanel_FiltersPanelName;
+	public static String BasicGridDefinitionPanel_IncreaseSize;
+	public static String BasicGridDefinitionPanel_InvalidCrs;
+	public static String BasicGridDefinitionPanel_InvalidSize;
+	public static String BasicGridDefinitionPanel_PanelName;
+	public static String BasicGridDefinitionPanel_TooManyValues;
+	public static String BasicGridDefinitionPanel_ValuePnlName;
 	public static String CaDataModelManagerImpl_LoadDataModelJobName;
 	public static String CategoryAttributeFilter_MissingCategoryAttribute;
 	public static String CategoryFilter_CategoryNotFound;
@@ -48,6 +61,7 @@ public class Messages extends NLS {
 	public static String CategoryGroupByDropItem_FiltersLabel;
 	public static String CategoryGroupByDropItem_IncludedLabel;
 	public static String CategoryGroupByDropItem_TreeLevelLabel;
+	public static String CategoryValueItem_categorynotfound;
 	public static String CategoryValueItem_CountIncidentLabel;
 	public static String CategoryValueItem_CountObservationLabel;
 	public static String ConservationAreaFilter_InvalidCaFilter;

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -30,11 +31,14 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
  * Creates a new value item that represents
@@ -44,7 +48,30 @@ import org.wcs.smart.query.ui.model.DropItem;
  * @author egouge
  * @since 1.0.0
  */
-public abstract class AttributeValueItem implements IValueItem {
+public class AttributeValueItem implements IValueItem {
+	
+	/**
+	 * Creates a new attribute value item of the form
+	 * < ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < ATTRIBUTE_KEY >
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static AttributeValueItem createAttributeItem(String key){
+		return new AttributeValueItem(key, false);
+	}
+	
+	/**
+	 * Creates a new attribute value item with category filter of the
+	 * form:
+	 * |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":attribute:n:" < AGG > ":" < DM_KEY > >
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static AttributeValueItem createCategoryAttributeItem(String key){
+		return new AttributeValueItem(key, true);
+	}
 	
 	private String key;
 	protected String categoryKey = null;
@@ -276,7 +303,58 @@ public abstract class AttributeValueItem implements IValueItem {
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
-	public abstract DropItem asDropItem(Session session) throws Exception;
+	@Override
+	public DropItem asDropItem(Session session) throws Exception{
+		try{
+			Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
+			if (att == null){
+				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_attributenotfound, new Object[]{attributeKey}));
+			}
+			DropItem di = null;
+			Category cat = null;
+			if (categoryKey != null){
+				cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
+				if (cat == null){
+					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_categorynotfound, new Object[]{categoryKey}));
+				}
+				cat.getFullCategoryName();			
+			}
+			if (attributeType == AttributeType.NUMERIC){
+				if (cat == null){
+					di = BasicDropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+				}else{
+					di = BasicDropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+				}
+			}else if (attributeType == AttributeType.LIST){
+				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
+				if (ali == null){
+					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_listitemnotfound, new Object[]{attributeKey, itemKey}));		
+				}
+				if (cat == null){
+					di = BasicDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
+				}else{
+					di = BasicDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
+				}
+			
+			}else if (attributeType == AttributeType.TREE){
+				AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
+				if (atn == null){
+					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_treenodenotfound, new Object[]{attributeKey, itemKey}));		
+				}
+				if (cat == null){
+					di = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
+				}else{
+					di = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
+				}
+			}
+			if (di != null){
+				di.initializeData(getDropItemInitializeData());
+			}
+			return di;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
+		}
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getInitializeData()

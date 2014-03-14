@@ -22,6 +22,10 @@
 package org.wcs.smart.query.ui.newwizard;
 
 import java.net.URL;
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -122,8 +126,16 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 	@Override
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
-		queryGroupPage.setOptions(QueryTypeManager.getInstance()
-				.getQueryGroups(), new LabelProvider() {
+		
+		List<QueryCategory> c = QueryTypeManager.getInstance().getQueryGroups();
+		Collections.sort(c, new Comparator<QueryCategory>() {
+			@Override
+			public int compare(QueryCategory c0, QueryCategory c1) {
+				return Collator.getInstance().compare(c0.getName(), c1.getName());
+			}
+		});
+		
+		queryGroupPage.setOptions(c, new LabelProvider() {
 			public String getText(Object element) {
 				return ((QueryCategory) element).getName();
 			}

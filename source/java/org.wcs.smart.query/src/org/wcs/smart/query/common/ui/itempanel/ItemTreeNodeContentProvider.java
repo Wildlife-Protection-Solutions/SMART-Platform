@@ -32,7 +32,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
-
+/**
+ * Content provider for a list of tree nodes
+ * @author Emily
+ *
+ */
 public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 
 	private List<IItemTreeNode> roots;

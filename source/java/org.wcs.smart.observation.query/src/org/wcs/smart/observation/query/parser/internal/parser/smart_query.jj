@@ -199,27 +199,27 @@ IValueItem SingleValueItem() :
 	(
 		< SUM_CAT_VALUE_KEY >
 		{
-			item = ObservationCategoryValueItem.createItem( token.image );
+			item = CategoryValueItem.createItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_KEY >
 		{
-			item = ObservationAttributeValueItem.createAttributeItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_KEY >
 		{
-			item = ObservationAttributeValueItem.createCategoryAttributeItem( token.image );
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
 		{
-			item = ObservationAttributeValueItem.createAttributeItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
 		{
-			item = ObservationAttributeValueItem.createCategoryAttributeItem( token.image );
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		} 
 	)
 	{

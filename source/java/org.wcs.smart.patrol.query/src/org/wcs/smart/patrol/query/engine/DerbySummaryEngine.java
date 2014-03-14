@@ -61,8 +61,6 @@ import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionTyp
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.summary.CombinedValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -84,7 +82,9 @@ import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
+import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
+import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
@@ -387,10 +387,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		}
 		if (it instanceof PatrolValueItem){
 			results = (getPatrolSummaryValue(dataTable, c, s, groupBy, (PatrolValueItem)it, caFilter));
-		}else if (it instanceof PatrolAttributeValueItem){
-			results =  (getAttributeValue(dataTable, c, s, groupBy, (PatrolAttributeValueItem)it, caFilter));
-		}else if (it instanceof PatrolCategoryValueItem){
-			results = (getCategoryValue(dataTable, c, s, groupBy, (PatrolCategoryValueItem)it, caFilter));
+		}else if (it instanceof AttributeValueItem){
+			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
+		}else if (it instanceof CategoryValueItem){
+			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
 		}else if (it instanceof CombinedValueItem){
 			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
 		}
@@ -516,7 +516,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			PatrolAttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
+			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
 			StringBuilder fromSql = new StringBuilder();
@@ -891,7 +891,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			String dataTable,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			PatrolCategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
+			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
@@ -979,8 +979,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
-				if (value instanceof PatrolCategoryValueItem
-						|| value instanceof PatrolAttributeValueItem) {
+				if (value instanceof CategoryValueItem
+						|| value instanceof AttributeValueItem) {
 					//category and attribute value area group bys use the waypoint location
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s

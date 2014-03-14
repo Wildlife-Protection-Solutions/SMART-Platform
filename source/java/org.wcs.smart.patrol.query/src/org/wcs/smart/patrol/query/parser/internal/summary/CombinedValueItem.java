@@ -138,30 +138,5 @@ public class CombinedValueItem implements IValueItem {
 		visitor.visit(part2);
 		visitor.visit(this);
 	}
-	
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasCategory()
-//	 */
-//	@Override
-//	public boolean hasCategory() {
-//		return part1.hasCategory() || part2.hasCategory();
-//	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasAttribute()
-//	 */
-//	public boolean hasAttribute(){
-//		return part1.hasAttribute() || part2.hasAttribute();
-//	}
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
-//	 */
-//	@Override
-//	public void validateDatabase(Session session) throws Exception {
-//		part1.validateDatabase(session);
-//		part2.validateDatabase(session);
-//	}
 
 }

@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Area tree node item.
@@ -145,7 +146,7 @@ public class AreaTreeNode implements IItemTreeNode{
 					return areas.get(at);
 				} else {
 					loadAreas(at);
-					return new String[] { "Loading..." };
+					return new String[] { Messages.AreaTreeNode_LoadingTest };
 				}
 			 }
 			return null;
@@ -174,7 +175,7 @@ public class AreaTreeNode implements IItemTreeNode{
 		 * @param at
 		 */
 		private void loadAreas(final Area.AreaType at) {
-			Job j = new Job(MessageFormat.format("loading areas", new Object[]{at.getGuiName()})) {
+			Job j = new Job(MessageFormat.format(Messages.AreaTreeNode_jobname, new Object[]{at.getGuiName()})) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session session = HibernateManager.openSession();

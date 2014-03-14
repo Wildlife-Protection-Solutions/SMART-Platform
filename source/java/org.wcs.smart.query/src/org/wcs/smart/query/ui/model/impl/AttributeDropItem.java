@@ -58,8 +58,8 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 	private DateTime dtime1;
 	private DateTime dtime2;
 	
-	private String text;
-	private String key;
+	protected String text;
+	protected String key;
 	
 	private String currentValue2 = null;
 	private String currentValue = null;

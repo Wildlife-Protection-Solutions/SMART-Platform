@@ -21,14 +21,8 @@
  */
 package org.wcs.smart.patrol.query.ui.definition;
 
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
-import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
-import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 
 /**

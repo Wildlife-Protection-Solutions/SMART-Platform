@@ -155,7 +155,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getGuiName()
 	 */
 	public String getGuiName() {
-		return "Grid and Value Definitions";
+		return Messages.BasicGridDefinitionPanel_PanelName;
 	}
 
 	/**
@@ -171,13 +171,13 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		try{
 			double x = getGridSize();
 			if (x <= 0){
-				return "Invalid grid size.  Value must be greater than 0";
+				return Messages.BasicGridDefinitionPanel_IncreaseSize;
 			}
 		}catch (Exception ex){
-			return "Invalid grid size.";
+			return Messages.BasicGridDefinitionPanel_InvalidSize;
 		}
 		if (getCrs() == null){
-			return "Coordinate reference system must be selected.";
+			return Messages.BasicGridDefinitionPanel_InvalidCrs;
 		}
 		return null;
 	}
@@ -551,7 +551,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 			@Override
 			public String validate() {
 				if (items.size() != 1){
-					return "Grid queries must compute a single value.";
+					return Messages.BasicGridDefinitionPanel_TooManyValues;
 				}
 				return null;
 			}
@@ -562,7 +562,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 			
 			@Override
 			public String getGuiName() {
-				return "Grid value panel";
+				return Messages.BasicGridDefinitionPanel_ValuePnlName;
 			}
 		};
 	}

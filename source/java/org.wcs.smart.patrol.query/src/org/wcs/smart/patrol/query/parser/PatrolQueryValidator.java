@@ -37,14 +37,14 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.filter.QueryDefinitionValidator;
+import org.wcs.smart.query.model.summary.AttributeValueItem;
+import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -203,8 +203,8 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 		public void visit(IValueItem item) {
 			if (ex != null) return ;
 			try{
-				if (item instanceof PatrolAttributeValueItem){
-					PatrolAttributeValueItem it = (PatrolAttributeValueItem)item;
+				if (item instanceof AttributeValueItem){
+					AttributeValueItem it = (AttributeValueItem)item;
 					validateAttribute(it.getAttributeKey());
 					if (it.getCategoryKey() != null){
 						validateCategory(it.getCategoryKey());
@@ -213,8 +213,8 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 						throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AggNoSupported, new Object[]{ it.getAggregationKey() }));
 					}
 					
-				}else if (item instanceof PatrolCategoryValueItem){
-					validateCategory(((PatrolCategoryValueItem) item).getCategoryHKey());
+				}else if (item instanceof CategoryValueItem){
+					validateCategory(((CategoryValueItem) item).getCategoryHKey());
 				}
 			}catch (Exception ex){
 				this.ex = ex;
