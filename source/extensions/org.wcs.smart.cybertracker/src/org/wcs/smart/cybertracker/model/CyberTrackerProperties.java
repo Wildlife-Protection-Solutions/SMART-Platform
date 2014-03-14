@@ -127,7 +127,7 @@ public class CyberTrackerProperties extends UuidItem {
 	private static final boolean lock100 = false;
 	private static final boolean useMapOnSkip = true;
 	
-	private static final boolean autoNext = true;
+	private static final boolean autoNext = false;
 	private static final boolean showEdit = true;
 	private static final boolean showGPS = true;
 	
