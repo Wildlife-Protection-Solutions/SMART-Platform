@@ -40,8 +40,6 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
-import org.wcs.smart.entity.query.parser.internal.ObservationAttributeValueItem;
-import org.wcs.smart.entity.query.parser.internal.ObservationCategoryValueItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -64,7 +62,9 @@ import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
+import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
+import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
@@ -364,10 +364,10 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 		if (results != null){
 			return results;
 		}
-		if (it instanceof ObservationAttributeValueItem){
-			results =  (getAttributeValue(dataTable, c, s, groupBy, (ObservationAttributeValueItem)it, caFilter));
-		}else if (it instanceof ObservationCategoryValueItem){
-			results = (getCategoryValue(dataTable, c, s, groupBy, (ObservationCategoryValueItem)it, caFilter));
+		if (it instanceof AttributeValueItem){
+			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
+		}else if (it instanceof CategoryValueItem){
+			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -389,7 +389,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			ObservationAttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
+			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
 			StringBuilder fromSql = new StringBuilder();
@@ -723,7 +723,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			String dataTable,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			ObservationCategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
+			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
@@ -810,8 +810,8 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 		
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
-				if (value instanceof ObservationCategoryValueItem
-						|| value instanceof ObservationAttributeValueItem) {
+				if (value instanceof CategoryValueItem
+						|| value instanceof AttributeValueItem) {
 					//category and attribute value area group bys use the waypoint location
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s

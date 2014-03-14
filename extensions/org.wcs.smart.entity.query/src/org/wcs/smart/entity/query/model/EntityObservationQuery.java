@@ -10,6 +10,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -142,6 +143,7 @@ public class EntityObservationQuery extends ObservationQuery {
 	}
 
 	@Override
+	@Transient
 	public IQueryType getType() {
 		return QueryTypeManager.getInstance().findQueryType(EntityObservationQueryType.KEY);
 	}

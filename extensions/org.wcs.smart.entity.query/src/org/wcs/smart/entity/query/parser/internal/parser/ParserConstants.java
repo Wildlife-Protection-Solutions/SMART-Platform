@@ -105,31 +105,51 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int OBSERVATION_FILTER_TYPE_KEY = 51;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 52;
+  int EA_PREFIX = 52;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 53;
+  int EA_ATT_STR_KEY = 53;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 54;
+  int EA_ATT_VALUE_KEY = 54;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 55;
+  int EA_ATT_LIST_KEY = 55;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 56;
+  int EA_ATT_TREE_KEY = 56;
   /** RegularExpression Id. */
-  int AGG = 57;
+  int EA_ATT_DATE_KEY = 57;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 58;
+  int EA_ATT_BOOL_KEY = 58;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 59;
+  int SUM_CAT_VALUE_KEY = 59;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 60;
+  int SUM_ATTRIBUTE_VALUE_KEY = 60;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 61;
+  int SUM_ENTITYATTRIBUTE_VALUE_KEY = 61;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 62;
+  int SUM_CAT_ATT_VALUE_KEY = 62;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 63;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 63;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 64;
+  int SUM_ENTITYATTRIBUTE_VALUE_LISTTREE_KEY = 64;
+  /** RegularExpression Id. */
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 65;
+  /** RegularExpression Id. */
+  int AGG = 66;
+  /** RegularExpression Id. */
+  int DATE_GROUPBY_ITEM = 67;
+  /** RegularExpression Id. */
+  int QUERY_SPLITTER = 68;
+  /** RegularExpression Id. */
+  int CATEGORY_GROUPBY_ITEM = 69;
+  /** RegularExpression Id. */
+  int AREA_GROUPBY_ITEM = 70;
+  /** RegularExpression Id. */
+  int ATTRIBUTE_GROUPBY_ITEM = 71;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 72;
+  /** RegularExpression Id. */
+  int ENTITYATTRIBUTE_GROUPBY_ITEM = 73;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 74;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -188,10 +208,19 @@ public interface ParserConstants {
     "<AREA_TYPE_KEY>",
     "<AREA_KEY>",
     "\"observation\"",
+    "<EA_PREFIX>",
+    "<EA_ATT_STR_KEY>",
+    "<EA_ATT_VALUE_KEY>",
+    "<EA_ATT_LIST_KEY>",
+    "<EA_ATT_TREE_KEY>",
+    "<EA_ATT_DATE_KEY>",
+    "<EA_ATT_BOOL_KEY>",
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",
+    "<SUM_ENTITYATTRIBUTE_VALUE_KEY>",
     "<SUM_CAT_ATT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_LISTTREE_KEY>",
+    "<SUM_ENTITYATTRIBUTE_VALUE_LISTTREE_KEY>",
     "<SUM_CAT_ATT_VALUE_LISTTREE_KEY>",
     "<AGG>",
     "<DATE_GROUPBY_ITEM>",
@@ -200,6 +229,7 @@ public interface ParserConstants {
     "<AREA_GROUPBY_ITEM>",
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
+    "<ENTITYATTRIBUTE_GROUPBY_ITEM>",
     "<QUOTED_STRING>",
   };
 

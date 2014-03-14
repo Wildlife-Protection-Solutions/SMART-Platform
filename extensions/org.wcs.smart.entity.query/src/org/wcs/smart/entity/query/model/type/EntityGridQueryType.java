@@ -59,7 +59,7 @@ public class EntityGridQueryType implements IQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "observationgrid"; //$NON-NLS-1$
+	public static final String KEY = "entitygrid"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */

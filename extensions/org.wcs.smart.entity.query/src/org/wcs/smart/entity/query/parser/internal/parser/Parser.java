@@ -3,7 +3,6 @@ package org.wcs.smart.entity.query.parser.internal.parser;
 
 import java.util.*;
 import org.wcs.smart.entity.query.parser.internal.*;
-import org.wcs.smart.entity.query.model.filter.*;
 import org.wcs.smart.query.model.filter.*;
 import org.wcs.smart.query.model.summary.*;
 
@@ -40,6 +39,12 @@ public class Parser implements ParserConstants {
     case CAT_ATT_DATE_KEY:
     case DM_KEY:
     case AREA_KEY:
+    case EA_ATT_STR_KEY:
+    case EA_ATT_VALUE_KEY:
+    case EA_ATT_LIST_KEY:
+    case EA_ATT_TREE_KEY:
+    case EA_ATT_DATE_KEY:
+    case EA_ATT_BOOL_KEY:
       vFilter = QueryFilterInternal();
       break;
     default:
@@ -67,6 +72,12 @@ public class Parser implements ParserConstants {
       case CAT_ATT_DATE_KEY:
       case DM_KEY:
       case AREA_KEY:
+      case EA_ATT_STR_KEY:
+      case EA_ATT_VALUE_KEY:
+      case EA_ATT_LIST_KEY:
+      case EA_ATT_TREE_KEY:
+      case EA_ATT_DATE_KEY:
+      case EA_ATT_BOOL_KEY:
         rFilter = QueryFilterInternal();
         break;
       default:
@@ -110,6 +121,12 @@ public class Parser implements ParserConstants {
     case CAT_ATT_DATE_KEY:
     case DM_KEY:
     case AREA_KEY:
+    case EA_ATT_STR_KEY:
+    case EA_ATT_VALUE_KEY:
+    case EA_ATT_LIST_KEY:
+    case EA_ATT_TREE_KEY:
+    case EA_ATT_DATE_KEY:
+    case EA_ATT_BOOL_KEY:
       valueFilter = QueryFilterInternal();
       break;
     default:
@@ -154,8 +171,10 @@ public class Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case SUM_CAT_VALUE_KEY:
     case SUM_ATTRIBUTE_VALUE_KEY:
+    case SUM_ENTITYATTRIBUTE_VALUE_KEY:
     case SUM_CAT_ATT_VALUE_KEY:
     case SUM_ATTRIBUTE_VALUE_LISTTREE_KEY:
+    case SUM_ENTITYATTRIBUTE_VALUE_LISTTREE_KEY:
     case SUM_CAT_ATT_VALUE_LISTTREE_KEY:
       item = ValueItem();
                         items.add(item);
@@ -194,23 +213,31 @@ public class Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case SUM_CAT_VALUE_KEY:
       jj_consume_token(SUM_CAT_VALUE_KEY);
-                        item = ObservationCategoryValueItem.createItem( token.image );
+                        item = CategoryValueItem.createItem( token.image );
       break;
     case SUM_ATTRIBUTE_VALUE_KEY:
       jj_consume_token(SUM_ATTRIBUTE_VALUE_KEY);
-                        item = ObservationAttributeValueItem.createAttributeItem( token.image );
+                        item = AttributeValueItem.createAttributeItem( token.image );
+      break;
+    case SUM_ENTITYATTRIBUTE_VALUE_KEY:
+      jj_consume_token(SUM_ENTITYATTRIBUTE_VALUE_KEY);
+                        item = EntityAttributeValueItem.createEntityAttributeItem( token.image );
       break;
     case SUM_CAT_ATT_VALUE_KEY:
       jj_consume_token(SUM_CAT_ATT_VALUE_KEY);
-                        item = ObservationAttributeValueItem.createCategoryAttributeItem( token.image );
+                        item = AttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     case SUM_ATTRIBUTE_VALUE_LISTTREE_KEY:
       jj_consume_token(SUM_ATTRIBUTE_VALUE_LISTTREE_KEY);
-                        item = ObservationAttributeValueItem.createAttributeItem( token.image );
+                        item = AttributeValueItem.createAttributeItem( token.image );
+      break;
+    case SUM_ENTITYATTRIBUTE_VALUE_LISTTREE_KEY:
+      jj_consume_token(SUM_ENTITYATTRIBUTE_VALUE_LISTTREE_KEY);
+                        item = EntityAttributeValueItem.createEntityAttributeItem( token.image );
       break;
     case SUM_CAT_ATT_VALUE_LISTTREE_KEY:
       jj_consume_token(SUM_CAT_ATT_VALUE_LISTTREE_KEY);
-                        item = ObservationAttributeValueItem.createCategoryAttributeItem( token.image );
+                        item = AttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     default:
       jj_la1[7] = jj_gen;
@@ -230,6 +257,7 @@ public class Parser implements ParserConstants {
     case AREA_GROUPBY_ITEM:
     case ATTRIBUTE_GROUPBY_ITEM:
     case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
+    case ENTITYATTRIBUTE_GROUPBY_ITEM:
       item = GroupByItem();
                         items.add(item);
       break;
@@ -273,6 +301,10 @@ public class Parser implements ParserConstants {
     case ATTRIBUTE_GROUPBY_ITEM:
       jj_consume_token(ATTRIBUTE_GROUPBY_ITEM);
                         item = AttributeGroupBy.createAttributeGroupBy(token.image);
+      break;
+    case ENTITYATTRIBUTE_GROUPBY_ITEM:
+      jj_consume_token(ENTITYATTRIBUTE_GROUPBY_ITEM);
+                        item = EntityAttributeGroupBy.createAttributeGroupBy(token.image);
       break;
     case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
       jj_consume_token(CATEGORY_ATTRIBUTE_GROUPBY_ITEM);
@@ -339,6 +371,12 @@ public class Parser implements ParserConstants {
     case CAT_ATT_LIST_KEY:
     case CAT_ATT_TREE_KEY:
     case CAT_ATT_DATE_KEY:
+    case EA_ATT_STR_KEY:
+    case EA_ATT_VALUE_KEY:
+    case EA_ATT_LIST_KEY:
+    case EA_ATT_TREE_KEY:
+    case EA_ATT_DATE_KEY:
+    case EA_ATT_BOOL_KEY:
       filter = AttributeExpression();
       break;
     case AREA_KEY:
@@ -373,6 +411,10 @@ public class Parser implements ParserConstants {
       jj_consume_token(CAT_ATT_BOOL_KEY);
                 filter = CategoryAttributeFilter.createBooleanFilter(token.image);
       break;
+    case EA_ATT_BOOL_KEY:
+      jj_consume_token(EA_ATT_BOOL_KEY);
+                filter = EntityAttributeFilter.createBooleanFilter(token.image);
+      break;
     default:
       jj_la1[14] = jj_gen;
       jj_consume_token(-1);
@@ -404,6 +446,14 @@ public class Parser implements ParserConstants {
                             value = Double.parseDouble(token.image);
                         filter = CategoryAttributeFilter.createValueFilter(key, op, value);
       break;
+    case EA_ATT_VALUE_KEY:
+      jj_consume_token(EA_ATT_VALUE_KEY);
+                                             key = token.image;
+      op = NumberOp();
+      jj_consume_token(NUMBER);
+                            value = Double.parseDouble(token.image);
+                        filter = EntityAttributeFilter.createValueFilter(key, op, value);
+      break;
     default:
       jj_la1[15] = jj_gen;
       jj_consume_token(-1);
@@ -421,21 +471,25 @@ public class Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ATT_STR_KEY:
     case CAT_ATT_STR_KEY:
+    case EA_ATT_STR_KEY:
       /* String comparison */
               filter = StringExpression();
       break;
     case ATT_VALUE_KEY:
     case CAT_ATT_VALUE_KEY:
+    case EA_ATT_VALUE_KEY:
       /* Numeric comparison */
               filter = NumberExpression();
       break;
     case ATT_BOOL_KEY:
     case CAT_ATT_BOOL_KEY:
+    case EA_ATT_BOOL_KEY:
       /* boolean */
               filter = BooleanItemExpression();
       break;
     case ATT_DATE_KEY:
     case CAT_ATT_DATE_KEY:
+    case EA_ATT_DATE_KEY:
       /* date */
               filter = DateItemExpression();
       break;
@@ -457,6 +511,15 @@ public class Parser implements ParserConstants {
                              value = token.image;
                 filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
       break;
+    case EA_ATT_LIST_KEY:
+      jj_consume_token(EA_ATT_LIST_KEY);
+                                     key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(DM_KEY);
+                             value = token.image;
+                filter = EntityAttributeFilter.createListItemFilter(key,op,value);
+      break;
     case ATT_TREE_KEY:
       jj_consume_token(ATT_TREE_KEY);
                                   key = token.image;
@@ -474,6 +537,15 @@ public class Parser implements ParserConstants {
       jj_consume_token(DM_KEY);
                              value = token.image;
                 filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
+      break;
+    case EA_ATT_TREE_KEY:
+      jj_consume_token(EA_ATT_TREE_KEY);
+                                     key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(DM_KEY);
+                             value = token.image;
+                filter = EntityAttributeFilter.createTreeItemFilter(key,op,value);
       break;
     default:
       jj_la1[16] = jj_gen;
@@ -513,6 +585,17 @@ public class Parser implements ParserConstants {
                                          date2 = token.image;
                         filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
       break;
+    case EA_ATT_DATE_KEY:
+      jj_consume_token(EA_ATT_DATE_KEY);
+                                             key = token.image;
+      op = DateOp();
+      jj_consume_token(DATE_STRING);
+                                          date1 = token.image;
+      jj_consume_token(K_AND);
+      jj_consume_token(DATE_STRING);
+                                         date2 = token.image;
+                        filter = EntityAttributeFilter.createDateFilter(key, date1, date2, op);
+      break;
     default:
       jj_la1[17] = jj_gen;
       jj_consume_token(-1);
@@ -543,6 +626,14 @@ public class Parser implements ParserConstants {
       jj_consume_token(QUOTED_STRING);
                                            value = token.image;
                         filter = CategoryAttributeFilter.createStringFilter(key, op, value);
+      break;
+    case EA_ATT_STR_KEY:
+      jj_consume_token(EA_ATT_STR_KEY);
+                                            key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                                           value = token.image;
+                        filter = EntityAttributeFilter.createStringFilter(key, op, value);
       break;
     default:
       jj_la1[18] = jj_gen;
@@ -678,10 +769,10 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x40100,0x40100,0x0,0x40100,0x0,0x0,0x400,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x280,0x4000100,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x43fff,0x43fff,0x8000000,0x43fff,0x2000,0x1f00000,0x0,0x1f00000,0xf4000000,0x0,0xf4000000,0x0,0x0,0x41fff,0x208,0x104,0x1ffe,0x1040,0x82,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x7e43fff,0x7e43fff,0x0,0x7e43fff,0x2000,0xf8000000,0x0,0xf8000000,0x0,0x0,0x0,0x0,0x0,0x7e41fff,0x4000208,0x400104,0x7e01ffe,0x2001040,0x200082,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x10,0x0,0x0,0x3,0x0,0x3,0x3e8,0x0,0x3e8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -798,7 +889,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[65];
+    boolean[] la1tokens = new boolean[75];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -818,7 +909,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 65; i++) {
+    for (int i = 0; i < 75; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

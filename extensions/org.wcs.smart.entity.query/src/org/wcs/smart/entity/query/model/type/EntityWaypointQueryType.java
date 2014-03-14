@@ -58,7 +58,7 @@ public class EntityWaypointQueryType implements IQueryType {
 	
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "observationwaypoint"; //$NON-NLS-1$
+	public static final String KEY = "entitywaypoint"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
