@@ -57,6 +57,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private String observationTable;
 	
 	private DerbyEntityQueryEngine engine;
+	private EntityAttributeFilterVisitor entityVisitor;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	
@@ -80,6 +81,9 @@ public class FilterProcessor implements IFilterProcessor {
 	@Override
 	public void dropTemporaryTables(Connection c){
 		engine.dropTable(c, observationTable);
+		if (entityVisitor != null){
+			entityVisitor.dropTemporaryTables(c, engine);
+		}
 	}
 
 	/**
@@ -276,7 +280,7 @@ public class FilterProcessor implements IFilterProcessor {
 		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine);
 		queryFilter.accept(areaVisitor);
 
-		EntityAttributeFilterVisitor entityVisitor = new EntityAttributeFilterVisitor(sql, engine, caFilter, c, observationTable);
+		entityVisitor = new EntityAttributeFilterVisitor(sql, engine, caFilter, c);
 		queryFilter.accept(entityVisitor);
 		
 		sql.append(engine.appendFromClause(usedTables));

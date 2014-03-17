@@ -1,6 +1,7 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 
@@ -11,23 +12,32 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 
+/**
+ * Process entity attribute filters but creating a temporary table
+ * for matching entities for the given filter.
+ * 
+ * <p>This filter makes a collection of temporary tables which
+ * should be dropped by calling the dropTemporaryTables function</p>
+ * @author Emily
+ *
+ */
 public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 
 	private HashSet<String> addedTableNames = new HashSet<String>();
+	private HashSet<String> toDrop = new HashSet<String>();
+	
 	private StringBuilder sql;
 	private DerbyEntityQueryEngine engine;
 	
 	private ConservationAreaFilter catFilter;
 	private Connection c;
-	private String observationTable;
 	
 	/**
 	 * Creates a new visitor
@@ -37,13 +47,12 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 	 * only needs to be added once
 	 */
 	public EntityAttributeFilterVisitor(StringBuilder sql, 
-			DerbyEntityQueryEngine engine, ConservationAreaFilter query, Connection c, String observationTable){
+			DerbyEntityQueryEngine engine, ConservationAreaFilter query, Connection c){
 		this.sql = sql;
 		this.engine = engine;
 	
 		this.catFilter = query;
 		this.c = c;
-		this.observationTable = observationTable;
 	}
 	
 	
@@ -52,31 +61,33 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 		if (filter instanceof EntityAttributeFilter){
 			EntityAttributeFilter ff = (EntityAttributeFilter)filter;
 			
-			String tableName = ff.getEntityKey() + "_" + ff.getEntityAttributeKey();
+			String tableName = ff.getEntityKey() + "_" + ff.getEntityAttributeKey(); //$NON-NLS-1$
 			
 			if (!addedTableNames.contains(tableName)) {
 				addedTableNames.add(tableName);
 
-				//create temporary table
+				//create temporary table that contains all the matching
+				//entity attribute values 
 				String tmpTable = engine.createTempTableName();
+				toDrop.add(tmpTable);
+				
 				StringBuilder tmp = new StringBuilder();
-				tmp.append("CREATE TABLE ");
+				tmp.append("CREATE TABLE "); //$NON-NLS-1$
 				tmp.append(tmpTable);
-				tmp.append("(entity_keyid char(128), value ");
+				tmp.append("(entity_keyid char(128), value "); //$NON-NLS-1$
 				if (ff.getAttributeType() == AttributeType.NUMERIC || 
 					ff.getAttributeType() == AttributeType.BOOLEAN){
-					tmp.append("double");
+					tmp.append("double"); //$NON-NLS-1$
 				}else if (ff.getAttributeType() == AttributeType.TEXT ||
 						ff.getAttributeType() == AttributeType.DATE){
-					tmp.append("varchar(1024)");
+					tmp.append("varchar(1024)"); //$NON-NLS-1$
 				}else if (ff.getAttributeType() == AttributeType.LIST ||
 						ff.getAttributeType() == AttributeType.TREE){
-//					tmp.append("char(16) for bit data");
-					tmp.append("varchar(128)");
+					tmp.append("varchar(128)"); //$NON-NLS-1$
 				}else{
-					throw new RuntimeException(MessageFormat.format("Attribute type {0} not supported.", new Object[]{ff.getAttributeType()}));
+					throw new RuntimeException(MessageFormat.format(Messages.EntityAttributeFilterVisitor_AttributeTypeNotSupported, new Object[]{ff.getAttributeType()}));
 				}
-				tmp.append(")");
+				tmp.append(")"); //$NON-NLS-1$
 				QueryPlugIn.logSql(tmp.toString());
 				try{
 					c.createStatement().execute(tmp.toString());
@@ -86,70 +97,70 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				
 				
 				tmp = new StringBuilder();
-				tmp.append("INSERT INTO ");
+				tmp.append("INSERT INTO "); //$NON-NLS-1$
 				tmp.append(tmpTable);
-				tmp.append(" SELECT ");
-				tmp.append("el.keyid, ");
+				tmp.append(" SELECT "); //$NON-NLS-1$
+				tmp.append("el.keyid, "); //$NON-NLS-1$
 			
 				if (ff.getAttributeType() == AttributeType.NUMERIC || 
 						ff.getAttributeType() == AttributeType.BOOLEAN){
 						tmp.append(engine.tablePrefix(EntityAttributeValue.class));
-						tmp.append(".number_value");
+						tmp.append(".number_value"); //$NON-NLS-1$
 				}else if (ff.getAttributeType() == AttributeType.TEXT ||
 						ff.getAttributeType() == AttributeType.DATE){
 					tmp.append(engine.tablePrefix(EntityAttributeValue.class));
-					tmp.append(".string_value");
+					tmp.append(".string_value"); //$NON-NLS-1$
 				}else if (ff.getAttributeType() == AttributeType.LIST){
 					tmp.append(engine.tablePrefix(AttributeListItem.class));
-					tmp.append(".keyid");
+					tmp.append(".keyid"); //$NON-NLS-1$
 				}else if(ff.getAttributeType() == AttributeType.TREE){
 					tmp.append(engine.tablePrefix(AttributeTreeNode.class));
-					tmp.append(".hkey");
+					tmp.append(".hkey"); //$NON-NLS-1$
 				}else{
-					throw new RuntimeException(MessageFormat.format("Attribute type {0} not supported.", new Object[]{ff.getAttributeType()}));
+					throw new RuntimeException(MessageFormat.format("Attribute type {0} not supported.", new Object[]{ff.getAttributeType()})); //$NON-NLS-1$
 				}
-				tmp.append(" FROM ");
+				tmp.append(" FROM "); //$NON-NLS-1$
 				tmp.append(engine.tableNamePrefix(EntityType.class));
-				tmp.append(" join ");
+				tmp.append(" join "); //$NON-NLS-1$
 				tmp.append(engine.tableNamePrefix(Entity.class));
-				tmp.append(" on ");
-				tmp.append(engine.tablePrefix(EntityType.class) + ".uuid = " + engine.tablePrefix(Entity.class) + ".entity_type_uuid");
-				tmp.append(" join ");
+				tmp.append(" on "); //$NON-NLS-1$
+				tmp.append(engine.tablePrefix(EntityType.class) + ".uuid = " + engine.tablePrefix(Entity.class) + ".entity_type_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(" join "); //$NON-NLS-1$
 				tmp.append(engine.tableName(AttributeListItem.class));
-				tmp.append(" el on el.uuid = ");
+				tmp.append(" el on el.uuid = "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(Entity.class));
-				tmp.append(".attribute_list_item_uuid");
-				tmp.append(" join ");
+				tmp.append(".attribute_list_item_uuid"); //$NON-NLS-1$
+				tmp.append(" join "); //$NON-NLS-1$
 				tmp.append(engine.tableNamePrefix(EntityAttributeValue.class));
-				tmp.append(" on ");
-				tmp.append(engine.tablePrefix(EntityAttributeValue.class) + ".entity_uuid = " + engine.tablePrefix(Entity.class) + ".uuid");
-				tmp.append(" join ");
+				tmp.append(" on "); //$NON-NLS-1$
+				tmp.append(engine.tablePrefix(EntityAttributeValue.class) + ".entity_uuid = " + engine.tablePrefix(Entity.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(" join "); //$NON-NLS-1$
 				tmp.append(engine.tableNamePrefix(EntityAttribute.class));
-				tmp.append(" on ");
-				tmp.append(engine.tablePrefix(EntityAttribute.class) + ".entity_type_uuid = " + engine.tablePrefix(EntityType.class) + ".uuid");
-				tmp.append(" and " + engine.tablePrefix(EntityAttribute.class) + ".uuid = " + engine.tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid");
+				tmp.append(" on "); //$NON-NLS-1$
+				tmp.append(engine.tablePrefix(EntityAttribute.class) + ".entity_type_uuid = " + engine.tablePrefix(EntityType.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(" and " + engine.tablePrefix(EntityAttribute.class) + ".uuid = " + engine.tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				if (ff.getAttributeType() == AttributeType.LIST){
-					tmp.append(" join ");
+					tmp.append(" join "); //$NON-NLS-1$
 					tmp.append(engine.tableNamePrefix(AttributeListItem.class));
-					tmp.append(" ON ");
-					tmp.append(engine.tablePrefix(EntityAttributeValue.class) + ".list_element_uuid = ");
-					tmp.append(engine.tablePrefix(AttributeListItem.class) + ".uuid");
+					tmp.append(" ON "); //$NON-NLS-1$
+					tmp.append(engine.tablePrefix(EntityAttributeValue.class) + ".list_element_uuid = "); //$NON-NLS-1$
+					tmp.append(engine.tablePrefix(AttributeListItem.class) + ".uuid"); //$NON-NLS-1$
 				}else if(ff.getAttributeType() == AttributeType.TREE){
-					tmp.append(" join ");
+					tmp.append(" join "); //$NON-NLS-1$
 					tmp.append(engine.tableNamePrefix(AttributeTreeNode.class));
-					tmp.append(" ON ");
-					tmp.append(engine.tablePrefix(EntityAttributeValue.class) + ".tree_node_uuid = ");
-					tmp.append(engine.tablePrefix(AttributeTreeNode.class) + ".uuid");
+					tmp.append(" ON "); //$NON-NLS-1$
+					tmp.append(engine.tablePrefix(EntityAttributeValue.class) + ".tree_node_uuid = "); //$NON-NLS-1$
+					tmp.append(engine.tablePrefix(AttributeTreeNode.class) + ".uuid"); //$NON-NLS-1$
 				}
 				
-				tmp.append(" WHERE ");
+				tmp.append(" WHERE "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(EntityType.class));
-				tmp.append(".keyId = '" + ff.getEntityKey() + "'");
-				tmp.append(" AND ");
+				tmp.append(".keyId = '" + ff.getEntityKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(" AND "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(EntityAttribute.class));
-				tmp.append(".keyId = '" + ff.getEntityAttributeKey() + "'");
-				tmp.append(" AND ");
+				tmp.append(".keyId = '" + ff.getEntityAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(" AND "); //$NON-NLS-1$
 				try{
 					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class)));
 					
@@ -162,12 +173,26 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				
 				sql.append(" left join "); //$NON-NLS-1$
 				sql.append(tmpTable);
-				sql.append(" " + tableName);
+				sql.append(" " + tableName); //$NON-NLS-1$
 				sql.append(" on "); //$NON-NLS-1$
-				sql.append(tableName + ".entity_keyid = ");
-				sql.append("qa." + ff.getEntityDmAttributeKey(c, engine));
+				sql.append(tableName + ".entity_keyid = "); //$NON-NLS-1$
+				sql.append("qa." + ff.getEntityDmAttributeKey(c, engine)); //$NON-NLS-1$
 
 			}
+		}
+	}
+	
+	/**
+	 * Drops any temporary tables creating while
+	 * processing entity attribute filters.
+	 * 
+	 * @param c
+	 * @param engine
+	 * @throws SQLException
+	 */
+	public void dropTemporaryTables(Connection c, DerbyEntityQueryEngine engine) {
+		for (String t : toDrop){
+			engine.dropTable(c,t);
 		}
 	}
 

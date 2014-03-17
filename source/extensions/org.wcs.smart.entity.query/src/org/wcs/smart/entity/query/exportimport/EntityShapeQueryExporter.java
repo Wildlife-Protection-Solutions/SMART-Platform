@@ -21,51 +21,49 @@
  */
 package org.wcs.smart.entity.query.exportimport;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.HashMap;
-
-import org.wcs.smart.entity.query.model.EntityQueryFactory;
+import org.geotools.data.DataUtilities;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.entity.query.map.geotools.QueryDataSource;
+import org.wcs.smart.entity.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
 import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
-import org.wcs.smart.entity.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
-import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.filter.QueryFilter;
-import org.wcs.smart.query.xml.model.UuidItemType;
+import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.model.Query;
 
 /**
- * Importer for importing query definition files.
+ * Shapefile query exporter.  Exports
+ * the results of a query to a shapefile.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImporter {
+public class EntityShapeQueryExporter extends ShapeQueryExporter{
 
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
+	 */
 	@Override
-	public boolean canImport(IQueryType qt) {
-		if (qt.getKey().equals(EntityObservationQueryType.KEY) ||
-				qt.getKey().equals(EntityWaypointQueryType.KEY)){
+	public boolean canExport(Query query) {
+		if (query.getType().getKey().equals(EntityObservationQueryType.KEY) ||
+				query.getType().getKey().equals(EntityWaypointQueryType.KEY)){
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
-		InputStream is = new ByteArrayInputStream(queryDef.getBytes());
-		
-		Parser parser = new Parser(is);
-		QueryFilter queryFilter = parser.QueryFilter();
-		is.close();
-
-		return queryFilter.asString();
+	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
+		return QueryResultItemFeature.createObservationFeature((EntityQueryResultItem) it, queryColumns, shapefile.getSchema());
 	}
-
 	@Override
-	protected SimpleQuery createQuery(IQueryType qt) {
-		return (SimpleQuery) EntityQueryFactory.createQuery(qt);
+	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
+		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+		
 	}
-	
+		
 }
+

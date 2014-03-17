@@ -26,16 +26,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.engine.DerbySummaryEngine;
-import org.wcs.smart.entity.query.internal.QueryUtils;
 import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.hibernate.HibernateManager;

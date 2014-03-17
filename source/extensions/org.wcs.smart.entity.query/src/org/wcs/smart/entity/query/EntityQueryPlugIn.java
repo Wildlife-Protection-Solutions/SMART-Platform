@@ -17,11 +17,22 @@ public class EntityQueryPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.entity.query"; //$NON-NLS-1$
 
-	
-	public static final String GRID_ICON = "org.wcs.smart.entity.query.grid.icon";
-	public static final String SUMMARY_ICON = "org.wcs.smart.entity.query.summary.icon";
-	public static final String OBSERVATION_ICON = "org.wcs.smart.entity.query.observation.icon";
-	public static final String WAYPOINT_ICON = "org.wcs.smart.entity.query.waypoint.icon";
+	/**
+	 * Entity grid query icon
+	 */
+	public static final String GRID_ICON = "org.wcs.smart.entity.query.grid.icon"; //$NON-NLS-1$
+	/**
+	 * Entity summary grid query icon
+	 */
+	public static final String SUMMARY_ICON = "org.wcs.smart.entity.query.summary.icon"; //$NON-NLS-1$
+	/**
+	 * Entity observation query icon
+	 */
+	public static final String OBSERVATION_ICON = "org.wcs.smart.entity.query.observation.icon"; //$NON-NLS-1$
+	/**
+	 * Entity waypoint query icon
+	 */
+	public static final String WAYPOINT_ICON = "org.wcs.smart.entity.query.waypoint.icon"; //$NON-NLS-1$
 
 	// The shared instance
 	private static EntityQueryPlugIn plugin;

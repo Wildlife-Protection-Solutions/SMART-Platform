@@ -21,40 +21,42 @@
  */
 package org.wcs.smart.entity.query.exportimport;
 
+import java.util.HashMap;
+
 import org.hibernate.Session;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
-import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.entity.query.model.EntityQueryFactory;
+import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
+import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
- * Exports a observation query definition
- * 
- * @author egouge
- * @since 1.0.0
+ * Query importer for importing gridded queries
+ * @author Emily
+ *
  */
-public class ObsSimpleQueryDefinitionExporter extends SimpleQueryDefinitionExporter {
+public class EntityGriddedQueryDefImporter extends GriddedQueryDefinitionImporter{
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
-	 */
 	@Override
-	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(EntityObservationQueryType.KEY) ||
-				query.getType().getKey().equals(EntityWaypointQueryType.KEY)){
-			return true;
-		}
-		return false;
+	public boolean canImport(IQueryType qt) {
+		return qt.getKey().equals(EntityGridQueryType.KEY);
+	}
+
+	@Override
+	protected GriddedQuery createQuery(String qtype) {
+		return EntityQueryFactory.createGriddedQuery();
 	}
 
 	/**
-	 * Nothing to do here.
+	 * There is nothing special to validate in these queries.  
 	 */
 	@Override
-	protected void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
+	protected void validateQuery(GridQueryDefinition def, String langCode,
+			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
+
 	}
-
+	
+	
 }
-

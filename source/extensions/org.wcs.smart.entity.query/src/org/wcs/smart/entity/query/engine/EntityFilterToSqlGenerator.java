@@ -66,15 +66,20 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		if (filter instanceof ConservationAreaFilter){
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class));
 		}else if (filter instanceof EntityAttributeFilter){
-			return asSql((EntityAttributeFilter)filter);
+			return asSql((EntityAttributeFilter)filter, engine);
 		}
 		return super.toSql(filter, engine);
 		
 	}
 	
 	
-	public String asSql(EntityAttributeFilter filter) throws SQLException{
-		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey();
+	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
+		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
+		if (col != null){
+			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		}
+		
+		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
 	
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
 			return " (" + tableName + ".value  > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
@@ -108,7 +113,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		}else if (filter.getAttributeType() == AttributeType.TREE){
 			return "( " + tableName + ".value >= '" + (String)filter.getValue()+ "' and " + tableName + ".value <'" + ((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
-		return "";
+		return "";  //$NON-NLS-1$
 	}
 	
 	

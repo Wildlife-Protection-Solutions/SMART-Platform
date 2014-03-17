@@ -37,7 +37,7 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  * @author egouge
  * @since 1.0.0
  */
-public class ObsSummaryQueryDefinitionImporter extends SummaryQueryDefinitionImporter{
+public class EntitySummaryQueryDefinitionImporter extends SummaryQueryDefinitionImporter{
 
 	@Override
 	public boolean canImport(IQueryType qt) {

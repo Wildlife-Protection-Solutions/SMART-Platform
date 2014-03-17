@@ -23,6 +23,7 @@ package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
@@ -32,7 +33,12 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityAttributeValue;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -336,7 +342,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			public void visit(IFilter filter) {
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
-					filter instanceof CategoryAttributeFilter ){						
+					filter instanceof CategoryAttributeFilter ||
+					filter instanceof EntityAttributeFilter){						
 					
 					String colName = engine.createTempTableName();
 					engine.filterTables.put(filter, colName);
@@ -428,7 +435,131 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(prefix(AttributeTreeNode.class) + ".uuid"); //$NON-NLS-1$
 				}
 			}
+			if (lfilter instanceof EntityAttributeFilter){
+				//get the dm model attribute repesenting the entity
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(WaypointObservationAttribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservation.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttribute.class) + ".observation_uuid "); //$NON-NLS-1$
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(Attribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(Attribute.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttribute.class) + ".attribute_uuid "); //$NON-NLS-1$
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(AttributeListItem.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttribute.class) + ".list_element_uuid = "); //$NON-NLS-1$
+				sql.append(prefix(AttributeListItem.class) + ".uuid"); //$NON-NLS-1$
+				
+				sql.append(" join ");  //$NON-NLS-1$
+				sql.append(" ( SELECT ");  //$NON-NLS-1$
+				sql.append("el.keyid as entity_key_id , ");  //$NON-NLS-1$
+			
+				EntityAttributeFilter ff = (EntityAttributeFilter)lfilter;
+				
+				if (ff.getAttributeType() == AttributeType.NUMERIC || 
+						ff.getAttributeType() == AttributeType.BOOLEAN){
+					sql.append(engine.tablePrefix(EntityAttributeValue.class));
+					sql.append(".number_value");  //$NON-NLS-1$
+				}else if (ff.getAttributeType() == AttributeType.TEXT ||
+						ff.getAttributeType() == AttributeType.DATE){
+					sql.append(engine.tablePrefix(EntityAttributeValue.class));
+					sql.append(".string_value");  //$NON-NLS-1$
+				}else if (ff.getAttributeType() == AttributeType.LIST){
+					sql.append(engine.tablePrefix(AttributeListItem.class));
+					sql.append(".keyid");  //$NON-NLS-1$
+				}else if(ff.getAttributeType() == AttributeType.TREE){
+					sql.append(engine.tablePrefix(AttributeTreeNode.class));
+					sql.append(".hkey");  //$NON-NLS-1$
+				}else{
+					throw new RuntimeException(MessageFormat.format(Messages.WaypointFilterProcessor_AttributeTypeNotSupported, new Object[]{ff.getAttributeType()}));
+				}
+				sql.append(" as value FROM "); //$NON-NLS-1$
+				sql.append(engine.tableNamePrefix(EntityType.class));
+				sql.append(" join ");  //$NON-NLS-1$
+				sql.append(engine.tableNamePrefix(Entity.class));
+				sql.append(" on ");  //$NON-NLS-1$
+				sql.append(engine.tablePrefix(EntityType.class) + ".uuid = " + engine.tablePrefix(Entity.class) + ".entity_type_uuid");  //$NON-NLS-1$  //$NON-NLS-2$
+				sql.append(" join ");  //$NON-NLS-1$
+				sql.append(engine.tableName(AttributeListItem.class));
+				sql.append(" el on el.uuid = ");  //$NON-NLS-1$
+				sql.append(engine.tablePrefix(Entity.class));
+				sql.append(".attribute_list_item_uuid");  //$NON-NLS-1$
+				sql.append(" join ");  //$NON-NLS-1$ 
+				sql.append(engine.tableNamePrefix(EntityAttributeValue.class));
+				sql.append(" on ");  //$NON-NLS-1$
+				sql.append(engine.tablePrefix(EntityAttributeValue.class) + ".entity_uuid = " + engine.tablePrefix(Entity.class) + ".uuid");  //$NON-NLS-1$  //$NON-NLS-2$
+				sql.append(" join ");  //$NON-NLS-1$
+				sql.append(engine.tableNamePrefix(EntityAttribute.class));
+				sql.append(" on ");  //$NON-NLS-1$
+				sql.append(engine.tablePrefix(EntityAttribute.class) + ".entity_type_uuid = " + engine.tablePrefix(EntityType.class) + ".uuid");  //$NON-NLS-1$  //$NON-NLS-2$  
+				sql.append(" and " + engine.tablePrefix(EntityAttribute.class) + ".uuid = " + engine.tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid");  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+				
+				if (ff.getAttributeType() == AttributeType.LIST){
+					sql.append(" join ");  //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(AttributeListItem.class));
+					sql.append(" ON ");  //$NON-NLS-1$
+					sql.append(engine.tablePrefix(EntityAttributeValue.class) + ".list_element_uuid = ");  //$NON-NLS-1$
+					sql.append(engine.tablePrefix(AttributeListItem.class) + ".uuid");  //$NON-NLS-1$
+				}else if(ff.getAttributeType() == AttributeType.TREE){
+					sql.append(" join ");  //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(AttributeTreeNode.class));
+					sql.append(" ON ");  //$NON-NLS-1$
+					sql.append(engine.tablePrefix(EntityAttributeValue.class) + ".tree_node_uuid = ");  //$NON-NLS-1$
+					sql.append(engine.tablePrefix(AttributeTreeNode.class) + ".uuid");  //$NON-NLS-1$
+				}
+				
+				sql.append(" WHERE ");  //$NON-NLS-1$
+				sql.append(engine.tablePrefix(EntityType.class));
+				sql.append(".keyId = '" + ff.getEntityKey() + "'");  //$NON-NLS-1$  //$NON-NLS-2$
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(engine.tablePrefix(EntityAttribute.class));
+				sql.append(".keyId = '" + ff.getEntityAttributeKey() + "'");  //$NON-NLS-1$  //$NON-NLS-2$
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, engine.tablePrefix(EntityType.class)));
+				sql.append(") foo "); //$NON-NLS-1$
+				sql.append(" on foo.entity_key_id = "); //$NON-NLS-1$
+				sql.append(prefix(AttributeListItem.class) + ".keyid"); //$NON-NLS-1$
+					
+			}
 			sql.append(" WHERE "); //$NON-NLS-1$
+			if (lfilter instanceof EntityAttributeFilter){
+				EntityAttributeFilter efilter = (EntityAttributeFilter)lfilter;
+				if (efilter.getAttributeType() == AttributeType.BOOLEAN){
+					sql.append( " (foo.value  > 0.5 ) ");			//$NON-NLS-1$ 
+				}else if (efilter.getAttributeType() == AttributeType.NUMERIC){
+					sql.append( " ( foo.value " + EntityFilterToSqlGenerator.INSTANCE.asSql(efilter.getOperator()) + " " + String.valueOf((Double)efilter.getValue()) + ") "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				}else if (efilter.getAttributeType() == AttributeType.TEXT){
+					String queryStr = ""; //$NON-NLS-1$
+					//TODO: look into escape % & _ as these are wild card characters
+					// SELECT a FROM tabA WHERE a LIKE '%=_' ESCAPE '='  (must specify escape character)
+					String val = (String)efilter.getValue();
+					val = val.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					if (efilter.getOperator() == Operator.STR_CONTAINS || 
+							efilter.getOperator() == Operator.STR_NOTCONTAINS){
+						queryStr = "( LOWER(foo.value) " + EntityFilterToSqlGenerator.INSTANCE.asSql(efilter.getOperator()) + " '%" + val.toLowerCase() + "%' )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+					}else if (efilter.getOperator() == Operator.STR_EQUALS){
+						queryStr = "( LOWER(foo.value) " + EntityFilterToSqlGenerator.INSTANCE.asSql(efilter.getOperator()) + " '" + val.toLowerCase() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+					}
+					sql.append( queryStr);
+				}else if (efilter.getAttributeType() == AttributeType.DATE){
+					String date1 = (String) efilter.getValue();
+					String date2 = (String) efilter.getValue2();			
+					sql.append ("( foo.value is not null AND DATE(foo.value) " + " " + EntityFilterToSqlGenerator.INSTANCE.asSql(efilter.getOperator()) + " DATE('" + date1 + "' ) " + EntityFilterToSqlGenerator.INSTANCE.asSql(Operator.AND) + " DATE('" + date2 + "') )");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ 
+				}else if (efilter.getAttributeType() == AttributeType.LIST ){
+					if (efilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
+						//any option
+						sql.append( "( foo.value is not null )" );  //$NON-NLS-1$ 
+					}else{
+						sql.append( "( foo.value " + EntityFilterToSqlGenerator.INSTANCE.asSql(efilter.getOperator()) + " '" + (String)efilter.getValue() + "' )" );  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+					}
+				}else if (efilter.getAttributeType() == AttributeType.TREE){
+					sql.append( "( foo.value >= '" + (String)efilter.getValue()+ "' and foo.value <'" + ((String)efilter.getValue()).substring(0,  ((String)efilter.getValue()).length() -1) + "/')");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				}
+			}
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
 				sql.append(" ( "); //$NON-NLS-1$
@@ -504,6 +635,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(") "); //$NON-NLS-1$
 				}
 			}
+		
 			
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());

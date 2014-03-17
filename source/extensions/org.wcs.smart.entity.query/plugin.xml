@@ -121,5 +121,153 @@
             class="org.wcs.smart.entity.query.model.EntitySummaryQuery">
       </class>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.entity.query.internal.EntityQueryTemplateCloner"
+            id="org.wcs.smart.entity.query.Cloner">
+         <require
+               id="org.wcs.smart.QueryCloner">
+         </require>
+      </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.entity.query.exportimport.EntityGridQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.entity.query.exportimport.EntityShapeQueryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.entity.query.exportimport.EntitySimpleQueryDefinitionImporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.entity.query.exportimport.EntitySummaryQueryDefinitionExporter">
+      </Exporter>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.import">
+      <QueryImporter
+            class="org.wcs.smart.entity.query.exportimport.EntityGriddedQueryDefImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.entity.query.exportimport.EntitySimpleQueryDefinitionImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.entity.query.exportimport.EntitySummaryQueryDefinitionImporter">
+      </QueryImporter>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.createQuery?after=org.wcs.smart.query.createunknown.separator">
+         <menu
+               icon="images/icons/obj16/entitytype.png"
+               id="org.wcs.smart.menu.query.createquery.entityqueries"
+               label="Entity Queries"
+               tooltip="creates queries that may include entity attributes">
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_observation_query.png"
+                  label="New Entity Observation Query ..."
+                  style="pulldown"
+                  tooltip="creates a new observation query that can include entity attribute filters">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entityobservation">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_waypoint_query.png"
+                  label="New Entity Incident Query ..."
+                  style="push"
+                  tooltip="creates a new incident query that can include entity attribute filters">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entitywaypoint">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_summary_query.png"
+                  label="New Entity Summary Query ..."
+                  style="push"
+                  tooltip="creates a new summary query that can include entity attributes">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entitysummary">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_gridded_query.png"
+                  label="New Entity Gridded Query ..."
+                  style="push"
+                  tooltip="creates a new gridded query that can include entity attributes">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entitygrid">
+               </parameter>
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
+         <menu
+               icon="images/icons/obj16/entitytype.png"
+               id="org.wcs.smart.menu.query.newquery.entityqueries"
+               label="Entity Queries"
+               tooltip="creates queries that may include entity attributes">
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_observation_query.png"
+                  label="New Entity Observation Query ..."
+                  style="pulldown"
+                  tooltip="creates a new observation query that can include entity attribute filters">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entityobservation">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_waypoint_query.png"
+                  label="New Entity Incident Query ..."
+                  style="push"
+                  tooltip="creates a new incident query that can include entity attribute filters">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entitywaypoint">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_summary_query.png"
+                  label="New Entity Summary Query ..."
+                  style="push"
+                  tooltip="creates a new summary query that can include entity attributes">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entitysummary">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/entity_gridded_query.png"
+                  label="New Entity Gridded Query ..."
+                  style="push"
+                  tooltip="creates a new gridded query that can include entity attributes">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="entitygrid">
+               </parameter>
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
 
 </plugin>
