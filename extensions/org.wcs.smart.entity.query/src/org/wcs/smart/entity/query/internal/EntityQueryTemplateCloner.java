@@ -52,7 +52,7 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
  * @author Emily
  *
  */
-public class ObservationQueryTemplateCloner implements
+public class EntityQueryTemplateCloner implements
 		IConservationAreaTemplateCloner {
 
 	@Override

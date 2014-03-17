@@ -34,7 +34,7 @@ import org.wcs.smart.query.xml.model.QueryType;
  * @author Emily
  *
  */
-public class ObsGridQueryDefinitionExporter extends GridQueryDefinitionExporter{
+public class EntityGridQueryDefinitionExporter extends GridQueryDefinitionExporter{
 
 	/**
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)

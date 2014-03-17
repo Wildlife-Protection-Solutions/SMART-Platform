@@ -21,65 +21,40 @@
  */
 package org.wcs.smart.entity.query.exportimport;
 
-import java.util.List;
-
 import org.hibernate.Session;
-import org.wcs.smart.entity.query.model.EntitySummaryQuery;
-import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;
+import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
+import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.summary.DateGroupBy;
-import org.wcs.smart.query.model.summary.GroupByPart;
-import org.wcs.smart.query.model.summary.IGroupBy;
-import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.xml.model.QueryType;
-import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.SmartUtils;
 
 /**
- * Summary query definition exporter
+ * Exports a observation query definition
+ * 
  * @author egouge
  * @since 1.0.0
  */
-public class ObsSummaryQueryDefinitionExporter extends SummaryQueryDefinitionExporter {
+public class EntitySimpleQueryDefinitionExporter extends SimpleQueryDefinitionExporter {
 
-	/**
+	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof EntitySummaryQuery){
+		if (query.getType().getKey().equals(EntityObservationQueryType.KEY) ||
+				query.getType().getKey().equals(EntityWaypointQueryType.KEY)){
 			return true;
 		}
 		return false;
 	}
 
-	/*
-	 * Exports the group by part information
-	 */
-	@Override
-	protected void processGroupBy(GroupByPart values, QueryType qt, Session session) throws Exception{
-		if (values == null) return;
-		for (IGroupBy item: values.getGroupBys()){
-			if (item instanceof DateGroupBy) continue;
-			List<ListItem> bits = item.getItems(session);
-			for (ListItem it : bits){
-				if (it.getUuid() != null){
-					UuidItemType uuiditem = new UuidItemType();
-					uuiditem.setUuid( SmartUtils.encodeHex( it.getUuid() ) );
-					uuiditem.getValue().add(it.getName());
-					qt.getUuiditem().add(uuiditem);
-				}
-			}
-		}
-	}
-	
 	/**
-	 * Nothing to do
-	 * 
+	 * Nothing to do here.
 	 */
 	@Override
 	protected void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
 	}
 
 }
+

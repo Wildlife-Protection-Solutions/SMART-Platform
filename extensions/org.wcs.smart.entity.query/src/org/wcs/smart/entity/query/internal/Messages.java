@@ -118,6 +118,7 @@ public class Messages extends NLS {
 	public static String SummaryQueryContentProvider_WaypointSourceGroupByName;
 	public static String SummaryQueryLabelProvider_CountCatLabel;
 	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
+	public static String WaypointFilterProcessor_AttributeTypeNotSupported;
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointSourceFilter_InvalidSourceFilter;
@@ -126,6 +127,7 @@ public class Messages extends NLS {
 	public static String WaypointSourceGroupByDropItem_FiltersLabel;
 	public static String WaypointSourceGroupByDropItem_WaypointSourceLabel;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String EntityAttributeFilterVisitor_AttributeTypeNotSupported;
 	public static String ObservationCategoryValueItem_CategoryKeyNotFound;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
 	public static String ObservationGridQueryType_QueryName;

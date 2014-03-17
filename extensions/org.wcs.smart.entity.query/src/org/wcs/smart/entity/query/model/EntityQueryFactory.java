@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.entity.query.model;
 
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
 import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;

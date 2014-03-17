@@ -2,25 +2,16 @@ package org.wcs.smart.entity.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.entity.model.EntityAttribute;
-import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.engine.DerbyEntityObservationEngine;
-import org.wcs.smart.entity.query.internal.QueryUtils;
-import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EntityQueryColumnCache;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
@@ -28,12 +19,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
-import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 @Entity
