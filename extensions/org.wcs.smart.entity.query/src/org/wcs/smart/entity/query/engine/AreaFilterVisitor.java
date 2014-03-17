@@ -40,7 +40,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 
 	private HashSet<String> addedTableNames = new HashSet<String>();
 	private StringBuilder sql;
-	private DerbyObservationQueryEngine engine;
+	private DerbyEntityQueryEngine engine;
 	
 	/**
 	 * Creates a new visitor
@@ -49,7 +49,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	 * @param usedTables list of tables already added to sql (Track.class)
 	 * only needs to be added once
 	 */
-	public AreaFilterVisitor(StringBuilder sql, DerbyObservationQueryEngine engine){
+	public AreaFilterVisitor(StringBuilder sql, DerbyEntityQueryEngine engine){
 		this.sql = sql;
 		this.engine = engine;
 	}

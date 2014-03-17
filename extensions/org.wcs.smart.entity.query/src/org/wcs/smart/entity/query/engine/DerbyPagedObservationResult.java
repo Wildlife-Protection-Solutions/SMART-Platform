@@ -87,15 +87,15 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	//current direction
 	private int direction = SWT.UP;
 	private boolean hasSortColumns = false;
-	private DerbyObservationQueryEngine engine;
+	private DerbyEntityQueryEngine engine;
 
 	
-	public DerbyPagedObservationResult(String queryTempTable, DerbyObservationQueryEngine engine) {
+	public DerbyPagedObservationResult(String queryTempTable, DerbyEntityQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyObservationQueryEngine engine) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyEntityQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;

@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -35,6 +37,7 @@ import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -62,9 +65,50 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof ConservationAreaFilter){
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class));
+		}else if (filter instanceof EntityAttributeFilter){
+			return asSql((EntityAttributeFilter)filter);
 		}
 		return super.toSql(filter, engine);
 		
+	}
+	
+	
+	public String asSql(EntityAttributeFilter filter) throws SQLException{
+		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey();
+	
+		if (filter.getAttributeType() == AttributeType.BOOLEAN){
+			return " (" + tableName + ".value  > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
+		}else if (filter.getAttributeType() == AttributeType.NUMERIC){
+			return " ( " + tableName + ".value " + asSql(filter.getOperator()) + " " + String.valueOf((Double)filter.getValue()) + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}else if (filter.getAttributeType() == AttributeType.TEXT){
+			String queryStr = ""; //$NON-NLS-1$
+			//TODO: look into escape % & _ as these are wild card characters
+			// SELECT a FROM tabA WHERE a LIKE '%=_' ESCAPE '='  (must specify escape character)
+			String val = (String)filter.getValue();
+			val = val.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			if (filter.getOperator() == Operator.STR_CONTAINS || 
+					filter.getOperator() == Operator.STR_NOTCONTAINS){
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " '%" + val.toLowerCase() + "%' )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
+			}else if (filter.getOperator() == Operator.STR_EQUALS){
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " '" + val.toLowerCase() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+			return queryStr;
+		}else if (filter.getAttributeType() == AttributeType.DATE){
+			String date1 = (String) filter.getValue();
+			String date2 = (String) filter.getValue2();			
+			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " DATE('" + date1 + "' ) " + asSql(Operator.AND) + " DATE('" + date2 + "') )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+		}else if (filter.getAttributeType() == AttributeType.LIST ){
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
+				//any option
+				return "( " + tableName + ".value is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " '" + (String)filter.getValue() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+		}else if (filter.getAttributeType() == AttributeType.TREE){
+			return "( " + tableName + ".value >= '" + (String)filter.getValue()+ "' and " + tableName + ".value <'" + ((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		}
+		return "";
 	}
 	
 	
@@ -73,7 +117,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyObservationQueryEngine)engine).filterTables.get(filter);
+		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
@@ -86,7 +130,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyObservationQueryEngine)engine).filterTables.get(filter);
+		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
 			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
 		}
@@ -98,7 +142,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyObservationQueryEngine)engine).filterTables.get(filter);
+		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}

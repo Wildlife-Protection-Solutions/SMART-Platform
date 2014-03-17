@@ -56,7 +56,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private String tableName;
 	private String observationTable;
 	
-	private DerbyObservationQueryEngine engine;
+	private DerbyEntityQueryEngine engine;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	
@@ -66,7 +66,7 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessor(String tableName, DerbyObservationQueryEngine engine){
+	public FilterProcessor(String tableName, DerbyEntityQueryEngine engine){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.observationTable = engine.createTempTableName();
@@ -276,6 +276,9 @@ public class FilterProcessor implements IFilterProcessor {
 		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine);
 		queryFilter.accept(areaVisitor);
 
+		EntityAttributeFilterVisitor entityVisitor = new EntityAttributeFilterVisitor(sql, engine, caFilter, c, observationTable);
+		queryFilter.accept(entityVisitor);
+		
 		sql.append(engine.appendFromClause(usedTables));
 		
 		boolean where = true;
@@ -332,7 +335,7 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		monitor.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttributes);
 		
-		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor();
+		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor(c, engine);
 		filter.accept(collector);
 		Collection<AttributeInfo> keys = collector.getAttributeInfo();
 		

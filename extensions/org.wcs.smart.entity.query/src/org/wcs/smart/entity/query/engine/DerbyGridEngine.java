@@ -67,7 +67,7 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
  * @since 1.0.0
  */
 
-public class DerbyGridEngine extends DerbyObservationQueryEngine{
+public class DerbyGridEngine extends DerbyEntityQueryEngine{
 	private Collection<GridResultItem> myResults;
 	
 	private EntityGriddedQuery query;
