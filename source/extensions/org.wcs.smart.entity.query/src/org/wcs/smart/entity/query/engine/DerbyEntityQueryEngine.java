@@ -28,6 +28,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.hibernate.Session;
+import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityAttributeValue;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -41,10 +45,28 @@ import org.wcs.smart.query.model.filter.IFilter;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class DerbyObservationQueryEngine extends AbstractQueryEngine{
+public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 
 	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
 
+	static {
+		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
+		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
+		tablePrefix.put(EntityAttribute.class, "ea"); //$NON-NLS-1$
+		tablePrefix.put(EntityAttributeValue.class, "eav"); //$NON-NLS-1$
+	}
+
+	
+	/**
+	 * Maps hibernate classes to database table names
+	 */
+	static {
+		tableNames.put(Entity.class, "smart.entity"); //$NON-NLS-1$
+		tableNames.put(EntityType.class, "smart.entity_type"); //$NON-NLS-1$
+		tableNames.put(EntityAttribute.class, "smart.entity_attribute"); //$NON-NLS-1$
+		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value"); //$NON-NLS-1$
+	}
+	
 	/**
 	 * Create the select statement to populate the temporary table
 	 * containing observation data for the query engine.
@@ -79,7 +101,7 @@ public abstract class DerbyObservationQueryEngine extends AbstractQueryEngine{
 	 * A string to append to the from clause of the select
 	 * statement to create the temporary table.
 	 * <p>Depending on the select clause additional tables may
-	 * be required.  See {@link DerbyObservationQueryEngine#getTemporaryTableCreateClause(String)}. </p> 
+	 * be required.  See {@link DerbyEntityQueryEngine#getTemporaryTableCreateClause(String)}. </p> 
 	 * @param tables List of tables already included in the from clause
 	 * @return
 	 */

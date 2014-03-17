@@ -49,7 +49,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
+public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 
 	private String queryDataTable;
 	
@@ -145,7 +145,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(DerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(DerbyEntityQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
@@ -154,7 +154,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(DerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(DerbyEntityQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());

@@ -1,5 +1,7 @@
 package org.wcs.smart.entity.query.parser.internal;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -9,10 +11,14 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.query.engine.DerbyEntityQueryEngine;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
@@ -98,6 +104,7 @@ public class EntityAttributeFilter implements IFilter {
 	private String entityKey;
 	private String entityAttributeKey;
 	private AttributeType attributeType;
+	private String dmEntityTypeAttributeKey = null;
 	private Operator op;
 	private Object value1;
 	private Object value2;
@@ -138,11 +145,61 @@ public class EntityAttributeFilter implements IFilter {
 	public Operator getOperator(){
 		return this.op;
 	}
+	
+	public String getEntityDmAttributeKey(Connection c, DerbyEntityQueryEngine engine){
+		if (dmEntityTypeAttributeKey != null){
+			return dmEntityTypeAttributeKey;
+		}
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT " + engine.tablePrefix(Attribute.class) + ".keyid");
+		sql.append(" FROM ");
+		sql.append(engine.tableNamePrefix(EntityType.class));
+		sql.append(" join ");
+		sql.append(engine.tableNamePrefix(Attribute.class));
+		sql.append(" on ");
+		sql.append(engine.tablePrefix(EntityType.class) + ".dm_attribute_uuid = ");
+		sql.append(engine.tablePrefix(Attribute.class) + ".uuid ");
+		sql.append(" WHERE ");
+		sql.append(engine.tablePrefix(EntityType.class));
+		sql.append(".keyid = '" + entityKey + "'");
+		sql.append(" AND ");
+		sql.append(engine.tablePrefix(EntityType.class));
+		if (SmartDB.isMultipleAnalysis()){
+			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()) + "'");
+		}else{
+			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()) + "'");
+		}
+
+		try{
+			QueryPlugIn.logSql(sql.toString());
+			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+			if (rs.next()){
+				dmEntityTypeAttributeKey = rs.getString(1);
+			}else{
+				throw new RuntimeException(MessageFormat.format("No data model attribute found for entity type {0}.", new Object[]{entityKey}));
+			}
+			rs.close();
+		}catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
+		
+		return dmEntityTypeAttributeKey;
+		
+	}
 	/**
-	 * @return the unique attribute key
+	 * @return the unique entity attribute key
 	 */
 	public String getEntityAttributeKey(){
 		return this.entityAttributeKey;
+	}
+	
+	/**
+	 * 
+	 * @return the unique entity key
+	 */
+	public String getEntityKey(){
+		return this.entityKey;
 	}
 	/**
 	 * @return the type of attribute represented by the filter

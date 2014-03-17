@@ -80,7 +80,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbySummaryEngine extends DerbyObservationQueryEngine{
+public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();

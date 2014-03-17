@@ -60,7 +60,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	private String tableName;
 	private String waypointTable;
 	
-	private DerbyObservationQueryEngine engine;
+	private DerbyEntityQueryEngine engine;
 
 	/**
 	 * Creates a new process filter
@@ -68,7 +68,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public WaypointFilterProcessor(String tableName, DerbyObservationQueryEngine engine){
+	public WaypointFilterProcessor(String tableName, DerbyEntityQueryEngine engine){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.waypointTable = engine.createTempTableName();

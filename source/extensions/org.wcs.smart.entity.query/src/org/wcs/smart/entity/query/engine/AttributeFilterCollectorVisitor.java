@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.entity.query.engine;
 
+import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeInfo;
@@ -41,6 +43,14 @@ public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 
 	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
 
+	private Connection c;
+	private DerbyEntityQueryEngine engine;
+	public AttributeFilterCollectorVisitor(Connection c, DerbyEntityQueryEngine engine){
+		this.c = c;
+		this.engine = engine;
+	}
+	
+	
 	@Override
 	public void visit(IFilter filter) {
 		if (filter instanceof AttributeFilter){
@@ -52,9 +62,8 @@ public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 			
 		}else if (filter instanceof EntityAttributeFilter){
 			EntityAttributeFilter f = (EntityAttributeFilter) filter;
-			
-			//TODO:
-			//AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType());
+			AttributeInfo in = new AttributeInfo(f.getEntityDmAttributeKey(c, engine), AttributeType.LIST);
+			//we need to add the dm attribute associated with the entity type
 			if (!filters.contains(in)){
 				filters.add(in);
 			}

@@ -18,7 +18,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
-import org.wcs.smart.entity.query.engine.DerbyObservationEngine;
+import org.wcs.smart.entity.query.engine.DerbyEntityObservationEngine;
 import org.wcs.smart.entity.query.internal.QueryUtils;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EntityQueryColumnCache;
@@ -115,7 +115,7 @@ public class EntityObservationQuery extends ObservationQuery {
 			lSession.beginTransaction();
 		}
 		try {
-			DerbyObservationEngine engine = new DerbyObservationEngine();
+			DerbyEntityObservationEngine engine = new DerbyEntityObservationEngine();
 			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lSession, progressMonitor);
 			return lastResult;
 		} finally {
