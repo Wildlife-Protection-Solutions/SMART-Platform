@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +38,14 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityAttributeValue;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -278,7 +284,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append("ALTER TABLE "); //$NON-NLS-1$
 			sql.append(tableName);
 			sql.append(" ADD column cat_hkey varchar(32672)"); //$NON-NLS-1$
-			QueryPlugIn.log(sql.toString(), null);
+			QueryPlugIn.logSql(sql.toString());
 			
 			c.createStatement().execute(sql.toString());
 			
@@ -302,7 +308,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append(tablePrefix(WaypointObservation.class));
 			sql.append(".category_uuid )"); //$NON-NLS-1$
 			
-			QueryPlugIn.log(sql.toString(), null);
+			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 		}
 	}
@@ -657,12 +663,10 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
 			return createValueResults(rs, groupBy, attributeItem.asString());
-		}
-		
-		
-		
+		}	
 		return null;
 	}
+	
 	
 	/**
 	 * Reads the results from a database value query
@@ -950,8 +954,80 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				fromSql.append(".keyid = '"); //$NON-NLS-1$
 				fromSql.append(((AttributeGroupBy)gb).getAttributeKey());
 				fromSql.append("' "); //$NON-NLS-1$
+			}else if (gb instanceof EntityAttributeGroupBy){
+				EntityAttributeGroupBy egb = (EntityAttributeGroupBy)gb;
+				
+				groupBySql.append("attribute_" + itemcnt); //$NON-NLS-1$
+				if (egb.getAttributeType() == AttributeType.LIST){
+					groupByInnerSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
+				}else if (egb.getAttributeType() == AttributeType.TREE){
+					groupByInnerSql.append("smart.trimHkeyToLevel("); //$NON-NLS-1$
+					groupByInnerSql.append(((EntityAttributeGroupBy)gb).getTreeLevel().intValue() + ","); //$NON-NLS-1$
+					groupByInnerSql.append(tablePrefix(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".hkey) as  attribute_" + itemcnt + " "); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				
+				fromSql.append(" JOIN "); //$NON-NLS-1$
+				fromSql.append(tableNames.get(WaypointObservationAttribute.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(" on "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".observation_uuid = temp.ob_uuid "); //$NON-NLS-1$
+			
+				fromSql.append(" join (SELECT "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(Entity.class) + ".attribute_list_item_uuid as attribute_list_item_uuid, "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityAttributeValue.class) + ".list_element_uuid as list_element_uuid, ");//$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityAttributeValue.class) + ".tree_node_uuid as tree_node_uuid "); //$NON-NLS-1$
+				fromSql.append(" FROM "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(Entity.class));
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(EntityAttributeValue.class));
+				fromSql.append(" ON "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(Entity.class) + ".uuid="); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityAttributeValue.class) + ".entity_uuid"); //$NON-NLS-1$
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(EntityAttribute.class));
+				fromSql.append(" ON "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityAttribute.class) + ".uuid="); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid"); //$NON-NLS-1$
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(EntityType.class));
+				fromSql.append(" ON "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityType.class) + ".uuid="); //$NON-NLS-1$
+				fromSql.append(tablePrefix(Entity.class) + ".entity_type_uuid"); //$NON-NLS-1$
+				fromSql.append(" WHERE "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityType.class) + ".keyid = '"+ egb.getEntityKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				fromSql.append(" AND "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(EntityAttribute.class) + ".keyid = '"+ egb.getEntityAttributeKey() + "') foo_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				fromSql.append(" ON foo_" + itemcnt + ".attribute_list_item_uuid = ");  //$NON-NLS-1$//$NON-NLS-2$
+				fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt + ".list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				fromSql.append(" JOIN "); //$NON-NLS-1$
+				if (((EntityAttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
+					fromSql.append(tableNames.get(AttributeListItem.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid ="); //$NON-NLS-1$
+					fromSql.append("foo_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
+				}else if (((EntityAttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
+					fromSql.append(tableNames.get(AttributeTreeNode.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid ="); //$NON-NLS-1$
+					fromSql.append("foo_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".tree_node_uuid "); //$NON-NLS-1$
+				}
+			
 			}else{
-				//throw new exception; should only be patrol group bys here for now
+				//throw new exception; 
+				throw new RuntimeException(MessageFormat.format(Messages.DerbySummaryEngine_InvalidGroupby, new Object[]{gb.getClass().getName()}));
 			}
 			itemcnt++;
 			
@@ -964,11 +1040,6 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			groupByInnerSql.deleteCharAt(groupByInnerSql.length() - 1);
 		}
 	}
-	
-	
-	
-	
-	
 	
 	
 	/**

@@ -25,7 +25,8 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
 
 /**
- * Attribute list type drop item.
+ * Attribute list type drop item for filtering
+ * list entity attributes 
  * 
  * 
  * @author Emily
@@ -33,14 +34,10 @@ import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
  */
 public class EntityAttributeListDropItem extends AttributeListDropItem {
 
-	private EntityAttribute ea;
-	
 	public EntityAttributeListDropItem(EntityAttribute ea) {
 		super(ea.getDmAttribute());
-		this.ea = ea;
-		
-		
-		this.key = "entity:" + ea.getEntityType().getKeyId() + ":attribute:" + ea.getDmAttribute().getType().typeKey + ":" + ea.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
-		this.text = ea.getEntityType().getName() + " - " + ea.getName();
+
+		this.key = "entity:" + ea.getEntityType().getKeyId() + ":attribute:" + ea.getDmAttribute().getType().typeKey + ":" + ea.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.text = ea.getEntityType().getName() + " - " + ea.getName(); //$NON-NLS-1$
 	}
 }

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.query.ui.itempanel;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -6,10 +27,15 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
-import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 
+/**
+ * Entity Type tree node for queries.  Supports filter and summary
+ * query types.
+ * @author Emily
+ *
+ */
 public class EntityTypeTreeNode implements IItemTreeNode {
-	public static final String KEY = "entitytype";
+	public static final String KEY = "entitytype"; //$NON-NLS-1$
 
 	private ITreeContentProvider provider;
 	private LabelProvider labelprovider;
@@ -17,7 +43,7 @@ public class EntityTypeTreeNode implements IItemTreeNode {
 	private String name;
 
 	public enum Type {
-		FILTER, GROUPBY, VALUE
+		FILTER, GROUPBY
 	};
 
 	/**
@@ -31,17 +57,10 @@ public class EntityTypeTreeNode implements IItemTreeNode {
 			labelprovider =EntityTypeFilterContentProvider.lblProvider;
 			name = "Entity Type Filters";
 		} else if (type == Type.GROUPBY) {
-			provider = new EntityTypeSummaryContentProvider(
-					EntityTypeSummaryContentProvider.Type.GROUPBY);
+			provider = new EntityTypeSummaryContentProvider();
 			labelprovider = ((EntityTypeSummaryContentProvider) provider)
 					.getLabelProvider();
 			name = "Entity Type Group Bys";
-		} else if (type == Type.VALUE) {
-			provider = new EntityTypeSummaryContentProvider(
-					EntityTypeSummaryContentProvider.Type.VALUE);
-			labelprovider = ((EntityTypeSummaryContentProvider) provider)
-					.getLabelProvider();
-			name = "Entity Type Values";
 		}
 
 	}
