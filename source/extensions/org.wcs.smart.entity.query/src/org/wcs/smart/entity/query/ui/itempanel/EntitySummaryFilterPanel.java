@@ -45,9 +45,9 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.ui.itempanel.EntityTypeTreeNode.Type;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -122,7 +122,6 @@ public class EntitySummaryFilterPanel extends AbstractQueryItemPanel{
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
-		valuenodes.add(new EntityTypeTreeNode(Type.VALUE));
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);
 		filterTreeViewer = tree.getTreeViewer();

@@ -58,11 +58,7 @@ import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 /**
  * Drop item factory for observation queries
@@ -132,10 +128,6 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 		return new EntityAttributeDropItem(ea);
 	}
 	
-	public DropItem createEntityAttributeValueDropItem(EntityAttribute ea){
-		return new EntityAttributeValueDropItem(ea);
-	}
-	
 	public DropItem createEntityAttributeListGroupByDropItem(EntityAttribute ea){
 		return new EntityAttributeListGroupByDropItem(ea);
 	}
@@ -160,9 +152,6 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 				}
 				return null;
 			}else if (object.getObject() instanceof EntityAttribute ) {
-					if (((EntityAttribute)object.getObject()).getDmAttribute().getType() == AttributeType.NUMERIC){
-						return createEntityAttributeValueDropItem((EntityAttribute) object.getObject());
-					}
 					return null;
 			} else if (object.getObject() instanceof CategoryAttribute) {
 				if (((CategoryAttribute)object.getObject()).getAttribute().getType() == AttributeType.NUMERIC){
@@ -176,19 +165,13 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 				if (object.getObject2() != null){
 					if (object.getObject2() instanceof Category){
 						return createAttributeListItemValueDropItem((AttributeListItem)object.getObject(),(Category)object.getObject2());
-					}else if (object.getObject2() instanceof EntityAttribute){
-						return createEntityAttributeListItemValueDropItem((EntityAttribute)object.getObject2(), (AttributeListItem)object.getObject());
 					}
 				}else{
 					return createAttributeListItemValueDropItem((AttributeListItem)object.getObject());
 				}
 			} else if (object.getObject() instanceof AttributeTreeNode){
 				if (object.getObject2() != null){
-					if (object.getObject2() instanceof EntityAttribute){
-						return createEntityAttributeTreeNodeValueDropItem((EntityAttribute)object.getObject2(), (AttributeTreeNode)object.getObject());
-					}else{
-						return createAttributeTreeNodeValueDropItem((AttributeTreeNode)object.getObject(), (Category)object.getObject2());
-					}
+					return createAttributeTreeNodeValueDropItem((AttributeTreeNode)object.getObject(), (Category)object.getObject2());
 				}else{
 					return createAttributeTreeNodeValueDropItem((AttributeTreeNode)object.getObject());
 				}
@@ -227,26 +210,6 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 		return null;
 	}
 
-	
-	
-	/**
-	 * Creates a new attribute list drop item
-	 * @param item
-	 * @return
-	 */
-	public DropItem createEntityAttributeListItemValueDropItem(EntityAttribute ea, AttributeListItem item){
-		return new EntityAttributeListValueDropItem(ea, item);
-	}
-	
-	/**
-	 * Creates a new attribute tree node drop item
-	 * @param item
-	 * @return
-	 */
-	public DropItem createEntityAttributeTreeNodeValueDropItem(EntityAttribute ea, AttributeTreeNode node ){
-		return new EntityAttributeTreeValueDropItem(ea, node);
-	}
-	
 	
 	/**
 	 * Generates drop items for the given query proxy.

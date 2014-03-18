@@ -25,20 +25,19 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 
 /**
- * Attribute tree drop item
+ * 
+ * Attribute tree drop item for filtering
+ * entity tree attributes. 
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class EntityAttributeTreeDropItem extends AttributeTreeDropItem{
 
-	private EntityAttribute ea;
-	
 	public EntityAttributeTreeDropItem(EntityAttribute ea) {
 		super(ea.getDmAttribute());
-		this.ea = ea;
-		
-		
-		this.key = "entity:" + ea.getEntityType().getKeyId() + ":attribute:" + ea.getDmAttribute().getType().typeKey + ":" + ea.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
-		this.text = ea.getEntityType().getName() + " - " + ea.getName();
+				
+		this.key = "entity:" + ea.getEntityType().getKeyId() + ":attribute:" + ea.getDmAttribute().getType().typeKey + ":" + ea.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.text = ea.getEntityType().getName() + " - " + ea.getName(); //$NON-NLS-1$
 	}
 }

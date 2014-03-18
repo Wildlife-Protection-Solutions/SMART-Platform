@@ -134,7 +134,7 @@ public class EntityAttributeListGroupByDropItem extends DropItem implements
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("entity:");
+		sb.append("entity:"); //$NON-NLS-1$
 		sb.append(attribute.getEntityType().getKeyId());
 		sb.append(":attribute:"); //$NON-NLS-1$
 		sb.append(attribute.getDmAttribute().getType().typeKey);

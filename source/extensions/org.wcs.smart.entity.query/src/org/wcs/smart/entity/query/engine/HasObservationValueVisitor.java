@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.entity.query.engine;
 
-import org.wcs.smart.entity.query.parser.internal.EntityAttributeValueItem;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
@@ -48,8 +47,6 @@ public class HasObservationValueVisitor implements IValueVisitor{
 			if (((AttributeValueItem) item).getCategoryKey() != null){
 				hasCategory = true;
 			}
-		}else if (item instanceof EntityAttributeValueItem){
-			hasAttribute = true;
 		}
 	}
 	

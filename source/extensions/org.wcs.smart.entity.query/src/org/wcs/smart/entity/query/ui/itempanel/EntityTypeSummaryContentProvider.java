@@ -78,15 +78,11 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 	private List<EntityType> types = null;
 	private Viewer viewer = null;
 	
-	private Type type;
-	public enum Type{GROUPBY, VALUE};
-	
 	/**
 	 * Creates a new content provider 
 	 * @type if this should return group by or value related items
 	 */
-	public EntityTypeSummaryContentProvider(Type type){
-		this.type = type;
+	public EntityTypeSummaryContentProvider(){
 		provider = new DataModelContentProvider(false, true, true);
 	}
 
@@ -145,62 +141,30 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 			return getChildren(parent);
 			
 		}else if (parentElement instanceof EntityType){
-			if (type == Type.GROUPBY){
-
-				List<EntityAttribute> eas = new ArrayList<EntityAttribute>();
-				eas.addAll(((EntityType) parentElement).getAttributes());
-				//filter out numeric only
-				for (Iterator<EntityAttribute> iterator = eas.iterator(); iterator.hasNext();) {
-					EntityAttribute attribute = (EntityAttribute) iterator.next();
-					if (attribute.getDmAttribute().getType() != AttributeType.LIST 
-							&& attribute.getDmAttribute().getType() != AttributeType.TREE){
-						iterator.remove();
-					}
-					
-				}
-				//sort
-				Collections.sort(eas, new Comparator<EntityAttribute>() {
-					@Override
-					public int compare(EntityAttribute o1, EntityAttribute o2) {
-						return Collator.getInstance().compare(o1.getName(),o2.getName());
-					}
-				});
-				//create required summary objects
-				Object[] results = new Object[eas.size()];
-				int cnt = 0;
-				for (EntityAttribute att: eas){
-					results[cnt++] = new SummaryDmObject(att, false);
-				}
-				return Arrays.copyOf(results, cnt);			
-			}else if (type == Type.VALUE){	
-				List<EntityAttribute> eas = new ArrayList<EntityAttribute>();
-				eas.addAll(((EntityType) parentElement).getAttributes());
-				//filter out numeric only
-				for (Iterator<EntityAttribute> iterator = eas.iterator(); iterator.hasNext();) {
-					EntityAttribute attribute = (EntityAttribute) iterator.next();
-					if (attribute.getDmAttribute().getType() != AttributeType.NUMERIC && 
-							attribute.getDmAttribute().getType() != AttributeType.LIST &&
-							attribute.getDmAttribute().getType() != AttributeType.TREE){
-						iterator.remove();
-					}
-					
-				}
-				//sort
-				Collections.sort(eas, new Comparator<EntityAttribute>() {
-					@Override
-					public int compare(EntityAttribute o1, EntityAttribute o2) {
-						return Collator.getInstance().compare(o1.getName(),o2.getName());
-					}
-				});
-				//create required summary objects
-				Object[] results = new Object[eas.size()];
-				int cnt = 0;
-				for (EntityAttribute att: eas){
-					results[cnt++] = new SummaryDmObject(att, true);
-				}
-				return Arrays.copyOf(results, cnt);
+			List<EntityAttribute> eas = new ArrayList<EntityAttribute>();
+			eas.addAll(((EntityType) parentElement).getAttributes());
+			//filter out numeric only
+			for (Iterator<EntityAttribute> iterator = eas.iterator(); iterator.hasNext();) {
+				EntityAttribute attribute = (EntityAttribute) iterator.next();
+				if (attribute.getDmAttribute().getType() != AttributeType.LIST 
+						&& attribute.getDmAttribute().getType() != AttributeType.TREE){
+					iterator.remove();
+				}	
 			}
-			return new Object[]{};
+			//sort
+			Collections.sort(eas, new Comparator<EntityAttribute>() {
+				@Override
+				public int compare(EntityAttribute o1, EntityAttribute o2) {
+					return Collator.getInstance().compare(o1.getName(),o2.getName());
+				}
+			});
+			//create required summary objects
+			Object[] results = new Object[eas.size()];
+			int cnt = 0;
+			for (EntityAttribute att: eas){
+				results[cnt++] = new SummaryDmObject(att, false);
+			}
+			return Arrays.copyOf(results, cnt);			
 		}else{
 			//assume data model
 			return provider.getChildren(parentElement);
@@ -272,11 +236,6 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 			return getAttributeTreeChildren(parent);		
 		}else if (raw instanceof AttributeTreeNode){
 			return getAttributeTreeChildren(parent);
-		}else if (raw instanceof Attribute && 
-				((Attribute)raw).getType() == AttributeType.LIST){
-			if (type == Type.VALUE){
-				return getAttributeListChildren(parent);
-			}
 		}
 		return null;
 	}
