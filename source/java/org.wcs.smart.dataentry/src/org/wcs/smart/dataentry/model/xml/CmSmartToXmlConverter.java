@@ -73,6 +73,7 @@ public class CmSmartToXmlConverter {
 			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
 			HashMap<String, Language> llookup = processLanguages(cm, xml);
+			setNames(xml.getName(), cm.getNames(), llookup);
 			monitor.worked(1);
 			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
