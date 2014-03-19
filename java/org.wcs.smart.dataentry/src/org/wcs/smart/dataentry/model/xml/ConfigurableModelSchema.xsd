@@ -11,6 +11,9 @@ elementFormDefault="qualified">
     		<element name="languages" type="smrt:LanguageListType"
     			maxOccurs="1" minOccurs="1">
     		</element>
+    		<element name="name" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
     		<element name="nodes" type="smrt:NodeTypeList"
     			maxOccurs="1" minOccurs="0">
     		</element>
