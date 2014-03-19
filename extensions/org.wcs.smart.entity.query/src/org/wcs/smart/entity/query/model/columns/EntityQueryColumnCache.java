@@ -15,6 +15,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -75,7 +76,7 @@ public class EntityQueryColumnCache {
 				return cloneColumns(queryColumns);
 			}
 
-			Job j = new Job("Loading Query Columns") {
+			Job j = new Job(Messages.EntityQueryColumnCache_jobname) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -168,7 +169,7 @@ public class EntityQueryColumnCache {
 			}
 
 			Job j = new Job(
-					"Loading Entity Waypoint Query Columns") {
+					Messages.EntityQueryColumnCache_jobname2) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

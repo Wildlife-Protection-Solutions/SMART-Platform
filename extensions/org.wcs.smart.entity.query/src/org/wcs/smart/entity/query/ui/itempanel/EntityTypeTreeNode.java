@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -55,12 +56,12 @@ public class EntityTypeTreeNode implements IItemTreeNode {
 		if (type == Type.FILTER) {
 			provider = new EntityTypeFilterContentProvider();
 			labelprovider =EntityTypeFilterContentProvider.lblProvider;
-			name = "Entity Type Filters";
+			name = Messages.EntityTypeTreeNode_FilterLabel;
 		} else if (type == Type.GROUPBY) {
 			provider = new EntityTypeSummaryContentProvider();
 			labelprovider = ((EntityTypeSummaryContentProvider) provider)
 					.getLabelProvider();
-			name = "Entity Type Group Bys";
+			name = Messages.EntityTypeTreeNode_GroupByLabel;
 		}
 
 	}

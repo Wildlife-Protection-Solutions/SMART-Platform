@@ -41,6 +41,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -141,7 +142,7 @@ public class EntityAttributeTreeGroupByDropItem extends DropItem implements
 			session.getTransaction().rollback();
 			session.close();
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Error loading items for tree.", ex);
+			QueryPlugIn.displayLog(Messages.EntityAttributeTreeGroupByDropItem_ErrorLoadingTreeItmes, ex);
 			session.close();
 		}
 		return items;
@@ -165,8 +166,9 @@ public class EntityAttributeTreeGroupByDropItem extends DropItem implements
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(attribute.getEntityType().getName() + " - "); //$NON-NLS-1$
 		sb.append(attribute.getName());
-		sb.append(" - " + "Level" ); //$NON-NLS-1$
+		sb.append(" - " + Messages.EntityAttributeTreeGroupByDropItem_LevelLabel ); //$NON-NLS-1$
 		sb.append(this.level);
 	
 		sb.append("\n"); //$NON-NLS-1$
@@ -254,7 +256,7 @@ public class EntityAttributeTreeGroupByDropItem extends DropItem implements
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.EntityAttributeTreeGroupByDropItem_FiltersLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -295,7 +297,7 @@ public class EntityAttributeTreeGroupByDropItem extends DropItem implements
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.EntityAttributeTreeGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -315,7 +317,7 @@ public class EntityAttributeTreeGroupByDropItem extends DropItem implements
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (filters == null){
-			tipStr.append("All");
+			tipStr.append(Messages.EntityAttributeTreeGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filters){
 				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

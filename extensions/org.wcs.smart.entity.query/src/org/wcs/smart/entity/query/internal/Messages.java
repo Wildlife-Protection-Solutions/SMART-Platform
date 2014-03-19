@@ -4,6 +4,10 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.entity.query.internal.messages"; //$NON-NLS-1$
+	public static String AddEntityQueryJob_AddQueryTablesJobName;
+	public static String AddEntityQueryJob_InstallError;
+	public static String AddEntityQueryJob_InstallError2;
+	public static String AddEntityQueryJob_Progress1;
 	public static String AttributeValueItem_AttributeNotFoundError;
 	public static String AttributeValueItem_CategoryNotFoundError;
 	public static String AttributeValueItem_ListItemNotFound;
@@ -128,7 +132,40 @@ public class Messages extends NLS {
 	public static String WaypointSourceGroupByDropItem_FiltersLabel;
 	public static String WaypointSourceGroupByDropItem_WaypointSourceLabel;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String EntityAttributeFilter_Invalidtype;
+	public static String EntityAttributeFilter_ListItemNotFound;
+	public static String EntityAttributeFilter_NoAttributeFound;
+	public static String EntityAttributeFilter_TreeNodeNotFound;
 	public static String EntityAttributeFilterVisitor_AttributeTypeNotSupported;
+	public static String EntityAttributeGroupBy_AttributeNotFound;
+	public static String EntityAttributeGroupBy_EntityAttributeNotFound;
+	public static String EntityAttributeGroupBy_InvalidAttributeType;
+	public static String EntityAttributeListGroupByDropItem_AllLabel;
+	public static String EntityAttributeListGroupByDropItem_ErrorLoadingListItem;
+	public static String EntityAttributeListGroupByDropItem_FiltersLabel;
+	public static String EntityAttributeListGroupByDropItem_IncludedLabel;
+	public static String EntityAttributeTreeGroupByDropItem_AllLabel;
+	public static String EntityAttributeTreeGroupByDropItem_ErrorLoadingTreeItmes;
+	public static String EntityAttributeTreeGroupByDropItem_FiltersLabel;
+	public static String EntityAttributeTreeGroupByDropItem_IncludedLabel;
+	public static String EntityAttributeTreeGroupByDropItem_LevelLabel;
+	public static String EntityGridQueryType_Name;
+	public static String EntityObservationQueryType_Name;
+	public static String EntityQueryColumnCache_jobname;
+	public static String EntityQueryColumnCache_jobname2;
+	public static String EntitySummaryQueryType_Name;
+	public static String EntityTypeFilterContentProvider_LoadingLabel;
+	public static String EntityTypeFilterContentProvider_LoadJobName;
+	public static String EntityTypeSummaryContentProvider_CountLabel;
+	public static String EntityTypeSummaryContentProvider_DataModelJobName;
+	public static String EntityTypeSummaryContentProvider_ErrorLoadingList;
+	public static String EntityTypeSummaryContentProvider_ErrorLoadingTree;
+	public static String EntityTypeSummaryContentProvider_LoadEntityTypesJobName;
+	public static String EntityTypeSummaryContentProvider_LoadingLabel;
+	public static String EntityTypeSummaryContentProvider_LoadingListJobName;
+	public static String EntityTypeTreeNode_FilterLabel;
+	public static String EntityTypeTreeNode_GroupByLabel;
+	public static String EntityWaypointQueryType_Name;
 	public static String ObservationCategoryValueItem_CategoryKeyNotFound;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
 	public static String ObservationGridQueryType_QueryName;
@@ -140,6 +177,10 @@ public class Messages extends NLS {
 	public static String ObservationQueryType_QueryName;
 	public static String ObservationSummaryQueryType_QueryName;
 	public static String ObservationWaypointQueryType_QueryName;
+
+	public static String RemoveQueryEntityJob_Error1;
+	public static String RemoveQueryEntityJob_Error2;
+	public static String RemoveQueryEntityJob_JobName;
 
 	static {
 		// initialize resource bundle
