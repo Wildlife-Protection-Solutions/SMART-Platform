@@ -247,7 +247,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		btnExport = new Button(exportImportCmp, SWT.PUSH);
 		btnExport.setEnabled(false);
-		btnExport.setText("Export To XML ...");
+		btnExport.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_Xml);
 		btnExport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -256,7 +256,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		});
 
 		btnImport = new Button(exportImportCmp, SWT.PUSH);
-		btnImport.setText("Import From XML ...");
+		btnImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_Xml);
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -311,7 +311,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 	private void exportXml(){
 		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
-		fd.setFilterNames(new String[]{"Xml File (.xml)"});
+		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_XmlFile});
 		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
 		
 		String file = fd.open();
@@ -321,8 +321,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		}
 		final File f = new File(file);
 		if (f.exists()){
-			if (!MessageDialog.openQuestion(getShell(), "Overwrite file", 
-					MessageFormat.format("The file {0} exists.  Do you want to overwrite it?", new Object[]{ f.getName()}))){
+			if (!MessageDialog.openQuestion(getShell(), Messages.ConfigurableModelPropertyDialog_Overwrite_Dialog_Title, 
+					MessageFormat.format(Messages.ConfigurableModelPropertyDialog_Overwrite_Dialog_Message, new Object[]{ f.getName()}))){
 				return;
 			}
 		}
@@ -338,11 +338,11 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try{
-						monitor.beginTask("Exporting configurable model to xml file...", 5);
-						monitor.subTask("Converting ...");
+						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 5);
+						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Converting);
 						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convert(cm, monitor);
 						
-						monitor.subTask("Writing to file...");
+						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
 						FileOutputStream fout = new FileOutputStream(f);
 						try{
 							CmXmlManager.writeDataModel(xml, fout);
@@ -353,20 +353,20 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								MessageDialog.openInformation(pmd.getShell(), "Success", "Configurable model exported successfully");
+								MessageDialog.openInformation(pmd.getShell(), Messages.ConfigurableModelPropertyDialog_Success_Dialog_Title, Messages.ConfigurableModelPropertyDialog_Success_Dialog_Message);
 							}});
 						
 					}catch (final Exception ex){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(pmd.getShell(), "Error exporting configurable model to xml.", ex);
+								SmartPlugIn.displayLog(pmd.getShell(), Messages.ConfigurableModelPropertyDialog_ExportError, ex);
 							}});
 					}
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), "Error exporting configurable model to xml.", ex);
+			SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_ExportError, ex);
 		}
 	}
 	
