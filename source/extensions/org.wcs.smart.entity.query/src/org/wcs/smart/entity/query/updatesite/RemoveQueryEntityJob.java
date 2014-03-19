@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -55,7 +56,7 @@ public class RemoveQueryEntityJob extends Job {
 	};
 	
 	public RemoveQueryEntityJob() {
-		super("Removing Entity Queries");
+		super(Messages.RemoveQueryEntityJob_JobName);
 	}
 
 	@Override
@@ -86,10 +87,10 @@ public class RemoveQueryEntityJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, "Error un-installing entity module.  Could not remove database tables.  Please contact your system administrator.", e);
+					SmartPlugIn.displayLog(null, Messages.RemoveQueryEntityJob_Error1, e);
 				}
 			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, "Error occurred uninstalling plugin" + e.getLocalizedMessage(), e); 
+			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveQueryEntityJob_Error2 + e.getLocalizedMessage(), e); 
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

@@ -34,6 +34,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -198,7 +199,7 @@ public class EntityAttributeGroupBy implements IGroupBy {
 		try{
 			ea = getEntityAttribute(session);
 		}catch (Exception ex){
-			EntityQueryPlugIn.displayLog(MessageFormat.format("Entity attribute {0} could not be found for key {1}.", new Object[]{entityKey, entityAttributeKey}), ex);
+			EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityAttributeGroupBy_EntityAttributeNotFound, new Object[]{entityKey, entityAttributeKey}), ex);
 			return items;
 		}
 		
@@ -208,7 +209,7 @@ public class EntityAttributeGroupBy implements IGroupBy {
 				for (AttributeListItem it : att.getAttributeList()) {
 					for (int i = 0; i < filterHkeys.length; i++) {
 						if (filterHkeys[i].equals(it.getKeyId())) {
-							items.add(new ListItem(null, it.getName(), it
+							items.add(new ListItem(null, it.getName() + " [" + ea.getEntityType().getName()  + "]", it //$NON-NLS-1$ //$NON-NLS-2$
 									.getKeyId()));
 							break;
 						}
@@ -216,14 +217,14 @@ public class EntityAttributeGroupBy implements IGroupBy {
 				}
 			}else{				
 				for (AttributeListItem it : QueryDataModelManager.getInstance().getActiveAttributeListItems(att, session)) {
-					items.add(new ListItem(null, it.getName(), it.getKeyId()));
+					items.add(new ListItem(null, it.getName() + " [" + ea.getEntityType().getName()  + "]", it.getKeyId())); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}else if (att.getType() == AttributeType.TREE){
 			if (filterHkeys == null){
 				//get all attribute nodes with given hkey length
 				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att, treeLevel, true)){
-					items.add(new ListItem(null, child.getName(), child.getHkey()));
+					items.add(new ListItem(null, child.getName() + " [" + ea.getEntityType().getName()  + "]", child.getHkey())); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else{
 				HashSet<String> keys = new HashSet<String>();
@@ -232,7 +233,7 @@ public class EntityAttributeGroupBy implements IGroupBy {
 				}
 				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att, treeLevel, true)){
 					if (keys.contains(child.getHkey())){
-						items.add(new ListItem(null, child.getName(), child.getHkey()));	
+						items.add(new ListItem(null, child.getName() + " [" + ea.getEntityType().getName()  + "]", child.getHkey()));	 //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 			}
@@ -250,7 +251,7 @@ public class EntityAttributeGroupBy implements IGroupBy {
 			
 			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, ea.getDmAttribute().getKeyId());
 			if (attribute == null) {
-				throw new Exception(MessageFormat.format("Attribute {0} not found.",new Object[] { ea.getDmAttribute().getKeyId() }));
+				throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_AttributeNotFound,new Object[] { ea.getDmAttribute().getKeyId() }));
 			}
 			DropItem it = null;
 			if (attributeType == AttributeType.LIST) {
@@ -316,7 +317,7 @@ public class EntityAttributeGroupBy implements IGroupBy {
 		@SuppressWarnings("unchecked")
 		List<EntityAttribute> results = q.list();
 		if (results.size() != 1 ){
-			throw new Exception(MessageFormat.format("The entity attribute {0} is not a valid attribute for the entity type {1}.", new Object[]{entityAttributeKey, entityKey}));
+			throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_InvalidAttributeType, new Object[]{entityAttributeKey, entityKey}));
 		}else{
 			entityAttribute = results.get(0);
 			return entityAttribute;

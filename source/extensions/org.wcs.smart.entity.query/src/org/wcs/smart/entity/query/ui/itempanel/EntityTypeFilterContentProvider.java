@@ -39,6 +39,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -67,7 +68,7 @@ public class EntityTypeFilterContentProvider implements ITreeContentProvider{
 	public Object[] getElements(Object inputElement) {
 		if (types == null){
 			loadTypes();
-			return new String[]{"Loading..."};
+			return new String[]{Messages.EntityTypeFilterContentProvider_LoadingLabel};
 		}
 		return types.toArray();
 	}
@@ -102,7 +103,7 @@ public class EntityTypeFilterContentProvider implements ITreeContentProvider{
 	}
 	
 	private void loadTypes(){
-		Job j = new Job("Load Entity Types"){
+		Job j = new Job(Messages.EntityTypeFilterContentProvider_LoadJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

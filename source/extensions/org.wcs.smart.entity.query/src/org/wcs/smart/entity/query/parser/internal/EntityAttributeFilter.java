@@ -14,6 +14,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.engine.DerbyEntityQueryEngine;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -151,23 +152,23 @@ public class EntityAttributeFilter implements IFilter {
 		}
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT " + engine.tablePrefix(Attribute.class) + ".keyid");
-		sql.append(" FROM ");
+		sql.append("SELECT " + engine.tablePrefix(Attribute.class) + ".keyid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(engine.tableNamePrefix(EntityType.class));
-		sql.append(" join ");
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(engine.tableNamePrefix(Attribute.class));
-		sql.append(" on ");
-		sql.append(engine.tablePrefix(EntityType.class) + ".dm_attribute_uuid = ");
-		sql.append(engine.tablePrefix(Attribute.class) + ".uuid ");
-		sql.append(" WHERE ");
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(engine.tablePrefix(EntityType.class) + ".dm_attribute_uuid = "); //$NON-NLS-1$
+		sql.append(engine.tablePrefix(Attribute.class) + ".uuid "); //$NON-NLS-1$
+		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(engine.tablePrefix(EntityType.class));
-		sql.append(".keyid = '" + entityKey + "'");
-		sql.append(" AND ");
+		sql.append(".keyid = '" + entityKey + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" AND "); //$NON-NLS-1$
 		sql.append(engine.tablePrefix(EntityType.class));
 		if (SmartDB.isMultipleAnalysis()){
-			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()) + "'");
+			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
-			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()) + "'");
+			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		try{
@@ -176,7 +177,7 @@ public class EntityAttributeFilter implements IFilter {
 			if (rs.next()){
 				dmEntityTypeAttributeKey = rs.getString(1);
 			}else{
-				throw new RuntimeException(MessageFormat.format("No data model attribute found for entity type {0}.", new Object[]{entityKey}));
+				throw new RuntimeException(MessageFormat.format(Messages.EntityAttributeFilter_NoAttributeFound, new Object[]{entityKey}));
 			}
 			rs.close();
 		}catch (Exception ex){
@@ -223,16 +224,18 @@ public class EntityAttributeFilter implements IFilter {
 	 */
 	@Override
 	public String asString() {
+		String key = "entity:" + entityKey + ":attribute:" + attributeType.typeKey + ":" + entityAttributeKey; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
 		if (attributeType == AttributeType.BOOLEAN){
-			return "entity:" + entityKey + ":attribute:" + AttributeType.BOOLEAN.typeKey + ":" + entityAttributeKey;
+			return key ;
 		}else if (attributeType == AttributeType.NUMERIC){
-			return "entity:" + entityKey + ":attribute:" + AttributeType.NUMERIC.typeKey + ":" + entityAttributeKey + " " + op.asSmartValue() + " " + ((Double)value1).toString();  //$NON-NLS-1$  //$NON-NLS-2$
+			return key + " " + op.asSmartValue() + " " + ((Double)value1).toString();  //$NON-NLS-1$  //$NON-NLS-2$
 		}else if (attributeType == AttributeType.TEXT){
-			return "entity:" + entityKey + ":attribute:" + AttributeType.TEXT.typeKey + ":" + entityAttributeKey + " " + op.asSmartValue() + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$ 
+			return key + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$ 
 		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
-			return "entity:" + entityKey + ":attribute:" + AttributeType.LIST.typeKey + ":" + entityAttributeKey + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
+			return key + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
 		}else if (attributeType == AttributeType.DATE){
-			return "entity:" + entityKey + ":attribute:" + AttributeType.DATE.typeKey + ":" + entityAttributeKey + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ 
+			return key + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -277,7 +280,7 @@ public class EntityAttributeFilter implements IFilter {
 					EntityAttribute ea = getEntityAttribute(session);
 					AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, ea.getDmAttribute().getKeyId(), (String)value1);
 					if (ali == null){
-						throw new IllegalStateException(MessageFormat.format("Attribute list item {0} not found for attribute {1}.", new Object[]{(String)value1, ea.getDmAttribute().getKeyId()}));
+						throw new IllegalStateException(MessageFormat.format(Messages.EntityAttributeFilter_ListItemNotFound, new Object[]{(String)value1, ea.getDmAttribute().getKeyId()}));
 					}
 					li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
 				}catch (Exception ex){
@@ -290,7 +293,7 @@ public class EntityAttributeFilter implements IFilter {
 				EntityAttribute ea = getEntityAttribute(session);
 				AttributeTreeNode ali = QueryDataModelManager.getInstance().getAttributeTreeNode(session, ea.getDmAttribute().getKeyId(), (String)value1);
 				if (ali == null){
-					throw new IllegalStateException(MessageFormat.format("Attribute tree node {0} not found for attribute {1}.", new Object[]{(String)value1, ea.getDmAttribute().getKeyId()}));
+					throw new IllegalStateException(MessageFormat.format(Messages.EntityAttributeFilter_TreeNodeNotFound, new Object[]{(String)value1, ea.getDmAttribute().getKeyId()}));
 				}
 				it.initializeData(ali);
 			}catch (Exception ex){
@@ -318,7 +321,7 @@ public class EntityAttributeFilter implements IFilter {
 		@SuppressWarnings("unchecked")
 		List<EntityAttribute> results = q.list();
 		if (results.size() != 1 ){
-			throw new Exception(MessageFormat.format("The entity attribute {0} is not a valid attribute for the entity type {1}.", new Object[]{entityAttributeKey, entityKey}));
+			throw new Exception(MessageFormat.format(Messages.EntityAttributeFilter_Invalidtype, new Object[]{entityAttributeKey, entityKey}));
 		}else{
 			return results.get(0);
 		}

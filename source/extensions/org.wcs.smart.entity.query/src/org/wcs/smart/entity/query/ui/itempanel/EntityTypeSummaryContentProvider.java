@@ -51,6 +51,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -126,7 +127,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 	public Object[] getElements(Object inputElement) {
 		if (types == null){
 			loadTypes();
-			return new String[]{"Loading..."};
+			return new String[]{Messages.EntityTypeSummaryContentProvider_LoadingLabel};
 		}
 		return types.toArray();
 	}
@@ -243,7 +244,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){
 		
 		final List<AttributeTreeNode> kids = new ArrayList<AttributeTreeNode>();
-		Job j = new Job("Loading Data Model Tree"){
+		Job j = new Job(Messages.EntityTypeSummaryContentProvider_DataModelJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -267,7 +268,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log("Error loading data model tree." + ex.getLocalizedMessage(), ex);
+					QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingTree + ex.getLocalizedMessage(), ex);
 				}finally{
 					session.close();
 				}
@@ -279,7 +280,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 		try{
 			j.join();
 		}catch (Exception ex){
-			QueryPlugIn.log("Error loading data model tree."  + ex.getLocalizedMessage(), ex);
+			QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingTree  + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		
@@ -301,7 +302,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 	private Object[] getAttributeListChildren(final SummaryDmObject parent){
 		
 		final List<AttributeListItem> kids = new ArrayList<AttributeListItem>();
-		Job j = new Job("Loading list attribute items"){
+		Job j = new Job(Messages.EntityTypeSummaryContentProvider_LoadingListJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -320,7 +321,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log("Error loading list item" + ex.getLocalizedMessage(), ex);
+					QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingList + ex.getLocalizedMessage(), ex);
 				}finally{
 					session.close();
 				}
@@ -332,7 +333,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 		try{
 			j.join();
 		}catch (Exception ex){
-			QueryPlugIn.log("Error loading list item" + ex.getLocalizedMessage(), ex);
+			QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingList + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		
@@ -368,14 +369,14 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 						}else if (obj.getObject() instanceof AttributeTreeNode){
 							String name = ((AttributeTreeNode)obj.getObject()).getName();
 							if (obj.isValue()){
-								return MessageFormat.format("Count ''{0}''", new Object[]{name});
+								return MessageFormat.format(Messages.EntityTypeSummaryContentProvider_CountLabel, new Object[]{name});
 							}else{
 								return name;
 							}
 						}else if (obj.getObject() instanceof AttributeListItem){
 							String name = ((AttributeListItem)obj.getObject()).getName();
 							if (obj.isValue()){
-								return MessageFormat.format("Count ''{0}''", new Object[]{name});
+								return MessageFormat.format(Messages.EntityTypeSummaryContentProvider_CountLabel, new Object[]{name});
 							}else{
 								return name;
 							}
@@ -404,16 +405,16 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 	
 	
 	private void loadTypes(){
-		Job j = new Job("Load Entity Types"){
+		Job j = new Job(Messages.EntityTypeSummaryContentProvider_LoadEntityTypesJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try {
-					Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat");
-					q.setParameter("ca", SmartDB.getCurrentConservationArea());
-					q.setParameter("stat", EntityType.Status.ACTIVE);
+					Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat"); //$NON-NLS-1$
+					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+					q.setParameter("stat", EntityType.Status.ACTIVE); //$NON-NLS-1$
 					
 					List<EntityType> items = q.list();
 					List<EntityType> tmp = new ArrayList<EntityType>();

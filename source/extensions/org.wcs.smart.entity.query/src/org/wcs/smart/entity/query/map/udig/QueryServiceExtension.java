@@ -39,8 +39,7 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class QueryServiceExtension implements ServiceExtension {
-    public static final String KEY = "org.wcs.smart.udig.catalog.SmartQueryService"; //$NON-NLS-1$
-   
+
     /**
      * Service parameter conservation area uuid key
      */

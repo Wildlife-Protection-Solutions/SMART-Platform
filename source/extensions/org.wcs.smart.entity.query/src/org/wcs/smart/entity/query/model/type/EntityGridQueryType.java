@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.entity.query.ui.EntityGriddedQueryEditor;
@@ -81,7 +82,7 @@ public class EntityGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Entity Gridded Query";
+		return Messages.EntityGridQueryType_Name;
 	}
 
 	/**

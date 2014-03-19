@@ -140,7 +140,7 @@
             class="org.wcs.smart.entity.query.exportimport.EntityShapeQueryExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.entity.query.exportimport.EntitySimpleQueryDefinitionImporter">
+            class="org.wcs.smart.entity.query.exportimport.EntitySimpleQueryDefinitionExporter">
       </Exporter>
       <Exporter
             class="org.wcs.smart.entity.query.exportimport.EntitySummaryQueryDefinitionExporter">

@@ -41,6 +41,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -102,7 +103,7 @@ public class EntityAttributeListGroupByDropItem extends DropItem implements
 			session.getTransaction().rollback();
 			session.close();
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Error loading items for list.", ex);
+			QueryPlugIn.displayLog(Messages.EntityAttributeListGroupByDropItem_ErrorLoadingListItem, ex);
 			session.close();
 		}
 		return items;
@@ -177,13 +178,13 @@ public class EntityAttributeListGroupByDropItem extends DropItem implements
 		comp.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText(formatStringForLabel(attribute.getName()));
+		lbl.setText(formatStringForLabel(attribute.getEntityType().getName() + " - " + attribute.getName())); //$NON-NLS-1$
 		initDrag(lbl);
 		
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.EntityAttributeListGroupByDropItem_FiltersLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -214,7 +215,7 @@ public class EntityAttributeListGroupByDropItem extends DropItem implements
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
-		toolTip.setText("included:");
+		toolTip.setText(Messages.EntityAttributeListGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -234,7 +235,7 @@ public class EntityAttributeListGroupByDropItem extends DropItem implements
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (filters == null){
-			tipStr.append("All");
+			tipStr.append(Messages.EntityAttributeListGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filters){
 				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

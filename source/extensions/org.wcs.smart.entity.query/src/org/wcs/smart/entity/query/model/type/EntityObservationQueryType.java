@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.entity.query.ui.SimpleQueryEditor;
@@ -80,7 +81,7 @@ public class EntityObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Entity Observation Query";
+		return Messages.EntityObservationQueryType_Name;
 	}
 
 	/**

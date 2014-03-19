@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.entity.query.ui.SimpleQueryEditor;
@@ -79,7 +80,7 @@ public class EntityWaypointQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Entity Waypoint Query";
+		return Messages.EntityWaypointQueryType_Name;
 	}
 
 	/**

@@ -62,7 +62,7 @@ public class QueryService extends IQueryService {
 	/**
 	 * The query service id
 	 */
-	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.queryService"; //$NON-NLS-1$
+	public static final String SERVICE_ID = "org.wcs.smart.entity.udig.catalog.queryService"; //$NON-NLS-1$
 	
 	private Map<String, Serializable> params;
 	private URL url;	

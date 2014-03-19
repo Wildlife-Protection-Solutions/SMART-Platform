@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -41,41 +42,41 @@ public class AddEntityQueryJob extends Job {
 
 	private static String[] CREATE_TABLE_SQL = new String[]{
 
-		"CREATE TABLE smart.entity_waypoint_query(	UUID CHAR(16) FOR BIT DATA NOT NULL, CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL, QUERY_FILTER VARCHAR(32672), CA_FILTER VARCHAR(32672), CA_UUID CHAR(16) FOR BIT DATA NOT NULL, FOLDER_UUID CHAR(16) FOR BIT DATA, COLUMN_FILTER VARCHAR(32672), SHARED BOOLEAN DEFAULT false NOT NULL,ID VARCHAR(6) NOT NULL, PRIMARY KEY (UUID));",
-		"CREATE TABLE smart.entity_summary_query(UUID CHAR(16) for bit data NOT NULL,CREATOR_UUID CHAR(16) for bit data NOT NULL,CA_FILTER VARCHAR(32672),QUERY_DEF VARCHAR(32672),FOLDER_UUID CHAR(16) for bit data,SHARED BOOLEAN NOT NULL,CA_UUID CHAR(16) for bit data NOT NULL,ID VARCHAR(6) NOT NULL,PRIMARY KEY (UUID));",
-		"CREATE TABLE smart.entity_gridded_query(UUID CHAR(16) for bit data NOT NULL,CREATOR_UUID CHAR(16) for bit data NOT NULL,QUERY_FILTER VARCHAR(32672),CA_FILTER VARCHAR(32672),QUERY_DEF VARCHAR(32672),FOLDER_UUID CHAR(16) for bit data,SHARED BOOLEAN NOT NULL,CA_UUID CHAR(16) for bit data NOT NULL,ID VARCHAR(6) NOT NULL,CRS_DEFINITION VARCHAR(32672) NOT NULL,PRIMARY KEY (UUID));",
-		"CREATE TABLE smart.entity_observation_query (UUID CHAR(16) FOR BIT DATA NOT NULL,CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL,QUERY_FILTER VARCHAR(32672),CA_FILTER VARCHAR(32672),CA_UUID CHAR(16) FOR BIT DATA NOT NULL,FOLDER_UUID CHAR(16) FOR BIT DATA,COLUMN_FILTER VARCHAR(32672),SHARED BOOLEAN DEFAULT false NOT NULL,ID VARCHAR(6) NOT NULL,PRIMARY KEY (UUID));",
-		"ALTER TABLE smart.entity_waypoint_query ADD constraint entitywaypoint_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_waypoint_query ADD constraint entity_waypoint_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_waypoint_query ADD constraint entity_waypoint_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_observation_query ADD constraint entityobservation_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT 	ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_observation_query ADD constraint entity_observation_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_observation_query ADD constraint entity_observation_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_summary_query ADD constraint entity_summary_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_summary_query ADD constraint entity_summary_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_summary_query ADD constraint entity_summary_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_gridded_query ADD constraint entity_gridded_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_gridded_query ADD constraint entity_gridded_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"ALTER TABLE smart.entity_gridded_query ADD constraint entity_gridded_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;",
-		"GRANT ALL PRIVILEGES ON smart.entity_observation_query to manager;",
-		"GRANT ALL PRIVILEGES ON smart.entity_waypoint_query to manager;",
-		"GRANT ALL PRIVILEGES ON smart.entity_summary_query to manager;",
-		"GRANT ALL PRIVILEGES ON smart.entity_gridded_query to manager;",
-		"GRANT ALL PRIVILEGES ON smart.entity_observation_query to analyst;",
-		"GRANT ALL PRIVILEGES ON smart.entity_waypoint_query to analyst;",
-		"GRANT ALL PRIVILEGES ON smart.entity_summary_query to analyst;",
-		"GRANT ALL PRIVILEGES ON smart.entity_gridded_query to analyst;"
+		"CREATE TABLE smart.entity_waypoint_query(	UUID CHAR(16) FOR BIT DATA NOT NULL, CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL, QUERY_FILTER VARCHAR(32672), CA_FILTER VARCHAR(32672), CA_UUID CHAR(16) FOR BIT DATA NOT NULL, FOLDER_UUID CHAR(16) FOR BIT DATA, COLUMN_FILTER VARCHAR(32672), SHARED BOOLEAN DEFAULT false NOT NULL,ID VARCHAR(6) NOT NULL, PRIMARY KEY (UUID));", //$NON-NLS-1$
+		"CREATE TABLE smart.entity_summary_query(UUID CHAR(16) for bit data NOT NULL,CREATOR_UUID CHAR(16) for bit data NOT NULL,CA_FILTER VARCHAR(32672),QUERY_DEF VARCHAR(32672),FOLDER_UUID CHAR(16) for bit data,SHARED BOOLEAN NOT NULL,CA_UUID CHAR(16) for bit data NOT NULL,ID VARCHAR(6) NOT NULL,PRIMARY KEY (UUID));", //$NON-NLS-1$
+		"CREATE TABLE smart.entity_gridded_query(UUID CHAR(16) for bit data NOT NULL,CREATOR_UUID CHAR(16) for bit data NOT NULL,QUERY_FILTER VARCHAR(32672),CA_FILTER VARCHAR(32672),QUERY_DEF VARCHAR(32672),FOLDER_UUID CHAR(16) for bit data,SHARED BOOLEAN NOT NULL,CA_UUID CHAR(16) for bit data NOT NULL,ID VARCHAR(6) NOT NULL,CRS_DEFINITION VARCHAR(32672) NOT NULL,PRIMARY KEY (UUID));", //$NON-NLS-1$
+		"CREATE TABLE smart.entity_observation_query (UUID CHAR(16) FOR BIT DATA NOT NULL,CREATOR_UUID CHAR(16) FOR BIT DATA  NOT NULL,QUERY_FILTER VARCHAR(32672),CA_FILTER VARCHAR(32672),CA_UUID CHAR(16) FOR BIT DATA NOT NULL,FOLDER_UUID CHAR(16) FOR BIT DATA,COLUMN_FILTER VARCHAR(32672),SHARED BOOLEAN DEFAULT false NOT NULL,ID VARCHAR(6) NOT NULL,PRIMARY KEY (UUID));", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_waypoint_query ADD constraint entitywaypoint_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_waypoint_query ADD constraint entity_waypoint_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_waypoint_query ADD constraint entity_waypoint_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_observation_query ADD constraint entityobservation_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT 	ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_observation_query ADD constraint entity_observation_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_observation_query ADD constraint entity_observation_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_summary_query ADD constraint entity_summary_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_summary_query ADD constraint entity_summary_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_summary_query ADD constraint entity_summary_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_gridded_query ADD constraint entity_gridded_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID) REFERENCES smart.employee (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_gridded_query ADD constraint entity_gridded_query_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"ALTER TABLE smart.entity_gridded_query ADD constraint entity_gridded_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID) REFERENCES smart.query_folder (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_observation_query to manager;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_waypoint_query to manager;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_summary_query to manager;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_gridded_query to manager;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_observation_query to analyst;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_waypoint_query to analyst;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_summary_query to analyst;", //$NON-NLS-1$
+		"GRANT ALL PRIVILEGES ON smart.entity_gridded_query to analyst;" //$NON-NLS-1$
 	};
 	
 	
 	public AddEntityQueryJob() {
-		super("Add Entity QueryTables");
+		super(Messages.AddEntityQueryJob_AddQueryTablesJobName);
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		
-		monitor.beginTask("Create query tables", 10);
+		monitor.beginTask(Messages.AddEntityQueryJob_Progress1, 10);
 
 		//this must be run as Admin User
 		//AND only admin users should be able to install plugins in the first place.
@@ -94,10 +95,10 @@ public class AddEntityQueryJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					EntityPlugIn.displayLog("An unknown error occurred installing plugin." + e.getLocalizedMessage(), e);
+					EntityPlugIn.displayLog(Messages.AddEntityQueryJob_InstallError + e.getLocalizedMessage(), e);
 				}
 			});
-			return new Status(Status.ERROR, EntityPlugIn.PLUGIN_ID, "An unknown error occurred installing plugin.", e);
+			return new Status(Status.ERROR, EntityPlugIn.PLUGIN_ID, Messages.AddEntityQueryJob_InstallError, e);
 		}finally{
 			try{
 				session.close();
@@ -124,10 +125,10 @@ public class AddEntityQueryJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, "Error occurred during install of entity module (could not create database tables).\n\nPlease restart the system, uninstall the entity module, and reinstall it.  If the problem persists contact your system administrator.", e);
+					SmartPlugIn.displayLog(null, Messages.AddEntityQueryJob_InstallError2, e);
 				}
 			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, "An unknown error occurred during plugin install." + e.getLocalizedMessage(),e);
+			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityQueryJob_InstallError + e.getLocalizedMessage(),e);
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
