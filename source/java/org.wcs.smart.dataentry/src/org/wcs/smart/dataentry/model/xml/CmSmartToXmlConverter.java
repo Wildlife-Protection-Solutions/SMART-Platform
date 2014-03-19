@@ -35,6 +35,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -52,7 +53,6 @@ import org.wcs.smart.dataentry.model.xml.generated.NameType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts a database configurable model to the xml representation 
@@ -71,19 +71,19 @@ public class CmSmartToXmlConverter {
 		try {
 			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
 			
-			monitor.subTask("Processing languages");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
 			HashMap<String, Language> llookup = processLanguages(cm, xml);
 			monitor.worked(1);
 			
-			monitor.subTask("Processing list items");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
 			processListItems(cm, xml, llookup, session);
 			monitor.worked(1);
 
-			monitor.subTask("Processing tree nodes");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
 			processTreeNodes(cm, xml, llookup, session);
 			monitor.worked(1);
 
-			monitor.subTask("Processing configurable model nodes");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
 			processCmNodes(cm, xml, llookup, session, monitor);
 			monitor.worked(1);
 		} finally {
@@ -106,7 +106,6 @@ public class CmSmartToXmlConverter {
 		for (CmAttributeListItem dbItem : dbList) {
 			AttributeItemType item = new AttributeItemType();
 			setNames(item.getName(), dbItem.getNames(), llookup);
-			item.setUuid(SmartUtils.encodeHex(dbItem.getUuid()));
 			item.setIsActive(dbItem.getIsActive());
 			item.setRefKey(dbItem.getListItem().getKeyId());
 			items.getItem().add(item);
@@ -126,7 +125,6 @@ public class CmSmartToXmlConverter {
 		for (CmAttributeTreeNode dbItem : dbList) {
 			AttributeItemType node = new AttributeItemType();
 			setNames(node.getName(), dbItem.getNames(), llookup);
-			node.setUuid(SmartUtils.encodeHex(dbItem.getUuid()));
 			node.setIsActive(dbItem.getIsActive());
 			node.setRefKey(dbItem.getDmTreeNode().getKeyId());
 			nodes.getNode().add(node);
@@ -151,7 +149,7 @@ public class CmSmartToXmlConverter {
 	private static void processCmNode(CmNode node, List<NodeType> xmlNodes,
 			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
 
-		monitor.subTask(MessageFormat.format("Processing node: {0}", node.getName()));
+		monitor.subTask(MessageFormat.format(Messages.CmSmartToXmlConverter_ProcessingNode, node.getName()));
 		NodeType nt = new NodeType();
 		setNames(nt.getName(), node.getNames(), llookup);
 		if (node.getCategory() != null) {
@@ -171,7 +169,28 @@ public class CmSmartToXmlConverter {
 					aot.setStringValue(option.getStringValue());
 					aot.setDoubleValue(option.getDoubleValue());
 					if (option.getUuidValue() != null) {
-						aot.setUuidRef(SmartUtils.encodeHex(option.getUuidValue()));
+						switch (ca.getAttribute().getType()) {
+						case LIST:
+						{
+							Criteria query = session.createCriteria(AttributeListItem.class).add(Restrictions.eq("uuid", option.getUuidValue())); //$NON-NLS-1$
+							AttributeListItem item = (AttributeListItem) query.uniqueResult();
+							if (item != null) {
+								aot.setKeyRef(item.getKeyId());
+							}
+							break;
+						}
+						case TREE:
+						{
+							Criteria query = session.createCriteria(AttributeTreeNode.class).add(Restrictions.eq("uuid", option.getUuidValue())); //$NON-NLS-1$
+							AttributeTreeNode item = (AttributeTreeNode) query.uniqueResult();
+							if (item != null) {
+								aot.setKeyRef(item.getKeyId());
+							}
+							break;
+						}
+						default:
+							break;
+						}
 					}
 					at.getOption().add(aot);
 				}

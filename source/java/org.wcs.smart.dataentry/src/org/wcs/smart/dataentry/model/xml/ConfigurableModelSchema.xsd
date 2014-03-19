@@ -8,13 +8,6 @@ elementFormDefault="qualified">
     
     <complexType name="ConfigurableModel">
     	<sequence>
-<!-- 
-    		<element name="language" type="smrt:LanguageType" maxOccurs="unbounded" minOccurs="1"></element>
-    		<element name="node" type="smrt:NodeType" maxOccurs="unbounded" minOccurs="0"></element>
-    		<element name="listItem" type="smrt:AttributeItemType" maxOccurs="unbounded" minOccurs="0"></element>
-    		<element name="treeNode" type="smrt:AttributeItemType" maxOccurs="unbounded" minOccurs="0"></element>
- -->
-     		
     		<element name="languages" type="smrt:LanguageListType"
     			maxOccurs="1" minOccurs="1">
     		</element>
@@ -85,7 +78,7 @@ elementFormDefault="qualified">
     	<attribute name="id" type="string"></attribute>
     	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="doubleValue" type="double"></attribute>
-    	<attribute name="uuidRef" type="string"></attribute>
+    	<attribute name="keyRef" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeListItemTypeList">
@@ -108,7 +101,6 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="isActive" type="boolean"></attribute>
     	<attribute name="refKey" type="string"></attribute>
-    	<attribute name="uuid" type="string"></attribute>
     </complexType>
 
 </schema>
