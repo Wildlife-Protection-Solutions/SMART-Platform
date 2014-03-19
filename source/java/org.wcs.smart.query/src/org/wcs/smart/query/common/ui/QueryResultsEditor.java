@@ -76,7 +76,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 public abstract class QueryResultsEditor extends MultiPageEditorPart implements MapPart, IQueryEditor, IAdaptable{
 
 	protected QueryProxy query;
-	private QueryResultsTablePage page1;
+	protected QueryResultsTablePage page1;
 	private QueryMapPageEditor page2;
 	private boolean isDirty = false;
 	
