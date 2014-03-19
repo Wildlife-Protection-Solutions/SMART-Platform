@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _ConfigurableModel_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/dataentry", "ConfigurableModel");
+    private final static QName _ConfigurableModel_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/dataentry", "ConfigurableModel"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.smartconservationsoftware.xml._1_0.dataentry
