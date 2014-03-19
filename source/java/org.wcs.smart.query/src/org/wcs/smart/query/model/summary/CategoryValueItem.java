@@ -145,7 +145,7 @@ public class CategoryValueItem implements IValueItem {
 			}
 			category.getFullCategoryName();		//cache this
 			DropItem di = BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			di.initializeData(getDropItemInitializeData());
 			return di;
 		} catch (Exception ex) {
 			return new ErrorDropItem(ex.getMessage());
