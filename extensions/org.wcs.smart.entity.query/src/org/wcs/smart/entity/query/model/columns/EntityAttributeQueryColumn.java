@@ -23,7 +23,6 @@ package org.wcs.smart.entity.query.model.columns;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
-import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -36,9 +35,21 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class EntityAttributeQueryColumn extends AttributeQueryColumn {
+public class EntityAttributeQueryColumn extends QueryColumn {
 
+	private String entityKey;
+	private String entityAttributeKey;
 	
+	/**
+	 * Builds the column key for an entity attribute query column
+	 * 
+	 * @param entityTypeKey
+	 * @param entityAttributeKey
+	 * @return
+	 */
+	public static final String buildColumnKey(String entityTypeKey,	String entityAttributeKey){
+		return entityTypeKey + ":" + entityAttributeKey; //$NON-NLS-1$
+	}
 	/**
 	 * Creates a new attribute column.
 	 * 
@@ -46,21 +57,40 @@ public class EntityAttributeQueryColumn extends AttributeQueryColumn {
 	 * @param key the attribute id key
 	 * @param type the type of the attribute column
 	 */
-	public EntityAttributeQueryColumn(String name, String attributeId, AttributeType type){
-		super(name, attributeId, type);
+	public EntityAttributeQueryColumn(String name, String entityTypeKey, 
+			String entityAttributeKey, AttributeType type){
+		super(name, buildColumnKey(entityTypeKey,entityAttributeKey), null); 
+		
+		ColumnType ctype = ColumnType.STRING;
+		if (type == AttributeType.NUMERIC ){
+			ctype = ColumnType.NUMBER;
+		}else if (type == AttributeType.BOOLEAN){
+			ctype = ColumnType.BOOLEAN;
+		}else {
+			ctype = ColumnType.STRING;
+		}
+		super.setType(ctype);
+		
+		this.entityAttributeKey = entityAttributeKey;
+		this.entityKey = entityTypeKey;
+	}
+
+	public EntityAttributeQueryColumn(String name, String entityTypeKey, 
+			String entityAttributeKey, ColumnType type){
+		super(name, buildColumnKey(entityTypeKey,entityAttributeKey), type); 
+		this.entityAttributeKey = entityAttributeKey;
+		this.entityKey = entityTypeKey;
+	}
+
+	public String getEntityKey(){
+		return this.entityKey;
 	}
 	
-	/**
-	 * Creates a new column with the given column type.
-	 * @param name
-	 * @param key the query column full key of the form "attribute:<ATTRIBUTEID>"
-	 * @param type
-	 */
-	public EntityAttributeQueryColumn(String name, String key, ColumnType type){
-		super(name, key, type);
+	public String getEntityAttributeKey(){
+		return this.entityAttributeKey;
 	}
-
-
+	
+	
 	/**
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
@@ -68,7 +98,7 @@ public class EntityAttributeQueryColumn extends AttributeQueryColumn {
 	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof EntityQueryResultItem) {
 			EntityQueryResultItem item = (EntityQueryResultItem) queryResultItem;
-			Object x = item.getAttributeValue(attributeKey);
+			Object x = item.getEntityAttributeValue(getKey());
 			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
 				return Boolean.valueOf((Double)x >= 0.5);
 			}
@@ -83,7 +113,7 @@ public class EntityAttributeQueryColumn extends AttributeQueryColumn {
 	 */
 	@Override
 	public QueryColumn clone() {
-		QueryColumn newColumn = new EntityAttributeQueryColumn(getName(), getKey(), getType());
+		QueryColumn newColumn = new EntityAttributeQueryColumn(getName(),entityKey, entityAttributeKey, getType());
 		return newColumn;
 	}
 }

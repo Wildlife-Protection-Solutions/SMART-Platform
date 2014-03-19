@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.model;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.query.model.IResultItem;
 
 /**
@@ -53,6 +54,7 @@ public class EntityQueryResultItem implements IResultItem{
 	
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
+	private HashMap<String, Object> entityAttributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
 	
@@ -91,10 +93,35 @@ public class EntityQueryResultItem implements IResultItem{
 		this.observationCategory = categoryLabels;
 	}
 	
+	/**
+	 * Sets the observation attributes; map from attribute
+	 * key to the associated value
+	 * @param attributes
+	 */
 	public void setAttributes(HashMap<String, Object> attributes) {
 		this.attributes = attributes;
 	}
 	
+	/**
+	 * Adds an entity attribute value
+	 * @param entityKey the entity key
+	 * @param entityAttribute the entity attribute key
+	 * @param value the value
+	 */
+	public void addEntityAttribute(String entityKey, String entityAttribute, Object value){
+		entityAttributes.put(EntityAttributeQueryColumn.buildColumnKey(entityKey, entityAttribute), value);
+	}
+	
+	/**
+	 * 
+	 * @param columnKey key of the form "<entityKey>:<entityAttributeKey>".
+	 * See EntityAttributeQueryColumn.buildColumnKey
+	 * 
+	 * @return
+	 */
+	public Object getEntityAttributeValue(String columnKey){
+		return entityAttributes.get(columnKey);
+	}
 	/**
 	 * Finds the attribute value of the associated attribute
 	 * key.

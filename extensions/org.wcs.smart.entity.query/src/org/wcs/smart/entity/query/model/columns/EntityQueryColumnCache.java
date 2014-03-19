@@ -116,7 +116,7 @@ public class EntityQueryColumnCache {
 					int numCategory = QueryDataModelManager.getInstance()
 							.getActiveDepth();
 					for (int i = 0; i < numCategory; i++) {
-						cols.add(new EntityCategoryQueryColumn(i));
+						cols.add(new EtCategoryQueryColumn(i));
 					}
 
 					// sort attributes alphabetically
@@ -132,8 +132,7 @@ public class EntityQueryColumnCache {
 
 					for (Attribute att : atts) {
 						String name = att.getName();
-						cols.add(new EntityAttributeQueryColumn(name, att
-								.getKeyId(), att.getType()));
+						cols.add(new EtAttributeQueryColumn(name, att.getKeyId(), att.getType()));
 					}
 					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 

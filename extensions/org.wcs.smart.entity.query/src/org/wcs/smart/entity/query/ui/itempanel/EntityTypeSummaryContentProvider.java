@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -48,12 +47,12 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -299,56 +298,6 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 		return results;
 	}
 	
-	private Object[] getAttributeListChildren(final SummaryDmObject parent){
-		
-		final List<AttributeListItem> kids = new ArrayList<AttributeListItem>();
-		Job j = new Job(Messages.EntityTypeSummaryContentProvider_LoadingListJobName){
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
-					List<AttributeListItem> nodes = null;
-					
-					if (parent.getObject() instanceof EntityAttribute){
-						Attribute att = ((EntityAttribute)parent.getObject()).getDmAttribute();
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(att, session);
-						for(AttributeListItem it : nodes){
-							it.getAttribute().getName();
-						}
-					}
-					kids.addAll(nodes);					
-					session.getTransaction().rollback();
-				}catch (Exception ex){
-					QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingList + ex.getLocalizedMessage(), ex);
-				}finally{
-					session.close();
-				}
-				return Status.OK_STATUS;
-			}
-			
-		};
-		j.schedule();
-		try{
-			j.join();
-		}catch (Exception ex){
-			QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingList + ex.getLocalizedMessage(), ex);
-			return null;
-		}
-		
-		if (kids == null || kids.size() == 0){
-			return null;
-		}
-		Object[] results = new Object[kids.size()];
-		int index = 0;
-		
-		for (AttributeListItem kid : kids){
-			results[index++] = new SummaryDmObject(kid, parent.getObject(), parent.isValue());
-		}
-		return results;
-	}
-	
 	private DataModelLabelProvider dmLabelProvider;
 	private LabelProvider lp = null;
 	public LabelProvider getLabelProvider(){
@@ -409,29 +358,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat"); //$NON-NLS-1$
-					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					q.setParameter("stat", EntityType.Status.ACTIVE); //$NON-NLS-1$
-					
-					List<EntityType> items = q.list();
-					List<EntityType> tmp = new ArrayList<EntityType>();
-					for (EntityType t : items){
-						tmp.add(t);
-						t.getDmAttribute().getName();
-						for (EntityAttribute ea : t.getAttributes()){
-							ea.getName();
-							ea.getDmAttribute().getType();
-							ea.getDmAttribute().getAggregations().size();
-						}
-					}
-					types = tmp;
-				} finally {
-					session.getTransaction().rollback();
-					session.close();
-				}
+				types = EntityHibernateManager.getActiveEntityTypes();
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {

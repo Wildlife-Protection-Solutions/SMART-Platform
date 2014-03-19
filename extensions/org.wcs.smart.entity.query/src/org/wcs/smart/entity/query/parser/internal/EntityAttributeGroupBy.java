@@ -26,17 +26,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.model.summary.IGroupBy;
@@ -306,21 +305,9 @@ public class EntityAttributeGroupBy implements IGroupBy {
 	 * @throws Exception
 	 */
 	public EntityAttribute getEntityAttribute(Session session) throws Exception{
-		if (entityAttribute != null){
-			return entityAttribute;
-		}
-		Query q = session.createQuery("From EntityAttribute where entityType.conservationArea.uuid = :ca and entityType.keyId = :entitykey and keyId = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
-		q.setParameter("key", entityAttributeKey); //$NON-NLS-1$
-		q.setParameter("entitykey", entityKey); //$NON-NLS-1$
-		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
-		List<EntityAttribute> results = q.list();
-		if (results.size() != 1 ){
-			throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_InvalidAttributeType, new Object[]{entityAttributeKey, entityKey}));
-		}else{
-			entityAttribute = results.get(0);
-			return entityAttribute;
-		}
+		if (entityAttribute == null){
+			entityAttribute = EntityHibernateManager.getEntityAttribute(entityKey, entityAttributeKey, session);
+		}		
+		return entityAttribute;
 	}
 }

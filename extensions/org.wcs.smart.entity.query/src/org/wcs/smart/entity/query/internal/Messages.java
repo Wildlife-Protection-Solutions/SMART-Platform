@@ -101,6 +101,7 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_ServiceName;
 	public static String SimplePatrolFilterPanel_PanelTitle;
 	public static String SimpleQuery_DropItemParseError;
+	public static String SimpleQueryEditor_JobName;
 	public static String SummaryFilterPanel_AreaGroupBy;
 	public static String SummaryFilterPanel_GeneralItemGroupBy;
 	public static String SummaryFilterPanel_RefreshTreeJobName;
