@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/dataentry" 
+xmlns:smrt="http://www.smartconservationsoftware.org/xml/1.0/dataentry"
+elementFormDefault="qualified">
+  	
+    <element name="ConfigurableModel" type="smrt:ConfigurableModel"></element>
+    
+    <complexType name="ConfigurableModel">
+    	<sequence>
+<!-- 
+    		<element name="language" type="smrt:LanguageType" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="node" type="smrt:NodeType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="listItem" type="smrt:AttributeItemType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="treeNode" type="smrt:AttributeItemType" maxOccurs="unbounded" minOccurs="0"></element>
+ -->
+     		
+    		<element name="languages" type="smrt:LanguageListType"
+    			maxOccurs="1" minOccurs="1">
+    		</element>
+    		<element name="nodes" type="smrt:NodeTypeList"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="listItems" type="smrt:AttributeListItemTypeList"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="treeNodes" type="smrt:AttributeTreeNodeTypeList"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		
+    	</sequence>
+    </complexType>
+
+    <complexType name="LanguageListType">
+    	<sequence>
+    		<element name="language" type="smrt:LanguageType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="LanguageType">
+    	<attribute name="code" type="string"></attribute>
+    </complexType>
+
+    <complexType name="NodeTypeList">
+    	<sequence>
+    		<element name="node" type="smrt:NodeType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="NodeType">
+    	<sequence>
+    		<element name="name" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="node" type="smrt:NodeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="attribute" type="smrt:AttributeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="categoryKey" type="string"></attribute>
+    	<attribute name="photoAllowed" type="boolean"></attribute>
+    	<attribute name="photoRequired" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="NameType">
+    	<attribute name="language_code" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+    <complexType name="AttributeType">
+    	<sequence>
+    		<element name="name" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="option" type="smrt:AttributeOptionType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="attributeKey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="AttributeOptionType">
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="stringValue" type="string"></attribute>
+    	<attribute name="doubleValue" type="double"></attribute>
+    	<attribute name="uuidRef" type="string"></attribute>
+    </complexType>
+
+    <complexType name="AttributeListItemTypeList">
+    	<sequence>
+    		<element name="item" type="smrt:AttributeItemType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="AttributeTreeNodeTypeList">
+    	<sequence>
+    		<element name="node" type="smrt:AttributeItemType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="AttributeItemType">
+     	<sequence>
+    		<element name="name" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="isActive" type="boolean"></attribute>
+    	<attribute name="refKey" type="string"></attribute>
+    	<attribute name="uuid" type="string"></attribute>
+    </complexType>
+
+</schema>

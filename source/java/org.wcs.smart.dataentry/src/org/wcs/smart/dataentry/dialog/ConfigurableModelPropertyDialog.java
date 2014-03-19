@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -51,12 +53,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
+import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -78,6 +83,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	private Button btnNew;
 	private Button btnEdit;
 	private Button btnDelete;
+	private Button btnExport;
+	private Button btnImport;
 
 	private LoadCmModelJob loadCmModelJob = new LoadCmModelJob();
 	
@@ -111,6 +118,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				updateTreeViewer();
 				btnEdit.setEnabled(!modelListViewer.getSelection().isEmpty());
 				btnDelete.setEnabled(!modelListViewer.getSelection().isEmpty());
+				btnExport.setEnabled(!modelListViewer.getSelection().isEmpty());
 			}
 		});
 		
@@ -231,6 +239,31 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				updateTreeViewer();
 			}
 		});		
+
+
+		Composite exportImportCmp = new Composite(container, SWT.NONE);
+		exportImportCmp.setLayout(new GridLayout(2, false));
+		exportImportCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
+		
+		btnExport = new Button(exportImportCmp, SWT.PUSH);
+		btnExport.setEnabled(false);
+		btnExport.setText("Export To XML ...");
+		btnExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportXml();
+			}
+		});
+
+		btnImport = new Button(exportImportCmp, SWT.PUSH);
+		btnImport.setText("Import From XML ...");
+		btnImport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				super.widgetSelected(e);
+			}
+		});
 		
 		setTitle(Messages.ConfigurableModelPropertyDialog_Title);
 		setMessage(Messages.ConfigurableModelPropertyDialog_Message);
@@ -276,6 +309,67 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		}
 	}
 
+	private void exportXml(){
+		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
+		fd.setFilterNames(new String[]{"Xml File (.xml)"});
+		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
+		
+		String file = fd.open();
+		if (file == null){
+			//nothing selected
+			return;
+		}
+		final File f = new File(file);
+		if (f.exists()){
+			if (!MessageDialog.openQuestion(getShell(), "Overwrite file", 
+					MessageFormat.format("The file {0} exists.  Do you want to overwrite it?", new Object[]{ f.getName()}))){
+				return;
+			}
+		}
+		final ConfigurableModel cm = (ConfigurableModel) ((IStructuredSelection) modelListViewer.getSelection()).getFirstElement();
+		if (cm == null){
+			return;
+		}
+		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					try{
+						monitor.beginTask("Exporting configurable model to xml file...", 5);
+						monitor.subTask("Converting ...");
+						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convert(cm, monitor);
+						
+						monitor.subTask("Writing to file...");
+						FileOutputStream fout = new FileOutputStream(f);
+						try{
+							CmXmlManager.writeDataModel(xml, fout);
+						}finally{
+							fout.close();
+						}
+						monitor.done();
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openInformation(pmd.getShell(), "Success", "Configurable model exported successfully");
+							}});
+						
+					}catch (final Exception ex){
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(pmd.getShell(), "Error exporting configurable model to xml.", ex);
+							}});
+					}
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(getShell(), "Error exporting configurable model to xml.", ex);
+		}
+	}
+	
 	class LoadCmModelJob extends Job{
 		public ConfigurableModel modelToLoad;
 		
