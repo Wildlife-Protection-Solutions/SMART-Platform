@@ -269,5 +269,12 @@
          </menu>
       </menuContribution>
    </extension>
+   <extension
+         point="org.wcs.smart.query.property">
+      <queryproperty
+            propertyName="Query Columns"
+            propertyProvider="org.wcs.smart.entity.query.ui.ColumnQueryPropertyProvider">
+      </queryproperty>
+   </extension>
 
 </plugin>

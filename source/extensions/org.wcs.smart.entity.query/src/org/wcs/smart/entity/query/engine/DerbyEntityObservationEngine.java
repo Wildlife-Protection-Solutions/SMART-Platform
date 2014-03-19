@@ -34,8 +34,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttributeValue;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -45,7 +49,10 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -60,13 +67,15 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 
 	private String queryDataTable;
 	private int categoryCount;
+	private SimpleQuery query;
 	
 	public DerbyPagedObservationResult executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
 		if (query.getDateFilter() == null){
 			return null;
 		}
+		this.query = query;
 		queryDataTable = createTempTableName();
-		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable, this);
+		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable, this, query);
 		
 		session.doWork(new Work() {
 			@Override
@@ -313,6 +322,78 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		} finally {
 			rs.close();
 		}
+	
+		//do the same thing for entity list and tree attributes
+		final List<String> entityTypes = new ArrayList<String>();
+		query.getFilter().getFilter().accept(new IFilterVisitor() {			
+			@Override
+			public void visit(IFilter filter) {
+				if (filter instanceof EntityAttributeFilter){
+					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				}
+			}
+		});
+		if (entityTypes.size() == 0){
+			return;
+		}
+		
+		StringBuilder s = new StringBuilder();
+		s.append("SELECT DISTINCT "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityAttributeValue.class) + "." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		s.append(", "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityType.class) + ".ca_uuid "); //$NON-NLS-1$
+		s.append(" FROM "); //$NON-NLS-1$
+		s.append(tableNamePrefix(EntityAttributeValue.class ));
+		s.append(" join "); //$NON-NLS-1$
+		s.append(tableNamePrefix(Entity.class ));
+		s.append(" on "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityAttributeValue.class ) + ".entity_uuid = "); //$NON-NLS-1$
+		s.append(tablePrefix(Entity.class ) + ".uuid "); //$NON-NLS-1$
+		s.append(" join "); //$NON-NLS-1$
+		s.append(tableNamePrefix(EntityType.class ));
+		s.append(" on "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityType.class ) + ".uuid = "); //$NON-NLS-1$
+		s.append(tablePrefix(Entity.class ) + ".entity_type_uuid "); //$NON-NLS-1$
+		s.append(" WHERE keyid IN ("); //$NON-NLS-1$
+		for (String et : entityTypes){
+			s.append("'" + et + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		s.deleteCharAt(s.length()-1);
+		s.append(")"); //$NON-NLS-1$
+		s.append(" AND ca_uuid IN ("); //$NON-NLS-1$
+		if (SmartDB.isMultipleAnalysis()){
+			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+				s.append("x'" + SmartUtils.encodeHex(ca.getUuid()) + "',");	 //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			s.deleteCharAt(s.length()-1);	
+		}else{
+			s.append("x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		s.append(")"); //$NON-NLS-1$
+		
+		QueryPlugIn.logSql(s.toString());
+		rs = c.createStatement().executeQuery(s.toString());
+		try {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				if (uuid != null) {
+					byte[] cauuid = rs.getBytes(2);
+					String value = linkedData.getLabel(session, cauuid, uuid);
+					statement.setBytes(1, uuid);
+					statement.setString(2, value);
+					statement.addBatch();
+					count++;
+					if (count >= 100){
+						statement.executeBatch();
+						count = 0;
+					}
+				}
+			}
+			statement.executeBatch();
+		} finally {
+			rs.close();
+		}
+		
 	}
 	
 	/**

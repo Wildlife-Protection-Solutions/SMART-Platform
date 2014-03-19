@@ -40,7 +40,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class EntityCategoryQueryColumn extends CategoryQueryColumn{
+public class EtCategoryQueryColumn extends CategoryQueryColumn{
 
 	/**
 	 * Creates a new category column
@@ -48,7 +48,7 @@ public class EntityCategoryQueryColumn extends CategoryQueryColumn{
 	 * @param name the name
 	 * @param level the level in the data model this column represents
 	 */
-	public EntityCategoryQueryColumn(int level){
+	public EtCategoryQueryColumn(int level){
 		super(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, new Object[]{level}),level);
 	}
 	
@@ -83,7 +83,7 @@ public class EntityCategoryQueryColumn extends CategoryQueryColumn{
 	 */
 	@Override
 	public QueryColumn clone() {
-		EntityCategoryQueryColumn newColumn = new EntityCategoryQueryColumn(level);
+		EtCategoryQueryColumn newColumn = new EtCategoryQueryColumn(level);
 		return newColumn;
 	}
 

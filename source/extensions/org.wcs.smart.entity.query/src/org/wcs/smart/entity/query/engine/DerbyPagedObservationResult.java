@@ -44,14 +44,18 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
-import org.wcs.smart.entity.query.model.columns.EntityCategoryQueryColumn;
+import org.wcs.smart.entity.query.model.columns.EtCategoryQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -88,18 +92,38 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	private int direction = SWT.UP;
 	private boolean hasSortColumns = false;
 	private DerbyEntityQueryEngine engine;
-
 	
-	public DerbyPagedObservationResult(String queryTempTable, DerbyEntityQueryEngine engine) {
+	private List<String> entityTypes;
+	public DerbyPagedObservationResult(String queryTempTable, DerbyEntityQueryEngine engine, SimpleQuery query) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
+		
+		entityTypes = new ArrayList<String>();
+		query.getFilter().getFilter().accept(new IFilterVisitor() {			
+			@Override
+			public void visit(IFilter filter) {
+				if (filter instanceof EntityAttributeFilter){
+					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				}
+			}
+		});
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyEntityQueryEngine engine) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyEntityQueryEngine engine, SimpleQuery query) {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;
 		this.engine = engine;
+
+		entityTypes = new ArrayList<String>();
+		query.getFilter().getFilter().accept(new IFilterVisitor() {			
+			@Override
+			public void visit(IFilter filter) {
+				if (filter instanceof EntityAttributeFilter){
+					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				}
+			}
+		});
 	}
 	
 	@Override
@@ -359,7 +383,67 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			}
 		} finally {
 			rs.close();
-		}		
+		}
+		
+		
+		if (entityTypes.size() > 0){
+		//attach entities
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT r.ob_uuid, a.keyid as entitykey, ea.keyid as entityattributekey, eav.number_value, eav.string_value, rl.value as list_value, rt.value as tree_value "); //$NON-NLS-1$
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(queryTempTable);
+			sql.append(" r join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid join smart.entity_type a on a.dm_attribute_uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+			sql.append(" join smart.entity e on e.attribute_list_item_uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
+			sql.append(" join smart.entity_attribute_value eav on eav.entity_uuid = e.uuid "); //$NON-NLS-1$
+			sql.append(" join smart.entity_attribute ea on ea.uuid = eav.entity_attribute_uuid left join "); //$NON-NLS-1$
+			sql.append(queryTempTable).append("_list rl on eav.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
+			sql.append(queryTempTable).append("_tree rt on eav.tree_node_uuid = rt.UUID "); //$NON-NLS-1$	
+		
+			sql.append("WHERE r.ob_uuid in ("); //$NON-NLS-1$
+			for (EntityQueryResultItem it : result) {
+				if (it.getObservationUuid() != null) {
+					sql.append("x'").append(SmartUtils.encodeHex(it.getObservationUuid())).append('\''); //$NON-NLS-1$
+					sql.append(',');
+				}
+			}
+			sql.deleteCharAt(sql.length() - 1);
+			
+			sql.append(") AND "); //$NON-NLS-1$
+			sql.append("a.keyid in ("); //$NON-NLS-1$
+			for (String et : entityTypes){
+				sql.append("'" + et + "',");  //$NON-NLS-1$//$NON-NLS-2$
+			}
+			sql.deleteCharAt(sql.length() - 1);
+			sql.append(")"); //$NON-NLS-1$
+			QueryPlugIn.logSql(sql.toString());
+			
+			rs = c.createStatement().executeQuery(sql.toString());
+			while(rs.next()){
+				byte[] obuuid = rs.getBytes(1);
+				String entityKey = rs.getString(2);
+				String entityAttributeKey = rs.getString(3);
+				Object value = null;
+				if (rs.getObject(4) != null){
+					value = rs.getDouble(4);
+				}else if (rs.getObject(5) != null){
+					value = rs.getString(5);
+				}else if (rs.getObject(6) != null){
+					value = rs.getString(6);
+				}else if (rs.getObject(7) != null){
+					value = rs.getString(7);
+				}
+				
+				for (EntityQueryResultItem it : result) {
+					if (it.getObservationUuid() != null &&
+							Arrays.equals(it.getObservationUuid(),obuuid )) {
+						it.addEntityAttribute(entityKey, entityAttributeKey, value);
+					}
+				}
+			}
+				
+			
+		}
+		
 	}
 	
 	private String buildSortSql() {
@@ -384,7 +468,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				result = "order by r."+key; //$NON-NLS-1$
 			}
 		}
-		if (sortColumn instanceof EntityCategoryQueryColumn) {
+		if (sortColumn instanceof EtCategoryQueryColumn) {
 			String key = sortColumn.getKey();
 			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$

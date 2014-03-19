@@ -3,14 +3,13 @@ package org.wcs.smart.entity.query.parser.internal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
-import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.engine.DerbyEntityQueryEngine;
@@ -104,6 +103,7 @@ public class EntityAttributeFilter implements IFilter {
 	private String entityKey;
 	private String entityAttributeKey;
 	private AttributeType attributeType;
+	private EntityAttribute entityAttribute;
 	private String dmEntityTypeAttributeKey = null;
 	private Operator op;
 	private Object value1;
@@ -312,21 +312,16 @@ public class EntityAttributeFilter implements IFilter {
 	 * @throws Exception
 	 */
 	public EntityAttribute getEntityAttribute(Session session) throws Exception{
-		
-		Query q = session.createQuery("From EntityAttribute where entityType.conservationArea.uuid = :ca and entityType.keyId = :entitykey and keyId = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
-		q.setParameter("key", entityAttributeKey); //$NON-NLS-1$
-		q.setParameter("entitykey", entityKey); //$NON-NLS-1$
-		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
-		List<EntityAttribute> results = q.list();
-		if (results.size() != 1 ){
-			throw new Exception(MessageFormat.format(Messages.EntityAttributeFilter_Invalidtype, new Object[]{entityAttributeKey, entityKey}));
-		}else{
-			return results.get(0);
-		}
+		if (entityAttribute == null){
+			entityAttribute = EntityHibernateManager.getEntityAttribute(entityKey, entityAttributeKey, session);
+		}		
+		return entityAttribute;
 	}
 
+	/**
+	 * 
+	 */
+	@Override
 	public void accept(IFilterVisitor visitor){
 		visitor.visit(this);
 	}

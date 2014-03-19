@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.entity.query.ui.itempanel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,15 +32,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Entity Type filter tree item content provider 
@@ -107,28 +103,8 @@ public class EntityTypeFilterContentProvider implements ITreeContentProvider{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat"); //$NON-NLS-1$
-					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					q.setParameter("stat", EntityType.Status.ACTIVE); //$NON-NLS-1$
-					
-					List<EntityType> items = q.list();
-					List<EntityType> tmp = new ArrayList<EntityType>();
-					for (EntityType t : items){
-						tmp.add(t);
-						t.getDmAttribute().getName();
-						for (EntityAttribute ea : t.getAttributes()){
-							ea.getName();
-							ea.getDmAttribute().getType();
-						}
-					}
-					types = tmp;
-				} finally {
-					session.getTransaction().rollback();
-					session.close();
-				}
+				types = EntityHibernateManager.getActiveEntityTypes();
+				
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {

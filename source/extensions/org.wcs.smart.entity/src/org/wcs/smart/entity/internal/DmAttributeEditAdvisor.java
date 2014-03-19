@@ -48,8 +48,7 @@ public class DmAttributeEditAdvisor implements IDmEditAdvisor {
 		//find all entity types associated with attribute
 		Query q = session.createQuery("FROM EntityType where dmAttribute = :att"); //$NON-NLS-1$
 		q.setParameter("att", attribute); //$NON-NLS-1$
-		List items = q.list();
-		
+		List<?> items = q.list();
 		if (items.size()  > 0){
 			EntityType et = (EntityType)items.get(0);
 			return MessageFormat.format(

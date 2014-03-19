@@ -105,6 +105,8 @@ public class Messages extends NLS {
 	public static String EntityFilter_ActiveOnlyEntitiesLabel;
 	public static String EntityFilter_AllEntitiesLabel;
 	public static String EntityFilter_CustomEntityLabel;
+	public static String EntityHibernateManager_InvalidEntityAttribute;
+	public static String EntityHibernateManager_InvalidEntityTypeKey;
 	public static String EntityListTable_AnyLabel;
 	public static String EntityListTable_FilterFieldLabel;
 	public static String EntityListTable_FilterFieldTooltip;
