@@ -62,6 +62,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
+import org.wcs.smart.dataentry.model.xml.CmXmlToSmartImporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -260,8 +261,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				super.widgetSelected(e);
+				importXml();
 			}
 		});
 		
@@ -368,6 +368,35 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_ExportError, ex);
 		}
+	}
+
+
+	private void importXml() {
+		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+		fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[]{"xml (*.xml)", "All Files (*.*)"});
+		
+		String file = fd.open();
+		if (file != null) {
+			final File f = new File(file);
+			try {
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+				pmd.run(false, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						try {
+							CmXmlToSmartImporter importer = new CmXmlToSmartImporter();
+							importer.importXml(f, monitor);
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog(getShell(), "Error occured while importing configurable model from xml file." + "\n\n" + ex.getMessage(), ex);
+						}
+					}
+
+				});
+			} catch (Exception ex) {
+				SmartPlugIn.displayLog(getShell(), "Error occured while importing configurable model from xml file." + "\n\n" + ex.getMessage(), ex);
+			}
+		}				
 	}
 	
 	class LoadCmModelJob extends Job{
