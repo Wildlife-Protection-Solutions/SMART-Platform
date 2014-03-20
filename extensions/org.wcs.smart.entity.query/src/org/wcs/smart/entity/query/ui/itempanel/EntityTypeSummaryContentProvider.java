@@ -117,6 +117,7 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 			this.dataModel = (DataModel)newInput;
 			provider.inputChanged(viewer, oldInput, this.dataModel);
 		}
+		types = null;
 	}
 
 	/**

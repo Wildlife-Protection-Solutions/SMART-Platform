@@ -45,7 +45,7 @@ import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.entity.query.ui.itempanel.ConservationAreaTreeNode;
 import org.wcs.smart.entity.query.ui.itempanel.EntityGriddedItemPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntityQueryFilterPanel;
-import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryFilterPanel;
+import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryItemPanel;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -100,15 +100,15 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 			
 		}else if (source instanceof AreaType){
-			if (queryItemPanelId.equals(EntitySummaryFilterPanel.ID)){
+			if (queryItemPanelId.equals(EntitySummaryItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
 			}
 		}else if (source instanceof Area){
-			if (queryItemPanelId.equals(EntitySummaryFilterPanel.ID)){
+			if (queryItemPanelId.equals(EntitySummaryItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 			}
 		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
-			if (queryItemPanelId.equals(EntitySummaryFilterPanel.ID) ||
+			if (queryItemPanelId.equals(EntitySummaryItemPanel.ID) ||
 					queryItemPanelId.equals(EntityGriddedItemPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}

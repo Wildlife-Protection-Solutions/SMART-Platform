@@ -67,7 +67,7 @@ import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
  * @author Emily
  *
  */
-public class EntitySummaryFilterPanel extends AbstractQueryItemPanel{
+public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 	
 	public static final String ID = "org.wcs.smart.entity.query.summaryItemPanel"; //$NON-NLS-1$
 	
@@ -93,7 +93,7 @@ public class EntitySummaryFilterPanel extends AbstractQueryItemPanel{
 		}
 	};
 	
-	public  EntitySummaryFilterPanel(){
+	public  EntitySummaryItemPanel(){
 	}
 	
 	

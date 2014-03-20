@@ -58,6 +58,7 @@ public class EntityTypeFilterContentProvider implements ITreeContentProvider{
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
+		this.types = null;
 	}
 
 	@Override
