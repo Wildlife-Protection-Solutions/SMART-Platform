@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -79,18 +80,18 @@ public class CmXmlToSmartImporter {
 	private Map<String, AttributeTreeNode> treeNodeLookup;
 
 	public void importXml(File xmlFile, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Importing configurable model from xml...", 3);
+		monitor.beginTask(Messages.CmXmlToSmartImporter_ImportingFromXml, 3);
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm = null;
 		FileInputStream in = new FileInputStream(xmlFile);
 		try {
-			monitor.subTask("Reading file");
+			monitor.subTask(Messages.CmXmlToSmartImporter_Reading);
 			xmlCm = CmXmlManager.readDataModel(in);
 			monitor.worked(1);
 		} finally {
 			in.close();
 		}
 		if (xmlCm == null) {
-			throw new Exception("Error reading from xml file");
+			throw new Exception(Messages.CmXmlToSmartImporter_ReadFile_Error);
 		}
 		convertAndSave(xmlCm, monitor);
 	}
@@ -111,7 +112,7 @@ public class CmXmlToSmartImporter {
 			
 			useAsDefault = checkLanguage(xmlCm.getLanguages().getLanguage(), SmartDB.getCurrentConservationArea());
 			if (useAsDefault == null){
-				throw new IllegalStateException("Default language is unknown for imported configurable model");
+				throw new IllegalStateException(Messages.CmXmlToSmartImporter_DefaultLanguage_Error);
 			}
 
 			ConfigurableModel cm = new ConfigurableModel();
@@ -120,12 +121,12 @@ public class CmXmlToSmartImporter {
 			
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
 			
-			monitor.subTask("Importing attribute list items");
+			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
 			List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
-			monitor.subTask("Importing attribute tree nodes");
+			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
 			List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
 			
-			monitor.subTask("Saving to database");
+			monitor.subTask(Messages.CmXmlToSmartImporter_Saving);
 			session.save(cm);
 			for (CmAttributeListItem item : listItems) {
 				session.save(item);
@@ -186,7 +187,7 @@ public class CmXmlToSmartImporter {
 			CmNode cmNode = new CmNode();
 			cmNode.setModel(cm);
 			updateNames(cmNode, xmlNode.getName());
-			monitor.subTask(MessageFormat.format("Importing node: {0}", cmNode.findName(langLookup.get(useAsDefault))));
+			monitor.subTask(MessageFormat.format(Messages.CmXmlToSmartImporter_ImportingNode, cmNode.findName(langLookup.get(useAsDefault))));
 			cmNode.setCategory(fetchCategory(xmlNode.getCategoryKey()));
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());
@@ -341,8 +342,8 @@ public class CmXmlToSmartImporter {
 			@Override
 			public void run() {
 				OptionSelectionDialog sd = new OptionSelectionDialog(Display.getDefault().getActiveShell(), values,
-						"Configurable Model Languages", 
-						MessageFormat.format("The imported configurable model does not contain labels for current conservation area language ''{0}''.  Which language from the imported data model would you like to use as the default language?", targetCa.getDefaultLanguage().getCode()));
+						Messages.CmXmlToSmartImporter_LanguageSelect_Title, 
+						MessageFormat.format(Messages.CmXmlToSmartImporter_LanguageSelect_Message, targetCa.getDefaultLanguage().getCode()));
 				if (sd.open() != IDialogConstants.OK_ID) {
 					selected[0] = null;
 				}else{

@@ -374,7 +374,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	private void importXml() {
 		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 		fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{"xml (*.xml)", "All Files (*.*)"});
+		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_XmlFiles, Messages.ConfigurableModelPropertyDialog_AllFiles});
 		
 		String file = fd.open();
 		if (file != null) {
@@ -388,13 +388,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							CmXmlToSmartImporter importer = new CmXmlToSmartImporter();
 							importer.importXml(f, monitor);
 						} catch (Exception ex) {
-							SmartPlugIn.displayLog(getShell(), "Error occured while importing configurable model from xml file." + "\n\n" + ex.getMessage(), ex);
+							SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						}
 					}
 
 				});
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog(getShell(), "Error occured while importing configurable model from xml file." + "\n\n" + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}				
 	}
