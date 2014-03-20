@@ -82,6 +82,7 @@ TOKEN :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) >
 | 	<  ENTITYATTRIBUTE_GROUPBY_ITEM :  < EA_PREFIX > < ATTRIBUTE_GROUPBY_ITEM > >
+|   <  CA_GROUPBY_ITEM : "ca:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
@@ -302,6 +303,11 @@ IGroupBy GroupByItem() :
 		< CATEGORY_ATTRIBUTE_GROUPBY_ITEM >
 		{
 		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
+		}
+	|
+		< CA_GROUPBY_ITEM >
+		{
+		  	item = ConservationAreaGroupBy.createGroupBy(token.image);
 		}	
 	)
 	{

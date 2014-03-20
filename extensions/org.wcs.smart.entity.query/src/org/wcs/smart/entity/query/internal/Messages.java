@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String AttributeValueItem_CategoryNotFoundError;
 	public static String AttributeValueItem_ListItemNotFound;
 	public static String AttributeValueItem_TreeNodeNotFound;
+	public static String ConservationAreaTreeNode_Name;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;
 	public static String DerbyGridEngine_Progress_RunningQuery;

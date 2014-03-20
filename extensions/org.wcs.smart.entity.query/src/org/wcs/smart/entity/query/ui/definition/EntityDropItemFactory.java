@@ -42,6 +42,7 @@ import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
 import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
+import org.wcs.smart.entity.query.ui.itempanel.ConservationAreaTreeNode;
 import org.wcs.smart.entity.query.ui.itempanel.EntityGriddedItemPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntityQueryFilterPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryFilterPanel;
@@ -93,7 +94,8 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 		} else if (source instanceof IDateGroupBy) {
 			items = new DropItem[]{createDateGroupByDropItem(
 							(IDateGroupBy) source)};
-		
+		}else if (source instanceof ConservationAreaTreeNode){
+			items = new DropItem[]{createConservationAreaGroupByDropItem()};
 		} else if (source instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 			

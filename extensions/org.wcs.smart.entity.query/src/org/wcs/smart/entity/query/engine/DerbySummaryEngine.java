@@ -71,6 +71,7 @@ import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
+import org.wcs.smart.query.model.summary.ConservationAreaGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
@@ -851,7 +852,18 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					groupBySql.append(key);
 				} 
 				
-			
+			}else if (gb instanceof ConservationAreaGroupBy){
+				groupByInnerSql.append(tablePrefix(Waypoint.class));
+				groupByInnerSql.append(".ca_uuid as cauuid_" + itemcnt); //$NON-NLS-1$
+				groupBySql.append("cauuid_" + itemcnt); //$NON-NLS-1$
+				if (!waypointAdd) {
+					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(Waypoint.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){

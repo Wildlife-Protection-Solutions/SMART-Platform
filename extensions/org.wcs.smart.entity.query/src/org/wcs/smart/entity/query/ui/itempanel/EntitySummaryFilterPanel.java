@@ -112,6 +112,9 @@ public class EntitySummaryFilterPanel extends AbstractQueryItemPanel{
 		});
 		
 		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
+		if (SmartDB.isMultipleAnalysis()){
+			groupbynodes.add(new ConservationAreaTreeNode());
+		}
 		groupbynodes.add(new DateTreeNode());
 		if (!SmartDB.isMultipleAnalysis()){
 			areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_AreaGroupBy);

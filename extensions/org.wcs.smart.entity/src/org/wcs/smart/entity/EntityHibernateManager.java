@@ -47,6 +47,9 @@ public class EntityHibernateManager {
 	 * @return
 	 */
 	public static EntityType getEntityType(String entityType,  Session session){
+		if (SmartDB.isMultipleAnalysis()){
+			return EntityTypeCcaaManager.getInstance().findType(entityType);
+		}
 		org.hibernate.Query hq = session.createQuery("FROM EntityType WHERE keyId = :key and conservationArea = :ca"); //$NON-NLS-1$
 		hq.setParameter("key", entityType); //$NON-NLS-1$
 		hq.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
@@ -69,6 +72,15 @@ public class EntityHibernateManager {
 	 * @throws Exception
 	 */
 	public static EntityAttribute getEntityAttribute(String entityKey,  String entityAttributeKey, Session session) throws Exception{
+		if (SmartDB.isMultipleAnalysis()){
+			EntityType et = EntityTypeCcaaManager.getInstance().findType(entityKey);
+			for (EntityAttribute ea : et.getAttributes()){
+				if (ea.getKeyId().equals(entityAttributeKey)){
+					return ea;
+				}
+			}
+			return null;
+		}
 		Query q = session.createQuery("From EntityAttribute where entityType.conservationArea.uuid = :ca and entityType.keyId = :entitykey and keyId = :key"); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 		q.setParameter("key", entityAttributeKey); //$NON-NLS-1$
@@ -89,6 +101,11 @@ public class EntityHibernateManager {
 	 * @return
 	 */
 	public static List<EntityType> getActiveEntityTypes(){
+		if (SmartDB.isMultipleAnalysis()){
+			return EntityTypeCcaaManager.getInstance().getAllEntityTypes();
+		}
+		
+		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
