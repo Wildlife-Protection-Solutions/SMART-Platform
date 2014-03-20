@@ -69,7 +69,8 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 	//data model 
 	private DataModel dataModel = null;
 	private DataModelContentProvider provider;
-	
+	private DataModelLabelProvider dmLabelProvider;
+	private LabelProvider lp = null;
 	private Type type;
 	public enum Type{GROUPBY, VALUE};
 	
@@ -469,8 +470,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 		return results;
 	}
 	
-	private DataModelLabelProvider dmLabelProvider;
-	private LabelProvider lp = null;
+
 	public LabelProvider getLabelProvider(){
 		if (lp == null) {
 			dmLabelProvider = new DataModelLabelProvider();
