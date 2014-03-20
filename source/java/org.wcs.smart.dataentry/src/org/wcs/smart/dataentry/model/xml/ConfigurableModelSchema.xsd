@@ -103,6 +103,7 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="isActive" type="boolean"></attribute>
+    	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="refKey" type="string"></attribute>
     </complexType>
 
