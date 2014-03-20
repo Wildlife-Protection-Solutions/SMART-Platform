@@ -64,6 +64,7 @@ import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.dataentry.model.xml.CmXmlToSmartImporter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -381,14 +382,30 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			final File f = new File(file);
 			try {
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-				pmd.run(false, false, new IRunnableWithProgress() {
+				pmd.run(true, false, new IRunnableWithProgress() {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							CmXmlToSmartImporter importer = new CmXmlToSmartImporter();
-							importer.importXml(f, monitor);
-						} catch (Exception ex) {
-							SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+							final ConfigurableModel cm = importer.importXml(f, monitor);
+							if (cm != null) {
+								Display.getDefault().syncExec(new Runnable() {
+									@Override
+									public void run() {
+										MessageDialog.openInformation(getShell(), Messages.ConfigurableModelPropertyDialog_Success_Title, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_Success_Message, cm.findName(SmartDB.getCurrentLanguage())));
+										//refresh list
+										modelListViewer.setInput(getModelsList().toArray());
+										updateTreeViewer();
+									}
+								});
+							}
+						} catch (final Exception ex) {
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+								}
+							});
 						}
 					}
 
