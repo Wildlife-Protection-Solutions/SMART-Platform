@@ -113,7 +113,7 @@ public class CyberTrackerProperties extends UuidItem {
 	
 	private static final boolean disableEditing = false;
 	private static final boolean useSdCard = false;
-	private static final boolean testTime = true;
+	private static final boolean testTime = false;
 	private static final boolean resetOnSync = false;
 	private static final boolean resetOnNext = true;
 	
