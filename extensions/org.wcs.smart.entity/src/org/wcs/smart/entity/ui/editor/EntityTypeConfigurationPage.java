@@ -971,8 +971,13 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtDmAttribute.setText(type.getDmAttribute().getName());
 		txtStatus.setText(type.getStatus().getGuiName());
 		txtType.setText(type.getType().getGuiName());
-		txtCreatedBy.setText(type.getCreator().getFullLabel());
-		txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));
+		if (type.getCreator() != null){
+			txtCreatedBy.setText(type.getCreator().getFullLabel());
+		}
+		if (type.getDateCreated() != null){
+			txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));	
+		}
+		
 		
 		attributeTable.setInput(type.getAttributes());			
 		

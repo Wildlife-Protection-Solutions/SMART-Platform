@@ -19,42 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ui;
+package org.wcs.smart.entity.ccca;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
-import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.entity.ccca.EntityTypeCcaaPerspective;
-import org.wcs.smart.entity.internal.Messages;
+import org.eclipse.ui.IFolderLayout;
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.IPerspectiveFactory;
 import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.ui.ConservationAreaListView;
+
 /**
- * View entities handler
+ * Cross conservation area entity type perspective.
  * @author Emily
  *
  */
-public class ViewEntityHandler  extends AbstractHandler {
+public class EntityTypeCcaaPerspective implements IPerspectiveFactory {
 
+	public static final String ID = "org.wcs.smart.entity.ccaa.EntityTypePerspective"; //$NON-NLS-1$
+	
+	
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		if (SmartDB.isMultipleAnalysis()){
-			IWorkbench wb = PlatformUI.getWorkbench();
-			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-			try {
-				wb.showPerspective(EntityTypeCcaaPerspective.ID, win);
-			} catch (WorkbenchException e) {
-				EntityPlugIn.displayLog(Messages.ViewEntityHandler_OpenError + " \n\n" + e.getMessage(), e); //$NON-NLS-1$
-			}
-		}else{
-			FieldDataPerspective.openPerspective(EntityTypeListView.ID);
-		}
-		return null;
+	public void createInitialLayout(IPageLayout layout) {
+		layout.setEditorAreaVisible(true);
+		
+		//right side - filters and layer manager
+		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.entity.folder1", IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		folder1.addView(ConservationAreaListView.ID);
+		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
+		
+		layout.addView(EntityTypeListView.ID, IPageLayout.BOTTOM, 0.3f, ConservationAreaListView.ID);
+		
+		layout.getViewLayout(EntityTypeListView.ID).setCloseable(false);
 	}
 
 }

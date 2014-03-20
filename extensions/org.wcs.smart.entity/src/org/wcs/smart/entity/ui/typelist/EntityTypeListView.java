@@ -52,15 +52,18 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * View containing a list of supported entity types.
@@ -128,29 +131,44 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 				}
 			});
 			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				Query query = filter.buildQuery(s);
-				List<?> results = query.list();
-				final EntityTypeEditorInput[] input = new EntityTypeEditorInput[results.size()];
+			EntityTypeEditorInput[] input = null;
+			if (SmartDB.isMultipleAnalysis()){
+				List<EntityType> ets = EntityHibernateManager.getActiveEntityTypes();
+				input = new EntityTypeEditorInput[ets.size()];
 				int i = 0;
-				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-					Object[] data = (Object[]) iterator.next();					
-					input[i++] = new EntityTypeEditorInput((byte[])data[0], (String)data[1], (String)data[2]);
+				for (EntityType et : ets){
+					input[i++] = new EntityTypeEditorInput(null, et.getKeyId(), et.getName());
 				}
-				
 				monitor.internalWorked(0.5);
+			}else{
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					Query query = filter.buildQuery(s);
+					List<?> results = query.list();
+					input = new EntityTypeEditorInput[results.size()];
+					int i = 0;
+					for	(Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+						Object[] data = (Object[]) iterator.next();					
+						input[i++] = new EntityTypeEditorInput((byte[])data[0], (String)data[1], (String)data[2]);
+					}
+					
+					monitor.internalWorked(0.5);
+				}finally{
+					s.getTransaction().rollback();
+					s.close();
+				}
+			}
+			
+			if (input != null){
+				final EntityTypeEditorInput[] inputs = input;
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						entityListViewer.setInput(input);
+						entityListViewer.setInput(inputs);
 						entityListViewer.refresh();
 					}
 				});
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			return Status.OK_STATUS;
 		}

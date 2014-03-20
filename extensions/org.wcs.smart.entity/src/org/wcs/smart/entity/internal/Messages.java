@@ -65,6 +65,7 @@ public class Messages extends NLS {
 	public static String DmAttributeListItemDeleteAdvisor_InvalidObject;
 	public static String EntitiesPage_PageName;
 	public static String Entity_ActiveStatusLabel;
+	public static String Entity_CaIdFieldName;
 	public static String Entity_IDFieldName;
 	public static String Entity_InActiveStatusLabel;
 	public static String Entity_StatusFieldName;
@@ -362,6 +363,7 @@ public class Messages extends NLS {
 	public static String TypeComposite_CompositeDescription;
 	public static String TypeComposite_CompositeName;
 	public static String TypeComposite_TypeLabel;
+	public static String ViewEntityHandler_OpenError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

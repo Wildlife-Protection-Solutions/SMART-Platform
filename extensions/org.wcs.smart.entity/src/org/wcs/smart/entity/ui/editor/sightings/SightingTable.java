@@ -46,7 +46,6 @@ import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Sightings table for displaying and managing sighting
@@ -161,7 +160,7 @@ public class SightingTable {
 		if (type.getAttributes() != null){
 			for (EntityAttribute ea : type.getAttributes()){
 				String name = ea.getName();
-				String key = "entity:" + SmartUtils.encodeHex(ea.getUuid()); //$NON-NLS-1$
+				String key = "entity:" + ea.getKeyId(); //$NON-NLS-1$
 				ColumnType cType = ColumnType.STRING;
 				if (ea.getDmAttribute().getType() == AttributeType.LIST ||
 						ea.getDmAttribute().getType() == AttributeType.TREE ||
@@ -177,7 +176,7 @@ public class SightingTable {
 				
 				QueryColumn column = new SightingQueryColumn(
 						ea.getEntityType().getName() + "|" + name, //$NON-NLS-1$
-						key, cType, "ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$ 
+						key, cType, "ea_" + ea.getKeyId()); //$NON-NLS-1$ 
 				cols.add(column);
 			}
 		}
