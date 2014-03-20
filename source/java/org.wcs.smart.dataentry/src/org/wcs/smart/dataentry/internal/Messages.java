@@ -44,6 +44,12 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_ImportingTreeNodes;
 	public static String CmXmlToSmartImporter_LanguageSelect_Message;
 	public static String CmXmlToSmartImporter_LanguageSelect_Title;
+	public static String CmXmlToSmartImporter_Problem_Attribute;
+	public static String CmXmlToSmartImporter_Problem_Category;
+	public static String CmXmlToSmartImporter_Problem_ListItem;
+	public static String CmXmlToSmartImporter_Problem_TreeNode;
+	public static String CmXmlToSmartImporter_ProblemDialog_Message;
+	public static String CmXmlToSmartImporter_ProblemDialog_Title;
 	public static String CmXmlToSmartImporter_ReadFile_Error;
 	public static String CmXmlToSmartImporter_Reading;
 	public static String CmXmlToSmartImporter_Saving;
@@ -78,6 +84,8 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_ProgressDelete;
 	public static String ConfigurableModelPropertyDialog_Success_Dialog_Message;
 	public static String ConfigurableModelPropertyDialog_Success_Dialog_Title;
+	public static String ConfigurableModelPropertyDialog_Success_Message;
+	public static String ConfigurableModelPropertyDialog_Success_Title;
 	public static String ConfigurableModelPropertyDialog_Title;
 	public static String ConfigurableModelPropertyDialog_Writing;
 	public static String ConfigurableModelPropertyDialog_XmlFile;

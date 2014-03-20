@@ -60,6 +60,7 @@ import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.OptionSelectionDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts a SMART XML configurable model to the database
@@ -78,8 +79,10 @@ public class CmXmlToSmartImporter {
 	private Map<String, Attribute> attrLookup;
 	private Map<String, AttributeListItem> listItemLookup;
 	private Map<String, AttributeTreeNode> treeNodeLookup;
+	
+	private List<String> warnings;
 
-	public void importXml(File xmlFile, IProgressMonitor monitor) throws Exception {
+	public ConfigurableModel importXml(File xmlFile, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.CmXmlToSmartImporter_ImportingFromXml, 3);
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm = null;
 		FileInputStream in = new FileInputStream(xmlFile);
@@ -93,14 +96,15 @@ public class CmXmlToSmartImporter {
 		if (xmlCm == null) {
 			throw new Exception(Messages.CmXmlToSmartImporter_ReadFile_Error);
 		}
-		convertAndSave(xmlCm, monitor);
+		return convertAndSave(xmlCm, monitor);
 	}
 
-	private void convertAndSave(org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm, IProgressMonitor monitor) {
+	private ConfigurableModel convertAndSave(org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm, IProgressMonitor monitor) {
 		catLookup = new HashMap<String, Category>();
 		attrLookup = new HashMap<String, Attribute>();
 		listItemLookup = new HashMap<String, AttributeListItem>();
 		treeNodeLookup = new HashMap<String, AttributeTreeNode>();
+		warnings = new ArrayList<String>();
 		
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
@@ -125,6 +129,33 @@ public class CmXmlToSmartImporter {
 			List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
 			List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
+
+			if (!warnings.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				for (String str: warnings){
+					sb.append(str);
+					sb.append(SmartUtils.LINE_SEPARATOR);
+				}
+				final String message = sb.toString();
+				final boolean[] cont = new boolean[]{true}; 
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						ProblemInputDialog dialog = new ProblemInputDialog(
+								Display.getDefault().getActiveShell(),
+								Messages.CmXmlToSmartImporter_ProblemDialog_Title,
+								Messages.CmXmlToSmartImporter_ProblemDialog_Message,
+								message, null);
+						if (dialog.open() != ProblemInputDialog.OK){
+							cont[0] = false;
+							
+						}	
+					}
+				});
+				if (!cont[0]) {
+					return null;
+				}
+			}
 			
 			monitor.subTask(Messages.CmXmlToSmartImporter_Saving);
 			session.save(cm);
@@ -135,6 +166,7 @@ public class CmXmlToSmartImporter {
 				session.save(node);
 			}
 			session.getTransaction().commit();
+			return cm;
 			
 		} finally {
 			langLookup = null;
@@ -143,6 +175,7 @@ public class CmXmlToSmartImporter {
 			attrLookup = null;
 			listItemLookup = null;
 			treeNodeLookup = null;
+			warnings = null;
 			if (session.getTransaction() != null && session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
 			}
@@ -236,6 +269,8 @@ public class CmXmlToSmartImporter {
 					AttributeListItem item = fetchAttributeListItem(xmlOption.getKeyRef(), parent.getAttribute());
 					if (item != null) {
 						cmOption.setUuidValue(item.getUuid());
+					} else {
+						break;
 					}
 					break;
 				}
@@ -268,6 +303,9 @@ public class CmXmlToSmartImporter {
 			c = (Category) query.uniqueResult();
 			catLookup.put(key, c);
 		}
+		if (c == null) {
+			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_Category, key));
+		}
 		return c;
 	}
 
@@ -281,6 +319,9 @@ public class CmXmlToSmartImporter {
 					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
 			a = (Attribute) query.uniqueResult();
 			attrLookup.put(key, a);
+		}
+		if (a == null) {
+			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_Attribute, key));
 		}
 		return a;
 	}
@@ -296,6 +337,9 @@ public class CmXmlToSmartImporter {
 			a = (AttributeListItem) query.uniqueResult();
 			listItemLookup.put(key, a);
 		}
+		if (a == null) {
+			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_ListItem, key, attribute.getKeyId()));
+		}
 		return a;
 	}
 
@@ -309,6 +353,9 @@ public class CmXmlToSmartImporter {
 					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
 			a = (AttributeTreeNode) query.uniqueResult();
 			treeNodeLookup.put(key, a);
+		}
+		if (a == null) {
+			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_TreeNode, key, attribute.getKeyId()));
 		}
 		return a;
 	}
