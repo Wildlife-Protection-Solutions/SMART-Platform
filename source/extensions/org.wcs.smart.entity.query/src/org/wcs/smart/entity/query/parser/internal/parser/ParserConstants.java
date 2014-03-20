@@ -145,7 +145,9 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ENTITYATTRIBUTE_GROUPBY_ITEM = 71;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 72;
+  int CA_GROUPBY_ITEM = 72;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 73;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -224,6 +226,7 @@ public interface ParserConstants {
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
     "<ENTITYATTRIBUTE_GROUPBY_ITEM>",
+    "<CA_GROUPBY_ITEM>",
     "<QUOTED_STRING>",
   };
 

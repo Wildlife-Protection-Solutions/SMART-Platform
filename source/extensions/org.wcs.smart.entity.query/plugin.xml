@@ -53,11 +53,11 @@
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
             class="org.wcs.smart.entity.query.model.type.EntityWaypointQueryType">
          <DefinitionPanel
-               id="org.wcs.smart.query.conservationAreaPanel">
-         </DefinitionPanel>
-         <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.entity.query.filterPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.conservationAreaPanel">
          </DefinitionPanel>
       </QueryType>
    </extension>

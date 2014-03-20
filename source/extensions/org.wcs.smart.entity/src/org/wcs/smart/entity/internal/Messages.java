@@ -228,6 +228,9 @@ public class Messages extends NLS {
 	public static String EntityTypeListView_LoadingLabel;
 	public static String EntityTypeListView_LoadingProgress;
 	public static String EntityTypeListView_RefreshJobName;
+	public static String EntityTypeMerger_ErrorMergingEntityTypes;
+	public static String EntityTypeMerger_ProgressLabel;
+	public static String EntityTypeMerger_ProgressLabelB;
 	public static String EntityTypeToXmlConverter_Progress1;
 	public static String EntityTypeToXmlConverter_Progress2;
 	public static String ExportEntityDialog_DirectoryNotFound;
