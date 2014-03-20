@@ -45,6 +45,12 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	protected BasicDropItemFactory(){
 		
 	}
+	
+	public DropItem createConservationAreaGroupByDropItem(){
+		return new ConservationAreaGroupByDropItem();
+	}
+	
+	
 	public static DropItem createBooleanOpDropItem(){
 		BooleanOpDropItem op = new BooleanOpDropItem();
 		return op;

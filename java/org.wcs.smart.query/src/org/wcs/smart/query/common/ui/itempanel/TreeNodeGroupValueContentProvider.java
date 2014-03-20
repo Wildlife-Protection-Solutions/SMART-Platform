@@ -182,8 +182,14 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		if (msg != null) return false;
-		if (element instanceof IItemTreeNode ||
-				element instanceof RootNode){
+		if (element instanceof IItemTreeNode){
+			Object[] elements = ((IItemTreeNode)element).getContentProvider().getElements(element);
+			if (elements == null || elements.length == 0){
+				return false;
+			}
+			return true;
+			
+		}else if (element instanceof RootNode){
 			return true;
 		}else if (element instanceof WrappedTreeNode){
 			return ((WrappedTreeNode) element).parent.getContentProvider().hasChildren(((WrappedTreeNode) element).item);

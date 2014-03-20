@@ -24,6 +24,7 @@ package org.wcs.smart.observation.query.ui.itempanel;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -38,9 +39,11 @@ public class GeneralTreeNode implements IItemTreeNode {
 	
 	private GeneralContentProvider provider;
 	private String name;
+	private  GeneralItem[] items;
 	
-	public GeneralTreeNode(String name){
+	public GeneralTreeNode(String name, GeneralItem[] items){
 		this.name = name;
+		this.items = items;
 	}
 	
 	@Override
@@ -56,7 +59,7 @@ public class GeneralTreeNode implements IItemTreeNode {
 	@Override
 	public ITreeContentProvider getContentProvider() {
 		if (provider == null){
-			provider = new GeneralContentProvider();
+			provider = new GeneralContentProvider(items);
 		}
 		return provider;
 	}

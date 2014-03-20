@@ -70,6 +70,10 @@ public class Messages extends NLS {
 	public static String ConservationAreaFilterPanel_Error_NoCas;
 	public static String ConservationAreaFilterPanel_FilterCaOp;
 	public static String ConservationAreaFilterPanel_IncludeAllCaOp;
+	public static String ConservationAreaGroupByDropItem_AllLabel;
+	public static String ConservationAreaGroupByDropItem_FiltersLabel;
+	public static String ConservationAreaGroupByDropItem_IncludedLabel;
+	public static String ConservationAreaGroupByDropItem_Name;
 	public static String CreateUnknownQueryHandler_ErrorLoadingQueryView;
 	public static String DataModelTreeNode_DataModelFiltersLabel;
 	public static String DataModelTreeNode_DmGroupByLabel;

@@ -234,6 +234,7 @@ public class Parser implements ParserConstants {
     case ATTRIBUTE_GROUPBY_ITEM:
     case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
     case WAYPOINT_SOURCE_GROUP_BY:
+    case CA_GROUP_BY:
       item = GroupByItem();
                         items.add(item);
       break;
@@ -285,6 +286,10 @@ public class Parser implements ParserConstants {
     case WAYPOINT_SOURCE_GROUP_BY:
       jj_consume_token(WAYPOINT_SOURCE_GROUP_BY);
                         item = WaypointSourceGroupBy.createGroupBy(token.image);
+      break;
+    case CA_GROUP_BY:
+      jj_consume_token(CA_GROUP_BY);
+                        item = ConservationAreaGroupBy.createGroupBy(token.image);
       break;
     default:
       jj_la1[10] = jj_gen;
@@ -698,7 +703,7 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0x243fff,0x243fff,0x20000000,0x243fff,0x2000,0x7c00000,0x0,0x7c00000,0xd0000000,0x0,0xd0000000,0x0,0x0,0x241fff,0x208,0x104,0x201ffe,0x1040,0x200082,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x0,0x7,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf,0x0,0xf,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -815,7 +820,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[68];
+    boolean[] la1tokens = new boolean[69];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -835,7 +840,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 68; i++) {
+    for (int i = 0; i < 69; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

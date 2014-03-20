@@ -38,6 +38,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_WaypointTimeColumnName;
 	public static String FixedQueryColumn_xColumnName;
 	public static String FixedQueryColumn_yColumnName;
+	public static String GeneralContentProvider_ConservationAreaLabel;
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;

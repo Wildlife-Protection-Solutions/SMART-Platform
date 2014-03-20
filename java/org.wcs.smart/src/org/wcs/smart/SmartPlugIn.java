@@ -133,6 +133,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String MAP_ICON = "org.wsc.smart.MAP_ICON"; //$NON-NLS-1$
 	
 	/**
+	 * Cross CA Icon
+	 */
+	public static final String CROSSCA_ICON = "org.wsc.smart.CROSSCA_ICON"; //$NON-NLS-1$
+	
+	/**
 	 * Image descriptor for wizard banner export
 	 */
 	public static final String WIZBAN_EXPORT_IMAGE = "org.wsc.smart.WIZBAN_EXPORT_IMAGE"; //$NON-NLS-1$
@@ -305,6 +310,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(MAP_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/map.png")); //$NON-NLS-1$
 	     
 	     reg.put(WIZBAN_EXPORT_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/wizban/exportimage_wiz.gif")); //$NON-NLS-1$
+	     reg.put(CROSSCA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/eview16/crossca.png")); //$NON-NLS-1$
 	}
 	
 	/**

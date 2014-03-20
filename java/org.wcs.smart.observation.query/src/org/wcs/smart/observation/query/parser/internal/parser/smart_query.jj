@@ -74,6 +74,7 @@ TOKEN :
 | 	<  CATEGORY_ATTRIBUTE_GROUPBY_ITEM :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |   <  WAYPOINT_SOURCE_GROUP_BY : "wpt:src:" ( < DM_KEY > )? (":" < DM_KEY > )* >
+|   <  CA_GROUP_BY : "ca:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
@@ -282,7 +283,12 @@ IGroupBy GroupByItem() :
 		}	
     |  
 		< WAYPOINT_SOURCE_GROUP_BY >		{
-		  	item = WaypointSourceGroupBy.createGroupBy(token.image);		} 
+		  	item = WaypointSourceGroupBy.createGroupBy(token.image);		}
+	|  
+		< CA_GROUP_BY >
+		{
+		  	item = ConservationAreaGroupBy.createGroupBy(token.image);
+		} 
 	)
 	{
 		 return item;
