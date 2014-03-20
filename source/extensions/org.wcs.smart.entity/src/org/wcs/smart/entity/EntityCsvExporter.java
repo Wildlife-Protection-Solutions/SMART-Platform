@@ -32,6 +32,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -39,6 +40,7 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -95,12 +97,19 @@ public class EntityCsvExporter implements ICsvDataExporter {
 			if (entityType.getType().equals(EntityType.Type.FIXED)){
 				extra = 4;
 			}
+			if (SmartDB.isMultipleAnalysis()){
+				extra++;
+			}
+			
 			String[] columns = new String[entityType.getAttributes().size() + extra];
 			columns[0] = Entity.ID_FIELD_NAME;
 			columns[1] = Entity.STATUS_FIELD_NAME;
 			if (entityType.getType().equals(EntityType.Type.FIXED)){
 				columns[2] = Entity.X_FIELD_NAME;
 				columns[3] = Entity.Y_FIELD_NAME;
+			}
+			if (SmartDB.isMultipleAnalysis()){
+				columns[extra-1] = Entity.CA_FIELD_NAME;
 			}
 			int i = 0;
 			for (EntityAttribute ea : entityType.getAttributes()){
@@ -122,10 +131,15 @@ public class EntityCsvExporter implements ICsvDataExporter {
 					csvout[2] = String.valueOf(entity.getX());
 					csvout[3] = String.valueOf(entity.getY());
 				}
+				if (SmartDB.isMultipleAnalysis()){
+					csvout[extra-1] = entity.getEntityType().getConservationArea().getId();
+				}
 				for (EntityAttribute ea : entityType.getAttributes()){
-					EntityAttributeValue x = entity.findAttribute(ea);
-					if (x != null){
-						csvout[i + extra] = x.getValueAsString(); 
+					for (EntityAttributeValue v : entity.getAttributes()){
+						if (v.getEntityAttribute().getKeyId().equals(ea.getKeyId())){
+							csvout[i + extra] = v.getValueAsString();
+							break;
+						}
 					}
 					i++;
 				}
@@ -142,7 +156,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 			} catch (IOException e) {
 				return false;
 			}
-			return false;
+			throw ex;
 		}
 	}
 
@@ -150,6 +164,10 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	
 	@SuppressWarnings("unchecked")
 	private List<Entity> getEntities(Session session, boolean onlyActive) {
+		if (SmartDB.isMultipleAnalysis()){
+			return EntityTypeCcaaManager.getInstance().getEntities(entityType.getKeyId(), session);
+		}
+		
 		session.beginTransaction();
 		try{
 			Criteria c = session.createCriteria(Entity.class).add(Restrictions.eq("entityType", entityType)); //$NON-NLS-1$

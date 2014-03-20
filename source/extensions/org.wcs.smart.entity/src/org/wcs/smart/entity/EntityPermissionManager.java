@@ -38,6 +38,9 @@ public class EntityPermissionManager {
 	 * @return
 	 */
 	public static boolean canCreateEditDeleteEntities(){
+		if (SmartDB.isMultipleAnalysis()){
+			return false;
+		}
 		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ANALYST){
 			return false;
 		}
@@ -49,6 +52,9 @@ public class EntityPermissionManager {
 	 * @return
 	 */
 	public static boolean canCreateEditDeleteTypes(){
+		if (SmartDB.isMultipleAnalysis()){
+			return false;
+		}
 		return SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN;
 	}
 	
@@ -57,6 +63,9 @@ public class EntityPermissionManager {
 	 * @return
 	 */
 	public static boolean canViewSightings(){
+		if (SmartDB.isMultipleAnalysis()){
+			return true;
+		}
 		return SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.DATA_ENTRY;
 	}
 }

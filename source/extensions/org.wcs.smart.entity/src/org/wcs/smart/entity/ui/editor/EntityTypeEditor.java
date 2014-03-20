@@ -24,6 +24,7 @@ package org.wcs.smart.entity.ui.editor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.List;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -47,6 +48,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPermissionManager;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
@@ -55,6 +57,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Editor for managing entity types and 
@@ -216,12 +219,15 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 				final Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
-					s.saveOrUpdate(entityType);
-					entityType.getName();
-					entityType.getDmAttribute().getName();
-					if (entityType.getAttributes() != null){
-						entityType.getAttributes().size();
+					if (entityType.getUuid() != null){
+						s.saveOrUpdate(entityType);
+						entityType.getName();
+						entityType.getDmAttribute().getName();
+						if (entityType.getAttributes() != null){
+							entityType.getAttributes().size();
+						}
 					}
+					
 					Display.getDefault().syncExec(new Runnable(){
 
 						@Override
@@ -278,14 +284,30 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	}
 	
 	/**
+	 * 
+	 * @param currentSession
+	 * @return list of entities associated with current type
+	 */
+	public List<Entity> getEntities(Session currentSession){
+		EntityType type = getEntityType();
+		if (SmartDB.isMultipleAnalysis()){
+			return EntityTypeCcaaManager.getInstance().getEntities(type.getKeyId(), currentSession);
+		}else{
+			return type.getEntities();
+		}
+	}
+	
+	/**
 	 * loads the plan from the database populating all 
 	 * lazy fields from the database.
 	 * 
 	 * Will always get a new object.
 	 */
 	private EntityType loadEntityType(){
+		if (SmartDB.isMultipleAnalysis()){
+			return EntityTypeCcaaManager.getInstance().findType(((EntityTypeEditorInput) getEditorInput()).getKeyId());
+		}
 		byte[] uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
-		
 		EntityType et = null;
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();

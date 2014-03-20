@@ -136,10 +136,15 @@
                tooltip="%deleteentitytype.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
-               </test>
+               <and>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
             </visibleWhen>
          </command>
          <command
@@ -148,16 +153,27 @@
                tooltip="%newentitytype.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
-               </test>
+               <and>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
             </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.entity.entitytypefilter"
                style="push"
                tooltip="%filter.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -169,10 +185,33 @@
                tooltip="%delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
-               </test>
+               <and>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
+         <command
+               commandId="org.wcs.smart.entity.perspective"
+               icon="images/icons/obj16/entitytype.png"
+               style="push"
+               tooltip="%openentities.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <not>
+                  <test
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </not>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -225,12 +264,6 @@
       <handler
             class="org.wcs.smart.entity.ui.ViewEntityHandler"
             commandId="org.wcs.smart.entity.perspective">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.entity.ui.DeleteEntityTypeHandler"
@@ -308,6 +341,9 @@
                </test>
             </and>
          </activeWhen>
+      </handler>
+      <handler
+            commandId="org.wcs.smart.entity.handler1">
       </handler>
    </extension>
    <extension
@@ -459,6 +495,15 @@
       <EditAdvisor
             advisor="org.wcs.smart.entity.internal.DmAttributeEditAdvisor">
       </EditAdvisor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.entity.ccca.EntityTypeCcaaPerspective"
+            icon="images/icons/obj16/entitytype.png"
+            id="org.wcs.smart.entity.ccaa.EntityTypePerspective"
+            name="Entity Types">
+      </perspective>
    </extension>
 
 </plugin>

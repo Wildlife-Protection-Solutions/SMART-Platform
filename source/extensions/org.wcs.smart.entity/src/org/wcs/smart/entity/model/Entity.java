@@ -58,6 +58,7 @@ public class Entity extends UuidItem {
 	public static final String STATUS_FIELD_NAME = Messages.Entity_StatusFieldName;
 	public static final String X_FIELD_NAME = Messages.Entity_XFieldName;
 	public static final String Y_FIELD_NAME = Messages.Entity_YFieldName;
+	public static final String CA_FIELD_NAME = Messages.Entity_CaIdFieldName;
 	
 	public enum Status{
 		ACTIVE(Messages.Entity_ActiveStatusLabel), INACTIVE(Messages.Entity_InActiveStatusLabel);

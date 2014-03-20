@@ -61,6 +61,7 @@ import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
@@ -277,6 +278,17 @@ public class EntityListTable extends Composite {
 		});
 		filterColumns.add(col);
 		
+		if (SmartDB.isMultipleAnalysis()){
+			col = createTableColumn(Entity.CA_FIELD_NAME, null, new ColumnLabelProvider() {
+				public String getText(Object element) {
+					if (element instanceof Entity) {
+						return ((Entity) element).getEntityType().getConservationArea().getId();
+					}
+					return super.getText(element);
+				}
+			});
+			filterColumns.add(col);	
+		}
 		
 		
 		if (entityType.getAttributes() != null){

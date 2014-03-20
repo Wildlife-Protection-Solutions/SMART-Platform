@@ -56,6 +56,14 @@ public class EntityTypeEditorInput implements IEditorInput {
 	
 	/**
 	 * 
+	 * @return entity type key
+	 */
+	public String getKeyId(){
+		return this.key;
+	}
+	
+	/**
+	 * 
 	 * @return the uuid
 	 * of the entity type represented
 	 */

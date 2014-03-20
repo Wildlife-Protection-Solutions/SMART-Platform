@@ -73,6 +73,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.ExportEntityDialog;
 import org.wcs.smart.entity.ui.importwizard.ImportEntitiesWizard;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -161,13 +162,13 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			}
 		});
 		
-		
+
+		int buttonSize = 80;
 		if (EntityPermissionManager.canCreateEditDeleteEntities()){
 			Composite buttonTableComp = toolkit.createComposite(main);
 			buttonTableComp.setLayout(new GridLayout(6, false));
 			buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			int buttonSize = 80;
 		
 			Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -214,6 +215,20 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 				}
 			});
 
+			btnExport = toolkit.createButton(buttonTableComp, DialogConstants.EXPORT_BUTTON_TEXT, SWT.PUSH);
+			btnExport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			((GridData)btnExport.getLayoutData()).widthHint = buttonSize;
+			btnExport.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					exportEntities();
+				}
+			});
+		}else if (SmartDB.isMultipleAnalysis()){
+			Composite buttonTableComp = toolkit.createComposite(main);
+			buttonTableComp.setLayout(new GridLayout(1, false));
+			buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
 			btnExport = toolkit.createButton(buttonTableComp, DialogConstants.EXPORT_BUTTON_TEXT, SWT.PUSH);
 			btnExport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnExport.getLayoutData()).widthHint = buttonSize;
@@ -471,7 +486,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		}else{
 			entityInfoPanel.initEntityFields();
 		}
-		entityTable.setInput(type.getEntities());
+		entityTable.setInput(parentEditor.getEntities(currentSession));
 	}
 	
 	@Override

@@ -63,7 +63,7 @@ public class EntityInfoPanelComposite extends Composite{
 	private Text txtY;
 	private Text txtStatus;
 	
-	private HashMap<EntityAttribute, Text> attributeToUi = null;
+	private HashMap<String, Text> attributeToUi = null;
 	
 	/**
 	 * Creates a new panel.
@@ -172,7 +172,7 @@ public class EntityInfoPanelComposite extends Composite{
 		}
 		
 		for(EntityAttributeValue v : entity.getAttributes()){
-			Text txt = attributeToUi.get(v.getEntityAttribute());
+			Text txt = attributeToUi.get(v.getEntityAttribute().getKeyId());
 			if (txt != null){
 				txt.setText(v.getValueAsString());
 			}
@@ -202,7 +202,7 @@ public class EntityInfoPanelComposite extends Composite{
 	}
 	
 	private void createComposite(Composite parent){
-		attributeToUi = new HashMap<EntityAttribute, Text>();
+		attributeToUi = new HashMap<String, Text>();
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		
@@ -245,7 +245,7 @@ public class EntityInfoPanelComposite extends Composite{
 				((GridData)txt.getLayoutData()).widthHint = 100;
 				txt.setEditable(false);
 			
-				attributeToUi.put(ea, txt);
+				attributeToUi.put(ea.getKeyId(), txt);
 			}
 		}
 		

@@ -234,7 +234,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 
 	@Override
 	public void updatePage(Session currentSession, boolean typeModified) {
-		entityFilter.setEntities(parentEditor.getEntityType().getEntities());
+		entityFilter.setEntities(parentEditor.getEntities(currentSession));
 		
 		if (typeModified){
 			sightingTable.setEntityType(parentEditor.getEntityType());

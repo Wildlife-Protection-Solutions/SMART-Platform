@@ -69,6 +69,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
 		tablePrefix.put(EntityAttributeValue.class, "eav"); //$NON-NLS-1$
+		tablePrefix.put(EntityAttribute.class, "ea"); //$NON-NLS-1$
 	}
 
 	/**
@@ -78,6 +79,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		tableNames.put(Entity.class, "smart.entity"); //$NON-NLS-1$
 		tableNames.put(EntityType.class, "smart.entity_type"); //$NON-NLS-1$
 		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value"); //$NON-NLS-1$
+		tableNames.put(EntityAttribute.class, "smart.entity_attribute"); //$NON-NLS-1$
 	}
 
 	private String queryDataTable;
@@ -201,7 +203,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			s.append(tableNamePrefix(EntityType.class));
 			s.append(" on " + tablePrefix(EntityType.class) + ".uuid = " + tablePrefix(Entity.class) + ".entity_type_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			s.append(" WHERE "); //$NON-NLS-1$
-			s.append(tablePrefix(EntityType.class) + ".uuid = x'" +SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			s.append(tablePrefix(EntityType.class) + ".keyid = '" +query.getEntityType().getKeyId() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			//entity filter		
 			if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
@@ -281,7 +283,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		DerbyFilterToSqlGenerator sqlGenerator = new DerbyFilterToSqlGenerator();
 		
 		//entity type
-		sql.append(tablePrefix(EntityType.class) + ".uuid = x'" + SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(tablePrefix(EntityType.class) + ".keyid = '" + query.getEntityType().getKeyId() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//ca filter
 		sql.append(" AND "); //$NON-NLS-1$
@@ -337,7 +339,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			sql.append("UPDATE " ); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET "); //$NON-NLS-1$
-			sql.append("ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
+			sql.append("ea_" + ea.getKeyId() ); //$NON-NLS-1$
 			sql.append(" = "); //$NON-NLS-1$
 			
 			
@@ -345,13 +347,18 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 					ea.getDmAttribute().getType() == AttributeType.DATE){ 
 				sql.append(" ( SELECT string_value FROM "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(EntityAttributeValue.class));
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(EntityAttribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(EntityAttribute.class) + ".uuid "); //$NON-NLS-1$
 				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
 				sql.append(".entity_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(".entity_uuid AND "); //$NON-NLS-1$
-				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(tablePrefix(EntityAttribute.class));
+				sql.append(".keyid = '" + ea.getKeyId() + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				QueryPlugIn.logSql(sql.toString());
 				c.createStatement().execute(sql.toString());
@@ -359,13 +366,18 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 					ea.getDmAttribute().getType() == AttributeType.NUMERIC){
 				sql.append(" ( SELECT number_value FROM "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(EntityAttributeValue.class));
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(EntityAttribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(EntityAttribute.class) + ".uuid "); //$NON-NLS-1$
 				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
 				sql.append(".entity_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(".entity_uuid AND "); //$NON-NLS-1$
-				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(tablePrefix(EntityAttribute.class));
+				sql.append(".keyid = '" + ea.getKeyId() + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 				QueryPlugIn.logSql(sql.toString());
 				c.createStatement().execute(sql.toString());
@@ -385,12 +397,24 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				sql2.append(" JOIN "); //$NON-NLS-1$
 				sql2.append( tableNamePrefix(Entity.class));
 				sql2.append(" ON " +tablePrefix(Entity.class) + ".uuid = " + tablePrefix(EntityAttributeValue.class) + ".entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql2.append(" join "); //$NON-NLS-1$
+				sql2.append(tableNamePrefix(EntityAttribute.class));
+				sql2.append(" on "); //$NON-NLS-1$
+				sql2.append(tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid = "); //$NON-NLS-1$
+				sql2.append(tablePrefix(EntityAttribute.class) + ".uuid "); //$NON-NLS-1$
+				
+				sql2.append(" join "); //$NON-NLS-1$
+				sql2.append(tableNamePrefix(EntityType.class));
+				sql2.append(" on "); //$NON-NLS-1$
+				sql2.append(tablePrefix(Entity.class) + ".entity_type_uuid = "); //$NON-NLS-1$
+				sql2.append(tablePrefix(EntityType.class) + ".uuid "); //$NON-NLS-1$
+				
 				sql2.append(" WHERE "); //$NON-NLS-1$
-				sql2.append( tablePrefix(Entity.class));
-				sql2.append(".entity_type_uuid = x'" + SmartUtils.encodeHex(query.getEntityType().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql2.append( tablePrefix(EntityType.class));
+				sql2.append(".keyid = '" + query.getEntityType().getKeyId() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				sql2.append(" AND "); //$NON-NLS-1$
-				sql2.append( tablePrefix(EntityAttributeValue.class));
-				sql2.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql2.append(tablePrefix(EntityAttribute.class));
+				sql2.append(".keyid = '" + ea.getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				QueryPlugIn.logSql(sql2.toString());
 				ResultSet rs = c.createStatement().executeQuery(sql2.toString());
 				
@@ -421,13 +445,18 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				}
 				sql.append(" ELSE NULL END  FROM "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(EntityAttributeValue.class));
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(EntityAttribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(EntityAttributeValue.class) + ".entity_attribute_uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(EntityAttribute.class) + ".uuid "); //$NON-NLS-1$
 				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttributeValue.class));
 				sql.append(".entity_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(".entity_uuid AND "); //$NON-NLS-1$
-				sql.append(tablePrefix(EntityAttributeValue.class));
-				sql.append(".entity_attribute_uuid = x'" + SmartUtils.encodeHex(ea.getUuid()) + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(tablePrefix(EntityAttribute.class));
+				sql.append(".keyid = '" + ea.getKeyId() + "' )"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				if (toUpdate){
 					QueryPlugIn.logSql(sql.toString());
@@ -460,8 +489,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(FixedColumns.ENTITY_STATUS.dbColName + " varchar(8)"); //$NON-NLS-1$
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
-			sql.append(", ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
-			//+ " varchar(1024)"
+			sql.append(", ea_" + ea.getKeyId()); //$NON-NLS-1$
 			if (ea.getDmAttribute().getType() == AttributeType.TEXT ||
 					ea.getDmAttribute().getType() == AttributeType.DATE ||
 					ea.getDmAttribute().getType() == AttributeType.LIST ||
@@ -502,11 +530,11 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
-			Object x = rs.getObject("ea" + SmartUtils.encodeHex(ea.getUuid())); //$NON-NLS-1$
+			Object x = rs.getObject("ea_" + ea.getKeyId()); //$NON-NLS-1$
 			if (x != null && ea.getDmAttribute().getType() == AttributeType.DATE){
 				x = java.sql.Date.valueOf((String)x);
 			}
-			it.setEntityAttribute("entity:" + SmartUtils.encodeHex(ea.getUuid()), x); //$NON-NLS-1$
+			it.setEntityAttribute("entity:" + ea.getKeyId(), x); //$NON-NLS-1$
 		}
 		
 		
