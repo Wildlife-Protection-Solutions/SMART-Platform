@@ -58,11 +58,9 @@ public class CmXmlManager {
 	public static ConfigurableModel readDataModel(InputStream file) throws JAXBException, ParseException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
-		Object o = un.unmarshal(file);
-		ConfigurableModel x = (ConfigurableModel) o;
-		
-		//TODO: validate configurable model
-		
+		@SuppressWarnings("unchecked")
+		JAXBElement<ConfigurableModel> o = (JAXBElement<ConfigurableModel>) un.unmarshal(file);
+		ConfigurableModel x = o.getValue();
 		return x;
 	}
 	
