@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>Components of SMART</title>
+  <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
+  <link href="../../../../java/org.wcs.smart.help/html/smart_help.css"
+  type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<h2>Entity Tracker</h2>
+
+<h4><a id="Overview">Overview</a></h4>
+
+<p>The Entity Tracker Plug-in can be be used within SMART to provide more
+detail and specifically track any specific "entities. Whether they are
+individual animals, people, places, things or anything else you can imagine,
+there can often be a benefit to using the entity tracker plug-in to track a
+specif list of these 'entities'.</p>
+
+<p>The general process of using the plug-in is most easily described using a
+specific example to avoid the many vague and configurable terms necessary when
+talking about something as flexible as an entity. The most common example that
+was used in designing and building the entity tracking system was the example
+of tracking a specific population of rhinos, where almost all the rhinos are
+identified and have an ID or name, so we will use this example throughout this
+help file to provide an example of how the plug-in may be used. Please keep in
+mind you are free use the adaptabililty and features of the system however you
+feel it will most benefit your team.</p>
+
+<p>Here is a very high-level overview of the steps to take when setting up the
+entity tracking plugin to track a popuation of rhino, our example scenario.
+Details for each step will follow in the section after this overview:</p>
+
+<p>1)Create a new Entity Type, Rhinos</p>
+
+<p>2)Edit the "Rhinos" entity type and configure the entity type</p>
+
+<p>3)Enter the list of current rhinos and their attributes</p>
+
+<p>4)Add the Rhinos' data model attribute into your data model in the most
+appropriate place.</p>
+
+<p></p>
+
+<p>Once these steps are complete you can successfully use this information to
+track you rhinos and do various queries on specific rhinos, rhino attributes
+and other observations about the rhinos as part of your analysis of this
+population and its change over time.</p>
+
+<p></p>
+
+<h4><a id="MapNav" name="MapNav">Creating a new Entity Type</a></h4>
+
+<p><img alt="New Entity Menu Item" src="images/newEntityMenu.png" width="588"
+height="215" /></p>
+
+<p></p>
+
+<p>To create a new entity, from the "Field Data" menu, select "Entity" and then
+"New Entity Type" to start the process of creating a new entity.</p>
+
+<p></p>
+
+<p><strong>Entity Type:</strong></p>
+
+<p>Transient - A transient entirty type is anything that does not have a fixed
+poistion, such as animals, people, or other mobile resources.</p>
+
+<p>Fixed - Anything with a fixed physical location such as a park gate, a fixed
+camera-trap or otherwise fixed objects, plants, etc.</p>
+
+<p><strong>Entity Name:</strong></p>
+
+<p>Simply a way to refer to this particular entiry. examples: Rhinos, Gates,
+Cameras, Persons of Interest.</p>
+
+<p><strong>Key:</strong></p>
+
+<p>A unique key we can use to match this entity with an entity from another CA
+if they are the same, this is filled out for you and you do not need to change
+the default.</p>
+
+<p><strong>Attribute Name:</strong></p>
+
+<p>The name of the attribute that will be used in the data model.</p>
+
+<p></p>
+
+<p></p>
+
+<h4>Entity Components</h4>
+
+<p><img alt="Entity Components" src="images/EntityComponent.png" width="750"
+height="563" /></p>
+
+<h4>Entities Tab</h4>
+
+<p>This is where your list of existing entities is shown. You can also create
+new entity entries or editi existing ones on this page using the "Add" and
+"Edit" buttons.</p>
+
+<p>You can use the Import/Export buttons to import and export lists of your
+entities. Your entity definition much match that of any entities that you are
+trying to import.</p>
+
+<p></p>
+
+<p><strong>Entities Details</strong></p>
+
+<p>This section simply shows you the details of the particular entity you have
+highlighted in the list of entities above. Only attributes with the "isPrimary"
+option set show up in this details screen. You can use this feature to show
+only the most important or commonly referred to features if your entities have
+many attributes and you wish to organize them.</p>
+
+<p></p>
+
+<p><strong>Configuration Tab</strong></p>
+
+<p><img alt="Configuration Tab" src="images/Configuration.png" width="703"
+height="629" /></p>
+
+<p>The "Entity Type Summary" Section is where you can edit the Name and Status
+of the entity types itself (ie Rhinos). This screen also shows how created the
+entity type and when.</p>
+
+<p>The "Data Model Attribute" show the attribute name this entity type is
+linked to in the data model and this is where you can find it if you happen to
+forget what name it was given upon creation.</p>
+
+<p>The "Entity Attributes" section is where you define the attributes you wish
+to store for this entity type. This is most typically done once upon initial
+creation of the type, and maybe a few attributes are then added over time as
+they occur, but it is a useful data organization tool to create all the
+attributes you may want to use at the start. <strong>These attributes should be
+things that do not change over time</strong>, such as birth date, eye color
+etc. Things like "age", size etc, that change over time should be put into the
+data model, so that the current state can be observed and tracked each time the
+entity is observed.</p>
+
+<p>One can use existing data model attributes or create new ones. Often
+creating new one is necessary as many of the default data model attributes are
+things that change over time, but individual judgement must be used to best
+organize you data.</p>
+
+<p>You can select the Data Model Attribute for your current entity type from
+the list of current data model attributes if you would like to make an
+attribute that references the entity type, such as creating an attribute of
+"Mother" and selecting the RhinoID" in our rhino sample to have an attribute
+that allows you select from your list of rhinos to specify an animal's
+mother.</p>
+
+<p>Use the "Edit" and "Delete" button to manage your list of attributes. You
+can also use the "Move Up" and "Move Down" buttons to order your attributes how
+you prefer them.</p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Sightings Tab</strong></p>
+
+<p><img alt="Sightings Tab" src="images/Sightings.png" width="704" height="653"
+/></p>
+
+<p></p>
+
+<p>The Sighting tab is a quick query tool alllowing you to find the last known
+sighting of a particular entity, all the sighting of a single or group of
+entities and a few other common queries.</p>
+
+<p>Date Filter - Allows you to specify what date rage or type you are looking
+for</p>
+
+<p>Entity Filter - Allows you to search all entities, only active entities or a
+specific list of them.</p>
+
+<p>Reload Table - This button will run the query and update the table to you
+current query parameters.</p>
+
+<p>Query Results - All the observations of entities that meet your query
+filters are show in the table once you press the "Reload Table" button.</p>
+
+<p>Export... - Allows you to export the list of observations in the table to a
+CSV or shape file.</p>
+
+<p></p>
+
+<p><strong>Map Tab</strong></p>
+
+<p><img alt="Map Tab" src="images/Map.png" width="709" height="657" /></p>
+
+<p>The Map tab allows users to view the results of the Sightings Query from the
+sightings tab, as well as view fixed entities themselves.</p>
+
+<p></p>
+
+<h4><a id="MapNav2" name="MapNav2">Creating more Entity Types</a></h4>
+
+<p>The plug-in is designed to allow any number of Entity types, so one may go
+through the process of creating another entity type over and over to create
+many entity types that will all work at once without any problems. Each entity
+type attribute must be added to the data model to allow you to enter
+observations about each entity type of course.</p>
+
+<h4><a id="MapNav3" name="MapNav3">Deleting an Entity Type</a></h4>
+
+<p>When view entities simply highlight the item in the left list and press the
+delete icon (with the red X) to remove an entire entity type.</p>
+
+<p>If you have collected data on the entities in the entity type the system
+will give you various messages saying that you cannot delete the entity type
+until you delete all of the associated data, so you may have to edit and delete
+many patrols or other data observations to successfully delete the entity type.
+Of course, we do not recommend you delete anything that contains actual data
+observations. If you no longer want to use the entity tracking you can simple
+remove the entities attribute from the data model and leave the historical
+observations alone.</p>
+
+<p></p>
+</body>
+</html>
