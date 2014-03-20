@@ -65,7 +65,7 @@
          point="org.wcs.smart.query.queryItemPanel">
       <QueryItemPanel
             id="org.wcs.smart.entity.query.summaryItemPanel"
-            panel="org.wcs.smart.entity.query.ui.itempanel.EntitySummaryFilterPanel">
+            panel="org.wcs.smart.entity.query.ui.itempanel.EntitySummaryItemPanel">
       </QueryItemPanel>
       <QueryItemPanel
             id="org.wcs.smart.entity.query.GriddedItemPanel"

@@ -38,7 +38,7 @@ import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.entity.query.ui.EntitySummaryQueryEditor;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.entity.query.ui.definition.EntitySummaryGroupByValuePanel;
-import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryFilterPanel;
+import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryItemPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -131,7 +131,7 @@ public class EntitySummaryQueryType implements IQueryType {
 					
 					if (source instanceof Area){
 						
-						if (queryItemPanelId.equals(EntitySummaryFilterPanel.ID)){
+						if (queryItemPanelId.equals(EntitySummaryItemPanel.ID)){
 							items = new DropItem[]{ createAreaGroupByDropItem((Area)source) };
 						}else {
 							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
