@@ -37,6 +37,16 @@ public class Messages extends NLS {
 	public static String CmTemplateCloner_CopyProgress;
 	public static String CmTemplateCloner_ListItemNotFoundError;
 	public static String CmTemplateCloner_TreeNodeNotFoundError;
+	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
+	public static String CmXmlToSmartImporter_ImportingFromXml;
+	public static String CmXmlToSmartImporter_ImportingListItems;
+	public static String CmXmlToSmartImporter_ImportingNode;
+	public static String CmXmlToSmartImporter_ImportingTreeNodes;
+	public static String CmXmlToSmartImporter_LanguageSelect_Message;
+	public static String CmXmlToSmartImporter_LanguageSelect_Title;
+	public static String CmXmlToSmartImporter_ReadFile_Error;
+	public static String CmXmlToSmartImporter_Reading;
+	public static String CmXmlToSmartImporter_Saving;
 	public static String ConfigurableModelEditDialog_Message;
 	public static String ConfigurableModelEditDialog_PropertiesLabel;
 	public static String ConfigurableModelEditDialog_SaveError;
@@ -44,6 +54,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
+	public static String ConfigurableModelPropertyDialog_AllFiles;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_Button_Export_Xml;
@@ -57,6 +68,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_ErrorDialogTitle;
 	public static String ConfigurableModelPropertyDialog_ExportError;
 	public static String ConfigurableModelPropertyDialog_Exporting;
+	public static String ConfigurableModelPropertyDialog_Import_Error;
 	public static String ConfigurableModelPropertyDialog_LoadingText;
 	public static String ConfigurableModelPropertyDialog_LoadJobName;
 	public static String ConfigurableModelPropertyDialog_LoadModelsListError;
@@ -69,6 +81,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_Title;
 	public static String ConfigurableModelPropertyDialog_Writing;
 	public static String ConfigurableModelPropertyDialog_XmlFile;
+	public static String ConfigurableModelPropertyDialog_XmlFiles;
 	public static String CreateNewOpDialog_BlankCmOp;
 	public static String CreateNewOpDialog_BlankCmToolTip;
 	public static String CreateNewOpDialog_DialogMessage;
