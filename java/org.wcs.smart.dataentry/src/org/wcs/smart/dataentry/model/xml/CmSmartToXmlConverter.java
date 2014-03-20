@@ -109,6 +109,7 @@ public class CmSmartToXmlConverter {
 			setNames(item.getName(), dbItem.getNames(), llookup);
 			item.setIsActive(dbItem.getIsActive());
 			item.setRefKey(dbItem.getListItem().getKeyId());
+			item.setAttributeKey(dbItem.getListItem().getAttribute().getKeyId());
 			items.getItem().add(item);
 		}
 	}
@@ -128,6 +129,7 @@ public class CmSmartToXmlConverter {
 			setNames(node.getName(), dbItem.getNames(), llookup);
 			node.setIsActive(dbItem.getIsActive());
 			node.setRefKey(dbItem.getDmTreeNode().getKeyId());
+			node.setAttributeKey(dbItem.getDmTreeNode().getAttribute().getKeyId());
 			nodes.getNode().add(node);
 		}
 
