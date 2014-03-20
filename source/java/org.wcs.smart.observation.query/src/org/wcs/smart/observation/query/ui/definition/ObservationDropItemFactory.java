@@ -44,6 +44,7 @@ import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
 import org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -109,11 +110,17 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 					queryItemPanelId.equals(GriddedItemPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
-		}else if (source instanceof GeneralContentProvider.GeneralItems){
+		}else if (source instanceof GeneralContentProvider.GeneralItem){
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
-				items = new DropItem[]{createWaypointSourceGroupByDropItem()};
+				if (source == GeneralItem.WAYPOINT_SOURCE){
+					items = new DropItem[]{createWaypointSourceGroupByDropItem()};
+				}else if (source == GeneralItem.CONSERVATION_AREA){
+					items = new DropItem[]{super.createConservationAreaGroupByDropItem()};
+				}
 			}else{
-				items = new DropItem[]{createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItems)source)};
+				if (source == GeneralItem.WAYPOINT_SOURCE){
+					items = new DropItem[]{createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItem)source)};
+				}
 			}
 		}
 		return items;
@@ -123,8 +130,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem createWaypointSourceGroupByDropItem(){
 		return new WaypointSourceGroupByDropItem();
 	}
-	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItems source){
-		if (source == GeneralContentProvider.GeneralItems.WAYPOINT_SOURCE){
+	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItem source){
+		if (source == GeneralContentProvider.GeneralItem.WAYPOINT_SOURCE){
 			return new WaypointSourceFilterDropItem();
 		}
 		throw new IllegalStateException(MessageFormat.format(Messages.ObservationDropItemFactory_QueryItemNotSupported, new Object[]{source.guiName}));

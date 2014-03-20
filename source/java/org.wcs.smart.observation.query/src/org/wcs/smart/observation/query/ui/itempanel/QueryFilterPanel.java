@@ -47,6 +47,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -111,7 +112,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters));
+		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE}));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		if (!SmartDB.isMultipleAnalysis()){
 			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);

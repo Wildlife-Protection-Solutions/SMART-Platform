@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 
@@ -37,15 +38,15 @@ public class GeneralContentProvider implements ITreeContentProvider{
 
 	public static final LabelProvider LABELPROVIDER = new LabelProvider(){
 		public String getText(Object element){
-			if (element instanceof GeneralItems){
-				return ((GeneralItems) element).guiName;
+			if (element instanceof GeneralItem){
+				return ((GeneralItem) element).guiName;
 			}
 			return super.getText(element);
 		}
 		
 		public Image getImage(Object element){
-			if (element instanceof GeneralItems){
-				return ((GeneralItems) element).image;
+			if (element instanceof GeneralItem){
+				return ((GeneralItem) element).image;
 			}
 			return super.getImage(element);
 		}
@@ -53,17 +54,30 @@ public class GeneralContentProvider implements ITreeContentProvider{
 	/**
 	 * Other item children
 	 */
-	public enum GeneralItems{
+	public enum GeneralItem{
 		WAYPOINT_SOURCE(Messages.QueryFilterContentProvider_WaypointSourceName,
-				ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON));
+				ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON)),
+		CONSERVATION_AREA(Messages.GeneralContentProvider_ConservationAreaLabel, 
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CROSSCA_ICON));
 		
 		public String guiName;
 		private Image image;
-		GeneralItems(String guiName, Image image){
+		GeneralItem(String guiName, Image image){
 			this.guiName = guiName;
 			this.image = image;
 		}
 	}
+	
+	private GeneralItem[] items = GeneralItem.values();
+	
+	/**
+	 * Creates a new content provider that only includes the selected general items
+	 * @param items
+	 */
+	public GeneralContentProvider(GeneralItem items[]){
+		this.items = items;
+	}
+	
 	
 	@Override
 	public void dispose() {
@@ -76,7 +90,7 @@ public class GeneralContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return GeneralItems.values();
+		return items;
 	}
 
 	@Override

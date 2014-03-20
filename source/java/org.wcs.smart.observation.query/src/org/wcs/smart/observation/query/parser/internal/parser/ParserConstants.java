@@ -135,7 +135,9 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int WAYPOINT_SOURCE_GROUP_BY = 66;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 67;
+  int CA_GROUP_BY = 67;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 68;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -209,6 +211,7 @@ public interface ParserConstants {
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
     "<WAYPOINT_SOURCE_GROUP_BY>",
+    "<CA_GROUP_BY>",
     "<QUOTED_STRING>",
   };
 

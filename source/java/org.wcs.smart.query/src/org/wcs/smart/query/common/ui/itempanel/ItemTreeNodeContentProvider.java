@@ -136,7 +136,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 	public static IStructuredSelection unwrapSelection(IStructuredSelection selection){
 		List<Object> items = new ArrayList<Object>();
 		
-		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object object = (Object) iterator.next();
 			if (object instanceof WrappedTreeNode){
 				items.add( ((WrappedTreeNode) object).item );
