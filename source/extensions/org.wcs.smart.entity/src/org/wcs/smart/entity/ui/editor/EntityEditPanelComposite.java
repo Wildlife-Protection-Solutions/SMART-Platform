@@ -244,7 +244,7 @@ public class EntityEditPanelComposite extends Composite{
 		entity.setStatus((Status) ((IStructuredSelection)cmbStatus.getSelection()).getFirstElement());
 		
 		for (Entry<EntityAttribute, IAttributeField<?>> entry : attributeToEdit.entrySet()){
-			EntityAttributeValue toUpdate = entity.findAttribute(entry.getKey());
+			EntityAttributeValue toUpdate = entity.findAttribute(entry.getKey().getKeyId());
 			
 			if (entry.getValue().getValue() == null){
 				//value removed; remove attribute value

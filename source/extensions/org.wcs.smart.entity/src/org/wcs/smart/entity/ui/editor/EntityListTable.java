@@ -299,7 +299,7 @@ public class EntityListTable extends Composite {
 						public String getText(Object element) {
 							if (element instanceof Entity) {
 								Entity e = (Entity) element;
-								EntityAttributeValue value = e.findAttribute(ea);
+								EntityAttributeValue value = e.findAttribute(ea.getKeyId());
 								if (value != null) {
 									return value.getValueAsString();
 								}

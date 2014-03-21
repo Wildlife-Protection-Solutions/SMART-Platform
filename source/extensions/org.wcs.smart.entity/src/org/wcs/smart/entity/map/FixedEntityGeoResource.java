@@ -54,18 +54,18 @@ import org.wcs.smart.util.SmartUtils;
 public class FixedEntityGeoResource extends IGeoResource {
 	
 	private URL url = null;
-	protected byte[] entityUuid;
+	protected String entityTypeKey;
 	protected String entityName;
 	private FixedEntityGeoResourceInfo info;
 	
-	public FixedEntityGeoResource(FixedEntityService service, String entityName, byte[] entityUuid){
+	public FixedEntityGeoResource(FixedEntityService service, String entityName, String entityTypeKey ){
 		this.service = service;
 		this.entityName = entityName;
-		this.entityUuid = entityUuid;
+		this.entityTypeKey = entityTypeKey;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + SmartUtils.encodeHex(entityUuid), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + entityTypeKey, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
@@ -77,8 +77,8 @@ public class FixedEntityGeoResource extends IGeoResource {
 		return entityName;
 	}
 	
-	public byte[] getEntityTypeUuid(){
-		return this.entityUuid;
+	public String getEntityTypeKey(){
+		return this.entityTypeKey;
 	}
 	
 	/**
@@ -153,7 +153,7 @@ public class FixedEntityGeoResource extends IGeoResource {
 			DataStore ds = ((FixedEntityService) service).getDataStore(monitor);
 			if (ds != null) {
 				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
-						.getFeatureSource(SmartUtils.encodeHex(entityUuid));
+						.getFeatureSource(entityTypeKey);
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {

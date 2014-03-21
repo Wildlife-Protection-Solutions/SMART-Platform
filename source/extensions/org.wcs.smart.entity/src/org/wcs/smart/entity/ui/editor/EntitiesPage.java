@@ -226,11 +226,13 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			});
 		}else if (SmartDB.isMultipleAnalysis()){
 			Composite buttonTableComp = toolkit.createComposite(main);
-			buttonTableComp.setLayout(new GridLayout(1, false));
+			GridLayout gl = new GridLayout();
+			gl.marginWidth = gl.marginHeight = 0;
+			buttonTableComp.setLayout(gl);
 			buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			btnExport = toolkit.createButton(buttonTableComp, DialogConstants.EXPORT_BUTTON_TEXT, SWT.PUSH);
-			btnExport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 			((GridData)btnExport.getLayoutData()).widthHint = buttonSize;
 			btnExport.addSelectionListener(new SelectionAdapter() {
 				@Override

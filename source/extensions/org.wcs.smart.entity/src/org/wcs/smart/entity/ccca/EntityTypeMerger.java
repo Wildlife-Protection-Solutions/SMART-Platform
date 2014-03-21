@@ -189,6 +189,15 @@ public class EntityTypeMerger {
 				q.setParameter("key", ea.getKeyId()); //$NON-NLS-1$
 				EntityAttribute defaultAtt = (EntityAttribute) q.list().get(0);
 				ea.setName(defaultAtt.getName());
+
+				//is primary
+				q = session.createQuery("FROM EntityAttribute e WHERE e.entityType.conservationArea in (:ca) and e.keyId = :key and is_primary = :primary"); //$NON-NLS-1$
+				q.setParameterList("ca", cas); //$NON-NLS-1$
+				q.setParameter("key", ea.getKeyId()); //$NON-NLS-1$
+				q.setParameter("primary", Boolean.TRUE); //$NON-NLS-1$
+				if (q.list().size() > 0){
+					ea.setIsPrimary(true);
+				}
 				
 			}else{
 				//not shared between all cas

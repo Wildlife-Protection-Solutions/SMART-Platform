@@ -178,10 +178,10 @@ public class Entity extends UuidItem {
 	}
 	
 	@Transient
-	public EntityAttributeValue findAttribute(EntityAttribute ea){
+	public EntityAttributeValue findAttribute(String eaKeyId){
 		if (getAttributes() == null) return null;
 		for (EntityAttributeValue v : getAttributes()){
-			if (v.getEntityAttribute().equals(ea)){
+			if (v.getEntityAttribute().getKeyId().equals(eaKeyId)){
 				return v;
 			}
 		}
