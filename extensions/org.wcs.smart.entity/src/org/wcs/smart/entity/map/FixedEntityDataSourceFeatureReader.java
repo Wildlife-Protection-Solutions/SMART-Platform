@@ -33,11 +33,13 @@ import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -62,14 +64,17 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 		this.ftype = ftype;
 		this.entityType = entityType;
 	
-		s = HibernateManager.openSession();	
-		entityType = (EntityType) s.merge(entityType);
-		
-		List<Entity> pnts = new ArrayList<Entity>();
-		if (entityType.getEntities() != null){
-			pnts.addAll(entityType.getEntities());
+		s = HibernateManager.openSession();
+		if (SmartDB.isMultipleAnalysis()){
+			fIterator = EntityTypeCcaaManager.getInstance().getEntities(entityType.getKeyId(), s).iterator();
+		}else{
+			entityType = (EntityType) s.merge(entityType);
+			List<Entity> pnts = new ArrayList<Entity>();
+			if (entityType.getEntities() != null){
+				pnts.addAll(entityType.getEntities());
+			}
+			fIterator = pnts.iterator();
 		}
-		fIterator = pnts.iterator();
 	}
 	
 
@@ -118,7 +123,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 		
 		for (int i = 0; i < entityType.getAttributes().size();i++){
 			EntityAttribute ea = entityType.getAttributes().get(i);
-			EntityAttributeValue value = entity.findAttribute(ea);
+			EntityAttributeValue value = entity.findAttribute(ea.getKeyId());
 			if (value == null){
 				data[i+3] = null;
 			}else{

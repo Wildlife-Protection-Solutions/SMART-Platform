@@ -163,7 +163,7 @@ public class EntityTable extends SmartBirtTable {
 			}
 			index = index - 2;
 		}
-		EntityAttributeValue eav = e.findAttribute(et.getAttributes().get(index-2));
+		EntityAttributeValue eav = e.findAttribute(et.getAttributes().get(index-2).getKeyId());
 		
 		if (eav == null){
 			return null;

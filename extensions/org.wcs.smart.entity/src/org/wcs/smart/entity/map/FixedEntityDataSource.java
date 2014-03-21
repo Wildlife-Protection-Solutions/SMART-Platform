@@ -35,12 +35,12 @@ import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -79,7 +79,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 	 * @param eType
 	 */
 	public void refresh(EntityType eType){
-		String key = SmartUtils.encodeHex(eType.getUuid());
+		String key = eType.getKeyId();
 		//remove schemas from cache
 		schemas.remove(key);
 		cachedTypes.put(key, eType);
@@ -94,20 +94,22 @@ public class FixedEntityDataSource extends AbstractDataStore{
 	@Override
 	public String[] getTypeNames()  {
 		List<String> names = new ArrayList<String>();
-		Session s = HibernateManager.openSession();
 		try {
-				Query q = s.createQuery("SELECT uuid FROM EntityType WHERE conservationArea = :ca and type = :type"); //$NON-NLS-1$
-				q.setParameter("conservationArea", ca); //$NON-NLS-1$
-				q.setParameter("type", EntityType.Type.FIXED); //$NON-NLS-1$
-				List<?> data = q.list();
-				for (int i = 0; i < data.size(); i++){
-					names.add(SmartUtils.encodeHex((byte[])data.get(i)));
+			for (EntityType et : EntityHibernateManager.getActiveEntityTypes()){
+				if (et.getType() == EntityType.Type.FIXED){
+					names.add(et.getKeyId());
 				}
+			}
+//				Query q = s.createQuery("SELECT keyId FROM EntityType WHERE conservationArea = :ca and type = :type"); //$NON-NLS-1$
+//				q.setParameter("conservationArea", ca); //$NON-NLS-1$
+//				q.setParameter("type", EntityType.Type.FIXED); //$NON-NLS-1$
+//				List<?> data = q.list();
+//				for (int i = 0; i < data.size(); i++){
+//					names.add(SmartUtils.encodeHex((byte[])data.get(i)));
+//				}
 			return names.toArray(new String[names.size()]);
 		} catch (Exception e) {
 			EntityPlugIn.log("Could not determine data source type names for fixed entity types.", e); //$NON-NLS-1$
-		}finally{
-			s.close();
 		}
 		return null;
 	}
@@ -145,7 +147,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 
 
 	
-	private SimpleFeatureType createEntitySchema(final String entityTypeUuid) throws SchemaException{
+	private SimpleFeatureType createEntitySchema(final String entityTypeKey) throws SchemaException{
 		final StringBuilder sb = new StringBuilder();
 		Job j = new Job(Messages.FixedEntityDataSource_BuildSchemaJobName){
 
@@ -153,7 +155,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				try{
-					EntityType entityType = (EntityType) s.load(EntityType.class, SmartUtils.decodeHex(entityTypeUuid));
+					EntityType entityType = EntityHibernateManager.getEntityType(entityTypeKey, s);
 					
 					sb.append("fid:String"); //$NON-NLS-1$
 					sb.append(",id:String"); //$NON-NLS-1$
@@ -188,7 +190,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 					sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 					
 				}catch (Exception ex){
-					EntityPlugIn.log("Error creating feature type for entity type uuid: " + entityTypeUuid, ex); //$NON-NLS-1$
+					EntityPlugIn.log("Error creating feature type for entity type key: " + entityTypeKey, ex); //$NON-NLS-1$
 				}finally{
 					s.close();
 				}
@@ -200,10 +202,10 @@ public class FixedEntityDataSource extends AbstractDataStore{
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			EntityPlugIn.log("Error creating feature type for entity type uuid: " + entityTypeUuid, e); //$NON-NLS-1$
+			EntityPlugIn.log("Error creating feature type for entity type key: " + entityTypeKey, e); //$NON-NLS-1$
 		}
 		
-		SimpleFeatureType type =  DataUtilities.createType(entityTypeUuid, sb.toString());
+		SimpleFeatureType type =  DataUtilities.createType(entityTypeKey, sb.toString());
 		return type;
 	}
 	

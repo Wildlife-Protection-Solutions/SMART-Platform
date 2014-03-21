@@ -106,7 +106,14 @@ public class EntityTypeEditorInput implements IEditorInput {
 
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof EntityTypeEditorInput){
-			return Arrays.equals(this.uuid, ((EntityTypeEditorInput)obj).uuid);
+			//uuid's will be null for ccaa analysis
+			if (this.uuid == null && ((EntityTypeEditorInput)obj).uuid == null){
+				if (key != null && ((EntityTypeEditorInput)obj).key != null){
+					return key.equals(((EntityTypeEditorInput)obj).key);
+				}
+			}else if (this.uuid != null && ((EntityTypeEditorInput)obj).uuid != null){
+				return Arrays.equals(this.uuid, ((EntityTypeEditorInput)obj).uuid);
+			}
 		}
 		return false;
 	}

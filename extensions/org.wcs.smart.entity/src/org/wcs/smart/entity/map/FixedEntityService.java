@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
@@ -83,14 +84,14 @@ public class FixedEntityService extends IService {
 				if (eventType == EntityEventManager.ENTITY_TYPE_ADDED ){
 					//add new entity type to members
 					EntityType et = (EntityType)source;
-					members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getUuid()));
+					members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getKeyId()));
 				}else if (eventType == EntityEventManager.ENTITY_TYPE_DELETED){
 					//remove from members array
 					EntityType et = (EntityType)source;
 					if (members != null){
 						for (Iterator<FixedEntityGeoResource> iterator = members.iterator(); iterator.hasNext();) {
 							FixedEntityGeoResource gr = (FixedEntityGeoResource) iterator.next();
-							if (Arrays.equals(gr.getEntityTypeUuid(), et.getUuid())){
+							if (gr.getEntityTypeKey().equals(et.getKeyId())){
 								iterator.remove();
 							}
 						}
@@ -111,7 +112,7 @@ public class FixedEntityService extends IService {
 	public void refresh(EntityType entityType, IProgressMonitor monitor) throws IOException{
 		getDataStore(monitor).refresh(entityType);
 		for (final IGeoResource member : resources(monitor)){
-			if (Arrays.equals(((FixedEntityGeoResource)member).getEntityTypeUuid(), entityType.getUuid())){
+			if (((FixedEntityGeoResource)member).getEntityTypeKey().equals(entityType.getKeyId())){
 				//update the bounds
 				Job j = new Job("recompute layer bounds") { //$NON-NLS-1$
 					
@@ -179,14 +180,19 @@ public class FixedEntityService extends IService {
 						protected IStatus run(IProgressMonitor monitor) {
 							Session s = HibernateManager.openSession();
 							try{
-								Query q = s.createQuery("FROM EntityType WHERE conservationArea = :ca and type = :type"); //$NON-NLS-1$
-								q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-								q.setParameter("type", EntityType.Type.FIXED); //$NON-NLS-1$
-								List<?> data = q.list();
-								for (int i = 0; i < data.size(); i++){
-									EntityType type = (EntityType) data.get(i);
-									members.add(new FixedEntityGeoResource(FixedEntityService.this, type.getName(), type.getUuid()));
+								for (EntityType et : EntityHibernateManager.getActiveEntityTypes()){
+									if (et.getType() == EntityType.Type.FIXED){
+										members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getKeyId()));
+									}
 								}
+//								Query q = s.createQuery("FROM EntityType WHERE conservationArea = :ca and type = :type"); //$NON-NLS-1$
+//								q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+//								q.setParameter("type", EntityType.Type.FIXED); //$NON-NLS-1$
+//								List<?> data = q.list();
+//								for (int i = 0; i < data.size(); i++){
+//									EntityType type = (EntityType) data.get(i);
+//									members.add(new FixedEntityGeoResource(FixedEntityService.this, type.getName(), type.getKeyId()));
+//								}
 							}finally{
 								s.close();
 							}

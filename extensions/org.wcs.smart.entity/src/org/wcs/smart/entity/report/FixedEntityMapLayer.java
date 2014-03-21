@@ -136,7 +136,7 @@ public class FixedEntityMapLayer implements IBirtMapLayerManager {
 		List<IGeoResource> resources = new ArrayList<IGeoResource>();
 		List<? extends IGeoResource> items = service.resources(null);
 		for (IGeoResource i : items){
-			if (Arrays.equals(((FixedEntityGeoResource)i).getEntityTypeUuid(), et.getUuid())){
+			if (((FixedEntityGeoResource)i).getEntityTypeKey().equals(et.getKeyId())){
 				resources.add(i);		
 			}
 		}

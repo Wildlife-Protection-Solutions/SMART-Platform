@@ -94,7 +94,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 				 
 				FixedEntityGeoResource geoResource = new FixedEntityGeoResource(
 						entityService, parentEditor.getEntityType().getName(), parentEditor
-								.getEntityType().getUuid());
+								.getEntityType().getKeyId());
 				
 				entityService.refresh(parentEditor.getEntityType(), monitor);
 				AddLayersCommand command = new AddLayersCommand(
