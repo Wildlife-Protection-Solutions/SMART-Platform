@@ -342,9 +342,6 @@
             </and>
          </activeWhen>
       </handler>
-      <handler
-            commandId="org.wcs.smart.entity.handler1">
-      </handler>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">

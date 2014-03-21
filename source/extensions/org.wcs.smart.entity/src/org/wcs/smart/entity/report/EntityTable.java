@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.report;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,12 +31,15 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.SightingQueryColumn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Entity type table for BIRT reporting 
@@ -138,11 +142,23 @@ public class EntityTable extends SmartBirtTable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> getValues (Collection<ConservationArea> cas, Session session) {
-		Query q = session.createQuery("SELECT e FROM Entity e WHERE e.entityType.keyId = :keyid and e.entityType.conservationArea in (:cas)"); //$NON-NLS-1$
+		Query q = session.createQuery("FROM Entity e WHERE e.entityType.keyId = :keyid and e.entityType.conservationArea in (:cas)"); //$NON-NLS-1$
 		q.setParameter("keyid", et.getKeyId()); //$NON-NLS-1$
 		q.setParameterList("cas", cas); //$NON-NLS-1$
-		return q.list();
+		List<Object> x = q.list();
+
+		for(int i = 0; i < x.size(); i ++){
+			session.flush();
+			for (EntityAttributeValue v : ((Entity)x.get(i)).getAttributes()){
+				v.getEntityAttribute().getDmAttribute().getName();
+				session.flush();
+				System.out.println(v.getEntityAttribute().getKeyId());
+				session.flush();
+				System.out.println(v.getValueAsString());
+			}
+		}
 		
+		return x;
 	}
 
 	/**
