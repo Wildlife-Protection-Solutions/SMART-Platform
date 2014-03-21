@@ -26,7 +26,9 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 
@@ -55,7 +57,6 @@ public class ObservationHibernateManager extends HibernateManager{
 	 * @return the patrol options
 	 */
 	public static ObservationOptions getPatrolOptions(ConservationArea ca, Session s){
-		s.beginTransaction();
 		try{
 			@SuppressWarnings("unchecked")
 			List<ObservationOptions> ops = s.createCriteria(ObservationOptions.class).
@@ -69,15 +70,31 @@ public class ObservationHibernateManager extends HibernateManager{
 			}else{
 				op = ops.get(0);
 			}
-			s.getTransaction().commit();
-			
 			return op;
 		}catch (Exception ex){
-			
-			s.getTransaction().rollback();
 			s.close();
 			ObservationPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoLoadPatrolOptions + ex.getLocalizedMessage(), ex);
-			
+		}
+		return null;
+	}
+
+	public static Projection getCurrentViewProjection() {
+		Session s = HibernateManager.openSession();
+		try {
+			return getCurrentViewProjection(s);
+		} finally {
+			s.close();
+		}
+	}
+
+	public static Projection getCurrentViewProjection(Session s) {
+		ObservationOptions observationOptions = getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
+		if (observationOptions != null) {
+			Projection p = observationOptions.getViewProjection();
+			if (p != null) {
+				p.getDefinition(); //lazy load
+			}
+			return p;
 		}
 		return null;
 	}
