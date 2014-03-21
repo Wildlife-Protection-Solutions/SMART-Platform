@@ -200,6 +200,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (!(modelTreeViewer.getInput() instanceof ConfigurableModel)){
+					return;
+				}
 				final ConfigurableModel cm = (ConfigurableModel) modelTreeViewer.getInput();
 				if (cm == null){
 					return;
