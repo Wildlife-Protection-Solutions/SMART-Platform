@@ -134,9 +134,11 @@ public class EntityHibernateManager {
 	 * @return
 	 */
 	public static List<EntityType> getEntityTypes(Session session){
+		if (SmartDB.isMultipleAnalysis()){
+			return EntityTypeCcaaManager.getInstance().getAllEntityTypes();
+		}
 		Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			
 		List<EntityType> items = q.list();
 		return items;
 	}

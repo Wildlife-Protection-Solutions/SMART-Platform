@@ -77,7 +77,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	private SightingPage sightingsPage;
 	
 	private EntityType entityType;
-	
+	private List<Entity> cachedEntities = null;	//for ccaa analysis
 	
 	private IEntityListener listener = new IEntityListener() {
 		
@@ -283,6 +283,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		return false;
 	}
 	
+	
 	/**
 	 * 
 	 * @param currentSession
@@ -291,7 +292,10 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	public List<Entity> getEntities(Session currentSession){
 		EntityType type = getEntityType();
 		if (SmartDB.isMultipleAnalysis()){
-			return EntityTypeCcaaManager.getInstance().getEntities(type.getKeyId(), currentSession);
+			if (cachedEntities == null){
+				cachedEntities = EntityTypeCcaaManager.getInstance().getEntities(type.getKeyId(), currentSession);
+			}
+			return cachedEntities;
 		}else{
 			return type.getEntities();
 		}

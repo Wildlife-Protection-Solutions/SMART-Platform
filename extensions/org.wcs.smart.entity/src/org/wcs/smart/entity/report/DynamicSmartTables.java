@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.report;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables;
@@ -30,7 +29,6 @@ import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * SMART Report Tables Extension that provides all entity types
@@ -46,9 +44,6 @@ public class DynamicSmartTables implements IDynamicSmartTables {
 
 	@Override
 	public List<SmartBirtTable> getTables() {
-		if (SmartDB.isMultipleAnalysis()){
-			return Collections.emptyList();
-		}
 		//find all entities
 		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>();
 		for (EntityType e : EntityHibernateManager.getEntityTypes(HibernateManager.openSession())){

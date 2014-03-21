@@ -61,7 +61,6 @@ public class EntityTypeCcaaManager {
 		@Override
 		public void modified() {
 			mergedTypes = null;
-			
 			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(EntityTypeListView.ID);
 			if (part != null){
 				QueryDataModelManager.getInstance().clearDataModel();
@@ -135,7 +134,7 @@ public class EntityTypeCcaaManager {
 		Query q = session.createQuery("FROM Entity e WHERE e.entityType.keyId = :keyId and e.entityType.conservationArea in (:ca)"); //$NON-NLS-1$
 		q.setParameter("keyId", entityTypeKey); //$NON-NLS-1$
 		q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-		List<Entity> allEntities = q.list();
+		List<Entity> allEntities = q.list();	
 		return allEntities;
 	}
 }
