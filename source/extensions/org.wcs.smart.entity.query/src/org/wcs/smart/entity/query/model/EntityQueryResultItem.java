@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.entity.query.model;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 
