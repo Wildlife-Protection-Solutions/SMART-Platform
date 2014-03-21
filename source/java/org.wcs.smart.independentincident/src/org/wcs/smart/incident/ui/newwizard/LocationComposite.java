@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
@@ -49,10 +50,13 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Incident location composite.
@@ -62,7 +66,11 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class LocationComposite extends AbstractIncidentComposite {
 
 	public static final String ID = "incident.location"; //$NON-NLS-1$
-	
+
+	private final GeometryFactory gf = new GeometryFactory();
+	private Projection currentProjection;
+	private Projection dbProjection;
+
 	private ComboViewer cmbProjection;
 	private Text txtX;
 	private Text txtY;
@@ -118,6 +126,8 @@ public class LocationComposite extends AbstractIncidentComposite {
 		cmbProjection.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				transformInput();
+				currentProjection = (Projection)((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
 				fireChange(new Event());	
 			}
 		});
@@ -156,6 +166,24 @@ public class LocationComposite extends AbstractIncidentComposite {
 		return item;
 	}
 
+	private void transformInput() {
+		Projection target = (Projection)((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+		transformInput(currentProjection, target);
+	}
+
+	private void transformInput(final Projection source, final Projection target) {
+		try {
+			//reproject
+			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(source.getCrs(), target.getCrs()));
+
+			txtX.setText(String.valueOf(p.getX()));
+			txtY.setText(String.valueOf(p.getY()));
+		} catch (Exception ex) {
+			//nothing
+		}
+	}
+	
 	@Override
 	public void updateIncident(Waypoint incident) {
 		try{
@@ -181,21 +209,20 @@ public class LocationComposite extends AbstractIncidentComposite {
 		initializing = true;
 		try{
 			List<Projection> projs = HibernateManager.getCaProjectionList(session);
-			Projection defaultp = null;
 			for(Projection p : projs){
 				try{
 					if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
-						defaultp = p;
+						dbProjection = p;
 						break;
 					}
 				}catch (Exception ex){
 					IncidentPlugIn.log(Messages.LocationComposite_Error2, ex);
 				}
 			}
-			if (defaultp == null){
-				defaultp = new Projection();
-				defaultp.setCrs(SmartDB.DATABASE_CRS);
-				projs.add(defaultp);
+			if (dbProjection == null){
+				dbProjection = new Projection();
+				dbProjection.setCrs(SmartDB.DATABASE_CRS);
+				projs.add(dbProjection);
 			}
 			cmbProjection.setInput(projs);
 			if (incident.getX() != null){
@@ -205,7 +232,12 @@ public class LocationComposite extends AbstractIncidentComposite {
 				txtY.setText(String.valueOf(incident.getY()));
 			}
 		
-			cmbProjection.setSelection(new StructuredSelection(defaultp));
+			currentProjection = dbProjection;
+			Projection viewPrj = ObservationHibernateManager.getCurrentViewProjection(session);
+			if (viewPrj == null) {
+				viewPrj = currentProjection;
+			}
+			cmbProjection.setSelection(new StructuredSelection(viewPrj)); //transformation will be done by change listener
 		}finally{
 			initializing = false;
 		}
@@ -236,20 +268,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 			if (md.getPoint() != null){
 				txtX.setText(String.valueOf(md.getPoint().getX()));
 				txtY.setText(String.valueOf(md.getPoint().getY()));
-
-				//select the correct projection
-				Projection defaultp = null;
-				for(Projection p : ((List<Projection>)cmbProjection.getInput())){
-					try{
-						if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
-							defaultp = p;
-							break;
-						}
-					}catch (Exception ex){
-						IncidentPlugIn.log(Messages.LocationComposite_Error3, ex);
-					}
-				}
-				cmbProjection.setSelection(new StructuredSelection(defaultp));
+				transformInput(dbProjection, currentProjection);
 			}
 		}
 	}

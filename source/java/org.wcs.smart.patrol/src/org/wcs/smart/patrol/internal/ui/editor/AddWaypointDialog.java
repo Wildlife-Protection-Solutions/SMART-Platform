@@ -46,6 +46,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -72,6 +73,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private double x;
 	private int waypointId;
 	private Projection[] projections;
+	private Projection currentProjection;
 	
 	private PatrolWaypoint newWaypoint;
 	
@@ -147,18 +149,21 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lstProjections.setLabelProvider(ProjectionLabelProvider.getInstance());
 		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
 		lstProjections.setInput(projections);
-		Projection defaultProj = projections.length > 0 ? projections[0] : null;
-		for (int i = 0; i < projections.length; i ++){
-			if (projections[i].getIsDefault() ){
-				defaultProj = projections[i];
-				break;
+		currentProjection = ObservationHibernateManager.getCurrentViewProjection();
+		if (currentProjection == null) {
+			currentProjection = projections.length > 0 ? projections[0] : null;
+			for (int i = 0; i < projections.length; i ++){
+				if (projections[i].getIsDefault() ){
+					currentProjection = projections[i];
+					break;
+				}
 			}
 		}
-		if (defaultProj != null){
-			lstProjections.setSelection(new StructuredSelection(defaultProj));			
+		if (currentProjection != null) {
+			lstProjections.setSelection(new StructuredSelection(currentProjection));			
 			try{
 				Point point = gf.createPoint(new Coordinate(x,y));
-				Point np = (Point)JTS.transform(point, CRS.findMathTransform(SmartDB.DATABASE_CRS, defaultProj.getCrs()));
+				Point np = (Point)JTS.transform(point, CRS.findMathTransform(SmartDB.DATABASE_CRS, currentProjection.getCrs()));
 				x = np.getX();
 				y = np.getY();
 			}catch (Exception ex){
@@ -168,6 +173,8 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lstProjections.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				transformInput();
+				currentProjection = (Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
 				validate();
 			}
 		});
@@ -234,6 +241,20 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		return parent;
 	}
 	
+	private void transformInput() {
+		try {
+			//reproject
+			CoordinateReferenceSystem sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
+			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(currentProjection.getCrs(), sourceCrs));
+
+			txtX.setText(String.valueOf(p.getX()));
+			txtY.setText(String.valueOf(p.getY()));
+		} catch (Exception ex) {
+			//nothing
+		}
+	}
+
 	@Override
 	protected Control createContents(Composite parent) {
 		Control ctr = super.createContents(parent);
