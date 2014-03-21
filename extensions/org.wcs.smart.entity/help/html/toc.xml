@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toc label="SMART Entity Tracker Help" topic="help/html/EntityTrackerHelp.html">
+      <topic href="help/html/EntityTrackerHelp.html#Overview" label="Entity Tracker">
+         <topic href="help/html/EntityTrackerHelp.html#Overview" label="Overview">
+         </topic>
+         <topic href="help/html/EntityTrackerHelp.html#NewType" label="Creating Entity Types">
+         </topic>
+      </topic>
+</toc>
