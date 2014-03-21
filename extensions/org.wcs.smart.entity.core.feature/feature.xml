@@ -28,4 +28,18 @@ and their associated properties over time and space.
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.wcs.smart.entity.query"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.entity.query.report"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
