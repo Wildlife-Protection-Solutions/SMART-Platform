@@ -24,15 +24,15 @@ package org.wcs.smart.entity.map;
 import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
-import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.internal.Messages;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Data Source Factory for fixed entity types.
@@ -102,15 +102,10 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		Session session = HibernateManager.openSession();
 		ConservationArea ca = null;
-		try{
-			ca = (ConservationArea)session.load(ConservationArea.class, ((byte[])params.get(CAUUID.key)));	
-		
-		}finally{
-			session.close();
-		}
-		if (ca == null ){
+		if (Arrays.equals(SmartDB.getCurrentConservationArea().getUuid(), ((byte[])params.get(CAUUID.key)))){
+			ca = SmartDB.getCurrentConservationArea();
+		}else{
 			throw new IOException(Messages.FixedEntityDataSourceFactory_CaNotFoundError);
 		}
 		return new FixedEntityDataSource(ca);

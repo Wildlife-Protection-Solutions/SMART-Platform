@@ -23,7 +23,6 @@ package org.wcs.smart.entity.report;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,19 +66,9 @@ public class FixedEntityMapLayer implements IBirtMapLayerManager {
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
 		if (odaHandle.getExtensionID().equals(SmartTableQuery.SMART_DATASET_TYPE)) {
 			if (odaHandle.getQueryText().startsWith(EntityTable.ENTITYKEY_PREFIX)){
-				String key = odaHandle.getQueryText().split(":")[1]; //$NON-NLS-1$
-				
-				Session s = HibernateManager.openSession();
-				try{
-					Criteria c = s.createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("keyId", key)); //$NON-NLS-1$ //$NON-NLS-2$
-					List<?> data = c.list();
-					if (data.size() > 0){
-						if (((EntityType)data.get(0)).getType()==EntityType.Type.FIXED){
-							return true;
-						}
-					}
-				}finally{
-					s.close();
+				String type = odaHandle.getQueryText().split(":")[1]; //$NON-NLS-1$
+				if (type.equals(EntityType.Type.FIXED.name())){
+					return true;
 				}
 			}
 		}
@@ -97,7 +86,7 @@ public class FixedEntityMapLayer implements IBirtMapLayerManager {
 			return null;
 		}
 		
-		String entityTypeKey =  odaHandle.getQueryText().split(":")[1]; //$NON-NLS-1$
+		String entityTypeKey =  odaHandle.getQueryText().split(":")[2]; //$NON-NLS-1$
 		
 		EntityType et = null;
 		//session is managed by running report

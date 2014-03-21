@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,16 +41,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * A service for fixed entity types.  A single service provides all entity
@@ -178,8 +173,8 @@ public class FixedEntityService extends IService {
 						
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							Session s = HibernateManager.openSession();
-							try{
+//							Session s = HibernateManager.openSession();
+//							try{
 								for (EntityType et : EntityHibernateManager.getActiveEntityTypes()){
 									if (et.getType() == EntityType.Type.FIXED){
 										members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getKeyId()));
@@ -193,9 +188,9 @@ public class FixedEntityService extends IService {
 //									EntityType type = (EntityType) data.get(i);
 //									members.add(new FixedEntityGeoResource(FixedEntityService.this, type.getName(), type.getKeyId()));
 //								}
-							}finally{
-								s.close();
-							}
+//							}finally{
+//								s.close();
+//							}
 							
 							return org.eclipse.core.runtime.Status.OK_STATUS;
 						}

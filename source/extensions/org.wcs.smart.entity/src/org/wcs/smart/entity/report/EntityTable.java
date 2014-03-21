@@ -49,7 +49,8 @@ public class EntityTable extends SmartBirtTable {
 	private EntityType et;
 	
 	public EntityTable(EntityType et) {
-		super(MessageFormat.format(Messages.EntityTable_EntityTypeTableName, new Object[]{et.getName()}),ENTITYKEY_PREFIX + Messages.EntityTable_1 + et.getKeyId());
+		super(MessageFormat.format(Messages.EntityTable_EntityTypeTableName, new Object[]{et.getName()}),
+				ENTITYKEY_PREFIX + ":" + et.getType().name() + ":" + et.getKeyId()); //$NON-NLS-1$ //$NON-NLS-2$
 		this.et = et;
 	}
 
