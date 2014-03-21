@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.query.model.columns;
 
+import java.sql.Time;
+
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.model.IResultItem;
@@ -104,7 +106,7 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_DISTANCE:
 				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
-				return item.getWpDateTime();
+				return new Time(item.getWpDateTime().getTime());
 			case WAYPOINT_X:
 				return item.getWaypointX();
 			case WAYPOINT_Y:

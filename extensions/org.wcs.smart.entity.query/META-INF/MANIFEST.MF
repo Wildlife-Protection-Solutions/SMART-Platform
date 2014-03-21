@@ -15,5 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.wcs.smart.entity.query.model,
+Export-Package: org.wcs.smart.entity.query.engine,
+ org.wcs.smart.entity.query.map.udig,
+ org.wcs.smart.entity.query.model,
  org.wcs.smart.entity.query.model.type
