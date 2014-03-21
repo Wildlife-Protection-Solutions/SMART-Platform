@@ -184,7 +184,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery?after=org.wcs.smart.query.createunknown.separator">
+            locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.query.createquery.patrolquery"
@@ -249,7 +249,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.query.newquery.patrolqueries"
