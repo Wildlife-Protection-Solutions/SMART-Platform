@@ -4,9 +4,9 @@
    <extension
          point="org.wcs.smart.query.queryType">
       <QueryCategory
-            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Entity Type Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Entity Type queries provide the ability to query observations based on entity type attributes in addition to the observaiton details.  A single entity type can be selected for each query.  The attributes associated with the selected entity types are then available for filtering and grouping and are included in the results tables where appropriate.&lt;/p&gt;"
+            html_description="%query.category.entities.description"
             id="org.wcs.smart.entity.query.group.EntityQuery"
-            name="Entity Queries">
+            name="%query.category.entities.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
@@ -82,19 +82,19 @@
             class="org.wcs.smart.entity.query.ui.SimpleQueryEditor"
             default="false"
             id="org.wcs.smart.entity.editor.simple"
-            name="Entity Query Editor">
+            name="%org.wcs.smart.entity.editor.simple.name">
       </editor>
       <editor
             class="org.wcs.smart.entity.query.ui.EntitySummaryQueryEditor"
             default="false"
             id="org.wcs.smart.entity.editor.summary"
-            name="Entity Summary Query">
+            name="%org.wcs.smart.entity.editor.summary.name">
       </editor>
       <editor
             class="org.wcs.smart.entity.query.ui.EntityGriddedQueryEditor"
             default="false"
             id="org.wcs.smart.entity.editor.gridded"
-            name="Entity Gridded Query">
+            name="%org.wcs.smart.entity.editor.gridded.name">
       </editor>
    </extension>
    <extension
@@ -162,18 +162,18 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery?after=org.wcs.smart.query.createunknown.separator">
+            locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
          <menu
                icon="images/icons/obj16/entitytype.png"
                id="org.wcs.smart.menu.query.createquery.entityqueries"
-               label="Entity Queries"
-               tooltip="creates queries that may include entity attributes">
+               label="%entityquery.menu.name"
+               tooltip="%new.entityqueries.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_observation_query.png"
-                  label="New Entity Observation Query ..."
+                  label="%new.observation.query.name"
                   style="pulldown"
-                  tooltip="creates a new observation query that can include entity attribute filters">
+                  tooltip="%new.observation.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entityobservation">
@@ -182,9 +182,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_waypoint_query.png"
-                  label="New Entity Incident Query ..."
+                  label="%new.incident.query.name"
                   style="push"
-                  tooltip="creates a new incident query that can include entity attribute filters">
+                  tooltip="%new.incident.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entitywaypoint">
@@ -193,9 +193,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_summary_query.png"
-                  label="New Entity Summary Query ..."
+                  label="%new.summary.query.name"
                   style="push"
-                  tooltip="creates a new summary query that can include entity attributes">
+                  tooltip="%new.summary.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entitysummary">
@@ -204,9 +204,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_gridded_query.png"
-                  label="New Entity Gridded Query ..."
+                  label="%new.gridded.query.name"
                   style="push"
-                  tooltip="creates a new gridded query that can include entity attributes">
+                  tooltip="%new.gridded.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entitygrid">
@@ -216,18 +216,18 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
                icon="images/icons/obj16/entitytype.png"
                id="org.wcs.smart.menu.query.newquery.entityqueries"
-               label="Entity Queries"
-               tooltip="creates queries that may include entity attributes">
+               label="%entityquery.menu.name"
+               tooltip="%new.entityqueries.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_observation_query.png"
-                  label="New Entity Observation Query ..."
+                  label="%new.observation.query.name"
                   style="pulldown"
-                  tooltip="creates a new observation query that can include entity attribute filters">
+                  tooltip="%new.observation.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entityobservation">
@@ -236,9 +236,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_waypoint_query.png"
-                  label="New Entity Incident Query ..."
+                  label="%new.incident.query.name"
                   style="push"
-                  tooltip="creates a new incident query that can include entity attribute filters">
+                  tooltip="%new.incident.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entitywaypoint">
@@ -247,9 +247,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_summary_query.png"
-                  label="New Entity Summary Query ..."
+                  label="%new.summary.query.name"
                   style="push"
-                  tooltip="creates a new summary query that can include entity attributes">
+                  tooltip="%new.summary.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entitysummary">
@@ -258,9 +258,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/entity_gridded_query.png"
-                  label="New Entity Gridded Query ..."
+                  label="%new.gridded.query.name"
                   style="push"
-                  tooltip="creates a new gridded query that can include entity attributes">
+                  tooltip="%new.gridded.query.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="entitygrid">
@@ -272,7 +272,7 @@
    <extension
          point="org.wcs.smart.query.property">
       <queryproperty
-            propertyName="Query Columns"
+            propertyName="%querycolumns.property.name"
             propertyProvider="org.wcs.smart.entity.query.ui.ColumnQueryPropertyProvider">
       </queryproperty>
    </extension>
