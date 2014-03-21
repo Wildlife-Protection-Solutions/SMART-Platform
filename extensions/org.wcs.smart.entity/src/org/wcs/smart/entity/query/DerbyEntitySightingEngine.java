@@ -517,7 +517,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setWaypointId(rs.getInt(FixedColumns.WAYPOINT_ID.dbColName)); 
 		it.setWaypointX(rs.getDouble(FixedColumns.WAYPOINT_X.dbColName)); 
 		it.setWaypointY(rs.getDouble(FixedColumns.WAYPOINT_Y.dbColName)); 
-		it.setWaypointDateTime(rs.getDate(FixedColumns.WAYPOINT_TIME.dbColName));
+		it.setWaypointDateTime(rs.getTimestamp(FixedColumns.WAYPOINT_TIME.dbColName));
 		it.setWaypointDirection(rs.getFloat(FixedColumns.WAYPOINT_DIRECTION.dbColName)); 
 		it.setWaypointDistance(rs.getFloat(FixedColumns.WAYPOINT_DISTANCE.dbColName)); 
 		it.setWaypointComment(rs.getString(FixedColumns.WAYPOINT_COMMENT.dbColName)); 

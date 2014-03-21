@@ -47,7 +47,6 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Data source for fixed entity type locations.  Displays
