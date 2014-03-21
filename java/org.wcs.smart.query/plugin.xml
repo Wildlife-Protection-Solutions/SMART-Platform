@@ -377,6 +377,10 @@
                      name="org.wcs.smart.query.newquery.separator"
                      visible="true">
                </separator>
+               <separator
+                     name="org.wcs.smart.query.newquery.separator2"
+                     visible="false">
+               </separator>
             </menu>
             <separator
                   name="org.wcs.smart.query.separator8"
@@ -598,6 +602,10 @@
          <separator
                name="org.wcs.smart.query.createunknown.separator"
                visible="true">
+         </separator>
+         <separator
+               name="org.wcs.smart.query.createunknown.separator2"
+               visible="false">
          </separator>
       </menuContribution>
    </extension>
