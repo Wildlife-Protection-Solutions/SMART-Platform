@@ -97,11 +97,30 @@ public class MistItem {
 		while(concated.substring(concated.length() - 1).equals(".")){
 			concated = concated.substring(0, concated.length()-1);
 		}
-		concated = concated + "|" + cat4;
-		this.category = concated;
+		concated = concated + ".|" + cat4.replaceAll("[.]", ""); //remove period in the item
+		//Add one "." back in before the |, FME is expecting this from the way it was processing the data before...
+		
+		
+		this.category = concated.toLowerCase();
 	}
 
 	public String getText() {
+		//doing all the data processing for special characters etc here, before we save to a file etc so that any old version files will still have it done each time they are re-saved 
+		
+		//make sure there is a period at the end of the category list, before the | 
+		char prebang = category.charAt((category.indexOf("|") - 1));
+		if(!(prebang == '.')){
+			category = category.replace("|", ".|");
+		}
+		
+		//lowercase
+		category = category.toLowerCase();
+		
+		category = category.replaceAll("\\s+",""); //remove whitespace
+		category = category.replaceAll("[-(),_/'><]", "");
+		//----
+		
+		
 		return category;
 	}
 	
