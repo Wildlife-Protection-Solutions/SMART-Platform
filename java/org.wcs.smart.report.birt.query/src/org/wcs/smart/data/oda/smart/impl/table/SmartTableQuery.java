@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
@@ -35,6 +36,7 @@ import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 
 /**
  * ODA query for a SmartBirtTable
@@ -76,6 +78,9 @@ public class SmartTableQuery implements IQuery {
 	public void prepare(String queryText) throws OdaException {
 		try{
 			this.table = SmartBirtTableUtils.getInstance().findTable(queryText);
+			if (this.table == null){
+				throw new OdaException(MessageFormat.format(Messages.SmartTableQuery_TableNotFound, new Object[]{queryText}));
+			}
 		}catch (Exception ex){
 			throw new OdaException(ex);
 		}

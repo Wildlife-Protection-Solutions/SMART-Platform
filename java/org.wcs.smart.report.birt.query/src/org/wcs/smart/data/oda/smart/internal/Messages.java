@@ -19,6 +19,8 @@ public class Messages extends NLS {
 	public static String SmartQuery_LoadQuery_JobName;
 	public static String SmartQuery_QueryTypeNotSupported;
 	public static String SmartQuery_QueryTypeNotSupportedReports;
+
+	public static String SmartTableQuery_TableNotFound;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

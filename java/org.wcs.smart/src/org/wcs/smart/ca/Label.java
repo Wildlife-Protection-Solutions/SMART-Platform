@@ -22,8 +22,10 @@
 package org.wcs.smart.ca;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -36,10 +38,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
@@ -80,7 +82,6 @@ public class Label  {
 	 * @param elementuuid
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
 		if (elementuuid == null || SmartDB.getCurrentConservationArea() == null){
@@ -111,31 +112,43 @@ public class Label  {
 			}
 			
 			if(SmartDB.isMultipleAnalysis()){
-				//if still null search some something with the same code
-				//this will happen for things such as station name when
-				//the current ca is the "cross conservation area ca"
-				Query q = s.createQuery("SELECT l.value from Label l where l.id.element.uuid = :uuid and l.id.language.code = :code"); //$NON-NLS-1$
-				q.setCacheable(true);
-				q.setParameter("uuid", elementuuid); //$NON-NLS-1$
-				q.setParameter("code", SmartDB.getConservationAreaConfiguration().getLanguage().getCode()); //$NON-NLS-1$
-				List<String> x = q.list();
-				if (x.size() > 0){
-					description = x.get(0);
-				}else{
-					//same language code
-					q.setParameter("code", SmartDB.getConservationAreaConfiguration().getLanguage().getCode().split("_")[0]); //$NON-NLS-1$ //$NON-NLS-2$
-					x = q.list();
-					if (x.size() > 0){
-						description = x.get(0);
-					}else{
-						q = s.createQuery("SELECT l.value FROM Label l where l.id.element.uuid = :uuid"); //$NON-NLS-1$
-						q.setCacheable(true);
-						q.setParameter("uuid", elementuuid); //$NON-NLS-1$
-						x = q.list();
-						if (x.size() > 0){
-							description = x.get(0);
+				final String elementuuidstr = SmartUtils.encodeHex(elementuuid);
+				final String[] temp = new String[]{null};
+				//for whatever reason when i did this as hibernate queries
+				//i could not load entity tables in reports; I don't understand why
+				//but it would try to load additional objects that weren't needed and this causes
+				//all sorts of addition problems.
+				s.doWork(new Work(){
+					@Override
+					public void execute(Connection c) throws SQLException {
+						ResultSet rs = c.createStatement().executeQuery(
+								"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
+								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
+								"' and a.code = '" + SmartDB.getConservationAreaConfiguration().getLanguage().getCode() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						try{
+							if (rs.next()){
+								temp[0] = rs.getString(1);
+								return;
+							}
+						}finally{
+							rs.close();
 						}
-					}
+						try{
+							rs = c.createStatement().executeQuery(
+									"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
+									"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
+									"' and a.code = '" +  //$NON-NLS-1$
+									SmartDB.getConservationAreaConfiguration().getLanguage().getCode().split("_")[0] + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+							if (rs.next()){
+								temp[0] = rs.getString(1);
+								return;
+							}
+						}finally{
+							rs.close();
+						}
+					}});
+				if (temp[0] != null){
+					description = temp[0];
 				}
 			}
 		}
