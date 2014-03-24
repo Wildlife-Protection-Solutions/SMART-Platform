@@ -155,8 +155,8 @@ public class EntityTypeMerger {
 			
 			clonedTypes.add(et);
 			
-			
-			monitor.worked( (int) ((i++ / ((float)keys.size())) * 100) );
+			i++;
+			monitor.worked( (int) ((i/ ((float)keys.size())) * 100) );
 		}
 		return clonedTypes;
 	}

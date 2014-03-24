@@ -58,7 +58,7 @@ public class EntityReportQuery implements ISmartQuery {
 			List<IGroupBy> headers = part.getGroupBys();
 			for (IGroupBy h : headers){
 				if (h instanceof DateGroupBy){
-					throw new OdaException(Messages.ObservationReportQuery_SummaryDateGroupByInvalid);
+					throw new OdaException(Messages.EntityReportQuery_SummaryDateGroupByInvalid);
 				}
 			}
 		} else if (smartQuery.getQuery() instanceof EntityGriddedQuery){
@@ -130,7 +130,7 @@ public class EntityReportQuery implements ISmartQuery {
 		} else if (smartQuery.getQuery().getType().getKey().equals(EntityGridQueryType.KEY)){
 			return new SimpleQueryResultSetMetadata( (GriddedQuery) smartQuery.getQuery());
 		}
-		throw new OdaException(Messages.ObservationReportQuery_MetadataError);
+		throw new OdaException(Messages.EntityReportQuery_MetadataError);
 	}
 
 }

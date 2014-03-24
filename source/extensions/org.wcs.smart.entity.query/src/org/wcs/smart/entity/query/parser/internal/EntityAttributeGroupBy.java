@@ -201,6 +201,10 @@ public class EntityAttributeGroupBy implements IGroupBy {
 			EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityAttributeGroupBy_EntityAttributeNotFound, new Object[]{entityKey, entityAttributeKey}), ex);
 			return items;
 		}
+		if (ea == null){
+			EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityAttributeGroupBy_EntityAttributeNotFound, new Object[]{entityKey, entityAttributeKey}), null);
+			return items;
+		}
 		
 		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,ea.getDmAttribute().getKeyId());
 		if (att.getType() == AttributeType.LIST){
@@ -247,7 +251,9 @@ public class EntityAttributeGroupBy implements IGroupBy {
 	public DropItem asDropItem(Session session) throws Exception{
 		try {
 			EntityAttribute ea = getEntityAttribute(session);
-			
+			if (ea == null){
+				throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_EntityAttributeNotFound1, new Object[]{entityAttributeKey, entityKey}));
+			}
 			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, ea.getDmAttribute().getKeyId());
 			if (attribute == null) {
 				throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_AttributeNotFound,new Object[] { ea.getDmAttribute().getKeyId() }));

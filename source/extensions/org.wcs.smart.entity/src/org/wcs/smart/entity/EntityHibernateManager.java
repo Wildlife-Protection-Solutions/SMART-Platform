@@ -75,6 +75,9 @@ public class EntityHibernateManager {
 	public static EntityAttribute getEntityAttribute(String entityKey,  String entityAttributeKey, Session session) throws Exception{
 		if (SmartDB.isMultipleAnalysis()){
 			EntityType et = EntityTypeCcaaManager.getInstance().findType(entityKey);
+			if (et == null){
+				return null;
+			}
 			for (EntityAttribute ea : et.getAttributes()){
 				if (ea.getKeyId().equals(entityAttributeKey)){
 					return ea;

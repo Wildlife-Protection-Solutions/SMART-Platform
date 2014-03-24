@@ -251,6 +251,9 @@ public class EntityAttributeFilter implements IFilter {
 	public DropItem[] getDropItems(Session session) throws Exception{
 		try{
 			EntityAttribute ea = getEntityAttribute(session);
+			if (ea == null){
+				throw new Exception(MessageFormat.format(Messages.EntityAttributeFilter_EntityAttributeNotFound, new Object[]{entityAttributeKey, entityKey}));
+			}
 			DropItem it = EntityDropItemFactory.INSTANCE.createEntityAttributeDropItem(ea);
 			initDropItem(it, session);
 			return new DropItem[]{it};

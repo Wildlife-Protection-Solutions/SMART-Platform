@@ -75,12 +75,14 @@ public class Messages extends NLS {
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String EntityAttributeFilter_EntityAttributeNotFound;
 	public static String EntityAttributeFilter_ListItemNotFound;
 	public static String EntityAttributeFilter_NoAttributeFound;
 	public static String EntityAttributeFilter_TreeNodeNotFound;
 	public static String EntityAttributeFilterVisitor_AttributeTypeNotSupported;
 	public static String EntityAttributeGroupBy_AttributeNotFound;
 	public static String EntityAttributeGroupBy_EntityAttributeNotFound;
+	public static String EntityAttributeGroupBy_EntityAttributeNotFound1;
 	public static String EntityAttributeListGroupByDropItem_AllLabel;
 	public static String EntityAttributeListGroupByDropItem_ErrorLoadingListItem;
 	public static String EntityAttributeListGroupByDropItem_FiltersLabel;
