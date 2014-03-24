@@ -6,5 +6,13 @@ metaRequirements.1.namespace=org.wcs.smart.entity
 metaRequirements.1.name=onUninstall
 metaRequirements.1.range=1.0.0
 
-instructions.install=org.wcs.smart.entity.onInstall();
-instructions.uninstall=org.wcs.smart.entity.onUninstall();
+metaRequirements.2.namespace=org.wcs.smart.entity.query
+metaRequirements.2.name=onInstall
+metaRequirements.2.range=1.0.0
+
+metaRequirements.3.namespace=org.wcs.smart.entity.query
+metaRequirements.3.name=onUninstall
+metaRequirements.3.range=1.0.0
+
+instructions.install=org.wcs.smart.entity.onInstall();org.wcs.smart.entity.query.onInstall();
+instructions.uninstall=org.wcs.smart.entity.onUninstall();org.wcs.smart.entity.query.onUninstall();

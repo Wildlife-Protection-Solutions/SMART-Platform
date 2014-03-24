@@ -1,7 +1,7 @@
-provides.0.namespace=org.wcs.smart.entity.query
-provides.0.name=onInstall
-provides.0.version=1.0.0
+provides.2.namespace=org.wcs.smart.entity.query
+provides.2.name=onInstall
+provides.2.version=1.0.0
 
-provides.1.namespace=org.wcs.smart.entity.query
-provides.1.name=onUninstall
-provides.1.version=1.0.0
+provides.3.namespace=org.wcs.smart.entity.query
+provides.3.name=onUninstall
+provides.3.version=1.0.0

@@ -28,8 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.entity.updatesite.AddEntityJob;
+import org.wcs.smart.entity.query.EntityQueryPlugIn;
 
 /**
  * Action that is called when Entity plug-in is installed or upgraded using update site
@@ -41,13 +40,13 @@ public class OnInstallAction extends ProvisioningAction {
 
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
-		Job job = new AddEntityJob();
+		Job job = new AddEntityQueryJob();
 		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		job.schedule();
 		try{
 			job.join();
 		}catch(InterruptedException ex){
-			EntityPlugIn.log(ex.getLocalizedMessage(), ex);
+			EntityQueryPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 		return Status.OK_STATUS;	//always return ok status to plugin is registered; users should uninstall and re-install if error occurs
 	}
