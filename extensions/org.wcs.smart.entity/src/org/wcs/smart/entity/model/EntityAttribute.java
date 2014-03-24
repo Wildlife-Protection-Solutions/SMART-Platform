@@ -144,9 +144,6 @@ public class EntityAttribute extends NamedKeyItem {
 	public String getName() {
 		String n = super.getName();
 		if (n == null || n.length() == 0){
-			if (getDmAttribute() == null){
-				return "";
-			}
 			return getDmAttribute().getName();
 		}
 		return n;

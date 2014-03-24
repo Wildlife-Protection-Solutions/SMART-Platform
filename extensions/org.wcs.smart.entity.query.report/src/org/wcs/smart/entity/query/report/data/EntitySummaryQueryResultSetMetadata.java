@@ -51,7 +51,7 @@ public class EntitySummaryQueryResultSetMetadata extends SummaryQueryResultSetMe
 
 	@Override
 	protected void parseHeader(final SummaryQuery query) {
-		Job parseQuery = new Job(Messages.ObservationSummaryQueryResultSetMetadata_JobName) {
+		Job parseQuery = new Job(Messages.EntitySummaryQueryResultSetMetadata_JobName) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
