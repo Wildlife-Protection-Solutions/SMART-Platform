@@ -85,25 +85,26 @@ public class RunReportJob extends Job {
 			}
 			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 
-			final IReportRunnable design = engine.openReportDesign(reportFile
-					.getAbsolutePath());
-
-			IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+			final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
+			
 			IRenderOption options = new RenderOption();
-			
 			FileOutputStream fout = new FileOutputStream(outputFile);
-			
-			options.setOutputStream(fout);
-			options.setEmitterID(info.getID());
-			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY,
-					outputFile.getParent());
-			options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-
-			task.setRenderOption(options);
-			task.setParameterValues(reportParameters);
-			task.run();
-			task.close();
-			fout.close();
+			try{
+				options.setOutputStream(fout);
+				options.setEmitterID(info.getID());
+				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+				try{
+					task.setRenderOption(options);
+					task.setParameterValues(reportParameters);
+					task.run();
+				}finally{
+					task.close();
+				}
+			}finally{
+				fout.close();
+			}
 
 		} catch (Exception e) {
 			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$

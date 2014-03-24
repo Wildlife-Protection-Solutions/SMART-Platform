@@ -98,20 +98,27 @@ public class ExportIntelligenceJob extends Job {
 			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
 			final IReportRunnable design = engine.openReportDesign(ReportIntelligence.getIntelligenceTemplate());
-			IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-			IRenderOption options = new RenderOption();
+			
 			FileOutputStream fout = new FileOutputStream(outputFile);
-		
-			options.setOutputStream(fout);
-			options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
-			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
-			options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-
-			task.setRenderOption(options);
-			task.setParameterValues(reportParameters);
-			task.run();
-			task.close();
-			fout.close();
+			try{
+				IRenderOption options = new RenderOption();
+				options.setOutputStream(fout);
+				options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
+				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+				
+				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+				try{
+					task.setRenderOption(options);
+					task.setParameterValues(reportParameters);
+					task.run();
+				}finally{
+					task.close();
+				}
+			}finally{
+				fout.close();
+			}
+			
 			
 		}catch (Exception ex){
 			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceJob_ExportError + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$

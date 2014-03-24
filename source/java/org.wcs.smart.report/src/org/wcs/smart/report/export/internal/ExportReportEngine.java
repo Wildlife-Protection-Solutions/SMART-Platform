@@ -255,22 +255,25 @@ public class ExportReportEngine {
 		
 		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
 
-		IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+		
+
 		IRenderOption options = new RenderOption();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		options.setOutputStream(out);
 		options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
-		
-		task.setRenderOption(options);
-		task.setParameterValues(reportParameters);
-		task.run();
-		task.close();
+		IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+		try{
+			task.setRenderOption(options);
+			task.setParameterValues(reportParameters);
+			task.run();
+		}finally{
+			task.close();
+		}
 		
 		PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
 		pras.add(new Copies(data.copyCount));
 		pras.add(data.collate ? SheetCollate.COLLATED : SheetCollate.UNCOLLATED);
-		
 		
 		
 		InputStream pin = new ByteArrayInputStream(out.toByteArray());
