@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toc label="SMART Entity Tracker Help" topic="help/html/Independent_Incidents_Help.html">
+      <topic href="help/html/Independent_Incidents_Help.html#Overview" label="Independent Incidents">
+         <topic href="help/html/Independent_Incidents_Help.html#Overview" label="Overview">
+         </topic>
+         <topic href="help/html/Independent_Incidents_Help.html#createnew" label="Creating a New Indepedent Incident">
+         </topic>
+         <topic href="help/html/Independent_Incidents_Help.html#addobservations" label="Add Observations to an Incident">
+         </topic>
+         <topic href="help/html/Independent_Incidents_Help.html#importexport" label="Import / Export Incidents">
+         </topic>
+      </topic>
+</toc>
