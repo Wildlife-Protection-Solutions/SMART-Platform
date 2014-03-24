@@ -470,5 +470,12 @@
             name="%editor.name">
       </editor>
    </extension>
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="help/html/toc.xml"
+            primary="true">
+      </toc>
+   </extension>
 
 </plugin>
