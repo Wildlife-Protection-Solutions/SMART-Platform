@@ -4,16 +4,26 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.wcs.smart.entity.EntityHibernateManager;
+import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.engine.DerbyEntityObservationEngine;
+import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EntityQueryColumnCache;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -24,6 +34,8 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.QueryFilter;
 @Entity
 @Table(name="smart.entity_observation_query")
@@ -34,64 +46,76 @@ public class EntityObservationQuery extends ObservationQuery {
 		if (this.queryColumns != null){
 			return;
 		}
-		QueryColumn[] cols = EntityQueryColumnCache.getInstance().getObservationQueryColumns();
 		
-		queryColumns = new ArrayList<QueryColumn>();
+		synchronized (this) {
+			if (this.queryColumns != null){
+				return;
+			}
+			
+			QueryColumn[] cols = EntityQueryColumnCache.getInstance().getObservationQueryColumns();
+			queryColumns = new ArrayList<QueryColumn>();
+			HashSet<String> visible = null;
+			if (visibleColumns != null){
+				String[] bits = visibleColumns.split(","); //$NON-NLS-1$
+				visible = new HashSet<String>();
+				for (int i = 0; i < bits.length; i ++){
+					visible.add(bits[i]);
+				}
+			}
+			
+			for (int i = 0; i < cols.length; i ++){
+				queryColumns.add(cols[i]);
+				if (visible == null){
+					cols[i].setVisible(true);
+				}else if (visible.contains(cols[i].getKey())){
+					cols[i].setVisible(true);
+				}else{
+					cols[i].setVisible(false);
+				}
+			}
+			
+			//initialize add entity type columns
+			QueryFilter filter = getFilter();
+			final Set<String> entityTypes = new HashSet<String>();
+			filter.getFilter().accept(new IFilterVisitor() {			
+				@Override
+				public void visit(IFilter filter) {
+					if (filter instanceof EntityAttributeFilter){
+						entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+					}
+				}
+			});
 		
-		HashSet<String> visible = null;
-		if (visibleColumns != null){
-			String[] bits = visibleColumns.split(","); //$NON-NLS-1$
-			visible = new HashSet<String>();
-			for (int i = 0; i < bits.length; i ++){
-				visible.add(bits[i]);
+			Job j = new Job("query columns"){ //$NON-NLS-1$
+				//done in job so it has it's own session
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session session = HibernateManager.openSession();
+					try{
+						for (String entityType : entityTypes){
+							EntityType et = EntityHibernateManager.getEntityType(entityType, session);
+							for (EntityAttribute ea : et.getAttributes()){
+								EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
+								queryColumns.add(newcol);
+							}
+						}
+					}finally{
+						session.close();
+					}
+					return Status.OK_STATUS;
+				}};
+			j.setSystem(true);	
+			j.schedule();
+			
+			try {
+				j.join();
+			} catch (InterruptedException e) {
+				EntityQueryPlugIn.log(e.getMessage(), e);
 			}
 		}
 		
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-			if (visible == null){
-				cols[i].setVisible(true);
-			}else if (visible.contains(cols[i].getKey())){
-				cols[i].setVisible(true);
-			}else{
-				cols[i].setVisible(false);
-			}
-		}
 		
-//		//add entity type columns
-//		try{
-//			List<EntityType> types = getEntityTypeList();
-//		
-//			for (EntityType e : types){
-//				//TODO: dela with this error
-//				for (EntityAttribute ea : e.getAttributes()){
-//			
-//					ColumnType ctype = ColumnType.STRING;
-//					if (ea.getDmAttribute().getType() == AttributeType.NUMERIC ){
-//						ctype = ColumnType.NUMBER;
-//					}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
-//						ctype = ColumnType.BOOLEAN;
-//					}else {
-//						ctype = ColumnType.STRING;
-//					}
-//			
-//					AttributeQueryColumn qc = new EntityAttributeQueryColumn(
-//					MessageFormat.format("{0}: {1}", new Object[]{e.getName(), ea.getName()}), 
-//					"entity:" + ea.getKeyId(), ctype);
-//			
-//					queryColumns.add(qc);
-//					if (visible == null){
-//						qc.setVisible(true);
-//					}else if (visible.contains(qc.getKey())){
-//						qc.setVisible(true);
-//					}else{
-//						qc.setVisible(false);
-//					}
-//				}
-//			}
-//		} catch (Exception e1) {
-//			EntityQueryPlugIn.displayLog("Error loading query columns." + e1.getMessage(), e1);
-//		}
+
 	}
 
 	
