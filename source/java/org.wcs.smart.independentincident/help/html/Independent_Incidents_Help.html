@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>Requirements</title>
+  <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<h1>SMART - Independent Incidents Plug-In</h1>
+
+<h4>Overview</h4>
+
+<p>The Independent Incidents add--on allows you to enter observation data whcih
+is not related to any paticular Patrol, Survey, or other formal data collection
+practice. This means it can be used for one-off, or oppourtunistic data. For
+example, an office employee saw an important animal species on the way to work,
+simply enter the rough date and time in the independent observation and you can
+add that observation to all your official patrol data etc. </p>
+
+<p>This plug-in is very useful to combine with the Entity Tracking Plug-ins as
+you can record many events that occur to your entities without the need for
+creating a patrol structure. For example: using Rhino Entities, one could
+record an animal translocation into your area as an independent
+observations.</p>
+
+<p>It is easy to query data both including and excluding the independent
+observations so you can continue to analyze you formal data collection
+efficiency etc without worry about diluting it with other less scientific data
+collection, but you may also query data from all sources in the cases where you
+would like to see every piece of information collected regardless of source.</p>
+
+<p></p>
+
+<h4>Terminology</h4>
+
+<p><strong>Incident</strong> - A place and time where something occured or was
+observed. Exactly the same database concept as a waypoint in a Patrol, there is
+simply one incident independent of any other patrols etc.</p>
+
+<p><strong>Observation</strong> - something that was observed at a particular
+incident or waypoint. You may have many observations at the same place and time
+which can be entered into the same incident to treat them as one incident. You
+may also create two incidents at the exact same time and place if you wish to
+treat observations as seperate incidents.</p>
+
+<h4><a id="install">Creating a New Incident</a></h4>
+
+<p>To create a new incident</p>
+<ol>
+  <li>Use the menu option: "Field Data-&gt;Independent Incidents-&gt;New
+    Independent Incident"</li>
+  <li>Enter an Id or use the default provided.</li>
+  <li>Enter a date and time.</li>
+  <li>Enter the location using the text fields, or use the map to draw the
+    point on screen (Ensure you are using the projection listed, or change the
+    projection to the coordinate system you have your data in)</li>
+  <li>Enter any comments and attachements you may wish to associate with this
+    incident and press "Finish".</li>
+</ol>
+
+<p></p>
+
+<p>You should then see the incident details page on your screen:</p>
+
+<p><img alt="Incedent Summary" src="images/Incident_Summary.png" width="658"
+height="607" /></p>
+
+<p></p>
+
+<h4>Properties</h4>
+
+<p>You can edit the properties of the incident on this screen using the "edit"
+button beside the property you wish to edit.</p>
+
+<h4><strong>Observations</strong></h4>
+
+<p>To add or edit observations press the "Edit Obesrvation" Button and select
+the category of observation to add. If you already have observations, this
+button will list them all and you can press the "Edit" or "Delete" button next
+to the observation you wish to modify.</p>
+
+<h4><strong>Map Tab</strong></h4>
+
+<p>The map tab at the bottom of the page allows you to view where this incident
+is on the map. Use the same map tools and buttons as the other mapping windows
+in the application.</p>
+
+<p></p>
+
+<h4>Import / Export Incidents</h4>
+
+<p>To <strong>export</strong> Incidents:</p>
+<ol>
+  <li>select "Field Data-&gt;Independent Incidents-&gt;Export Incidents".</li>
+  <li>Select a destination folder to the save to the export to.</li>
+  <li>Change the filter using the "here" link if you do not see all the
+    incidents you wish to export in the list.</li>
+  <li>Select the incidents you wish to export, use the "Select All" link at the
+    bottom if you wish to export all of them.</li>
+  <li>Press the "Export" button.</li>
+</ol>
+
+<p>To <strong>import</strong> incidenents:</p>
+<ol>
+  <li>select "Field Data-&gt;Independent Incidents-&gt;Import Incidents".</li>
+  <li>Select the export file(s) you wish to import usint the "Add" button.</li>
+  <li>Press "Import".</li>
+  <li>You may get warnings if you already have an incident with a duplicate ID,
+    wish is allowed, but may be an error so the system allows you to cancel you
+    import if you wish when duplicates are detected.</li>
+</ol>
+
+<p></p>
+
+<h4>View Incidents</h4>
+
+<p>Select "Field Data-&gt;Independent Incidents-&gt;View Incidents" to see a
+list of existing incidents. </p>
+
+<p></p>
+
+<p>Use the "delete" "Add" and "Filter" icons at the top of the list to remove,
+add or change the list filter(the default filter shows only data from the last
+30 days).</p>
+
+<p><img alt="Icons" src="images/Incident_Icons.png" width="71" height="25"
+/></p>
+
+<p></p>
+
+<p></p>
+</body>
+</html>
