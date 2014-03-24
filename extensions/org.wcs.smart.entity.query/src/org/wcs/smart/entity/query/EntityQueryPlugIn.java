@@ -37,7 +37,10 @@ public class EntityQueryPlugIn extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.entity.query"; //$NON-NLS-1$
-
+	
+	//The current db version
+	public static final String DB_VERSION = "1.0"; //$NON-NLS-1$
+	
 	/**
 	 * Entity grid query icon
 	 */

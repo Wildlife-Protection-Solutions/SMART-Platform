@@ -22,8 +22,7 @@
 package org.wcs.smart.entity.query.updatesite;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.entity.updatesite.RemoveEntityJob;
+import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -36,12 +35,12 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
 	protected void performRemove() {
-		Job job = new RemoveEntityJob();
+		Job job = new RemoveQueryEntityJob();
 		job.schedule();
 		try{
 			job.join();
 		}catch(InterruptedException ex){
-			EntityPlugIn.log(ex.getLocalizedMessage(), ex);
+			EntityQueryPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
 

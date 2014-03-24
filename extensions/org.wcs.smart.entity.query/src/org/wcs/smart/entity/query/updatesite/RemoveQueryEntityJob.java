@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -82,12 +82,13 @@ public class RemoveQueryEntityJob extends Job {
 					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 				}
 			}
+			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, null, session);
 			session.getTransaction().commit();
 		} catch (final Exception e) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, Messages.RemoveQueryEntityJob_Error1, e);
+					EntityQueryPlugIn.displayLog(Messages.RemoveQueryEntityJob_Error1, e);
 				}
 			});
 			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveQueryEntityJob_Error2 + e.getLocalizedMessage(), e); 
