@@ -35,8 +35,10 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -51,6 +53,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -68,6 +71,7 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
@@ -75,6 +79,8 @@ import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Creates a panel for entering/editing
@@ -87,6 +93,10 @@ public class EntityEditPanelComposite extends Composite{
 	
 	private Entity entity;
 	private EntityType etype;
+
+	private final GeometryFactory gf = new GeometryFactory();
+	private Projection currentProjection;
+	private Projection dbProjection;
 	
 	private Text txtId;
 	private Text txtX;
@@ -145,9 +155,34 @@ public class EntityEditPanelComposite extends Composite{
 		createEditComposite(main);
 		if (cmbProjection != null){
 			List<Projection> projs = HibernateManager.getCaProjectionList(session);
+			dbProjection = currentProjection = getDatabaseProjection(projs);
 			cmbProjection.setInput(projs);
-			cmbProjection.setSelection(new StructuredSelection(projs.get(0)));
+			Projection selectedProjection = ObservationHibernateManager.getCurrentViewProjection(session);
+			if (selectedProjection == null) {
+				selectedProjection = projs.get(0);
+			}
+			cmbProjection.setSelection(new StructuredSelection(selectedProjection));
 		}
+	}
+
+	private Projection getDatabaseProjection(List<Projection> projs) {
+		Projection defaultp = null;
+		for(Projection p : projs){
+			try{
+				if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+					defaultp = p;
+					break;
+				}
+			}catch (Exception ex){
+				EntityPlugIn.log("Error parsing projection info", ex); //$NON-NLS-1$
+			}
+		}
+		if (defaultp == null){
+			defaultp = new Projection();
+			defaultp.setCrs(SmartDB.DATABASE_CRS);
+			projs.add(defaultp);
+		}
+		return defaultp;
 	}
 	
 	@Override
@@ -183,6 +218,7 @@ public class EntityEditPanelComposite extends Composite{
 					txtY.setText(""); //$NON-NLS-1$
 				}
 			}
+			transformInput(dbProjection, currentProjection);
 			
 			cmbStatus.setSelection(new StructuredSelection(e.getStatus()));
 			for(EntityAttributeValue v : e.getAttributes()){
@@ -337,6 +373,13 @@ public class EntityEditPanelComposite extends Composite{
 			cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
 			cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)cmbProjection.getControl().getLayoutData()).widthHint = 100;
+			cmbProjection.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					transformInput();
+					currentProjection = (Projection)((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+				}
+			});
 			
 			Composite posComp = new Composite(postComp, SWT.NONE);
 			GridLayout gl = new GridLayout(4, false);
@@ -424,6 +467,24 @@ public class EntityEditPanelComposite extends Composite{
 		}
 	}
 
+	private void transformInput() {
+		Projection target = (Projection)((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+		transformInput(currentProjection, target);
+	}
+
+	private void transformInput(final Projection source, final Projection target) {
+		try {
+			//reproject
+			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(source.getCrs(), target.getCrs()));
+
+			txtX.setText(String.valueOf(p.getX()));
+			txtY.setText(String.valueOf(p.getY()));
+		} catch (Exception ex) {
+			//nothing
+		}
+	}
+	
 	private Coordinate getPosition() throws Exception{
 		if (txtX == null || txtY == null || cmbProjection == null){
 			return null;
@@ -468,20 +529,7 @@ public class EntityEditPanelComposite extends Composite{
 			if (md.getPoint() != null){
 				txtX.setText(String.valueOf(md.getPoint().getX()));
 				txtY.setText(String.valueOf(md.getPoint().getY()));
-
-				//select the correct projection
-				Projection defaultp = null;
-				for(Projection p : ((List<Projection>)cmbProjection.getInput())){
-					try{
-						if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
-							defaultp = p;
-							break;
-						}
-					}catch (Exception ex){
-						EntityPlugIn.displayLog(Messages.EntityEditPanelComposite_ProjectionError2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-					}
-				}
-				cmbProjection.setSelection(new StructuredSelection(defaultp));
+				transformInput(dbProjection, currentProjection);
 			}
 		}
 	}
