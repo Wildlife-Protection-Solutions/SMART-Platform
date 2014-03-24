@@ -3,7 +3,7 @@
    <feature url="features/org.wcs.smart.entity.feature_1.0.0.jar" id="org.wcs.smart.entity.feature" version="1.0.0">
       <category name="entity"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.feature_3.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="3.0.0" os="win32">
+   <feature url="features/org.wcs.smart.cybertracker.feature_3.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="3.0.0" os="">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.intelligence.feature_3.0.0.jar" id="org.wcs.smart.intelligence.feature" version="3.0.0">
