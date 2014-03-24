@@ -32,6 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
@@ -75,6 +76,15 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 			clone.setConservationArea(engine.getNewCa());
 			clone.setCreator(engine.getNewCa().getEmployees().get(0));
 			clone.setDateCreated(new Date());
+			
+			//remove list items from attribute list; we don't want to
+			//be cloning the actual entity entries
+			Attribute dmAttribute = findNewAttribute(et.getDmAttribute());
+			for (AttributeListItem it : dmAttribute.getAttributeList()){
+				it.setAttribute(null);
+			}
+			dmAttribute.getAttributeList().clear();
+			engine.getSession().save(dmAttribute);
 			
 			clone.setDmAttribute(findNewAttribute(et.getDmAttribute()));
 			
