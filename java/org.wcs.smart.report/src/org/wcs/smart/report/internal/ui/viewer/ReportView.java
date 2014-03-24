@@ -86,28 +86,34 @@ public class ReportView extends ViewPart implements IReportListener{
 				IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
 				
-				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-				HTMLRenderOption options = new HTMLRenderOption();
+				
 				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				options = new HTMLRenderOption( );
-				options.setOutputStream(bos);
-				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-				options.setOutputFormat(HTMLRenderOption.HTML);
-				task.setRenderOption(options);
-				task.setParameterValues(selectedParams);
-				task.run();
-				task.close();
-				browser.getDisplay().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						try {
-							browser.setText(bos.toString("UTF8")); //$NON-NLS-1$
-						} catch (UnsupportedEncodingException e) {
-							throw new IllegalStateException(Messages.ReportView_UTF8NotSupported);
-						}
-						
-
-					}});
+				try{
+					HTMLRenderOption options = new HTMLRenderOption();
+					options = new HTMLRenderOption( );
+					options.setOutputStream(bos);
+					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+					options.setOutputFormat(HTMLRenderOption.HTML);
+					IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+					try{
+						task.setRenderOption(options);
+						task.setParameterValues(selectedParams);
+						task.run();
+					}finally{
+						task.close();
+					}
+					browser.getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							try {
+								browser.setText(bos.toString("UTF8")); //$NON-NLS-1$
+							} catch (UnsupportedEncodingException e) {
+								throw new IllegalStateException(Messages.ReportView_UTF8NotSupported);
+							}
+						}});
+				}finally{
+					bos.close();
+				}
 		} catch (Exception e) {
 			ReportPlugIn.displayLog(REPORT_ERROR_MSG + e.getLocalizedMessage(), e);
 		}			

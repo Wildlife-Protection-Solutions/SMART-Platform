@@ -335,13 +335,4 @@
          </require>
       </templateCloner>
    </extension>
-   <extension
-         point="org.eclipse.equinox.http.registry.resources">
-   </extension>
-   <extension
-         point="org.eclipse.equinox.http.registry.servlets">
-   </extension>
-   <extension
-         point="org.eclipse.equinox.http.registry.httpcontexts">
-   </extension>
 </plugin>
