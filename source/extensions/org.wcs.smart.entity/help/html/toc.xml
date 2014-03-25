@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<toc label="SMART Entity Tracker Help" topic="help/html/EntityTrackerHelp.html">
-      <topic href="help/html/EntityTrackerHelp.html#Overview" label="Entity Tracker">
+<toc label="SMART Entity Tracker Help" link_to="../org.wcs.smart.help/toc.xml#SmartExtensions" topic="help/html/EntityTrackerHelp.html">
+      <topic href="help/html/EntityTrackerHelp.html" label="Entity Tracker PlugIn">
          <topic href="help/html/EntityTrackerHelp.html#Overview" label="Overview">
          </topic>
          <topic href="help/html/EntityTrackerHelp.html#NewType" label="Creating Entity Types">

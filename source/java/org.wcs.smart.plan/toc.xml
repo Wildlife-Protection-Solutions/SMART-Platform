@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<toc label="SMART Plan Help">
-      <topic href="html/Plan.html#Plans" label="Plan Perspective">
+<toc label="SMART Plan Help" link_to="../org.wcs.smart.help/toc.xml#SmartExtensions" topic="html/Plan.html">
+      <topic href="html/Plan.html" label="Plan Plugin">
          <topic href="html/Plan.html#DevelopingPlans" label="Developing Plans">
          </topic>
          <topic href="html/Plan.html#LinkPatrolPlan" label="Linking Patrols To Plans">

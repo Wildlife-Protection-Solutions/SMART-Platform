@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<toc label="SMART Independent Incident Help" topic="help/html/Independent_Incidents_Help.html">
-      <topic href="help/html/Independent_Incidents_Help.html#Overview" label="Independent Incidents">
+<toc label="SMART Independent Incident Help" link_to="../org.wcs.smart.help/toc.xml#SmartExtensions" topic="help/html/Independent_Incidents_Help.html">
+      <topic href="help/html/Independent_Incidents_Help.html" label="Independent Incidents Plugin">
          <topic href="help/html/Independent_Incidents_Help.html#Overview" label="Overview">
          </topic>
          <topic href="help/html/Independent_Incidents_Help.html#createnew" label="Creating a New Indepedent Incident">
