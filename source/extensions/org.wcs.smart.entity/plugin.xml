@@ -29,6 +29,14 @@
       </perspectiveExtension>
    </extension>
    <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.entity.ccca.EntityTypeCcaaPerspective"
+            id="org.wcs.smart.entity.ccaa.EntityTypePerspective"
+            name="%perspective.ccaa.name">
+      </perspective>
+   </extension>
+   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
@@ -97,6 +105,7 @@
             <command
                   commandId="org.wcs.smart.entity.perspective"
                   icon="images/icons/obj16/entitytype.png"
+                  label="%viewentities.command.name"
                   mnemonic="%showentities.command.mnemonic"
                   style="push"
                   tooltip="%showentities.command.tooltip">
@@ -238,6 +247,38 @@
                </not>
             </visibleWhen>
          </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file.multipleCa?before=org.wcs.smart.file.separator1">
+         <command
+               commandId="org.eclipse.ui.file.export"
+               id="%file.exportmap.command.mnemonic"
+               label="%menu.file.command.export.label"
+               style="push"
+               tooltip="%file.exportmap.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.entity.ccaa.EntityTypePerspective">
+                     </equals>
+                  </with>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
+               </and>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator3"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension
