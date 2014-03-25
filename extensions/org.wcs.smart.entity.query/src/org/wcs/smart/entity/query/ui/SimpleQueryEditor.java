@@ -177,6 +177,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 			}
 			
 			if (mod){
+				q.updateVisibleColumns();
 				Display.getDefault().syncExec(new Runnable(){
 
 					@Override

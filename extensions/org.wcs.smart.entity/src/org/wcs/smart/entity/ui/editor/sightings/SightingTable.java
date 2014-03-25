@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.internal.Messages;
@@ -38,7 +39,10 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.SightingQueryColumn;
 import org.wcs.smart.entity.query.SightingQueryColumn.FixedColumns;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.common.ui.QueryTableViewerColumn;
@@ -144,15 +148,35 @@ public class SightingTable {
 	private List<QueryColumn> getQueryColumns(EntityType type){
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
+		
+		ObservationOptions obsOptions = null;
+		Session session = HibernateManager.openSession();
+		try {
+			obsOptions = ObservationHibernateManager
+					.getPatrolOptions(
+							SmartDB.getCurrentConservationArea(),
+							session);
+		} finally {
+			session.close();
+		}
+
+		
 		//fixed columns for waypoint and fixed entity attributes
 		for (FixedColumns fixed : SightingQueryColumn.FixedColumns.values()){
 			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType(), fixed.dbColName);
-			if (SmartDB.isMultipleAnalysis()){
-				cols.add(column);	
+			
+			if (fixed == FixedColumns.WAYPOINT_DIRECTION || fixed == FixedColumns.WAYPOINT_DISTANCE){
+				if (obsOptions.getTrackDistanceDirection()){
+					cols.add(column);
+				}
 			}else{
-				if ( fixed != FixedColumns.CA_ID && fixed != FixedColumns.CA_NAME ){
+				if (SmartDB.isMultipleAnalysis()){
 					cols.add(column);	
-				}	
+				}else{
+					if ( fixed != FixedColumns.CA_ID && fixed != FixedColumns.CA_NAME ){
+						cols.add(column);	
+					}	
+				}
 			}
 		}
 		

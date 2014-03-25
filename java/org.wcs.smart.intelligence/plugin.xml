@@ -128,6 +128,19 @@
                      style="push"
                      tooltip="%command.importtemplate.tooltip">
                </command>
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </menu>
             <separator
                   name="org.wcs.smart.intelligence.separator2"

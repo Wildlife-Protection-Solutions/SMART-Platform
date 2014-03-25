@@ -32,6 +32,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.TreeEditorField;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A attribute field for tree attributes.
@@ -64,7 +65,7 @@ public class TreeAttributeField extends TreeEditorField implements IAttributeFie
 	@Override
 	public void createComposite(Composite parent) {		
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
+		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		super.createComposite(parent);

@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A table for displaying observations for a specific 
@@ -90,7 +91,7 @@ public class AttributeTable {
 			for (int i = 0; i < attributes.size(); i ++){
 				TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
 //				column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
-				column.setText(attributes.get(i).getName());
+				column.setText(SmartUtils.formatStringForLabel(attributes.get(i).getName()));
 				column.setResizable(true);
 				column.setMoveable(false);
 				

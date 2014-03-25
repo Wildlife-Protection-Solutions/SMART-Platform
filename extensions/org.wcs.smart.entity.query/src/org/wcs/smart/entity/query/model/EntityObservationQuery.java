@@ -65,13 +65,7 @@ public class EntityObservationQuery extends ObservationQuery {
 			
 			for (int i = 0; i < cols.length; i ++){
 				queryColumns.add(cols[i]);
-				if (visible == null){
-					cols[i].setVisible(true);
-				}else if (visible.contains(cols[i].getKey())){
-					cols[i].setVisible(true);
-				}else{
-					cols[i].setVisible(false);
-				}
+				
 			}
 			
 			//initialize add entity type columns
@@ -106,12 +100,23 @@ public class EntityObservationQuery extends ObservationQuery {
 				}};
 			j.setSystem(true);	
 			j.schedule();
-			
 			try {
 				j.join();
 			} catch (InterruptedException e) {
 				EntityQueryPlugIn.log(e.getMessage(), e);
 			}
+			
+			
+			for (QueryColumn c : queryColumns){
+				if (visible == null){
+					c.setVisible(true);
+				}else if (visible.contains(c.getKey())){
+					c.setVisible(true);
+				}else{
+					c.setVisible(false);
+				}
+			}
+			
 		}
 		
 		

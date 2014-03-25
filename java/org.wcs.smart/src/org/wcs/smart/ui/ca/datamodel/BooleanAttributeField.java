@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Attribute field for modifying boolean observation
@@ -98,7 +99,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
+		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		Composite comp = new Composite(parent, SWT.NONE);
