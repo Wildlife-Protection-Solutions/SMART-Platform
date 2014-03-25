@@ -220,4 +220,7 @@
    </topic>
    <topic href="html/CommunityForum.html" label="Community Forum">
    </topic>
+   <topic label="SMART Plugins">
+      <anchor id="SmartExtensions"/>
+   </topic>
 </toc>

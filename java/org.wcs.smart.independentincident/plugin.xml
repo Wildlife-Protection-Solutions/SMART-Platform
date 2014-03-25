@@ -474,7 +474,7 @@
          point="org.eclipse.help.toc">
       <toc
             file="help/html/toc.xml"
-            primary="true">
+            primary="false">
       </toc>
    </extension>
 
