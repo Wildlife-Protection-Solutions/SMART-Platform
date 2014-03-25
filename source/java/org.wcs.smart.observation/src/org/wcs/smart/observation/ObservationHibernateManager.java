@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.observation;
 
-import java.util.List;
-
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -58,17 +55,9 @@ public class ObservationHibernateManager extends HibernateManager{
 	 */
 	public static ObservationOptions getPatrolOptions(ConservationArea ca, Session s){
 		try{
-			@SuppressWarnings("unchecked")
-			List<ObservationOptions> ops = s.createCriteria(ObservationOptions.class).
-					add(Restrictions.eq("uuid", ca.getUuid())).list(); //$NON-NLS-1$
-			if (ops.size() > 1){
-				throw new IllegalStateException(Messages.PatrolHibernateManager_Error_ToManyPatrolOptions);
-			}
-			ObservationOptions op = null;
-			if (ops.size() == 0){
+			ObservationOptions op = (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
+			if (op == null){
 				op = createPatrolOption(ca, s);
-			}else{
-				op = ops.get(0);
 			}
 			return op;
 		}catch (Exception ex){

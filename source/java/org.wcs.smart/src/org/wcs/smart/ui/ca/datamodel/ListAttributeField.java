@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -96,7 +97,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
+		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbViewer = new ComboViewer(new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY));

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * String attribute field for Stringg type attributes.
@@ -76,7 +77,7 @@ public class StringAttributeField implements IAttributeField<String>{
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
+		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txt = new Text(parent, SWT.BORDER);

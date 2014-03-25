@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A table viewer column for the query results table viewer.
@@ -50,7 +51,7 @@ public class QueryTableViewerColumn {
 		this.column = column;
 		
 		tcolumn = new TableViewerColumn(viewer, SWT.NONE);
-		tcolumn.getColumn().setText(column.getName());
+		tcolumn.getColumn().setText(SmartUtils.formatStringForLabel(column.getName()));
 		tcolumn.getColumn().setWidth(100);
 		if (column.isVisible()){
 			show();
