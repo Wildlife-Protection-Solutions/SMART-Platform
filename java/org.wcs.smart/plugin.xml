@@ -206,7 +206,7 @@
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
                      <equals
-                           value="org.wcs.smart.DefaultPerspective">
+                           value="org.wcs.smart.DefaultCrossCaPerspective">
                      </equals>
                   </with>
                </visibleWhen>
