@@ -608,6 +608,64 @@
                visible="false">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file.multipleCa?before=org.wcs.smart.file.separator1">
+         <separator
+               name="org.wcs.smart.query.ccaa.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.file.save"
+               label="%menu.file.command.save.label"
+               mnemonic="%menu.file.command.save.mnemonic"
+               tooltip="%menu.file.command.save.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.ui.file.saveAs"
+               label="%menu.file.command.saveAs.label"
+               mnemonic="%menu.file.command.saveAs.mnemonic"
+               tooltip="%menu.file.command.saveAs.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.ui.file.export"
+               label="%menu.file.command.export.label"
+               mnemonic="%menu.file.command.export.mnemonic"
+               style="push"
+               tooltip="%menu.file.command.export.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.ccaa.separator3"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
