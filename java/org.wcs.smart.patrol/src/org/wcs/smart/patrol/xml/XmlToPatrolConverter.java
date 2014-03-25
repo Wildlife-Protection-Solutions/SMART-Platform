@@ -58,9 +58,9 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
 import org.wcs.smart.patrol.xml.model.PatrolLegType;
 import org.wcs.smart.patrol.xml.model.PatrolMemberType;
@@ -123,7 +123,7 @@ public class XmlToPatrolConverter {
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void fromXml(PatrolType xml, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
+	public void fromXml(PatrolType xml, boolean keepIDs, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
 		this.session = session;
 		this.ca = ca;
 		this.attachmentLocation = attachmentLocation;
@@ -135,6 +135,9 @@ public class XmlToPatrolConverter {
 		patrol.setEndDate(xml.getEndDate().toGregorianCalendar().getTime());
 		patrol.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
 		patrol.setComment(xml.getComment());
+		if (keepIDs) {
+			patrol.setId(xml.getId());
+		}
 		
 		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType().toUpperCase()));
 		if (xml.getObjective() != null){

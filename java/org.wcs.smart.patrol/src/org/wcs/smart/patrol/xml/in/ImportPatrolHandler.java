@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -71,10 +70,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 		final IWorkbench activeWorkbench = HandlerUtil
 				.getActiveWorkbenchWindow(event).getWorkbench();
 
-		XmlImportDialog dialog = new XmlImportDialog(Display.getCurrent().getActiveShell(),
-				Messages.ImportPatrolDialog_DialogTitle,
-				Messages.ImportPatrolDialog_DialogText,
-				Messages.ImportPatrolDialog_DialogMessage);
+		PatrolXmlImportDialog dialog = new PatrolXmlImportDialog();
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}
@@ -88,15 +84,15 @@ public class ImportPatrolHandler extends AbstractHandler {
 						Messages.ImportPatrolHandler_ErrorDialog_Title, MessageFormat.format(Messages.ImportPatrolHandler_Error_DirectoryNotFound,  new Object[]{file.toString()}));
 				return null;
 			}			
-			importFile(activeWorkbench, file);
+			importFile(activeWorkbench, file, dialog.isKeepIDs());
 		
 		}else if (files.size() > 0){
-			importFiles(activeWorkbench, files);
+			importFiles(activeWorkbench, files, dialog.isKeepIDs());
 		}
 		return null;
 	}
 
-	public void importFiles(final IWorkbench activeWorkbench, final List<String> files){
+	public void importFiles(final IWorkbench activeWorkbench, final List<String> files, final boolean keepIDs){
 		final Display display = Display.getCurrent();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
 		
@@ -129,7 +125,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 						monitor.worked(1);
 						if (file.isDirectory()) continue;
 						try{
-							Patrol p = PatrolImporter.importPatrol(file, nullPm);
+							Patrol p = PatrolImporter.importPatrol(file, keepIDs, nullPm);
 							if (p != null) {
 								PatrolEventManager.getInstance().patrolAdded(p);
 							}
@@ -156,7 +152,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 	}
 	
 	
-	public void importFile(final IWorkbench activeWorkbench, final File file) {
+	public void importFile(final IWorkbench activeWorkbench, final File file, final boolean keepIDs) {
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
 				.getCurrent().getActiveShell());
 		try {
@@ -165,7 +161,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						Patrol p = PatrolImporter.importPatrol(file, monitor);
+						Patrol p = PatrolImporter.importPatrol(file, keepIDs, monitor);
 						if (p != null) {
 							PatrolEventManager.getInstance().patrolAdded(p);
 							final PatrolEditorInput input = new PatrolEditorInput(

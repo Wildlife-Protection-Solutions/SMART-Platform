@@ -80,15 +80,15 @@ public class PatrolImporter {
 	 * @param monitor progress monitor 
 	 * @throws Exception
 	 */
-	public static Patrol importPatrol(File file, IProgressMonitor monitor) throws Exception{
+	public static Patrol importPatrol(File file, boolean keepIDs, IProgressMonitor monitor) throws Exception{
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
 			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 4);
-			return importXmlToPatrol(file, monitor);
+			return importXmlToPatrol(file, keepIDs, monitor);
 		}else{
 			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 3);
-			return importPatrolFromFile(file, monitor);
+			return importPatrolFromFile(file, keepIDs, monitor);
 		}
 	}
 	
@@ -100,7 +100,7 @@ public class PatrolImporter {
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
-	private static Patrol importXmlToPatrol(File zipFile, IProgressMonitor monitor) throws Exception{
+	private static Patrol importXmlToPatrol(File zipFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
 		
 		PatrolType ptype = null;
 		//unzip 
@@ -145,7 +145,7 @@ public class PatrolImporter {
 		}
 		monitor.worked(1);
 		
-		Patrol p = convertAndSave(ptype, directory, monitor);
+		Patrol p = convertAndSave(ptype, keepIDs, directory, monitor);
 		
 		monitor.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
@@ -163,7 +163,7 @@ public class PatrolImporter {
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
-	private static Patrol importPatrolFromFile(File xmlFile, IProgressMonitor monitor) throws Exception{
+	private static Patrol importPatrolFromFile(File xmlFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
 		PatrolType ptype = null;
 		FileInputStream in = new FileInputStream(xmlFile);
 		try{
@@ -176,7 +176,7 @@ public class PatrolImporter {
 		if (ptype == null){
 			throw new Exception(Messages.PatrolImporter_Error_ReadingPatrolXmlFile);
 		}
-		return convertAndSave(ptype, null, monitor);
+		return convertAndSave(ptype, keepIDs, null, monitor);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class PatrolImporter {
 	 * @return created Patrol or null
 	 * @throws Exception
 	 */
-	private static Patrol  convertAndSave(PatrolType xmlPatrol, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static Patrol  convertAndSave(PatrolType xmlPatrol, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		XmlToPatrolConverter converter = new XmlToPatrolConverter();
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
@@ -210,9 +210,9 @@ public class PatrolImporter {
 
 						@Override
 						public void run() {
+							String message = keepIDs ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
 							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle, 
-									null,
-									MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, new Object[]{pid}),
+									null, message,
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 1){
@@ -229,7 +229,7 @@ public class PatrolImporter {
 				}
 			}		
 			monitor.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
-			converter.fromXml(xmlPatrol, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
+			converter.fromXml(xmlPatrol, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 		} finally {
 			if (session.isOpen()){
 				session.close();

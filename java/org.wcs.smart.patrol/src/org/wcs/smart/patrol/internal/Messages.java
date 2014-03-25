@@ -334,6 +334,7 @@ public class Messages extends NLS {
 	public static String PatrolIdWizardPage_PageMessage;
 	public static String PatrolIdWizardPage_Title;
 	public static String PatrolImporter_ConfirmationMessage;
+	public static String PatrolImporter_ConfirmationMessage_SameId;
 	public static String PatrolImporter_Error_ReadingPatrolXmlFile;
 	public static String PatrolImporter_Error_UnzipError;
 	public static String PatrolImporter_Error_XmlFileNotFound;
@@ -602,6 +603,8 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_Title;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
 	public static String PatrolWaypointSource_WaypointNotFoundError;
+	public static String PatrolXmlImportDialog_KeepId;
+	public static String PatrolXmlImportDialog_NewId;
 	public static String SavePatrolPartJob_Name;
 	public static String ScreenOption_Armed;
 	public static String ScreenOption_Comment;
