@@ -215,6 +215,30 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.file.multipleCa">
+         <menu
+               id="org.wcs.smart.menu.ccaa.entity"
+               label="%entity.menu.label">
+            <command
+                  commandId="org.wcs.smart.entity.perspective"
+                  icon="images/icons/obj16/entitytype.png"
+                  mnemonic="%showentities.command.mnemonic"
+                  style="push"
+                  tooltip="%showentities.command.tooltip">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <not>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </not>
+            </visibleWhen>
+         </menu>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
