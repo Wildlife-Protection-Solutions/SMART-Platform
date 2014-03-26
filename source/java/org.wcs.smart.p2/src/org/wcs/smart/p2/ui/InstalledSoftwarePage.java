@@ -153,7 +153,8 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 			return;
 
 		
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
+		if (!SmartDB.isMultipleAnalysis() &&
+				SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
  			// Uninstall action
 			Action uninstallAction = new UninstallAction(getProvisioningUI(), 
 					installedIUGroup.getStructuredViewer(), profileId) {
@@ -205,7 +206,9 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 
 	void updateEnablement() {
 		Button[] buttons = {uninstallButton, propertiesButton};
+		
 		for (int i = 0; i < buttons.length; i++) {
+			if (buttons[i] == null) continue;
 			Action action = (Action) buttons[i].getData(BUTTON_ACTION);
 			if (action == null || !action.isEnabled())
 				buttons[i].setEnabled(false);
@@ -270,6 +273,9 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 	protected void buttonPressed(int buttonId) {
 		switch (buttonId) {
 			case UNINSTALL_ID :
+				if (uninstallButton == null){
+					return;
+				}
 				((Action) uninstallButton.getData(BUTTON_ACTION)).run();
 				break;
 			case PROPERTIES_ID :
