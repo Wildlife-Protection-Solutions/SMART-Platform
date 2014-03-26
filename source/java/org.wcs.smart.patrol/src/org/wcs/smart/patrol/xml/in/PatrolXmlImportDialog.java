@@ -60,6 +60,7 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		
 		Button btnAssign = new Button(optionCmp, SWT.RADIO);
 		btnAssign.setText(Messages.PatrolXmlImportDialog_NewId);
+		btnAssign.setToolTipText(Messages.PatrolXmlImportDialog_AutoGenerateIdsTooltip);
 		btnAssign.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnAssign.setSelection(true);
 		btnAssign.addSelectionListener(new SelectionAdapter() {
@@ -71,6 +72,7 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		
 		Button btnKeep = new Button(optionCmp, SWT.RADIO);
 		btnKeep.setText(Messages.PatrolXmlImportDialog_KeepId);
+		btnKeep.setToolTipText(Messages.PatrolXmlImportDialog_KeepIdsTooltip);
 		btnKeep.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnKeep.addSelectionListener(new SelectionAdapter() {
 			@Override

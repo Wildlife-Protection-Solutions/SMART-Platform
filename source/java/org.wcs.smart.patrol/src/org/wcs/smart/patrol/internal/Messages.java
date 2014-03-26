@@ -603,7 +603,9 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_Title;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
 	public static String PatrolWaypointSource_WaypointNotFoundError;
+	public static String PatrolXmlImportDialog_AutoGenerateIdsTooltip;
 	public static String PatrolXmlImportDialog_KeepId;
+	public static String PatrolXmlImportDialog_KeepIdsTooltip;
 	public static String PatrolXmlImportDialog_NewId;
 	public static String SavePatrolPartJob_Name;
 	public static String ScreenOption_Armed;
