@@ -4,7 +4,6 @@
       label="Core SMART CyberTracker Module (Required)"
       version="3.0.0"
       provider-name="org.wcs.smart"
-      os="win32"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
 
