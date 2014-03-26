@@ -286,7 +286,7 @@ and import options in the entity tracking plug-in.</p>
 <p><strong>To export an Entity List:</strong></p>
 <ol>
   <li>Click the the Entity Perspective Icon <img alt="icon"
-    src="images/entity_icon.png" width="268" height="72" />
+    src="images/entity_icon.png" width="268" height="72" /> 
     <p></p>
   </li>
   <li>Open the Entity Type you wish to view by double clicking it in the list
@@ -301,7 +301,7 @@ and import options in the entity tracking plug-in.</p>
 <p><strong>To import an Entity List:</strong></p>
 <ol>
   <li>Click the the Entity Perspective Icon <img alt="icon"
-    src="images/entity_icon.png" width="268" height="72" />
+    src="images/entity_icon.png" width="268" height="72" /> 
     <p></p>
   </li>
   <li>Open the Entity Type you plan to import by double clicking it in the list
@@ -312,7 +312,45 @@ and import options in the entity tracking plug-in.</p>
     type using the drop downs provided and press "Finish"</li>
 </ol>
 
+<h2><a id="entityqueries">Entity Queries</a></h2>
 
+<p>The Entity Query User Interfaces are very much the same as all other Query
+types for the various result types, see the Query Help pages, in the table of
+contents under: "Componenets of Smart -&gt; Query Perspective" for details on
+the general use and building of queries.</p>
+
+<p>To Query Entity specific properties, one would use the additional Query
+Filters under "Entity Type Filters" in the standard filter windown, these
+filters are only when selecting an "Eentity Query".</p>
+
+<p><img alt="Entity Query" src="images/entity_query.png" width="795"
+height="663" /></p>
+
+<p></p>
+
+<p>To Create the query shown above which basically asks the question, "List all
+Rhino sightings for children of the Rhino named Jill" You would do the
+following:</p>
+<ol>
+  <li>Select "Query - &gt; New Query -&gt; Entity Queries -&gt; New Entity
+    Observation Query" (or use the new query wizard and select "Entity" and
+    then "Entity Observation Query")</li>
+  <li>Expand the Entity Type filters from the filters tab and double click the
+    attribute you want, in our case, "Mother" (this attribute was setup using
+    the configuration tab of the Rhino entity type)</li>
+  <li>Then select the specific value for "Mother" to be equal to, in our case
+    "Jill".</li>
+</ol>
+
+<p></p>
+
+<p>Using this same method and all the same query options and features as
+regular SMART queries, you can create complex and powerful queries, summaries
+and maps with entity-specific attributes in your query filters.</p>
+
+<p></p>
+
+<p></p>
 
 <p></p>
 </body>
