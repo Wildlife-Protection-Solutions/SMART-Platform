@@ -6,8 +6,7 @@
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>Components of SMART</title>
   <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
-  <link href="smart_help.css"
-  type="text/css" rel="stylesheet" />
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
@@ -220,6 +219,100 @@ Of course, we do not recommend you delete anything that contains actual data
 observations. If you no longer want to use the entity tracking you can simple
 remove the entities attribute from the data model and leave the historical
 observations alone.</p>
+
+<p></p>
+
+<h4><a id="vs">Entity Types vs Entities Lists</a></h4>
+
+<p>Often it will make sense to create a single master list of entities and
+distribute it to multiple field sites. This can be done easily using the export
+and import options in the entity tracking plug-in.</p>
+
+<p>There are 2 types of files that can be exported and imported:</p>
+<ol>
+  <li><strong>Entity Types</strong> - The definition of an entity type, this is
+    an xml file that includes the properties you wish to track about an entity,
+    its name, type etc. This does not export any individual entities that you
+    have created, just the type definition. EX: If you have a Rhino entity type
+    and you wish to track 2 completely separate rhino populations, you would
+    create the type in Conservation #1, then export the type definition and
+    import it in Conservation area #2. Then, in each separate CA, you could
+    create the lists of rhinos relevant to each area. Using the same definition
+    will allow you to combine the data in the future for national roll-ups or
+    other purposes, but you can manage the names and activities of each rhino
+    population separately.</li>
+  <li><strong>Entity Lists</strong> - The Entity lists are the actual list of
+    individual entities, in our rhino example it would be the list of Rhino
+    Names, and all of the values for the properties for each individual rhino.
+    EX: In a large park that has a rhino population that can move across 2
+    areas which are patroled/tracked using 2 different SMART Conservation Area
+    Databases, you may whish to make the entity type, and enter the list of all
+    rhinos in CA#1, then export the type and import into CA#2. Then also export
+    the Entity List and import into CA#2. Now you have all rhinos in both areas
+    and can easily record observations of any rhino in the entire population in
+    either CA#1 or CA#2. In this scenario, when you wish to add or disable a
+    particular rhino, you must do it in both CA's to maintain this
+  consistency.</li>
+</ol>
+
+<p></p>
+
+<h4><a id="exporttypes">Import/Export Entity Types</a></h4>
+
+<p><strong>To export an Entity Type:</strong></p>
+<ol>
+  <li>Click the the Entity Perspective Icon <img alt="icon"
+    src="images/entity_icon.png" width="268" height="72" /></li>
+  <li>Open the Entity Type you wish to export by double clicking it in the list
+    on the left.</li>
+  <li>Then, select the Menu option: "Field Data -&gt; Entity -&gt; Export
+    Entity Type".</li>
+  <li>Then select a file locatio and name to save the exported list and press
+    OK.</li>
+</ol>
+
+<p><strong>To import an Entity Type:</strong></p>
+<ol>
+  <li>Simply select the Menu option: "Field Data -&gt; Entity -&gt; Import
+    Entity Type" </li>
+  <li>Select the exported file you wish to import using the "browse" button,
+    then press OK</li>
+</ol>
+
+<p></p>
+
+<h4><a id="exportlists">Import/Export Entity Lists</a></h4>
+
+<p><strong>To export an Entity List:</strong></p>
+<ol>
+  <li>Click the the Entity Perspective Icon <img alt="icon"
+    src="images/entity_icon.png" width="268" height="72" />
+    <p></p>
+  </li>
+  <li>Open the Entity Type you wish to view by double clicking it in the list
+    on the left.</li>
+  <li>On the "Entities" tab, select any filter you wish to apply at the top and
+    when you list is what you wish to export, press the "Export..." button on
+    the right side.</li>
+  <li>Select a filename and location using the "Browse..." button and press
+    "OK".</li>
+</ol>
+
+<p><strong>To import an Entity List:</strong></p>
+<ol>
+  <li>Click the the Entity Perspective Icon <img alt="icon"
+    src="images/entity_icon.png" width="268" height="72" />
+    <p></p>
+  </li>
+  <li>Open the Entity Type you plan to import by double clicking it in the list
+    on the left.</li>
+  <li>Press the "Import..." button on the right and select the file you wish to
+    import entities from and press next.</li>
+  <li>Match the columns from the export file to the properties of your entity
+    type using the drop downs provided and press "Finish"</li>
+</ol>
+
+
 
 <p></p>
 </body>

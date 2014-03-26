@@ -5,5 +5,12 @@
          </topic>
          <topic href="help/html/EntityTrackerHelp.html#NewType" label="Creating Entity Types">
          </topic>
+         <topic href="help/html/EntityTrackerHelp.html#vs" label="Entity Types vs Entity Lists">
+         </topic>
+         <topic href="help/html/EntityTrackerHelp.html#exporttypes" label="Import/Export Entity Types">
+         </topic>
+         <topic href="help/html/EntityTrackerHelp.html#exportlists" label="Import/Export Entity Lists">
+         </topic>
+
       </topic>
 </toc>
