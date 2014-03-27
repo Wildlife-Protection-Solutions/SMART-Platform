@@ -44,6 +44,10 @@ public class DataModelListener implements IDataModelListener {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void modified() {
+		if (SmartDB.isMultipleAnalysis()){
+			return;
+		}
+		
 		Session session = HibernateManager.openSession();
 		
 		session.beginTransaction();
