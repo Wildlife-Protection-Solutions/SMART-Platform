@@ -164,14 +164,21 @@ public class GPSDataImport {
 			//assign waypoints to days
 			modified.addAll(GPSDataImport.assignWaypoints(waypoints, patrol.getLegs()));
 
+			int cnt = 0;
 			for(PatrolLegDay pld : modified){
+				for (PatrolWaypoint pw : pld.getWaypoints()){
+					if (pw.getWaypoint().getUuid() == null){
+						//new waypoint add to our cnt
+						cnt++;
+					}
+				}
 				addedWaypoints.addAll(pld.getWaypoints());
 			}
 			if (addedWaypoints.size() == 0){
 				//nothing imported; not date matched
 				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
 			}else{
-				message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{addedWaypoints.size(), modified.size()});
+				message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{cnt, modified.size()});
 			}	
 		}else{
 			modified.add(currentLeg);
