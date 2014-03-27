@@ -107,7 +107,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsMapPage, sightingsPage}, true);
+							initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsPage, sightingsMapPage}, true);
 						}});
 					
 				}
