@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident.ui.newwizard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -44,6 +45,7 @@ import org.wcs.smart.incident.ui.IncidentEditorInput;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 
 /**
  * New incident wizard.
@@ -55,6 +57,8 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 	private Waypoint newIncident;
 	private Session session;
 	private ObservationOptions ops;
+	
+	
 	public NewIncidentWizard(){
 		super();
 		
@@ -63,6 +67,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		newIncident = new Waypoint();
 		newIncident.setConservationArea(SmartDB.getCurrentConservationArea());
 		newIncident.setSourceId(IndepedentIncidentSource.KEY);
+		newIncident.setAttachments(new ArrayList<WaypointAttachment>());
 		
 		session = HibernateManager.openSession();
 		
@@ -84,8 +89,8 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 	@Override
 	public boolean performFinish() {
 		//update the last page
-		((IncidentWizardPage)this.getPages()[this.getPageCount()-1]).updateIncident(newIncident);
-		
+		((IncidentWizardPage)getContainer().getCurrentPage()).updateIncident(newIncident);
+
 		//save to db
 		//close and reopen with attachment interceptor
 		session.close();
