@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui.importexport;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -104,71 +106,85 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 				
-					File f = page1.getFile();
 					QueryFolder qf = page2.getFolder();
 					
 					QueryImportEngine importer = new QueryImportEngine();
-					try{
-						Query query = importer.importQuery(f);
+					Query firstQuery = null;
+					
+					for (File f : page1.getFiles()){
+						try{
+							Query query = importer.importQuery(f);
+							if (firstQuery == null){
+								firstQuery = query;
+							}
 						
-						List<String> warnings = importer.getWarnings();
-						if (warnings.size() > 0){
-							StringBuilder sb = new StringBuilder();
-							for (String str: warnings){
-								sb.append(str);
-								sb.append(SmartUtils.LINE_SEPARATOR);
-								sb.append(SmartUtils.LINE_SEPARATOR);
+							List<String> warnings = importer.getWarnings();
+							if (warnings.size() > 0){
+								StringBuilder sb = new StringBuilder();
+								for (String str: warnings){
+									sb.append(str);
+									sb.append(SmartUtils.LINE_SEPARATOR);
+									sb.append(SmartUtils.LINE_SEPARATOR);
+								}
+							
+								ConfirmInputDialog dialog = new ConfirmInputDialog(
+										getContainer().getShell(),
+										Messages.ImportQueryWizard_Confirm_DialogTitle,
+										Messages.ImportQueryWizard_Confirm_DialogMessage,
+										sb.toString(), null);
+								if (dialog.open() != ConfirmInputDialog.OK){
+									//skip this query
+									continue;
+								}	
+							}
+						
+						
+							if (!qf.isRootFolder()){
+								query.setFolder(qf);
+								query.setIsShared(qf.getEmployee() == null);
+							}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
+								query.setIsShared(true);
+							}
+						
+							//set the owner
+							if (query.getIsShared() && SmartDB.isMultipleAnalysis()){
+								//shared queries in the cross-ca analysis do not have a user
+								query.setOwner(SmartDB.getSharedEmployee());
+							}else{
+								query.setOwner(SmartDB.getCurrentEmployee());
 							}
 							
-							ConfirmInputDialog dialog = new ConfirmInputDialog(
-									getContainer().getShell(),
-									Messages.ImportQueryWizard_Confirm_DialogTitle,
-									Messages.ImportQueryWizard_Confirm_DialogMessage,
-									sb.toString(), null);
-							if (dialog.open() != ConfirmInputDialog.OK){
-								return;
-							}	
-						}
-						
-						
-						if (!qf.isRootFolder()){
-							query.setFolder(qf);
-							query.setIsShared(qf.getEmployee() == null);
-						}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
-							query.setIsShared(true);
-						}
-						
-						//set the owner
-						if (query.getIsShared() && SmartDB.isMultipleAnalysis()){
-							//shared queries in the cross-ca analysis do not have a user
-							query.setOwner(SmartDB.getSharedEmployee());
-						}else{
-							query.setOwner(SmartDB.getCurrentEmployee());
-						}
-						
-						Session session = HibernateManager.openSession();
-						session.beginTransaction();
-						try{
-							//generate id
-							query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-							session.save(query);
-							session.getTransaction().commit();
+							Session session = HibernateManager.openSession();
+							session.beginTransaction();
+							try{
+								//generate id
+								query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
+								session.save(query);
+								session.getTransaction().commit();
+							}catch (Exception ex){
+								session.getTransaction().rollback();
+								throw ex;
+							}finally{
+								session.close();
+							}				
+							QueryEventManager.getInstance().fireQueryAdded(query);
 						}catch (Exception ex){
-							session.getTransaction().rollback();
-							throw ex;
-						}finally{
-							session.close();
-						}				
-						QueryEventManager.getInstance().fireQueryAdded(query);
-						
-						//open query in editor
-						QueryEditorInput qi = new QueryEditorInput(query);
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, query.getType().getEditorId());
-					}catch (Exception ex){
-						QueryPlugIn.displayLog(Messages.ImportQueryWizard_CouldNotImportError + ex.getLocalizedMessage(), ex);
-					}
+							QueryPlugIn.displayLog(MessageFormat.format("The file {0} could not be imported.", new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex);
+						}	
 					
+					}
+					//open query in editor
+					if (page1.getFiles().size() == 1){
+						QueryEditorInput qi = new QueryEditorInput(firstQuery);
+						try {
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, firstQuery.getType().getEditorId());
+						} catch (PartInitException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				}
+				
 			});
 		} catch (Exception e) {
 			QueryPlugIn.displayLog(Messages.ImportQueryWizard_ImportFailed + e.getLocalizedMessage(), e);
