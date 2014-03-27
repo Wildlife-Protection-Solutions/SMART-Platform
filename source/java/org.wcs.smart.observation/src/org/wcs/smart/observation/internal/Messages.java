@@ -59,7 +59,6 @@ public class Messages extends NLS {
 	public static String ObservationOptionsPropertyPage_ViewProjectionGroupTitle;
 
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
-	public static String PatrolHibernateManager_Error_ToManyPatrolOptions;
 	public static String ObservationSummaryWizardPage_PageMessage;
 	public static String ObservationSummaryWizardPage_PageName;
 	public static String ObservationSummaryWizardPage_PageTitle;

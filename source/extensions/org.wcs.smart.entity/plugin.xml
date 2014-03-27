@@ -32,6 +32,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.entity.ccca.EntityTypeCcaaPerspective"
+            icon="images/icons/obj16/entitytype.png"
             id="org.wcs.smart.entity.ccaa.EntityTypePerspective"
             name="%perspective.ccaa.name">
       </perspective>
@@ -557,15 +558,6 @@
       <EditAdvisor
             advisor="org.wcs.smart.entity.internal.DmAttributeEditAdvisor">
       </EditAdvisor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            class="org.wcs.smart.entity.ccca.EntityTypeCcaaPerspective"
-            icon="images/icons/obj16/entitytype.png"
-            id="org.wcs.smart.entity.ccaa.EntityTypePerspective"
-            name="Entity Types">
-      </perspective>
    </extension>
    <extension
          point="org.eclipse.help.toc">

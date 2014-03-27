@@ -120,7 +120,6 @@ public class Messages extends NLS {
 	public static String LocationComposite_Description;
 	public static String LocationComposite_Error1;
 	public static String LocationComposite_Error2;
-	public static String LocationComposite_Error3;
 	public static String LocationComposite_Name;
 	public static String LocationComposite_ProjectionLabel;
 	public static String LocationComposite_SelectOnMap;
