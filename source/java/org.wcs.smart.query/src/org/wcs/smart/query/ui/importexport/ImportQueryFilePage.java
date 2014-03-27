@@ -22,11 +22,16 @@
 package org.wcs.smart.query.ui.importexport;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -35,8 +40,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Query wizard page to select the import file .
@@ -46,13 +51,14 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class ImportQueryFilePage extends WizardPage {
 
+	private List<File> files = null;
 	
-	private Text txtFile = null;
 	/**
 	 * Creates a new query wizard page.
 	 */
 	protected ImportQueryFilePage() {
 		super(Messages.ImportQueryFilePage_PageTitle);
+		files = new ArrayList<File>();
 	}
 
 	/**
@@ -64,49 +70,75 @@ public class ImportQueryFilePage extends WizardPage {
 		main.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.ImportQueryFilePage_FileLabel);
+		lbl.setText(Messages.ImportQueryFilePage_FileLabel1);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		txtFile = new Text(main, SWT.BORDER);
-		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		txtFile.addModifyListener(new ModifyListener() {
+		final ListViewer lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI);
+		lstFiles.setContentProvider(ArrayContentProvider.getInstance());
+		lstFiles.setLabelProvider(new LabelProvider(){
 			@Override
-			public void modifyText(ModifyEvent e) {
-				File f = new File(txtFile.getText());
-				
-				if (!f.exists()){
-					setErrorMessage(Messages.ImportQueryFilePage_FileNotFoundError);
-					setPageComplete(false);
-				}else{
-					setPageComplete(true);
-					setErrorMessage(null);
+			public String getText(Object element){
+				if (element instanceof File){
+					return ((File) element).getAbsolutePath();
 				}
+				return super.getText(element);
 			}
-		});		
+		});
+		lstFiles.setInput(files);
+		lstFiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText(Messages.ImportQueryFilePage_BrowseButton);
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
+		Composite buttons = new Composite(main, SWT.NONE);
+		buttons.setLayout(new GridLayout());
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Button btnAdd = new Button(buttons, SWT.NONE);
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fd = new FileDialog(ImportQueryFilePage.this.getShell(), SWT.OPEN);
-				
+				FileDialog fd = new FileDialog(ImportQueryFilePage.this.getShell(), 
+						SWT.OPEN | SWT.MULTI);
 				
 				String[] extensions = new String[]{"*.xml", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
 				String[] names = new String[]{Messages.ImportQueryFilePage_xmlFilterName, Messages.ImportQueryFilePage_AllFilesFilterName};
 				
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);
-				fd.setFilterPath(txtFile.getText());
-				fd.setFileName(txtFile.getText());
 				
 				String f = fd.open();
+				
 				if (f != null) {
-					txtFile.setText(f);
+					for (String f2 : fd.getFileNames()){
+						File newF = new File(fd.getFilterPath(), f2);
+						if (!files.contains(newF)){
+							files.add(newF);
+							lstFiles.refresh();	
+						}	
+					}	
 				}
+				setPageComplete(files.size() > 0);
 			}
 		});
+		
+		Button btnRemove = new Button(buttons, SWT.NONE);
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnRemove.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection sel = (IStructuredSelection) lstFiles.getSelection();
+				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+					Object file = (Object) iterator.next();
+					if (file instanceof File){
+						files.remove(file);
+					}
+				}
+				lstFiles.refresh();
+			}
+		});
+		
+		
 		setTitle(Messages.ImportQueryFilePage_WizardPageTitle);
 		setMessage(Messages.ImportQueryFilePage_PageMessage);
 		setPageComplete(false);
@@ -116,7 +148,7 @@ public class ImportQueryFilePage extends WizardPage {
 	/**
 	 * @return the selected file
 	 */
-	public File getFile(){
-		return new File(txtFile.getText().trim());
+	public List<File> getFiles(){
+		return files;
 	}
 }

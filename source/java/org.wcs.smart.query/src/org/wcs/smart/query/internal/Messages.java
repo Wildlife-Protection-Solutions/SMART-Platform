@@ -162,7 +162,7 @@ public class Messages extends NLS {
 	public static String IFilter_ObservationFilterName;
 	public static String ImportQueryFilePage_AllFilesFilterName;
 	public static String ImportQueryFilePage_BrowseButton;
-	public static String ImportQueryFilePage_FileLabel;
+	public static String ImportQueryFilePage_FileLabel1;
 	public static String ImportQueryFilePage_FileNotFoundError;
 	public static String ImportQueryFilePage_PageMessage;
 	public static String ImportQueryFilePage_PageTitle;
