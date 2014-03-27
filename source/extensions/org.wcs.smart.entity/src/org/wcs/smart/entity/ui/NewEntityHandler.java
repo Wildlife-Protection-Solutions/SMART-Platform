@@ -24,10 +24,16 @@ package org.wcs.smart.entity.ui;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.ui.newwizard.NewEntityTypeWizard;
 import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
@@ -39,6 +45,18 @@ public class NewEntityHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+
+		//check if data model is configured before continuing
+		Session s = HibernateManager.openSession();
+		try{
+			DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
+			if (dm == null || dm.getCategories().size() == 0){
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.NewEntityHandler_DialogTitle, Messages.NewEntityHandler_DataModelNotInitialized);
+				return null;
+			}
+		}finally{
+			s.close();
+		}
 		
 		WizardDialog newEntityDialog = new WizardDialog(HandlerUtil.getActiveShell(event), new NewEntityTypeWizard());
 		newEntityDialog.open();

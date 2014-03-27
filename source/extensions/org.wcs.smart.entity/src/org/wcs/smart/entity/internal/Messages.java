@@ -319,6 +319,8 @@ public class Messages extends NLS {
 	public static String NewEntityDialog_NewEntityMessage;
 	public static String NewEntityDialog_SaveEntityError;
 	public static String NewEntityDialog_SaveErrorDialogTitle;
+	public static String NewEntityHandler_DataModelNotInitialized;
+	public static String NewEntityHandler_DialogTitle;
 	public static String NewEntityTypeWizard_ErrorSavingEntityType;
 	public static String NewEntityTypeWizard_WizardTitle;
 	public static String RemoveEntityJob_Error;
