@@ -36,3 +36,4 @@ Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
 Eclipse-BuddyPolicy: global
+Bundle-Vendor: org.wcs.smart

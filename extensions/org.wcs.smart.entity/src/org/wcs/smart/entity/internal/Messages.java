@@ -98,7 +98,6 @@ public class Messages extends NLS {
 	public static String EntityEditPanelComposite_IdError;
 	public static String EntityEditPanelComposite_LocationLabel;
 	public static String EntityEditPanelComposite_ProjectionError;
-	public static String EntityEditPanelComposite_ProjectionError2;
 	public static String EntityEditPanelComposite_ProjectionLabel;
 	public static String EntityEditPanelComposite_SelectOnMapLink;
 	public static String EntityEditPanelComposite_xError;
