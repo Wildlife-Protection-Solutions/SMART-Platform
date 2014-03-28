@@ -107,7 +107,7 @@ public interface IQueryHibernateManager {
 	 * @param session
 	 * @param queryUuid
 	 * @param queryType the type of query or null if query type not known
-	 * @return
+	 * @return the query or null if query not found
 	 */
 	public org.wcs.smart.query.model.Query findQuery(Session session, 
 			byte[] queryUuid, IQueryType queryType);

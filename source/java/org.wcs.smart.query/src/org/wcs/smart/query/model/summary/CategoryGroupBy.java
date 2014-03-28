@@ -135,6 +135,9 @@ public class CategoryGroupBy implements IGroupBy {
 		if (filterHkeys != null && filterHkeys.length > 0){
 			for (int i = 0; i < filterHkeys.length; i++){
 				Category cat = QueryDataModelManager.getInstance().getCategory(session, filterHkeys[i]);
+				if (cat == null){
+					throw new IllegalStateException(MessageFormat.format(Messages.CategoryGroupBy_CategoryNotFound, new Object[]{filterHkeys[i]}));
+				}
 				items.add( new ListItem(null, cat.getFullCategoryName(), cat.getHkey()) );		
 			}
 		}else{

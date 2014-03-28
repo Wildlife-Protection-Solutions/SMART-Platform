@@ -25,6 +25,7 @@ import java.io.File;
 
 import net.refractions.udig.catalog.URLUtils;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -73,7 +74,7 @@ public class ExportQueryLocationPage extends WizardPage {
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		IQueryExporter exporter = wizard.getQueryExporter();
 		
-		String initFile = location + File.separator + URLUtils.cleanFilename(wizard.getQueryName()) + "." ; //$NON-NLS-1$
+		String initFile = location + File.separator + URLUtils.cleanFilename(wizard.getQuery().getName()) + "_" + wizard.getQuery().getId() + "." ; //$NON-NLS-1$ //$NON-NLS-2$
 		if (exporter == null){
 			initFile += ".txt"; //$NON-NLS-1$
 		}else{
@@ -132,7 +133,7 @@ public class ExportQueryLocationPage extends WizardPage {
 				}
 			}
 		});
-		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQueryName()); //$NON-NLS-1$
+		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
 		setPageComplete(false);
 		setControl(main);
@@ -154,5 +155,9 @@ public class ExportQueryLocationPage extends WizardPage {
 		}
 		
 	}
+	
+	 public IWizardPage getNextPage() {
+		 return null;
+	 }
 	
 }
