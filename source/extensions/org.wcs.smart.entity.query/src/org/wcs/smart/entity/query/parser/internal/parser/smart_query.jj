@@ -4,6 +4,7 @@ SMART Query Engine Language Syntax & Semantic actions
 import java.util.*;
 import org.wcs.smart.entity.query.parser.internal.*;import org.wcs.smart.query.model.filter.*;
 import org.wcs.smart.query.model.summary.*;
+import org.wcs.smart.observation.query.model.filter.*;
 
 public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >}
 
@@ -59,6 +60,7 @@ TOKEN :
  | < EA_ATT_TREE_KEY : < EA_PREFIX > < ATT_TREE_KEY > >
  | < EA_ATT_DATE_KEY : < EA_PREFIX > < ATT_DATE_KEY > >
  | < EA_ATT_BOOL_KEY : < EA_PREFIX > < ATT_BOOL_KEY > >
+ | < WAYPOINT_SOURCE_KEY : "wpn:src" >
   }
 /* Summary Query */
 TOKEN :
@@ -83,6 +85,7 @@ TOKEN :
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) >
 | 	<  ENTITYATTRIBUTE_GROUPBY_ITEM :  < EA_PREFIX > < ATTRIBUTE_GROUPBY_ITEM > >
 |   <  CA_GROUPBY_ITEM : "ca:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
+|   <  WAYPOINT_SOURCE_GROUP_BY : "wpt:src:" ( < DM_KEY > )? (":" < DM_KEY > )* >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
@@ -308,7 +311,12 @@ IGroupBy GroupByItem() :
 		< CA_GROUPBY_ITEM >
 		{
 		  	item = ConservationAreaGroupBy.createGroupBy(token.image);
-		}	
+		}
+	|  
+		< WAYPOINT_SOURCE_GROUP_BY >
+		{
+		  	item = WaypointSourceGroupBy.createGroupBy(token.image);
+		}
 	)
 	{
 		 return item;
@@ -599,6 +607,13 @@ IFilter StringExpression():
 		{
   			filter = EntityAttributeFilter.createStringFilter(key, op, value);
 		}
+	| 
+		 < WAYPOINT_SOURCE_KEY >
+  		  op = StringOp()
+  		< QUOTED_STRING > {value = token.image;}
+  		{
+    		filter = WaypointSourceFilter.createFilter(value,op);
+  		}
 	)
 	{  		return filter;
 	}

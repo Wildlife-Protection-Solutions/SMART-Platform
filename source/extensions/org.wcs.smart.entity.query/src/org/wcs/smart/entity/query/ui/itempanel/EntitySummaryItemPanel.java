@@ -48,6 +48,8 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.ui.itempanel.EntityTypeTreeNode.Type;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralTreeNode;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -112,9 +114,15 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 		});
 		
 		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
+		GeneralItem[] items = null;
 		if (SmartDB.isMultipleAnalysis()){
-			groupbynodes.add(new ConservationAreaTreeNode());
+			items = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.CONSERVATION_AREA};
+		}else{
+			items = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE};
 		}
+		
+		groupbynodes.add(new GeneralTreeNode("General Items", items));
+		
 		groupbynodes.add(new DateTreeNode());
 		if (!SmartDB.isMultipleAnalysis()){
 			areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_AreaGroupBy);

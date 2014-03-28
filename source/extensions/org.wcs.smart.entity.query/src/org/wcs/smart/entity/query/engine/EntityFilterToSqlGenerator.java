@@ -30,6 +30,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -67,10 +68,27 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class));
 		}else if (filter instanceof EntityAttributeFilter){
 			return asSql((EntityAttributeFilter)filter, engine);
+		}else if (filter instanceof WaypointSourceFilter){
+			return asSql((WaypointSourceFilter)filter, engine);
 		}
 		return super.toSql(filter, engine);
 		
 	}
+	
+	/*
+	 * Waypoint source filter
+	 */
+	protected String asSql(WaypointSourceFilter filter, IQueryEngine engine) throws SQLException{
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(Waypoint.class));
+		sb.append(".source "); //$NON-NLS-1$
+		sb.append(asSql(filter.getOperator()));
+		//TODO: escape waypoint source key
+		sb.append(" '" + SmartUtils.stripQuotes(filter.getWaypointSourceKey()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		return sb.toString();
+	}
+
 	
 	
 	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{

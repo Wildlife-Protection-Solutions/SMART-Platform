@@ -119,35 +119,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int EA_ATT_BOOL_KEY = 58;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 59;
+  int WAYPOINT_SOURCE_KEY = 59;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 60;
+  int SUM_CAT_VALUE_KEY = 60;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 61;
+  int SUM_ATTRIBUTE_VALUE_KEY = 61;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 62;
+  int SUM_CAT_ATT_VALUE_KEY = 62;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 63;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 63;
   /** RegularExpression Id. */
-  int AGG = 64;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 64;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 65;
+  int AGG = 65;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 66;
+  int DATE_GROUPBY_ITEM = 66;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 67;
+  int QUERY_SPLITTER = 67;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 68;
+  int CATEGORY_GROUPBY_ITEM = 68;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 69;
+  int AREA_GROUPBY_ITEM = 69;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 70;
+  int ATTRIBUTE_GROUPBY_ITEM = 70;
   /** RegularExpression Id. */
-  int ENTITYATTRIBUTE_GROUPBY_ITEM = 71;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 71;
   /** RegularExpression Id. */
-  int CA_GROUPBY_ITEM = 72;
+  int ENTITYATTRIBUTE_GROUPBY_ITEM = 72;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 73;
+  int CA_GROUPBY_ITEM = 73;
+  /** RegularExpression Id. */
+  int WAYPOINT_SOURCE_GROUP_BY = 74;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 75;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -213,6 +217,7 @@ public interface ParserConstants {
     "<EA_ATT_TREE_KEY>",
     "<EA_ATT_DATE_KEY>",
     "<EA_ATT_BOOL_KEY>",
+    "\"wpn:src\"",
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",
     "<SUM_CAT_ATT_VALUE_KEY>",
@@ -227,6 +232,7 @@ public interface ParserConstants {
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
     "<ENTITYATTRIBUTE_GROUPBY_ITEM>",
     "<CA_GROUPBY_ITEM>",
+    "<WAYPOINT_SOURCE_GROUP_BY>",
     "<QUOTED_STRING>",
   };
 

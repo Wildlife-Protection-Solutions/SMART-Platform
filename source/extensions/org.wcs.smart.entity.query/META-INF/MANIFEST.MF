@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.observation;bundle-version="3.0.0",
  net.refractions.udig.catalog.rasterings;bundle-version="1.2.0",
  org.wcs.smart.p2,
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.wcs.smart.observation.query;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.entity.query.engine,

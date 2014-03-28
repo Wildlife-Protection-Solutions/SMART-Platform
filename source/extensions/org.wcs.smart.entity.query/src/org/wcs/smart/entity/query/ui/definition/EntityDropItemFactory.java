@@ -46,6 +46,9 @@ import org.wcs.smart.entity.query.ui.itempanel.ConservationAreaTreeNode;
 import org.wcs.smart.entity.query.ui.itempanel.EntityGriddedItemPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntityQueryFilterPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryItemPanel;
+import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -115,6 +118,18 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 		}else if (source instanceof EntityAttribute){
 			if (queryItemPanelId.equals(EntityQueryFilterPanel.ID)){
 				items = new DropItem[]{createEntityAttributeDropItem((EntityAttribute)source)};
+			}
+		}else if (source instanceof GeneralContentProvider.GeneralItem){
+			if (queryItemPanelId.equals(EntitySummaryItemPanel.ID)){
+				if (source == GeneralItem.WAYPOINT_SOURCE){
+					items = new DropItem[]{ObservationDropItemFactory.INSTANCE.createWaypointSourceGroupByDropItem()};
+				}else if (source == GeneralItem.CONSERVATION_AREA){
+					items = new DropItem[]{super.createConservationAreaGroupByDropItem()};
+				}
+			}else{
+				if (source == GeneralItem.WAYPOINT_SOURCE){
+					items = new DropItem[]{ObservationDropItemFactory.INSTANCE.createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItem)source)};
+				}
 			}
 		}
 		return items;
@@ -211,6 +226,7 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 		}
 		return null;
 	}
+
 
 	
 	/**

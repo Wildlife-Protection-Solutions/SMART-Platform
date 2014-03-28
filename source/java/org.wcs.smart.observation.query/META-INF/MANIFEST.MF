@@ -17,5 +17,8 @@ Export-Package: org.wcs.smart.observation.query,
  org.wcs.smart.observation.query.map.udig,
  org.wcs.smart.observation.query.model,
  org.wcs.smart.observation.query.model.columns,
+ org.wcs.smart.observation.query.model.filter,
  org.wcs.smart.observation.query.model.types,
- org.wcs.smart.observation.query.ui.definition
+ org.wcs.smart.observation.query.ui,
+ org.wcs.smart.observation.query.ui.definition,
+ org.wcs.smart.observation.query.ui.itempanel
