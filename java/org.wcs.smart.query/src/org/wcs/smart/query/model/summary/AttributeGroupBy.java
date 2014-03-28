@@ -214,6 +214,9 @@ public class AttributeGroupBy implements IGroupBy {
 		//get children categories
 		
 		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
+		if (att == null){
+			throw new RuntimeException(MessageFormat.format(Messages.AttributeGroupBy_AttributeNotFound, new Object[]{attributeKey}));
+		}
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (att.getType() == AttributeType.LIST){
 			if (filterHkeys != null) {

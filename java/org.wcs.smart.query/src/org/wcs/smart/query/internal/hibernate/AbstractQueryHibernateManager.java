@@ -198,8 +198,8 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * 
 	 * @param session
 	 * @param queryUuid
-	 * @param queryType the type of query or null if query type not known
-	 * @return
+	 * @param queryType the type of query
+	 * @return the query or null if query not found
 	 */
 	public org.wcs.smart.query.model.Query findQuery(Session session, 
 			byte[] queryUuid, IQueryType queryType) {		

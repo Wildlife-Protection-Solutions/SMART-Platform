@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -110,7 +111,7 @@ public class ExportQueryTypePage extends WizardPage {
 			public void doubleClick(DoubleClickEvent event) {
 				if (!outputOptions.getSelection().isEmpty()){
 					setPageComplete(true);
-					((ExportQueryWizard)getWizard()).getContainer().showPage( getWizard().getNextPage(ExportQueryTypePage.this) );
+					((ExportQueryWizard)getWizard()).getContainer().showPage( getNextPage() );
 				}
 				
 			}
@@ -126,7 +127,7 @@ public class ExportQueryTypePage extends WizardPage {
 			outputOptions.setSelection(new StructuredSelection(defaultExport));
 		}
 		
-		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQueryName()); //$NON-NLS-1$
+		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryTypePage_DialogMessage);
 		setControl(main);
 		setPageComplete(!outputOptions.getSelection().isEmpty());
@@ -146,6 +147,18 @@ public class ExportQueryTypePage extends WizardPage {
 		}catch (Exception ex){
 			//eatme
 		}
-		
 	}
+	
+    /* (non-Javadoc)
+     * Method declared on IWizardPage.
+     * The default behavior is to ask the wizard for the next page.
+     */
+    public IWizardPage getNextPage() {
+    	IQueryExporter exporter = getQueryExporter();
+    	if (exporter.getId().startsWith(IQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
+    		return getWizard().getPage(ExportQueryListPage.PAGE_NAME);
+    	}else{
+    		return getWizard().getNextPage(this);
+    	}
+    }
 }

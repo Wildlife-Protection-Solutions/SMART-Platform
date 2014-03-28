@@ -155,6 +155,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryResultsEditor_RunQueryJobName;
 	public static String PatrolQueryResultsEditor_TableTabName;
 	public static String PatrolQueryType_PatrolQueryTypeName;
+	public static String PatrolQueryValidator_CouldNotMatchFilter;
 	public static String PatrolEndDateField_PatrolEndDatefilter;
 	public static String PatrolObservationQueryType_PatrolObservationQueryTypeName;
 	public static String PatrolStartDateField_PatrolStartDate;

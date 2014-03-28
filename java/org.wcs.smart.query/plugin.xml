@@ -799,27 +799,6 @@
       <handler
             class="org.wcs.smart.query.ui.importexport.ExportQueryHandler"
             commandId="org.wcs.smart.query.exportQuery">
-         <enabledWhen>
-            <and>
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
-                     </equals>
-                  </or>
-               </with>
-               <with
-                     variable="activeEditorInput">
-                  <instanceof
-                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
-                  </instanceof>
-               </with>
-            </and>
-         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.query.ui.querylist.DeleteItemHandler"

@@ -159,7 +159,11 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 									Messages.FilterValidator_PatrolFilterError, new Object[]{ filter.asString()}));
 							}
 							if (NamedItem.class.isAssignableFrom(op.getSourceClass())){
-							
+								if (item.getValue() == null || item.getValue().size() == 0){
+									throw new Exception(MessageFormat.format(
+											Messages.PatrolQueryValidator_CouldNotMatchFilter,
+											new Object[]{filter.asString()}));
+								}
 								NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings);							
 								if (it == null){
 									throw new Exception(MessageFormat.format(

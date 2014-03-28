@@ -28,6 +28,7 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
 
@@ -49,11 +50,11 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 		if (editor instanceof IQueryEditor){
 			query = ((IQueryEditor) editor).getQueryProxy().getQuery();
 		}
-		if (query != null){
-			ExportQueryWizard wizard = new ExportQueryWizard(query);
-			WizardDialog wd = new WizardDialog(editor.getSite().getShell(), wizard);
-			wd.open();
-		}
+		
+		ExportQueryWizard wizard = new ExportQueryWizard(query);
+		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+		wd.open();
+		
 			
 		return null;
 	}
