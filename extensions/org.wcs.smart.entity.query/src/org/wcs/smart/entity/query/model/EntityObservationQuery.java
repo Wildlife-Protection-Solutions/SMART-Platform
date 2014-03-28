@@ -93,6 +93,8 @@ public class EntityObservationQuery extends ObservationQuery {
 								queryColumns.add(newcol);
 							}
 						}
+					}catch (Exception ex){
+						EntityQueryPlugIn.log(ex.getMessage(), ex);
 					}finally{
 						session.close();
 					}
