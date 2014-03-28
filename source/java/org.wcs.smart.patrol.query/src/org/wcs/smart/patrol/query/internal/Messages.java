@@ -78,6 +78,11 @@ public class Messages extends NLS {
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
+	public static String PatrolAttributeValueItem_AttributeNotFound;
+	public static String PatrolAttributeValueItem_CategoryNotFound;
+	public static String PatrolAttributeValueItem_ListItemNotFound;
+	public static String PatrolAttributeValueItem_TreeNodeNotFound;
+	public static String PatrolCategoryValueItem_CategoryNotFound;
 	public static String PatrolContributionFactory_ParseContribution_Error;
 	public static String PatrolFilter_EmployeeNotFound;
 	public static String PatrolFilter_InvalidPrefix;
