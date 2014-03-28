@@ -167,12 +167,11 @@ public class ExportEntityTypeHandler extends AbstractHandler {
 			
 			String initFile = URLUtils.cleanFilename(et.getName()) + ".xml"; //$NON-NLS-1$
 			String location = EntityPlugIn.getDefault().getDialogSettings().get(LAST_DIR_KEY);
-			File init = null;
-			if (location != null){
-				init = new File(location, initFile);
-			}else{
-				init = new File(initFile);
+			if (location == null){
+				location = System.getProperty("user.home"); //$NON-NLS-1$
 			}
+			File init = new File(location, initFile);
+
 			txtFile.setText(init.getAbsolutePath());
 			txtFile.addModifyListener(new ModifyListener() {
 				@Override

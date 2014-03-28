@@ -109,12 +109,10 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 		chIncludeAll.setText(Messages.ExportEntityDialog_IncludeInactive);
 		
 		String file = EntityPlugIn.getDefault().getDialogSettings().get(EXPORT_ENTITIES_DIRKEY);
-		File init = null;
-		if (file != null){
-			init = new File(file, URLUtils.cleanFilename(((EntityCsvExporter)config.getExporter()).getEntityType().getName()) + ".csv"); //$NON-NLS-1$
-		}else{
-			init = new File(URLUtils.cleanFilename(((EntityCsvExporter)config.getExporter()).getEntityType().getName()) + ".csv"); //$NON-NLS-1$
+		if (file == null){
+			file = System.getProperty("user.home"); //$NON-NLS-1$
 		}
+		File init = new File(file, URLUtils.cleanFilename(((EntityCsvExporter)config.getExporter()).getEntityType().getName()) + ".csv"); //$NON-NLS-1$
 		super.csvComposite.setFileText(init.toString());
 		
 		return comp;
