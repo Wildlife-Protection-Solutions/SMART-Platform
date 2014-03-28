@@ -176,6 +176,10 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_Confirm_DialogMessage;
 	public static String ImportQueryWizard_Confirm_DialogTitle;
 	public static String ImportQueryWizard_CouldNotImportError;
+	public static String ImportQueryWizard_ErrorImportingFile;
+	public static String ImportQueryWizard_ErrorOpeningEditor;
+	public static String ImportQueryWizard_ImportCompleteMessage;
+	public static String ImportQueryWizard_ImportCompleteTitle;
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_Title;
 	public static String ItemTreeNodeTree_Loading;

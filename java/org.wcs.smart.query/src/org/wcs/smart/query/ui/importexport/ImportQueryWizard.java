@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
@@ -107,17 +108,14 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						throws InvocationTargetException, InterruptedException {
 				
 					QueryFolder qf = page2.getFolder();
-					
+					int importCnt = 0;
 					QueryImportEngine importer = new QueryImportEngine();
 					Query firstQuery = null;
 					
 					for (File f : page1.getFiles()){
 						try{
 							Query query = importer.importQuery(f);
-							if (firstQuery == null){
-								firstQuery = query;
-							}
-						
+							
 							List<String> warnings = importer.getWarnings();
 							if (warnings.size() > 0){
 								StringBuilder sb = new StringBuilder();
@@ -161,6 +159,11 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 								query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
 								session.save(query);
 								session.getTransaction().commit();
+								
+								if (firstQuery == null){
+									firstQuery = query;
+								}
+								importCnt++;
 							}catch (Exception ex){
 								session.getTransaction().rollback();
 								throw ex;
@@ -169,19 +172,20 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 							}				
 							QueryEventManager.getInstance().fireQueryAdded(query);
 						}catch (Exception ex){
-							QueryPlugIn.displayLog(MessageFormat.format("The file {0} could not be imported.", new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex);
+							QueryPlugIn.displayLog(MessageFormat.format(Messages.ImportQueryWizard_ErrorImportingFile, new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}	
 					
 					}
-					//open query in editor
-					if (page1.getFiles().size() == 1){
+					//open query in editor if only importing a single query
+					if (page1.getFiles().size() == 1 && firstQuery != null){
 						QueryEditorInput qi = new QueryEditorInput(firstQuery);
 						try {
 							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, firstQuery.getType().getEditorId());
 						} catch (PartInitException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							QueryPlugIn.displayLog(Messages.ImportQueryWizard_ErrorOpeningEditor + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
 						}
+					}else{
+						MessageDialog.openInformation(getShell(), Messages.ImportQueryWizard_ImportCompleteTitle, MessageFormat.format(Messages.ImportQueryWizard_ImportCompleteMessage, new Object[]{importCnt, page1.getFiles().size()}));
 					}
 				}
 				
