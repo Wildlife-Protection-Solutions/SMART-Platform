@@ -49,6 +49,7 @@ import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
@@ -1036,7 +1037,20 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					fromSql.append("foo_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".tree_node_uuid "); //$NON-NLS-1$
 				}
-			
+			}else if (gb instanceof WaypointSourceGroupBy){
+				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
+				groupByInnerSql.append(tablePrefix(Waypoint.class));
+				groupByInnerSql.append(".source"); //$NON-NLS-1$
+				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
+					
+				groupBySql.append(categoryKey);
+					
+				if (!waypointAdd) {
+					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
 			}else{
 				//throw new exception; 
 				throw new RuntimeException(MessageFormat.format(Messages.DerbySummaryEngine_InvalidGroupby, new Object[]{gb.getClass().getName()}));
