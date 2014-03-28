@@ -40,12 +40,18 @@ import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeListValueDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeTreeValueDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.CategoryValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
@@ -257,7 +263,80 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 
 	
 	
+	/**
+	 * Creates anew attribute value drop item
+	 * @param att
+	 * @return
+	 */
+	@Override
+	public DropItem createAttributeValueDropItem(Attribute att){
+		return new AttributeValueDropItem(att);
+	}
 	
+	/**
+	 * Creates a new category attribute value drop item
+	 * @param catatt
+	 * @return
+	 */
+	@Override
+	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
+		return new AttributeValueDropItem(catatt);
+	}
+	
+	/**
+	 * Creates a new attribute list drop item
+	 * @param item
+	 * @return
+	 */
+	@Override
+	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
+		return new AttributeListValueDropItem(item);
+	}
+	
+	/**
+	 * Creates a new attribute list item associated with a category
+	 * @param item
+	 * @param cat
+	 * @return
+	 */
+	@Override
+	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
+		return new AttributeListValueDropItem(item,cat);
+	}
+	
+	/**
+	 * Creates a new attribute tree node drop item
+	 * @param item
+	 * @return
+	 */
+	@Override
+	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
+		return new AttributeTreeValueDropItem(item);
+	}
+	
+	/**
+	 * Creates a new attribute tree node associated with a category
+	 * @param item
+	 * @param cat
+	 * @return
+	 */
+	@Override
+	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
+		return new AttributeTreeValueDropItem(item,cat);
+	}
+	
+	/**
+	 * Creates a category value drop item
+	 * @param cat
+	 * @return
+	 */
+	@Override
+	public DropItem createCategoryValueDropItem(Category cat){
+		if (cat == null){
+			return new CategoryValueDropItem();
+		}
+		return new CategoryValueDropItem(cat);
+	}
 	
 	/**
 	 * Generates drop items for the given query proxy.
@@ -276,15 +355,31 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
-			
+			//value filter panel
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, //$NON-NLS-1$
+					def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session));
+			//rate filter panel
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, //$NON-NLS-1$
+					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
+			//column group by
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
 					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+			//row group by
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
 					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
-			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), //$NON-NLS-1$
-					def == null || def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
+
+			//values
+			List<DropItem> items = null;
+			if (def != null && def.getValuePart() != null){
+				items = def.getValuePart().getDropItems(session);
+				for (DropItem i : items){
+					if (i instanceof AbstractValueDropItem){
+						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+					}
+				}
+			}
+			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
+					
 			
 		}else if(proxy.getQuery().getType().getClass().equals(PatrolGridQueryType.class)){
 			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();
@@ -297,6 +392,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			DropItem valueItem = null;
 			try{
 				valueItem = def.getValuePart().asDropItem(session);
+				if (valueItem instanceof AbstractValueDropItem){
+					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
+				}
 			}catch(Exception ex){
 				QueryPlugIn.log(ex.getMessage(), ex);
 				valueItem = new ErrorDropItem(ex.getMessage());
