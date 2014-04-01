@@ -36,6 +36,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
@@ -119,6 +120,10 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 			if (queryItemPanelId.equals(EntityQueryFilterPanel.ID)){
 				items = new DropItem[]{createEntityAttributeDropItem((EntityAttribute)source)};
 			}
+		}else if (source instanceof EntityType){
+			if (queryItemPanelId.equals(EntityQueryFilterPanel.ID)){
+				items = new DropItem[]{createEntityTypeDropItem((EntityType)source)};
+			}
 		}else if (source instanceof GeneralContentProvider.GeneralItem){
 			if (queryItemPanelId.equals(EntitySummaryItemPanel.ID)){
 				if (source == GeneralItem.WAYPOINT_SOURCE){
@@ -143,6 +148,10 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 			return new EntityAttributeTreeDropItem(ea);
 		}
 		return new EntityAttributeDropItem(ea);
+	}
+	
+	public DropItem createEntityTypeDropItem(EntityType et){
+		return new EntityTypeDropItem(et);
 	}
 	
 	public DropItem createEntityAttributeListGroupByDropItem(EntityAttribute ea){

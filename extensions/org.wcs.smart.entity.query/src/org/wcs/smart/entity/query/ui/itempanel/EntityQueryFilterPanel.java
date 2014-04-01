@@ -113,7 +113,7 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 		
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new GeneralTreeNode("General Items", new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE}));
+		nodes.add(new GeneralTreeNode(Messages.EntityQueryFilterPanel_GeneralItemsLabel, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE}));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		if (!SmartDB.isMultipleAnalysis()){
 			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
