@@ -121,7 +121,7 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 			items = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE};
 		}
 		
-		groupbynodes.add(new GeneralTreeNode("General Items", items));
+		groupbynodes.add(new GeneralTreeNode(Messages.EntitySummaryItemPanel_GeneralItemsLabel, items));
 		
 		groupbynodes.add(new DateTreeNode());
 		if (!SmartDB.isMultipleAnalysis()){

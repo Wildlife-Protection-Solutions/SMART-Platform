@@ -96,7 +96,10 @@ public class Messages extends NLS {
 	public static String EntityObservationQueryType_Name;
 	public static String EntityQueryColumnCache_jobname;
 	public static String EntityQueryColumnCache_jobname2;
+	public static String EntityQueryFilterPanel_GeneralItemsLabel;
+	public static String EntitySummaryItemPanel_GeneralItemsLabel;
 	public static String EntitySummaryQueryType_Name;
+	public static String EntityTypeFilter_EntityTypeNotFound;
 	public static String EntityTypeFilterContentProvider_LoadingLabel;
 	public static String EntityTypeFilterContentProvider_LoadJobName;
 	public static String EntityTypeSummaryContentProvider_CountLabel;

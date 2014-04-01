@@ -54,9 +54,11 @@ TOKEN :
  | < AREA_KEY : "area:" ("wp" | "t") ":" < AREA_TYPE_KEY > ":" < DM_KEY > >
  | < OBSERVATION_FILTER_TYPE_KEY : "observation" >
  | < EA_PREFIX : "entity:"< DM_KEY > ":" >
+ | < ET_PREFIX : "entitytype:"< DM_KEY > ":" >
  | < EA_ATT_STR_KEY : < EA_PREFIX > < ATT_STR_KEY > >
  | < EA_ATT_VALUE_KEY : < EA_PREFIX > < ATT_VALUE_KEY > >
  | < EA_ATT_LIST_KEY : < EA_PREFIX > < ATT_LIST_KEY > >
+ | < ET_ATT_LIST_KEY : < ET_PREFIX > <ATT_LIST_KEY > >
  | < EA_ATT_TREE_KEY : < EA_PREFIX > < ATT_TREE_KEY > >
  | < EA_ATT_DATE_KEY : < EA_PREFIX > < ATT_DATE_KEY > >
  | < EA_ATT_BOOL_KEY : < EA_PREFIX > < ATT_BOOL_KEY > >
@@ -488,7 +490,16 @@ IFilter AttributeExpression():
 	{
 		filter = EntityAttributeFilter.createListItemFilter(key,op,value);
 	}
-	
+	| 
+	/* entity-type */
+	(
+		< ET_ATT_LIST_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = EntityTypeFilter.createListItemFilter(key,op,value);
+	}	
 	| 
 	/* attribute tree items */
 	(
