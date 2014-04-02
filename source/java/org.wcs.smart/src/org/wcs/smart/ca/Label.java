@@ -246,7 +246,7 @@ public class Label  {
 
 	
 	@Embeddable
-	protected static class LabelItemPK implements Serializable {
+	public static class LabelItemPK implements Serializable {
 		/**
 		 * 
 		 */

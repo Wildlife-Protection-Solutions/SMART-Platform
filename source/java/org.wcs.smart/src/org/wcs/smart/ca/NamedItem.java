@@ -32,6 +32,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.Type;
@@ -110,6 +111,20 @@ public class NamedItem extends UuidItem {
 				session.evict(name);
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @return the label associated with the default language
+	 */
+	@Transient
+	public String getDefaultName(){
+		for (Label l : getNames()){
+			if (l.getLanguage().isDefault()){
+				return l.getValue();
+			}
+		}
+		return ""; //$NON-NLS-1$
 	}
 	
 	/**
