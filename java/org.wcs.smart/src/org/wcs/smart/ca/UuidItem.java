@@ -51,6 +51,14 @@ public class UuidItem {
 	/**
 	 * Creates a new label class
 	 */
+	public  UuidItem(byte[] uuid){
+		this.uuid = uuid;
+	}
+
+	
+	/**
+	 * Creates a new label class
+	 */
 	public  UuidItem(){}
 
 	/**
