@@ -730,11 +730,170 @@ it does not match one of the listed formats. </p>
 
 <p><strong>Skip first row...</strong> - Check this box if you have a header row
 at the top of your data.</p>
-<br />
-<br />
 
+<h4>Importing Waypoints from CSV - Common Solutions for CSV File Import
+Problems</h4>
 
-<p><strong><u>Manual Entry of Waypoints</u></strong></p>
+<p>If you are experiencing an issue importing waypoints from CSV files, this
+section should provide clarification and guidance on how to address several
+frequently encountered issues. Often times, all that is required to get the
+import to work is a simple manipulation of the file. Many of the examples here
+illustrate how to make new columns with date and time in formats that can be
+easily imported. The CSV import functionality only loads Waypoints, not actual
+observations. This is useful for speeding data that comes in digital format,
+but it doesn't completely automate it.</p>
+
+<p></p>
+
+<p><strong>Files with date and time in the same column</strong></p>
+
+<p>You need to ensure date/time columns are correct. If date and time
+information is combined in one column, you have two options to correct it.</p>
+
+<p></p>
+
+<p><strong>Option 1:</strong></p>
+<ol>
+  <li>Copy the combined date/time column to another column.</li>
+  <li>Rename the header on the original column "Date" and format that entire
+    column to be of type, "date" using the default date format. This can be
+    done by following the below steps:
+    <ul>
+      <li>Select the entire column and right click</li>
+      <li>Select the 'format cells' option</li>
+      <li>Select the 'number' tab at the top of the box</li>
+      <li>Select &lsquo;date&rsquo;</li>
+    </ul>
+  </li>
+  <li>Rename the copied column's header "Time" and format that entire column to
+    be of type, "time" (leave the default time type on the right). This can be
+    done by following the below steps:
+    <ul>
+      <li>Select the entire column and right click</li>
+      <li>Select the 'format cells' option</li>
+      <li>Select the 'number' tab at the top of the box</li>
+      <li>Select &lsquo;time&rsquo;</li>
+    </ul>
+  </li>
+  <li>Save the file.</li>
+  <li>When using the import tool, select the columns for date and time as the
+    two columns you edited and renamed the headers.</li>
+  <li>If you have other relevant columns in your file, select the fields and
+    options accordingly. For example, if you have a column for Waypoint ID
+    entitled &lsquo;Waypoint&rsquo;, fill out the options as shown in the below
+    image.</li>
+  <li>Press finish and the points should load correctly.</li>
+</ol>
+
+<p></p>
+
+<p><strong>Option 2:</strong></p>
+
+<p>NOTE: for this example we are assuming date-time is in column A. If your
+date-time is in a different column, such as column G, then replace any column A
+references or formulas with G.</p>
+<ol>
+  <li>We are going to make new, separate columns for date and time. So, rename
+    column A to "Date-Time", so you are not confused with the new date column
+    we create.</li>
+  <li>Create a new header in the next available empty column and label it
+  "Date"</li>
+  <li>Enter the formula: =LEFT(A2,10) into row 2, then copy/paste that into all
+    the remaining rows. You should get just the date portion in that row.
+    <ul>
+      <li>As previously mentioned, if your date-time is in a different column,
+        such as column G, then you would replace the &lsquo;A&rsquo; in this
+        formula =LEFT(A2,10) with a G. The formula would read =LEFT(G2,10)</li>
+      <li>NOTE: the number 10(ten) indicates the number of characters to use.
+        In this example and most of the time, the format is 10 characters, such
+        as 01/21/2001 or 2003/12/25. But, if your format has more or less, you
+        will need to modify the number. For example, if you use Feb-01-2002,
+        then the number needs to be changed to 11.</li>
+      <li>If your resulting date format is not in the format of M/d/y
+        (01/23/2001), format the date using the instructions in Option 1, step
+        2.</li>
+    </ul>
+  </li>
+  <li>Create a new header in the next available empty column and label it
+  "Time"</li>
+  <li>Enter the formula: =RIGHT(A2,8) into row 2, then copy/paste that into all
+    the remaining rows. You should get just the time portion in that row.
+    <ul>
+      <li>Same comment as above, if your date-time is in column G (or any other
+        column), then you would replace the &lsquo;A&rsquo; in this formula
+        =RIGHT(A2,8) with a G. For example, it would read =RIGHT(G2,10)</li>
+      <li>NOTE: Again, change the number 8(eight) to the number of characters
+        in your time format. In many examples, time the format is 8 characters,
+        such as 01:31:01 or 14:22 PM (the space counts as one). But, if your
+        format has more or less you will need to modify the number. For
+        example, if you use 03:59:59 AM, the number should be changed to
+      11.</li>
+    </ul>
+  </li>
+  <li>Save the file.</li>
+  <li>Open in a text editor and delete any rows at the end of the file with
+    only commas in them. (If you paste your formulas into rows beyond the last
+    one with data, you can create these empty rows).</li>
+  <li>Open in SMART and select the settings according to the format of your CSV
+    file. Two different examples and the associated screenshots are provided
+    below.
+    <ul>
+      <li>If you had an additional column for Waypoint ID that was labeled
+        &lsquo;No&rsquo;, an extra column for the comments field labeled
+        &lsquo;Id_GPS&rsquo; and your headers read: &lsquo;No&rsquo;,
+        &lsquo;Id_GPS&rsquo;, &lsquo;Lat&rsquo;, &lsquo;Long&rsquo;...then your
+        screen would look like this:</li>
+      <li>If you did not have additional columns for Waypoint ID or comments
+        and your columns read: &lsquo;latitude&rsquo;,
+        &lsquo;longitude&rsquo;... then your screen would look like this:</li>
+    </ul>
+  </li>
+</ol>
+
+<p></p>
+
+<p><strong>Files with no date or time</strong></p>
+
+<p>If you are importing a CSV file without a date or time, presumably you know
+what day this patrol was undertaken. From there, you can assign arbitrary
+times. This step is necessary since time is required.</p>
+<ol>
+  <li>Add a date column header and put the correct date in row 2, copy it to
+    the rest of the column.</li>
+  <li>In the next available, empty column add a time column header, and then
+    set all times to noon or whatever time is most appropriate.
+    <p>a) One option would be to create a formula to add 10 minutes to each
+    row.</p>
+  </li>
+  <li>Set the properties to the values according to your file. The screenshot
+    below provides an example of how the values should be set if your X
+    coordinate column was labeled &lsquo;easting&rsquo; and your Y coordinate
+    column was labeled &lsquo;northing&rsquo;. NOTE: the projection should be
+    modified to the correct UTM zone.</li>
+  <li>Press finish and the points should load.</li>
+</ol>
+
+<p></p>
+
+<p><strong>Files with additional data rows before the waypoint data</strong></p>
+
+<p>If you are importing a CSV file with rows above the column headers, you will
+need to remove the additional rows so the column headers appear as the first
+row. Follow the below steps.</p>
+<ol>
+  <li>If you need the information that appears in the current rows above the
+    column headers, take a copy for your records.</li>
+  <li>Delete X number of rows (however many proceed the column headers), so you
+    are left with just the column headers.</li>
+</ol>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<h4><strong><u>Manual Entry of Waypoints</u></strong></h4>
 
 <p> SMART allows for the manual entry of waypoint information. </p>
 
