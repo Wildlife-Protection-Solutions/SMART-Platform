@@ -69,6 +69,26 @@ public class DeleteItemHandler extends AbstractHandler {
 		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
 		Collections.reverse(selection);
 		
+		
+		if (selection.size() == 1 && (selection.get(0) instanceof QueryEditorInput) ){
+			QueryEditorInput query = ((QueryEditorInput)selection.get(0)) ;
+			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
+					Messages.DeleteItemHandler_Confirm_DialogTitle, 
+					MessageFormat.format(
+							Messages.DeleteItemHandler_ConfirmMessage,  new Object[]{ query.getName() + " [" + query.getId() + "]"}))){ //$NON-NLS-1$ //$NON-NLS-2$
+			
+				return null;
+			}
+		}else{
+	
+			String message = Messages.DeleteItemHandler_ConfirmDelete;
+			message = MessageFormat.format(message, new Object[]{selection.size()});
+			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteItemHandler_ConfirmDeleteTitle, message )){
+				return null;
+			}	
+			
+		}
+		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();			
 			if (o instanceof QueryFolder){
@@ -95,12 +115,6 @@ public class DeleteItemHandler extends AbstractHandler {
 		 */
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
 		
-		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
-				Messages.DeleteItemHandler_Confirm_DialogTitle, 
-				MessageFormat.format(
-						Messages.DeleteItemHandler_ConfirmMessage,  new Object[]{ o.getName() + " [" + o.getId() + "]"}))){ //$NON-NLS-1$ //$NON-NLS-2$
-			return;
-		}
 		//need to save and refresh query list view
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
@@ -154,11 +168,11 @@ public class DeleteItemHandler extends AbstractHandler {
 	private void deleteFolder(QueryFolder folder, ITreeContentProvider provider) {
 		
 		if (folder.getChildren() != null && folder.getChildren().size() > 0){
-			QueryPlugIn.displayLog(Messages.DeleteItemHandler_CannotDeleteItemWithKids, null);
+			QueryPlugIn.displayLog(MessageFormat.format(Messages.DeleteItemHandler_CannotDeleteItemWithKids1, new Object[]{folder.getName()}), null);
 			return;
 		}
 		if (provider.hasChildren(folder) ){
-			QueryPlugIn.displayLog(Messages.DeleteItemHandler_CannotDeleteItemWithKids, null);
+			QueryPlugIn.displayLog(MessageFormat.format(Messages.DeleteItemHandler_CannotDeleteItemWithKids1, new Object[]{folder.getName()}), null);
 			return;
 		}
 			

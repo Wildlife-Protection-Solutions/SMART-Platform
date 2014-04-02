@@ -21,84 +21,66 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.ui.QueryFolderTreeComposite;
 
 /**
- * Query wizard page to select the query import folder location.
- * 
+ * Wizard page to select the import source
+ * for queries to import.
  * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class ImportQueryFolderPage extends WizardPage {
+public class ImportQuerySourcePage extends WizardPage {
 
-	public static final String PAGENAME = "ImportLocation"; //$NON-NLS-1$
+	public static final String PAGENAME="Source"; //$NON-NLS-1$
 	
-	private QueryFolderTreeComposite folderTree;
+	private Button opFile;
+	private Button opCa;
 
 	/**
 	 * Creates a new query wizard page.
 	 */
-	protected ImportQueryFolderPage() {
+	protected ImportQuerySourcePage() {
 		super(PAGENAME);
 	}
 
-	/**
-	 * Initializes the values in the query wizard
-	 */
-	public void initValues(){
-		setPageComplete(false);
-		
-	}
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
-		
-		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.ImportQueryFolderPage_FolderLabel);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		folderTree= new QueryFolderTreeComposite(main,QueryHibernateManager.getInstance().canModifyCaQueries());
-		folderTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		folderTree.addSelectionListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				setPageComplete(!event.getSelection().isEmpty());
-			}
-		});
-		setTitle(Messages.ImportQueryFolderPage_PageTitle);
-		setMessage(Messages.ImportQueryFolderPage_PageMessage);
-		setPageComplete(false);
-		setControl(main);
-	}
+		main.setLayout(new GridLayout(1, false));
 
-	/**
-	 * @return the selected query folder
-	 */
-	public QueryFolder getFolder(){
-		return (QueryFolder)((IStructuredSelection)folderTree.getSelection()).getFirstElement();
+		opFile = new Button(main, SWT.RADIO);
+		opFile.setText(Messages.ImportQuerySourcePage_OpImportFile);
+		opFile.setSelection(true);
+		
+		opCa = new Button(main, SWT.RADIO);
+		opCa.setText(Messages.ImportQuerySourcePage_OpImportCa);
+
+		
+		setTitle(Messages.ImportQuerySourcePage_Title);
+		setMessage(Messages.ImportQuerySourcePage_Message);
+		setPageComplete(true);
+		setControl(main);
+	
 	}
 	
 	@Override
 	public IWizardPage getNextPage() {
+		if (opFile.getSelection()){
+			return getWizard().getPage(ImportQueryFilePage.PAGENAME);
+		}else if (opCa.getSelection()){
+			return getWizard().getPage(ImportQueryCaPage.PAGENAME);
+		}
 		return null;
 	}
-
+	
 }

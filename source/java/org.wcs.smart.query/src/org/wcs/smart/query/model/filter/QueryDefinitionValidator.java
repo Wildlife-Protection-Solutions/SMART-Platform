@@ -31,6 +31,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
@@ -193,6 +194,31 @@ public class QueryDefinitionValidator {
 			return (NamedItem)results.get(0);
 		}else{
 			return (NamedItem)results.get(0);
+		}
+	}
+	
+	/**
+	 * Looks up a named by item by the keyid
+	 * @param key the key to find
+	 * @param objectType the type of object to search.  Assumes this object type has a conservationArea property
+	 * 
+	 * @return the matching item or null if nothing found
+	 */
+	public NamedKeyItem findKeyValue(String key, String objectType){
+		
+		String sql = "SELECT c FROM " + objectType + " c WHERE keyId = :keyId and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		
+		org.hibernate.Query query = session.createQuery(sql);
+		query.setParameter("keyId", key); //$NON-NLS-1$
+		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		
+		List<?> results = query.list();
+		if (results.size() == 0){
+			return null;
+		}else if (results.size() > 1){
+			return null;
+		}else{
+			return (NamedKeyItem)results.get(0);
 		}
 	}
 	

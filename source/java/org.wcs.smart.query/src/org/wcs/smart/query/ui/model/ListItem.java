@@ -146,8 +146,12 @@ public class ListItem implements Comparable<ListItem>{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((key == null) ? 0 : key.hashCode());
-		result = prime * result + Arrays.hashCode(uuid);
+		if (uuid != null){
+			result = prime * result + Arrays.hashCode(uuid);
+		}else{
+			result = prime * result + ((key == null) ? 0 : key.hashCode());
+		}
+		
 		return result;
 	}
 
@@ -160,14 +164,13 @@ public class ListItem implements Comparable<ListItem>{
 		if (getClass() != obj.getClass())
 			return false;
 		ListItem other = (ListItem) obj;
-		if (key == null) {
-			if (other.key != null)
-				return false;
-		} else if (!key.equals(other.key))
-			return false;
-		if (!Arrays.equals(uuid, other.uuid))
-			return false;
-		return true;
+		if (key != null && other.key != null) {
+			return key.equals(other.key);
+		}else if (uuid != null && other.uuid != null){
+			return Arrays.equals(uuid, other.uuid);
+		}
+		System.out.println(false);
+		return false;
 	}
 
 	/* (non-Javadoc)
