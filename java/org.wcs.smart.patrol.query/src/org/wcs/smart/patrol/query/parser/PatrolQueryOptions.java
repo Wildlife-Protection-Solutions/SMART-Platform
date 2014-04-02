@@ -534,7 +534,7 @@ public class PatrolQueryOptions {
 			Object x = getObject(session, uuid);
 			if (x != null){
 				if (x instanceof NamedItem){
-					return new String[]{((NamedItem)x).findName(SmartDB.getCurrentConservationArea().getDefaultLanguage())};
+					return new String[]{((NamedItem)x).getDefaultName()};
 				}else if (x instanceof Employee){
 					Employee e = (Employee)x;
 					return new String[]{e.getId(), e.getGivenName(), e.getFamilyName()};
@@ -591,7 +591,9 @@ public class PatrolQueryOptions {
 						results.add(new ListItem(((NamedItem) object).getUuid(), ((NamedItem) object).getName()));
 					}else if (object instanceof Employee){
 						Employee e = (Employee)object;
-						results.add(new ListItem(e.getUuid(), e.getFullLabel()));
+						if (e.getConservationArea() == SmartDB.getCurrentConservationArea()){
+							results.add(new ListItem(e.getUuid(), e.getFullLabel()));
+						}
 					}else if (object instanceof ConservationArea){
 						ConservationArea ca = (ConservationArea)object;
 						results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
