@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
@@ -56,17 +57,23 @@ public class PatrolFilterProcessorVisitor implements IFilterVisitor {
             UuidItemType item = new UuidItemType();
             item.setUuid(uuid);
             //find item in database
-
-            String[] data = option.getNames(session, SmartUtils.decodeHex(uuid));
-            if (data != null){
-                int index = 0;
-                if (data.length > 1){
-                    item.setId(data[0]);
-                    index = 1;
-                }
-                for (;index < data.length; index++){
-                    item.getValue().add(data[index]);
-                }
+            if (NamedKeyItem.class.isAssignableFrom(option.getSourceClass())){
+            	//match items based on key
+            	NamedKeyItem ki = (NamedKeyItem)option.getObject(session,  SmartUtils.decodeHex(uuid));
+            	item.getValue().add(ki.getKeyId());
+            }else{
+            	//match items based on name
+            	String[] data = option.getNames(session, SmartUtils.decodeHex(uuid));
+            	if (data != null){
+            		int index = 0;
+            		if (data.length > 1){
+            			item.setId(data[0]);
+            			index = 1;
+            		}
+            		for (;index < data.length; index++){
+            			item.getValue().add(data[index]);
+            		}
+            	}
             }
 
             return item;

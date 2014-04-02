@@ -30,9 +30,15 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
@@ -148,50 +154,86 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 					PatrolQueryOption op = ((PatrolFilter) filter).getPatrolOption();
 					if (op.getType() == PatrolQueryOptions.PatrolQueryOptionType.UUID){
 						byte[] uuid = SmartUtils.decodeHex( ((PatrolFilter)filter).getValue() );
-						if (op.getObject(session, uuid)  != null){
-							//object exists in db
-							return;
-						}else{
-							UuidItemType item = uuidLookup.get(  ((PatrolFilter)filter).getValue()  );
-							if (item == null){
-								throw new Exception(
-									MessageFormat.format(
-									Messages.FilterValidator_PatrolFilterError, new Object[]{ filter.asString()}));
+						Object x = op.getObject(session, uuid);
+						if (x instanceof Station){
+							if (((Station)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								return ;
 							}
-							if (NamedItem.class.isAssignableFrom(op.getSourceClass())){
-								if (item.getValue() == null || item.getValue().size() == 0){
-									throw new Exception(MessageFormat.format(
-											Messages.PatrolQueryValidator_CouldNotMatchFilter,
-											new Object[]{filter.asString()}));
-								}
-								NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings);							
-								if (it == null){
-									throw new Exception(MessageFormat.format(
-										Messages.FilterValidator_PatrolFilter_ValueMatchingError,
-										new Object[]{filter.asString(), op.getSourceClass().getSimpleName(), item.getValue().get(0)}));
-								}else{
-									warnings.add(MessageFormat.format(Messages.FilterValidator_PatrolFilter_UnqiueIdMatchingError,
-											new Object[]{op.getGuiName(), item.getValue().get(0)}));
-									//update uuid
-									((PatrolFilter)filter).setValue(SmartUtils.encodeHex(it.getUuid()));
-								}
-							}else if (Employee.class.isAssignableFrom(op.getSourceClass())){
-								//lookup employee
-								Employee e = findEmployee(item.getId(), item.getValue().get(0), item.getValue().get(1), warnings);
-								if (e != null){
-									((PatrolFilter)filter).setValue(SmartUtils.encodeHex(e.getUuid()));
-								}else{
-									throw new Exception(
-										MessageFormat.format(Messages.FilterValidator_PatrolFilter_EmployeeError,
-											new Object[]{filter.asString(), 
-											item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "}));	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-								}	
+						}else if (x instanceof Team){
+							if (((Team)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								return ;
+							}
+						}else if (x instanceof PatrolMandate){
+							if (((PatrolMandate)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								return ;
+							}
+						}else if (x instanceof PatrolTransportType){
+							if (((PatrolTransportType)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								return ;
+							}
+						}else if (x instanceof Employee){
+							if (((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								return;
+							}
+						}else if (x instanceof ConservationArea){
+							return;
+						}
+						
+						UuidItemType item = uuidLookup.get(  ((PatrolFilter)filter).getValue()  );
+						if (item == null){
+							throw new Exception(
+								MessageFormat.format(
+								Messages.FilterValidator_PatrolFilterError, new Object[]{ filter.asString()}));
+						}
+						if (NamedKeyItem.class.isAssignableFrom(op.getSourceClass())){
+							//try to match the key first
+							if (item.getValue() == null || item.getValue().size() == 0){
+								throw new Exception(MessageFormat.format(
+										Messages.PatrolQueryValidator_CouldNotMatchFilter,
+										new Object[]{filter.asString()}));
+							}
+							NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName());
+							if (it != null){
+								((PatrolFilter)filter).setValue(SmartUtils.encodeHex(it.getUuid()));
+								return;
+							}
+							
+						}
+						if (NamedItem.class.isAssignableFrom(op.getSourceClass())){
+							//try to match names
+							if (item.getValue() == null || item.getValue().size() == 0){
+								throw new Exception(MessageFormat.format(
+										Messages.PatrolQueryValidator_CouldNotMatchFilter,
+										new Object[]{filter.asString()}));
+							}
+							NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings);							
+							if (it == null){
+								throw new Exception(MessageFormat.format(
+									Messages.FilterValidator_PatrolFilter_ValueMatchingError,
+									new Object[]{filter.asString(), op.getSourceClass().getSimpleName(), item.getValue().get(0)}));
+							}else{
+								warnings.add(MessageFormat.format(Messages.FilterValidator_PatrolFilter_UnqiueIdMatchingError,
+										new Object[]{op.getGuiName(), item.getValue().get(0)}));
+								//update uuid
+								((PatrolFilter)filter).setValue(SmartUtils.encodeHex(it.getUuid()));
+							}
+						}else if (Employee.class.isAssignableFrom(op.getSourceClass())){
+							//lookup employee
+							Employee e = findEmployee(item.getId(), item.getValue().get(0), item.getValue().get(1), warnings);
+							if (e != null){
+								((PatrolFilter)filter).setValue(SmartUtils.encodeHex(e.getUuid()));
 							}else{
 								throw new Exception(
-									MessageFormat.format(
-									Messages.FilterValidator_PatrolFilterErrorB, new Object[]{ filter.asString()}));
-							}
-						}					
+									MessageFormat.format(Messages.FilterValidator_PatrolFilter_EmployeeError,
+										new Object[]{filter.asString(), 
+										item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "}));	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							}	
+						}else{
+							throw new Exception(
+								MessageFormat.format(
+								Messages.FilterValidator_PatrolFilterErrorB, new Object[]{ filter.asString()}));
+						}
+										
 					}
 				}
 			}catch(Exception ex){
@@ -246,49 +288,85 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 						for (int i = 0; i < groupBy.getItems().length; i ++){
 							String key = groupBy.getItems()[i];
 							byte[] uuid = SmartUtils.decodeHex(key);
-							if (groupBy.getOption().getObject(session, uuid) == null) {
-								// this item does not exist in the database
-								if (NamedItem.class.isAssignableFrom(groupBy.getOption().getSourceClass())) {
-									UuidItemType item = uuidLookup.get(key);
-									if (item == null) {
-										throw new Exception(MessageFormat.format(
-											COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
-									}
-									NamedItem it = findValue(langCode, item.getValue().get(0), groupBy.getOption().getSourceClass().getSimpleName(), warnings);
-									if (it == null) {
-										throw new Exception(
-											MessageFormat.format(
-													Messages.PatrolGroupBy_Error_NoMatchingValue,
-													new Object[]{groupBy.asString(), groupBy.getOption().getSourceClass().getSimpleName(),item.getValue().get(0) }));
-									} else {
-										warnings.add(
-											MessageFormat.format(
-													Messages.PatrolGroupBy_Error_NotUniqueId,
-													new Object[]{groupBy.getOption().getGuiName(), item.getValue().get(0) }));	
-										// update uuid
-										groupBy.getItems()[i] = SmartUtils.encodeHex(it.getUuid());
-									}
-								} else if (Employee.class.isAssignableFrom(groupBy.getOption().getSourceClass())) {
-									UuidItemType item = uuidLookup.get(key);
-									if (item == null) {
-										throw new Exception(MessageFormat.format(
-											COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
-									}
-									// lookup employee
-									Employee e = findEmployee(item.getId(),item.getValue().get(0), item.getValue().get(1), warnings);
-									if (e != null) {
-										groupBy.getItems()[i] = SmartUtils.encodeHex(e.getUuid());
-									} else {
-										throw new Exception(
-											MessageFormat.format(
-											Messages.PatrolGroupBy_Error_NoEmployee,
-											new Object[]{groupBy.asString(),item.getValue().get(0) + " " + item.getValue().get(1) + " [" + item.getId() + "] "})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-									}
-								} else {
+							Object x = groupBy.getOption().getObject(session, uuid);
+							if (x instanceof Station){
+								if (((Station)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+									return ;
+								}
+							}else if (x instanceof Team){
+								if (((Team)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+									return ;
+								}
+							}else if (x instanceof PatrolMandate){
+								if (((PatrolMandate)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+									return ;
+								}
+							}else if (x instanceof PatrolTransportType){
+								if (((PatrolTransportType)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+									return ;
+								}
+							}else if (x instanceof Employee){
+								if (((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+									return;
+								}
+							}else if (x instanceof ConservationArea){
+								return;
+							}
+							if (NamedKeyItem.class.isAssignableFrom(groupBy.getOption().getSourceClass())){
+								UuidItemType item = uuidLookup.get(key);
+								if (item == null || item.getValue().size() == 0) {
 									throw new Exception(MessageFormat.format(
 										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
 								}
+								NamedKeyItem it = findKeyValue(item.getValue().get(0), groupBy.getOption().getSourceClass().getSimpleName());
+								if (it != null){
+									groupBy.getItems()[i] = SmartUtils.encodeHex(it.getUuid());
+									continue;
+								}
+								
 							}
+							// this item does not exist in the database for the current conservation area
+							if (NamedItem.class.isAssignableFrom(groupBy.getOption().getSourceClass())) {
+								UuidItemType item = uuidLookup.get(key);
+								if (item == null) {
+									throw new Exception(MessageFormat.format(
+										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
+								}
+								NamedItem it = findValue(langCode, item.getValue().get(0), groupBy.getOption().getSourceClass().getSimpleName(), warnings);
+								if (it == null) {
+									throw new Exception(
+										MessageFormat.format(
+												Messages.PatrolGroupBy_Error_NoMatchingValue,
+												new Object[]{groupBy.asString(), groupBy.getOption().getSourceClass().getSimpleName(),item.getValue().get(0) }));
+								} else {
+									warnings.add(
+										MessageFormat.format(
+												Messages.PatrolGroupBy_Error_NotUniqueId,
+												new Object[]{groupBy.getOption().getGuiName(), item.getValue().get(0) }));	
+									// update uuid
+									groupBy.getItems()[i] = SmartUtils.encodeHex(it.getUuid());
+								}
+							} else if (Employee.class.isAssignableFrom(groupBy.getOption().getSourceClass())) {
+								UuidItemType item = uuidLookup.get(key);
+								if (item == null) {
+									throw new Exception(MessageFormat.format(
+										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
+								}
+								// lookup employee
+								Employee e = findEmployee(item.getId(),item.getValue().get(0), item.getValue().get(1), warnings);
+								if (e != null) {
+									groupBy.getItems()[i] = SmartUtils.encodeHex(e.getUuid());
+								} else {
+									throw new Exception(
+										MessageFormat.format(
+										Messages.PatrolGroupBy_Error_NoEmployee,
+										new Object[]{groupBy.asString(),item.getValue().get(0) + " " + item.getValue().get(1) + " [" + item.getId() + "] "})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								}
+							} else {
+								throw new Exception(MessageFormat.format(
+									COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
+							}
+							
 						}
 					} else if (groupBy.getOption().getType() == PatrolQueryOptionType.KEY){
 						for (String key : groupBy.getItems()){
