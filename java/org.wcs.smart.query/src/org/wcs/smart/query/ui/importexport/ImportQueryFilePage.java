@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -44,20 +45,23 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Query wizard page to select the import file .
+ * Query wizard page to select query files to import.
+ * 
  * 
  * @author Emily
  * @since 1.0.0
  */
 public class ImportQueryFilePage extends WizardPage {
-
+	
+	public static final String PAGENAME = "QueryFiles"; //$NON-NLS-1$
+	
 	private List<File> files = null;
 	
 	/**
 	 * Creates a new query wizard page.
 	 */
 	protected ImportQueryFilePage() {
-		super(Messages.ImportQueryFilePage_PageTitle);
+		super(PAGENAME);
 		files = new ArrayList<File>();
 	}
 
@@ -139,8 +143,8 @@ public class ImportQueryFilePage extends WizardPage {
 		});
 		
 		
-		setTitle(Messages.ImportQueryFilePage_WizardPageTitle);
-		setMessage(Messages.ImportQueryFilePage_PageMessage);
+		setTitle(Messages.ImportQueryFilePage_WizardPageTitle1);
+		setMessage(Messages.ImportQueryFilePage_PageMessage1);
 		setPageComplete(false);
 		setControl(main);
 	}
@@ -150,5 +154,10 @@ public class ImportQueryFilePage extends WizardPage {
 	 */
 	public List<File> getFiles(){
 		return files;
+	}
+	
+	@Override
+	public IWizardPage getNextPage() {
+		return getWizard().getPage(ImportQueryFolderPage.PAGENAME);
 	}
 }

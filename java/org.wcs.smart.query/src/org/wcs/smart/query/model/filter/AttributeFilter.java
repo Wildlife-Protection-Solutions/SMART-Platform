@@ -151,14 +151,14 @@ public class AttributeFilter implements IFilter {
 	 * @param op the filter operator
 	 * @param value the filter value
 	 */
-	private AttributeFilter(String attributeIdentifier, Operator op, Object value){
+	protected AttributeFilter(String attributeIdentifier, Operator op, Object value){
 		this(attributeIdentifier);
 		this.op = op;
 		this.value1 = value;
 	}
 	
 	/* for between operators */
-	private AttributeFilter(String attributeIdentifier, Operator op, Object value, Object value2){
+	protected AttributeFilter(String attributeIdentifier, Operator op, Object value, Object value2){
 		this(attributeIdentifier, op,  value);
 		this.value2 = value2;
 	}
