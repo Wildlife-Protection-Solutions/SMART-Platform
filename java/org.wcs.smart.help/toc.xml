@@ -88,6 +88,8 @@
          </topic>
          <topic href="html/ComponentsOfSMART.html#ImportWaypoints" label="Importing Waypoints">
          </topic>
+         <topic href="html/ComponentsOfSMART.html#ImportWaypointsHelp" label="Importing Waypoints - Common Solutions for CSV File Import Problems">
+         </topic>
          <topic href="html/ComponentsOfSMART.html#ImportTracks" label="Importing Tracks">
          </topic>
          <topic href="html/ComponentsOfSMART.html#Observations" label="Entering Observations">
