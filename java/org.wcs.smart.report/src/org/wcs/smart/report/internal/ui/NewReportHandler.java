@@ -154,7 +154,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 				boolean canEdit = true;
 				try{
 					//create report file with default library
-					reportFile = new File(ReportPlugIn.getReportDirectory(), report.getFilename());
+					reportFile = new File(ReportPlugIn.getReportDirectory(report.getConservationArea()), report.getFilename());
 
 					SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 

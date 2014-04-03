@@ -23,6 +23,8 @@ package org.wcs.smart.report.model;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.internal.Messages;
 
 /**
@@ -35,23 +37,40 @@ public class RootReportFolder implements IAdaptable{
 	/**
 	 * Conservation area root folder
 	 */
-	public static final RootReportFolder CA_ROOT_FOLDER = new RootReportFolder(Messages.RootReportFolder_CaRootReportFolderName, true);
+	public static final RootReportFolder CA_ROOT_FOLDER = new RootReportFolder(Messages.RootReportFolder_CaRootReportFolderName, true, SmartDB.getCurrentConservationArea());
 	/**
 	 * User root folder
 	 */
-	public static final RootReportFolder USER_ROOT_FOLDER = new RootReportFolder(Messages.RootReportFolder_UserRootReportFolderName, false);
+	public static final RootReportFolder USER_ROOT_FOLDER = new RootReportFolder(Messages.RootReportFolder_UserRootReportFolderName, false, SmartDB.getCurrentConservationArea());
 	
 	private String name;
-	private boolean isShared = false;
+	private Boolean isShared = false;
+	private ConservationArea ca;
+	
+	public static RootReportFolder createCaRootFolder(ConservationArea ca){
+		return new RootReportFolder(Messages.RootReportFolder_CaRootReportFolderName, true, ca);
+	}
+	
+	public static RootReportFolder createUserRootFolder(ConservationArea ca){
+		return new RootReportFolder(Messages.RootReportFolder_UserRootReportFolderName, false, ca);
+	}
 	
 	/**
 	 * Creates a new root folder
 	 * @param name name
 	 * @param isShared if shared between users
 	 */
-	private RootReportFolder(String name, boolean isShared){
+	private RootReportFolder(String name, boolean isShared, ConservationArea ca){
 		this.name = name;
 		this.isShared = isShared;
+		this.ca = ca;
+	}
+	
+	/**
+	 * @return Conservation Area associated with root folder 
+	 */
+	public ConservationArea getConservationArea(){
+		return this.ca;
 	}
 	
 	/**
@@ -74,5 +93,23 @@ public class RootReportFolder implements IAdaptable{
 	@Override
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().getAdapter(this, adapter);
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other instanceof RootReportFolder){
+			RootReportFolder o = (RootReportFolder) other;
+			return ca.equals(o.ca) && isShared == o.isShared; 
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ca.hashCode();
+		result = prime * result + isShared.hashCode();
+		return result;
 	}
 }

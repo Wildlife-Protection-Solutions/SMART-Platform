@@ -32,8 +32,8 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
@@ -105,9 +105,8 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		}
 	}
 
-	public static File getReportDirectory() {
-		return new File(SmartDB.getCurrentConservationArea()
-				.getFileDataStoreLocation()
+	public static File getReportDirectory(ConservationArea ca) {
+		return new File(ca.getFileDataStoreLocation()
 				+ File.separator
 				+ ReportPlugIn.REPORT_DIR + File.separator);
 	}

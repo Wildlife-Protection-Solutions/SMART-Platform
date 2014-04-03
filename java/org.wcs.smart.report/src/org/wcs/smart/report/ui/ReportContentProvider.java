@@ -31,9 +31,16 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Content provider for report tree that makes use of
@@ -45,24 +52,36 @@ import org.wcs.smart.report.model.RootReportFolder;
 public class ReportContentProvider extends BaseWorkbenchContentProvider{
 	
 	private DeferredTreeContentManager manager;
-	private boolean ownerOnly;
+	private RootType type;
+	
+	private ConservationArea ca;
+	
+	public enum RootType{SHARED_ONLY, USER_ONLY, ALL};
 	
 	/**
 	 * Creates a new content provide that displays
 	 * all folders
 	 */
 	public ReportContentProvider(){
-		this(false);
+		this(RootType.ALL);
 	}
 	
 	/**
 	 * Creates a new content provider.
 	 * @param ownerOnly display only owner owned folders
 	 */
-	public ReportContentProvider(boolean ownerOnly){
+	public ReportContentProvider(RootType type){
+		this(type, SmartDB.getCurrentConservationArea());
+	}
+	
+	/**
+	 * Creates a new content provider.
+	 * @param ownerOnly display only owner owned folders
+	 */
+	public ReportContentProvider(RootType type, ConservationArea ca){
 		super();
-		this.ownerOnly = ownerOnly;
-		
+		this.type = type;
+		this.ca = ca;
 	}
 	
 	/**
@@ -85,12 +104,31 @@ public class ReportContentProvider extends BaseWorkbenchContentProvider{
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (ownerOnly){
-			return new Object[]{RootReportFolder.USER_ROOT_FOLDER};	
-		}
-		return new Object[]{RootReportFolder.CA_ROOT_FOLDER,
-				RootReportFolder.USER_ROOT_FOLDER
+		if (ca == SmartDB.getCurrentConservationArea()){
+			if (type == RootType.USER_ONLY ){
+				return new Object[]{RootReportFolder.USER_ROOT_FOLDER};
+			}else if (type == RootType.SHARED_ONLY){
+				return new Object[]{RootReportFolder.CA_ROOT_FOLDER};
+			}else{
+				return new Object[]{
+						RootReportFolder.CA_ROOT_FOLDER,
+						RootReportFolder.USER_ROOT_FOLDER
 				};
+			}
+		}else{
+			if (type == RootType.USER_ONLY ){
+				return new Object[]{
+						RootReportFolder.createUserRootFolder(ca)
+					};
+			}else if (type == RootType.SHARED_ONLY){
+				return new Object[]{RootReportFolder.createCaRootFolder(ca)};
+			}else{
+				return new Object[]{
+						RootReportFolder.createCaRootFolder(ca),
+						RootReportFolder.createUserRootFolder(ca)
+				};
+			}
+		}
 	}
 	
 	/**
@@ -155,4 +193,53 @@ public class ReportContentProvider extends BaseWorkbenchContentProvider{
 		}});
 	}
 	
+	
+	public static void assignNames(List<?> items, Session s){
+		Language match = null;
+		
+		for (Object x : items){
+			ConservationArea ca = null;
+			if (x instanceof ReportFolder){
+				ReportFolder f = (ReportFolder)x;
+				if (f.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+					continue;
+				}
+				ca = f.getConservationArea();
+			}else if (x instanceof Report){
+				Report r = (Report)x;
+				r.getConservationArea().getName();
+				if (r.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+					continue;
+				}
+				ca = r.getConservationArea();
+			}
+			
+			NamedItem it = (NamedItem)x;
+			
+			if (match == null){
+				match = SmartUtils.findLanguageMatch(ca.getLanguages());
+				if (match == null){
+					match = ca.getDefaultLanguage();
+				}
+			}
+			it.setName(ReportContentProvider.findLabel(match, it.getUuid(), ca, s));	
+		}
+	}
+	private static String findLabel(Language match, byte[] item, ConservationArea currentCa, Session session){
+		org.wcs.smart.ca.Label.LabelItemPK lid = new org.wcs.smart.ca.Label.LabelItemPK();
+		lid.setElement(new UuidItem(item));
+		lid.setLanguage(match);
+		
+		org.wcs.smart.ca.Label ll = (org.wcs.smart.ca.Label) session.load(org.wcs.smart.ca.Label.class, lid);
+		if (ll == null){
+			lid.setLanguage(currentCa.getDefaultLanguage());
+			ll = (org.wcs.smart.ca.Label) session.load(org.wcs.smart.ca.Label.class, lid);
+			if (ll != null){
+				return ll.getValue();
+			}
+		}else{
+			return ll.getValue();
+		}
+		return ""; //$NON-NLS-1$
+	}
 }
