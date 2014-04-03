@@ -35,6 +35,11 @@
       <command
             id="org.wcs.smart.report.exportReport"
             name="%exportreport.command.name">
+         <commandParameter
+               id="org.wcs.smart.report.export.parameter.isMultiple"
+               name="MultipleReports"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.report.importReport"
@@ -128,18 +133,6 @@
       <handler
             class="org.wcs.smart.report.internal.ui.ExportReportHandler"
             commandId="org.wcs.smart.report.exportReport">
-         <enabledWhen>
-            <with
-                  variable="selection">
-               <iterate
-                     ifEmpty="false"
-                     operator="or">
-                  <instanceof
-                        value="org.wcs.smart.report.model.Report">
-                  </instanceof>
-               </iterate>
-            </with>
-         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.report.internal.ui.ImportReportHandler"
@@ -554,7 +547,12 @@
             </separator>
             <command
                   commandId="org.wcs.smart.report.exportReport"
+                  label="%exportreport.command.name.1"
                   style="push">
+               <parameter
+                     name="org.wcs.smart.report.export.parameter.isMultiple"
+                     value="true">
+               </parameter>
             </command>
             <command
                   commandId="org.wcs.smart.report.importReport"

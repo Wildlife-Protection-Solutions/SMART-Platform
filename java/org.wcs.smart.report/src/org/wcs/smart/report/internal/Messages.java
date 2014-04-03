@@ -52,6 +52,7 @@ public class Messages extends NLS {
 	public static String ExportReportDialog_MultiExportPageTitle;
 	public static String ExportReportDialog_OutputDirectoryLabel;
 	public static String ExportReportDialog_OutputFileLabel;
+	public static String ExportReportDialog_ReportsLabel;
 	public static String ExportReportEngine_Error_GatheringParameters;
 	public static String ExportReportEngine_ExportComplete_DialogMessage;
 	public static String ExportReportEngine_ExportComplete_DialogTitle;
@@ -132,6 +133,10 @@ public class Messages extends NLS {
 	public static String ReportItemNameCellEditor_Error_CouldNotSaveReport;
 	public static String ReportItemNameCellEditor_UpdateFolderJobName;
 	public static String ReportItemNameCellEditor_UpdateReportJobName;
+	public static String ReportListDialog_LoadingLabel;
+	public static String ReportListDialog_Message;
+	public static String ReportListDialog_ShellTitle;
+	public static String ReportListDialog_Title;
 	public static String ReportListView_LoadingLabel;
 	public static String ReportManager_Deleteok_ReportFileNotFound;
 	public static String ReportManager_Deleteok_ReportFileNotRemoved;

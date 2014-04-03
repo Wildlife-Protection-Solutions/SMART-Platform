@@ -57,40 +57,31 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
-		}
+		List<Report> selectedReports = new ArrayList<Report>();
 		
 		// find all selected reports
-		List<Report> selectedReports = new ArrayList<Report>();
-		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
-			Object type = (Object) iterator.next();
-			if (type instanceof Report){
-				selectedReports.add((Report)type);
+		if (thisSelection != null){
+			for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
+				Object type = (Object) iterator.next();
+				if (type instanceof Report){
+					selectedReports.add((Report)type);
+				}
 			}
 		}
-
-		if (selectedReports.size() == 0){
-			//nothing to export
-			return null;
+		boolean isMultiple = !(selectedReports.size() == 1);
+		String parameter = event.getParameter("org.wcs.smart.report.export.parameter.isMultiple"); //$NON-NLS-1$
+		if (parameter != null && parameter.equalsIgnoreCase("true")){ //$NON-NLS-1$
+			//this is from the main report->export reports menu item; we want users to pick reports
+			isMultiple = true;
 		}
-//		if (true){
-//			Report r = selectedReports.get(0);
-//			try{
-//			ExportReportEngine.printReport(r);
-//			}catch (Exception ex){
-//				ex.printStackTrace();
-//			}
-//			return null;
-//		}
-		
 		
 		//get export location information
-		ExportReportDialog dia = new ExportReportDialog(HandlerUtil.getActiveShell(event), selectedReports.size() == 1 ? selectedReports.get(0) : null);
+		ExportReportDialog dia = new ExportReportDialog(HandlerUtil.getActiveShell(event), selectedReports, isMultiple);
 		if (dia.open() != Window.OK){
 			return null;
 		}
 		
+		selectedReports = dia.getSelectedReports();
 		IExportFormat format = dia.getOutputFormat();
 		File outputDir = new File(dia.getOutputDir());
 		
