@@ -166,7 +166,10 @@ public class DeleteItemHandler extends AbstractHandler {
 		
 	}
 	private void deleteFolder(QueryFolder folder, ITreeContentProvider provider) {
-		
+		if (folder.isRootFolder()){
+			//cannot delete root folders
+			return;
+		}
 		if (folder.getChildren() != null && folder.getChildren().size() > 0){
 			QueryPlugIn.displayLog(MessageFormat.format(Messages.DeleteItemHandler_CannotDeleteItemWithKids1, new Object[]{folder.getName()}), null);
 			return;

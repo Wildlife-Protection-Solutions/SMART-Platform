@@ -108,7 +108,11 @@ public class ImportQueryCaListPage extends WizardPage {
 						.add(Restrictions.eq("conservationArea", currentCa)) //$NON-NLS-1$
 						.add(Restrictions.isNull("employee")) //$NON-NLS-1$
 						.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
-				for (QueryFolder qf :rootFolders){
+				List<QueryFolder> toName = new ArrayList<QueryFolder>();
+				toName.addAll(rootFolders);
+				while(toName.size() > 0){
+					QueryFolder qf = toName.remove(0);
+					toName.addAll(qf.getChildren());
 					qf.setName(findLabel(match, qf.getUuid(), session));
 				}
 				
@@ -123,29 +127,29 @@ public class ImportQueryCaListPage extends WizardPage {
 							+ " a " //$NON-NLS-1$
 							+ "WHERE a.conservationArea = :ca " //$NON-NLS-1$
 							+ "and a.isShared ='true'"); //$NON-NLS-1$
-				hquery.setParameter("ca", currentCa); //$NON-NLS-1$
+					hquery.setParameter("ca", currentCa); //$NON-NLS-1$
 
-				List<?> results = hquery.list();
-				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-					Object[] object = (Object[]) iterator.next();
-					byte[] uuid = (byte[]) object[0];
-					byte[] folderuuid = (byte[])object[1];
-					String id = (String) object[3];
-					String name = findLabel(match, uuid, session);
+					List<?> results = hquery.list();
+					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+						Object[] object = (Object[]) iterator.next();
+						byte[] uuid = (byte[]) object[0];
+						byte[] folderuuid = (byte[])object[1];
+						String id = (String) object[3];
+						String name = findLabel(match, uuid, session);
 					
-					QueryEditorInput proxy = new QueryEditorInput(uuid, name, id, true, type);
-					byte[] key = folderuuid;
-					if (folderuuid == null) {
-						key = CaQueryHibernateManagerImpl.CA_QUERY_KEY;
+						QueryEditorInput proxy = new QueryEditorInput(uuid, name, id, true, type);
+						byte[] key = folderuuid;
+						if (folderuuid == null) {
+							key = CaQueryHibernateManagerImpl.CA_QUERY_KEY;
+						}
+						List<QueryEditorInput> proxies = queries.get(Arrays.hashCode(key));
+						if (proxies == null) {
+							proxies = new ArrayList<QueryEditorInput>();
+							queries.put(Arrays.hashCode(key), proxies);
+						}
+						proxies.add(proxy);
 					}
-					List<QueryEditorInput> proxies = queries.get(Arrays.hashCode(key));
-					if (proxies == null) {
-						proxies = new ArrayList<QueryEditorInput>();
-						queries.put(Arrays.hashCode(key), proxies);
-					}
-					proxies.add(proxy);
 				}
-			}
 			}finally{
 				session.close();
 			}
@@ -158,6 +162,7 @@ public class ImportQueryCaListPage extends WizardPage {
 
 				@Override
 				public void run() {
+					if (chQueries.getControl().isDisposed()) return;
 					chQueries.setAutoExpandLevel(2);
 					chQueries.setInput(data);
 					chQueries.refresh();

@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.querylist;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
@@ -50,6 +51,8 @@ public class QueryListLabelProvider extends LabelProvider {
 			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.FOLDER_ICON);
 		}else if (element instanceof QueryEditorInput){
 			return ((QueryEditorInput)element).getType().getImage();
+		}else if (element instanceof Query){
+			return ((Query)element).getType().getImage();
 		}
 		return null;
 	}
@@ -64,6 +67,8 @@ public class QueryListLabelProvider extends LabelProvider {
 			return ((QueryFolder) element).getName() ;
 		}else if (element instanceof QueryEditorInput){
 			return ((QueryEditorInput) element).getName() + " [" + ((QueryEditorInput)element).getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}else if (element instanceof Query){
+			return ((Query)element).getName() + " [" + ((Query)element).getId() + "]";  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		return super.getText(element);
 	}

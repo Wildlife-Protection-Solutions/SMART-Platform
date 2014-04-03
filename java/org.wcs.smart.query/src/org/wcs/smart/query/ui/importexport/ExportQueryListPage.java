@@ -61,14 +61,14 @@ public class ExportQueryListPage extends WizardPage {
 	private Text txtFile = null;
 	private TableViewer queryList;
 	private File selectedDirectory;
-	private List<QueryEditorInput> queries;
+	private List<Object> queries;
 	
 	/**
 	 * Creates a new query wizard page.
 	 */
 	protected ExportQueryListPage() {
 		super(PAGE_NAME);
-		this.queries = new ArrayList<QueryEditorInput>();
+		this.queries = new ArrayList<Object>();
 	}
 
 	/**
@@ -82,9 +82,8 @@ public class ExportQueryListPage extends WizardPage {
 		txtFile.setText( location );
 		
 		if ( ((ExportQueryWizard)getWizard()).getQuery() != null){
-			QueryEditorInput in = new QueryEditorInput(((ExportQueryWizard)getWizard()).getQuery());
-			if (!queries.contains(in)){
-				queries.add(in);
+			if (!queries.contains(((ExportQueryWizard)getWizard()).getQuery())){
+				queries.add(((ExportQueryWizard)getWizard()).getQuery());
 			}
 		}
 		queryList.refresh();
@@ -212,7 +211,7 @@ public class ExportQueryListPage extends WizardPage {
 	/**
 	 * @return the selected file
 	 */
-	public List<QueryEditorInput> getQueries(){
+	public List<Object> getQueries(){
 		return this.queries;
 	}
 	
