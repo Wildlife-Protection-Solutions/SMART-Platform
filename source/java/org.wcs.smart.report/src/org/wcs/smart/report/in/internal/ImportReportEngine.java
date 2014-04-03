@@ -54,7 +54,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -81,7 +80,6 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.internal.ui.CreateReportDialog;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
@@ -120,10 +118,11 @@ public class ImportReportEngine {
 	 * Imports the report 
 	 * 
 	 * @param file the report export to import
+	 * @param folder the destination folder  (RootReportFolder or ReportFolder)
 	 * @return <code>true</code> if successful, <code>false</code> if cancelled
 	 * @throws Exception if error occurs
 	 */
-	public boolean importReport(File file) throws Exception{
+	public boolean importReport(File file, Object folder) throws Exception{
 		this.display = Display.getDefault();
 		
 		//unzip report deifnition file
@@ -161,23 +160,6 @@ public class ImportReportEngine {
 				//need to import new report - ask for location
 				isNew = true;
 				
-				final CreateReportDialog[] dialog = new CreateReportDialog[]{null};
-				display.syncExec(new Runnable(){
-
-					@Override
-					public void run() {
-						dialog[0] = new CreateReportDialog(display.getActiveShell(), null, null, false);
-						dialog[0].setTitle(Messages.ImportReportEngine_CreateReport_DialogTitle);
-						if (dialog[0].open() != Window.OK){
-							dialog[0]= null;
-						}
-						
-					}});
-				
-				if (dialog[0] == null){
-					return false;
-				}
-				Object folder = dialog[0].getReportFolder();
 				if (folder instanceof RootReportFolder){
 					importReport.setShared(((RootReportFolder)folder).isShared());
 					importReport.setFolder(null);

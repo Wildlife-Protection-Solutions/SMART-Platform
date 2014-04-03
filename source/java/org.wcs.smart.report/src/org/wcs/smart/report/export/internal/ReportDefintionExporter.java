@@ -153,7 +153,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	private void exportQueries(ZipOutputStream zout, Report report) throws Exception{
 		
-		File reportFile = new File(ReportPlugIn.getReportDirectory(), report.getFilename());
+		File reportFile = new File(ReportPlugIn.getReportDirectory(report.getConservationArea()), report.getFilename());
 
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 

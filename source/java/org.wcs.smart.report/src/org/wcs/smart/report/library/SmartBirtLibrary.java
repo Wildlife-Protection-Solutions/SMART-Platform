@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.util.SmartUtils;
 
@@ -84,7 +85,7 @@ public class SmartBirtLibrary {
 	 * </p>
 	 */
 	public SmartBirtLibrary(){
-		libraryLocation = new File(ReportPlugIn.getReportDirectory(), LIBRARY_DIR + File.separator);
+		libraryLocation = new File(ReportPlugIn.getReportDirectory(SmartDB.getCurrentConservationArea()), LIBRARY_DIR + File.separator);
 		if (!libraryLocation.exists()){
 			SmartUtils.createDirectory(libraryLocation);
 		}

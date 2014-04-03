@@ -151,7 +151,7 @@ public class Report extends NamedItem {
 	 */
 	@Transient
 	public File getFullReportFilename(){
-		return new File(ReportPlugIn.getReportDirectory(), getFilename());
+		return new File(ReportPlugIn.getReportDirectory(getConservationArea()), getFilename());
 	}
 	
 }

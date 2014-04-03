@@ -98,7 +98,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 		try{
 			s.beginTransaction();
 			//get kid folders
-			RootReportFolder root = ((RootReportFolder)object);
+			RootReportFolder root = (RootReportFolder)object;
 			List<Object> kids = new ArrayList<Object>();
 			if (root.isShared()){
 				List<?> kidFolders = s
@@ -106,14 +106,14 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 						.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
 						.add(Restrictions.isNull("employee")) //$NON-NLS-1$
 						.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
-								SmartDB.getCurrentConservationArea())).list();
+								root.getConservationArea())).list();
 				kids.addAll(kidFolders);
 				List<?> kidQueries = s
 						.createCriteria(Report.class)
 						.add(Restrictions.isNull("folder")) //$NON-NLS-1$
 						.add(Restrictions.eq("shared", true)) //$NON-NLS-1$
 						.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
-								SmartDB.getCurrentConservationArea())).list();
+								root.getConservationArea())).list();
 				kids.addAll(kidQueries);
 			}else{
 				List<?> kidFolders = s
@@ -122,7 +122,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 						.add(Restrictions.in("employee",  //$NON-NLS-1$
 								SmartDB.getConservationAreaConfiguration().getEmployees()))
 						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
-								SmartDB.getCurrentConservationArea())).list();
+								root.getConservationArea())).list();
 				kids.addAll(kidFolders);
 				List<?> kidQueries = s
 						.createCriteria(Report.class)
@@ -130,9 +130,10 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 						.add(Restrictions.eq("shared", false))  //$NON-NLS-1$
 						.add(Restrictions.in("owner",SmartDB.getConservationAreaConfiguration().getEmployees()))  //$NON-NLS-1$
 						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
-								SmartDB.getCurrentConservationArea())).list();
+								root.getConservationArea())).list();
 				kids.addAll(kidQueries);
 			}
+			ReportContentProvider.assignNames(kids, s);
 			ReportContentProvider.sortItems(kids);
 			collector.add(kids.toArray(), monitor);
 			s.getTransaction().commit();

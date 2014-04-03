@@ -175,7 +175,7 @@ public class ReportManager {
 	 * @throws Exception if cannot determine a filename for the report
 	 */
 	public synchronized static String generateFilename(Report r) throws Exception{
-		File dir = ReportPlugIn.getReportDirectory();
+		File dir = ReportPlugIn.getReportDirectory(r.getConservationArea());
 
 		String fname = r.getId().replaceAll("[^\\p{Ll}\\p{Lu}\\p{Lt}\\p{Nd}]", ""); //$NON-NLS-1$ //$NON-NLS-2$  letters and digits
 		String suffix =  ".rptdesign"; //$NON-NLS-1$
