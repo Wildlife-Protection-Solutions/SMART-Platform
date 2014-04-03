@@ -41,6 +41,8 @@ import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Copies;
 import javax.print.attribute.standard.SheetCollate;
 
+import net.refractions.udig.catalog.URLUtils;
+
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
@@ -205,12 +207,11 @@ public class ExportReportEngine {
 	 * @param extension new file extension
 	 */
 	public static File getOutputFileName(Report report, File directory, String extension){
-		String f = report.getFilename();
+		String f = URLUtils.cleanFilename(report.getName() + "_" + report.getId()); //$NON-NLS-1$
 		int index = f.lastIndexOf('.');
 		if (index > 0){
 			f = f.substring(0, index);
 		}
-		//String filename = report.getName().replaceAll("[^\\p{L&}\\p{Nd}]", ""); ;  //$NON-NLS-1$ //$NON-NLS-2$
 		if (directory != null){
 			return new File(directory, f + "." + extension); //$NON-NLS-1$
 		}else{

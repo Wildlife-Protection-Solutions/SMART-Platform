@@ -24,8 +24,11 @@ package org.wcs.smart.report.internal.ui.export;
 import java.io.File;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -37,8 +40,10 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -55,6 +60,8 @@ import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.internal.ExportReportEngine;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -80,18 +87,20 @@ public class ExportReportDialog extends TitleAreaDialog {
 	private Text txtFileName;
 	private ComboViewer cmbEmitters;
 	private boolean multipleFiles;
-	private Report report;
+	private List<Report> reports;
+	private TableViewer lstReports;
 	
 	/**
 	 * @param parentShell
-	 * @param report if not null the dialog prompts the user
-	 * for a export file; otherwise it prompts the user for a directory
+	 * @param reports to export 
 	 * 
 	 */
-	public ExportReportDialog(Shell parentShell, Report report) {
+	public ExportReportDialog(Shell parentShell, List<Report> reports, boolean isMultiple) {
 		super(parentShell);
-		this.multipleFiles = report == null;
-		this.report = report;
+		this.multipleFiles = isMultiple;
+		
+		this.reports = new ArrayList<Report>();
+		this.reports.addAll(reports);
 	}
 	
 	/**
@@ -106,6 +115,10 @@ public class ExportReportDialog extends TitleAreaDialog {
 	 */
 	public IExportFormat getOutputFormat(){
 		return this.emitter;
+	}
+	
+	public List<Report> getSelectedReports(){
+		return this.reports;
 	}
 	
 	/**
@@ -128,7 +141,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		parent = (Composite) super.createDialogArea(parent);
 		if (!multipleFiles){
 			getShell().setText(Messages.ExportReportDialog_DialogTitleA1);
-			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + this.report.getName()); //$NON-NLS-1$
+			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + reports.get(0).getName()); //$NON-NLS-1$
 			
 		}else{
 			getShell().setText(Messages.ExportReportDialog_DialogTitleB);
@@ -139,7 +152,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		Composite comp = new Composite(parent, SWT.NONE);
 		
 		comp.setLayout(new GridLayout(3, false));
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Label lbl = new Label(comp, SWT.NONE);
 		lbl.setText(Messages.ExportReportDialog_FormatLabel);
@@ -208,6 +221,58 @@ public class ExportReportDialog extends TitleAreaDialog {
 			}
 		}
 		
+		
+		if (this.multipleFiles){
+			Label l = new Label(comp, SWT.NONE);
+			l.setText(Messages.ExportReportDialog_ReportsLabel);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+			
+			lstReports = new TableViewer(comp, SWT.BORDER | SWT.MULTI);
+			lstReports.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			lstReports.setContentProvider(ArrayContentProvider.getInstance());
+			lstReports.setLabelProvider(new ReportLabelProvider());
+			lstReports.setInput(reports);
+			((GridData)lstReports.getControl().getLayoutData()).heightHint = 150;
+			
+			Composite buttonPnl = new Composite(comp, SWT.NONE);
+			buttonPnl.setLayout(new GridLayout());
+			buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			
+			Button btnAdd = new Button(buttonPnl, SWT.PUSH);
+			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnAdd.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					ReportListDialog d = new ReportListDialog(getShell());
+					if (d.open() == ReportListDialog.OK){
+						for (Report r : d.getSelectedReports()){
+							if (!reports.contains(r)){
+								reports.add(r);
+							}
+						}
+					}
+					lstReports.refresh();
+				}
+			});
+			
+			
+			Button btnRemove = new Button(buttonPnl, SWT.PUSH);
+			btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnRemove.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					IStructuredSelection selection = (IStructuredSelection) lstReports.getSelection();
+					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+						Object x = (Object) iterator.next();
+						reports.remove(x);
+					}
+					lstReports.refresh();
+				}
+			});
+		}
+		
 		cmbEmitters.setSelection(new StructuredSelection(defaultExport));
 		
 		String location = settings.get(DIRECTORY_SETTING);
@@ -218,7 +283,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 			txtFileName.setText(location);
 			addDirectoryListener(btnBrowse);
 		}else{
-			location += File.separator + ExportReportEngine.getOutputFileName(report, null, defaultExport.getFileExtension()).getName();
+			location += File.separator + ExportReportEngine.getOutputFileName(reports.get(0), null, defaultExport.getFileExtension()).getName();
 			txtFileName.setText(location);
 			addFileListner(btnBrowse);
 		}

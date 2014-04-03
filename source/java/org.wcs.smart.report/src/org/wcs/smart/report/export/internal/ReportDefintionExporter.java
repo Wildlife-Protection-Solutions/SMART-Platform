@@ -106,7 +106,11 @@ public class ReportDefintionExporter implements IReportExporter {
 			}
 			monitor.worked(1);
 		}finally{
-			zout.close();
+			try{
+				zout.close();
+			}catch (Exception ex){
+				ReportPlugIn.log(ex.getMessage(), ex);
+			}
 		}
 		
 	}
