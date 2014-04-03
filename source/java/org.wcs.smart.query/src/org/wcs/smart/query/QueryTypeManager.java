@@ -80,7 +80,7 @@ public class QueryTypeManager {
 				return type;
 			}
 		}
-		return null;
+		return findDeprecatedQueryType(typeKey);
 	}
 		
 	/**

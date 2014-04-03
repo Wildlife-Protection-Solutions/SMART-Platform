@@ -537,6 +537,30 @@
                style="push"
                tooltip="%querylist.toolbar.delete.command.tooltip">
          </command>
+         <command
+               commandId="org.wcs.smart.query.createUnknownQuery"
+               id="org.wcs.smart.query.createQuery"
+               label="%queryToolbar.createquery.command.label"
+               style="pulldown"
+               tooltip="%queryToolbar.createquery.command.toolbar">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
