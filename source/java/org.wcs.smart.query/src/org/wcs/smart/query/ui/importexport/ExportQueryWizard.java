@@ -76,9 +76,15 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * @param queryName the query name
 	 */
 	public ExportQueryWizard(Query query) {
-		setWindowTitle(Messages.ExportQueryWizard_WindowTitle);
-		setDialogSettings(QueryPlugIn.getDefault().getDialogSettings());
 		this.query = query;
+		if (this.query != null){
+			setWindowTitle(Messages.ExportQueryWizard_Title1);	
+		}else{
+			setWindowTitle(Messages.ExportQueryWizard_Title2);
+		}
+		
+		setDialogSettings(QueryPlugIn.getDefault().getDialogSettings());
+		
 		super.setNeedsProgressMonitor(true);
 	}
 
@@ -249,61 +255,68 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 		boolean overwriteall = false;
 		monitor.beginTask(Messages.ExportQueryWizard_ExportProgress, page3.getQueries().size());
-		for (QueryEditorInput qi : page3.getQueries()){
+		for (Object qi : page3.getQueries()){
 			monitor.worked(1);
-			monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ExportProgress2, new Object[]{qi.getName()}));
+			
 			Query query = null;
-			Session session = HibernateManager.openSession();
-			try{
-				query = QueryHibernateManager.getInstance().findQuery(session, qi.getUuid(), qi.getType());
-			}finally{
-				session.close();
-			}
-			
-			
-			if (query == null){
-				MessageDialog.openError(getShell(), Messages.ExportQueryWizard_QueryNotFound, MessageFormat.format(Messages.ExportQueryWizard_QueryNotFoundMsg, new Object[]{qi.getName() + " [" + qi.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
-				continue;
-			}else{
-				IQueryExporter lexporter = null;
-				for (IQueryExporter exporter : QueryExportEngine.getQueryExports(query)){
-					if (exporter.getId().startsWith(IQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
-						lexporter = exporter;
-						break;
-					}
+			if (qi instanceof Query){
+				query = (Query) qi;
+				monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ExportProgress2, new Object[]{query.getName()}));
+			}else if (qi instanceof QueryEditorInput){
+				monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ExportProgress2, new Object[]{((QueryEditorInput)qi).getName()}));
+				Session session = HibernateManager.openSession();
+				try{
+					query = QueryHibernateManager.getInstance().findQuery(session, ((QueryEditorInput)qi).getUuid(), ((QueryEditorInput)qi).getType());
+				}finally{
+					session.close();
 				}
-				if (lexporter == null){
-					MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExporterNotFound, MessageFormat.format(Messages.ExportQueryWizard_ExporterNotFoundMsg, new Object[]{qi.getName() + " [" + qi.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
+				if (query == null){
+					MessageDialog.openError(getShell(), Messages.ExportQueryWizard_QueryNotFound, MessageFormat.format(Messages.ExportQueryWizard_QueryNotFoundMsg, new Object[]{((QueryEditorInput)qi).getName() + " [" + ((QueryEditorInput)qi).getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
 					continue;
 				}
-				
-				File outputFile = new File(outputDir, URLUtils.cleanFilename(qi.getName()) +"_" + qi.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
-				if (!overwriteall && outputFile.exists()){
-					MessageDialog md = new MessageDialog(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle,
-							MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
-							MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}), 
-							MessageDialog.INFORMATION,
-							new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.SKIP_LABEL},
-							0);
-					int ret = md.open();
-					if (ret == 2){
-						continue;
-					}else if (ret == 0){
-						overwriteall = true;
-					}
-					
-				}
-				
-				try{
-					lexporter.export(query, outputFile, monitor);
-					exportedCnt++;
-				}catch (Throwable ex){
-					MessageDialog.openError(getShell(), 
-							Messages.ExportQueryWizard_ExportFailed, 
-							MessageFormat.format(Messages.ExportQueryWizard_ExportFailedMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{qi.getName() + " [" + qi.getId() + "]"}));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ 
-					QueryPlugIn.log(ex.getMessage(), ex);
+			}
+			
+			
+		
+			IQueryExporter lexporter = null;
+			for (IQueryExporter exporter : QueryExportEngine.getQueryExports(query)){
+				if (exporter.getId().startsWith(IQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
+					lexporter = exporter;
+					break;
 				}
 			}
+			if (lexporter == null){
+				MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExporterNotFound, MessageFormat.format(Messages.ExportQueryWizard_ExporterNotFoundMsg, new Object[]{query.getName() + " [" + query.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
+				continue;
+			}
+			
+			File outputFile = new File(outputDir, URLUtils.cleanFilename(query.getName()) +"_" + query.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
+			if (!overwriteall && outputFile.exists()){
+				MessageDialog md = new MessageDialog(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle,
+						MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
+						MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}), 
+						MessageDialog.INFORMATION,
+						new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.SKIP_LABEL},
+						0);
+				int ret = md.open();
+				if (ret == 2){
+					continue;
+				}else if (ret == 0){
+					overwriteall = true;
+				}
+					
+			}
+				
+			try{
+				lexporter.export(query, outputFile, monitor);
+				exportedCnt++;
+			}catch (Throwable ex){
+				MessageDialog.openError(getShell(), 
+						Messages.ExportQueryWizard_ExportFailed, 
+						MessageFormat.format(Messages.ExportQueryWizard_ExportFailedMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{query.getName() + " [" + query.getId() + "]"}));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ 
+				QueryPlugIn.log(ex.getMessage(), ex);
+			}
+		
 			if (monitor.isCanceled()){
 				break;
 			}

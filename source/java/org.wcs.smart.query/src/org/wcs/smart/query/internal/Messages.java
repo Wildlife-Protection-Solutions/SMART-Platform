@@ -135,7 +135,8 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_OverwriteDialogTitle;
 	public static String ExportQueryWizard_QueryNotFound;
 	public static String ExportQueryWizard_QueryNotFoundMsg;
-	public static String ExportQueryWizard_WindowTitle;
+	public static String ExportQueryWizard_Title1;
+	public static String ExportQueryWizard_Title2;
 	public static String FilterDropTargetPanel_FilterTypeLabel;
 	public static String FilterDropTargetPanel_observationtooltip;
 	public static String FilterDropTargetPanel_waypointtooltip;
@@ -190,16 +191,12 @@ public class Messages extends NLS {
 	public static String ImportQueryCaPage_Message;
 	public static String ImportQueryCaPage_Title;
 	public static String ImportQueryFilePage_AllFilesFilterName;
-	public static String ImportQueryFilePage_BrowseButton;
 	public static String ImportQueryFilePage_FileLabel1;
-	public static String ImportQueryFilePage_FileNotFoundError;
 	public static String ImportQueryFilePage_PageMessage1;
-	public static String ImportQueryFilePage_PageTitle;
 	public static String ImportQueryFilePage_WizardPageTitle1;
 	public static String ImportQueryFilePage_xmlFilterName;
 	public static String ImportQueryFolderPage_FolderLabel;
 	public static String ImportQueryFolderPage_PageMessage;
-	public static String ImportQueryFolderPage_PageName;
 	public static String ImportQueryFolderPage_PageTitle;
 	public static String ImportQueryHandler_ErrorOpeningPerspective;
 	public static String ImportQuerySourcePage_Message;
@@ -208,7 +205,6 @@ public class Messages extends NLS {
 	public static String ImportQuerySourcePage_Title;
 	public static String ImportQueryWizard_Confirm_DialogMessage;
 	public static String ImportQueryWizard_Confirm_DialogTitle;
-	public static String ImportQueryWizard_CouldNotImportError;
 	public static String ImportQueryWizard_ErrorDialogTitle;
 	public static String ImportQueryWizard_ErrorDialogTitle1;
 	public static String ImportQueryWizard_ErrorImportingFile;
@@ -216,6 +212,7 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_ImportCompleteMessage;
 	public static String ImportQueryWizard_ImportCompleteTitle;
 	public static String ImportQueryWizard_ImportError;
+	public static String ImportQueryWizard_ImportError1;
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_ImportingProgress;
 	public static String ImportQueryWizard_ImportingTaskName;

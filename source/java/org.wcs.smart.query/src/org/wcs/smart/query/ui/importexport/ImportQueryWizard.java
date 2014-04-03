@@ -189,7 +189,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					}catch (Throwable ex){
 						MessageDialog.openError(getShell(), 
 								Messages.ImportQueryWizard_ErrorDialogTitle, 
-								MessageFormat.format("The query {0} could not be imported.  An error occurred while importing the query." + "\n\n" + ex.getLocalizedMessage(), new Object[]{qi.getName() + " [" + qi.getId() + "]"}));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+								MessageFormat.format(Messages.ImportQueryWizard_ImportError1 + "\n\n" + ex.getLocalizedMessage(), new Object[]{qi.getName() + " [" + qi.getId() + "]"}));    //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						QueryPlugIn.log(ex.getMessage(), ex);
 					}finally{
 						if (outputFile != null){
