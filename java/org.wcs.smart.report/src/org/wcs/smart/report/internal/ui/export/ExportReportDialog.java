@@ -337,25 +337,12 @@ public class ExportReportDialog extends TitleAreaDialog {
 		File dir = new File(txtFileName.getText());
 		
 		if (multipleFiles){
-			if (dir.exists() && dir.isDirectory()){
-			
-				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
-						MessageFormat.format(Messages.ExportReportDialog_DirOverwirtten, new Object[]{txtFileName.getText()}))){
-					return;
-				}
-			}
 			if (!checkDirectory(dir)){
 				return;
 			}
 		}else {
 			if (!checkDirectory(dir.getParentFile())){
 				return;
-			}
-			if (dir.exists()){
-				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
-					MessageFormat.format(Messages.ExportReportDialog_FileOverwritten, new Object[]{txtFileName.getText()}))){
-					return;
-				}
 			}
 		}
 		

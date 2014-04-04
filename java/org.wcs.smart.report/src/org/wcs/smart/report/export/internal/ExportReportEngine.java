@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +55,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.PrinterData;
@@ -88,6 +91,81 @@ public class ExportReportEngine {
 	private final static HashSet<Job> jobs = new HashSet<Job>();
 	
 	/**
+	 * Exports a collection of reports using an IReportExporter or BIRT emitter.  Only
+	 * one of outputFormat or exporter should be supplied.
+	 * 
+	 * @param reports reports to export
+	 * @param directory output directory or file is reports.size() == 1
+	 * @param outputFormat output format
+	 * @param exporter the report exportor
+	 */
+	private static void exportReports(List<Report> reports, File directory, EmitterInfo outputFormat, IReportExporter exporter){
+		if (exporter == null && outputFormat == null){
+			return;
+		}
+		HashMap<String, Object> params = null;
+		if (outputFormat != null){
+			params  = collectParameters(reports);
+			if (params == null) return;
+		}else if (exporter != null && exporter.requiresParameters()){
+			params = collectParameters(reports);
+			if (params == null) return;
+		}
+		
+		boolean yesToOverwrite = false;
+		JobChangeAdapter endJob = new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				jobs.remove(event.getJob());
+				checkJobs();
+			}
+		};
+		
+		for (int i = 0; i < reports.size(); i ++){
+			File outputFile = directory;
+			if (reports.size() > 1){
+				if (outputFormat != null){
+					outputFile = getOutputFileName(reports.get(i), directory,outputFormat.getFormat());
+				}else if (exporter != null){
+					outputFile = getOutputFileName(reports.get(i), directory,exporter.getExportFormat());
+				}
+			}
+			if (outputFile.exists()){
+				if (!yesToOverwrite){
+					MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(),
+							Messages.ExportReportEngine_OverwriteFile,
+							MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
+							MessageFormat.format(Messages.ExportReportEngine_FileExists, new Object[]{outputFile.toString()}), 
+							MessageDialog.INFORMATION,
+							new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.SKIP_LABEL},
+							0);
+					int ret = md.open();
+					if (ret == 2){
+						//skip
+						continue;
+					}else if (ret == 0){
+						yesToOverwrite = true;
+					}
+				}
+			}
+			
+			Job rr = null;
+			if (outputFormat != null){
+				rr = new RunReportJob(reports.get(i), outputFile, outputFormat, params);
+			}else if (exporter != null){
+				rr = new ExportReportJob(reports.get(i), outputFile, exporter, params);
+			}
+			if (rr != null){
+				rr.addJobChangeListener(endJob);
+				jobs.add(rr);
+			}
+		}
+		
+		for (Job j : jobs){
+			j.schedule();
+		}
+	}
+	/**
 	 * Exports a collection of reports using a BIRT emitter.
 	 * 
 	 * @param reports reports to export
@@ -95,31 +173,7 @@ public class ExportReportEngine {
 	 * @param outputFormat output format
 	 */
 	public static void exportReports(List<Report> reports, File directory, EmitterInfo outputFormat){
-		HashMap<String, Object> params  = collectParameters(reports);
-		if (params == null) return;
-		
-		
-		for (int i = 0; i < reports.size(); i ++){
-			File outputFile = directory;
-			if (reports.size() > 1){
-				outputFile = getOutputFileName(reports.get(i), directory,outputFormat.getFormat()); 
-			}
-			final RunReportJob rr = new RunReportJob(
-					reports.get(i), 
-					outputFile,
-					outputFormat, params);
-			
-			jobs.add(rr);
-			rr.addJobChangeListener(new JobChangeAdapter() {
-				@Override
-				public void done(IJobChangeEvent event) {
-					jobs.remove(rr);
-					checkJobs();
-				}
-				
-			});
-			rr.schedule();
-		}
+		exportReports(reports, directory, outputFormat, null);
 	}
 	
 	/**
@@ -130,32 +184,8 @@ public class ExportReportEngine {
 	 * @param outputFormat output format
 	 */
 	public static void exportReports(List<Report> reports, File directory, IReportExporter exporter){
-		HashMap<String, Object> params = null;
-		if (exporter.requiresParameters()){
-			params = collectParameters(reports);
-			if (params == null) return;
-		}
+		exportReports(reports, directory, null, exporter);
 		
-		for (int i = 0; i < reports.size(); i ++){
-			File outputFile = directory;
-			if (reports.size() > 1){
-				outputFile = getOutputFileName(reports.get(i), directory,exporter.getExportFormat()); 
-			}
-			final ExportReportJob rr = new ExportReportJob(reports.get(i), 
-					outputFile,
-					exporter, params);
-
-			jobs.add(rr);
-			rr.addJobChangeListener(new JobChangeAdapter() {
-				@Override
-				public void done(IJobChangeEvent event) {
-					jobs.remove(rr);
-					checkJobs();
-				}
-				
-			});
-			rr.schedule();
-		}
 	}
 	
 	public static HashMap<String, Object> collectParameters(List<Report> reports){

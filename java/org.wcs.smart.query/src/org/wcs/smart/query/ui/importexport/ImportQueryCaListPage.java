@@ -245,7 +245,7 @@ public class ImportQueryCaListPage extends WizardPage {
 						chQueries.setChecked(tp, !value);
 					}
 					e.doit = false;
-							
+					updateSelection();
 				}
 				
 			}
@@ -253,13 +253,7 @@ public class ImportQueryCaListPage extends WizardPage {
 		chQueries.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				setPageComplete(false);
-				for (Object x : chQueries.getCheckedElements()){
-					if (x instanceof QueryEditorInput){
-						setPageComplete(true);
-					}
-				}
-				getContainer().updateButtons();
+				updateSelection();
 			}
 		});
 		
@@ -267,6 +261,16 @@ public class ImportQueryCaListPage extends WizardPage {
 		setTitle(Messages.ImportQueryCaListPage_Title);
 		setMessage(Messages.ImportQueryCaListPage_Message);
 
+	}
+	
+	private void updateSelection(){
+		setPageComplete(false);
+		for (Object x : chQueries.getCheckedElements()){
+			if (x instanceof QueryEditorInput){
+				setPageComplete(true);
+			}
+		}
+		getContainer().updateButtons();
 	}
 	
 	public void initValues(){

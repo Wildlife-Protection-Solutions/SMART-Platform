@@ -554,12 +554,13 @@ public class ImportReportEngine {
 					queryWarnings.addAll( qi.getWarnings());
 					return Status.OK_STATUS;
 				}catch (Exception ex){
-					return new Status(IStatus.ERROR, ReportPlugIn.PLUGIN_ID, IStatus.ERROR, ex.getLocalizedMessage(), ex);
+					return new Status(IStatus.INFO, ReportPlugIn.PLUGIN_ID, IStatus.INFO, ex.getLocalizedMessage(), ex);
 				}
 			}};
+		j.setSystem(true);
 		j.schedule();
 		j.join();
-		if (j.getResult().getCode() == IStatus.ERROR){
+		if (j.getResult().getCode() == IStatus.INFO){
 			throw (Exception)j.getResult().getException();
 		}
 		
@@ -646,7 +647,7 @@ public class ImportReportEngine {
 
 		//search by uuid
 		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.getInstance().findQuery(session, SmartUtils.decodeHex(queryUuid), importedQuery.getType());
-		if (uuidQuery != null){
+		if (uuidQuery != null && uuidQuery.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 			queries.add(uuidQuery);
 		}else{
 			//search by name

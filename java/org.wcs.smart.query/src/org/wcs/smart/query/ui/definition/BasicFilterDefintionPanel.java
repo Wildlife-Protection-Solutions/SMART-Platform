@@ -242,7 +242,8 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	}
 	
 	/**
-	 * Adds a drop item to the query formula
+	 * Adds a drop item to the query formula; fires a query changed
+	 *  event after item added
 	 * @param item drop item to add
 	 */
 	public void addItem(DropItem item) {
@@ -257,6 +258,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 		}
 		items.add(item);
 		orderElements();
+		fireQueryChangedListeners();
 	}
 
 	/**

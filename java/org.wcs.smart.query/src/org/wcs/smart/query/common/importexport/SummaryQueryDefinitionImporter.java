@@ -88,27 +88,7 @@ public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 					session.beginTransaction();
 					try {
 						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
-						validateQuery(sumDef, langCode, uuidLookup, session);
-//						PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session);
-//						if (sumDef.getValueFilter() != null ){
-//							warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
-//						}
-//						if (sumDef.getRateFilter() != null){
-//							warnings.addAll(validator.validate(sumDef.getRateFilter().getFilter()));
-//						}
-//						//process value items
-//						for (IValueItem item: sumDef.getValuePart().getValueItems()){
-//							warnings.addAll(validator.validate(item));
-//						}
-//						
-//						//process group by 
-//						for (IGroupBy gbpart: sumDef.getColumnGroupByPart().getGroupBys()){
-//							warnings.addAll(validator.validate(gbpart));
-//						}		
-//						for (IGroupBy gbpart: sumDef.getRowGroupByPart().getGroupBys()){
-//							warnings.addAll(validator.validate(gbpart));
-//						}		
-					
+						validateQuery(sumDef, langCode, uuidLookup, session);					
 						summaryQuery.setQuery(sumDef.asQuery(), sumDef);
 					} finally {
 						session.getTransaction().rollback();

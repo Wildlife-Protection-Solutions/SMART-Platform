@@ -117,6 +117,7 @@ public class ImportReportCaListPage extends WizardPage {
 						Object tp = (Object) iterator.next();
 						chReports.setChecked(tp, !value);
 					}
+					treeSelectionChanged();
 					e.doit = false;
 							
 				}
@@ -126,13 +127,7 @@ public class ImportReportCaListPage extends WizardPage {
 		chReports.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				setPageComplete(false);
-				for (Object x : chReports.getCheckedElements()){
-					if (x instanceof Report){
-						setPageComplete(true);
-					}
-				}
-				getContainer().updateButtons();
+				treeSelectionChanged();
 			}
 		});
 		
@@ -140,6 +135,16 @@ public class ImportReportCaListPage extends WizardPage {
 		setTitle(Messages.ImportReportCaListPage_Title);
 		setMessage(Messages.ImportReportCaListPage_Message);
 
+	}
+	
+	private void treeSelectionChanged(){
+		setPageComplete(false);
+		for (Object x : chReports.getCheckedElements()){
+			if (x instanceof Report){
+				setPageComplete(true);
+			}
+		}
+		getContainer().updateButtons();
 	}
 	
 	public void initValues(){
