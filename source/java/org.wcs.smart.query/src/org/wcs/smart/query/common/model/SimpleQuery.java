@@ -193,10 +193,9 @@ public abstract class SimpleQuery extends Query {
 		}
 		
 		SimpleQuery query = (SimpleQuery)other;
-		return (query.getVisibleColumns() == null && 
-				this.getVisibleColumns() == null) || 
-				(query.getVisibleColumns() != null && query.getVisibleColumns().equals(this.getVisibleColumns()) &&
-				query.getQueryFilter().equalsIgnoreCase(this.getQueryFilter()));
+		return ((query.getVisibleColumns() == null && this.getVisibleColumns() == null) || 
+				(query.getVisibleColumns() != null && query.getVisibleColumns().equals(this.getVisibleColumns()))) &&
+				query.getQueryFilter().equalsIgnoreCase(this.getQueryFilter());
 	}
 	
 	/**
