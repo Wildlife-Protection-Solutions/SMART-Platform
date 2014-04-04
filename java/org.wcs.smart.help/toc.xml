@@ -115,20 +115,6 @@
          <topic href="html/ComponentsOfSMART.html#reporttools" label="Report Components and Tools">
          </topic>
       </topic>
-      <topic href="html/ComponentsOfSMART.html#Plans" label="Plan Perspective">
-         <topic href="html/ComponentsOfSMART.html#DevelopingPlans" label="Developing Plans">
-         </topic>
-         <topic href="html/ComponentsOfSMART.html#LinkPatrolPlan" label="Linking Patrols To Plans">
-         </topic>
-         <topic href="html/ComponentsOfSMART.html#validatePlan" label="Validating Plans">
-         </topic>
-      </topic>
-      <topic href="html/ComponentsOfSMART.html#Intelligence" label="Intelligence Perspective">
-         <topic href="html/ComponentsOfSMART.html#CreateIntel" label="Creating Intelligence Records">
-         </topic>
-         <topic href="html/ComponentsOfSMART.html#QueryIntel" label="Quering Intelligence Records">
-         </topic>
-      </topic>
       <topic href="html/ComponentsOfSMART.html#DataModel" label="The SMART Data Model">
          <topic href="html/ComponentsOfSMART.html#dmcategories" label="Categories">
          </topic>
