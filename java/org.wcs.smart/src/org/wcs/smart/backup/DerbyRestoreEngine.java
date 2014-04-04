@@ -45,8 +45,10 @@ import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
+import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -232,6 +234,11 @@ public class DerbyRestoreEngine {
 
 		/* connect to the extractedDb and verify version */
 		SmartHibernateManager.setDatabaseParameter(extractedDb.getAbsolutePath());
+		/* need to login as admin user to perform upgrade */
+		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		
+//		UpgradeEngine.upgrageSystem(monitor);
+		
 		try{
 			validateConfiguration(versions);
 		}catch (Exception ex){
@@ -249,6 +256,7 @@ public class DerbyRestoreEngine {
 			HibernateManager.endSessionFactory(true);	
 			//restore database parameter to main db
 			SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 
 		
