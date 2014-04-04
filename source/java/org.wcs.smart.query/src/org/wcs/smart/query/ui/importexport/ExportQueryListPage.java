@@ -74,7 +74,7 @@ public class ExportQueryListPage extends WizardPage {
 	/**
 	 * Initializes the values in the query wizard
 	 */
-	public void initValues(){
+	public void initValues(List<QueryEditorInput> initqueries){
 		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(LAST_DIR_KEY) : null;
 		if (location == null){
 			location = System.getProperty("user.home"); //$NON-NLS-1$
@@ -86,6 +86,10 @@ public class ExportQueryListPage extends WizardPage {
 				queries.add(((ExportQueryWizard)getWizard()).getQuery());
 			}
 		}
+		if (initqueries != null){
+			queries.addAll(initqueries);
+		}
+		
 		queryList.refresh();
 		
 		validate();

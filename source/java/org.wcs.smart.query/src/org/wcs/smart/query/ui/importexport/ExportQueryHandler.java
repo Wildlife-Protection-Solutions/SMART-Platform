@@ -21,16 +21,23 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Handler for the export query button.
@@ -51,7 +58,21 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 			query = ((IQueryEditor) editor).getQueryProxy().getQuery();
 		}
 		
-		ExportQueryWizard wizard = new ExportQueryWizard(query);
+		List<QueryEditorInput> selectedQueries = null;
+		if (query == null){
+			selectedQueries =  new ArrayList<QueryEditorInput>();
+			ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
+			// find all selected reports
+			if (thisSelection != null){
+				for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					if (type instanceof QueryEditorInput){
+						selectedQueries.add((QueryEditorInput)type);
+					}
+				}
+			}
+		}
+		ExportQueryWizard wizard = new ExportQueryWizard(query, selectedQueries);
 		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
 		wd.open();
 		
