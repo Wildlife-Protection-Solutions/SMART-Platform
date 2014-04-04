@@ -42,11 +42,9 @@ public class Messages extends NLS {
 	public static String ExportReportDialog_DirDoesNotExist1;
 	public static String ExportReportDialog_DirectoryDialogMessage;
 	public static String ExportReportDialog_DirectoryDialogTitle;
-	public static String ExportReportDialog_DirOverwirtten;
 	public static String ExportReportDialog_Error_DialogTitle;
 	public static String ExportReportDialog_ExportButton;
 	public static String ExportReportDialog_ExportDialogTitle;
-	public static String ExportReportDialog_FileOverwritten;
 	public static String ExportReportDialog_FormatLabel;
 	public static String ExportReportDialog_InvalidDir;
 	public static String ExportReportDialog_MultiExportPageTitle;
@@ -56,6 +54,8 @@ public class Messages extends NLS {
 	public static String ExportReportEngine_Error_GatheringParameters;
 	public static String ExportReportEngine_ExportComplete_DialogMessage;
 	public static String ExportReportEngine_ExportComplete_DialogTitle;
+	public static String ExportReportEngine_FileExists;
+	public static String ExportReportEngine_OverwriteFile;
 	public static String ExportReportHandler_ExportError;
 	public static String ExportReportJob_ErrorExportingReport;
 	public static String ExportReportJob_ExportReportJobName;
@@ -109,10 +109,11 @@ public class Messages extends NLS {
 	public static String ImportReportSourcePage_opCa;
 	public static String ImportReportSourcePage_opFile;
 	public static String ImportReportSourcePage_Title;
+	public static String ImportReportWizard_CancelledMessage;
+	public static String ImportReportWizard_CancelledTitle;
 	public static String ImportReportWizard_completeMsg;
 	public static String ImportReportWizard_completeMsg1;
 	public static String ImportReportWizard_ErrorMsg;
-	public static String ImportReportWizard_ErrorTitle;
 	public static String ImportReportWizard_FailedMessage;
 	public static String ImportReportWizard_FileError;
 	public static String ImportReportWizard_ImportComplete;

@@ -169,7 +169,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLog(final String message, Throwable t) {
 		log(message, t);
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(),

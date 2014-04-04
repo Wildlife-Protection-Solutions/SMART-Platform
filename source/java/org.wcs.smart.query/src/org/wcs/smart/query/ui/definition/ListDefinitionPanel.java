@@ -188,7 +188,8 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 	}
 	
 	/**
-	 * Adds a drop item to the query formula.
+	 * Adds a drop item to the query formula.  Fires a query 
+	 * change event after item added.
 	 * @param item drop item to add
 	 */
 	public void addItem(DropItem item) {

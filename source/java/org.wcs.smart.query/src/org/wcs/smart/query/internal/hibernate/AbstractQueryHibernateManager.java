@@ -193,8 +193,8 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	}
 	
 	/**
-	 * Searches all the queries for the given
-	 * query uuid.
+	 * Searches all the queries in the all conservation areas
+	 * for the given query uuid.
 	 * 
 	 * @param session
 	 * @param queryUuid
@@ -204,7 +204,6 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	public org.wcs.smart.query.model.Query findQuery(Session session, 
 			byte[] queryUuid, IQueryType queryType) {		
 		return (org.wcs.smart.query.model.Query) session.get(queryType.getHibernateClass(), queryUuid);
-
 	}
 	
 	

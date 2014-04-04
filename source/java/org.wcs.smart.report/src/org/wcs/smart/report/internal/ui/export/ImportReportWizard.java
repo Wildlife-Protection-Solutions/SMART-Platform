@@ -27,7 +27,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -122,42 +122,57 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 	}
 
 	private void importReports() throws Exception{
-		getContainer().run(false, true, new IRunnableWithProgress() {
+		final Object inputFolder = page2.getFolder();
+		final List<Report> reports = page4.getReports();
+		
+		getContainer().run(true, true, new IRunnableWithProgress() {
 			@Override
 			public void run(IProgressMonitor monitor)
 				throws InvocationTargetException, InterruptedException {
-		
-				List<Report> reports = page4.getReports();
-				
 				monitor.beginTask(Messages.ImportReportWizard_TaskName, reports.size()*2);
+				
 				int importCnt = 0;
-				
-				Object rf = page2.getFolder();
-				
 				ReportDefintionExporter exporter = new ReportDefintionExporter();
 				for (Report report : reports){
-					monitor.worked(1);
-					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress, new Object[]{report.getName()}));
+					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress, new Object[]{report.getName() + " [" + report.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					File outputFile = null;
 					try{
 						outputFile = File.createTempFile(report.getId(), ".xml"); //$NON-NLS-1$
-						exporter.exportReport(outputFile, report, null, new SubProgressMonitor(monitor, 2));
+						exporter.exportReport(outputFile, report, null, new NullProgressMonitor());//new SubProgressMonitor(monitor, 2));
+						monitor.worked(1);
 						
-						importReport(outputFile, rf);
+						importReport(outputFile, inputFolder);
 						importCnt++;
+						monitor.worked(1);
 					}catch (Throwable ex){
-						MessageDialog.openError(getShell(), 
-								Messages.ImportReportWizard_ErrorTitle, 
-								MessageFormat.format(Messages.ImportReportWizard_ErrorMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{report.getName() + " [" + report.getId() + "]"}));    //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						ReportPlugIn.log(ex.getMessage(), ex);
+						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_ErrorMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{report.getName() + " [" + report.getId() + "]"}), ex); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}finally{
 						if (outputFile != null){
 							outputFile.delete();
 						}
 					}
+					if (monitor.isCanceled()){
+						break;
+					}
 				}
-				MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_ImportComplete, MessageFormat.format(Messages.ImportReportWizard_completeMsg, new Object[]{importCnt, reports.size()}));
+				
+				if (monitor.isCanceled()){
+					final int cnt = importCnt;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_CancelledTitle, MessageFormat.format(Messages.ImportReportWizard_CancelledMessage, new Object[]{cnt, reports.size()}));
+						}});					
+				}else{
+					final int cnt = importCnt;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_ImportComplete, MessageFormat.format(Messages.ImportReportWizard_completeMsg, new Object[]{cnt, reports.size()}));
+						}});
+				}
+				
 			}
 		});
 		
@@ -166,29 +181,44 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 			
 	private void importFiles(final List<File> files) throws Exception {
 		
-		getContainer().run(false, false, new IRunnableWithProgress() {
+		final Object inputFolder = page2.getFolder();
+		getContainer().run(true, true, new IRunnableWithProgress() {
 			@Override
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 			
 				monitor.beginTask(Messages.ImportReportWizard_TaskName2, files.size());
-				
-				Object qf = page2.getFolder();
 				int importCnt = 0;
-				
 				
 				for (File f : files){
 					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress2, new Object[]{f.getName()}));
 					monitor.worked(1);
 					try{
-						importReport(f, qf);
+						importReport(f, inputFolder);
 						importCnt++;
 					}catch (Exception ex){
 						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_FileError, new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 					}	
-				
+					if (monitor.isCanceled()){
+						break;
+					}
 				}
-				MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_ImportComplete1, MessageFormat.format(Messages.ImportReportWizard_completeMsg1, new Object[]{importCnt, files.size()}));
+
+				if (monitor.isCanceled()){
+					final int cnt = importCnt;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_CancelledTitle, MessageFormat.format(Messages.ImportReportWizard_CancelledMessage, new Object[]{cnt, files.size()}));
+						}});					
+				}else{
+					final int cnt = importCnt;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_ImportComplete1, MessageFormat.format(Messages.ImportReportWizard_completeMsg1, new Object[]{cnt, files.size()}));
+						}});
+				}
 				
 			}
 			
