@@ -59,11 +59,13 @@ public class ReportImportHandler implements IReportImportHandler {
 				if (x instanceof ExtendedItemHandle && ((ExtendedItemHandle) x).getReportItem() instanceof SmartMapItem){
 					SmartMapItem item = (SmartMapItem)((ExtendedItemHandle)x).getReportItem();
 					ArrayList<String> newLayers = new ArrayList<String>();
-					for (String layer : item.getLayers()){
-						if (oldToNewQuery.get(layer) != null){
-							newLayers.add(oldToNewQuery.get(layer));
-						}else{
-							newLayers.add(layer);
+					if (item.getLayers() != null){
+						for (String layer : item.getLayers()){
+							if (oldToNewQuery.get(layer) != null){
+								newLayers.add(oldToNewQuery.get(layer));
+							}else{
+								newLayers.add(layer);
+							}
 						}
 					}
 					item.setLayers(newLayers);

@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.List;
 
 import net.refractions.udig.catalog.URLUtils;
 
@@ -67,25 +68,35 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private ExportQueryListPage page3;
 	
 	private boolean hasError = false;
+	private List<QueryEditorInput> initSelection = null;
 	
 	/**
 	 * Creates a new wizard.
 	 *
-	 * @param data the data to export
-	 * @param columns the query columns to export
-	 * @param queryName the query name
+	 * @param query the query to export (can be null)
+	 * @param initSelection collection of queries to export (can be null)  Only one of query or initSelection can be provided 
 	 */
-	public ExportQueryWizard(Query query) {
+	public ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
 		this.query = query;
 		if (this.query != null){
 			setWindowTitle(Messages.ExportQueryWizard_Title1);	
 		}else{
+			this.initSelection = initSelection;
 			setWindowTitle(Messages.ExportQueryWizard_Title2);
 		}
 		
 		setDialogSettings(QueryPlugIn.getDefault().getDialogSettings());
 		
 		super.setNeedsProgressMonitor(true);
+	}
+	
+	/**
+	 * Creates a new wizard.
+	 *
+	 * @param query the query to export
+	 */
+	public ExportQueryWizard(Query query) {
+		this(query, null);
 	}
 
     /*
@@ -122,7 +133,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 		if (this.query == null){
-			page3.initValues();
+			page3.initValues(initSelection);
 		}
 	}
 
@@ -342,7 +353,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			page2.initValues();
 			page2.setPageComplete(true);
 		}else if (event.getTargetPage() == page3){
-			page3.initValues();
+			page3.initValues(initSelection);
 			page3.setPageComplete(true);
 		}
 	}

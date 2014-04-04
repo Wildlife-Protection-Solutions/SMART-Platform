@@ -73,7 +73,7 @@ public class ReportQueryListener extends QueryListenerAdapter {
 			if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
 					WARNING_DIALOGTITLE, 
 					MessageFormat.format(
-							Messages.ReportQueryListener_BeforeDelete_QueryUsedWarning, new Object[]{sb.toString()}))){
+							Messages.ReportQueryListener_BeforeDelete_QueryUsedWarning1, new Object[]{sb.toString(), query.getName() + " [" + query.getId() + "]"}))){ //$NON-NLS-1$ //$NON-NLS-2$
 				return false;
 			}
 			return true;
