@@ -50,8 +50,6 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class ExportQueryLocationPage extends WizardPage {
 
-	private static final String LAST_DIR_KEY = "LAST_EXPORT_DIR"; //$NON-NLS-1$
-	
 	private Text txtFile = null;
 
 	
@@ -66,7 +64,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	 * Initializes the values in the query wizard
 	 */
 	public void initValues(){
-		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(LAST_DIR_KEY) : null;
+		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(ExportQueryWizard.LAST_DIR_KEY) : null;
 		if (location == null){
 			location = System.getProperty("user.home"); //$NON-NLS-1$
 		}
@@ -74,7 +72,11 @@ public class ExportQueryLocationPage extends WizardPage {
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		IQueryExporter exporter = wizard.getQueryExporter();
 		
-		String initFile = location + File.separator + URLUtils.cleanFilename(wizard.getQuery().getName()) + "_" + wizard.getQuery().getId() + "." ; //$NON-NLS-1$ //$NON-NLS-2$
+		String initFile = wizard.getQuery().getName();
+		if (wizard.getQuery().getId() != null){
+			initFile = initFile + "_" + wizard.getQuery().getId(); //$NON-NLS-1$
+		}
+		initFile = location + File.separator + URLUtils.cleanFilename(initFile) + "." ; //$NON-NLS-1$ 
 		if (exporter == null){
 			initFile += ".txt"; //$NON-NLS-1$
 		}else{
@@ -144,16 +146,6 @@ public class ExportQueryLocationPage extends WizardPage {
 	 */
 	public File getFile(){
 		return new File(txtFile.getText());
-	}
-	
-	public void performFinish(){
-		try{
-			File f = new File(txtFile.getText());
-			getWizard().getDialogSettings().put(LAST_DIR_KEY, f.getParent().toString());
-		}catch (Exception ex){
-			//eatme
-		}
-		
 	}
 	
 	 public IWizardPage getNextPage() {
