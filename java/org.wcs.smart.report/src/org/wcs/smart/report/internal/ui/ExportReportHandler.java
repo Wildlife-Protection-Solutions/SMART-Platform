@@ -83,25 +83,33 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 		
 		selectedReports = dia.getSelectedReports();
 		IExportFormat format = dia.getOutputFormat();
-		File outputDir = new File(dia.getOutputDir());
+		File outputLocation = new File(dia.getOutputDir());
 		
 		
-		if (selectedReports.size() > 1){
+		if (isMultiple){
 			//dir provided			
-			ExportReportEngine.validateDirectory(outputDir);
+			ExportReportEngine.validateDirectory(outputLocation);
 		}
 		if (format.getExporter() instanceof EmitterInfo){
 			EmitterInfo outputFormat = (EmitterInfo) format.getExporter();
 			//export reports
 			try {
-				ExportReportEngine.exportReports(selectedReports, outputDir, outputFormat);
+				if (isMultiple){
+					ExportReportEngine.exportReports(selectedReports, outputLocation, null, outputFormat);
+				}else{
+					ExportReportEngine.exportReports(selectedReports, null, outputLocation, outputFormat);
+				}
 			} catch (Exception e) {
 				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
 			}
 		}else if (format.getExporter() instanceof IReportExporter){
 			IReportExporter exporter = (IReportExporter) format.getExporter();
 			try {
-				ExportReportEngine.exportReports(selectedReports, outputDir, exporter);
+				if (isMultiple){
+					ExportReportEngine.exportReports(selectedReports, outputLocation, null, exporter);
+				}else{
+					ExportReportEngine.exportReports(selectedReports, null, outputLocation, exporter);
+				}
 			} catch (Exception e) {
 				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
 			}
