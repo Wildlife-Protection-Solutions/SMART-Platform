@@ -3,11 +3,12 @@ package org.wcs.smart.upgrade;
 import java.io.InputStream;
 import java.sql.Connection;
 
-//import org.apache.derby.tools.ij;
+import org.apache.derby.tools.ij;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.upgrade.v200.Upgrader112To200;
 import org.wcs.smart.upgrade.v300.Upgrader200To300;
 
 /**
@@ -20,7 +21,7 @@ import org.wcs.smart.upgrade.v300.Upgrader200To300;
 public class UpgradeEngine {
 
 	private enum UpgradeFromVersion {
-		V110,
+		V112,
 		V200
 	}
 	
@@ -31,8 +32,8 @@ public class UpgradeEngine {
 			UpgradeFromVersion fromVersion = null;
 			if ("2.0.0".equals(version)) { //$NON-NLS-1$
 				fromVersion = UpgradeFromVersion.V200;
-			} else if ("1.1.0".equals(version)) { //$NON-NLS-1$
-				fromVersion = UpgradeFromVersion.V110;
+			} else if ("1.1.2".equals(version)) { //$NON-NLS-1$
+				fromVersion = UpgradeFromVersion.V112;
 			}
 			
 			if (fromVersion == null){
@@ -40,8 +41,8 @@ public class UpgradeEngine {
 			}
 			
 			switch (fromVersion) {
-			case V110:
-//				Upgrader110To200.upgrade(s, monitor);
+			case V112:
+				Upgrader112To200.upgrade(s, monitor);
 			case V200:
 				Upgrader200To300.upgrade(s, monitor);
 			default:
@@ -67,11 +68,11 @@ public class UpgradeEngine {
 	 * @param updateScript inputstream representing the queries to run
 	 */
 	public static void runScript(Connection databaseConnection, InputStream in) throws Exception{
-//		try{
-//			ij.runScript(databaseConnection, in, "utf-8", System.out, "utf-8");  //$NON-NLS-1$//$NON-NLS-2$
-//		}finally{
-//			in.close();
-//		}
+		try{
+			ij.runScript(databaseConnection, in, "utf-8", System.out, "utf-8");  //$NON-NLS-1$//$NON-NLS-2$
+		}finally{
+			in.close();
+		}
 	}
 	
 }

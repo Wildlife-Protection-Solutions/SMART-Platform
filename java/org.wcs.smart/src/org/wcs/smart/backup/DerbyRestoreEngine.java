@@ -237,7 +237,7 @@ public class DerbyRestoreEngine {
 		/* need to login as admin user to perform upgrade */
 		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
-//		UpgradeEngine.upgrageSystem(monitor);
+		UpgradeEngine.upgrageSystem(monitor);
 		
 		try{
 			validateConfiguration(versions);
