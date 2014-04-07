@@ -64,6 +64,10 @@ public class EntityTypeMerger {
 		
 		final List<EntityType> newTypes = new ArrayList<EntityType>();
 		
+		//ensure the data model is loaded here; outside the progress monitor 
+		//to prevent deadlocking
+		QueryDataModelManager.getInstance().getDataModel();
+		
 		Display.getDefault().syncExec(new Runnable(){
 
 			@Override

@@ -87,6 +87,10 @@ public class SightingPagedResults implements IObservationPagedQueryResultSet {
 		return super.equals(obj);
 	}
 
+	@Override
+	public int hashCode(){
+		return queryTempTable.hashCode();
+	}
 	/**
 	 * Destroys the results
 	 */

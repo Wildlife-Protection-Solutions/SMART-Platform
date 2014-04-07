@@ -169,8 +169,7 @@ public class EntitySightingQuery extends Query{
 	 */
 	@Override
 	public Query clone() {
-//		throw new OperationNotSupportedException("Cannot clone entity sighting queries");
-		return null;
+		throw new RuntimeException("Cannot clone entity sighting queries"); //$NON-NLS-1$
 	}
 
 	@Override
