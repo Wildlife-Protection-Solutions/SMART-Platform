@@ -204,7 +204,6 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 					return;
 				}
 				ExportQueryWizard wizard = new ExportQueryWizard(currentQuery);
-				
 				WizardDialog dialog = new WizardDialog(parentEditor.getSite().getShell(), wizard);
 				dialog.open();
 			}

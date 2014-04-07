@@ -175,7 +175,7 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 	};
 	
 	/**
-	 * listener for patrol change events.
+	 * listener for entity change events.
 	 */
 	private IEntityListener entityListener = new IEntityListener() {
 		

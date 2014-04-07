@@ -28,17 +28,15 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.ID;
 import net.refractions.udig.catalog.IService;
 
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
+import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.map.FixedEntityService;
 import org.wcs.smart.entity.map.FixedEntityServiceExtension;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 /**
@@ -50,6 +48,7 @@ import org.wcs.smart.query.QueryDataModelManager;
  */
 public class EntityTypeCcaaManager {
 
+	private final static Object LOCK = new Object();
 	private static EntityTypeCcaaManager instance;
 	
 	private List<EntityType> mergedTypes;
@@ -61,18 +60,19 @@ public class EntityTypeCcaaManager {
 		@Override
 		public void modified() {
 			mergedTypes = null;
-			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(EntityTypeListView.ID);
-			if (part != null){
-				QueryDataModelManager.getInstance().clearDataModel();
-				((EntityTypeListView)part).updateContent();
-				
-				//clear Fixed Entity Service
-				URL url = FixedEntityServiceExtension.createURL(SmartDB.getCurrentConservationArea());
-				FixedEntityService entityService = (FixedEntityService) CatalogPlugin.getDefault().getLocalCatalog().getById(IService.class, new ID(url), null);
-				if (entityService != null){
-					CatalogPlugin.getDefault().getLocalCatalog().remove(entityService);
-				}
+
+			QueryDataModelManager.getInstance().clearDataModel();
+			
+			//this will update the entity type list view part
+			EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, null);
+			
+			//clear Fixed Entity Service
+			URL url = FixedEntityServiceExtension.createURL(SmartDB.getCurrentConservationArea());
+			FixedEntityService entityService = (FixedEntityService) CatalogPlugin.getDefault().getLocalCatalog().getById(IService.class, new ID(url), null);
+			if (entityService != null){
+				CatalogPlugin.getDefault().getLocalCatalog().remove(entityService);
 			}
+			
 		}
 	};
 	
@@ -86,7 +86,12 @@ public class EntityTypeCcaaManager {
 	 */
 	public static EntityTypeCcaaManager getInstance(){
 		if (instance == null){
-			instance = new EntityTypeCcaaManager();
+			synchronized (LOCK) {
+				if (instance == null){
+					instance = new EntityTypeCcaaManager();
+				}
+			}
+			
 		}
 		return instance;
 	}
