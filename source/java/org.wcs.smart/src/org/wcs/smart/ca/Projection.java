@@ -161,7 +161,8 @@ public class Projection extends UuidItem {
 			return point;
 		try {
 			CoordinateReferenceSystem targetCrs = targetProjection.getCrs();
-			if (!SmartDB.DATABASE_CRS.getCoordinateSystem().equals(targetCrs)){
+			
+			if (!CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, targetCrs)){
 				MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, targetCrs);
 				Point p = (Point) JTS.transform(point, transform);
 				return p;
