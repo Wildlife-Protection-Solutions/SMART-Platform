@@ -76,7 +76,6 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
 		wd.open();
 		
-			
 		return null;
 	}
 

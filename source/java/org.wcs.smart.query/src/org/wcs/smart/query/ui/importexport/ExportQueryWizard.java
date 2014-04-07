@@ -56,7 +56,9 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class ExportQueryWizard extends Wizard implements IPageChangingListener{
-
+	
+	public static final String LAST_DIR_KEY = "LAST_EXPORT_DIR"; //$NON-NLS-1$
+	
 	private static final String EXPORT_FAILED_MGS = Messages.ExportQueryWizard_ExportFailedError;
 
 	private static final String EXPORT_DIALOGTITLE = Messages.ExportQueryWizard_ExportDialogTitle;
@@ -164,12 +166,6 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		if (page1 != null){
 			page1.performFinish();
 		}
-		if (page2 != null){
-			page2.performFinish();
-		}
-		if (page3 != null){
-			page3.performFinish();
-		}
 		
 		try {
 			getContainer().run(false, true, new IRunnableWithProgress() {
@@ -206,6 +202,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	private boolean exportSingleFile(IQueryExporter exporter, IProgressMonitor monitor) throws Exception{
 		File outputFile = page2.getFile();
+		getDialogSettings().put(LAST_DIR_KEY, outputFile.getParent().toString());
 		
 		if (!outputFile.getParentFile().exists()){
 			boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputFile.getParent()}));
@@ -248,6 +245,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	private void exportMultiDefs(IProgressMonitor monitor) {
 		File outputDir = page3.getDirectory();
+		getDialogSettings().put(LAST_DIR_KEY, outputDir.toString());
 		
 		if (!outputDir.exists()){
 			boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputDir.toString()}));

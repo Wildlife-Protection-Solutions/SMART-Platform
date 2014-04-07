@@ -42,6 +42,8 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  */
 public class QueryTypeManager {
 
+	private static final Object LOCK = new Object();
+	
 	private static final String QUERYTYPE_EXTNAME = "QueryType"; //$NON-NLS-1$
 
 	private static final String QUERYTYPEGROUP_EXTNAME = "QueryCategory"; //$NON-NLS-1$
@@ -64,7 +66,11 @@ public class QueryTypeManager {
 	 */
 	public static QueryTypeManager getInstance(){
 		if (instance == null){
-			instance = new QueryTypeManager();
+			synchronized (LOCK) {
+				if (instance == null){
+					instance = new QueryTypeManager();
+				}
+			}
 		}
 		return instance;
 	}

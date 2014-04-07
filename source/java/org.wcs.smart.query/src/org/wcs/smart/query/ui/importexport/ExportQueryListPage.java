@@ -56,11 +56,9 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class ExportQueryListPage extends WizardPage {
 
 	public static final String PAGE_NAME = "QueryListPage"; //$NON-NLS-1$
-	private static final String LAST_DIR_KEY = "LAST_EXPORT_DIR"; //$NON-NLS-1$
 	
 	private Text txtFile = null;
 	private TableViewer queryList;
-	private File selectedDirectory;
 	private List<Object> queries;
 	
 	/**
@@ -75,7 +73,7 @@ public class ExportQueryListPage extends WizardPage {
 	 * Initializes the values in the query wizard
 	 */
 	public void initValues(List<QueryEditorInput> initqueries){
-		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(LAST_DIR_KEY) : null;
+		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(ExportQueryWizard.LAST_DIR_KEY) : null;
 		if (location == null){
 			location = System.getProperty("user.home"); //$NON-NLS-1$
 		}
@@ -209,7 +207,7 @@ public class ExportQueryListPage extends WizardPage {
 	 * @return the selected file
 	 */
 	public File getDirectory(){
-		return selectedDirectory;
+		return new File(txtFile.getText());
 	}
 	
 	/**
@@ -217,16 +215,6 @@ public class ExportQueryListPage extends WizardPage {
 	 */
 	public List<Object> getQueries(){
 		return this.queries;
-	}
-	
-	public void performFinish(){
-		try{
-			selectedDirectory = new File(txtFile.getText());
-			getWizard().getDialogSettings().put(LAST_DIR_KEY, selectedDirectory.toString());
-		}catch (Exception ex){
-			//eatme
-		}
-		
 	}
 	
 }
