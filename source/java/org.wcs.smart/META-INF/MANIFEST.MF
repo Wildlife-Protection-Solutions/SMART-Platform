@@ -20,7 +20,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/opencsv-2.3.jar,
  lib/commons-compress-1.5.jar,
- lib/gson-2.2.4.jar
+ lib/gson-2.2.4.jar,
+ lib/derbytools-10.9.1.0.jar
 Export-Package: au.com.bytecode.opencsv,
  au.com.bytecode.opencsv.bean,
  org.wcs.smart,
