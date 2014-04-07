@@ -20,6 +20,12 @@
             <artifactId>derby</artifactId>
             <version>10.10.1.1</version>
         </dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbytools</artifactId>
+			<version>10.10.1.1</version>
+		</dependency>
+        
 <!--         <dependency> -->
 <!--             <groupId>net.sourceforge.hatbox</groupId> -->
 <!--             <artifactId>hatbox</artifactId> -->
