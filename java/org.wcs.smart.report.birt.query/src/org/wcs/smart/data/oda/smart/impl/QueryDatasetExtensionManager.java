@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.Platform;
 public class QueryDatasetExtensionManager {
 
 	private static QueryDatasetExtensionManager instance = null;
-	
+	private static final Object LOCK = new Object();
 	/**
 	 * Mapping from query type key to smart dataset
 	 */
@@ -53,7 +53,11 @@ public class QueryDatasetExtensionManager {
 	 */
 	public static QueryDatasetExtensionManager getInstance(){
 		if (instance == null){
-			instance = new QueryDatasetExtensionManager();
+			synchronized (LOCK) {
+				if (instance == null){
+					instance = new QueryDatasetExtensionManager();
+				}
+			}
 		}
 		return instance;
 	}
