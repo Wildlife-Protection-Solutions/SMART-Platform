@@ -95,11 +95,12 @@ public class ExportReportEngine {
 	 * one of outputFormat or exporter should be supplied.
 	 * 
 	 * @param reports reports to export
-	 * @param directory output directory or file is reports.size() == 1
+	 * @param directory output directory. Only one of directory or file is used and only one of them should be supplied.
+	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 * @param exporter the report exportor
 	 */
-	private static void exportReports(List<Report> reports, File directory, EmitterInfo outputFormat, IReportExporter exporter){
+	private static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat, IReportExporter exporter){
 		if (exporter == null && outputFormat == null){
 			return;
 		}
@@ -122,8 +123,8 @@ public class ExportReportEngine {
 		};
 		
 		for (int i = 0; i < reports.size(); i ++){
-			File outputFile = directory;
-			if (reports.size() > 1){
+			File outputFile = file;
+			if (file == null){
 				if (outputFormat != null){
 					outputFile = getOutputFileName(reports.get(i), directory,outputFormat.getFormat());
 				}else if (exporter != null){
@@ -169,22 +170,24 @@ public class ExportReportEngine {
 	 * Exports a collection of reports using a BIRT emitter.
 	 * 
 	 * @param reports reports to export
-	 * @param directory output directory or file if reports.size() == 1
+	 * @param directory output directory. Only one of directory or file is used and only one of them should be supplied.
+	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 */
-	public static void exportReports(List<Report> reports, File directory, EmitterInfo outputFormat){
-		exportReports(reports, directory, outputFormat, null);
+	public static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat){
+		exportReports(reports, directory, file, outputFormat, null);
 	}
 	
 	/**
 	 * Exports a collection of reports using an IReportExporter
 	 * 
 	 * @param reports reports to export
-	 * @param directory output directory or file is reports.size() == 1
+	 * @param directory output directory. Only one of directory or file is used and only one of them should be supplied.
+	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 */
-	public static void exportReports(List<Report> reports, File directory, IReportExporter exporter){
-		exportReports(reports, directory, null, exporter);
+	public static void exportReports(List<Report> reports, File directory, File file, IReportExporter exporter){
+		exportReports(reports, directory, file, null, exporter);
 		
 	}
 	
