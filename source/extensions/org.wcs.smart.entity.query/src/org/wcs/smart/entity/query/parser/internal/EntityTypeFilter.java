@@ -75,6 +75,14 @@ public class EntityTypeFilter extends AttributeFilter {
 	}
 	
 	/**
+	 * 
+	 * @return the entity type key
+	 */
+	public String getEntityTypeKey(){
+		return this.entityKey;
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
 	 */
 	@Override

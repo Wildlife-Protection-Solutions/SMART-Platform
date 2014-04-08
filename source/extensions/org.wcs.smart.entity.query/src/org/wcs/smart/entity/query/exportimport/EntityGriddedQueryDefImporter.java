@@ -56,6 +56,18 @@ public class EntityGriddedQueryDefImporter extends GriddedQueryDefinitionImporte
 	protected void validateQuery(GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 
+		EntityQueryValidator validator = new EntityQueryValidator(session);
+		if (def.getValueFilter() != null){
+			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
+		}
+		
+		if (def.getRateFilter() != null){
+			warnings.addAll(validator.validate(def.getRateFilter().getFilter()));
+		}
+		
+		//process value items
+		warnings.addAll(validator.validate(def.getValuePart()));
+		
 	}
 	
 	

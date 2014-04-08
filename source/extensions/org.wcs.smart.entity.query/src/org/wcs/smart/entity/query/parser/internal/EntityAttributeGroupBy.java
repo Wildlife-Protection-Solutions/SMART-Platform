@@ -206,7 +206,7 @@ public class EntityAttributeGroupBy implements IGroupBy {
 			return items;
 		}
 		
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,ea.getDmAttribute().getKeyId());
+		Attribute att = ea.getDmAttribute();
 		if (att.getType() == AttributeType.LIST){
 			if (filterHkeys != null) {
 				for (AttributeListItem it : att.getAttributeList()) {

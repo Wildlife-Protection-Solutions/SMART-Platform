@@ -77,8 +77,8 @@ public abstract class SummaryQueryDefinitionExporter extends DefinitionQueryExpo
 				processFilter(summary.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
 			}
 			
-			processGroupBy(summary.getQueryDefinition().getRowGroupByPart(), xmlQuery,s);
-			processGroupBy(summary.getQueryDefinition().getColumnGroupByPart(), xmlQuery,s);
+			processGroupBy(summary.getQueryDefinition().getRowGroupByPart(), xmlQuery, s);
+			processGroupBy(summary.getQueryDefinition().getColumnGroupByPart(), xmlQuery, s);
 
 		}finally{
 			s.getTransaction().rollback();

@@ -136,15 +136,17 @@ public class CategoryValueItem implements IValueItem {
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
 		try{
+			DropItem di = null;
 			if (categoryHkey == null){
-				return BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+				di = BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+			}else{
+				Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+				if (category == null){
+					throw new Exception(MessageFormat.format(Messages.CategoryValueItem_categorynotfound, new Object[]{categoryHkey}));
+				}
+				category.getFullCategoryName();		//cache this
+				di = BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
 			}
-			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-			if (category == null){
-				throw new Exception(MessageFormat.format(Messages.CategoryValueItem_categorynotfound, new Object[]{categoryHkey}));
-			}
-			category.getFullCategoryName();		//cache this
-			DropItem di = BasicDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
 			di.initializeData(getDropItemInitializeData());
 			return di;
 		} catch (Exception ex) {

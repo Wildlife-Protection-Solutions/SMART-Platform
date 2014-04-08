@@ -212,8 +212,7 @@ public class AttributeGroupBy implements IGroupBy {
 	@Override
 	public List<ListItem> getItems(Session session) {
 		//get children categories
-		
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(session, attributeKey);
 		if (att == null){
 			throw new RuntimeException(MessageFormat.format(Messages.AttributeGroupBy_AttributeNotFound, new Object[]{attributeKey}));
 		}

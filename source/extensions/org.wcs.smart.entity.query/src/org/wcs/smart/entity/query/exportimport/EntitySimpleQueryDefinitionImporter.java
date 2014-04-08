@@ -25,10 +25,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.hibernate.Session;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
 import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -60,6 +62,16 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 		QueryFilter queryFilter = parser.QueryFilter();
 		is.close();
 
+		//perform validation
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			EntityQueryValidator validator = new EntityQueryValidator(session);
+			warnings.addAll(validator.validate(queryFilter.getFilter()));
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
 		return queryFilter.asString();
 	}
 

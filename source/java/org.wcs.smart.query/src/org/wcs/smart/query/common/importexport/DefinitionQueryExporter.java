@@ -90,17 +90,19 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		QueryType xmlQuery = new QueryType();
 		wpquery.setQuery(xmlQuery);
 		xmlQuery.setQueryType(query.getType().getKey());
-		if (SmartDB.getCurrentConservationArea().getDefaultLanguage() != null){
-			xmlQuery.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
-		}else{
-			xmlQuery.setLanguage(SmartDB.getCurrentLanguage().getCode());
-		}
+		
 		
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try {
 			s.saveOrUpdate(query);
 
+			if (query.getConservationArea().getDefaultLanguage() != null){
+				xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());
+			}else{
+				xmlQuery.setLanguage(SmartDB.getCurrentLanguage().getCode());
+			}
+			
 			for (org.wcs.smart.ca.Label l : query.getNames()) {
 				QueryName qn = new QueryName();
 				qn.setName(l.getValue());

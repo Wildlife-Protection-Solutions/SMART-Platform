@@ -29,6 +29,7 @@ import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
 import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.filter.QueryDefinitionValidator;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
@@ -55,7 +56,17 @@ public class ObsGriddedQueryDefImporter extends GriddedQueryDefinitionImporter{
 	@Override
 	protected void validateQuery(GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
-
+		QueryDefinitionValidator validator = new QueryDefinitionValidator(session);
+		if (def.getValueFilter() != null){
+			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
+		}
+		
+		if (def.getRateFilter() != null){
+			warnings.addAll(validator.validate(def.getRateFilter().getFilter()));
+		}
+		
+		//process value items
+		warnings.addAll(validator.validate(def.getValuePart()));
 	}
 	
 	
