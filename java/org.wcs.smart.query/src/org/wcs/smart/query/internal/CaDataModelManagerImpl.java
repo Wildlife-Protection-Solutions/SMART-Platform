@@ -212,7 +212,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 */
 	@Override
 	public Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea.uuid = :ca and hkey = :key"); //$NON-NLS-1$
+		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		q.setParameter("key", categoryKey); //$NON-NLS-1$
 		q.setCacheable(true);
