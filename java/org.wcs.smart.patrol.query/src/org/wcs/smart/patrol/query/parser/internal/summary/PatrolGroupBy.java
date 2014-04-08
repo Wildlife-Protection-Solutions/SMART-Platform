@@ -82,11 +82,6 @@ public class PatrolGroupBy implements IGroupBy {
 		}
 	}
 	
-	
-	public String[] getRawItems(){
-		return this.items;
-	}
-	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
 	 */

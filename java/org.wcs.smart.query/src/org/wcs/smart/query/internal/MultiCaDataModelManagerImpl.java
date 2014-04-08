@@ -230,6 +230,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		}
 		return null;
 	}
+
 	
 	/**
 	 * Returns the attribute associated with the main conservation area with the attribute of the given key.
@@ -291,7 +292,6 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		
 	}
 	
-	
 	/**
 	 * 
 	 * Gets all the categories at a given level that are shared across all conservation areas.
@@ -318,6 +318,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		return nodes;
 		
 	}
+
 	
 	/**
 	 * Loads an attribute list item for the given key and the

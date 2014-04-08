@@ -97,6 +97,8 @@ public class Messages extends NLS {
 	public static String EntityQueryColumnCache_jobname;
 	public static String EntityQueryColumnCache_jobname2;
 	public static String EntityQueryFilterPanel_GeneralItemsLabel;
+	public static String EntityQueryValidator_EntityAttributeNotFound;
+	public static String EntityQueryValidator_EntityTypeNotFound;
 	public static String EntitySummaryItemPanel_GeneralItemsLabel;
 	public static String EntitySummaryQueryType_Name;
 	public static String EntityTypeFilter_EntityTypeNotFound;

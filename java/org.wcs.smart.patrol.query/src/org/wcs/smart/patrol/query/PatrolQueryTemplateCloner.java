@@ -266,11 +266,11 @@ public class PatrolQueryTemplateCloner implements
 		for(IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof PatrolGroupBy && gb.getType().equals(GroupByType.BYTE)){
 				PatrolGroupBy pgb = (PatrolGroupBy)gb;
-				if (pgb.getRawItems() != null){
-					for (int i = 0; i < pgb.getRawItems().length; i ++){
-						UuidItem it = engine.getNewConservationItem(SmartUtils.decodeHex(pgb.getRawItems()[i]));
+				if (pgb.getItems() != null){
+					for (int i = 0; i < pgb.getItems().length; i ++){
+						UuidItem it = engine.getNewConservationItem(SmartUtils.decodeHex(pgb.getItems()[i]));
 						if (it != null){
-							pgb.getRawItems()[i] = SmartUtils.encodeHex(it.getUuid());
+							pgb.getItems()[i] = SmartUtils.encodeHex(it.getUuid());
 						}
 					}
 				}

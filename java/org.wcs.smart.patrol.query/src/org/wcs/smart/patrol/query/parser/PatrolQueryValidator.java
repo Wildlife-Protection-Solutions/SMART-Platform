@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.query.parser;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,13 +42,14 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.filter.QueryDefinitionValidator;
-import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
@@ -112,14 +112,15 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public List<String> validate(IGroupBy item) throws Exception{
-		super.validate(item);
+		List<String> warnings = super.validate(item);
 		
 		GroupByValidatorVisitor vv = new GroupByValidatorVisitor();
 		item.visit(vv);
 		if (vv.ex != null){
 			throw vv.ex;
 		}
-		return Collections.emptyList();
+		warnings.addAll(vv.warnings);
+		return warnings;
 	}
 	
 	
@@ -128,14 +129,14 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 	 */
 	@Override
 	public List<String> validate(IValueItem item) throws Exception{
-		super.validate(item);
+		List<String> warnings = super.validate(item);
 		
 		ValueVisitor vv = new ValueVisitor();
 		item.accept(vv);
 		if (vv.ex != null){
 			throw vv.ex;
 		}
-		return Collections.emptyList();
+		return warnings;
 	}
 	
 	
@@ -241,33 +242,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 			}
 		}
 	}
-	
-	class ValueVisitor implements IValueVisitor{
-		private Exception ex;
 		
-		@Override
-		public void visit(IValueItem item) {
-			if (ex != null) return ;
-			try{
-				if (item instanceof AttributeValueItem){
-					AttributeValueItem it = (AttributeValueItem)item;
-					validateAttribute(it.getAttributeKey());
-					if (it.getCategoryKey() != null){
-						validateCategory(it.getCategoryKey());
-					}
-					if (it.getAggregation() == null){
-						throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AggNoSupported, new Object[]{ it.getAggregationKey() }));
-					}
-					
-				}else if (item instanceof CategoryValueItem){
-					validateCategory(((CategoryValueItem) item).getCategoryHKey());
-				}
-			}catch (Exception ex){
-				this.ex = ex;
-			}
-		}
-	};
-	
 	class GroupByValidatorVisitor implements IGroupByVisitor{
 
 		private Exception ex;
@@ -386,4 +361,36 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 			}
 		}
 	}
+	
+	
+	class ValueVisitor implements IValueVisitor{
+		private Exception ex;
+		
+		@Override
+		public void visit(IValueItem item) {
+			if (ex != null) return ;
+			try{
+				if (item instanceof PatrolAttributeValueItem){
+					PatrolAttributeValueItem it = (PatrolAttributeValueItem)item;
+					validateAttribute(it.getAttributeKey());
+					if (it.getCategoryKey() != null){
+						validateCategory(it.getCategoryKey());
+					}
+					if (it.getAggregation() == null){
+						throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AggNoSupported, new Object[]{ it.getAggregationKey() }));
+					}
+					
+				}else if (item instanceof PatrolCategoryValueItem){
+					CategoryValueItem i = (CategoryValueItem)item;
+					if (i.getCategoryHKey() == null){
+						//this is okay; we assume all categories
+					}else{
+						validateCategory(((CategoryValueItem) item).getCategoryHKey());
+					}
+				}
+			}catch (Exception ex){
+				this.ex = ex;
+			}
+		}
+	};
 }

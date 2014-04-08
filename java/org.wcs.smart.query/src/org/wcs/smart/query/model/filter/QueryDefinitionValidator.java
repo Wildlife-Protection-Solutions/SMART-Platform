@@ -41,7 +41,9 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
+import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
+import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 
@@ -96,6 +98,11 @@ public class QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public List<String> validate(IValueItem item) throws Exception{
+		ValueVisitor vv = new ValueVisitor();
+		item.accept(vv);
+		if (vv.ex != null){
+			throw vv.ex;
+		}
 		return Collections.emptyList();
 	}
 	
@@ -273,6 +280,9 @@ public class QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateAttributeListItem(String key, String attributeKey) throws Exception{
+		if (key.equals(AttributeFilter.ANY_OPTION.getKey())){
+			return;
+		}
 		Object x = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, key);
 		if (x == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeListItemNotFound, new Object[]{key}));
@@ -366,4 +376,35 @@ public class QueryDefinitionValidator {
 			}
 		}
 	}
+	
+	class ValueVisitor implements IValueVisitor{
+		private Exception ex;
+		
+		@Override
+		public void visit(IValueItem item) {
+			if (ex != null) return ;
+			try{
+				if (item instanceof AttributeValueItem){
+					AttributeValueItem it = (AttributeValueItem)item;
+					validateAttribute(it.getAttributeKey());
+					if (it.getCategoryKey() != null){
+						validateCategory(it.getCategoryKey());
+					}
+					if (it.getAggregation() == null){
+						throw new Exception(MessageFormat.format(Messages.QueryDefinitionValidator_AggregationNotSupported, new Object[]{ it.getAggregationKey() }));
+					}
+					
+				}else if (item instanceof CategoryValueItem){
+					CategoryValueItem i = (CategoryValueItem)item;
+					if (i.getCategoryHKey() == null){
+						//this is okay; we assume all categories
+					}else{
+						validateCategory(((CategoryValueItem) item).getCategoryHKey());
+					}
+				}
+			}catch (Exception ex){
+				this.ex = ex;
+			}
+		}
+	};
 }

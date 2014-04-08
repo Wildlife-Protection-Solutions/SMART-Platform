@@ -263,6 +263,7 @@ public class Messages extends NLS {
 	public static String QueryDateFilterComposite_BetweenLabel2;
 	public static String QueryDateFilterComposite_DateLabel;
 	public static String QueryDateFilterComposite_InvalidDate;
+	public static String QueryDefinitionValidator_AggregationNotSupported;
 	public static String QueryDefPanel_QueryTypeNotSupported;
 	public static String QueryDefView_CloseError;
 	public static String QueryEditorUtils_BlankNameError;

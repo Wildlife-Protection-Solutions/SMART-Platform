@@ -29,6 +29,8 @@ import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
@@ -48,7 +50,27 @@ public class EntitySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	protected void validateQuery(SumQueryDefinition sumDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
-			
+		
+		EntityQueryValidator validator = new EntityQueryValidator(session);
+		
+		if (sumDef.getValueFilter() != null ){
+			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
+		}
+		if (sumDef.getRateFilter() != null){
+			warnings.addAll(validator.validate(sumDef.getRateFilter().getFilter()));
+		}
+		//process value items
+		for (IValueItem item: sumDef.getValuePart().getValueItems()){
+			warnings.addAll(validator.validate(item));
+		}
+		
+		//process group by 
+		for (IGroupBy gbpart: sumDef.getColumnGroupByPart().getGroupBys()){
+			warnings.addAll(validator.validate(gbpart));
+		}		
+		for (IGroupBy gbpart: sumDef.getRowGroupByPart().getGroupBys()){
+			warnings.addAll(validator.validate(gbpart));
+		}			
 	
 	}
 

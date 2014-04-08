@@ -169,6 +169,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 			return results.get(0);
 		}
 	}
+
 	
 	/**
 	 * Returns the attribute with the given key
@@ -212,7 +213,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	@Override
 	public Category getCategory(Session session, String categoryKey){
 		Query q = session.createQuery("From Category where conservationArea.uuid = :ca and hkey = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		q.setParameter("key", categoryKey); //$NON-NLS-1$
 		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
@@ -222,9 +223,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		}else{
 			return results.get(0);
 		}
-		
 	}
-	
 	
 	/**
 	 * Finds all attributes associated with the given category
@@ -253,7 +252,6 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * @param level
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Category> getCategories(Session session, int level){
 		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
@@ -264,6 +262,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		List<Category> cats = q.list();
 		return cats;
 	}
+
 	
 	/**
 	 * Loads an attribute list item for the given key and the

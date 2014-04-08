@@ -70,15 +70,17 @@ public class PatrolCategoryValueItem extends CategoryValueItem {
 	@Override
 	public DropItem asDropItem(Session session) throws Exception{
 		try{
+			DropItem di = null;
 			if (categoryHkey == null){
-				return PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+				di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+			}else{
+				Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+				if (category == null){
+					throw new Exception(MessageFormat.format(Messages.PatrolCategoryValueItem_CategoryNotFound, new Object[]{categoryHkey}));
+				}
+				category.getFullCategoryName();		//cache this
+				di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
 			}
-			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-			if (category == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolCategoryValueItem_CategoryNotFound, new Object[]{categoryHkey}));
-			}
-			category.getFullCategoryName();		//cache this
-			DropItem di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
 			
 			di.initializeData(new Object[]{getDropItemInitializeData(), null});
 			return di;

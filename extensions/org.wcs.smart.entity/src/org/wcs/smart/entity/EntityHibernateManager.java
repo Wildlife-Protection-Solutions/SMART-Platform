@@ -67,12 +67,13 @@ public class EntityHibernateManager {
 	 * Finds the entity attribute with the associated key.
 	 * @param entityKey entity type key
 	 * @param entityAttributeKey entity attribute key 
+	 * @param conservationArea the conservation area to search or null if current ca should be used
 	 * @param session
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	public static EntityAttribute getEntityAttribute(String entityKey,  String entityAttributeKey, Session session) throws Exception{
+	public static EntityAttribute getEntityAttribute(String entityKey, String entityAttributeKey, Session session) throws Exception{
 		if (SmartDB.isMultipleAnalysis()){
 			EntityType et = EntityTypeCcaaManager.getInstance().findType(entityKey);
 			if (et == null){
@@ -85,8 +86,8 @@ public class EntityHibernateManager {
 			}
 			return null;
 		}
-		Query q = session.createQuery("From EntityAttribute where entityType.conservationArea.uuid = :ca and entityType.keyId = :entitykey and keyId = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
+		Query q = session.createQuery("From EntityAttribute where entityType.conservationArea = :ca and entityType.keyId = :entitykey and keyId = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		q.setParameter("key", entityAttributeKey); //$NON-NLS-1$
 		q.setParameter("entitykey", entityKey); //$NON-NLS-1$
 		q.setCacheable(true);

@@ -25,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.observation.query.model.types.ObservationQueryType;
 import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
@@ -32,6 +34,7 @@ import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.filter.QueryDefinitionValidator;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.xml.model.UuidItemType;
 
@@ -60,6 +63,16 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 		QueryFilter queryFilter = parser.QueryFilter();
 		is.close();
 
+
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			QueryDefinitionValidator validator = new QueryDefinitionValidator(session);
+			warnings.addAll(validator.validate(queryFilter.getFilter()));
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
 		return queryFilter.asString();
 	}
 
