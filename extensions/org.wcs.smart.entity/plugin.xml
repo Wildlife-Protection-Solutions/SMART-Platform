@@ -433,6 +433,10 @@
             advisor="org.wcs.smart.entity.event.DmAttributeListItemDeleteAdvisor"
             class="org.wcs.smart.ca.datamodel.AttributeListItem">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.entity.event.DmAttributeTreeNodeDeleteAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
