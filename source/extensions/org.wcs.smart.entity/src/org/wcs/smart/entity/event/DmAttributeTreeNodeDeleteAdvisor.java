@@ -52,7 +52,7 @@ public class DmAttributeTreeNodeDeleteAdvisor implements IDeleteAdvisor {
 		//if an entity attribute is represented by the list item cannot delete
 		Query q = session.createQuery("FROM EntityAttributeValue v WHERE v.attributeTreeNode = :todelete"); //$NON-NLS-1$
 		q.setParameter("todelete", toDelete); //$NON-NLS-1$
-		List results = q.list();
+		List<?> results = q.list();
 		if (results.size() > 0){
 			EntityAttributeValue v1 = (EntityAttributeValue) results.get(0);
 			//attribute associated with an entity and cannot be deleted

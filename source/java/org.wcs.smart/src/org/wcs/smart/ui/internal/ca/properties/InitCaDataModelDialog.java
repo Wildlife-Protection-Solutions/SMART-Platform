@@ -140,7 +140,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		btnUseIucn = new Button(comp, SWT.RADIO);
 		btnUseIucn.setText(Messages.InitCaDataModelDialog_Op_UseIUCN);
 		btnUseIucn.addSelectionListener(validateListener);
-		btnUseIucn.setSelection(false);
+		btnUseIucn.setSelection(true);
 
 		btnBlank = new Button(comp, SWT.RADIO);
 		btnBlank.setText(Messages.InitCaDataModelDialog_Op_UseBlank);
@@ -236,6 +236,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 					validate();
 				}
 			});
+			btnClone.setSelection(false);
 
 			imp = new Composite(comp, SWT.NONE);
 			imp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
