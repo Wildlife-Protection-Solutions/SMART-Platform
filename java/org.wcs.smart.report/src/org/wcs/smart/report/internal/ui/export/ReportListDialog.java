@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
-import org.wcs.smart.report.ui.ReportContentProvider;
+import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
 
 /**
@@ -75,7 +75,7 @@ public class ReportListDialog extends TitleAreaDialog{
 		
 		reportList = new TreeViewer(composite, SWT.MULTI);
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		reportList.setContentProvider(new ReportContentProvider());
+		reportList.setContentProvider(new LazyReportContentProvider());
 		reportList.setLabelProvider(new ReportLabelProvider());
 		reportList.setInput(Messages.ReportListDialog_LoadingLabel);
 		reportList.expandToLevel(2);

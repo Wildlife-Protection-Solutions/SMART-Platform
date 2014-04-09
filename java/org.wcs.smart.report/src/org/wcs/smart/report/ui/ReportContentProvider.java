@@ -21,225 +21,178 @@
  */
 package org.wcs.smart.report.ui;
 
-import java.text.Collator;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.model.BaseWorkbenchContentProvider;
-import org.eclipse.ui.progress.DeferredTreeContentManager;
-import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
-import org.wcs.smart.util.SmartUtils;
-
 /**
- * Content provider for report tree that makes use of
- * deferred loading.
+ * A report content provide that expects everything to be loaded
+ * into memory.
  * 
- * @author egouge
- * @since 1.0.0
+ * <p>
+ *  Input for this content provided is expected to an array that
+ *  contains two lists of objects.  The objects can be Report or ReportFolder.
+ *  The first array is the shared reports, the second the user reports.  Either
+ *  can be null which means that node of the tree won't be displayed.
+ * 
+ * @author Emily
+ *
  */
-public class ReportContentProvider extends BaseWorkbenchContentProvider{
+public class ReportContentProvider implements ITreeContentProvider{
+
+	private RootReportFolder userFolder;
+	private RootReportFolder caFolder;
 	
-	private DeferredTreeContentManager manager;
-	private RootType type;
-	
-	private ConservationArea ca;
-	
-	public enum RootType{SHARED_ONLY, USER_ONLY, ALL};
+	private List<Object> userItems;
+	private List<Object> caItems;
+
+	private String loadingLabel = null;
 	
 	/**
-	 * Creates a new content provide that displays
-	 * all folders
+	 * Creates a new content provider.
+	 * 
 	 */
 	public ReportContentProvider(){
-		this(RootType.ALL);
+
 	}
 	
-	/**
-	 * Creates a new content provider.
-	 * @param ownerOnly display only owner owned folders
-	 */
-	public ReportContentProvider(RootType type){
-		this(type, SmartDB.getCurrentConservationArea());
+	@Override
+	public void dispose() {
 	}
-	
-	/**
-	 * Creates a new content provider.
-	 * @param ownerOnly display only owner owned folders
-	 */
-	public ReportContentProvider(RootType type, ConservationArea ca){
-		super();
-		this.type = type;
-		this.ca = ca;
+
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		if (newInput == null){
+			return;
+		}
+		if (newInput instanceof String){
+			loadingLabel = (String) newInput;
+			return;
+		}
+		loadingLabel = null;
+		Object[] items = (Object[])newInput;
+		if (items[0] == null){
+			caFolder = null;
+			caItems = null;
+		}else{
+			caFolder = RootReportFolder.CA_ROOT_FOLDER;
+			caItems = (List<Object>) items[0];
+		}
+		if (items[1] == null){
+			userFolder = null;
+			userItems = null;
+		}else{
+			userFolder = RootReportFolder.USER_ROOT_FOLDER;
+			userItems = (List<Object>) items[1];
+		}
 	}
-	
-	/**
-	 * @see DeferredTreeContentManager#addUpdateCompleteListener(IJobChangeListener)
-	 * @param listsner
-	 */
-	public void addUpdateCompleteListener(IJobChangeListener listsner){
-			manager.addUpdateCompleteListener(listsner);
-	}
-	/**
-	 * @see DeferredTreeContentManager#removeUpdateCompleteListener(IJobChangeListener)
-	 * @param listsner
-	 */
-	public void removeUpdateCompleteListener(IJobChangeListener listsner){
-		manager.removeUpdateCompleteListener(listsner);
-	}
-	
+
 	/**
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (ca == SmartDB.getCurrentConservationArea()){
-			if (type == RootType.USER_ONLY ){
-				return new Object[]{RootReportFolder.USER_ROOT_FOLDER};
-			}else if (type == RootType.SHARED_ONLY){
-				return new Object[]{RootReportFolder.CA_ROOT_FOLDER};
-			}else{
-				return new Object[]{
-						RootReportFolder.CA_ROOT_FOLDER,
-						RootReportFolder.USER_ROOT_FOLDER
-				};
-			}
-		}else{
-			if (type == RootType.USER_ONLY ){
-				return new Object[]{
-						RootReportFolder.createUserRootFolder(ca)
-					};
-			}else if (type == RootType.SHARED_ONLY){
-				return new Object[]{RootReportFolder.createCaRootFolder(ca)};
-			}else{
-				return new Object[]{
-						RootReportFolder.createCaRootFolder(ca),
-						RootReportFolder.createUserRootFolder(ca)
-				};
-			}
+		if (loadingLabel != null){
+			return new Object[]{loadingLabel};
 		}
+		if (caFolder != null && userFolder != null){
+			return new Object[]{caFolder, userFolder};
+		}else if (caFolder == null && userFolder != null){
+			return new Object[]{userFolder};
+		}else if (caFolder != null && userFolder == null){
+			return new Object[]{caFolder};
+		}
+		return null;
 	}
 	
-	/**
-	 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
 	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput){
-		if(viewer instanceof AbstractTreeViewer){
-			manager = new DeferredTreeContentManager((AbstractTreeViewer) viewer);
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof Report){
+			return null;
+		}else if (parentElement == caFolder || parentElement == userFolder){
+			List<Object> roots = null;
+			if (parentElement == caFolder){
+				roots = caItems;
+			}else{
+				roots = userItems;
+			}
+			List<Object> items = new ArrayList<Object>();
+			for (Object x : roots){
+				if (x instanceof Report){
+					if (((Report) x).getFolder() == null){
+						items.add(x);
+					}
+				}else if (x instanceof ReportFolder){
+					if (((ReportFolder)x).getParentFolder() == null){
+						items.add(x);
+					}
+				}
+			}
+			return items.toArray();
+		}else if (parentElement instanceof ReportFolder){
+			List<Object> kids = new ArrayList<Object>();
+			kids.addAll(((ReportFolder)parentElement).getChildren());
+			if (caItems != null){
+				for (Object x : caItems){
+					if (x instanceof Report && ((Report)x).getFolder() == parentElement){
+						kids.add(x);
+					}
+				}
+			}
+			if (userItems != null){
+				for (Object x : userItems){
+					if (x instanceof Report && ((Report)x).getFolder() == parentElement){
+						kids.add(x);
+					}
+				}
+			}
+			return kids.toArray();
 		}
-		super.inputChanged(viewer, oldInput, newInput);
+		return null;
 	}
-	
-	
-	
-	/**
-	 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#hasChildren(java.lang.Object)
-	 */
+
+	 /* (non-Javadoc)
+     * Method declared on ITreeContentProvider.
+     */
 	@Override
-	public boolean hasChildren(Object element){
+    public Object getParent(Object element) {
 		if (element instanceof Report){
+			Object parent = ((Report) element).getFolder();
+			if (parent == null){
+				if (((Report) element).getShared()){
+					return caFolder;
+				}else{
+					return userFolder;
+				}
+			}
+			return parent;
+		}else if (element instanceof ReportFolder){
+			if (((ReportFolder) element).getParentFolder() == null){
+				if (((ReportFolder)element).getEmployee() == null){
+					return caFolder;
+				}else{
+					return userFolder;
+				}
+			}else{
+				return ((ReportFolder) element).getParentFolder();
+			}
+		}
+		return null;
+    }
+
+	@Override
+	public boolean hasChildren(Object element) {
+		if (element instanceof Report ){
 			return false;
 		}
-		if (manager != null){
-			if (manager.isDeferredAdapter(element)){
-				return manager.mayHaveChildren(element);
-			}
-		}
-		return super.hasChildren(element);
-	}
-	
-	/**
-	 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#getChildren(java.lang.Object)
-	 */
-	@Override
-	public Object[] getChildren(Object parent){
-		if (manager != null){
-			Object[] kids = manager.getChildren(parent);
-			if (kids != null){
-				return kids;
-			}
-		}
-		Object[] kids = super.getChildren(parent);
-		return kids;
-	}
-	
-	public static void sortItems(List<Object> items){
-		Collections.sort(items, new Comparator<Object>(){
-
-			@Override
-			public int compare(Object a, Object b) {
-				if (a instanceof ReportFolder && !(b instanceof ReportFolder)){
-					return -1;
-				}else if (a instanceof ReportFolder && b instanceof ReportFolder){
-					return Collator.getInstance().compare(((ReportFolder)a).getName(), ((ReportFolder)b).getName());
-				}else if (b instanceof ReportFolder && !(a instanceof ReportFolder)){
-					return 1;
-				}else if (a instanceof Report && b instanceof Report){
-					return Collator.getInstance().compare(((Report)a).getName(), ((Report)b).getName());
-				}
-				return Collator.getInstance().compare(a.toString(),b.toString());
-		}});
+		return true;
 	}
 	
 	
-	public static void assignNames(List<?> items, Session s){
-		Language match = null;
-		
-		for (Object x : items){
-			ConservationArea ca = null;
-			if (x instanceof ReportFolder){
-				ReportFolder f = (ReportFolder)x;
-				if (f.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-					continue;
-				}
-				ca = f.getConservationArea();
-			}else if (x instanceof Report){
-				Report r = (Report)x;
-				r.getConservationArea().getName();
-				if (r.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-					continue;
-				}
-				ca = r.getConservationArea();
-			}
-			
-			NamedItem it = (NamedItem)x;
-			
-			if (match == null){
-				match = SmartUtils.findLanguageMatch(ca.getLanguages());
-				if (match == null){
-					match = ca.getDefaultLanguage();
-				}
-			}
-			it.setName(ReportContentProvider.findLabel(match, it.getUuid(), ca, s));	
-		}
-	}
-	private static String findLabel(Language match, byte[] item, ConservationArea currentCa, Session session){
-		org.wcs.smart.ca.Label.LabelItemPK lid = new org.wcs.smart.ca.Label.LabelItemPK();
-		lid.setElement(new UuidItem(item));
-		lid.setLanguage(match);
-		
-		org.wcs.smart.ca.Label ll = (org.wcs.smart.ca.Label) session.load(org.wcs.smart.ca.Label.class, lid);
-		if (ll == null){
-			lid.setLanguage(currentCa.getDefaultLanguage());
-			ll = (org.wcs.smart.ca.Label) session.load(org.wcs.smart.ca.Label.class, lid);
-			if (ll != null){
-				return ll.getValue();
-			}
-		}else{
-			return ll.getValue();
-		}
-		return ""; //$NON-NLS-1$
-	}
+	
+	
 }

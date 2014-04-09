@@ -32,7 +32,6 @@ import org.eclipse.ui.progress.IElementCollector;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
@@ -90,18 +89,9 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 			return folder.getParentFolder();
 		}else{
 			if (folder.getEmployee() == null){
-				if (folder.getConservationArea() == SmartDB.getCurrentConservationArea()){
-					return RootReportFolder.CA_ROOT_FOLDER;
-				}else{
-					return RootReportFolder.createCaRootFolder(folder.getConservationArea());
-				}
+				return RootReportFolder.CA_ROOT_FOLDER;
 			}else{
-				if (folder.getConservationArea() == SmartDB.getCurrentConservationArea()){
-					return RootReportFolder.USER_ROOT_FOLDER;
-				}else{
-					return RootReportFolder.createUserRootFolder(folder.getConservationArea());
-				}
-				
+				return RootReportFolder.USER_ROOT_FOLDER;
 			}
 		}
 	}
@@ -129,13 +119,11 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 			List<?> kidQueries = s.createCriteria(Report.class)
 					.add(Restrictions.eq("folder", parent)).list(); //$NON-NLS-1$
 			kids.addAll(kidQueries);
-			
-			ReportContentProvider.assignNames(kids, s);
-			ReportContentProvider.sortItems(kids);
-			
-			
+
+			LazyReportContentProvider.sortItems(kids);
 			collector.add(kids.toArray(), monitor);
 			s.getTransaction().commit();
+			
 		}finally{
 			s.close();
 		}
