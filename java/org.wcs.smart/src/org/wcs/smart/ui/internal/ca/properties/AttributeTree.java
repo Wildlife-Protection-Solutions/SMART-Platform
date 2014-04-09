@@ -379,26 +379,34 @@ public class AttributeTree {
 	
 	
 	private void deleteNodes() {
-		StringBuilder itemsToDelete = new StringBuilder();
+		
 		final ArrayList<AttributeTreeNode> toDelete = new ArrayList<AttributeTreeNode>();
 		Language currentLang = ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage();
 		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof AttributeTreeNode){
-				itemsToDelete.append(((AttributeTreeNode) x).findName(currentLang) + ", "); //$NON-NLS-1$
-				toDelete.add(0, (AttributeTreeNode)x);
+				List<AttributeTreeNode> toProcess = new ArrayList<AttributeTreeNode>();
+				toProcess.add((AttributeTreeNode)x);
+				while(toProcess.size() > 0){
+					AttributeTreeNode item = toProcess.remove(0);
+					toDelete.remove(item);
+					toDelete.add(0, item);
+					if (item.getChildren() != null){
+						toProcess.addAll(item.getChildren());
+					}
+				}
 			}
 		}
+		
 		if(toDelete.size() == 0){
 			return;
 		}
+		
 		String deleteQuestion = null;
-		if (toDelete.size() > 2){
-			deleteQuestion = MessageFormat.format(Messages.AttributeTree_DeleteMultipleMsg,new Object[]{Integer.valueOf(toDelete.size())}); 
+		if (toDelete.size()  > 1){
+			deleteQuestion = MessageFormat.format(Messages.AttributeTree_ConfirmDelete_DialogMessage1,new Object[]{Integer.valueOf(toDelete.size())});
 		}else{
-			itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
-			itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
-			deleteQuestion= MessageFormat.format(Messages.AttributeTree_ConfirmDelete_DialogMessage, new Object[]{ itemsToDelete.toString() });
+			deleteQuestion= MessageFormat.format(Messages.AttributeTree_ConfirmDelete_DialogMessage2, new Object[]{ toDelete.get(0).findName(currentLang) });
 		}
 				
 				
