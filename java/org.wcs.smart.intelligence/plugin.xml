@@ -362,7 +362,8 @@
          <command
                commandId="org.wcs.smart.intelligence.NewIntelligence"
                label="%command.create.label"
-               style="push">
+               style="push"
+               tooltip="%command.create.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <and>
