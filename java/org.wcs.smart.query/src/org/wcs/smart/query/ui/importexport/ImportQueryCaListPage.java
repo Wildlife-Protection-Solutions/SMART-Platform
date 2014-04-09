@@ -31,11 +31,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ICheckStateProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -216,19 +216,22 @@ public class ImportQueryCaListPage extends WizardPage {
 		chQueries.setContentProvider(new QueryListContentProvider(true));
 		chQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		
 		chQueries.setCheckStateProvider(new ICheckStateProvider() {
-			
-			@Override
 			public boolean isGrayed(Object element) {
-				return element instanceof QueryFolder;
+				return false;
 			}
 			
 			@Override
 			public boolean isChecked(Object element) {
-				return element instanceof QueryFolder;
+				Object parent = ((QueryListContentProvider)chQueries.getContentProvider()).getParent(element);
+				if (parent == null){
+					return false;
+				}else{
+					return chQueries.getChecked(parent);
+				}
 			}
 		});
+		
 		chQueries.getTree().addKeyListener(new KeyAdapter() {
 			
 			@Override
@@ -250,9 +253,57 @@ public class ImportQueryCaListPage extends WizardPage {
 				
 			}
 		});
-		chQueries.addSelectionChangedListener(new ISelectionChangedListener() {
+
+		
+		chQueries.addCheckStateListener(new ICheckStateListener() {
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				if (event.getElement() instanceof QueryFolder){
+					boolean newState = event.getChecked();
+					
+					//check or uncheck all sub folder
+					QueryFolder qf = (QueryFolder) event.getElement();
+					List<Object> objects = new ArrayList<Object>();
+					objects.add(qf);
+					while(objects.size() > 0){
+						Object o = objects.remove(0);
+						chQueries.setChecked(o, newState);
+						if (o instanceof QueryFolder){
+							Object[] kids = ((QueryListContentProvider)chQueries.getContentProvider()).getChildren(o);
+							for (Object kid : kids){
+								objects.add(kid);
+							}
+						}
+					}	
+					chQueries.setGrayed(event.getElement(), false);
+				}
+				//if checked then we want to check all parent elements
+				if (event.getChecked()){
+					QueryFolder parent = (QueryFolder) ((QueryListContentProvider)chQueries.getContentProvider()).getParent(event.getElement());
+					while(parent != null){
+						chQueries.setGrayChecked(parent, true);
+						parent = (QueryFolder) ((QueryListContentProvider)chQueries.getContentProvider()).getParent(parent);
+					}
+				}else{
+					//we want de-select parent if appropriate 
+					QueryFolder parent = (QueryFolder) ((QueryListContentProvider)chQueries.getContentProvider()).getParent(event.getElement());
+					while(parent != null){
+						//if any of the children are checked then
+						//we need to unselect 
+						boolean checked = false;
+						Object[] kids = ((QueryListContentProvider)chQueries.getContentProvider()).getChildren(parent);
+						for (Object k : kids){
+							if (chQueries.getChecked(k)){
+								checked = true;
+								break;
+							}
+						}
+						chQueries.setGrayChecked(parent, checked);
+						
+						parent = (QueryFolder) ((QueryListContentProvider)chQueries.getContentProvider()).getParent(parent);
+					}
+				}
+				
 				updateSelection();
 			}
 		});
@@ -268,6 +319,7 @@ public class ImportQueryCaListPage extends WizardPage {
 		for (Object x : chQueries.getCheckedElements()){
 			if (x instanceof QueryEditorInput){
 				setPageComplete(true);
+				break;
 			}
 		}
 		getContainer().updateButtons();
