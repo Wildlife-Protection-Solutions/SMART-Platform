@@ -2,10 +2,21 @@ package org.wcs.smart.upgrade;
 
 import java.io.InputStream;
 import java.sql.Connection;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.derby.tools.ij;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.upgrade.v200.Upgrader112To200;
@@ -20,33 +31,68 @@ import org.wcs.smart.upgrade.v300.Upgrader200To300;
  */
 public class UpgradeEngine {
 
+	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrage"; //$NON-NLS-1$
+
 	private enum UpgradeFromVersion {
 		V112,
-		V200
+		V200,
+		V300
 	}
 	
 	public static void upgrageSystem(IProgressMonitor monitor) {
 		Session s = HibernateManager.openSession();
 		try {
-			String version = getVersion(s);
-			UpgradeFromVersion fromVersion = null;
-			if ("2.0.0".equals(version)) { //$NON-NLS-1$
-				fromVersion = UpgradeFromVersion.V200;
-			} else if ("1.1.2".equals(version)) { //$NON-NLS-1$
-				fromVersion = UpgradeFromVersion.V112;
+			final String version = getSmartVersion(s);
+			final boolean[] isOk = {false};
+			if (!SmartPlugIn.PLUGIN_VERSION.equals(version)) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						isOk[0] = MessageDialog.openQuestion(
+								Display.getDefault().getActiveShell(),
+								"Backup upgrade",
+								MessageFormat.format("Provided backup file contains SMART version \"{0}\" while current application is version \"{1}\". Current version is not compatiple with old database.\n\n Do you want to upgrade backup data to match the latest version?", version, SmartPlugIn.PLUGIN_VERSION));
+					}
+				});
+				if (!isOk[0]) {
+					return;
+				}
+				
+				UpgradeFromVersion fromVersion = null;
+				if ("3.0.0".equals(version)) { //$NON-NLS-1$
+					fromVersion = UpgradeFromVersion.V300;
+				} else if ("2.0.0".equals(version)) { //$NON-NLS-1$
+					fromVersion = UpgradeFromVersion.V200;
+				} else if ("1.1.2".equals(version)) { //$NON-NLS-1$
+					fromVersion = UpgradeFromVersion.V112;
+				}
+				
+				if (fromVersion == null) {
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openError(
+									Display.getDefault().getActiveShell(),
+									"Backup upgrade error",
+									MessageFormat.format("Unable to perform upgrade from version \"{0}\".", version));
+						}
+					});
+					return;
+				}
+				
+				switch (fromVersion) {
+				case V112:
+					Upgrader112To200.upgrade(s, monitor);
+				case V200:
+					Upgrader200To300.upgrade(s, monitor);
+				default:
+					break;
+				}
 			}
 			
-			if (fromVersion == null){
-				return; //TODO: need some message
-			}
-			
-			switch (fromVersion) {
-			case V112:
-				Upgrader112To200.upgrade(s, monitor);
-			case V200:
-				Upgrader200To300.upgrade(s, monitor);
-			default:
-				break;
+			List<IDatabaseUpgrader> extensions = getExtensions();
+			for (IDatabaseUpgrader upgrader : extensions) {
+				upgrader.upgrade(s, monitor);
 			}
 			
 		} finally {
@@ -54,12 +100,32 @@ public class UpgradeEngine {
 		}
 	}
 
-	public static String getVersion(Session s) {
+	public static String getSmartVersion(Session s) {
+		Map<String, String> versions = getVersions(s);
+		if (versions != null) {
+			return versions.get(SmartPlugIn.PLUGIN_ID);
+		}
 		//NOTE: before 3.0.0 db-version table contained only single column with one value
 		String version = (String) s.createSQLQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL).uniqueResult(); //$NON-NLS-1$
 		return version;
 	}
 
+	public static Map<String, String> getVersions(Session s) {
+		Map<String, String> versions = new HashMap<String, String>();
+		try {
+			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			for (Object x : tmpversions){
+				String pluginid = (String) ((Object[])x)[0];
+				String version = (String) ((Object[])x)[1];
+				versions.put(pluginid, version);
+			}
+		} catch (Exception e) {
+			//most likely it is because of old version which doesn't contain pligin_id column
+			return null;
+		}
+		return versions;
+	}
+	
 	/**
 	 * Runs an file containing a set of sql commands.  
 	 * Note: input stream is closed when complete 
@@ -74,5 +140,22 @@ public class UpgradeEngine {
 			in.close();
 		}
 	}
-	
+
+	/**
+	 * @return list of {@link IDatabaseUpgrader} extension points
+	 */
+	private static List<IDatabaseUpgrader> getExtensions() {
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return items;
+	}
+
 }

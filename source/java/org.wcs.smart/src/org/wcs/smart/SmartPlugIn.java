@@ -58,6 +58,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart"; //$NON-NLS-1$
 
+	// The plug-in ID
+	public static final String PLUGIN_VERSION = "3.0.0"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static SmartPlugIn plugin;
 	
