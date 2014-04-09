@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
@@ -49,7 +50,8 @@ public class QueryListContentProvider implements ITreeContentProvider{
 	public static final int FOLDER_KEY = 1;
 	public static final int QUERY_KEY = 2;
 	
-	private List<QueryFolder> folders = null;
+	private List<QueryFolder> rootFolders = null;
+	private HashMap<Integer, QueryFolder> folders = null;
 	private HashMap<Integer, List<QueryEditorInput>> queries = null;
 	
 	private boolean includeQueries = false;
@@ -70,14 +72,15 @@ public class QueryListContentProvider implements ITreeContentProvider{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		folders = new HashMap<Integer, QueryFolder>();
 		if (newInput == null || !(newInput instanceof HashMap)){
-			folders = null;
+			rootFolders = null;
 			queries = null;
 			return;
 		}
 		if (newInput instanceof HashMap){
 			HashMap<Integer, Object> data = (HashMap<Integer, Object>)newInput;
-			folders = (List<QueryFolder>) data.get(FOLDER_KEY);
+			rootFolders = (List<QueryFolder>) data.get(FOLDER_KEY);
 			queries = (HashMap<Integer, List<QueryEditorInput>>) data.get(QUERY_KEY);
 		}
 	
@@ -88,10 +91,10 @@ public class QueryListContentProvider implements ITreeContentProvider{
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (folders == null){
+		if (rootFolders == null){
 			return new String[]{Messages.QueryListViewContentProvider_LoadingLabel};
 		}
-		return folders.toArray();
+		return rootFolders.toArray();
 	}
 
 	/* (non-Javadoc)
@@ -103,7 +106,10 @@ public class QueryListContentProvider implements ITreeContentProvider{
 			QueryFolder folder = (QueryFolder)parentElement;
 			List<Object> children = new ArrayList<Object>();
 			if (folder.getChildren() != null){
-				children.addAll(folder.getChildren());
+				for (QueryFolder kid: folder.getChildren()){
+					children.add(kid);
+					folders.put(Arrays.hashCode(kid.getUuid()), kid);
+				}
 			}
 			if (includeQueries){
 				List<QueryEditorInput> qs = queries.get( Arrays.hashCode(folder.getUuid()) );
@@ -136,21 +142,42 @@ public class QueryListContentProvider implements ITreeContentProvider{
 	 */
 	@Override
 	public Object getParent(Object element) {
+		
 		if (element instanceof QueryEditorInput && queries != null){
+			QueryFolder parent = null;
 			for (Iterator<Entry<Integer, List<QueryEditorInput>>> iterator = queries.entrySet().iterator(); iterator.hasNext();) {
 				Entry<Integer, List<QueryEditorInput>> type = (Entry<Integer, List<QueryEditorInput>>) iterator.next();
 				if (type.getValue().contains(element)){
-					for (QueryFolder folder : folders){
-						if ( Arrays.hashCode(folder.getUuid()) ==type.getKey()){
-							return folder;
+					parent = folders.get(type.getKey());
+					if (parent == null){
+						for (QueryFolder f : rootFolders){
+							if (Arrays.hashCode(f.getUuid()) == type.getKey()){
+								return f;
+							}
 						}
+					}else{
+						return parent;
 					}
 				}
-				
 			}
 			return null;
 		}else if (element instanceof QueryFolder){
-			return ((QueryFolder) element).getParentFolder();
+			if (((QueryFolder) element).isRootFolder()){
+				return null;
+			}
+			QueryFolder parent = ((QueryFolder) element).getParentFolder();
+			if (parent == null){
+				for (QueryFolder f : rootFolders){
+					if (f.isRootFolder()){
+						if (((QueryFolder) element).getEmployee() == null && Arrays.equals(f.getUuid(), IQueryHibernateManager.CA_QUERY_KEY)){
+							return f;
+						}else if (((QueryFolder) element).getEmployee() != null && Arrays.equals(f.getUuid(), IQueryHibernateManager.USER_QUERY_KEY)){
+							return f;
+						}
+					}
+				}
+			}
+			return parent;
 		}
 		return null;
 	}
