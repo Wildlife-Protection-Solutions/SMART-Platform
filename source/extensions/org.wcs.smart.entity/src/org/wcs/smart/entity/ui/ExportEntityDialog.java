@@ -57,6 +57,7 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 
 	private ICsvExportDialogConfig config;
 	private Button chIncludeAll;
+	
 	private boolean activeOnly = true;
 	
 	public static final String EXPORT_ENTITIES_DIRKEY = "org.wcs.smart.export.entities.directory"; //$NON-NLS-1$

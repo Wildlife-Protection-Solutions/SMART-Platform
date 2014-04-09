@@ -378,18 +378,10 @@
             class="org.wcs.smart.entity.ui.ExportEntityTypeHandler"
             commandId="org.wcs.smart.entitytype.export">
          <activeWhen>
-            <and>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-               <with
-                     variable="activeEditorId ">
-                  <equals
-                        value="org.wcs.smart.entity.editor.entitytype">
-                  </equals>
-               </with>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
       <handler

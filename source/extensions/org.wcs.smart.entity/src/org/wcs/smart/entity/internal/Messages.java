@@ -236,7 +236,6 @@ public class Messages extends NLS {
 	public static String ExportEntityDialog_ExportDialogTitle;
 	public static String ExportEntityDialog_FileExists;
 	public static String ExportEntityDialog_IncludeInactive;
-	public static String ExportEntityTypeHandler_AllFiles;
 	public static String ExportEntityTypeHandler_BrowseLabel;
 	public static String ExportEntityTypeHandler_DialogMessage;
 	public static String ExportEntityTypeHandler_DialogTitle;
@@ -245,11 +244,17 @@ public class Messages extends NLS {
 	public static String ExportEntityTypeHandler_DirectoryNotExistant;
 	public static String ExportEntityTypeHandler_ExportComplete;
 	public static String ExportEntityTypeHandler_ExportError;
+	public static String ExportEntityTypeHandler_ExportLabel;
 	public static String ExportEntityTypeHandler_ExportProgress;
-	public static String ExportEntityTypeHandler_FileExists;
 	public static String ExportEntityTypeHandler_FileLabel;
+	public static String ExportEntityTypeHandler_InvalidDirectory;
+	public static String ExportEntityTypeHandler_LoadingLabel;
+	public static String ExportEntityTypeHandler_OutputDirectory;
+	public static String ExportEntityTypeHandler_OverwriteMsg;
+	public static String ExportEntityTypeHandler_OverwriteOption;
+	public static String ExportEntityTypeHandler_ProgressLabel;
+	public static String ExportEntityTypeHandler_TypesLabel;
 	public static String ExportEntityTypeHandler_WarningDialogTitle;
-	public static String ExportEntityTypeHandler_XmlLabel;
 	public static String FileWizardPage_AllFiles;
 	public static String FileWizardPage_BrowseLabel;
 	public static String FileWizardPage_CsvFile;

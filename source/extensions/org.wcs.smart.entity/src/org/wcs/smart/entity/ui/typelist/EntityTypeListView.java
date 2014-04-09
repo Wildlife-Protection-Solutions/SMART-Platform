@@ -33,11 +33,9 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -226,25 +224,7 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 		Table list = entityListViewer.getTable();
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		list.setBounds(0, 0, 88, 68);
-		
-		entityListViewer.setLabelProvider(new LabelProvider(){
-			
-			@Override
-			public Image getImage(Object element){
-				if (element instanceof EntityTypeEditorInput){
-					EntityTypeEditorInput p = (EntityTypeEditorInput)element;
-					return p.getImageDescriptor().createImage();			
-				}
-				return null;
-			}
-			@Override
-			public String getText(Object element) {
-				if (element instanceof EntityTypeEditorInput){
-					return ((EntityTypeEditorInput)element).getName();
-				}
-				return super.getText(element);
-			}
-		});
+		entityListViewer.setLabelProvider(new EntityTypeLabelProvider());
 		entityListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		entityListViewer.setInput(loadingInput);
 		entityListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
