@@ -133,8 +133,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 								root.getConservationArea())).list();
 				kids.addAll(kidQueries);
 			}
-			ReportContentProvider.assignNames(kids, s);
-			ReportContentProvider.sortItems(kids);
+			LazyReportContentProvider.sortItems(kids);
 			collector.add(kids.toArray(), monitor);
 			s.getTransaction().commit();
 		}finally{

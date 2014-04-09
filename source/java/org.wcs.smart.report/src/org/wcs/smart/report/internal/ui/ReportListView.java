@@ -58,7 +58,7 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
-import org.wcs.smart.report.ui.ReportContentProvider;
+import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
 
 /**
@@ -190,12 +190,12 @@ public class ReportListView extends ViewPart {
 						IJobChangeListener listener = new JobChangeAdapter() {
 							@Override
 							public void done(IJobChangeEvent event) {
-								((ReportContentProvider)reportList.getContentProvider()).removeUpdateCompleteListener(this);
+								((LazyReportContentProvider)reportList.getContentProvider()).removeUpdateCompleteListener(this);
 								editElement(o);
 								
 							}
 						};
-						((ReportContentProvider)reportList.getContentProvider()).addUpdateCompleteListener(listener);
+						((LazyReportContentProvider)reportList.getContentProvider()).addUpdateCompleteListener(listener);
 					}
 				}
 			});
@@ -222,7 +222,7 @@ public class ReportListView extends ViewPart {
 		
 		reportList = new TreeViewer(main, SWT.MULTI);
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		reportList.setContentProvider(new ReportContentProvider());
+		reportList.setContentProvider(new LazyReportContentProvider());
 		reportList.setLabelProvider(new ReportLabelProvider());
 		reportList.setInput(Messages.ReportListView_LoadingLabel);
 		

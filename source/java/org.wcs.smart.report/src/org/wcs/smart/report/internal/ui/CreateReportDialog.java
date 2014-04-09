@@ -45,8 +45,8 @@ import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
-import org.wcs.smart.report.ui.ReportContentProvider;
-import org.wcs.smart.report.ui.ReportContentProvider.RootType;
+import org.wcs.smart.report.ui.LazyReportContentProvider;
+import org.wcs.smart.report.ui.LazyReportContentProvider.RootType;
 import org.wcs.smart.report.ui.ReportLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -164,7 +164,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 		reportList.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		reportList.setContentProvider(new ReportContentProvider(
+		reportList.setContentProvider(new LazyReportContentProvider(
 				(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN) ? RootType.ALL : RootType.USER_ONLY));
 		reportList.setLabelProvider(new ReportLabelProvider());
 		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);

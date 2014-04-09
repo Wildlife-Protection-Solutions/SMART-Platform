@@ -47,14 +47,6 @@ public class RootReportFolder implements IAdaptable{
 	private Boolean isShared = false;
 	private ConservationArea ca;
 	
-	public static RootReportFolder createCaRootFolder(ConservationArea ca){
-		return new RootReportFolder(Messages.RootReportFolder_CaRootReportFolderName, true, ca);
-	}
-	
-	public static RootReportFolder createUserRootFolder(ConservationArea ca){
-		return new RootReportFolder(Messages.RootReportFolder_UserRootReportFolderName, false, ca);
-	}
-	
 	/**
 	 * Creates a new root folder
 	 * @param name name
