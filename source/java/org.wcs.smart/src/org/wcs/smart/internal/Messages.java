@@ -133,7 +133,8 @@ public class Messages extends NLS {
 	public static String AttributeItemDialog_Dialog_Message1;
 	public static String AttributeItemDialog_Dialog_Title;
 	public static String AttributeTree_AddButton_Tooltip;
-	public static String AttributeTree_ConfirmDelete_DialogMessage;
+	public static String AttributeTree_ConfirmDelete_DialogMessage1;
+	public static String AttributeTree_ConfirmDelete_DialogMessage2;
 	public static String AttributeTree_ConfirmDelete_DialogTitle;
 	public static String AttributeTree_Delete_Tooltip;
 	public static String AttributeTree_DeleteMultipleMsg;
