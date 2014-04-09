@@ -120,6 +120,12 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 					.add(Restrictions.eq("folder", parent)).list(); //$NON-NLS-1$
 			kids.addAll(kidQueries);
 
+			//ensure ca is loaded for report items
+			for (Object  x : kids){
+				if (x instanceof Report){
+					((Report) x).getConservationArea().getId();
+				}
+			}
 			LazyReportContentProvider.sortItems(kids);
 			collector.add(kids.toArray(), monitor);
 			s.getTransaction().commit();

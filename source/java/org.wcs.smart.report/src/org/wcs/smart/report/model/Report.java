@@ -87,6 +87,7 @@ public class Report extends NamedItem {
 	/**
 	 * @return the conservationArea
 	 */
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
