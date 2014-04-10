@@ -50,7 +50,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
-		Preferences node = DefaultScope.INSTANCE.getNode("org.wcs.smart.p2"); //$NON-NLS-1$
+		Preferences node = DefaultScope.INSTANCE.getNode(Activator.PLUGIN_ID); //$NON-NLS-1$
 		// default values
 		node.putBoolean(PreferenceConstants.PREF_SHOW_LATEST_VERSION, true);
 		node.put(PreferenceConstants.PREF_OPEN_WIZARD_ON_ERROR_PLAN, MessageDialogWithToggle.PROMPT);
