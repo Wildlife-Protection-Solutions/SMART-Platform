@@ -23,11 +23,12 @@ package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
-import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.SmartUtils;
@@ -41,8 +42,10 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @author egouge
  * @since 1.0.0
  */
-public class CsvSummaryExporter implements IQueryExporter {
+public class CsvSummaryExporter implements ICsvQueryExporter {
 
+	private char delimiter = DEFAULT_DELIMITER;
+	
 	/**
 	 * 
 	 */
@@ -73,15 +76,21 @@ public class CsvSummaryExporter implements IQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File outputFile, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, File outputFile, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		SummaryQuery sumQuery = (SummaryQuery)query;
 		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults(monitor);
 		if (results == null){
 			throw new Exception(Messages.CsvSummaryExporter_QueryNotRun);
 		}
 		
+		if (parameters.get(DELIMITER_KEY) != null){
+			try{
+				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
+			}catch(Exception ex){}
+		}
+		
 		//column headers
-		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), ',', '"',SmartUtils.LINE_SEPARATOR);
+		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), delimiter, '"',SmartUtils.LINE_SEPARATOR);
 		for (int i = 0; i < results.getColumnHeaders().size(); i ++){
 			String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
 		

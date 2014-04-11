@@ -86,14 +86,14 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 	 * @throws Exception if there are any issues with the data in the csv file
 	 */
 	@Override
-	public boolean importCsvFile(File file, boolean skipHeader, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean importCsvFile(File file, char delimiter, boolean skipHeader, IProgressMonitor monitor, Session session) throws Exception {
 		warnings = new ArrayList<String>();
 		
 		if (!file.exists()){
 			throw new IOException(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist + file.toString() );
 		}
 		
-		CSVReader reader = new CSVReader(new FileReader(file));
+		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
 		
 		int line = 1;
 		if (skipHeader){

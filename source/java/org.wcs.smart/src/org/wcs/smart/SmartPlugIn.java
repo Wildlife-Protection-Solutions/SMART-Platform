@@ -65,6 +65,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	private static SmartPlugIn plugin;
 	
 	/**
+	 * dialog setting key for csv file delimiter
+	 */
+	public static final String DEFAULT_DELIMITER_KEY = "CSV_FILE_DELIMITER"; //$NON-NLS-1$
+	
+	/**
 	 * Image descriptor key for smart employee
 	 */
 	public static final String SMART_EMPLOYEE_ICON = "org.wsc.smart.SMART_EMPLOYEE_ICON"; //$NON-NLS-1$

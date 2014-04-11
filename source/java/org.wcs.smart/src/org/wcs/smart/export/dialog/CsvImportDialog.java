@@ -51,8 +51,8 @@ public class CsvImportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
-		return config.getImporter().importCsvFile(file, headers, monitor, session);
+	protected boolean performAction(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+		return config.getImporter().importCsvFile(file, delimiter, headers, monitor, session);
 	}
 	
 	@Override

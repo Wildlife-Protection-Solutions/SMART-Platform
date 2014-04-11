@@ -84,12 +84,12 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 	}
 	
 	@Override
-	public boolean importCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean importCsvFile(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		if (!file.exists()){
 			throw new IOException(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist + file.toString() );
 		}
 
-		CSVReader reader = new CSVReader(new FileReader(file));
+		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
 		
 		//reading the first line with language codes
 		String[] row = reader.readNext();

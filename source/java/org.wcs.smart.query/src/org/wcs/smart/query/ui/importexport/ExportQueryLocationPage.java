@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.importexport;
 
 import java.io.File;
+import java.util.HashMap;
 
 import net.refractions.udig.catalog.URLUtils;
 
@@ -39,6 +40,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.export.dialog.DelimiterCombo;
+import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 
@@ -52,6 +55,8 @@ public class ExportQueryLocationPage extends WizardPage {
 
 	private Text txtFile = null;
 
+	private Label lblDelimiter;
+	private DelimiterCombo cmbDelimiter;
 	
 	/**
 	 * Creates a new query wizard page.
@@ -83,20 +88,26 @@ public class ExportQueryLocationPage extends WizardPage {
 			initFile += exporter.getDefaultExtension();
 		}
 		txtFile.setText( initFile );
-		setPageComplete(false);
 		
+		
+		boolean isDelimiter =  ((ExportQueryWizard)getWizard()).getQueryExporter() instanceof ICsvQueryExporter;
+		lblDelimiter.setVisible(isDelimiter);
+		cmbDelimiter.getCombo().setVisible(isDelimiter);
+		
+		setPageComplete(false);
 	}
+	
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
+		main.setLayout(new GridLayout(3, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ExportQueryLocationPage_FileLabel);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+//		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -135,6 +146,14 @@ public class ExportQueryLocationPage extends WizardPage {
 				}
 			}
 		});
+		
+		lblDelimiter = new Label(main, SWT.NONE);
+		lblDelimiter.setText(Messages.ExportQueryLocationPage_delimiterLabel);
+		lblDelimiter.setToolTipText(Messages.ExportQueryLocationPage_delimiterTooltip);
+		
+		cmbDelimiter = new DelimiterCombo(main,  SWT.DROP_DOWN);
+		
+		
 		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
 		setPageComplete(false);
@@ -148,8 +167,19 @@ public class ExportQueryLocationPage extends WizardPage {
 		return new File(txtFile.getText());
 	}
 	
+	public HashMap<String, Object> getOptions() throws Exception{
+		if (cmbDelimiter.getCombo().isVisible()){
+			HashMap<String, Object> ops = new HashMap<String, Object>();
+			ops.put(ICsvQueryExporter.DELIMITER_KEY, cmbDelimiter.getDelimiter());
+			return ops;
+		}else{
+			return null;
+		}
+	}
 	 public IWizardPage getNextPage() {
 		 return null;
 	 }
+	 
+	 
 	
 }

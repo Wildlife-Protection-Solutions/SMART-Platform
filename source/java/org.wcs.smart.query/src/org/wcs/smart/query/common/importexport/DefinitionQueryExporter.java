@@ -25,6 +25,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -84,8 +85,8 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(org.wcs.smart.query.model.Query query, File file,
-			IProgressMonitor monitor) throws Exception {
+	public void export(org.wcs.smart.query.model.Query query, File file, 
+			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		Query wpquery = new Query();
 		QueryType xmlQuery = new QueryType();
 		wpquery.setQuery(xmlQuery);

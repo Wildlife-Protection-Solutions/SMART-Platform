@@ -54,6 +54,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
+	private static final String LAST_DIR_KEY = "ABSTRACT_CSV_LAST_DIR_KEY"; //$NON-NLS-1$
+	
 	private ICsvDialogConfig config;
 	protected CsvFileComposite csvComposite;
 	
@@ -97,6 +99,13 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 				}
 			});
 		}
+		
+		String initLocation = SmartPlugIn.getDefault().getDialogSettings().get(LAST_DIR_KEY);
+		if (initLocation == null){
+			initLocation = System.getProperty("user.home"); //$NON-NLS-1$
+		}
+		csvComposite.setFileText(initLocation + File.separator + config.getDefaultFileName());
+		
 		return csvComposite;
 	}
 	
@@ -116,17 +125,26 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 	@Override
 	protected void buttonPressed(int buttonId) {
-		if (IDialogConstants.OK_ID == buttonId) {
-			String fileName = csvComposite.getFileText();
-			if (validateFilename(fileName)){
-				if (process(fileName)){
-					setReturnCode(OK);
-					close();
+		try{
+			if (IDialogConstants.OK_ID == buttonId) {
+				String fileName = csvComposite.getFileText();
+				char delimiter = csvComposite.getDelimiter();
+			
+				if (validateFilename(fileName)){
+					SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf(delimiter));	
+					SmartPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, (new File(fileName)).getParent());
+				
+					if (process(fileName, delimiter)){
+						setReturnCode(OK);
+						close();
+					}
 				}
+			} else if (IDialogConstants.CANCEL_ID == buttonId) {
+				setReturnCode(CANCEL);
+				close();
 			}
-		} else if (IDialogConstants.CANCEL_ID == buttonId) {
-			setReturnCode(CANCEL);
-			close();
+		}catch (Exception ex){
+			MessageDialog.openError(getShell(), Messages.AbstractCsvDialog_ErrorTitle, ex.getMessage());
 		}
 	}
 
@@ -144,11 +162,11 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	protected boolean process(final String fileName) {
+	protected boolean process(final String fileName, final char delimiter) {
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try {
 			boolean headers = csvComposite.getHeadersSelection();
-			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, headers);
+			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, delimiter, headers);
 			dialog.run(true, true, processRunnable);
 			
 			
@@ -170,9 +188,26 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		}
 	}
 
-	protected abstract boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
+	/**
+	 * perform the appropriate actions
+	 * 
+	 * @param file the file to process
+	 * @param delimiter the field delimiter 
+	 * @param headers if headers are to be included
+	 * @param monitor progress monitor
+	 * @param session database session
+	 * @return
+	 * @throws Exception
+	 */
+	protected abstract boolean performAction(File file, char delimiter, 
+			boolean headers, IProgressMonitor monitor, Session session) throws Exception;
 
+	/**
+	 * 
+	 * @return set of warnings generated during action
+	 */
 	protected abstract List<String> getWarnings();
+	
 	/**
 	 * Inner class responsible for wrapping import/export operation into {@link IRunnableWithProgress}
 	 * 
@@ -182,18 +217,20 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 	private class ProcessingRunnable implements IRunnableWithProgress {
 		private final String file;
 		private final boolean headers;
+		private final char delimiter;
 		private boolean success;
 
-		private ProcessingRunnable(String file, boolean headers) {
+		private ProcessingRunnable(String file, char delimiter, boolean headers) {
 			this.file = file;
 			this.headers = headers;
+			this.delimiter = delimiter;
 		}
 
 		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			Session session = HibernateManager.openSession();
 			try {
-				boolean ok = performAction(new File(file), headers, monitor, session);
+				boolean ok = performAction(new File(file), delimiter, headers, monitor, session);
 				setSuccess(ok);
 			} catch (final Exception ex) {
 				setSuccess(false);

@@ -30,6 +30,7 @@ import org.wcs.smart.export.config.AbstractCsvImportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -48,6 +49,11 @@ public class EmployeeCsvImportConfig extends AbstractCsvImportConfig {
 	@Override
 	public ICsvDataImporter getImporter() {
 		return importer;
+	}
+	
+	@Override
+	public String getDefaultFileName(){
+		return SmartDB.getCurrentConservationArea().getId() + "_employees"; //$NON-NLS-1$
 	}
 
 	@Override

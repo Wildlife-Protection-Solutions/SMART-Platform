@@ -42,6 +42,9 @@ import org.wcs.smart.internal.Messages;
  */
 public class CsvFileComposite extends Composite {
 
+	
+	
+
 	private ICsvDialogConfig config;
 
 	private Label lblFile;
@@ -49,7 +52,12 @@ public class CsvFileComposite extends Composite {
 	private Button btnHasHeader;
 	private Text txtInfo;
 	private Button btnBrowse;
+	private Label lblDelimiter;
+	private DelimiterCombo cmbDelimiters;
 	
+	
+	
+
 	public CsvFileComposite(Composite parent, int style, ICsvDialogConfig config) {
 		super(parent, style);
 		this.config = config;
@@ -88,6 +96,13 @@ public class CsvFileComposite extends Composite {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
+		
+		lblDelimiter = new Label(this, SWT.NONE);
+		lblDelimiter.setText(Messages.CsvFileComposite_DelimiterLabel);
+		lblDelimiter.setToolTipText(Messages.CsvFileComposite_DelimiterTooltip);
+		
+		cmbDelimiters = new DelimiterCombo(this, SWT.DROP_DOWN);
+		
 		if (config.includeHasHeader()){
 			btnHasHeader = new Button(this, SWT.CHECK);
 			String hasHeaderText = config.getHasHeaderText();
@@ -113,11 +128,18 @@ public class CsvFileComposite extends Composite {
 		return txtFile.getText();
 	}
 	
+	public char getDelimiter() throws Exception{
+		return cmbDelimiters.getDelimiter();
+	}
+	
 	/**
 	 * Sets the file name text box value
 	 * @param fileName
 	 */
 	public void setFileText(String fileName){
+		if (config.appendFileExtension() && !fileName.endsWith(".csv")) { //$NON-NLS-1$
+			fileName += ".csv"; //$NON-NLS-1$
+		}
 		txtFile.setText(fileName);
 	}
 	
@@ -132,6 +154,8 @@ public class CsvFileComposite extends Composite {
 		txtFile.setEnabled(enabled);
 		txtInfo.setEnabled(enabled);
 		btnBrowse.setEnabled(enabled);
+		lblDelimiter.setEnabled(enabled);
+		cmbDelimiters.getControl().setEnabled(enabled);
 		if (btnHasHeader != null){
 			btnHasHeader.setEnabled(enabled);
 		}

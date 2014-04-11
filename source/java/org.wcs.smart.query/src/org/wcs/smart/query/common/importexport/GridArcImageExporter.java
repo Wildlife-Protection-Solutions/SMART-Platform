@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
@@ -65,7 +66,8 @@ public class GridArcImageExporter implements IQueryExporter {
 	}
 
 	@Override
-	public void export(Query query, File file, IProgressMonitor monitor)
+	public void export(Query query, File file, 
+			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		
 		File sourceFile = ((GriddedQuery)query).getLastRasterFile();

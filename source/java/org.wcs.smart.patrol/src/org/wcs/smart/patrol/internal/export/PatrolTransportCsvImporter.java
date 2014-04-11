@@ -81,12 +81,12 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 	}
 	
 	@Override
-	public boolean importCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean importCsvFile(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		if (!file.exists()){
 			throw new IOException(MessageFormat.format(Messages.PatrolTransportCsvImporter_ErrorfileNotFound, new Object[]{file.toString()}));
 		}
 
-		CSVReader reader = new CSVReader(new FileReader(file));
+		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
 		
 		//reading the first line with language codes
 		String[] headerRow = reader.readNext();

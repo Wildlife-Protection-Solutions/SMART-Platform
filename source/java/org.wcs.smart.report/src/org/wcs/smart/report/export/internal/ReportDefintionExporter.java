@@ -210,7 +210,7 @@ public class ReportDefintionExporter implements IReportExporter {
 		
 		File tmpFile = File.createTempFile(SmartUtils.encodeHex(query.getUuid()), QUERYFILE_EXTENSION);
 		try{
-			definitionExporter.export(query, tmpFile, new NullProgressMonitor());
+			definitionExporter.export(query, tmpFile, null, new NullProgressMonitor());
 			addFile(tmpFile, SmartUtils.encodeHex(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
 		}finally{
 			tmpFile.delete();

@@ -35,6 +35,19 @@ import org.wcs.smart.ca.ConservationArea;
  */
 public interface ICsvDataExporter {
 
-	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
+	/**
+	 * Exports data to a delimited file (csv)
+	 * 
+	 * @param file file to export to
+	 * @param char field delimiter
+	 * @param ca conservation area to export from
+	 * @param headers if headers to be written
+	 * @param monitor progress monitor
+	 * @param session database session
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, 
+			boolean headers, IProgressMonitor monitor, Session session) throws Exception;
 	
 }

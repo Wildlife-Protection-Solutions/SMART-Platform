@@ -25,6 +25,7 @@ import org.wcs.smart.export.config.AbstractCsvImportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SmartUtils;
@@ -40,6 +41,11 @@ public class PatrolTransportCsvImportConfig extends AbstractCsvImportConfig {
 
 	private PatrolTransportCsvExporter exporter = new PatrolTransportCsvExporter();
 	private PatrolTransportCsvImporter importer = new PatrolTransportCsvImporter();
+	
+	@Override
+	public String getDefaultFileName(){
+		return SmartDB.getCurrentConservationArea().getId() + "_transports"; //$NON-NLS-1$
+	}
 	
 	@Override
 	public ICsvDataImporter getImporter() {

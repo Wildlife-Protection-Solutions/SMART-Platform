@@ -56,8 +56,8 @@ public class CsvExportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
-		return config.getExporter().exportCsvFile(file, SmartDB.getCurrentConservationArea(), headers, monitor, session);
+	protected boolean performAction(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+		return config.getExporter().exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), headers, monitor, session);
 	}
 
 	@Override
