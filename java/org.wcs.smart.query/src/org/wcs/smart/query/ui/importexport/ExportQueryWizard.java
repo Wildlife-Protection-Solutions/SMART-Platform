@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 
 import net.refractions.udig.catalog.URLUtils;
@@ -40,9 +41,11 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.internal.Messages;
@@ -224,7 +227,18 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			}
 		}
 		
-		exporter.export(query, outputFile, monitor);
+		HashMap<String, Object> ops = null;
+		try{
+			ops = page2.getOptions();
+			if (ops != null){
+				SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf((Character)ops.get(ICsvQueryExporter.DELIMITER_KEY)));
+			}
+		}catch(Exception ex){
+			MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExportDialogTitle, ex.getMessage());
+			hasError = true;
+			return false;
+		}
+		exporter.export(query, outputFile, ops, monitor);
 		
 
 		
@@ -260,6 +274,18 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			}
 		}
 
+		HashMap<String, Object> ops = null;
+		try{
+			ops = page2.getOptions();
+			if (ops != null){
+				SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf((Character)ops.get(ICsvQueryExporter.DELIMITER_KEY)));
+			}
+		}catch(Exception ex){
+			MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExportDialogTitle, ex.getMessage());
+			hasError = true;
+			return ;
+		}
+		
 		int exportedCnt = 0;
 		
 		boolean overwriteall = false;
@@ -315,9 +341,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				}
 					
 			}
-				
+
 			try{
-				lexporter.export(query, outputFile, monitor);
+				lexporter.export(query, outputFile, ops, monitor);
 				exportedCnt++;
 			}catch (Throwable ex){
 				MessageDialog.openError(getShell(), 

@@ -50,10 +50,10 @@ import com.ibm.icu.text.SimpleDateFormat;
 public class EmployeeCsvExporter implements ICsvDataExporter {
 
 	@Override
-	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		CSVWriter writer = null;
 		try {
-			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
 			if (headers) {
 				// WriteHeaders
 				//String[] headerCols = {"ID", "Given Name", "Family Name", "Birth Date", "Gender", "Start Employement Date", "End Employement Date", "Agency", "Rank"};

@@ -32,6 +32,12 @@ import org.wcs.smart.export.dialog.AbstractCsvDialog;
 public interface ICsvDialogConfig {
 
 	/**
+	 * The default file name to export data to.
+	 * @return
+	 */
+	public String getDefaultFileName();
+	
+	/**
 	 * Indicates weather checkbox responsible for csv headers in present in gui
 	 * @return boolean
 	 */

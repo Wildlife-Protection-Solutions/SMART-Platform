@@ -19,38 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.export.config;
+package org.wcs.smart.query.importexport;
 
-import java.io.File;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
 
 /**
- * Class that is able to perform import from csv file operation.
- * 
- * @author elitvin
- * @since 1.0.0
+ * Interface for exporters which require
+ * a delimiter field.
+ *  
+ * @author Emily
+ *
  */
-public interface ICsvDataImporter {
-
-	/**
-	 * Imports a delimited file
-	 * @param file the file to import
-	 * @param delimiter the field delimiter
-	 * @param headers if the first line contains headers
-	 * @param monitor progress monitor 
-	 * @param session db session
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean importCsvFile(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
+public interface ICsvQueryExporter extends IQueryExporter{
 	
 	/**
-	 * 
-	 * @return a list of warning generated during the import process.  Can be
-	 * <code>null</code> or an empty list if no warnings generated
+	 * Option key for delimiter export parameter
 	 */
-	public List<String> getWarnings();
+	public static final String DELIMITER_KEY = "DELIMITER_KEY"; //$NON-NLS-1$
+	
+	public static final char DEFAULT_DELIMITER = ',';
 }

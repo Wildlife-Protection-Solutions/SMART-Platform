@@ -175,7 +175,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					File outputFile = null;
 					try{
 						outputFile = File.createTempFile(qi.getId(), ".xml"); //$NON-NLS-1$
-						def.export(query, outputFile, monitor);
+						def.export(query, outputFile, null, monitor);
 						
 						Query q = importQuery(outputFile, qf);
 						if (q != null){

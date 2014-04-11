@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 import net.refractions.udig.catalog.URLUtils;
 
@@ -134,7 +135,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		this.query = ((SimpleQuery)query);
 		
 		if (query instanceof IPagedQuery) {

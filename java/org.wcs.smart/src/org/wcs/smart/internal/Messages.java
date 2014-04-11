@@ -5,6 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.internal.messages"; //$NON-NLS-1$
 	public static String AbstractCsvDialog_Browse_Button;
+	public static String AbstractCsvDialog_ErrorTitle;
 	public static String AbstractCsvDialog_Fail_Error;
 	public static String AbstractCsvDialog_File_Label;
 	public static String AbstractCsvDialog_FileFilter_All;
@@ -354,6 +355,13 @@ public class Messages extends NLS {
 	public static String CsvExportDialog_CreateDirectory;
 	public static String CsvExportDialog_DialogTitle;
 	public static String CsvExportDialog_OverwriteFile;
+	public static String CsvFileComposite_colon;
+	public static String CsvFileComposite_comma;
+	public static String CsvFileComposite_DelimiterLabel;
+	public static String CsvFileComposite_DelimiterTooltip;
+	public static String CsvFileComposite_InvalidDelimiter1;
+	public static String CsvFileComposite_semicolon;
+	public static String CsvFileComposite_tab;
 	public static String DataModel_AttributeAlreadyExists;
 	public static String DataModel_AttributeAlreadyExistsChild;
 	public static String DataModel_AttributeAlreadyExistsParent;

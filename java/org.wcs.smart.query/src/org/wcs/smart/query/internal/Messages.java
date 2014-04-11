@@ -110,6 +110,8 @@ public class Messages extends NLS {
 	public static String ExportQueryListPage_ValidOutputDirRequired;
 	public static String ExportQueryLocationPage_AllFilesFilterName;
 	public static String ExportQueryLocationPage_BrowseButton;
+	public static String ExportQueryLocationPage_delimiterLabel;
+	public static String ExportQueryLocationPage_delimiterTooltip;
 	public static String ExportQueryLocationPage_DialogMessage;
 	public static String ExportQueryLocationPage_FileLabel;
 	public static String ExportQueryLocationPage_PageName;

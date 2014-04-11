@@ -54,11 +54,11 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 
 	@Override
-	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
 		CSVWriter writer = null;
 		try {
 			List<Language> languages = new ArrayList<Language>(ca.getLanguages());
-			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
 			List<PatrolTransportType> types = getTransportTypes(ca, session);
 
 			// WriteHeaders

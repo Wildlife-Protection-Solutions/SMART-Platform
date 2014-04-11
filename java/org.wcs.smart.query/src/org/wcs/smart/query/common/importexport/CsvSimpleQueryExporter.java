@@ -24,10 +24,11 @@ package org.wcs.smart.query.common.importexport;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.importexport.IQueryExporter;
+import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
@@ -44,9 +45,10 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @author Emily
  * @since 1.0.0
  */
-public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQueryExporter {
+public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQueryExporter {
 
 	private CSVWriter writer = null;
+	protected char delimiter = DEFAULT_DELIMITER;
 	
 	/**
 	 * Creates a new exporter that exports to csv format
@@ -69,7 +71,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@Override
 	protected void init() throws Exception {
-		writer = new CSVWriter(new FileWriter(outputFile), ',', '"',SmartUtils.LINE_SEPARATOR);
+		writer = new CSVWriter(new FileWriter(outputFile), delimiter, '"',SmartUtils.LINE_SEPARATOR);
 		
 		String data[] = new String[queryColumns.size()]; 
 		for (int i = 0; i < data.length; i ++){
@@ -135,8 +137,12 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
-		
+	public void export(Query query, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+		if (parameters.get(DELIMITER_KEY) != null){
+			try{
+				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
+			}catch(Exception ex){}
+		}
 		if (query instanceof IPagedQuery) {
 			super.setData((IPagedQueryResultSet)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
 		} else {

@@ -29,6 +29,7 @@ import org.wcs.smart.export.EmployeeCsvImporter;
 import org.wcs.smart.export.config.AbstractCsvExportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -46,6 +47,11 @@ public class EmployeeCsvExportConfig extends AbstractCsvExportConfig {
 	@Override
 	public ICsvDataExporter getExporter() {
 		return exporter;
+	}
+	
+	@Override
+	public String getDefaultFileName(){
+		return SmartDB.getCurrentConservationArea().getId() + "_employees"; //$NON-NLS-1$
 	}
 	
 	@Override
