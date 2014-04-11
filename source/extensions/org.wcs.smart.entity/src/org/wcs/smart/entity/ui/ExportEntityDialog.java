@@ -81,14 +81,14 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 		super.buttonPressed(buttonId);
 	}
 	@Override
-	protected boolean performAction(File file, boolean headers,
+	protected boolean performAction(File file, char delimiter, boolean headers,
 			IProgressMonitor monitor, Session session) throws Exception {
 		ICsvDataExporter exporter = config.getExporter();
 		if (exporter instanceof EntityCsvExporter){
 			((EntityCsvExporter) exporter).setActiveOnly(activeOnly);
 		}
 		
-		return exporter.exportCsvFile(file, SmartDB.getCurrentConservationArea(), 
+		return exporter.exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), 
 				headers, monitor, session);
 	}
 

@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.opengis.feature.simple.SimpleFeature;
@@ -62,7 +63,7 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, File file, HashMap<String, Object> options, IProgressMonitor monitor) throws Exception {
 		this.query = ((EntitySightingQuery)query);
 		super.setData((IPagedQueryResultSet)query.getCachedResults(monitor), ((EntitySightingQuery)query).getQueryColumns(), file);
 		super.export(monitor);
