@@ -137,6 +137,7 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 						}
 						
 						Set<String> processed = new HashSet<String>();
+						processed.add(et.getDmAttribute().getKeyId());	//this will automatically be added
 						StringBuilder sb = new StringBuilder();
 						for (EntityAttribute ea : et.getAttributes()){
 							if (ea.getDmAttribute().getUuid() == null && !processed.contains(ea.getDmAttribute().getKeyId())){
@@ -162,23 +163,23 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 							if (!cont[0]){
 								return;
 							}
-							
+						}
 							
 							//save to the database
-							session.beginTransaction();
-							try{
-								session.saveOrUpdate(et.getDmAttribute());
-								for (EntityAttribute ea : et.getAttributes()){
-									session.saveOrUpdate(ea.getDmAttribute());
-								}
-								session.saveOrUpdate(et);
-								session.getTransaction().commit();
-								newType = et;
-							}catch (Exception ex){
-								session.getTransaction().rollback();
-								throw ex;
+						session.beginTransaction();
+						try{
+							session.saveOrUpdate(et.getDmAttribute());
+							for (EntityAttribute ea : et.getAttributes()){
+								session.saveOrUpdate(ea.getDmAttribute());
 							}
+							session.saveOrUpdate(et);
+							session.getTransaction().commit();
+							newType = et;
+						}catch (Exception ex){
+							session.getTransaction().rollback();
+							throw ex;
 						}
+						
 					}catch(ParseException parse){
 						errorMessage = parse.getMessage();
 						exception = parse;
