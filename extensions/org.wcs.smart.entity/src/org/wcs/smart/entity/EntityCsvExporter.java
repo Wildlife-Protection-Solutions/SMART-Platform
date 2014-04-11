@@ -81,7 +81,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	}
 	
 	@Override
-	public boolean exportCsvFile(File file, ConservationArea ca,
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca,
 			boolean headers, IProgressMonitor monitor, Session session)
 			throws Exception {
 		
@@ -89,7 +89,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		
 		CSVWriter writer = null;
 		try {
-			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
 			List<Entity> stations = getEntities(session, activeOnly);
 
 			// WriteHeaders
@@ -188,6 +188,11 @@ public class EntityCsvExporter implements ICsvDataExporter {
 			return false;
 		}
 
+		@Override
+		public String getDefaultFileName(){
+			return SmartDB.getCurrentConservationArea().getId() + "_entities"; //$NON-NLS-1$
+		}
+		
 		@Override
 		public String getHasHeaderText() {
 			return null;
