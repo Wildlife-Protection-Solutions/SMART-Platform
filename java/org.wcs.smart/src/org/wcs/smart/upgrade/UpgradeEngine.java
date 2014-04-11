@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.v200.Upgrader112To200;
 import org.wcs.smart.upgrade.v300.Upgrader200To300;
 
@@ -50,8 +51,8 @@ public class UpgradeEngine {
 					public void run() {
 						isOk[0] = MessageDialog.openQuestion(
 								Display.getDefault().getActiveShell(),
-								"Backup upgrade",
-								MessageFormat.format("Provided backup file contains SMART version \"{0}\" while current application is version \"{1}\". Current version is not compatiple with old database.\n\n Do you want to upgrade backup data to match the latest version?", version, SmartPlugIn.PLUGIN_VERSION));
+								Messages.UpgradeEngine_Confirm_Title,
+								MessageFormat.format(Messages.UpgradeEngine_Confirm_Message, version, SmartPlugIn.PLUGIN_VERSION));
 					}
 				});
 				if (!isOk[0]) {
@@ -73,8 +74,8 @@ public class UpgradeEngine {
 						public void run() {
 							MessageDialog.openError(
 									Display.getDefault().getActiveShell(),
-									"Backup upgrade error",
-									MessageFormat.format("Unable to perform upgrade from version \"{0}\".", version));
+									Messages.UpgradeEngine_Error_Title,
+									MessageFormat.format(Messages.UpgradeEngine_Error_Message, version));
 						}
 					});
 					return;

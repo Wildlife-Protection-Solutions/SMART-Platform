@@ -957,6 +957,10 @@ public class Messages extends NLS {
 	public static String TranslateSimpleListItemDialog_Error_LabelRequired;
 	public static String TranslateSimpleListItemDialog_LanguageLabel;
 	public static String TranslateSimpleListItemDialog_NameLabel;
+	public static String UpgradeEngine_Confirm_Message;
+	public static String UpgradeEngine_Confirm_Title;
+	public static String UpgradeEngine_Error_Message;
+	public static String UpgradeEngine_Error_Title;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;
 	public static String UserNamePasswordDialog_Username_Label;
