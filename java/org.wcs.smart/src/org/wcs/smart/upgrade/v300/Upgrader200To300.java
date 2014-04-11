@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
@@ -47,7 +48,7 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class Upgrader200To300 {
 
 	public static void upgrade(Session s, IProgressMonitor monitor) {
-		monitor.subTask("Upgrading from 2.x.x to 3.x.x");
+		monitor.subTask(Messages.Upgrader200To300_SubTask_Name);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -58,7 +59,7 @@ public class Upgrader200To300 {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Error upgrading from 2.x.x to 3.x.x", e);
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.Upgrader200To300_Error, e);
 						}
 					});
 				} finally {
