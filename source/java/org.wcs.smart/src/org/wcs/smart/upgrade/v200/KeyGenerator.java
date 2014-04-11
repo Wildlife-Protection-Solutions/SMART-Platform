@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.upgrade.v200;
 
-import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -40,13 +38,13 @@ import java.util.regex.Pattern;
  *
  */
 public class KeyGenerator {
-	private static final String INVALID_START_CHARS_KEY_PATTERN = "[^a-z]+"; 
+	private static final String INVALID_START_CHARS_KEY_PATTERN = "[^a-z]+";  //$NON-NLS-1$
 	
 	public void generateKeys(Connection c, String tableName) throws Exception{
 		
-		String sql = "SELECT a.uuid, b.value, a.ca_uuid from " + tableName + 
-			" a LEFT JOIN ( smart.i18n_label b JOIN smart.LANGUAGE c ON b.language_uuid = c.uuid and c.isdefault ) " +
-			"on a.uuid = b.element_uuid";
+		String sql = "SELECT a.uuid, b.value, a.ca_uuid from " + tableName +  //$NON-NLS-1$
+			" a LEFT JOIN ( smart.i18n_label b JOIN smart.LANGUAGE c ON b.language_uuid = c.uuid and c.isdefault ) " + //$NON-NLS-1$
+			"on a.uuid = b.element_uuid"; //$NON-NLS-1$
 		
 
 		ResultSet rs = c.createStatement().executeQuery(sql);
@@ -76,7 +74,7 @@ public class KeyGenerator {
 		}
 
 		
-		PreparedStatement ps = c.prepareStatement("UPDATE " + tableName + " set keyid = ? where uuid = ?");
+		PreparedStatement ps = c.prepareStatement("UPDATE " + tableName + " set keyid = ? where uuid = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (Object[] updates : keys){
 			ps.setString(1, (String)updates[1]);
 			ps.setBytes(2, (byte[])updates[0]);
@@ -90,15 +88,15 @@ public class KeyGenerator {
 
 		String raw = name.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		if (raw.isEmpty()){
-			raw = "key";
+			raw = "key"; //$NON-NLS-1$
 		}
 		
 		//remove _ and 1 
 		while(raw.length() > 0 && Pattern.matches(INVALID_START_CHARS_KEY_PATTERN, raw.subSequence(0, 1))){
-			raw = raw.replaceFirst(INVALID_START_CHARS_KEY_PATTERN, "");
+			raw = raw.replaceFirst(INVALID_START_CHARS_KEY_PATTERN, ""); //$NON-NLS-1$
 		}
 		if(raw.isEmpty()){
-			raw = "key";
+			raw = "key"; //$NON-NLS-1$
 		}
 		
 		String temp = raw;
@@ -110,27 +108,5 @@ public class KeyGenerator {
 		raw = temp;
 		return raw;
 	}
-	
-	private static Connection getConnection(File databaseFile) throws Exception{
-		String driver = "org.apache.derby.jdbc.EmbeddedDriver"; 
-		Class.forName(driver).newInstance();
-		
-		String queryString = "jdbc:derby:" + databaseFile.getAbsolutePath() + ";user=smart_admin;password=smart_derby";
-		
-		Connection c = DriverManager.getConnection(queryString);
-		c.setAutoCommit(false);
-		return c;
-	}
-	
-//	public static void main(String args[]) throws Exception{
-//		File dbFile = new File("C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java\\org.wcs.smart\\data\\database\\smartdb");
-//		Connection c = getConnection(dbFile);
-//		
-//		KeyGenerator kg = new KeyGenerator();
-//		kg.generateKeys(c, "smart.patrol_mandate");
-//		kg.generateKeys(c, "smart.team");
-//		kg.generateKeys(c, "smart.patrol_transport");
-//		
-//	}
 	
 }

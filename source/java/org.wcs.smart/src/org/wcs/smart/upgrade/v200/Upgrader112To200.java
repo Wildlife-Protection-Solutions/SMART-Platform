@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
@@ -42,7 +43,7 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class Upgrader112To200 {
 
 	public static void upgrade(Session s, IProgressMonitor monitor) {
-		monitor.subTask("Upgrading from 1.x.x to 2.x.x");
+		monitor.subTask(Messages.Upgrader112To200_SubTask_Name);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -53,7 +54,7 @@ public class Upgrader112To200 {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Error upgrading from 1.x.x to 2.x.x", e);
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.Upgrader112To200_Error, e);
 						}
 					});
 				} finally {
@@ -82,7 +83,7 @@ public class Upgrader112To200 {
 
 	public static void upgradeCt111to200(Connection c) throws Exception{
 		
-		String sql = "select count(*) from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid WHERE a.tablename='CYBERTRACKER_PROPERTIES' and b.schemaname='SMART'";
+		String sql = "select count(*) from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid WHERE a.tablename='CYBERTRACKER_PROPERTIES' and b.schemaname='SMART'"; //$NON-NLS-1$
 		ResultSet rs = c.createStatement().executeQuery(sql);
 		rs.next();
 		int cnt = rs.getInt(1);
