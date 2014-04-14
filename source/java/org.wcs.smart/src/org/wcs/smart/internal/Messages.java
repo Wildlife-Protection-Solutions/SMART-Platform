@@ -577,7 +577,7 @@ public class Messages extends NLS {
 	public static String EmployeeCsvImporter_Error_EndEmployementDateFormat;
 	public static String EmployeeCsvImporter_Error_EndAfterStartDate;
 	public static String EmployeeCsvImporter_Error_Gender;
-	public static String EmployeeCsvImporter_Error_InputFileDoesNotExist;
+	public static String EmployeeCsvImporter_Error_InputFileDoesNotExist1;
 	public static String EmployeeCsvImporter_Error_InvalidNumberField;
 	public static String EmployeeCsvImporter_Error_NoFamilyName;
 	public static String EmployeeCsvImporter_Error_NoGivenName;
@@ -589,8 +589,8 @@ public class Messages extends NLS {
 	public static String EmployeeDeleteAdvisor_Error_NotEmployee;
 	public static String EmployeeDialog_Create_DialogTitle;
 	public static String EmployeeDialog_Edit_DialogTitle;
-	public static String EmployeeDialog_Error_InvalidUserId_DialogMessage;
-	public static String EmployeeDialog_Error_InvalidUserId_DialogTitle;
+	public static String EmployeeDialog_Error_InvalidUserId_DialogMessage1;
+	public static String EmployeeDialog_Error_InvalidUserId_DialogTitle1;
 	public static String EmployeeDialog_Error_SaveError;
 	public static String EmployeeDialog_SaveButton;
 	public static String EmployeePropertyPage_8;

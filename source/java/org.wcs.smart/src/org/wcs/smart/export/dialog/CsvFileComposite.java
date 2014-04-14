@@ -42,9 +42,6 @@ import org.wcs.smart.internal.Messages;
  */
 public class CsvFileComposite extends Composite {
 
-	
-	
-
 	private ICsvDialogConfig config;
 
 	private Label lblFile;
@@ -54,9 +51,6 @@ public class CsvFileComposite extends Composite {
 	private Button btnBrowse;
 	private Label lblDelimiter;
 	private DelimiterCombo cmbDelimiters;
-	
-	
-	
 
 	public CsvFileComposite(Composite parent, int style, ICsvDialogConfig config) {
 		super(parent, style);

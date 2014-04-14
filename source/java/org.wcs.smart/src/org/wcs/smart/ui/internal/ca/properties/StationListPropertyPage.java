@@ -65,7 +65,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -186,14 +185,12 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		container.setLayout(new GridLayout(3, false));
 
 		Label lblNewLabel = new Label(container, SWT.NONE);
-		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
-				false, 1, 1));
+		lblNewLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
 		lblNewLabel.setText(Messages.StationListPropertyPage_LanguageLabel);
 
 		cmbLanguage = new LanguageViewer(container, SWT.NONE,currentCa);
-		Combo lblLanguage = cmbLanguage.getCombo();
-		lblLanguage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 2, 1));
+		cmbLanguage.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
 		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -303,6 +300,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		Composite btnPanel = new Composite(container, SWT.NONE);
 		btnPanel.setLayout(new GridLayout(2, false));
+		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3,1));
 		
 		Button btnImport = new Button(btnPanel, SWT.PUSH);
 		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
