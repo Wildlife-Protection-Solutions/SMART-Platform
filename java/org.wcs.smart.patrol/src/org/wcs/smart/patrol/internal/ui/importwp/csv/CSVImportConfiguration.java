@@ -74,9 +74,18 @@ public class CSVImportConfiguration {
 	private boolean skipHeaders;
 
 	private CsvHeader[] availableColumns;
+	private char delimiter;
 	
 	public CSVImportConfiguration(){
 		
+	}
+	
+	public char getDelimiter(){
+		return this.delimiter;
+	}
+	
+	public void setDelimiter(char delimiter){
+		this.delimiter = delimiter;
 	}
 	
 	public void setAvailableColumns(CsvHeader[] cols){
@@ -107,7 +116,7 @@ public class CSVImportConfiguration {
 		}
 		
 		try{
-			CSVReader reader = new CSVReader(new FileReader(filename) );
+			CSVReader reader = new CSVReader(new FileReader(filename), getDelimiter() );
 
 			int counter = 0;
 			if(skipHeaders){

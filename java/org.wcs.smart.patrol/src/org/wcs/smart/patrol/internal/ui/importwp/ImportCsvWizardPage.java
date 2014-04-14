@@ -25,6 +25,7 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 import java.io.FileReader;
 import java.text.MessageFormat;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -91,7 +92,6 @@ public class ImportCsvWizardPage extends WizardPage implements IImportWizardPage
 				return;
 			}
 		});
-		
 	
 		ops2 = new ImportOptionsComposite(center, ((ImportGpsDataWizard)getWizard()).getCurrentDate(), ((ImportGpsDataWizard)getWizard()).getType());
 		ops2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -136,22 +136,37 @@ public class ImportCsvWizardPage extends WizardPage implements IImportWizardPage
 			
 			((ImportGpsDataWizard)getWizard()).setImportOption(ops2.getImportOption());
 			final CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
-			config.setFileName(ops.getFileText());
 			
-			//read header fields
 			try{
-				CSVReader reader = new CSVReader(new FileReader(ops.getFileText() ) );
-				String[] headers = reader.readNext();
-				CsvHeader[] columnNames = new CsvHeader[headers.length];
-				for(int i=0; i<headers.length; i++){
-					columnNames[i] = new CsvHeader(headers[i], i);
+				if (ops.getFileText().equals(config.getFilename()) && config.getDelimiter() == ops.getDelimiter()){
+					//nothing has changed; leave the last configuration along
+					return true;
 				}
-				config.setAvailableColumns(columnNames);
-			}catch (Exception e) {
+				//something has changed; reparse
+				config.setFileName(ops.getFileText());
+				config.setDelimiter(ops.getDelimiter());
+			}catch (Exception ex){
+				MessageDialog.openError(getShell(), Messages.ImportCsvWizardPage_ErrorDialogTitle, ex.getMessage());
+				return false;
+			}
+			// read header fields
+			try {
+				CSVReader reader = new CSVReader(new FileReader(
+						ops.getFileText()), config.getDelimiter());
+				try {
+					String[] headers = reader.readNext();
+					CsvHeader[] columnNames = new CsvHeader[headers.length];
+					for (int i = 0; i < headers.length; i++) {
+						columnNames[i] = new CsvHeader(headers[i], i);
+					}
+					config.setAvailableColumns(columnNames);
+				} finally {
+					reader.close();
+				}
+			} catch (Exception e) {
 				SmartPatrolPlugIn.displayLog(Messages.ImportCsvWizardPage_2, e);
 				return false;
 			}
-			
 		}
 		return true;
 	}
