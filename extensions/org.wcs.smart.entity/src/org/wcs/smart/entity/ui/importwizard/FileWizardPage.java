@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.export.dialog.DelimiterCombo;
 
 /**
  * Wizard page for collecting input file.
@@ -43,6 +44,7 @@ import org.wcs.smart.entity.internal.Messages;
 public class FileWizardPage extends WizardPage {
 
 	private Text txtFile;
+	private DelimiterCombo cmbDelimiter;
 	
 	protected FileWizardPage() {
 		super("File"); //$NON-NLS-1$
@@ -79,6 +81,14 @@ public class FileWizardPage extends WizardPage {
 			
 		});
 		
+		l = new Label(c, SWT.NONE);
+		l.setText(Messages.FileWizardPage_DelimiterLabel);
+		l.setToolTipText(Messages.FileWizardPage_DelimiterTooltip);
+		
+		cmbDelimiter = new DelimiterCombo(c, SWT.NONE);
+		cmbDelimiter.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
 		setTitle(Messages.FileWizardPage_Title);
 		setMessage(Messages.FileWizardPage_Message);
 		
@@ -89,4 +99,7 @@ public class FileWizardPage extends WizardPage {
 		return this.txtFile.getText();
 	}
 
+	public char getDelimiter() throws Exception{
+		return cmbDelimiter.getDelimiter();
+	}
 }
