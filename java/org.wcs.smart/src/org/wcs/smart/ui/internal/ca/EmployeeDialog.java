@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -169,7 +170,8 @@ public class EmployeeDialog extends Dialog {
 			}
 			
 			if (!HibernateManager.validateUserIdUnique(smartUser,ca, session)){
-				MessageDialog.openError(this.getShell(), Messages.EmployeeDialog_Error_InvalidUserId_DialogTitle, Messages.EmployeeDialog_Error_InvalidUserId_DialogMessage);
+				MessageDialog.openError(this.getShell(), Messages.EmployeeDialog_Error_InvalidUserId_DialogTitle1, 
+						MessageFormat.format(Messages.EmployeeDialog_Error_InvalidUserId_DialogMessage1, new Object[]{smartUser}));
 				return false;
 			}
 		}

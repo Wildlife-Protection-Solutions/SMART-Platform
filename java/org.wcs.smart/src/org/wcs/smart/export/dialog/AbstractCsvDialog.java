@@ -90,12 +90,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 			csvComposite.addFileModifyListener(new Listener() {
 				@Override
 				public void handleEvent(Event event) {
-					if (getButton(IDialogConstants.OK_ID) == null) return;
-					if (csvComposite.getFileText().length() > 0){
-						getButton(IDialogConstants.OK_ID).setEnabled(true);
-					}else{
-						getButton(IDialogConstants.OK_ID).setEnabled(false);
-					}
+					updateButtons();
 				}
 			});
 		}
@@ -107,6 +102,15 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		csvComposite.setFileText(initLocation + File.separator + config.getDefaultFileName());
 		
 		return csvComposite;
+	}
+	
+	private void updateButtons(){
+		if (getButton(IDialogConstants.OK_ID) == null) return;
+		if (csvComposite.getFileText().length() > 0){
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
+		}else{
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+		}
 	}
 	
 	protected void initDialogLabels() {
@@ -121,6 +125,8 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		Button btn = createButton(parent, IDialogConstants.OK_ID, config.getActionButtonText(), true);
 		btn.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		
+		updateButtons();
 	}
 
 	@Override

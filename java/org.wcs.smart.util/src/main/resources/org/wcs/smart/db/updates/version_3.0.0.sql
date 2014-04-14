@@ -326,3 +326,7 @@ WHERE a.tablename='CT_PROPERTIES_OPTION' and b.schemaname='SMART') foo;
 -- ** VERSION UDATE **
 update smart.db_version set version = '3.0.0' where plugin_id = 'org.wcs.smart';
 
+GRANT SELECT ON smart.db_version TO data_entry;
+GRANT SELECT ON smart.db_version TO manager;
+GRANT SELECT ON smart.db_version TO analyst;
+

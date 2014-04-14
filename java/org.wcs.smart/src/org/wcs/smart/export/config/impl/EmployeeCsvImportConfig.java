@@ -53,7 +53,7 @@ public class EmployeeCsvImportConfig extends AbstractCsvImportConfig {
 	
 	@Override
 	public String getDefaultFileName(){
-		return SmartDB.getCurrentConservationArea().getId() + "_employees"; //$NON-NLS-1$
+		return SmartDB.getCurrentConservationArea().getId() + "_employees.csv"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -284,7 +284,9 @@ UPDATE smart.db_version SET plugin_id = 'org.wcs.smart';
 ALTER TABLE smart.db_version ALTER COLUMN plugin_id  NOT NULL;
 ALTER TABLE smart.db_version ADD PRIMARY KEY (plugin_id);
 
-
+GRANT SELECT ON smart.db_version TO data_entry;
+GRANT SELECT ON smart.db_version TO manager;
+GRANT SELECT ON smart.db_version TO analyst;
 
 -- ** "photo required" option support **
 ALTER TABLE smart.CM_NODE ADD COLUMN photo_required BOOLEAN;
