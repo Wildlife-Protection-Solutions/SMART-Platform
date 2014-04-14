@@ -134,10 +134,13 @@ public class Messages extends NLS {
 	public static String ImportCSVOptionsComposite_1;
 	public static String ImportCSVOptionsComposite_2;
 	public static String ImportCSVOptionsComposite_3;
+	public static String ImportCSVOptionsComposite_DelimiterLabel;
+	public static String ImportCSVOptionsComposite_DelimiterTooltip;
 	public static String ImportCsvWizardPage_0;
 	public static String ImportCsvWizardPage_1;
 	public static String ImportCsvWizardPage_2;
 	public static String ImportCsvWizardPage_CSVImportMessage;
+	public static String ImportCsvWizardPage_ErrorDialogTitle;
 	public static String CSVImportConfiguration_0;
 	public static String CSVImportConfiguration_1;
 	public static String CSVImportConfiguration_11;

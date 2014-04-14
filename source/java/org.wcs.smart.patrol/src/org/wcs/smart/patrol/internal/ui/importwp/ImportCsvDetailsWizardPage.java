@@ -29,9 +29,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.CSVImportConfiguration;
+import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvHeader;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.CsvImportEngine;
 import org.wcs.smart.patrol.internal.ui.importwp.csv.ImportCSVDetailsComposite;
 
@@ -54,6 +56,7 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 	private ImportGpsDataWizard wizard;
 	
 	private ImportWpSelectWizardPage nextPage ;
+	private CsvHeader[] lastHeaders;
 	
 	/**
 	 * @param pageName
@@ -89,7 +92,9 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 			}
 		});
 		ops.setConfigData(((CsvImportEngine)wizard.getImportEngine()).getConfiguration());
-
+		lastHeaders = ((CsvImportEngine)wizard.getImportEngine()).getConfiguration().getAvailableColumns();
+		((GridData)ops.getLayoutData()).widthHint = 350;
+		
 		setPageComplete(false);
 		
 		super.setTitle(Messages.ImportGpxWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
@@ -151,6 +156,8 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 	public boolean beforeMoveNext(WizardPage nextPage) {
 		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
 		updateConfiguration(config);
+		
+		SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf(config.getDelimiter()));
 		return true;
 	}
 
@@ -159,13 +166,12 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 	public boolean init() {
 		if (ops != null) {
 			CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
-			String opsFile = ops.getConfigFileName();
-			if (opsFile == null || !opsFile.equals(config.getFilename())) {
-				//reset columns only if file changed
+			if (lastHeaders != config.getAvailableColumns()){
+				lastHeaders = config.getAvailableColumns();
 				ops.setConfigData(config);
-				ops.validate();
-				updateComplete();
 			}
+			ops.validate();
+			updateComplete();
 		}
 		return true;
 	}

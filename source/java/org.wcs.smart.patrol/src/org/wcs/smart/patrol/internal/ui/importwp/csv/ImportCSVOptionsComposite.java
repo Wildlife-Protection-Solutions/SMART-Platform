@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**
@@ -45,6 +46,8 @@ public class ImportCSVOptionsComposite extends Composite{
 	private Label lblFile;
 	private Text txtFile;
 	private Button btnBrowse;
+
+	private DelimiterCombo cmbDelimiter;
 	
 		
 	public ImportCSVOptionsComposite(Composite parent) {
@@ -80,10 +83,22 @@ public class ImportCSVOptionsComposite extends Composite{
 			}
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		
+		Label l = new Label(this, SWT.NONE);
+		l.setText(Messages.ImportCSVOptionsComposite_DelimiterLabel);
+		l.setToolTipText(Messages.ImportCSVOptionsComposite_DelimiterTooltip);
+		
+		cmbDelimiter = new DelimiterCombo(this, SWT.NONE);
+		cmbDelimiter.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	}
 
 	public void addFileModifyListener(Listener listener) {
 		txtFile.addListener(SWT.Modify, listener);
+	}
+	
+	public char getDelimiter() throws Exception{
+		return cmbDelimiter.getDelimiter();
 	}
 	
 	public String getFileText() {
