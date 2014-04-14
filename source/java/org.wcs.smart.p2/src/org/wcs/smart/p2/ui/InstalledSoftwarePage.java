@@ -70,6 +70,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.about.InstallationPage;
 import org.eclipse.ui.menus.AbstractContributionFactory;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.wcs.smart.SmartApp;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
@@ -214,6 +215,12 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 				buttons[i].setEnabled(false);
 			else
 				buttons[i].setEnabled(true);
+		}
+		
+		for (IInstallableUnit unit : installedIUGroup.getSelectedIUs()) {
+			if (SmartApp.ID.equals(unit.getId())) {
+				uninstallButton.setEnabled(false);
+			}
 		}
 	}
 

@@ -35,6 +35,8 @@ import org.eclipse.ui.application.WorkbenchAdvisor;
  * @since 1.0.0
  */
 public class SmartApp implements IApplication {
+	
+	public static final String ID = "smartapp"; //$NON-NLS-1$
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {	
