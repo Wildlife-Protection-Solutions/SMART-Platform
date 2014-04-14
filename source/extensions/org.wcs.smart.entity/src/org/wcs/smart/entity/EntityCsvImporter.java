@@ -66,8 +66,6 @@ public class EntityCsvImporter {
 	private File importFile;
 	private CsvImporterConfig configuration;
 	
-	private String[] fileHeaders;
-	
 	/**
 	 * Creates a new importer for a given entity type.
 	 * @param et
@@ -110,22 +108,18 @@ public class EntityCsvImporter {
 	 * @throws Exception
 	 */
 	public String[] getFileHeaders() throws Exception{
-		if (fileHeaders == null){
-			readHeaders();
-		}
-		return fileHeaders;
-		
+		return readHeaders();
 	}
 	
 	/*
 	 * Reads the headers from the csv file
 	 */
-	private void readHeaders() throws Exception{
-		
+	private String[] readHeaders() throws Exception{
+	
 		FileReader reader = new FileReader(importFile);
 		try{
-			CSVReader csvReader = new CSVReader(reader);
-			fileHeaders = csvReader.readNext();
+			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
+			return csvReader.readNext();
 		}finally{
 			reader.close();
 		}
@@ -152,7 +146,7 @@ public class EntityCsvImporter {
 		// read all to get the total count
 		FileReader reader = new FileReader(importFile);
 		try{
-			CSVReader csvReader = new CSVReader(reader);
+			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
 			totalCount = csvReader.readAll().size();
 			csvReader.close();
 		}finally{
@@ -163,9 +157,9 @@ public class EntityCsvImporter {
 		reader = new FileReader(importFile);
 		try{
 			int lineCount = 0;
-			CSVReader csvReader = new CSVReader(reader);
+			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
 			if (configuration.getSkipHeader()){
-				fileHeaders = csvReader.readNext();
+				csvReader.readNext();
 				lineCount ++;
 			}
 			

@@ -34,6 +34,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityCsvImporter;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
@@ -68,7 +69,7 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 
 	@Override
 	public boolean performFinish() {
-		
+		SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf(importer.getConfiguration().getDelimiter()));
 		//update the configuration
 		mapPage.updateConfiguration();
 		
@@ -144,6 +145,13 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 			}
 			
 			importer.setFile(f);
+			try{
+				importer.getConfiguration().setDelimitier(filePage.getDelimiter());
+			}catch (Exception ex){
+				MessageDialog.openError(getShell(), Messages.ImportEntitiesWizard_ErrorDialogTitle, ex.getMessage());
+				event.doit = false;
+				return;
+			}
 			
 			error = null;
 			try {

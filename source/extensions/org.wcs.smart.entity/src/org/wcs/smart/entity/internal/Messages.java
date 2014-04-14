@@ -259,6 +259,8 @@ public class Messages extends NLS {
 	public static String FileWizardPage_AllFiles;
 	public static String FileWizardPage_BrowseLabel;
 	public static String FileWizardPage_CsvFile;
+	public static String FileWizardPage_DelimiterLabel;
+	public static String FileWizardPage_DelimiterTooltip;
 	public static String FileWizardPage_FileLabel;
 	public static String FileWizardPage_Message;
 	public static String FileWizardPage_Title;

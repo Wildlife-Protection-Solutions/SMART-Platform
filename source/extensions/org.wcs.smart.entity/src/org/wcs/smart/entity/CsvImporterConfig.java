@@ -18,6 +18,8 @@ public class CsvImporterConfig {
 	private Projection projection;
 	private String dateFormatString = null;
 	
+	private char fieldDelimiter = ',';
+	
 	public CsvImporterConfig(){
 		attributeToColumn = new HashMap<EntityAttribute, Integer>();
 	}
@@ -81,5 +83,13 @@ public class CsvImporterConfig {
 	}
 	public String getDateFormatString(){
 		return this.dateFormatString;
+	}
+	
+	public void setDelimitier(char delimiter){
+		this.fieldDelimiter = delimiter;
+	}
+	
+	public char getDelimiter(){
+		return this.fieldDelimiter;
 	}
 }

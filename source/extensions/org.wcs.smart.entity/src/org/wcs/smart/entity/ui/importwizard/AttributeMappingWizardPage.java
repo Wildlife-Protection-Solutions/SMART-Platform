@@ -77,6 +77,7 @@ public class AttributeMappingWizardPage extends WizardPage {
 	private ComboViewer xViewer;
 	private ComboViewer yViewer;
 	private ComboViewer projViewer;
+	
 	private HashMap<EntityAttribute, ComboViewer> viewers;
 	
 	private ComboViewer cmbColumnSelectorDateFormat;
@@ -118,7 +119,7 @@ public class AttributeMappingWizardPage extends WizardPage {
 		groupA.setLayout(new GridLayout(2, false));
 		groupA.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		groupA.setText(Messages.AttributeMappingWizardPage_ConfigurationSectionName);
-		
+
 		Label l = new Label(groupA, SWT.NONE);
 		l.setText(Messages.AttributeMappingWizardPage_SkipHeadersLabel);
 		
@@ -272,9 +273,10 @@ public class AttributeMappingWizardPage extends WizardPage {
 		}else{
 			cdId.hide();
 		}
-		
+	
 		super.setPageComplete(valid);
 	}
+	
 
 	public String getDateFormat(){
 		ISelection selection = cmbColumnSelectorDateFormat.getSelection();
@@ -311,25 +313,7 @@ public class AttributeMappingWizardPage extends WizardPage {
 			viewer.setInput(data);
 		}
 		
-		// "Guess" at correct columns
-		//purposely not guessing id and status to make sure users at least look at this
-//		for (ViewerContent d : data){
-//			if (d.index != null){
-//				if (xViewer != null && d.name.toLowerCase().startsWith("x")){
-//					xViewer.setSelection(new StructuredSelection(d));
-//				}
-//				if (yViewer != null && d.name.toLowerCase().startsWith("y")){
-//					yViewer.setSelection(new StructuredSelection(d));
-//				}
-//				for (Entry<EntityAttribute, ComboViewer> e : viewers.entrySet()){
-//					if (d.name.toLowerCase().startsWith(e.getKey().getName().toLowerCase())){
-//						e.getValue().setSelection(new StructuredSelection(d));
-//					}
-//				}
-//				
-//			}
-//		}
-		
+
 		//layout and validate
 		((Composite)getControl()).layout(true);
 		validate();
@@ -362,7 +346,6 @@ public class AttributeMappingWizardPage extends WizardPage {
 		if (projViewer != null){			
 			importer.getConfiguration().setProjection((Projection)((IStructuredSelection)projViewer.getSelection()).getFirstElement());
 		}
-		
 		for (Entry<EntityAttribute,ComboViewer> data : viewers.entrySet()){
 			importer.getConfiguration().setColumn(data.getKey(), getIndex(data.getValue()));
 		}
