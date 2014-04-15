@@ -833,5 +833,11 @@
             primary="false">
       </toc>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.plan.upgrade.PlanDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
