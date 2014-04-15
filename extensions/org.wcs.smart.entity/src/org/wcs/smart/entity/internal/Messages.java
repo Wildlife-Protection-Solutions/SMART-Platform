@@ -96,6 +96,7 @@ public class Messages extends NLS {
 	public static String EntityCsvImporter_XRequired;
 	public static String EntityCsvImporter_YCannotBeParsed;
 	public static String EntityCsvImporter_YRequired;
+	public static String EntityDatabaseUpgrader_UpgradeTask;
 	public static String EntityEditPanelComposite_IdError;
 	public static String EntityEditPanelComposite_LocationLabel;
 	public static String EntityEditPanelComposite_ProjectionError;
