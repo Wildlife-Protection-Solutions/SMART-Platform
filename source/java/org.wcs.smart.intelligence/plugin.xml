@@ -850,5 +850,11 @@
             class="org.wcs.smart.intelligence.model.IntelligenceSource">
       </DeleteAdvisor>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.intelligence.upgrade.IntelligenceDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
