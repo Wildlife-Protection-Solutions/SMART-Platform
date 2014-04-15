@@ -40,7 +40,7 @@ public class UpgradeEngine {
 		V300
 	}
 	
-	public static void upgrageSystem(IProgressMonitor monitor) {
+	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) {
 		Session s = HibernateManager.openSession();
 		try {
 			final String version = getSmartVersion(s);
@@ -88,6 +88,35 @@ public class UpgradeEngine {
 					Upgrader200To300.upgrade(s, monitor);
 				default:
 					break;
+				}
+			}
+			
+			if (currentVersions != null) {
+				Map<String, String> backupVersions = getVersions(s);
+				String problems = ""; //$NON-NLS-1$
+				for (String curPlugin : currentVersions.keySet()) {
+					if (backupVersions.containsKey(curPlugin)) {
+						String curV = currentVersions.get(curPlugin);
+						String backV = backupVersions.get(curPlugin); 
+						if (!curV.equals(backV)) {
+							problems += MessageFormat.format(Messages.UpgradeEngine_Plugin_WrongVersion, curPlugin, backV, curV) + "\n"; //$NON-NLS-1$
+						}
+					} else {
+						problems += MessageFormat.format(Messages.UpgradeEngine_Plugin_Missing, curPlugin) + "\n"; //$NON-NLS-1$
+					}
+				}
+				if (!problems.isEmpty()) {
+					final String msg = problems;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openWarning(
+									Display.getDefault().getActiveShell(),
+									Messages.UpgradeEngine_Confirm_Title,
+									MessageFormat.format(Messages.UpgradeEngine_Plugin_UpgradeMessage, msg));
+						}
+					});
+					
 				}
 			}
 			
