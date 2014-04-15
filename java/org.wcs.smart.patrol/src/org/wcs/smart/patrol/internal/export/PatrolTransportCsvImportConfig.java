@@ -44,7 +44,7 @@ public class PatrolTransportCsvImportConfig extends AbstractCsvImportConfig {
 	
 	@Override
 	public String getDefaultFileName(){
-		return SmartDB.getCurrentConservationArea().getId() + "_transports"; //$NON-NLS-1$
+		return SmartDB.getCurrentConservationArea().getId() + "_transports.csv"; //$NON-NLS-1$
 	}
 	
 	@Override
