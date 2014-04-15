@@ -158,5 +158,11 @@
             directory="Cybertracker">
       </FilestoreDirectory>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.cybertracker.upgrade.CtDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
