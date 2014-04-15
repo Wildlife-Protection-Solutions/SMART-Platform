@@ -562,5 +562,11 @@
             primary="false">
       </toc>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.entity.upgrade.EntityDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
