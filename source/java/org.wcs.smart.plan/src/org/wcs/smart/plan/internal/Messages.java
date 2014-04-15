@@ -114,6 +114,7 @@ public class Messages extends NLS {
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Message;
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Title;
 	public static String PlanConfigurationPreferencePage_METER_LABEL;
+	public static String PlanDatabaseUpgrader_UpgradeTask;
 	public static String PlanDatesComposite_ClidRangeViolation_Message;
 	public static String PlanDatesComposite_EndDate;
 	public static String PlanDatesComposite_EndDate_Invalid_Error;
