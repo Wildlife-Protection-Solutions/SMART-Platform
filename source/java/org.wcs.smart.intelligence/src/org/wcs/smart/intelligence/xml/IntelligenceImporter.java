@@ -217,7 +217,20 @@ public class IntelligenceImporter {
 						@Override
 						public void run() {
 							MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.IntelligenceImporter_DuplicateDialog_Title,
-									MessageFormat.format(Messages.IntelligenceImporter_Name_NoMatch_Error, filename));
+									MessageFormat.format(Messages.IntelligenceImporter_FileError1 + "\n\n" + Messages.IntelligenceImporter_Name_NoMatch_Error1, filename)); //$NON-NLS-1$
+						}
+					});
+					return null;
+				}
+				if (!SmartUtils.isSimpleString(name,
+						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
+						org.wcs.smart.ca.Label.MAX_LENGTH, 1)) {
+					final String fname = name;
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.IntelligenceImporter_DuplicateDialog_Title,
+									MessageFormat.format(Messages.IntelligenceImporter_FileError2 + "\n\n" + Messages.IntelligenceImporter_InvalidName, fname, org.wcs.smart.ca.Label.MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, filename)); //$NON-NLS-1$
 						}
 					});
 					return null;
