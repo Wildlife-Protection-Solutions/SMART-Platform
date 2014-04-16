@@ -130,6 +130,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 		
+		updateButtons();
 	}
 	
 	/**
@@ -252,6 +253,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 						}
 					}
 					lstReports.refresh();
+					updateButtons();
 				}
 			});
 			
@@ -268,6 +270,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 						reports.remove(x);
 					}
 					lstReports.refresh();
+					updateButtons();
 				}
 			});
 		}
@@ -327,6 +330,16 @@ public class ExportReportDialog extends TitleAreaDialog {
 				}
 			}
 		});
+	}
+	
+	private void updateButtons(){
+		if (lstReports != null){
+			if (reports.size() == 0){
+				getButton(OK).setEnabled(false);
+			}else{
+				getButton(OK).setEnabled(true);
+			}
+		}
 	}
 	
 	@Override

@@ -161,10 +161,6 @@ public class QueryListView extends ViewPart {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
 	}
 	
-	public QueryListContentProvider getQueryListContentProvider(){
-		return (QueryListContentProvider) this.queryList.getContentProvider();
-	}
-	
 	@Override
 	public void createPartControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);

@@ -230,6 +230,8 @@ public class IncidentSummaryPage extends EditorPart {
 	}
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit.setBorderStyle(SWT.BORDER);
+		
 		Form frmSummary = toolkit.createForm(parent);
 		frmSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		

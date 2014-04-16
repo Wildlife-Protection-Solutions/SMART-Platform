@@ -85,7 +85,8 @@ public interface IQueryHibernateManager {
 	 * A set of query proxies for all queries associated with the
 	 * current conservation area  and the current user. 
 	 * @param session
-	 * @return a map of the hashcode of the uuid array of a query folder mapped to query input of the query
+	 * @return a map of the hashcode of the uuid array of a query folder 
+	 * mapped to query input of the query
 	 */
 	public HashMap<Integer, List<QueryEditorInput>> getQueryProxies(Session session);
 

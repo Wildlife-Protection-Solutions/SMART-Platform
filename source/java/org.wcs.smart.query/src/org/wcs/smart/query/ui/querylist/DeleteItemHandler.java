@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.querylist;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +33,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -92,8 +92,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();			
 			if (o instanceof QueryFolder){
-				QueryListContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
-				deleteFolder((QueryFolder)o, contentProvider);
+				deleteFolder((QueryFolder)o);
 			}else if (o instanceof Query){
 				deleteQuery((Query)o, event);
 			}else if (o instanceof QueryEditorInput){
@@ -165,7 +164,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		}
 		
 	}
-	private void deleteFolder(QueryFolder folder, ITreeContentProvider provider) {
+	private void deleteFolder(QueryFolder folder) {
 		if (folder.isRootFolder()){
 			//cannot delete root folders
 			return;
@@ -174,7 +173,9 @@ public class DeleteItemHandler extends AbstractHandler {
 			QueryPlugIn.displayLog(MessageFormat.format(Messages.DeleteItemHandler_CannotDeleteItemWithKids1, new Object[]{folder.getName()}), null);
 			return;
 		}
-		if (provider.hasChildren(folder) ){
+		
+		List<?> items = SavedQueryTree.getInstance().getQueries().get(Arrays.hashCode(folder.getUuid()));
+		if (items != null && items.size() > 0){
 			QueryPlugIn.displayLog(MessageFormat.format(Messages.DeleteItemHandler_CannotDeleteItemWithKids1, new Object[]{folder.getName()}), null);
 			return;
 		}
