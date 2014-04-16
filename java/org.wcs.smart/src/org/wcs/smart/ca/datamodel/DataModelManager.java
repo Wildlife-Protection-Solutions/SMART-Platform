@@ -264,7 +264,10 @@ public class DataModelManager {
 	 * @throws Exception if item cannot be deleted
 	 */
 	public boolean validateDelete(AttributeListItem listItem, IProgressMonitor monitor, Session session) throws Exception{
-
+		if (listItem.getUuid() == null){
+			//not yet saved; nothing can reference return true;
+			return true;
+		}
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteListItem + listItem.getName(), 1);
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		try{
@@ -297,6 +300,10 @@ public class DataModelManager {
 	public boolean validateDelete(AttributeTreeNode node, IProgressMonitor monitor, Session session) throws Exception{
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteTreeNode + node.getName(), 1);		
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
+		if (node.getUuid() == null){
+			//not saved so we should always be able to delete it
+			return true;
+		}
 		
 		try{
 			if (!DeleteManager.canDelete(node, session)){

@@ -951,7 +951,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 							
 							for(AttributeTreeNode toDelete : attTree.getDeletedNodes()){
 								try{
-									DataModelManager.getInstance().fireDeleteListener(currentSession, toDelete);
+									if (toDelete.getUuid() != null){
+										DataModelManager.getInstance().fireDeleteListener(currentSession, toDelete);
+									}
 								}catch (Exception ex){
 									throw new InvocationTargetException(ex);
 								}
