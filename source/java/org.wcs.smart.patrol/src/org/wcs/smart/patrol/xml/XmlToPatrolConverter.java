@@ -137,13 +137,20 @@ public class XmlToPatrolConverter {
 		patrol.setComment(xml.getComment());
 		if (keepIDs) {
 			patrol.setId(xml.getId());
+			//validate patrol id
+			if (! SmartUtils.isSimpleString(patrol.getId(), 
+					SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
+				throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidPatrolId,
+						patrol.getId(), Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
+			}
+				
 		}
 		
 		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType().toUpperCase()));
 		if (xml.getObjective() != null){
 			patrol.setObjective(xml.getObjective().getDescription());
 		}
-//		patrol.setObjectiveRating(xml.getObjective().getRating());
+
 		if (xml.getMandate() != null){
 			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate"); //$NON-NLS-1$
 			if (m == null){
