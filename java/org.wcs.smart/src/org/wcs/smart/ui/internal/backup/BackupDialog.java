@@ -151,7 +151,14 @@ public class BackupDialog extends TitleAreaDialog {
 				}
 			}
 		});
-		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));		
+		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		Composite infoCmp = new Composite(composite, SWT.NONE);
+		infoCmp.setLayout(new GridLayout(1, false));
+		infoCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label info = new Label(infoCmp, SWT.NONE);
+		info.setText(Messages.BackupDialog_InfoMessage);
+		
 		setTitle(title);
 		setMessage(message); //"Select the file to backup the system to."
 		super.getShell().setText(title);
