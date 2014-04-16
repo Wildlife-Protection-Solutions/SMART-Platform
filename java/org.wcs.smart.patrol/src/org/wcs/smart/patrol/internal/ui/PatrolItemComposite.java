@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
@@ -126,6 +127,15 @@ public abstract class PatrolItemComposite {
 	 * @return the attribute being modified.
 	 */
 	public abstract int getAttribute();
+	
+	/**
+	 * 
+	 * @return the initial size for the dialog or null
+	 * if use default
+	 */
+	public Point getInitialSize(){
+		return null;
+	}
 }
 
 

@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.editpatrol;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -75,6 +76,15 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		super(parent, item.getTitle());
 		this.item = item;
 		this.patrol = patrol;
+	}
+	
+	@Override
+	public Point getInitialSize(){
+		Point p = item.getInitialSize();
+		if (p != null){
+			return p;
+		}
+		return super.getInitialSize();
 	}
 	
 	@Override
