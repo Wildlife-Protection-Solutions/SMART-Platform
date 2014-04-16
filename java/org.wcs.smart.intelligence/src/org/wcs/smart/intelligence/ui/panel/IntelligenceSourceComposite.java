@@ -182,10 +182,18 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	@Override
 	public void initFromModel(Intelligence intelligence) {
 	    if (intelligence.getSource() != null) {
-	    	sourceType.setSelection(new StructuredSelection(intelligence.getSource()));
+	    	if (sourceType != null){
+	    		if (sourceTypeList.contains(intelligence.getSource())){
+	    			sourceType.setSelection(new StructuredSelection(intelligence.getSource()));
+	    		}else{
+	    			sourceType.setSelection(null);
+	    		}
+	    	}
 	    }
 	    if (intelligence.getPatrol() != null) {
-	    	patrolId.setSelection(intelligence.getPatrol());
+	    	if (patrolId != null){
+	    		patrolId.setSelection(intelligence.getPatrol());
+	    	}
 	    }
 	}
     

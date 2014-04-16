@@ -98,7 +98,13 @@ public class Messages extends NLS {
 
 	public static String ImportIntelligenceHandler_CancelInfoDialog_Title;
 
+	public static String ImportIntelligenceHandler_CancelledMessage;
+
 	public static String ImportIntelligenceHandler_CannotImportFile;
+
+	public static String ImportIntelligenceHandler_CompleteMessage;
+
+	public static String ImportIntelligenceHandler_CompleteTitle;
 
 	public static String ImportIntelligenceHandler_Dialog_Message;
 
@@ -258,9 +264,15 @@ public class Messages extends NLS {
 
 	public static String IntelligenceImporter_ExtractingZip_Error;
 
+	public static String IntelligenceImporter_FileError1;
+
+	public static String IntelligenceImporter_FileError2;
+
 	public static String IntelligenceImporter_Importing;
 
-	public static String IntelligenceImporter_Name_NoMatch_Error;
+	public static String IntelligenceImporter_InvalidName;
+
+	public static String IntelligenceImporter_Name_NoMatch_Error1;
 
 	public static String IntelligenceImporter_ReadingFile;
 
@@ -452,9 +464,21 @@ public class Messages extends NLS {
 
 	public static String SourceTypesPropertyDialog_Title;
 
+	public static String XmlToIntelligenceConverter_DescriptionTooLong;
+
+	public static String XmlToIntelligenceConverter_InvalidAdditionalName;
+
+	public static String XmlToIntelligenceConverter_InvalidDefaultName;
+
+	public static String XmlToIntelligenceConverter_InvalidFromDate;
+
+	public static String XmlToIntelligenceConverter_InvalidRecievedDate;
+
 	public static String XmlToIntelligenceConverter_NoAttachmentFound_Warning;
 
 	public static String XmlToIntelligenceConverter_NoLangCodeFound_Warning;
+
+	public static String XmlToIntelligenceConverter_NoNameFound;
 
 	public static String XmlToIntelligenceConverter_SeveralLangCodeFound_Warning;
 

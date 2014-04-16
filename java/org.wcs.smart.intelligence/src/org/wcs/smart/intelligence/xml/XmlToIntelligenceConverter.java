@@ -33,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -42,6 +43,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.xml.model.IntelligenceType;
 import org.wcs.smart.intelligence.xml.model.LabelType;
 import org.wcs.smart.intelligence.xml.model.PointType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class responsible for converting XML data to intelligence object.
@@ -59,23 +61,53 @@ public class XmlToIntelligenceConverter {
 	
 	private File attachmentLocation = null;
 	
-	public void fromXml(IntelligenceType xml, Session session, ConservationArea ca, File attachLoc) {
+	public void fromXml(IntelligenceType xml, Session session, ConservationArea ca, File attachLoc) throws Exception {
 		this.session = session;
 		this.ca = ca;
 		this.attachmentLocation = attachLoc;
 		
 		intelligence = new Intelligence();
 		intelligence.setConservationArea(ca);
+		intelligence.setCreator(SmartDB.getCurrentEmployee());
 		
 		/* names */
 		for(LabelType labelType : xml.getName()) {
 			Label label = labelForElement(labelType, intelligence);
 			if (label != null) {
-				intelligence.getNames().add(label);
+				//validate name
+				if (!SmartUtils.isSimpleString(label.getValue(),
+						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
+						org.wcs.smart.ca.Label.MAX_LENGTH, 1)) {
+					if (label.getLanguage().isDefault()){
+						//error
+						throw new Exception(MessageFormat.format(Messages.XmlToIntelligenceConverter_InvalidDefaultName, label.getValue(), org.wcs.smart.ca.Label.MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
+					}else{
+						//just skip
+						warnings.add(MessageFormat.format(Messages.XmlToIntelligenceConverter_InvalidAdditionalName, label.getValue(), label.getLanguage().getCode(), org.wcs.smart.ca.Label.MAX_LENGTH,SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
+					}
+				}else{
+					//valid names lets add it
+					intelligence.getNames().add(label);
+				}
 			}
 		}
-
+		//a name for default language is required
+		if (intelligence.getNames().size() == 0){
+			//this should never happen; as a check is done elsewhere for this
+			throw new Exception(Messages.XmlToIntelligenceConverter_NoNameFound);
+		}
+		if (intelligence.findNameNull(ca.getDefaultLanguage()) == null){
+			//just pick any value
+			intelligence.updateName(ca.getDefaultLanguage(), intelligence.getNames().iterator().next().getValue());
+		}
+		
 		/* dates */
+		if (xml.getReceivedDate() == null){
+			throw new Exception(Messages.XmlToIntelligenceConverter_InvalidRecievedDate);
+		}
+		if (xml.getFromDate() == null){
+			throw new Exception(Messages.XmlToIntelligenceConverter_InvalidFromDate);
+		}
 		intelligence.setReceivedDate(xml.getReceivedDate().toGregorianCalendar().getTime());
 		intelligence.setFromDate(xml.getFromDate().toGregorianCalendar().getTime());
 		if (xml.getToDate() != null) {
@@ -93,6 +125,10 @@ public class XmlToIntelligenceConverter {
 
 		/* description */
 		intelligence.setDescription(xml.getDescription());
+		if (intelligence.getDescription().length() > Intelligence.MAX_DESCRIPTION_LENTH){
+			warnings.add(MessageFormat.format(Messages.XmlToIntelligenceConverter_DescriptionTooLong, Intelligence.MAX_DESCRIPTION_LENTH));
+			intelligence.setDescription(intelligence.getDescription().substring(0, Intelligence.MAX_DESCRIPTION_LENTH));
+		}
 
 		/* points */
 		for(PointType pointType : xml.getPoints()) {

@@ -82,6 +82,7 @@ public class ImportIntelligenceHandler extends AbstractHandler {
 					monitor.beginTask(Messages.ImportIntelligenceHandler_LoadingFile, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
+					int imported = 0;
 					for (int i = 0; i < files.size(); i ++){
 						File file = new File(files.get(i));
 						monitor.subTask(MessageFormat.format(Messages.ImportIntelligenceHandler_ProcessingFile, file.toString()));
@@ -90,21 +91,33 @@ public class ImportIntelligenceHandler extends AbstractHandler {
 						try{
 							Intelligence intel = IntelligenceImporter.importIntelligence(file, nullPm);
 							if (intel != null) {
+								imported++;
 								IntelligenceEventManager.getInstance().intelligenceAdded(intel);
 							}
 						}catch (Exception ex){
-							IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ImportIntelligenceHandler_CannotImportFile, file.toString()) + ex.getLocalizedMessage(), ex);
+							IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ImportIntelligenceHandler_CannotImportFile, file.toString()) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						if (monitor.isCanceled()){
+							final int fimported = imported;
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIntelligenceHandler_CancelInfoDialog_Title, Messages.ImportIntelligenceHandler_CancelInfoDialog_Message);									
+									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIntelligenceHandler_CancelInfoDialog_Title,
+											MessageFormat.format(Messages.ImportIntelligenceHandler_CancelledMessage,fimported, files.size() ));									
 								}
 							});
 							return;
 						}
 					}
+					
+					final int iimported = imported;
+					display.syncExec(new Runnable() {
+						@Override
+						public void run() {
+							MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIntelligenceHandler_CompleteTitle, MessageFormat.format(Messages.ImportIntelligenceHandler_CompleteMessage, iimported, files.size()));									
+						}
+					});
+			
 				}
 			});
 		} catch (Exception e) {
