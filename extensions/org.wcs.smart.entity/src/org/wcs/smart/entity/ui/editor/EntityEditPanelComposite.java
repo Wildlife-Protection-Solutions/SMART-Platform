@@ -329,7 +329,7 @@ public class EntityEditPanelComposite extends Composite{
 			@Override
 			public void handleEvent(Event event) {
 				if (!SmartUtils.isSimpleString(txtId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Entity.ID_MAX_LENGTH, 1)){
-					cdId.setDescriptionText(MessageFormat.format(Messages.EntityEditPanelComposite_IdError, new Object[]{Entity.ID_MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX}));
+					cdId.setDescriptionText(MessageFormat.format(Messages.EntityEditPanelComposite_IdError, new Object[]{Entity.ID_MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 					cdId.show();
 				}else{
 					cdId.setDescriptionText(null);
