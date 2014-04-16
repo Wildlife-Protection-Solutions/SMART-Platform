@@ -119,6 +119,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 					monitor.beginTask(Messages.ImportPatrolHandler_Progress_LoadingPatrols, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
+					int imported = 0;
 					for (int i = 0; i < files.size(); i ++){
 						File file = new File(files.get(i));
 						monitor.subTask(Messages.ImportPatrolHandler_Progress_ProcessingFile + file.toString());
@@ -127,22 +128,31 @@ public class ImportPatrolHandler extends AbstractHandler {
 						try{
 							Patrol p = PatrolImporter.importPatrol(file, keepIDs, nullPm);
 							if (p != null) {
+								imported ++;
 								PatrolEventManager.getInstance().patrolAdded(p);
 							}
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ImportPatrolHandler_Error_FileNotImported, new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex);
+							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ImportPatrolHandler_Error_FileNotImported + "\n\n", new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						if (monitor.isCanceled()){
+							final int aimported = imported;
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportPatrolHandler_Cancelled_DialogTitle, Messages.ImportPatrolHandler_Cancelled_DialogMessage);									
+									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage1, aimported, files.size()));									
 								}
 							});
 							
 							return;
 						}
 					}
+					final int iimported = imported;
+					display.syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(display.getActiveShell(), Messages.ImportPatrolHandler_MessageTitle, MessageFormat.format(Messages.ImportPatrolHandler_CompleteMessage, iimported, files.size()));
+							
+						}});
 				}
 			});
 		} catch (Exception e) {

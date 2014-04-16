@@ -202,11 +202,13 @@ public class Messages extends NLS {
 	public static String ImportPatrolDialog_DialogMessage;
 	public static String ImportPatrolDialog_DialogText;
 	public static String ImportPatrolDialog_DialogTitle;
-	public static String ImportPatrolHandler_Cancelled_DialogMessage;
+	public static String ImportPatrolHandler_Cancelled_DialogMessage1;
 	public static String ImportPatrolHandler_Cancelled_DialogTitle;
+	public static String ImportPatrolHandler_CompleteMessage;
 	public static String ImportPatrolHandler_Error_DirectoryNotFound;
 	public static String ImportPatrolHandler_Error_FileNotImported;
 	public static String ImportPatrolHandler_ErrorDialog_Title;
+	public static String ImportPatrolHandler_MessageTitle;
 	public static String ImportPatrolHandler_PatrolNotImported_Error;
 	public static String ImportPatrolHandler_Progress_LoadingPatrols;
 	public static String ImportPatrolHandler_Progress_ProcessingFile;
@@ -686,6 +688,7 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_Error_MandateNotFound;
 	public static String XmlToPatrolConverter_Error_TranpsortTypeNotFound;
 	public static String XmlToPatrolConverter_InvalidDateString;
+	public static String XmlToPatrolConverter_InvalidPatrolId;
 	public static String XmlToPatrolConverter_Warning_AttachmentFileNotFound;
 	public static String XmlToPatrolConverter_Warning_AttributeNotFound;
 	public static String XmlToPatrolConverter_Warning_CategoryNotFound;
