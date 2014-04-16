@@ -84,6 +84,7 @@ public class Messages extends NLS {
 	public static String EntityCsvImporter_IdFieldRequired;
 	public static String EntityCsvImporter_ImportDialogTitle;
 	public static String EntityCsvImporter_InvalidCoordinates;
+	public static String EntityCsvImporter_InvalidId;
 	public static String EntityCsvImporter_InvalidValue;
 	public static String EntityCsvImporter_NoEntitiesFound;
 	public static String EntityCsvImporter_NoIdColumn;

@@ -49,6 +49,7 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -195,6 +196,8 @@ public class EntityCsvImporter {
 					String id = data[configuration.getIdColumn()].trim();
 					if (id.length() == 0){
 						throw new Exception(MessageFormat.format(Messages.EntityCsvImporter_IdFieldRequired,new Object[]{lineCount}));
+					}else if (!SmartUtils.isSimpleString(id, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Entity.ID_MAX_LENGTH, 1)){
+						throw new Exception(MessageFormat.format(Messages.EntityCsvImporter_InvalidId, lineCount,Entity.ID_MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
 					}
 					entity.setId(id);
 				}
