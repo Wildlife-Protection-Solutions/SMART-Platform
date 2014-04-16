@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.common.attachment.AttachmentUtil;
@@ -160,8 +161,13 @@ public class ExportPlanJob extends Job {
 			return Status.CANCEL_STATUS;
 		}
 		
-		//launch file
-		AttachmentUtil.launch(outputFile);
+		//launch the file
+		//this has to be done in the display thread to work in linux.
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				AttachmentUtil.launch(outputFile);		
+			}});
 		
 		//open in system editor
 		return Status.OK_STATUS;

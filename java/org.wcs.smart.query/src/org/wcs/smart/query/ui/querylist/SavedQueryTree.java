@@ -218,7 +218,8 @@ public class SavedQueryTree {
 	}
 	
 	/**
-	 * @return the saved queries 
+	 * @return the saved queries; a map of the hashcode of the uuid array of a query folder 
+	 * mapped to set of query input of the query
 	 */
 	public HashMap<Integer, List<QueryEditorInput>> getQueries(){
 		if (queries == null){

@@ -121,15 +121,13 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		
 		
 		btnTrackDistanceDirection = new Button(g, SWT.CHECK);
-		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		btnTrackDistanceDirection.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				setChangesMade(true);
 			}
 		});
-		lbl = new Label(g, SWT.NONE);
-		lbl.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnTrackDistanceDirection.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
 		
 		lbl = new Label(container, SWT.NONE);  //spacer
 		
