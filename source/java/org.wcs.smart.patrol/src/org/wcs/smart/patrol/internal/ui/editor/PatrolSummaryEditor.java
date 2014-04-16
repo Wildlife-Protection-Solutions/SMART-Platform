@@ -49,6 +49,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -116,7 +117,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	private static final String EDIT_LABEL = PatrolUtils.EDIT_LINK_TEXT;
 	private static final int WIDTH_HINT = 50;	//width hint for fields
-	private static final int EMPLOYEE_LIST_HEIGHT_HINT = 120;
+	private static final int EMPLOYEE_LIST_HEIGHT_HINT = 50;
 	
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolSummaryEditor"; //$NON-NLS-1$
 
@@ -191,18 +192,10 @@ public class PatrolSummaryEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit.setBorderStyle(SWT.BORDER);
-		
-		ScrolledComposite container = new ScrolledComposite(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		container.setLayout(new GridLayout());
-		container.setExpandHorizontal(true);
-		container.setExpandVertical(true);
-		container.setMinHeight(300);
-		container.setMinWidth(300);
-		
-		outline = toolkit.createComposite(container);
+
+		outline = toolkit.createComposite(parent);
 		outline.setLayout(new GridLayout());
 		outline.setLayoutData(new GridData(SWT.FILL, SWT.FILL ,true, true));
-		container.setContent(outline);
 		
 		toolkit.paintBordersFor(outline);
 		
@@ -223,16 +216,27 @@ public class PatrolSummaryEditor extends EditorPart {
 			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
 		}
 		
-		Section patrolSection = toolkit.createSection(frmPatrolSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED  );
+		SashForm sashForm = new SashForm(frmPatrolSummary.getBody(), SWT.VERTICAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(sashForm);
+		
+		Section patrolSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED );
 		patrolSection.setText(Messages.PatrolSummaryEditor_PatrolInfo_SectionHeader);
 		patrolSection.setDescription(Messages.PatrolSummaryEditor_PatrolInfo_SectionDescription);
 		patrolSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Composite top = toolkit.createComposite(patrolSection, SWT.NONE);
-		top.setLayout(new GridLayout(2, false));
-		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		patrolSection.setClient(top);
+		ScrolledComposite scrolltop = new ScrolledComposite(patrolSection, SWT.V_SCROLL | SWT.H_SCROLL);
+		scrolltop.setLayout(new GridLayout());
+		scrolltop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scrolltop.setExpandHorizontal(true);
+		scrolltop.setExpandVertical(true);
+				
+		patrolSection.setClient(scrolltop);
+		
+		Composite top = toolkit.createComposite(scrolltop);
+		top.setLayout(new GridLayout(2, true));
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scrolltop.setContent(top);
 		
 		Composite left = toolkit.createComposite(top, SWT.NONE);
 		GridLayout leftLayout = new GridLayout(3, false);
@@ -330,9 +334,9 @@ public class PatrolSummaryEditor extends EditorPart {
 		((GridData)txtComment.getLayoutData()).heightHint = 100;
 		editComment = createEditLink(toolkit, right, new CommentComposite());
 		editComment.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false,1,1));
-		
+
 		/* ----- Patrol Days / Legs Section ------- */
-		Section dataSection = toolkit.createSection(frmPatrolSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED  );
+		Section dataSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED  );
 		dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataSection.setText(Messages.PatrolSummaryEditor_PatrolData_SectionName);
 		dataSection.setDescription(Messages.PatrolSummaryEditor_PatrolData_SectionDescription);
@@ -434,12 +438,14 @@ public class PatrolSummaryEditor extends EditorPart {
 				
 			}
 		});
-		
 		dataSection.setClient(compData);
 		
-		Point p = outline.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-				
-		container.setMinSize(p.x, p.y+100);
+		Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolltop.setMinSize(p.x, p.y+20);
+		
+		sashForm.setWeights(new int[]{70,30});
+		
+		
 		initValues();
 	}
 

@@ -42,6 +42,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -102,6 +103,26 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	public PatrolLegsComposite(boolean canEditDates) {
 		this.canEditDates = canEditDates;
+	}
+	
+	/**
+	 * 
+	 * @return the initial size for the dialog or null
+	 * if use default
+	 */
+	public Point getInitialSize(){
+		try{
+			int width = (int) (Display.getDefault().getActiveShell().getBounds().width * 0.6);
+			if (width < 500){
+				width = 500;
+			}
+			int height = (int) (Display.getDefault().getActiveShell().getBounds().height * 0.6);
+			if (height < 350){
+				height = 350;
+			}
+			return new Point(width, height);
+		}catch (Exception ex){}
+		return null;
 	}
 	
 	/**
