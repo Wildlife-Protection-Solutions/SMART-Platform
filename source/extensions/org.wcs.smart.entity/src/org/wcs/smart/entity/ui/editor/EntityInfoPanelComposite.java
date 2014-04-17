@@ -205,6 +205,7 @@ public class EntityInfoPanelComposite extends Composite{
 		attributeToUi = new HashMap<String, Text>();
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+		toolkit.setBorderStyle(SWT.BORDER);
 		
 		Composite comp = toolkit.createComposite(parent);
 		comp.setLayout(new GridLayout(4, false));
