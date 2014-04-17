@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -52,8 +53,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.ExpansionAdapter;
-import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
@@ -141,7 +140,10 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		glayout.marginHeight = 0;
 		form.getBody().setLayout(glayout);
 		
-		final Section entityList = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED );
+		final SashForm sashForm = new SashForm(form.getBody(), SWT.VERTICAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		final Section entityList = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED );
 		entityList.setLayout(new GridLayout(1, false));
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityList.setText(Messages.EntityTypeEntitiesPage_EntityListSectionTitle);
@@ -242,21 +244,11 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			});
 		}
 		
-		final Section entityDetailsSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+		final Section entityDetailsSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED);
 		entityDetailsSection.setLayout(new GridLayout(1, false));
 		entityDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityDetailsSection.setText(Messages.EntityTypeEntitiesPage_EntityDetailsSectionTitle);
-		entityDetailsSection.addExpansionListener(new ExpansionAdapter() {
-			@Override
-			public void expansionStateChanged(ExpansionEvent e) {
-				if (entityDetailsSection.isExpanded()){
-					entityDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
-				}else{
-					entityDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				}
-				entityDetailsSection.getParent().layout(true, true);
-			}
-		});
+		
 		Composite entityDetails = toolkit.createComposite(entityDetailsSection);
 		entityDetailsSection.setClient(entityDetails);
 		entityDetails.setLayout(new GridLayout());
@@ -288,6 +280,8 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 				}
 			});
 		}
+		
+		sashForm.setWeights(new int[]{70,30});
 	}
 	
 	private void importEntities(){
