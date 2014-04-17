@@ -30,18 +30,25 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -96,12 +103,17 @@ public class BackupDialog extends TitleAreaDialog {
 		return this.selectedFile;
 	}
 	
+	@Override
+	public Point getInitialSize(){
+		return new Point(550, 350);
+	}
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
+		
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -153,11 +165,26 @@ public class BackupDialog extends TitleAreaDialog {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
-		Composite infoCmp = new Composite(composite, SWT.NONE);
-		infoCmp.setLayout(new GridLayout(1, false));
-		infoCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label info = new Label(infoCmp, SWT.NONE);
+		Group g = new Group(main, SWT.NONE);
+		g.setText(SmartUtils.formatStringForLabel("Backup & Upgrading"));
+		FontData fd = g.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		final Font boldFont = new Font(getShell().getDisplay(), fd);
+		g.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				boldFont.dispose();
+			}
+		});
+		g.setFont(boldFont);
+		
+		g.setLayout(new GridLayout(1, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		Text info = new Text(g, SWT.MULTI | SWT.WRAP);
+		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)info.getLayoutData()).widthHint = 200;
 		info.setText(Messages.BackupDialog_InfoMessage);
+		info.setBackground(g.getBackground());
 		
 		setTitle(title);
 		setMessage(message); //"Select the file to backup the system to."
