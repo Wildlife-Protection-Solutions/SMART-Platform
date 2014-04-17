@@ -354,7 +354,7 @@ public class PatrolLegDayInputComposite {
 			public void focusLost(FocusEvent e) {
 				try{
 					int x = Integer.parseInt(restMinutes.getText());
-					if (x == patrolLegDate.getRestMinutes()){
+					if (patrolLegDate.getRestMinutes() != null && x == patrolLegDate.getRestMinutes()){
 						return;
 					}
 				}catch (Exception ex){
