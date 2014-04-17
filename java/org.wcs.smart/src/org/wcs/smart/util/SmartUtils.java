@@ -41,6 +41,8 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import net.refractions.udig.catalog.URLUtils;
+
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.DateTime;
@@ -59,8 +61,6 @@ import org.wcs.smart.internal.Messages;
  */
 public class SmartUtils {
 
-	public static final String INVALID_FILENAME_CHARS_PATTERN = "[\"',/:;<>\\\\|]"; //$NON-NLS-1$
-	
 	/**
 	 * Various pre-defined regex expressions
 	 * for validating strings in smart.
@@ -684,7 +684,7 @@ public class SmartUtils {
 	 */
 	public static String getFileName(String smartName) {
 		//remove all special characters from the name
-		smartName = smartName.replaceAll(INVALID_FILENAME_CHARS_PATTERN, ""); //$NON-NLS-1$
+		smartName = URLUtils.cleanFilename(smartName);
 		if (smartName.isEmpty()) {
 			smartName = "object"; //$NON-NLS-1$
 		}
