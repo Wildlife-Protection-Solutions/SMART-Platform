@@ -216,10 +216,11 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 			else
 				buttons[i].setEnabled(true);
 		}
-		
-		for (IInstallableUnit unit : installedIUGroup.getSelectedIUs()) {
-			if (SmartApp.ID.equals(unit.getId())) {
-				uninstallButton.setEnabled(false);
+		if (uninstallButton != null){
+			for (IInstallableUnit unit : installedIUGroup.getSelectedIUs()) {
+				if (SmartApp.ID.equals(unit.getId())) {
+					uninstallButton.setEnabled(false);
+				}
 			}
 		}
 	}
