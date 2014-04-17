@@ -343,7 +343,7 @@ public class PatrolLegDayInputComposite {
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_RestMinutesLabel);
-		restMinutes = toolkit.createText(c, "0"); //$NON-NLS-1$
+		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gd.widthHint = 30;
 		restMinutes.setLayoutData(gd);

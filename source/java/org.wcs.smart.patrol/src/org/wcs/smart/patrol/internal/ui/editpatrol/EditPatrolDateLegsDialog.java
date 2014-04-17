@@ -92,7 +92,7 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 		item.addChangeListener(listener);
 		
 		item.setValues(startDate,  endDate);
-		setMessage(item.getTitle());
+		setTitle(item.getTitle());
 		setChangesMade(false);
 		return comp;
 	}
