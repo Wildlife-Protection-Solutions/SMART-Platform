@@ -40,7 +40,7 @@ public class UpgradeEngine {
 		V300
 	}
 	
-	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) {
+	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
 		Session s = HibernateManager.openSession();
 		try {
 			final String version = getSmartVersion(s);
@@ -56,7 +56,7 @@ public class UpgradeEngine {
 					}
 				});
 				if (!isOk[0]) {
-					return;
+					throw new Exception(Messages.UpgradeEngine_IncompatibleVersion);
 				}
 				
 				UpgradeFromVersion fromVersion = null;
