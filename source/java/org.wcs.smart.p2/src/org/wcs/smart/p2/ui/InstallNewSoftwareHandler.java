@@ -31,8 +31,14 @@
  */
 package org.wcs.smart.p2.ui;
 
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.ui.LoadMetadataRepositoryJob;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+import org.wcs.smart.DefaultPerspective;
 import org.wcs.smart.p2.internal.Messages;
 
 /**
@@ -48,7 +54,17 @@ public class InstallNewSoftwareHandler extends PreloadingRepositoryHandler {
 		super();
 	}
 
+
 	protected void doExecute(LoadMetadataRepositoryJob job) {
+		//show default perspective to try to avoid hibernate errors that may occur in field data perspective 
+		//see ticket #894
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+		try {
+			wb.showPerspective(DefaultPerspective.ID, win);
+		} catch (WorkbenchException e) {
+		}
+			
 		getProvisioningUI().openInstallWizard(null, null, job);
 	}
 
