@@ -966,6 +966,7 @@ public class Messages extends NLS {
 	public static String UpgradeEngine_Plugin_Missing;
 	public static String UpgradeEngine_Plugin_UpgradeMessage;
 	public static String UpgradeEngine_Plugin_WrongVersion;
+	public static String UpgradeEngine_UpgradeTask;
 	public static String Upgrader112To200_Error;
 	public static String Upgrader112To200_SubTask_Name;
 	public static String Upgrader200To300_Error;
