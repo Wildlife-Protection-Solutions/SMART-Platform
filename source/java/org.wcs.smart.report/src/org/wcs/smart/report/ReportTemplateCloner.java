@@ -24,6 +24,7 @@ package org.wcs.smart.report;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -129,6 +130,7 @@ public class ReportTemplateCloner implements
 		clone.setConservationArea(engine.getNewCa());
 		clone.setEmployee(null);
 		clone.setParentFolder(newParent);
+		clone.setChildren(new ArrayList<ReportFolder>());
 		
 		engine.getSession().save(clone);
 		engine.addConservationItemMapping(templateFolder, clone);
