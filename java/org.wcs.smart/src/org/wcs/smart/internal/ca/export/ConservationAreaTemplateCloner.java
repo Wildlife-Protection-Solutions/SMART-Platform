@@ -115,6 +115,7 @@ public class ConservationAreaTemplateCloner implements
 			clone.setName(p.getName());
 			
 			engine.getSession().save(clone);
+			engine.addConservationItemMapping(p, clone);
 		}
 		engine.getSession().flush();
 	}

@@ -83,7 +83,7 @@ public class ExportCaHandler extends AbstractHandler {
 						new Object[]{ SmartDB.getCurrentConservationArea().getName() }),
 				Messages.ExportCaHandler_ExportButton, 
 				"org.wcs.smart.exportca.location", //$NON-NLS-1$
-				CaExporter.getDefaultFileName());
+				CaExporter.getDefaultFileName(), false);
 		
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
