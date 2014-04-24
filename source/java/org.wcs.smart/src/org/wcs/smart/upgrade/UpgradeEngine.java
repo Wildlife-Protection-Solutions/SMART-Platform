@@ -41,6 +41,7 @@ public class UpgradeEngine {
 	}
 	
 	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
+		monitor.setTaskName(Messages.UpgradeEngine_UpgradeTask);
 		Session s = HibernateManager.openSession();
 		try {
 			final String version = getSmartVersion(s);
