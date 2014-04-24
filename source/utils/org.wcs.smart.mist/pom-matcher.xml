@@ -6,7 +6,7 @@
 	<groupId>org.wcs.smart.mist</groupId>
 	<artifactId>Mist2Smart</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>Mist2Smart</name>
 
 	<properties>
