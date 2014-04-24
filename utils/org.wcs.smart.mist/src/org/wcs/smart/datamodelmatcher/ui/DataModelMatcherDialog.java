@@ -302,7 +302,7 @@ public class DataModelMatcherDialog extends Composite {
 							ms.loadRows(); //loads the mist data	   
 						} catch (Exception e) {
 							ms.setError(e.toString());
-							//e.printStackTrace();
+							e.printStackTrace();
 						} 
 	    				
 	    			}});
@@ -521,7 +521,7 @@ public class DataModelMatcherDialog extends Composite {
 	    			
 	    			if(!ms.getError().equals("")){
 						MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR);
-				    	messageBox.setMessage("Error while processing data, most likely an incorrect user/pass:   " + ms.getError());
+				    	messageBox.setMessage("Error while processing data, most likely an incorrect user/pass or the file is being used by another application:   " + ms.getError());
 				    	messageBox.open();
 				    	return;
 	    			}
