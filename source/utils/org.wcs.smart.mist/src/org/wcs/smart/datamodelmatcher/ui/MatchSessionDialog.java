@@ -1058,7 +1058,13 @@ public class MatchSessionDialog extends Dialog {
   						return "empty";
   					}
   					if(attributeSelection.getValueText().getText().equals(AttributeSelection.useTotalObservations) ){
-  						fullKey += "|" + "TOTAL_OBSERVED" + "|dValue|1"; //TOTAL_OBSERVED is a keyword for the FME process to use a value for that particular observation.
+  						fullKey += "|" + "k_TOTAL_OBSERVED" + "|dValue|1"; //TOTAL_OBSERVED is a keyword for the FME process to use a value for that particular observation.
+  					}else if(attributeSelection.getValueText().getText().equals(AttributeSelection.useTotalMaleObservations) ){
+  						fullKey += "|" + "k_TOTAL_MALES" + "|dValue|1"; // a keyword for the FME process to use a value for that particular observation.
+  					}else if(attributeSelection.getValueText().getText().equals(AttributeSelection.useTotalFemaleObservations) ){
+  						fullKey += "|" + "k_TOTAL_FEMALES" + "|dValue|1"; // a keyword for the FME process to use a value for that particular observation.
+  					}else if(attributeSelection.getValueText().getText().equals(AttributeSelection.useTotalYoungObservations) ){
+  						fullKey += "|" + "k_TOTAL_YOUNG" + "|dValue|1"; // a keyword for the FME process to use a value for that particular observation.
   					}else{
   						fullKey += "|" + attributeSelection.getValueText().getText() + "|dValue|1";
   					}

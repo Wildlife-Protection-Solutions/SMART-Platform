@@ -54,6 +54,9 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 public class AttributeSelection {
 	public static String useTotalObservations = "<Use TOTAL_OBSERVED from MIST>";
+	public static Object useTotalMaleObservations = "<Use TOTAL_MALES from MIST>";
+	public static Object useTotalFemaleObservations = "<Use TOTAL_FEMALES from MIST>";
+	public static Object useTotalYoungObservations = "<Use TOTAL_YOUNG from MIST>";
 	private Combo langSelector;
 	private String[] codes;
 	
