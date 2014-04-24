@@ -30,25 +30,21 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -61,7 +57,7 @@ import com.ibm.icu.text.MessageFormat;
  */
 public class BackupDialog extends TitleAreaDialog {
 
-	/* only maintain dialog settings within the current applicaiton run */
+	// only maintain dialog settings within the current application run
 	private final static DialogSettings localSettings = new DialogSettings(""); //$NON-NLS-1$
 	
 	private Text txtBackupFile;
@@ -73,7 +69,7 @@ public class BackupDialog extends TitleAreaDialog {
 	private String defaultFileName;
 	
 	private String fileNameKey;
-	
+	private boolean upgradeInstructions;
 	
 	/**
 	 * @param parentShell
@@ -83,9 +79,10 @@ public class BackupDialog extends TitleAreaDialog {
 	 * @param fileNameKey unique key for storing & retrieving selected filename
 	 * between uses of dialog
 	 * @param deafultFileName the default filename to display
+	 * @param upgradeInstructions if upgrade instructions should be displayed
 	 */
 	public BackupDialog(Shell parentShell, String title, String message, 
-			String buttonText, String fileNameKey, String defaultFileName) {
+			String buttonText, String fileNameKey, String defaultFileName, boolean upgradeInstructions) {
 		super(parentShell);
 		this.title = title;
 		this.message = message;
@@ -93,6 +90,7 @@ public class BackupDialog extends TitleAreaDialog {
 		
 		this.fileNameKey = fileNameKey;
 		this.defaultFileName = defaultFileName;
+		this.upgradeInstructions = upgradeInstructions;
 	}
 	
 	/**
@@ -165,26 +163,27 @@ public class BackupDialog extends TitleAreaDialog {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
-		Group g = new Group(main, SWT.NONE);
-		g.setText(SmartUtils.formatStringForLabel("Backup & Upgrading"));
-		FontData fd = g.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		final Font boldFont = new Font(getShell().getDisplay(), fd);
-		g.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				boldFont.dispose();
-			}
-		});
-		g.setFont(boldFont);
-		
-		g.setLayout(new GridLayout(1, false));
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-		Text info = new Text(g, SWT.MULTI | SWT.WRAP);
-		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)info.getLayoutData()).widthHint = 200;
-		info.setText(Messages.BackupDialog_InfoMessage);
-		info.setBackground(g.getBackground());
+		if (upgradeInstructions){
+			Composite g = new Composite(main, SWT.NONE);
+			g.setLayout(new GridLayout());
+			g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+			
+			Link lnk = new Link(g, SWT.NONE);
+			lnk.setText(Messages.BackupDialog_UpgradeQuestion);
+			
+			final Text info = new Text(g, SWT.MULTI | SWT.WRAP | SWT.BORDER);
+			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)info.getLayoutData()).widthHint = 200;
+			info.setText(Messages.BackupDialog_InfoMessage);
+			info.setVisible(false);
+			
+			lnk.addListener(SWT.Selection, new org.eclipse.swt.widgets.Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					info.setVisible(true);
+				}
+			});
+		}
 		
 		setTitle(title);
 		setMessage(message); //"Select the file to backup the system to."

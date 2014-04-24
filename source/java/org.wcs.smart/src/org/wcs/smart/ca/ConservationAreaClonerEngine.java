@@ -236,10 +236,8 @@ public class ConservationAreaClonerEngine {
 	 * @return
 	 * @throws Exception
 	 */
-	public UuidItem getNewConservationItem(UuidItem templateItem) throws Exception{
-		UuidItem item = templateToNewObjectMap.get(templateItem);
-		return item;
-		
+	public UuidItem getNewConservationItem(UuidItem templateItem) {
+		return  templateToNewObjectMap.get(templateItem);
 	}
 	
 

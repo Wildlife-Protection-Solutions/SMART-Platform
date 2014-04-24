@@ -138,7 +138,6 @@ public class Messages extends NLS {
 	public static String AttributeTree_ConfirmDelete_DialogMessage2;
 	public static String AttributeTree_ConfirmDelete_DialogTitle;
 	public static String AttributeTree_Delete_Tooltip;
-	public static String AttributeTree_DeleteMultipleMsg;
 	public static String AttributeTree_DeleteProgress;
 	public static String AttributeTree_DeleteSubProgress;
 	public static String AttributeTree_DisableAll_Tooltip;
@@ -190,6 +189,7 @@ public class Messages extends NLS {
 	public static String BackupDialog_FileLabel;
 	public static String BackupDialog_InfoMessage;
 	public static String BackupDialog_InvalidFile;
+	public static String BackupDialog_UpgradeQuestion;
 	public static String BackupHandler_Backup_DialogButton;
 	public static String BackupHandler_Backup_DialogTitle;
 	public static String BackupHandler_Backup_DialotMessage;

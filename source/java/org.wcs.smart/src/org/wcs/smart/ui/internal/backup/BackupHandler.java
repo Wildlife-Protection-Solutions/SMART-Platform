@@ -90,7 +90,7 @@ public class BackupHandler extends AbstractHandler {
 				Messages.BackupHandler_Backup_DialotMessage, 
 				Messages.BackupHandler_Backup_DialogButton,
 				"org.wcs.smart.backup.location", //$NON-NLS-1$
-				DerbyBackupEngine.getDefaultFileName()); 
+				DerbyBackupEngine.getDefaultFileName(), true); 
 		
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
