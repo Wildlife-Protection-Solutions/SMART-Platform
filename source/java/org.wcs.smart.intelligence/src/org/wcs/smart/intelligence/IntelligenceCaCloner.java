@@ -21,13 +21,17 @@
  */
 package org.wcs.smart.intelligence;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
+import org.wcs.smart.intelligence.report.ReportIntelligence;
 
 /**
  * Cloner that clones intelligence source options.
@@ -45,6 +49,7 @@ public class IntelligenceCaCloner implements IConservationAreaTemplateCloner {
 			IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.IntelligenceCaCloner_ProgressMessage);
 		cloneSources(engine);
+		clonePrintTemplate(engine);
 	}
 
 	
@@ -64,5 +69,25 @@ public class IntelligenceCaCloner implements IConservationAreaTemplateCloner {
 			engine.addConservationItemMapping(s,clone);
 		}
 		engine.getSession().flush();
+	}
+	
+	/*
+	 * clone the printing template
+	 */
+	private void clonePrintTemplate(ConservationAreaClonerEngine engine){
+		//need to clone: the plan template
+		File f = new File(engine.getTemplateCa().getFileDataStoreLocation(),IntelligencePlugIn.INTELLIGENCE_DIR);
+		File templateFile = new File(f, ReportIntelligence.INTELLIGENCE_TEMPLATE);
+		
+		if (templateFile.exists()){
+			//copy plan template
+			f = new File(engine.getNewCa().getFileDataStoreLocation(),IntelligencePlugIn.INTELLIGENCE_DIR);
+			File newFile = new File(f, ReportIntelligence.INTELLIGENCE_TEMPLATE);
+			try {
+				FileUtils.copyFile(templateFile, newFile);
+			} catch (IOException e) {
+				IntelligencePlugIn.log("Error clonging intelligence template.", e); //$NON-NLS-1$
+			}
+		}
 	}
 }
