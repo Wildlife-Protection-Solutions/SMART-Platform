@@ -3,11 +3,13 @@
       <topic href="help/html/Independent_Incidents_Help.html" label="Independent Incidents Plugin">
          <topic href="help/html/Independent_Incidents_Help.html#Overview" label="Overview">
          </topic>
+         <topic href="help/html/Independent_Incidents_Help.html#terms" label="Terminology">
+         </topic>
          <topic href="help/html/Independent_Incidents_Help.html#createnew" label="Creating a New Indepedent Incident">
          </topic>
-         <topic href="help/html/Independent_Incidents_Help.html#addobservations" label="Add Observations to an Incident">
-         </topic>
          <topic href="help/html/Independent_Incidents_Help.html#importexport" label="Import / Export Incidents">
+         </topic>
+         <topic href="help/html/Independent_Incidents_Help.html#view" label="Viewing Incidents">
          </topic>
       </topic>
 </toc>
