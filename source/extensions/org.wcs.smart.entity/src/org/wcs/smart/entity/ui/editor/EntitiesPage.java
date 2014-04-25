@@ -106,7 +106,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 	}
-
+	
 	@Override
 	public void doSaveAs() {
 	}
@@ -309,7 +309,6 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			}
 		}
 		ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
-		entityTable.setSelection(new StructuredSelection(dialog.getEntity()), true);
 	}
 	
 	/*

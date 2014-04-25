@@ -82,7 +82,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	private IEntityListener listener = new IEntityListener() {
 		
 		@Override
-		public void handleEvent(int eventType, Object source) {
+		public void handleEvent(final int eventType, Object source) {
 			boolean isThisEditor = false;
 			
 			if (source instanceof EntityType){
@@ -221,13 +221,8 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 				try{
 					if (entityType.getUuid() != null){
 						s.saveOrUpdate(entityType);
-						entityType.getName();
-						entityType.getDmAttribute().getName();
-						if (entityType.getAttributes() != null){
-							entityType.getAttributes().size();
-						}
 					}
-					
+					entityType.getNames().size();
 					Display.getDefault().syncExec(new Runnable(){
 
 						@Override
@@ -317,6 +312,8 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		session.beginTransaction();
 		try{
 			et = (EntityType) session.load(EntityType.class, uuid);
+			et.getDmAttribute().getName();
+			et.getName();
 			
 			//ensure attributes are lazily loaded
 			if (et.getAttributes() != null){

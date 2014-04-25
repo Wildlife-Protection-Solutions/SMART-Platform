@@ -269,6 +269,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtName.getLayoutData()).widthHint = 100;
 		
 		editLink = createEditLink(toolkit, leftContent);
 		if (editLink != null){
@@ -285,6 +286,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtKey.getLayoutData()).widthHint = 100;
+		
 		l.setToolTipText(Messages.EntityTypeConfigurationPage_KeyTooltip);
 		editLink = createEditLink(toolkit, leftContent);
 		if (editLink != null){
@@ -364,6 +366,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtDmAttribute = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtDmAttribute.setEditable(false);
 		txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtDmAttribute.getLayoutData()).widthHint = 100;
 		toolkit.createLabel(rightContent, ""); //$NON-NLS-1$
 		
 		summaryScroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
