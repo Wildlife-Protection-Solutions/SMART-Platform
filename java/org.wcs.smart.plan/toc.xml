@@ -7,5 +7,7 @@
          </topic>
          <topic href="html/Plan.html#validatePlan" label="Validating Plans">
          </topic>
+         <topic href="html/Plan.html#printPlan" label="Printing Plans">
+         </topic>
       </topic>
 </toc>
