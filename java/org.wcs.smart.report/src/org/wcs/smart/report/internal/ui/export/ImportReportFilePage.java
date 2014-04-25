@@ -77,7 +77,7 @@ public class ImportReportFilePage extends WizardPage {
 		lbl.setText(Messages.ImportReportFilePage_FileLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		final ListViewer lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI);
+		final ListViewer lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstFiles.setContentProvider(ArrayContentProvider.getInstance());
 		lstFiles.setLabelProvider(new LabelProvider(){
 			@Override
