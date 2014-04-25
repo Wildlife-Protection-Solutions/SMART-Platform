@@ -77,6 +77,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	private EntitySightingQuery currentQuery;
 	
 	private Label lblQueryProgress;
+	private Form form;
 	
 	/**
 	 * Creates a new sighting page
@@ -121,14 +122,13 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 		toolkit.setBorderStyle(SWT.BORDER);
 		
-		Form form = toolkit.createForm(parent);
+		form = toolkit.createForm(parent);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		GridLayout glayout = new GridLayout();
 		glayout.verticalSpacing = 0;
 		glayout.marginHeight = 0;
 		form.getBody().setLayout(glayout);
-		form.setText(MessageFormat.format(Messages.SightingPage_SightingPageName, new Object[]{getEditorInput().getName()}));
 		
 		Section sec = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.CLIENT_INDENT);		
 		sec.setText(Messages.SightingPage_FiltersLabel);
@@ -234,6 +234,8 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	@Override
 	public void updatePage(Session currentSession, boolean typeModified) {
 		entityFilter.setEntities(parentEditor.getEntities(currentSession));
+		form.setText(MessageFormat.format(Messages.SightingPage_SightingPageName, 
+				new Object[]{parentEditor.getEntityType().getName()}));
 		
 		if (typeModified){
 			sightingTable.setEntityType(parentEditor.getEntityType());

@@ -339,7 +339,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	 */
 	public void saveEntityType(){
 		final EntityType et = entityType;
-
+		
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getSite().getShell());
 		try{
 		dialog.run(true, false, new IRunnableWithProgress() {
