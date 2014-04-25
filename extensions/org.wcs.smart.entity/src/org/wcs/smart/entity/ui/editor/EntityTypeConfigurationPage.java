@@ -963,7 +963,8 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	 */
 	public void updatePage(Session currentSession, boolean typeChanged) {
 		EntityType type = this.parentEditor.getEntityType();
-		form.setText(MessageFormat.format(Messages.EntityTypeConfigurationPage_PageName, new Object[]{getEditorInput().getName()}));
+		form.setText(MessageFormat.format(Messages.EntityTypeConfigurationPage_PageName, 
+				new Object[]{parentEditor.getEntityType().getName()}));
 		
 		type.getNames().size();
 		txtName.setText(type.getName());
