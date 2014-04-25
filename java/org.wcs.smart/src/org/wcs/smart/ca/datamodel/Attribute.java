@@ -59,7 +59,7 @@ import org.wcs.smart.internal.Messages;
 @Table(name = "smart.dm_attribute")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attribute extends DmObject{
-
+	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 1024;
 	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
 	public static final String BOOLEAN_TRUE_LABEL = Messages.Attribute_BooleanAttribute_True_Label;
 	public static final String BOOLEAN_FALSE_LABEL = Messages.Attribute_BooleanAttribute_False_Label;
