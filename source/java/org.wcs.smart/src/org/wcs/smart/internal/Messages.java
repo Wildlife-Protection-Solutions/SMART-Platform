@@ -154,6 +154,7 @@ public class Messages extends NLS {
 	public static String AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;
 	public static String AttributeValidator_InvalidAttributeValue;
 	public static String AttributeValidator_RegexMatchFailed;
+	public static String AttributeValidator_StringTooLong;
 	public static String AttributeValidator_ValueRequired;
 	public static String AttributeValidator_ValueToBig;
 	public static String AttributeValidator_ValueToSmall;

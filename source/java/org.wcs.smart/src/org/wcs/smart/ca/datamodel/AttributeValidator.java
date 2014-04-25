@@ -94,6 +94,11 @@ public class AttributeValidator {
 				attribute.getRegex()});
 			}
 		}
+		
+		if (value != null && ((String)value).length() > Attribute.STRING_ATTRIBUTE_MAX_LENGTH){
+			return MessageFormat.format(Messages.AttributeValidator_StringTooLong, 
+					new Object[]{Attribute.STRING_ATTRIBUTE_MAX_LENGTH});
+		}
 		return null;
 	}
 	
