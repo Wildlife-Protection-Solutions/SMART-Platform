@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
@@ -75,6 +76,8 @@ public class AddEntityQueryJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		//required if run during restore to ensure Display.syncexec calls don't block
+		DisplayAccess.accessDisplayDuringStartup();
 		
 		monitor.beginTask(Messages.AddEntityQueryJob_Progress1, 10);
 
@@ -123,6 +126,7 @@ public class AddEntityQueryJob extends Job {
 			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION, session);
 			session.getTransaction().commit();
 		} catch (final Exception e) {
+			//causing deadlock if occurs during restore.
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
