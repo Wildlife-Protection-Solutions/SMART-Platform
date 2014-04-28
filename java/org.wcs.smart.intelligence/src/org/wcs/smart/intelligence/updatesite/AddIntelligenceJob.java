@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
@@ -60,6 +61,9 @@ public class AddIntelligenceJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		//required if run during restore to ensure Display.syncexec calls don't block
+		DisplayAccess.accessDisplayDuringStartup();
+				
 		final IntelligenceTablesMarkers mark = new IntelligenceTablesMarkers();
 		Session session = HibernateManager.openSession();
 		try{

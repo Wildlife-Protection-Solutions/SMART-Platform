@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -44,6 +45,9 @@ public class AddPlanJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		//required if run during restore to ensure Display.syncexec calls don't block
+		DisplayAccess.accessDisplayDuringStartup();
+				
 		final PlanTablesMarkers mark = new PlanTablesMarkers();
 		Session session = HibernateManager.openSession();
 		try{

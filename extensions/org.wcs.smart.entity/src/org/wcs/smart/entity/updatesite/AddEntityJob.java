@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -92,6 +93,8 @@ public class AddEntityJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		//required if run during restore to ensure Display.syncexec calls don't block
+		DisplayAccess.accessDisplayDuringStartup();
 		
 		monitor.beginTask(Messages.AddEntityJob_TaskName, 10);
 
