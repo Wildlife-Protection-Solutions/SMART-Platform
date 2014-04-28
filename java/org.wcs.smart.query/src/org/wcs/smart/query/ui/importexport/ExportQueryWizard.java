@@ -276,9 +276,11 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 
 		HashMap<String, Object> ops = null;
 		try{
-			ops = page2.getOptions();
-			if (ops != null){
-				SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf((Character)ops.get(ICsvQueryExporter.DELIMITER_KEY)));
+			if (page2 != null){
+				ops = page2.getOptions();
+				if (ops != null){
+					SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf((Character)ops.get(ICsvQueryExporter.DELIMITER_KEY)));
+				}
 			}
 		}catch(Exception ex){
 			MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExportDialogTitle, ex.getMessage());
