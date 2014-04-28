@@ -177,6 +177,7 @@ public class QueryImportEngine {
 					Language best = SmartUtils.findLanguageMatch(langs);
 					if (best != null){
 						name = query.findName(best);
+						query.updateName(SmartDB.getCurrentLanguage(), name);
 					}else{
 						name = ""; //$NON-NLS-1$
 					}
