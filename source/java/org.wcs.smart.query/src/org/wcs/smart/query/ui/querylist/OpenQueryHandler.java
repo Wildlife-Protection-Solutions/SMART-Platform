@@ -69,7 +69,7 @@ public class OpenQueryHandler extends AbstractHandler {
 	public static void openQuery(QueryEditorInput input){
 		try {
 			if (SmartDB.isMultipleAnalysis()){
-				//ensure data model is loaded; otherwise end up with deallocking issues
+				//ensure data model is loaded; otherwise end up with deadlocking issues
 				QueryDataModelManager.getInstance().getDataModel();
 			}
 			 

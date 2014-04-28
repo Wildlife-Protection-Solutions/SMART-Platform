@@ -59,6 +59,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.observation_query")
 public class PatrolObservationQuery extends ObservationQuery{
 
+	private Object LOCK = new Object();
 
 	@Transient
 	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
@@ -107,29 +108,35 @@ public class PatrolObservationQuery extends ObservationQuery{
 	}
 	
 	@Override
-	protected synchronized void initQueryColumns() {
+	protected void initQueryColumns() {
 			if (this.queryColumns != null){
 				return;
 			}
-			QueryColumn[] cols = PatrolQueryColumnCache.getInstance().getObservationQueryColumns();
+			synchronized (LOCK) {
+				if (this.queryColumns != null){
+					return;
+				}	
 			
-			queryColumns = new ArrayList<QueryColumn>();
-			HashSet<String> visible = null;
-			if (visibleColumns != null){
-				String[] bits = visibleColumns.split(","); //$NON-NLS-1$
-				visible = new HashSet<String>();
-				for (int i = 0; i < bits.length; i ++){
-					visible.add(bits[i]);
+				QueryColumn[] cols = PatrolQueryColumnCache.getInstance().getObservationQueryColumns();
+			
+				queryColumns = new ArrayList<QueryColumn>();
+				HashSet<String> visible = null;
+				if (visibleColumns != null){
+					String[] bits = visibleColumns.split(","); //$NON-NLS-1$
+					visible = new HashSet<String>();
+					for (int i = 0; i < bits.length; i ++){
+						visible.add(bits[i]);
+					}
 				}
-			}
-			for (int i = 0; i < cols.length; i ++){
-				queryColumns.add(cols[i]);
-				if (visible == null){
-					cols[i].setVisible(true);
-				}else if (visible.contains(cols[i].getKey())){
-					cols[i].setVisible(true);
-				}else{
-					cols[i].setVisible(false);
+				for (int i = 0; i < cols.length; i ++){
+					queryColumns.add(cols[i]);
+					if (visible == null){
+						cols[i].setVisible(true);
+					}else if (visible.contains(cols[i].getKey())){
+						cols[i].setVisible(true);
+					}else{
+						cols[i].setVisible(false);
+					}
 				}
 			}
 	}

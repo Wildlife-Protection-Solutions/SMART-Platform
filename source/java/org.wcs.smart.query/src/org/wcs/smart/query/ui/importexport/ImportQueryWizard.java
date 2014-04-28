@@ -58,6 +58,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -201,11 +202,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				//open query in editor if only importing a single query
 				if (queries.size() == 1 && firstQuery != null){
 					QueryEditorInput qi = new QueryEditorInput(firstQuery);
-					try {
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, firstQuery.getType().getEditorId());
-					} catch (PartInitException e) {
-						QueryPlugIn.displayLog(Messages.ImportQueryWizard_ErrorOpeningEditor + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
-					}
+					OpenQueryHandler.openQuery(qi);
 				}else{
 					MessageDialog.openInformation(getShell(), Messages.ImportQueryWizard_ImportCompleteTitle, MessageFormat.format(Messages.ImportQueryWizard_ImportCompleteMessage, new Object[]{importCnt, queries.size()}));
 				}
@@ -250,11 +247,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				//open query in editor if only importing a single query
 				if (files.size() == 1 && firstQuery != null){
 					QueryEditorInput qi = new QueryEditorInput(firstQuery);
-					try {
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, firstQuery.getType().getEditorId());
-					} catch (PartInitException e) {
-						QueryPlugIn.displayLog(Messages.ImportQueryWizard_ErrorOpeningEditor + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
-					}
+					OpenQueryHandler.openQuery(qi);
 				}else{
 					MessageDialog.openInformation(getShell(), Messages.ImportQueryWizard_ImportCompleteTitle, MessageFormat.format(Messages.ImportQueryWizard_ImportCompleteMessage, new Object[]{importCnt, files.size()}));
 				}

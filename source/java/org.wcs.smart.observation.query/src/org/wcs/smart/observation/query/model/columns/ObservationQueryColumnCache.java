@@ -83,7 +83,9 @@ public class ObservationQueryColumnCache {
 				return cloneColumns(queryColumns);
 			}	
 		
-		
+			//outside job to prevent deadlocking
+			final DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+			
 			Job j = new Job(Messages.QueryColumn_LoadingObservationColumnJobName){
 
 			@Override
@@ -113,8 +115,6 @@ public class ObservationQueryColumnCache {
 					}
 				}
 
-				DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
-				
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
