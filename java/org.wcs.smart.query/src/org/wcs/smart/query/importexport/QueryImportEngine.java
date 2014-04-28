@@ -27,12 +27,15 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -44,6 +47,7 @@ import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;
 import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query definition importer
@@ -163,7 +167,20 @@ public class QueryImportEngine {
 			}
 			String name = query.findNameNull(SmartDB.getCurrentLanguage());
 			if (name == null){
-				name = query.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				name = query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			
+				if (name == null){
+					Set<Language> langs = new HashSet<Language>();
+					for(Label l : query.getNames()){
+						langs.add(l.getLanguage());
+					}
+					Language best = SmartUtils.findLanguageMatch(langs);
+					if (best != null){
+						name = query.findName(best);
+					}else{
+						name = ""; //$NON-NLS-1$
+					}
+				}
 			}
 			query.setName(name);
 		
