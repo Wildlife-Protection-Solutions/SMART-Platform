@@ -35,6 +35,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.newwizard.NewQueryWizard;
+import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
 
 /**
  * Query handler that prompt the user for the type of query they
@@ -85,13 +86,7 @@ public class CreateUnknownQueryHandler extends AbstractHandler {
 	}
 	private void createQuery(IQueryType qtype){
 		/* open editor for query type */
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-					new QueryEditorInput(qtype),
-					qtype.getEditorId());	
-		} catch (Throwable t) {
-			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
-		}
+		OpenQueryHandler.openQuery(new QueryEditorInput(qtype));
 	}
 
 	

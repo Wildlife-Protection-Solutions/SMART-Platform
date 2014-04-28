@@ -90,7 +90,9 @@ public class PatrolQueryColumnCache {
 				return cloneColumns(queryColumns);
 			}	
 		
-		
+			//outside job to prevent deadlocking
+			final DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+			
 			Job j = new Job(Messages.QueryColumn_LoadingObservationColumnJobName){
 
 			@Override
@@ -125,7 +127,7 @@ public class PatrolQueryColumnCache {
 					}
 				}
 
-				DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+				
 				
 				// add data model category columns
 				int numCategory =QueryDataModelManager.getInstance().getActiveDepth();
