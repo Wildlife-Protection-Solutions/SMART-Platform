@@ -75,7 +75,9 @@ public class EntityQueryColumnCache {
 			if (queryColumns != null) {
 				return cloneColumns(queryColumns);
 			}
-
+			//outside job to prevent deadlocking
+			final DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+			
 			Job j = new Job(Messages.EntityQueryColumnCache_jobname) {
 
 				@Override
@@ -108,9 +110,6 @@ public class EntityQueryColumnCache {
 							cols.add(new FixedQueryColumn(item));
 						}
 					}
-
-					DataModel dataModel = QueryDataModelManager.getInstance()
-							.getDataModel();
 
 					// add data model category columns
 					int numCategory = QueryDataModelManager.getInstance()
