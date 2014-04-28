@@ -122,19 +122,11 @@ public class DeleteItemHandler extends AbstractHandler {
 			if (query == null) throw new Exception(Messages.DeleteItemHandler_ErrorQueryNotFound);
 			
 			if (!QueryEventManager.getInstance().fireBeforeDelete(query, s)){
-				return;
-			}
-			
-			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getHibernateClass().getSimpleName() + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-			q.setParameter("uuid", o.getUuid()); //$NON-NLS-1$
-			int deleted = q.executeUpdate();
-			if (deleted != 1){
-				QueryPlugIn.log(MessageFormat.format(Messages.DeleteItemHandler_ErrorDeletingQuery, new Object[]{ o.getName()}), null);
 				s.getTransaction().rollback();
 				return;
-			}else{
-				s.getTransaction().commit();
 			}
+			s.delete(query);
+			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			QueryPlugIn.log(MessageFormat.format(
