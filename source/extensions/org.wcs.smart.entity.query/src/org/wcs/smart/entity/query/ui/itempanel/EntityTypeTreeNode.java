@@ -55,7 +55,7 @@ public class EntityTypeTreeNode implements IItemTreeNode {
 	public EntityTypeTreeNode(Type type) {
 		if (type == Type.FILTER) {
 			provider = new EntityTypeFilterContentProvider();
-			labelprovider =EntityTypeFilterContentProvider.lblProvider;
+			labelprovider = EntityTypeFilterContentProvider.lblProvider;
 			name = Messages.EntityTypeTreeNode_FilterLabel;
 		} else if (type == Type.GROUPBY) {
 			provider = new EntityTypeSummaryContentProvider();

@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.ui.itempanel.EntityTypeTreeNode.Type;
 import org.wcs.smart.hibernate.SmartDB;
@@ -76,6 +78,7 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 	private TreeViewer filterTreeViewer;
 	private Composite main;
 	private AreaTreeNode areaTreeNode;
+	private EntityTypeTreeNode entityNode;
 	
 	/*
 	 * listener for refreshing areas
@@ -94,6 +97,21 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 			}
 		}
 	};
+	private IEntityListener entityListener = new IEntityListener(){
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			if (eventType == EntityEventManager.ENTITY_TYPE_ADDED || 
+					eventType == EntityEventManager.ENTITY_TYPE_DELETED ||
+					eventType == EntityEventManager.ENTITY_TYPE_MODIFIED ){
+			
+				((EntityTypeSummaryContentProvider)entityNode.getContentProvider()).clearTypes();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						filterTreeViewer.refresh();
+					}});
+			}
+		}};
 	
 	public  EntitySummaryItemPanel(){
 	}
@@ -106,10 +124,12 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 		main.setLayout(gl);
 		
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		EntityEventManager.getInstance().addListener(entityListener);
 		main.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+				EntityEventManager.getInstance().removeListener(entityListener);
 			}
 		});
 		
@@ -129,7 +149,9 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 			groupbynodes.add(areaTreeNode);
 		}
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
-		groupbynodes.add(new EntityTypeTreeNode(Type.GROUPBY));
+		
+		entityNode = new EntityTypeTreeNode(Type.GROUPBY);
+		groupbynodes.add(entityNode);
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));

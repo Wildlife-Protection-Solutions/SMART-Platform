@@ -45,10 +45,12 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.query.ui.itempanel.GeneralTreeNode;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralTreeNode;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -73,6 +75,7 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 	private Composite main = null;
 	private TreeViewer filterTreeViewer;
 	private AreaTreeNode areaTreeNode;
+	private EntityTypeTreeNode entityNode;
 	
 	/*
 	 * listener for refreshing areas
@@ -92,6 +95,23 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 		}
 	};
 	
+	private IEntityListener entityListener = new IEntityListener(){
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			if (eventType == EntityEventManager.ENTITY_TYPE_ADDED || 
+					eventType == EntityEventManager.ENTITY_TYPE_DELETED ||
+					eventType == EntityEventManager.ENTITY_TYPE_MODIFIED ){
+			
+				((EntityTypeFilterContentProvider)entityNode.getContentProvider()).clear();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						filterTreeViewer.refresh();
+					}});
+			}
+		}};
+	
+	
 	public EntityQueryFilterPanel() {
 		
 	}
@@ -103,12 +123,16 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 		main.setLayout(gl);
 		
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		EntityEventManager.getInstance().addListener(entityListener);
+		
 		main.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+				EntityEventManager.getInstance().removeListener(entityListener);
 			}
 		});
+		
 		
 		
 		
@@ -119,7 +143,8 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
 			nodes.add(areaTreeNode);
 		}
-		nodes.add(new EntityTypeTreeNode(EntityTypeTreeNode.Type.FILTER));
+		entityNode = new EntityTypeTreeNode(EntityTypeTreeNode.Type.FILTER);
+		nodes.add(entityNode);
 		nodes.add(new OperatorsTreeNode());
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE, nodes);
