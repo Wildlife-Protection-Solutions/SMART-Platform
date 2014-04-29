@@ -42,6 +42,8 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
 
 /**
@@ -63,12 +65,15 @@ public class SmartPolicy extends Policy {
 		setVisibleInstalledIUQuery(new UserVisibleRootQuery());
 		setRepositoryPreferencePageId("org.wcs.smart.p2.ui.SitesPreferencePage"); //$NON-NLS-1$		
 		setRepositoryPreferencePageName(Messages.SmartPolicy_PreferencePageName);
+		setRepositoriesVisible(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN);
 		Activator.getDefault().updateWithPreferences(this);
 	}
 
 	public IStatus getNoProfileChosenStatus() {
 		return Activator.getNoSelfProfileStatus();
 	}
+	
+	
 
 	public boolean continueWorkingOperation(ProfileChangeOperation operation, Shell shell) {
 		// don't continue if superclass has already identified problem scenarios
