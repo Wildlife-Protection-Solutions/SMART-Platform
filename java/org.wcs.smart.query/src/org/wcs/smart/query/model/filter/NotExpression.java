@@ -67,7 +67,7 @@ public class NotExpression implements IFilter {
 	
 	@Override
 	public void accept(IFilterVisitor visitor) {
-		visitor.visit(filter);
+		filter.accept(visitor);
 		visitor.visit(this);
 	}
 	
