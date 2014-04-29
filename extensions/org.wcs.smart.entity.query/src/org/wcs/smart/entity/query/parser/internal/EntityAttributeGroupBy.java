@@ -254,6 +254,10 @@ public class EntityAttributeGroupBy implements IGroupBy {
 			if (ea == null){
 				throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_EntityAttributeNotFound1, new Object[]{entityAttributeKey, entityKey}));
 			}
+			//cache names
+			ea.getEntityType().getName();
+			ea.getName();
+			
 			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, ea.getDmAttribute().getKeyId());
 			if (attribute == null) {
 				throw new Exception(MessageFormat.format(Messages.EntityAttributeGroupBy_AttributeNotFound,new Object[] { ea.getDmAttribute().getKeyId() }));

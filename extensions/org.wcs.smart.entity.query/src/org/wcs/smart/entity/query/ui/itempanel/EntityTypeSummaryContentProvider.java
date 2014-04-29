@@ -94,6 +94,9 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 		provider.dispose();
 	}
 
+	public void clearTypes(){
+		this.types = null;
+	}
 	
 	/**
 	 * 
