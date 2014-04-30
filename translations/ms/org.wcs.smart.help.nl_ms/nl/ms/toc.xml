@@ -18,6 +18,8 @@
    </topic>
    <topic href="html/AdministrativeTasks.html" label="Administrator Tasks">
       <topic href="html/AdministrativeTasks.html#createca" label="Creating a Conservation Area">
+         <topic href="html/AdministrativeTasks.html#catemplate" label="Conservation Area Templates">
+         </topic>
          <topic href="html/AdministrativeTasks.html#caproperties" label="Conservation Area Properties">
          </topic>
          <topic href="html/AdministrativeTasks.html#caadminuser" label="Defining an Administrative User">
@@ -55,6 +57,8 @@
       </topic>
       <topic href="html/AdministrativeTasks.html#AutoBackup" label="Automatic Backup">
       </topic>
+      <topic href="html/AdministrativeTasks.html#InstallingPlugins" label="Installing Plug-Ins">
+      </topic>
    </topic>
    <topic href="html/ComponentsOfSMART.html" label="Components Of Smart">
       <topic href="html/ComponentsOfSMART.html#Overview" label="Overview">
@@ -74,17 +78,19 @@
          </topic>
       </topic>
       <topic href="html/ComponentsOfSMART.html#Patrol" label="Patrol Perspective">
-         <topic href="html/ComponentsOfSMART.html#PatrolOp" label="Patrol Options">
+         <topic href="html/ComponentsOfSMART.html#PatrolOp" label="Field Data Collection Options">
          </topic>
          <topic href="html/ComponentsOfSMART.html#PatrolMandates" label="Patrol Mandates">
          </topic>
-         <topic href="html/ComponentsOfSMART.html#PatrolTypes" label="PatrolTypes">
+         <topic href="html/ComponentsOfSMART.html#PatrolTypes" label="Patrol Types">
          </topic>
          <topic href="html/ComponentsOfSMART.html#PatrolTeams" label="Patrol Teams">
          </topic>
          <topic href="html/ComponentsOfSMART.html#CreatePatrol" label="Creating Patrols">
          </topic>
          <topic href="html/ComponentsOfSMART.html#ImportWaypoints" label="Importing Waypoints">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ImportWaypointsHelp" label="Importing Waypoints - Common Solutions for CSV File Import Problems">
          </topic>
          <topic href="html/ComponentsOfSMART.html#ImportTracks" label="Importing Tracks">
          </topic>
@@ -98,7 +104,9 @@
       <topic href="html/ComponentsOfSMART.html#Query" label="Query Perspective">
          <topic href="html/ComponentsOfSMART.html#QueryType" label="Types of Queries">
          </topic>
-         <topic href="html/ComponentsOfSMART.html#PatrolObservationQuery" label="Patrol and Observation Queries">
+         <topic href="html/ComponentsOfSMART.html#PatrolObservationQuery" label="Patrol, Incident, and Observation Queries">
+            <topic href="html/ComponentsOfSMART.html#ObservationIncidentFilter" label="Observation vs Incident Filters">
+            </topic>
          </topic>
          <topic href="html/ComponentsOfSMART.html#SummaryQuery" label="Summary Query">
          </topic>
@@ -107,20 +115,6 @@
       </topic>
       <topic href="html/ComponentsOfSMART.html#Reports" label="Report Perspective">
          <topic href="html/ComponentsOfSMART.html#reporttools" label="Report Components and Tools">
-         </topic>
-      </topic>
-      <topic href="html/ComponentsOfSMART.html#Plans" label="Plan Perspective">
-         <topic href="html/ComponentsOfSMART.html#DevelopingPlans" label="Developing Plans">
-         </topic>
-         <topic href="html/ComponentsOfSMART.html#LinkPatrolPlan" label="Linking Patrols To Plans">
-         </topic>
-         <topic href="html/ComponentsOfSMART.html#validatePlan" label="Validating Plans">
-         </topic>
-      </topic>
-      <topic href="html/ComponentsOfSMART.html#Intelligence" label="Intelligence Perspective">
-         <topic href="html/ComponentsOfSMART.html#CreateIntel" label="Creating Intelligence Records">
-         </topic>
-         <topic href="html/ComponentsOfSMART.html#QueryIntel" label="Quering Intelligence Records">
          </topic>
       </topic>
       <topic href="html/ComponentsOfSMART.html#DataModel" label="The SMART Data Model">
@@ -142,6 +136,10 @@
       <topic href="html/ComponentsOfSMART.html#CrossCa" label="Cross Conservation Area Analysis">
          <topic href="html/ComponentsOfSMART.html#ccalogin" label="Login Requirements">
          </topic>
+         <topic href="html/ComponentsOfSMART.html#ccaaoverview" label="Overview">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ccaabasemaps" label="Basemaps">
+         </topic>
          <topic href="html/ComponentsOfSMART.html#ccaqueries" label="Queries">
          </topic>
          <topic href="html/ComponentsOfSMART.html#ccareports" label="Report">
@@ -159,6 +157,10 @@
    <topic href="html/SMART_TipsTricks.html" label="Tips,Tricks, and FAQ">
       <topic href="html/SMART_TipsTricks.html#Tips" label="Tips &amp; Tricks">
          <topic href="html/SMART_TipsTricks.html#ShiftSelect" label="Checkbox List Select">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#ReportDateTimeOrder" label="Ordering Dates &amp; Times in Report Charts">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#FilterSearching" label="Data Model &amp; Filter Searching">
          </topic>
       </topic>
       <topic href="html/SMART_TipsTricks.html#FAQ" label="FAQ">
@@ -190,6 +192,37 @@
          </topic>
          <topic href="html/SMART_TipsTricks.html#Q14" label="GPSBabel On Mac">
          </topic>
+         <topic href="html/SMART_TipsTricks.html#Q15" label="Import Patrol Patrol Type Not Found">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q16" label="Adding Totals or Averages to Summary Query">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q17" label="Summarizing Report Columns">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q18" label="SMART won&apos;t start">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q19" label="Adding Patrol ID Filter to Report">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q20" label="Adding Trendline to Report Chart">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q22" label="Report Date Ranges and Internationalization">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q23" label="Restoring Backup Errors">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q24" label="Gridded Queries - Grid Too Large">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q25" label="Theming Styles and Classes">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q26" label="Importing Conservation Area already exists">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q27" label="Patrol Import Errors">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q28" label="More Help">
+         </topic>
       </topic>
+   </topic>
+   <topic href="html/CommunityForum.html" label="Community Forum">
+   </topic>
+   <topic label="SMART Plugins">
+      <anchor id="SmartExtensions"/>
    </topic>
 </toc>
