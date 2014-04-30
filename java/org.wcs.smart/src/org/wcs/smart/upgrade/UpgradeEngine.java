@@ -125,6 +125,7 @@ public class UpgradeEngine {
 			for (IDatabaseUpgrader upgrader : extensions) {
 				upgrader.upgrade(s, monitor);
 			}
+			monitor.subTask(""); //$NON-NLS-1$
 			
 		} finally {
 			s.close();
