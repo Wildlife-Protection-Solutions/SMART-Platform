@@ -24,8 +24,8 @@ providing unique functionality for each perspective. </p>
 
 <p><strong>Overview</strong></p>
 
-<p><img alt="SMART Overview" src="images/Overview.png" width="631" height="485"
-/></p>
+<p> <input type="image" name="overview" alt="overview"
+src="images/overview2.png" /></p>
 
 <p></p>
 
@@ -45,7 +45,7 @@ providing unique functionality for each perspective. </p>
         width="22" height="21" /></td>
     </tr>
     <tr>
-      <td>Patrol Perspective</td>
+      <td>Field Data Perspective</td>
       <td><img alt="patrol perspective" src="images/iconPatrolPerspective.png"
         width="22" height="21" /></td>
     </tr>
@@ -61,8 +61,8 @@ providing unique functionality for each perspective. </p>
     </tr>
     <tr>
       <td>SMART Plans</td>
-      <td><img alt="plan icon" src="images/plans.png" width="21" height="20"
-      /></td>
+      <td><img alt="plans icon" src="images/plansIcon.png" width="22"
+        height="23" /></td>
     </tr>
     <tr>
       <td>SMART Intelligence</td>
@@ -71,6 +71,8 @@ providing unique functionality for each perspective. </p>
     </tr>
   </tbody>
 </table>
+
+<p></p>
 
 <h2><a id="MapView">Map Perspective</a></h2>
 
@@ -172,8 +174,8 @@ mapping window. </p>
     </tr>
     <tr>
       <td>Add a layer to the map</td>
-      <td><img alt="Add Layers" src="images/iconAddLayers.png" width="20"
-        height="19" /></td>
+      <td><img alt="add layer" src="images/addLayer12.png" width="16"
+        height="16" /></td>
     </tr>
   </tbody>
 </table>
@@ -352,21 +354,23 @@ window will be:</p>
 
 <p></p>
 
-<p><img alt="Patrol Perspective" src="images/PatrolPerspective.png"
-width="1059" height="772" /></p>
+<p><img alt="patrol overview 2" src="images/patrols2.png" width="946"
+height="770" /></p>
 
 <p></p>
 
-<h4><a id="PatrolOp">Patrol Options</a></h4>
+<h4><a id="PatrolOp">Field Data Collection Options</a></h4>
 
 <p>As part of the initialization process for a new Conservation Area, the
-Administrator is required to configure various patrol parameters. Patrol
-Options allow for (1) edits to a patrol to be permissible during a set period
-of time and (2) additional information to be available during the creation of
-patrols. This process is not a requirement during the initialization of the
-patrol information for the Conservation Area.</p>
+Administrator is required to configure various field data parameters. </p>
 
-<p></p>
+<p>Field Data Options allow for:</p>
+<ul>
+  <li>Edits to a patrol to be permissible during a set period of time </li>
+  <li>Additional information to be available during the creation of patrols.
+    This process is not a requirement during the initialization of the patrol
+    information for the Conservation Area.</li>
+</ul>
 
 <p><strong>Record Distance and Direction:</strong> If checked, patrol data will
 have two extra columns to record distance and direction offsets of observations
@@ -376,16 +380,23 @@ from the captured coordinate information gathered by the GPS.</p>
 during which the patrol data can be edited by non-Administrator accounts. The
 default of -1 specifies that the patrol will always be editable.</p>
 
+<p><strong>Data Entry Projections:</strong> Projection in which data is
+displayed and entered by default.</p>
+
 <p></p>
 
-<p><img alt="patrol Options" src="images/patrolOptions.png" width="509"
-height="395" /></p>
+<p><img alt="field data options" src="images/fieldDataOptions.png"
+width="525" height="480" /></p>
+
+<p></p>
 
 <h4><a id="PatrolMandates">Patrol Mandates</a></h4>
 
 <p>Patrol Mandates are a list of Mandates that are associated with each patrol.
 This process is not a requirement during the initialization of the patrol
 information for the Conservation Area.</p>
+
+<p><img alt="mandates" src="images/mandates.png" width="432" height="367" /></p>
 
 <p></p>
 
@@ -398,10 +409,12 @@ for future use.</p>
 <p><strong>Delete: </strong>Permanently deletes the mandate from the list. This
 is only possible if no patrol information is associated with it.</p>
 
+<p><strong>Edit Key:</strong> Allows for manual changes to the primary key.</p>
+
 <p><em>Note: The language is set before entering in the mandate list
 entries.</em></p>
 
-<p><img alt="mandates" src="images/mandates.png" width="508" height="321" /></p>
+<p></p>
 
 <h4><a id="PatrolTypes">Patrol Types</a></h4>
 
@@ -410,6 +423,11 @@ Conservation Area. The base options for Patrol Types are Air, Ground and
 Marine. Each of these options can be disabled if not in use by the Conservation
 Area. The Transportation Options are the specific types of transportation for
 the base options of Air, Ground and Marine. </p>
+
+<p></p>
+
+<p><img alt="transport types" src="images/transportationTypes.png" width="541"
+height="530" /></p>
 
 <p></p>
 
@@ -422,15 +440,10 @@ It can later be enabled for future use.</p>
 <p><strong>Delete: </strong>Permanently deletes the option/type from the list.
 This is only possible if no patrol information is associated with it.</p>
 
-<p></p>
+<p><strong>Edit Key:</strong> Allows for manual changes to the primary key.</p>
 
 <p><em>Note: The language is set before entering in the transportation
 options.</em></p>
-
-<p></p>
-
-<p><img alt="transportation types" src="images/transportationTypes.png"
-width="508" height="461" /></p>
 
 <p></p>
 
@@ -440,6 +453,11 @@ width="508" height="461" /></p>
 this screen. If no mandates have been created, there will be no option to
 select from the list. This process is not a requirement during the
 initialization of the patrol information for the Conservation Area.</p>
+
+<p></p>
+
+<p><img alt="patrol teams" src="images/patrolTeams.png" width="481"
+height="422" /></p>
 
 <p></p>
 
@@ -464,9 +482,6 @@ only possible if no patrol information is associated with it.</p>
 <p></p>
 
 <p><em>Note: The language is set before entering in the patrol teams.</em></p>
-
-<p><img alt="patrol teams" src="images/patrolTeams.png" width="509"
-height="340" /></p>
 
 <p></p>
 
@@ -536,7 +551,7 @@ width="695" height="311" /></p>
 
 <p></p>
 
-<p><strong>Start Time</strong> - the patrol start time for that day or leg.</p>
+<p>Start Time - the patrol start time for that day or leg.</p>
 
 <p><strong>End Time</strong> - the patrol end time for that day or leg.</p>
 
@@ -552,8 +567,9 @@ available waypoints).</p>
 coordinates and timestamps.</p>
 
 <p><strong>Import Waypoints</strong> - opens the GPS waypoint wizard.</p>
-<br />
 
+<p><br />
+</p>
 
 <p><strong><u>Waypoint Table Fields</u></strong></p>
 
@@ -587,6 +603,9 @@ a mass storage device.</p>
 
 <p><strong>GPX Import -</strong> Select this method if the GPS functions as a
 mass storage device.</p>
+
+<p><strong>CSV File - </strong>Select this method if your data is stored in a
+CSV file.</p>
 <br />
 <br />
 
@@ -634,10 +653,247 @@ only the waypoints for the selected date.</p>
 
 <p><strong>Select which waypoints to import for &lt;date&gt; -</strong> The
 SMART user will select and assign waypoints to the selected date.</p>
+<br />
+<br />
+
+
+<p><strong><u>CSV File Import Options</u></strong></p>
+
+<p><strong>Select CSV File -</strong> Use this to select the CSV file from
+which you want to import your waypoints.</p>
+
+<p><strong>Import All (and assign to correct day) - </strong>SMART will use the
+time provided in the file and assign the collected waypoints to the correct
+date.</p>
+
+<p><strong>Import Only waypoints for &lt;date&gt; - </strong>SMART will import
+only the waypoints for the selected date.</p>
+
+<p><strong>Select which waypoints to import for &lt;date&gt; -</strong> The
+SMART user will select and assign waypoints to the selected date.</p>
 
 <p></p>
 
-<p><strong>Manual Entry of Waypoints</strong></p>
+<p><img alt="CSV Waypoint Import" src="images/csvImport.png" width="510"
+height="558" /></p>
+
+<p></p>
+
+<p><strong style="text-decoration: underline;">CSV File
+Configuration</strong></p>
+
+<p><strong>X- Column</strong> - select the text from the first row of the file
+(header or value) which represents the column where theX co-ordinate values are
+stored.</p>
+
+<p><strong>Y- Column</strong> - select the text from the first row of the file
+(header or value) which represents the column where the Y co-ordinate values
+are stored.</p>
+
+<p><strong>Date</strong> - select the text from the first row of the file
+(header or value) which represents the column where the date values are
+stored.</p>
+
+<p><strong>Time</strong> - select the text from the first row of the file
+(header or value) which represents the column where the time values are stored.
+Valid time formats are as follows:</p>
+<ol>
+  <li>HH:mm (24-hour time, no seconds given)</li>
+  <li>HH:mm:ss (24-hour time with seconds)</li>
+  <li>hh:mm am (12-hour time, no seconds followed by one of: "am", "pm", "AM"
+    or "PM"</li>
+  <li>hh:mm:ss pm (same as above with seconds)</li>
+  <li>HH:mm GMT-08:00 (24-hour time, with a GMT + or - timezone)</li>
+  <li>HH:mm:ss GMT+03:00 (same as above with seconds)</li>
+</ol>
+
+<p><strong><u>Optional Columns</u></strong></p>
+
+<p><strong>Waypoint ID</strong> - Select the text which represents the waypoint
+id you would like to use. Left blank the system will select the next highest
+number in the patrol-leg-day as the id.</p>
+
+<p><strong>Comments Field</strong> - Select the text which represents the
+comments you wish to be added to the waypoint. Left blank, the comments field
+in SMART will be blank.</p>
+
+<p><strong><u>Data Options</u></strong></p>
+
+<p><strong>Coordinate Projection</strong> - Select what projection your X and Y
+coordinate data is stored in.</p>
+
+<p><strong>Date Format</strong> - The format your dates from the Date column
+are stored in. See
+http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html for
+date representations, you may type into this field to describe your format if
+it does not match one of the listed formats. </p>
+
+<p><strong>Skip first row...</strong> - Check this box if you have a header row
+at the top of your data.</p>
+
+<h4><a id="ImportWaypointsHelp">Importing Waypoints from CSV - Common Solutions for CSV File Import
+Problems</a></h4>
+
+<p>If you are experiencing an issue importing waypoints from CSV files, this
+section should provide clarification and guidance on how to address several
+frequently encountered issues. Often times, all that is required to get the
+import to work is a simple manipulation of the file. Many of the examples here
+illustrate how to make new columns with date and time in formats that can be
+easily imported. The CSV import functionality only loads Waypoints, not actual
+observations. This is useful for speeding data that comes in digital format,
+but it doesn't completely automate it.</p>
+
+<p></p>
+
+<p><strong>Files with date and time in the same column</strong></p>
+
+<p>You need to ensure date/time columns are correct. If date and time
+information is combined in one column, you have two options to correct it.</p>
+
+<p></p>
+
+<p><strong>Option 1:</strong></p>
+<ol>
+  <li>Copy the combined date/time column to another column.</li>
+  <li>Rename the header on the original column "Date" and format that entire
+    column to be of type, "date" using the default date format. This can be
+    done by following the below steps:
+    <ul>
+      <li>Select the entire column and right click</li>
+      <li>Select the 'format cells' option</li>
+      <li>Select the 'number' tab at the top of the box</li>
+      <li>Select &lsquo;date&rsquo;</li>
+    </ul>
+  </li>
+  <li>Rename the copied column's header "Time" and format that entire column to
+    be of type, "time" (leave the default time type on the right). This can be
+    done by following the below steps:
+    <ul>
+      <li>Select the entire column and right click</li>
+      <li>Select the 'format cells' option</li>
+      <li>Select the 'number' tab at the top of the box</li>
+      <li>Select &lsquo;time&rsquo;</li>
+    </ul>
+  </li>
+  <li>Save the file.</li>
+  <li>When using the import tool, select the columns for date and time as the
+    two columns you edited and renamed the headers.</li>
+  <li>If you have other relevant columns in your file, select the fields and
+    options accordingly. For example, if you have a column for Waypoint ID
+    entitled &lsquo;Waypoint&rsquo;, fill out the options as shown in the below
+    image.</li>
+  <li>Press finish and the points should load correctly.</li>
+</ol>
+
+<p></p>
+
+<p><strong>Option 2:</strong></p>
+
+<p>NOTE: for this example we are assuming date-time is in column A. If your
+date-time is in a different column, such as column G, then replace any column A
+references or formulas with G.</p>
+<ol>
+  <li>We are going to make new, separate columns for date and time. So, rename
+    column A to "Date-Time", so you are not confused with the new date column
+    we create.</li>
+  <li>Create a new header in the next available empty column and label it
+  "Date"</li>
+  <li>Enter the formula: =LEFT(A2,10) into row 2, then copy/paste that into all
+    the remaining rows. You should get just the date portion in that row.
+    <ul>
+      <li>As previously mentioned, if your date-time is in a different column,
+        such as column G, then you would replace the &lsquo;A&rsquo; in this
+        formula =LEFT(A2,10) with a G. The formula would read =LEFT(G2,10)</li>
+      <li>NOTE: the number 10(ten) indicates the number of characters to use.
+        In this example and most of the time, the format is 10 characters, such
+        as 01/21/2001 or 2003/12/25. But, if your format has more or less, you
+        will need to modify the number. For example, if you use Feb-01-2002,
+        then the number needs to be changed to 11.</li>
+      <li>If your resulting date format is not in the format of M/d/y
+        (01/23/2001), format the date using the instructions in Option 1, step
+        2.</li>
+    </ul>
+  </li>
+  <li>Create a new header in the next available empty column and label it
+  "Time"</li>
+  <li>Enter the formula: =RIGHT(A2,8) into row 2, then copy/paste that into all
+    the remaining rows. You should get just the time portion in that row.
+    <ul>
+      <li>Same comment as above, if your date-time is in column G (or any other
+        column), then you would replace the &lsquo;A&rsquo; in this formula
+        =RIGHT(A2,8) with a G. For example, it would read =RIGHT(G2,10)</li>
+      <li>NOTE: Again, change the number 8(eight) to the number of characters
+        in your time format. In many examples, time the format is 8 characters,
+        such as 01:31:01 or 14:22 PM (the space counts as one). But, if your
+        format has more or less you will need to modify the number. For
+        example, if you use 03:59:59 AM, the number should be changed to
+      11.</li>
+    </ul>
+  </li>
+  <li>Save the file.</li>
+  <li>Open in a text editor and delete any rows at the end of the file with
+    only commas in them. (If you paste your formulas into rows beyond the last
+    one with data, you can create these empty rows).</li>
+  <li>Open in SMART and select the settings according to the format of your CSV
+    file. Two different examples and the associated screenshots are provided
+    below.
+    <ul>
+      <li>If you had an additional column for Waypoint ID that was labeled
+        &lsquo;No&rsquo;, an extra column for the comments field labeled
+        &lsquo;Id_GPS&rsquo; and your headers read: &lsquo;No&rsquo;,
+        &lsquo;Id_GPS&rsquo;, &lsquo;Lat&rsquo;, &lsquo;Long&rsquo;...then your
+        screen would look like this:</li>
+      <li>If you did not have additional columns for Waypoint ID or comments
+        and your columns read: &lsquo;latitude&rsquo;,
+        &lsquo;longitude&rsquo;... then your screen would look like this:</li>
+    </ul>
+  </li>
+</ol>
+
+<p></p>
+
+<p><strong>Files with no date or time</strong></p>
+
+<p>If you are importing a CSV file without a date or time, presumably you know
+what day this patrol was undertaken. From there, you can assign arbitrary
+times. This step is necessary since time is required.</p>
+<ol>
+  <li>Add a date column header and put the correct date in row 2, copy it to
+    the rest of the column.</li>
+  <li>In the next available, empty column add a time column header, and then
+    set all times to noon or whatever time is most appropriate.
+    <p>a) One option would be to create a formula to add 10 minutes to each
+    row.</p>
+  </li>
+  <li>Set the properties to the values according to your file. The screenshot
+    below provides an example of how the values should be set if your X
+    coordinate column was labeled &lsquo;easting&rsquo; and your Y coordinate
+    column was labeled &lsquo;northing&rsquo;. NOTE: the projection should be
+    modified to the correct UTM zone.</li>
+  <li>Press finish and the points should load.</li>
+</ol>
+
+<p></p>
+
+<p><strong>Files with additional data rows before the waypoint data</strong></p>
+
+<p>If you are importing a CSV file with rows above the column headers, you will
+need to remove the additional rows so the column headers appear as the first
+row. Follow the below steps.</p>
+<ol>
+  <li>If you need the information that appears in the current rows above the
+    column headers, take a copy for your records.</li>
+  <li>Delete X number of rows (however many proceed the column headers), so you
+    are left with just the column headers.</li>
+</ol>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<h4><strong><u>Manual Entry of Waypoints</u></strong></h4>
 
 <p> SMART allows for the manual entry of waypoint information. </p>
 
@@ -647,11 +903,12 @@ SMART user will select and assign waypoints to the selected date.</p>
 
 <p><strong>Move Waypoint(s)</strong> - Reassigns the selected waypoint(s) to
 another day.</p>
+<br />
+<br />
 
-<p></p>
 
-<p><strong>Special Notes on Importing GPS Waypoints for Multi-Leg
-Patrols</strong></p>
+<p><strong><u>Special Notes on Importing GPS Waypoints for Multi-Leg
+Patrols</u></strong></p>
 <ul>
   <li>If two (or more) legs share the same time range SMART does not know which
     leg to assign the points to and will pick one of the legs. Waypoint
@@ -730,8 +987,6 @@ export the patrol after the information has been entered. The patrol is
 exported in an XML structure and contains attached files (if any). This XML
 package can be later imported into a different computer.</p>
 
-<p></p>
-
 <h5>Patrol Export</h5>
 
 <p><img alt="Export Patrol" src="images/ExportPatrol.png" width="508"
@@ -761,8 +1016,10 @@ selected patrols.</p>
 
 <h5>Patrol Import</h5>
 
-<p><strong><img alt="Import Patrol" src="images/ImportPatrol.png" width="509"
-height="270" /></strong></p>
+<p><img alt="import Patrols 2" src="images/ImportPatrols.png"
+width="359" height="300" /></p>
+
+<p></p>
 
 <p><strong>Browse</strong> - Imports a single patrol file.</p>
 
@@ -773,6 +1030,12 @@ process.</p>
 
 <p><strong>Import</strong> - Executes the patrol import process.</p>
 
+<p><strong>Assign New Patrol IDs - </strong>Overrides the ID in the XML import
+and assigns new IDs to the patrols</p>
+
+<p><strong>Keep Patrol IDs - </strong>Preserves the original ID of the
+patrol</p>
+
 <p></p>
 
 <h2><a id="Query">Query Perspective</a></h2>
@@ -782,10 +1045,72 @@ of SMART are found. Queries can be created, run, saved and exported/imported.
 The results from the queries can be viewed directly in the Query Perspective or
 exported for use in other software applications. </p>
 
+<p><strong>Queries are sorted by the Type of Data you wish to Query and the
+type of results you wish to receive.</strong></p>
+
+<p>There are a number of different Data types you can query depending on which
+plug-ins you have installed in your SMART software. The basic types that all
+users will have are:</p>
+<ul>
+  <li><strong>All Data Queries</strong> - These queries will query all
+    observations in the system, regardless of the source, whether from patrols,
+    independent incidents (plugin), surveys (planned plugin) or other data. You
+    can however add the data source into your filter to customize these
+    queries. Use the "General Filters - &gt;Waypoint Source" filter to restrict
+    your query to some set of source types if you wish.</li>
+  <li><strong>Patrol Queries</strong> - These queries will only query patrol
+    data, not data from other sources as mentioned above. Using this type
+    allows you to add Patrol specific filters to your query such as patrol
+    leader, patrol type etc which you can not do when using the "All Data
+    Query" option. These are listed under "Patrol Filters" in the filter
+  tab.</li>
+</ul>
+
+<p>Other Types</p>
+<ul>
+  <li>see Plugin Specific Help files for other data types you can query such as
+    Entities or Independant Incidents (In the Help Contents: "SMART
+    Help-&gt;SMART Plugins-&gt; ...").</li>
+</ul>
+
 <p></p>
 
+<p><strong>There are 4 different queries result types</strong> available in all
+data types. Some plug-ins have additional types supported, the four basic types
+of results you can select are:</p>
+<ul>
+  <li><strong>Observations</strong> - You will get a list of individual
+    observations as your results, including the ability to view them on a
+  map.</li>
+  <li><strong>Incident</strong> (or waypoint) - You will get a list of
+    incidents/waypoints as your results, including the ability to view them on
+    a map.</li>
+  <li><strong>Map Grid</strong> (Gridded) - You will get a gridded map
+    (sometimes known as a heatmap) as your results, as well as the table of
+    grid cells and values that define the map.</li>
+  <li><strong>Summary Result</strong> - You will get a table (matrix) of values
+    as your result. This allows you to summarize the raw data and group it into
+    different categories.</li>
+</ul>
+
+<p></p>
+
+<p>Other Types</p>
+<ul>
+  <li>Patrol Queries - Only available for querying patrol data, this will give
+    you a list of patrols as your results. Ex: "List all patrols where John Doe
+    was the Leader".</li>
+  <li>See the Plug-in specific help files (In the Help Contents: "SMART
+    Help-&gt;SMART Plugins-&gt; ...") for details on other querys and types
+    provided by each specific plugin.</li>
+</ul>
+
+<p>Each of these query types has its own purpose and its own set of results
+that can provide the user with specific information about what is happening
+within the Conservation Area. </p>
+
 <p>The SMART query perspective shares the same basic framework for all query
-types. Individual components of the four query types will vary depending on
+types. Individual components of the five query types will vary depending on
 which query is chosen.</p>
 
 <p><em>Note: Patrol and Waypoint queries share all the same components with
@@ -793,17 +1118,78 @@ each other and many of the same components as Summary and Grid Queries</em>.</p>
 
 <p></p>
 
+<h4>New Query Wizard</h4>
+
+<p>Users are encouraged to use and read the on-screen instructions provided by
+the "New Query Wizard" if they are unsure what type of query they would like to
+build. Use the Menu item: "Query-&gt;New Query Wizard..." to launch the
+wizard.</p>
+
+<p>This wizard will help you select what data you wish to query and then what
+results type you would like.</p>
+
+<p></p>
+
+<p><img alt="query wizard" src="images/QueryWizard.png" width="659"
+height="405" /></p>
+
+<p></p>
+
 <h4><a id="QueryType">Types of Queries</a></h4>
 
 <p>A SMART query is a logical expression used to filter the entries in the
-database. SMART has four query types (waypoint, patrol, summary, and grid).</p>
+database. SMART has five query types (observation, incident, patrol, summary,
+and grid).</p>
 
-<h5>Waypoint</h5>
+<table border="1">
+  <caption></caption>
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>Query Type</strong></td>
+      <td><strong>Icon</strong></td>
+    </tr>
+    <tr>
+      <td>Observation</td>
+      <td><img alt="observation query icon" src="images/mapQuery_WPT.png"
+        width="16" height="16" /></td>
+    </tr>
+    <tr>
+      <td>Incident</td>
+      <td><img alt="incident query icon" src="images/mapQuery_incident.png"
+        width="16" height="16" /></td>
+    </tr>
+    <tr>
+      <td>Patrol</td>
+      <td><img alt="patrol query icon" src="images/mapQuery_TRK.png" width="16"
+        height="16" /></td>
+    </tr>
+    <tr>
+      <td>Summary</td>
+      <td><img alt="summary query icon" src="images/summary_query.png"
+        width="16" height="16" /></td>
+    </tr>
+    <tr>
+      <td>Grid</td>
+      <td><img alt="grid query icon" src="images/gridded_query.png" width="16"
+        height="16" /></td>
+    </tr>
+  </tbody>
+</table>
 
-<p>Displays the raw observation records that are selected using filters, with
-no summarizing (totals, etc.). Queries can be viewed in tables or on a map.</p>
+<h5>Observation</h5>
 
-<p><em>Example: Show me all waypoints for Patrol ID 1021</em></p>
+<p>Observation queries are used to display what was encountered during the
+patrol. They display the raw observation records which meet the requirements of
+the filters. No summarizing takes place (ie. no totals, amounts, aggregations,
+etc.). Queries can be viewed in a table or on a map. When displayed on a map if
+more than one observation is present at a waypoint then multiple mapping points
+will exist in that location. </p>
+
+<p></p>
+
+<p><em>Example: Show me all observations for Patrol ID 1021</em></p>
 
 <table border="1">
   <thead>
@@ -835,11 +1221,64 @@ no summarizing (totals, etc.). Queries can be viewed in tables or on a map.</p>
 
 <p></p>
 
+<p><strong><span style="font-size: 10pt">Incident</span></strong></p>
+
+<p>Displays the locations that meet the requirements of the filters. This query
+will return a single location that meets the requirements of the query filter.
+Incident queries are used to query across multiple categories to see where
+multiple observation categories ocurred and what other observations have been
+seen at that location. Queries can be viewed in a table or on a map. When
+displayed on a map only one mapping points will exist in that location. </p>
+
+<p></p>
+
+<p><em>Example: Show me where patrols have confiscated weapons and
+carcasses.</em></p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <td>Patrol ID</td>
+      <td>Patrol Leg</td>
+      <td>Patrol Date</td>
+      <td>Waypoint ID</td>
+      <td>X</td>
+      <td>Y</td>
+      <td>Time</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1011</td>
+      <td>1</td>
+      <td>Nov 1, 2011</td>
+      <td>7</td>
+      <td>49.5</td>
+      <td>-123.0</td>
+      <td>7:34</td>
+    </tr>
+    <tr>
+      <td>1014</td>
+      <td>1</td>
+      <td>Nov 2, 2011</td>
+      <td>32</td>
+      <td>49.1</td>
+      <td>-122.8</td>
+      <td>12:14</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
 <h5>Patrol</h5>
 
-<p>Displays the patrols that were selected using the query filters. Waypoint
-observations are not displayed in the results nor are any summaries. Queries
-can be viewed in tables or on a map.</p>
+<p>Displays the patrols that were selected using the query filters (no
+information about observations or incidents are displayed). The patrol GPS
+tracks are displayed in the mapping window. Details about the patrols are
+displayed in the tabular window. </p>
+
+<p></p>
 
 <p><em>Example: Show me all patrols that encountered an elephant
 carcass</em></p>
@@ -875,10 +1314,11 @@ carcass</em></p>
 
 <p>A summary summarizes the raw data and allows for grouping into different
 categories. Items that can be summarized are values such as total number of
-patrols, the total distance travelled, the total number of snare observations,
-etc. Groupings are categories such as management sectors, patrol types, patrol
-mandates, stations, teams, etc. Summaries can only be viewed as tables. Results
-are displayed only in tables.</p>
+patrols, the total distance travelled, the total number of snare observations
+and rate encounters (how many X per km, man-hours, time. Groupings are
+categories such as management sectors, patrol types, patrol mandates, stations,
+teams, etc. Summaries can only be viewed as tables. Results are displayed only
+in tables. </p>
 
 <p><em>Example: Show me the total number of snares observed in each management
 sector for each of the last 6 months.</em></p>
@@ -932,7 +1372,7 @@ sector for each of the last 6 months.</em></p>
 
 <p>Results are displayed in a user specified grid (raster) format with
 aggregated results based on the defined grid size. Results are displayed in
-tables or on a map.</p>
+tables or on a map. These are commonly referered to as heat-maps.</p>
 
 <p><em>Example: Show me how many patrols were in each grid cell</em></p>
 
@@ -960,16 +1400,13 @@ tables or on a map.</p>
 
 <p></p>
 
-<h4><a id="PatrolObservationQuery">Patrol and Observation Queries</a></h4>
+<h4><a id="PatrolObservationQuery">Patrol, Incident, and Observation
+Queries</a></h4>
 
 <p></p>
 
-<p><img alt="Query Perspective" src="images/QueryPerspective2.png" width="986"
-height="665" /></p>
-
-<p></p>
-
-<p></p>
+<p><img alt="query overview 2" src="images/queryOverview.png"
+width="946" height="558" /></p>
 
 <p></p>
 
@@ -1071,6 +1508,19 @@ height="665" /></p>
         src="images/SmartDefinitionWindow.png" width="145" height="21" /></td>
       <td>Window where the query or summary is constructed, erased, run and
         saved.</td>
+    </tr>
+    <tr>
+      <td><img alt="waypoint source" src="images/waypointSource.png"
+        width="113" height="18" /></td>
+      <td>A filter to select between patrol based observations and independent
+        incidents</td>
+    </tr>
+    <tr>
+      <td><img alt="incident observation filter"
+        src="images/incident_Observation_filter.png" width="289" height="20"
+      /></td>
+      <td>A filter to display incidents or observations when performing a
+      query.</td>
     </tr>
   </tbody>
 </table>
@@ -1208,6 +1658,61 @@ to allow SMART users to be able to build more complex queries.</p>
 
 <p></p>
 
+<p><strong><a id="ObservationIncidentFilter">Observation and Incident
+Filters</a></strong></p>
+
+<p>After the basic filters (see above) have been constructed the user has a
+secondary filter option to further the results of the query.</p>
+
+<table border="1">
+  <caption></caption>
+  <col />
+  <col />
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>Query Type</strong></td>
+      <td><strong>Filter Type</strong></td>
+      <td><strong>Reason for Use</strong></td>
+      <td><strong>Results Returned</strong></td>
+    </tr>
+    <tr>
+      <td>Observation</td>
+      <td>Observation</td>
+      <td>To find all raw observations. Does not query across categories.</td>
+      <td>All raw observations and might return many instances of a single XY.
+      </td>
+    </tr>
+    <tr>
+      <td>Observation</td>
+      <td>Incident</td>
+      <td>To find out what other observations occurred at the incident
+        locations. Can be used to query across categories.</td>
+      <td>All raw observations found at the incidents that meet the requirments
+        of the primary filter. </td>
+    </tr>
+    <tr>
+      <td>Incident</td>
+      <td>Observation</td>
+      <td>To find the unduplicated locations that meet the requirements of the
+        primary filter. Does not query across categories.</td>
+      <td>WIll return the basic location information for the query. No
+        observation information is included in the results.</td>
+    </tr>
+    <tr>
+      <td>Incident</td>
+      <td>Incident</td>
+      <td>To find the unduplicated locations and can perform queries across
+        categories.</td>
+      <td>WIll return the basic location information for the query. No
+        observation information is included in the results.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
 <p></p>
 
 <h4><a id="SummaryQuery">Summary Query</a></h4>
@@ -1216,10 +1721,8 @@ to allow SMART users to be able to build more complex queries.</p>
 
 <p><strong>Summary Query Overview</strong></p>
 
-<p><img alt="summaries overview" src="images/summaryOverview.png" width="913"
-height="583" /></p>
-
-<p></p>
+<p><img alt="summaryQuery" src="images/summaryQuery.png" width="990"
+height="611" /></p>
 
 <h5>Summary Icons and Links</h5>
 
@@ -1288,6 +1791,18 @@ height="583" /></p>
       <td>Opens windows for the "Group By and Values Tab" and "Filter Tab".</td>
     </tr>
     <tr>
+      <td><img alt="waypoint source" src="images/waypointSource.png"
+        width="113" height="18" /></td>
+      <td>Filters patrol based information and independently sourced
+      information</td>
+    </tr>
+    <tr>
+      <td><img alt="area group bys" src="images/AreaGroupBys.png"
+        width="105" height="18" /></td>
+      <td>Groups by the spatial boundary files associated with the Conservation
+        Area</td>
+    </tr>
+    <tr>
       <td><img alt="group by options" src="images/groupByOptions.png"
         width="132" height="18" /></td>
       <td>Group By Options used to aggregate the summary value results.</td>
@@ -1318,6 +1833,14 @@ height="583" /></p>
 </table>
 
 <p><strong>Group By Options</strong></p>
+
+<p><strong>General Items</strong> - aggregates data based on patrol or
+independently sourced information</p>
+
+<p><strong>Area Group By</strong> - groups by the spatial boundary files
+associated with the Conservation Area</p>
+
+<p><strong>Date</strong> - uses dates to aggregate the data</p>
 
 <p><strong>Patrol Group By &ndash;</strong> aggregations of values based on
 patrol characteristics</p>
@@ -1488,7 +2011,7 @@ with the major difference being that no Group-By Options are available.</p>
     </tr>
     <tr>
       <td><img alt="run query 1" src="images/runQuery1.png" width="83"
-        height="25" />&amp; <img alt="run query 2" src="images/runQuery2.png"
+        height="25" /> &amp; <img alt="run query 2" src="images/runQuery2.png"
         width="16" height="13" /></td>
       <td>Executes the query.</td>
     </tr>
@@ -1574,12 +2097,10 @@ reporting package. </p>
 
 <p></p>
 
-<p><img alt="Report Icon" src="images/reportICon.png" width="418" height="67"
-/></p>
+<p> <input type="image" name="report icons" alt="report icons"
+src="images/ReportIcons.png" /></p>
 
-<p></p>
-
-<h4><a id="reportools">Report Components and Tools</a></h4>
+<h4><a id="reporttools">Report Components and Tools</a></h4>
 
 <p></p>
 
@@ -1588,8 +2109,8 @@ reporting package. </p>
 <p>The report toolbar has icons for creating, editing, running, exporting and
 deleting reports.</p>
 
-<p><img alt="Report List" src="images/reportList.png" width="328" height="130"
-/></p>
+<p><img alt="Report Perspective" src="images/ReportPerspective.png"
+width="524" height="149" /></p>
 
 <p></p>
 
@@ -1603,6 +2124,11 @@ deleting reports.</p>
       <td><img alt="Delete Report" src="images/deleteReport.png" width="22"
         height="18" /></td>
       <td>Deletes the selected report(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="report" src="images/report.png" width="20"
+        height="24" /></td>
+      <td>Opens the report perspective</td>
     </tr>
     <tr>
       <td><img alt="Create Report" src="images/CreateReport.png" width="22"
@@ -1757,227 +2283,6 @@ height="398" /></p>
 
 <p></p>
 
-<h2><a id="Plans">SMART Plans</a></h2>
-
-<p>SMART Plans allow for a set of targets to be assigned to a patrol or series
-of patrols and to keep track of available and active rangers. SMART plans can
-be arranged in a parent-child relationship where a parent plan can have a
-number of children plans (sub-plans) that are associated with the parent. Plans
-are assigned to patrols, and when a patrol returns from the field and the data
-has been entered into SMART the software will automatically validate whether
-the objectives have been met or not. </p>
-
-<p></p>
-
-<h4><strong><a id="DevelopingPlans">Developing Plans</a></strong></h4>
-
-<p>A plan allows for specific targets and goals to be assigned to a
-Conservation Area, station, team or series of patrols. A plan is created
-through the use of a wizard, similar to the wizard used to create patrols.
-After a plan has been created, it can be associated with a patrol or series of
-patrols, which then use(s) the track information to calculate the success or
-failure of defined targets.</p>
-
-<p></p>
-
-<p><strong>Steps in Creating a Plan</strong></p>
-
-<p><strong>1. Template </strong><strong>-</strong> Create a plan from scratch
-or use an existing plan as a template</p>
-
-<p><strong>2. Plan Type -</strong> Choose the type of plan (Patrol, Team,
-Station or Conservation Area) and available rangers for the plan</p>
-
-<p><strong>3. Parent Plan -</strong> Choose whether the plan is a sub-plan of
-another plan or stands alone</p>
-
-<p><strong>4. Plan Information -</strong> Plan ID, Name and Description</p>
-
-<p><strong>5. Station / Team -</strong> Selection of the Team and Station
-involved in the plan</p>
-
-<p><strong>6. Plan Dates -</strong> Selection of the start and end date of the
-plan</p>
-
-<p><strong>7. Plan Targets -</strong> Add targets and objectives to the plan</p>
-
-<p></p>
-
-<p><strong>Target Types</strong></p>
-<dl>
-  <dt><strong>Numeric</strong> - targets include distance and amount of patrol
-  time</dt>
-</dl>
-
-<p><img alt="numeric plan" src="images/numericPlan.png" width="351"
-height="345" /></p>
-
-<p><strong>Numeric Target Types:</strong></p>
-<ul>
-  <li>Distance Travelled</li>
-  <li>Patrol Hours</li>
-  <li>Patrol Days</li>
-  <li>Patrol Man-Hours</li>
-</ul>
-
-<p></p>
-<dl>
-  <dt><strong>Administrative</strong> - can be defined and described as
-  required by the administrators and planners of the Conservation Area patrols.
-  SMART does not automatically evaluate the pass/fail of Administrative
-  patrols. When an administrative patrol target has been achieved, the check
-  box for "Target has been achieved" will be manually selected.</dt>
-</dl>
-
-<p><img alt="Administrative Plan" src="images/AdministrativePlan.png"
-width="352" height="349" /></p>
-
-<p></p>
-<dl>
-  <dt><strong>Spatial</strong> - locations within the Conservation Area that
-  need to be visited by the patrols, specified by manual coordinate input or
-  through a mapping interface <img alt="Add Spatial Target Point"
-  src="images/AddSpatialTarget.png" width="16" height="16" />. The Distance for
-  Completion (meters) parameter defines how close to the exact coordinates the
-  patrol needs to be before the target location is considered to be
-  successfully visited.</dt>
-</dl>
-
-<p><img alt="Spatial Target" src="images/SpatialTarget.png" width="708"
-height="548" /></p>
-<ul>
-</ul>
-
-<p></p>
-
-<p><strong>Summary Screen of Plan</strong></p>
-
-<p><img alt="Plan Summary Overview" src="images/PlanOverviewSummary.png"
-width="718" height="671" /></p>
-
-<p></p>
-
-<p><strong>edit</strong> - edits the selected plan target</p>
-
-<p><strong>manage</strong> - opens a dialog to add new targets</p>
-
-<p><strong>refresh</strong> - refreshes validation checks on patrols associated
-with these targets</p>
-
-<p></p>
-
-<h4><strong><a id="LinkPatrolPlan">Linking Patrols to Plans</a></strong></h4>
-
-<p>After a plan has been created, it can then be assigned to a patrol or
-multiple patrols. </p>
-
-<p>Linking a patrol to a plan requires that the user open that specific patrol
-in the Patrol Perspective and click on the "Other" tab (bottom of window).</p>
-
-<p>Then, clicking on the edit link next to the Plan window will open a dialog
-to link the active patrol with a plan.</p>
-
-<p><img alt="Linking a Patrol to a Plan" src="images/linkingPlanPatrols.png"
-width="769" height="593" /></p>
-
-<p></p>
-
-<h4><strong><a id="validatePlan">Validating Plans</a></strong></h4>
-
-<p>After a patrol has been linked to a plan, SMART can validate the numeric and
-spatial targets. These targets are validated against the track information, so
-if no track information has been entered the validation of the plans will not
-be successful. </p>
-
-<p><img alt="Plan Validation" src="images/PlanValidation.png" width="860"
-height="232" /></p>
-
-<p>After the patrols and plans have been linked, the user will need to click
-the refresh button to run the validation. When the target has been successfully
-validated, the red circle turns green. This applies to numeric and spatial
-targets.</p>
-
-<p></p>
-
-<p>Validation of administrative targets is a manual process which requires the
-user to select and edit the Admin targets and click the checkbox "Target has
-been achieved".</p>
-
-<p><img alt="Admin plan validation" src="images/adminTargetValidation.png"
-width="589" height="261" /></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<h2><a id="Intelligence">Intelligence Perspective</a></h2>
-
-<p>Intelligence records are pieces of information that have been gathered
-through previous patrols or from external sources. Information from
-intelligence records can be used by Conservation Area managers to help plan
-future patrols. </p>
-
-<p></p>
-
-<h4><strong><a id="CreateIntel">Creating Intelligence Records</a></strong></h4>
-
-<p>1. Intelligence Received Date</p>
-
-<p>2. Intelligence Source (Patrol, Public, Informant, CET)</p>
-
-<p>3. Intelligence relevant for Multiple Days</p>
-
-<p>4. Intelligence Name and Description</p>
-
-<p>5. Intelligence Location</p>
-
-<p>6. Intelligence Attachments</p>
-
-<p></p>
-
-<p><strong>Intelligence Record Types</strong></p>
-
-<p><strong>Patrol</strong> - gathered directly by a previous patrol</p>
-
-<p><strong>Public</strong> - from an unassociated public member</p>
-
-<p><strong>Informant</strong> - a person with some ties to the Conservation
-Area</p>
-
-<p><strong>CET</strong> - Community Extension Team (i.e. the separate Forest
-Department / NGO team working with local communities)</p>
-
-<p></p>
-
-<p><img alt="Intelligence Overview" src="images/IntelligenceOverview.png"
-width="850" height="628" /></p>
-
-<p></p>
-
-<p></p>
-
-<p><strong>Intelligence is Relevant for Multiple Days</strong></p>
-
-<p>If the incoming intelligence is to cover activity that spans multiple days,
-then in this step you should check the box and enter in the appropriate
-dates.</p>
-
-<p></p>
-
-<h4><strong><a id="QueryIntel">Querying Intelligence Records</a></strong></h4>
-
-<p>Plans with links to patrols can be queried with a Patrol Query using Patrol
-Filters. The patrol filter "Motivated by Intelligence" is to query any patrols
-associated with Intelligence Records. The patrol filter "Part of Plan" is to
-query any patrols that were associated with Plans.</p>
-
-<p><img alt="Query Plans and Intelligence"
-src="images/QueryPlanIntelligence.png" width="182" height="236" /></p>
-
-<p></p>
-
 <h2><a id="DataModel">The SMART Data Model</a></h2>
 
 <p>SMART's data model is the foundation of the data entry, analysis and
@@ -2047,6 +2352,12 @@ information collected in the field.</p>
         logical format such as animal species</td>
     </tr>
     <tr>
+      <td><img alt="date icon" src="images/DM_DateIcon.png"
+        width="19" height="23" /></td>
+      <td>Date</td>
+      <td>Date specific attribute</td>
+    </tr>
+    <tr>
       <td><img alt="Attribute Boolean" src="images/att_boolean.png" width="18"
         height="17" /></td>
       <td>Boolean</td>
@@ -2067,7 +2378,7 @@ require attributes. </p>
 categories. </p>
 <ol>
   <li>Select Category and Click Add Attribute</li>
-  <li>Chose to create a new attribute or to apply an existing attribute or
+  <li>Choose to create a new attribute or to apply an existing attribute or
     attributes. If the choice is to apply existing attribute(s) to the selected
     category, the user can select a single attribute or multiple
   attributes.</li>
@@ -2084,10 +2395,13 @@ categories. </p>
         Import options exist for attributes properly formatted in XML.</li>
       <li><strong>Boolean</strong> - no additional options available for
         boolean attributes.</li>
+      <li><strong>Date</strong> - specific date attribute </li>
     </ul>
   </li>
   <li><strong>Finish</strong> and <strong>Save</strong></li>
 </ol>
+
+<p></p>
 
 <h4><strong><a id="dmdisabledelete">Disabling and Deleting Categories or
 Attributes</a></strong></h4>
@@ -2124,13 +2438,17 @@ new position within that tier. </p>
 <p>Tree attributes can be pre-defined outside of SMART in an XML format and
 imported into the data model using the attribute <strong>Import</strong> option
 when creating a new attribute. The most common usage of this feature would be
-when creating a new Conservation Area and defining the data model for the
-area.</p>
+when creating a new Conservation Area and defining the Species list for the
+Conservation Area.</p>
 
 <p>The default data model does not contain a predefined species list. The
 Import option allows for a custom importation of a species list that brings
 only the desired entries into the Conservation Area's data model. Other tree
-attributes can be imported if the XML is properly constructed.</p>
+attributes can be imported if the XML is properly constructed. </p>
+
+<p>If duplicate entries are selected on additional imports the import process
+will validate the incoming entries to what is available and filter out any
+redundant values.</p>
 
 <p></p>
 
@@ -2149,43 +2467,203 @@ keys are edited.</span></strong></em></p>
 
 <p></p>
 
+<h4><strong><a id="configurablemodel">Configuring a Data Model for
+CyberTracker</a></strong></h4>
+
+<p><strong>Motivation</strong></p>
+
+<p>The current data model is designed for data analysis flexibility and not
+field user data entry efficiency. For example, the default data model has a
+variety of higher level categories (Animals, Features, People) that the field
+data entry users don&rsquo;t necessarily want to select each time they make an
+observation. In order to improve data entry efficiency this document provides a
+collection of options to allows users to configure data entry aiming to make it
+more it more efficient.</p>
+
+<p>The options below are critical for the success of the SMART CyberTracker
+integration as they will allow the SMART data model to be quickly and easily
+deployed with CyberTracker in a way that leverages the richness and ease of use
+CyberTracker users already expect.</p>
+
+<p>The initial scope of work is to only update the SMART CyberTracker plugin to
+use the new features outlined below. There will be no changes to the existing
+SMART data entry UI. However, as additional work, the SMART data entry UI could
+be updated to make use of the new features.</p>
+
 <p></p>
 
-<h2><a id="CrossCa" name="Patrol1">Cross Conservation Analysis</a></h2>
+<p><strong>Configurable &lsquo;Data Collection&rsquo; Data Model</strong></p>
+
+<p>This application extension would allow users to create a custom &ldquo;data
+collection&rdquo; data model. This data model would be similar to the main data
+model however it would allow users to re-group categories in a form that makes
+more sense for data entry users and potentially provide additional properties
+to use in the data entry UI.</p>
+
+<p></p>
+
+<p><strong>Description</strong></p>
+
+<p>Each category &amp; all its associated attributes (including inherited
+attributes) in the main data model would be considered a data entry component.
+Users will be able to build a custom tree structure, adding these data-entry
+components to the tree. Users cannot add new data entry components, nor add new
+attributes. These functions would have to be done on the main data model.</p>
+
+<p>Any data entry component can be renamed. This means that categories and
+attributes can be renamed for the configured data model. In the cybertracker,
+example a category with a long name might need to be shorter to display
+correctly on the screen.</p>
+
+<p>List and tree attributes can have their list items or tree nodes renamed.</p>
+
+<p></p>
+
+<p><strong>Data Model Attributes - Disable / Default Values</strong></p>
+
+<p>This extension would allow users to disable data model attributes for data
+entry purposes only and/or provide a default value to use for all observations
+of the associated category.</p>
+
+<p>Attributes would have two additional properties:</p>
+<ul>
+  <li>Show Attribute - If true the data-entry user will be prompted for the
+    attribute value. If false, no option for entering a value is displayed.</li>
+  <li>Default Value - The default value to use on the data entry screen or, if
+    the attribute is not visible (show attribute = false), the value to apply
+    to all observations. If the attribute is a required attribute and attribute
+    is false then users will be required to enter a default value. Otherwise
+    this can be left blank.</li>
+</ul>
+
+<p><em>Note: Modifications would probably have to be made by the CT to support
+default values. However, show attribute property could still be applied. In
+case where default values are not uses only non-required attributes would have
+&lsquo;show attribute&rsquo; property.</em></p>
+
+<p></p>
+
+<p>These properties would apply to the given category/attribute combination. So
+if an attribute is used in multiple categories, the attribute can have
+different settings for each category. For example consider the following core
+data model:</p>
+
+<p><img alt="config dm1" src="images/config_dm1.png" width="178" height="128"
+/></p>
+
+<p></p>
+
+<p>The Threat and Infraction attributes are inherited by the categories People,
+Human Sign, Shelter or Camp and Weapons &amp; Equipment. In the core data model
+disabling the Threat attribute disables it for all categories. However, in the
+configured data model users would be able to set the &lsquo;show
+attribute&rsquo; property to different values for each of these subcategories
+as shown in the sample configured model below:</p>
+
+<p><img alt="config dm2" src="images/config_dm2.png" width="206" height="273"
+/></p>
+
+<p><em>Note: the in addition to disabling specific attributes, attributes can
+also be ordered differently in different categories.</em></p>
+
+<p></p>
+
+<p><strong>Collapsible Tree Attributes</strong></p>
+
+<p>This extension would allow users to specify if a tree attribute should be
+collapsed or not collapsed. Collapsing a tree attribute would convert the tree
+into a single list by including all the leaf nodes of the tree. In this case
+data entry users will not be able to select intermediate nodes as attribute
+values. Non-collapsed trees would remain as tree structures.</p>
+
+<p>This is specified on a category/attribute level so if an attribute is
+re-used under multiple categories each category can have custom settings for
+the attribute. For one category they may choose to collapse the tree in another
+category they may choose not to.</p>
+
+<p></p>
+
+<p><strong>Multi-Select Lists</strong></p>
+
+<p>Multi select lists would allow the user to define a single list attribute as
+a multi-select list for each category. Multi-select lists must be displayed to
+the data entry user in a way that allows the data entry user to select multiple
+items. Prompts then must be made for each additional attribute associated with
+the category for each item selected in the multi-select list.</p>
+
+<p>Only a single attribute per category can be selected as a multi-select
+list.</p>
+
+<p>The multi-select list attribute must be the first attribute in the list of
+attributes associated with the category. So users must first select all the
+possible list item values, then they can enter additional attributes about the
+list item.</p>
+
+<p></p>
+
+<p>Example:</p>
+
+<p>Consider the following category/attribute combination.</p>
+
+<p><img alt="config dm3" src="images/config_dm3.png" width="280" height="77"
+/></p>
+
+<p></p>
+
+<p></p>
+
+<h2><a id="CrossCa" name="Patrol1">Cross Conservation Area Analysis</a></h2>
 
 <p>Analysis between Conservation Areas takes place in the Cross Conservation
-Analysis framework. This framework allows for queries between the Conservation
-Areas stored within one installation of SMART. Cross Conservation Analysis
-requires more than one Conservation Area loaded within one installation of
-SMART. </p>
+Area Analysis framework. This framework allows for queries between the
+Conservation Areas stored within one installation of SMART. Cross Conservation
+Area Analysis requires more than one Conservation Area loaded within one
+installation of SMART. </p>
 
 <h4><strong><a id="ccalogin">Log-In Requirements</a></strong></h4>
 
 <p>1. More than one Conservation Area is loaded into SMART</p>
 
-<p>2. A Username and Passsword is common to the available Conservation Areas</p>
+<p>2. A Username and Password is common to the available Conservation Areas</p>
 
 <p></p>
 
-<p><img alt="Cross Conservation Area Login" src="images/X-CA_login.png"
-width="495" height="314" /></p>
+<p><img alt="CCAA Login" src="images/XCA_Login.png" width="500" height="320"
+/></p>
 
-<p>To log in the user selects <strong>"XXX - Cross Conservation
+<p></p>
+
+<p>To log in, the user selects <strong>"CCAA - Cross Conservation Area
 Analysis"</strong> and is required to enter in the Username and Password that
 is common to the Conservation Areas.</p>
 
 <p></p>
 
+<h4><a id="ccaaoverview">Overview</a></h4>
+
 <p>After logging in to SMART, open up the listing of Conservation Areas
-available for analysis. This screen allows for which Conservation Areas will be
-included in the analysis. The SMART user can select which CAs to include by
-licking the <em><strong>"Modify..."</strong></em> link. This will open up a
-window where the user can select specific Conservations Areas for analysis.
-After the Conservation Areas are selected SMART will validate the selected data
-models and search for common components that will be available for use in the
-Queries or Reports. </p>
+available for analysis. This screen allows the user to choose which
+Conservation Areas (CAs) will be included in the analysis. The SMART user can
+select which CAs to include by clicking the
+<em><strong>"Modify..."</strong></em> link. This will open up a window where
+the user can select specific Conservations Areas for analysis. After the
+Conservation Areas are selected, SMART will validate the selected data models
+and search for common components that will be available for use in the Queries
+or Reports. </p>
+
+<p>After the selected Conservation Areas have been analyzed for common
+elements, the user can begin the process of building queries and reports.</p>
 
 <p></p>
+
+<p><strong>Overview Perspective</strong></p>
+
+<p> <input type="image" name="CCAA Overview" alt="CCAA Overview"
+src="images/CCAA_Overview1.png" /></p>
+
+<p></p>
+
+<p><strong>List of Cross Conservation Area Analysis Overview Icons</strong></p>
 
 <table border="1">
   <col />
@@ -2201,9 +2679,14 @@ Queries or Reports. </p>
       <td>Query Perspective</td>
     </tr>
     <tr>
-      <td><img alt="Icon Report" src="images/iconReports.png" width="22"
-        height="21" /></td>
+      <td><input type="image" name="report" alt="report"
+        src="images/report.png" /></td>
       <td>Report Perspective</td>
+    </tr>
+    <tr>
+      <td><img alt="add report" src="images/addreport.png" width="21"
+        height="22" /></td>
+      <td>Creates a new Report</td>
     </tr>
     <tr>
       <td><img alt="Save Query Icon" src="images/querySave.png" width="22"
@@ -2228,15 +2711,51 @@ Queries or Reports. </p>
     <tr>
       <td><img alt="refresh" src="images/refreshPerspectiveIcon.png" width="18"
         height="18" /></td>
-      <td>Reset windows</td>
+      <td>Refresh Windows</td>
+    </tr>
+    <tr>
+      <td><img alt="smart map view" src="images/smartMapView.png" width="130"
+        height="30" /></td>
+      <td>Map Perspective</td>
+    </tr>
+    <tr>
+      <td><img alt="Cross CA List" src="images/XCA_List.png" width="181"
+        height="28" /></td>
+      <td>Cross Conservation Area Analysis Merge List</td>
+    </tr>
+    <tr>
+      <td><img alt="modify" src="images/XCA_Modify_list.png" width="60"
+        height="23" /></td>
+      <td>Opens dialog to select Conservation Areas for analysis</td>
     </tr>
   </tbody>
 </table>
 
 <p></p>
 
-<p><em>Note: The icons used in the Cross Conservation Analysis are the same
-icons used by the rest of the program. </em></p>
+<p><em>Note: The icons used in the Cross Conservation Area Analysis are the
+same icons used by the rest of the program. </em></p>
+
+<p></p>
+
+<h4><a id="ccaabasemaps">Basemaps</a></h4>
+
+<p>Creating basemaps in the Cross Conservation Area Analysis framework follows
+similar procedures as in a single Conservation Area. The exception to this is
+for the layers representing the individual Conservation Area boundaries. These
+layers are loaded into the basemap the same way as any other shapefile. </p>
+
+<p><em>Note: SMART Area Connection Page does not reference the
+boundaries.</em></p>
+
+<p>Once the layers have been added and themed, the Admin user can save the
+basemap for future use in the Cross-CA queries or reports. </p>
+
+<p></p>
+
+<p><img alt="xca save basemap" src="images/xca-save-basemap.png" width="426"
+height="342" /> <img alt="xca load basemap" src="images/xca-load-basemap.png"
+width="299" height="275" /></p>
 
 <p></p>
 
@@ -2244,16 +2763,24 @@ icons used by the rest of the program. </em></p>
 
 <p>The query filters (patrol and data model) available for use are those
 components that are common to all data models. SMART searches the unique data
-model keys and the patrol information to extract elements common to all of the
-selected Conservation Areas. If a data model key has been altered, the software
-will not be able to query against other areas unless all others keys have
-similarly been updated. Preserving keys in a standardized data model allows for
-Cross Conservation Analysis. Altering keys takes away this ability. </p>
+model and patrol keys to extract elements common to all of the selected
+Conservation Areas. If a data model or patrol key has been altered, the
+software will not be able to query against other areas unless all other keys
+have similarly been updated. Preserving keys in the data model and patrol
+parameters allows for a greater success in creating queries in the Cross
+Conservation Area Analysis framework. Altering keys takes away this ability.
+</p>
+
+<p><em>Note: It is highly recommended that edits to the unique keys be made
+only if the full implications are known.</em></p>
+
+<p>Any categories and attributes not present in all of the merged Conservation
+Areas will not appear in the Query Filter list.</p>
 
 <p></p>
 
-<p>A Cross Conservation Query is built using the same workflow as a standard
-query. </p>
+<p>A Cross Conservation Area Query is built using the same workflow as a
+standard query: </p>
 <ul>
   <li>Filters are applied (date, patrol &amp; data model)</li>
   <li>Operators are added if required</li>
@@ -2265,38 +2792,26 @@ query. </p>
 
 <p></p>
 
-<h4><a id="ccareports">Report</a></h4>
+<h4><a id="ccareports">Reports</a></h4>
 
-<p>As with standard SMART reports, Cross Conservation Area reports are linked
-to the saved queries. Any Cross Conservation Area reports wishing to link to a
-query must first build queries specific within the Cross Conservation Analysis
-framework. Once queries have been saved, they are then available for use in
-Cross Conservation Analysis reports.</p>
+<p>As with standard SMART reports, Cross Conservation Area Analysis reports are
+linked to the saved queries. Any Cross Conservation Area Analysis reports
+wishing to link to a query must first build queries specific within the Cross
+Conservation Area Analysis framework. Once queries have been saved, they are
+then available for use in Cross Conservation Area Analysis reports.</p>
 
 <p><em>Note: report datasets linked to tables do not need any additional work
 to access the information. </em></p>
 
 <p></p>
 
-<p>A Cross Conservation Report is built using the same workflow as a standard
-report.</p>
+<p>A Cross Conservation Area Analysis Report is built using the same workflow
+as a standard report.</p>
 <ul>
   <li>Build up a report</li>
   <li>Save the report</li>
   <li>Run and/or export a report</li>
 </ul>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
 
 <p></p>
 </body>
