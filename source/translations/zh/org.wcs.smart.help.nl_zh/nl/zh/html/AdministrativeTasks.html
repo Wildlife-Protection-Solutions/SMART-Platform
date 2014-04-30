@@ -10,11 +10,11 @@
 </head>
 
 <body>
-<h1>Administrator Tasks ES</h1>
+<h1>Administrator Tasks</h1>
 
 <p></p>
 
-<h2><a id="createca">Creating a Conservation Area</a></h2>
+<h2><a id="createca" name="createca">Creating a Conservation Area</a></h2>
 
 <p>Upon initial installation of the SMART software, you will need to set up a
 new Conservation Area which involves a number of configuration components. </p>
@@ -60,14 +60,35 @@ height="318" /></p>
 
 <p></p>
 
-<h4><a id="caproperties">Conservation Area Properties</a></h4>
+<h4><a id="catemplate">Conservation Area Templates</a></h4>
+
+<p>An existing Conservation Area can be used as a template to create new
+Conservation Areas. A template includes the data model, CA properties,
+stations, agencies and ranks, patrol mandates, transport types, teams, queries
+and reports. By using an existing template the administrator can save on time
+and ensure consistency between Conservation Areas. </p>
+
+<p>Select the option of Create Conservation Area using existing Conservation
+Area as Template and then select the appropriate Conservation Area from the
+drop down list.</p>
+
+<p>If the option of Create Blank Conservation Area is selected the wizard will
+continue through the remaining steps in setting up a Conservation Area.</p>
+
+<p><img alt="CA Template" src="images/CreateCA_Template.png" width="514"
+height="338" /></p>
+
+<p></p>
+
+<h4><a id="caproperties" name="caproperties">Conservation Area
+Properties</a></h4>
 
 <p>The Conservation Area Properties are names and descriptors assigned to a
 specific Conservation Area. These properties can help users of the SMART
 software manage multiple conservation areas. </p>
 
-<p><img alt="CA Properties" src="images/ConservationAreaProperties.png"
-width="511" height="312" /></p>
+<p><img alt="Conservation Area properties"
+src="images/ConservationAreaProperties.png" width="553" height="427" /></p>
 
 <p></p>
 <ul>
@@ -77,11 +98,14 @@ width="511" height="312" /></p>
   <li><strong>Description</strong>: Description of the Conservation Area</li>
   <li><strong>Designation</strong>: Designation or Status of the Conservation
     Area</li>
+  <li><strong>Supported Languages:</strong> List of languages supported by the
+    current Conservation Area</li>
 </ul>
 
 <p></p>
 
-<h4><a id="caadminuser">Defining an Administrative User</a></h4>
+<h4><a id="caadminuser" name="caadminuser">Defining an Administrative
+User</a></h4>
 
 <p>Creating an account for the primary administrator of a newly created
 Conservation Area is required, and the fields will need to be populated before
@@ -132,15 +156,13 @@ will need to define the data model to be used for the new Conservation Area.</p>
 
 <p></p>
 
-<p><img alt="initialize data model" src="images/initializeDataModel.png"
-width="678" height="373" /></p>
-
-<p></p>
+<p><img alt="ca data model list" src="images/ca_dm.png" width="693"
+height="384" /></p>
 
 <p>This process can be accomplished by:</p>
 <ul>
-  <li><strong>Using the default IUCN data model</strong> - this option will
-    apply the SMART default data model to the new conservation area. This is
+  <li><strong>Using the default data model</strong> - this option will apply
+    the SMART default data model to the new conservation area. This is
     recommended for novice users.</li>
   <li><strong>Using a blank data model</strong> - this option results in no
     data model and is not recommended unless the user is prepared to manually
@@ -148,27 +170,31 @@ width="678" height="373" /></p>
     though, and no data model is manually created, the administrator will be
     able to return to this screen in the future to choose a different
   option.</li>
-  <li><strong>Copying from an existing Conservation Area</strong> (if one has
-    been previously initialized by that instance of SMART) - this is the way to
-    use a copy of an existing data model from another Conservation Area within
-    the local SMART database. If this option is used, then an exact copy of an
-    existing data model will be created for the new Conservation Area. But at
-    that point, the two data models will be managed separately - any changes
-    that are made to either data model will only occur within the associated
-    Conservation Area. To use this option, you will have to specify the
-    existing Conservation Area, within your SMART database, that uses the data
-    model which you wish to copy to the new Conservation Area.</li>
-  <li><strong>Importing a custom data model</strong> (if a previously exported
-    XML data model file has been created) - this option allows the
-    administrator to import an XML formatted SMART Data Model. The most likely
-    scenario for using this option is when another SMART administrator has
-    provided an XML Data Model export from a separate installation of SMART.
-    Perhaps it has been provided on a memory stick or via email attachment. To
-    use this option, you will have to navigate to the location of the file.</li>
+  <li><strong>Copy data model from an existing Conservation Area</strong> (if
+    one has been previously initialized by that instance of SMART) - this is
+    the way to use a copy of an existing data model from another Conservation
+    Area within the local SMART database. If this option is used, then an exact
+    copy of an existing data model will be created for the new Conservation
+    Area. But at that point, the two data models will be managed separately -
+    any changes that are made to either data model will only occur within the
+    associated Conservation Area. To use this option, you will have to specify
+    the existing Conservation Area, within your SMART database, that uses the
+    data model which you wish to copy to the new Conservation Area.</li>
+  <li><strong>Import a custom data model</strong> (if a previously exported XML
+    data model file has been created) - this option allows the administrator to
+    import an XML formatted SMART Data Model. The most likely scenario for
+    using this option is when another SMART administrator has provided an XML
+    Data Model export from a separate installation of SMART. Perhaps it has
+    been provided on a memory stick or via email attachment. To use this
+    option, you will have to navigate to the location of the file.</li>
 </ul>
 
 <p>After a data model has been established it is then possible to customize the
 data model to suit the needs of a particular Conservation Area.</p>
+
+<p></p>
+
+<p></p>
 
 <h4><a id="AgenciesRanks" name="AgenciesRanks">Creating Agencies and
 Ranks</a></h4>
@@ -184,8 +210,8 @@ Area - Agency and Rank List &hellip;&rdquo;</p>
 
 <p></p>
 
-<p><img alt="employees and ranks" src="images/employeesRanks.png" width="437"
-height="397" /></p>
+<p><img alt="agency rank" src="images/agencyRank2.png" width="525" height="454"
+/></p>
 
 <p></p>
 
@@ -197,6 +223,12 @@ height="397" /></p>
 agency</p>
 
 <p><strong>Delete Rank:</strong> Deletes selected ranks</p>
+
+<p><strong>Import:</strong> Imports an XML file containing the list of agencies
+and ranks</p>
+
+<p><strong>Export:</strong> Exports an XML file containing the list of agencies
+and ranks</p>
 
 <p></p>
 
@@ -315,7 +347,8 @@ password</p>
 
 <p></p>
 
-<h4><a id="userlevels">Setting Accounts and Permissions</a></h4>
+<h4><a id="userlevels" name="userlevels">Setting Accounts and
+Permissions</a></h4>
 
 <p><strong>User Levels Permissions and Restrictions</strong></p>
 
@@ -375,11 +408,7 @@ SMART.</p>
 
 <p></p>
 
-<p></p>
-
-<p></p>
-
-<h4><a id="Stations">Station List</a></h4>
+<h4><a id="Stations" name="Stations">Station List</a></h4>
 
 <p>After initalization of a new Conservation Area, a list of stations is
 required. </p>
@@ -397,13 +426,31 @@ description of the station.</em></p>
 
 <p></p>
 
+<p><strong>Add:</strong> Adds a new Station</p>
+
+<p><strong>Disable:</strong> Disables a station from future usage</p>
+
+<p><strong>Delete:</strong> Completely deletes the station from the
+Conservation Area</p>
+
+<p><strong>Import:</strong> Imports an XML of Stations</p>
+
+<p><strong>Export:</strong> Exports an XML of Stations</p>
+
 <p></p>
 
-<h4><a id="Projections">Managing Projections</a></h4>
+<h4><a id="Projections" name="Projections">Managing Projections</a></h4>
 
 <p>SMART supports multiple coordinate system projections and the Administrator
 can select and set default projections. This process is not a requirement
 during the initialization of the Conservation Area.</p>
+
+<p></p>
+
+<p><img alt="projection" src="images/projections.png" width="510" height="327"
+/></p>
+
+<p></p>
 
 <p><strong>Add</strong>: Adds projections to the Conservation Area</p>
 
@@ -417,22 +464,19 @@ the Conservation Area</p>
 
 <p></p>
 
-<p></p>
-
-<p><img alt="projection" src="images/projections.png" width="510" height="327"
-/></p>
-
-<p></p>
-
-<p></p>
-
-<h4><a id="AreaBoundaries">Defining Area Boundaries</a></h4>
+<h4><a id="AreaBoundaries" name="AreaBoundaries">Defining Area
+Boundaries</a></h4>
 
 <p>As part of the initialization process the new Conservation Area will require
 boundary files to be loaded. Not every Conservation Area will have boundary
 files for all 5 types and not all 5 are required.</p>
 
 <p>ESRI Shapefiles are the default format for loading into SMART.</p>
+
+<p></p>
+
+<p><img alt="boundaries" src="images/boundaries.png" width="510" height="336"
+/></p>
 
 <p></p>
 
@@ -451,14 +495,7 @@ Shapefile.</em></p>
 
 <p></p>
 
-<p><img alt="boundaries" src="images/boundaries.png" width="510" height="336"
-/></p>
-
-<p></p>
-
-<p></p>
-
-<h4><a id="Basemaps">Managing Basemaps</a></h4>
+<h4><a id="Basemaps" name="Basemaps">Managing Basemaps</a></h4>
 
 <p>Basemaps are essentially saved cartographic display parameters and are
 created in the Mapping Perspective window. The Administrator can set a default
@@ -468,31 +505,30 @@ Area.</p>
 
 <p></p>
 
-<p><strong>Set As Default:</strong> Sets the selected basemap as the default
-for the entire Conservation Area</p>
-
-<p><strong>Delete:</strong> Deletes the selected basemap.</p>
-
-<p></p>
-
 <p><img alt="basemap" src="images/basemaps.png" width="508" height="270" /></p>
 
 <p></p>
 
-<h4><a id="UserNames">Changing Usernames and Passwords</a></h4>
+<p><strong>Rename:</strong> Dialog to rename or provide translations for the
+basemap names</p>
+
+<p><strong>Set As Default:</strong> Sets the selected basemap as the default
+for the entire Conservation Area</p>
+
+<p><strong>Delete:</strong> Deletes the selected basemap</p>
+
+<p></p>
+
+<h4><a id="UserNames" name="UserNames">Changing Usernames and Passwords</a></h4>
 
 <p></p>
 
 <p>To change your username and/or password, from the main File menu select
 "Change Password ..."</p>
 
-<p></p>
-
 <p><strong>To change your username</strong>, click on the button labelled
 "Change...", type in a new username, and then click on the "OK" button. Once
 you click this "OK" button, the username has been updated.</p>
-
-<p></p>
 
 <p><strong>To change your password</strong>, type in your current password next
 to "Current Password:", and type a new password next to "New Password:". You
@@ -501,9 +537,17 @@ Password:". Then click on the button labelled "Save" to implement the new
 password. If you decide that you do not wish to save the new password, you can
 instead click on the button labelled "Close".</p>
 
+<p><strong>To change the password of another account: </strong>An administrator
+account is required to reset the password of another account. The administrator
+will need to enter in to the Conservation Area menu and select "Employee List".
+The next step is to select the employee and click "Edit" at the bottom of the
+window. This will bring up the Update Employee window and the administrator can
+reset the password from this window.</p>
+
 <p></p>
 
-<h4><a id="ExportImportPatrol">Exporting and Importing Patrols</a></h4>
+<h4><a id="ExportImportPatrol" name="ExportImportPatrol">Exporting and
+Importing Patrols</a></h4>
 
 <p>SMART&rsquo;s ability to Export and Import patrols allows for distributed
 data entry and reloading into a master system, as well as functioning as a
@@ -549,7 +593,8 @@ when you have added all of the desired patrols to the list.</p>
 
 <p></p>
 
-<h4><a id="ExportDataModel">Exporting the Data Model</a></h4>
+<h4><a id="ExportDataModel" name="ExportDataModel">Exporting the Data
+Model</a></h4>
 
 <p>To assist in distribution of a well designed data model or to protect
 against data loss, SMART can export the data model in a structured XML format.
@@ -564,7 +609,7 @@ saving. Click on the "Save" button to create the XML data model file. Wait for
 the software to tell you that the data model has been successfully exported,
 and then click on the "OK" button.</p>
 
-<h4><a id="exportca">Exporting a Conservation Area</a></h4>
+<h4><a id="exportca" name="exportca">Exporting a Conservation Area</a></h4>
 
 <p>The exporting of a Conservation Area will export all of the components of a
 particular Conservation Area. This function not only allows for the archiving
@@ -582,7 +627,7 @@ Conservation Area successfully. Click "OK" when you get this message.</p>
 
 <p></p>
 
-<h4><a id="ImportCa">Importing a Conservation Area</a></h4>
+<h4><a id="ImportCa" name="ImportCa">Importing a Conservation Area</a></h4>
 
 <p>From the initial SMART startup screen, you can import a Conservation Area
 from a saved file. To do so, click on the "Advanced Options" button, and then
@@ -609,13 +654,20 @@ use.</p>
 
 <p></p>
 
-<h4><a id="DeleteCa">Deleting a Conservation Area</a></h4>
+<h4><a id="DeleteCa" name="DeleteCa">Deleting a Conservation Area</a></h4>
 
-<p>It may occasionally be necessary to delete a Conservation Area. Three
-example reasons to do so are: (1) if the data has become corrupted or otherwise
-is in irreparable condition, (2) if you have been using a Conservation Area for
-training or testing purposes and wish to delete it, or (3) if the Conservation
-Area was never actively used within SMART.</p>
+<p>It may occasionally be necessary to delete a Conservation Area. </p>
+
+<p>Three example reasons to do so are: </p>
+<ol>
+  <li>If the data has become corrupted or otherwise is in irreparable
+  condition</li>
+  <li>If you have been using a Conservation Area for training or testing
+    purposes and wish to delete it </li>
+  <li>If the Conservation Area was never actively used within SMART</li>
+</ol>
+
+<p></p>
 
 <p>Hopefully, if a conservation area has become corrupted or otherwise has
 become unusable due to a data issue, you will be restoring a backup of the
@@ -640,7 +692,7 @@ currently logged into.</p>
 
 <p></p>
 
-<h4><a id="Backup">System Backup</a></h4>
+<h4><a id="Backup" name="Backup">System Backup</a></h4>
 
 <p>The Backup System function will create a backup file of the entire database,
 and thus it provides a backup of every Conservation Area managed by the
@@ -659,7 +711,7 @@ created the backup file. Click "OK" when you get this message.</p>
 
 <p></p>
 
-<h4><a id="AutoBackup">Automatic Backup</a></h4>
+<h4><a id="AutoBackup" name="AutoBackup">Automatic Backup</a></h4>
 
 <p>Remembering to perform regular backups is critical to ensuring that data can
 be recovered in the event of a system crash. SMART has the ability to
@@ -698,6 +750,87 @@ location.</p>
 implement these Automatic Backup settings. Note that a backup will not be
 performed at this precise moment; automatic backups are performed, if
 scheduled, when you close the software.</p>
+
+<p></p>
+
+<h4><a id="InstallingPlugins" name="InstallingPlugins">Installing Plug-Ins</a></h4>
+
+<p>The SMART software is an extensible design that allows for a repository of
+additional plug-ins to be installed by an Administrator. The SMART plug in
+system uses a built in installer that accesses a remote site or a local file
+containing the additional plug ins. </p>
+
+<p>Access to the Plug-In Installer is found in the File Menu.</p>
+
+<p><img alt="Install New Plugins" src="images/InstallPlugIns.png" width="236"
+height="257" /></p>
+
+<p></p>
+
+<p><img alt="Plug In Installer" src="images/PlugInInstaller.png" width="569"
+height="678" /></p>
+
+<p></p>
+
+<p>The Plug-In Installer allows the Administrator to select which plug-ins (or
+components of the plug-ins) that will be added to the working Conservation
+Area.</p>
+
+<p><em><span style="color:#ff0000">Note: Available Language packs are installed
+using the Plug-In interface.</span></em></p>
+
+<p>After the selection of requested Plug-Ins the installer will preform
+validation checks to ensure that a plug-in isn't already present and creates a
+simple wizard for the install process.</p>
+
+<p></p>
+
+<p><strong>Notes on System Back-Ups and Conservation Export/Imports</strong></p>
+
+<p>System Backups and Restores require the SMART intallation to have the same
+configuration as the system restore file. If the system retore file has a
+different configuration than SMART installation the restore process will fail.
+If a failure occurs then the Administrator will have to update the SMART
+installation to match the restore file before a successful restore will be
+possible.</p>
+
+<p>The Conservation Area import process is handled differently and if the
+import file has data from additional plug-ins that the active SMART
+installation does not then that information will not be imported. The import
+will not fail but it will mean that information is not imported. If the
+addition data is required then it is recommended to delete the newly imported
+Conservation Area, install the appropriate plug-ins, then reimport. </p>
+
+<p></p>
+
+<p><strong>Unstalling Plug-Ins</strong></p>
+
+<p>If an optional plug-in needs to be uninstalled the Administrator will need
+to enter into the Help - About SMART screen and select the Installation Details
+option. This will bring up the SMART INtallation Details screen that contains
+technical information about the SMART installation. The tab Installed Plugins
+is where the optional plug-ins can be uninstalled. </p>
+
+<p></p>
+
+<p><img alt="Uninstalling Plugins" src="images/UninstallPlugIns.png"
+width="668" height="800" /></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
 
 <p></p>
 
