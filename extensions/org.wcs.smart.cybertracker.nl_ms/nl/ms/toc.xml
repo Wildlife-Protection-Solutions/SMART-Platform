@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.toc"?>
 
-<toc label="SMART CyberTracker Help">
+<toc label="SMART CyberTracker Help" link_to="../org.wcs.smart.help/toc.xml#SmartExtensions" topic="html/Cybertracker.html">
    <topic href="html/Cybertracker.html" label="CyberTracker Plugin">
-      <topic href="html/Cybertracker.html#install" label="Installing the SMART-CyberTracker Plugin">
+      <topic href="html/Cybertracker.html#install" label="Software Requirements">
       </topic>
       <topic href="html/Cybertracker.html#properties" label="Configuration Properties">
       </topic>
@@ -12,6 +12,8 @@
       <topic href="html/Cybertracker.html#exporting" label="Exporting a Data Model to a Mobile Device">
       </topic>
       <topic href="html/Cybertracker.html#importing" label="Importing Data from a Mobile Device">
+      </topic>
+      <topic href="html/Cybertracker.html#customDataModel" label="Creating Custom Data Models">
       </topic>
    </topic>
 </toc>
