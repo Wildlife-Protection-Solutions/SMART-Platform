@@ -591,7 +591,7 @@ public class PatrolQueryOptions {
 						results.add(new ListItem(((NamedItem) object).getUuid(), ((NamedItem) object).getName()));
 					}else if (object instanceof Employee){
 						Employee e = (Employee)object;
-						if (e.getConservationArea() == SmartDB.getCurrentConservationArea()){
+						if (e.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 							results.add(new ListItem(e.getUuid(), e.getFullLabel()));
 						}
 					}else if (object instanceof ConservationArea){
