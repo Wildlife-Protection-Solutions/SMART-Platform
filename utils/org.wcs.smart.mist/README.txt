@@ -1,7 +1,10 @@
 This project uses Maven.
 
 To build in a eclipse project:
-1.  run "mvn eclipse:eclipse"
+1a)  run "mvn eclipse:eclipse"
+or
+1b)  run "mvn -f pom-matcher.xml eclipse:eclipse"
+
 2.  then run "mvn compile"
 
 The mvn compile command will download both the firebird database and a 32 bit java jre 
