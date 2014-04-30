@@ -95,8 +95,13 @@ public class MistItem {
 		
 		//strip all trailing "." 's
 		while(concated.substring(concated.length() - 1).equals(".")){
+			if(concated.length() == 1){
+				concated = concated.substring(0, concated.length()-1);
+				break;
+			}
 			concated = concated.substring(0, concated.length()-1);
 		}
+
 		concated = concated + ".|" + cat4.replaceAll("[.]", ""); //remove period in the item
 		//Add one "." back in before the |, FME is expecting this from the way it was processing the data before...
 		
