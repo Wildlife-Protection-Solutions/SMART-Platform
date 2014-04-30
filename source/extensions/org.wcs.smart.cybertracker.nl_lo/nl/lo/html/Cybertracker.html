@@ -4,34 +4,24 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>Requirements</title>
+  <title>CyberTracker Plugin</title>
   <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
   <link href="smart_help.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
-<h1>SMART-CyberTracker Plug-In</h1>
+<h1>CyberTracker Plugin</h1>
 
-<h4><a id="install">Installing the SMART-CyberTracker Plug-in</a></h4>
+<h4><a id="install">Software Requirements</a></h4>
 
 <p><strong>Software Requirements:</strong></p>
 
 <p>You must have the CyberTracker Desktop application installed on your
-computer for the plug-in to function correctly. CyberTracker version 3.319 or higher is required.</p>
+computer for the plugin to function correctly. CyberTracker version 3.319 or
+higher is required.</p>
 
-<p></p>
-
-<p>To install the SMART-CyberTracker Plug-in, simply:</p>
-
-<p>1) Unzip the CyberTracker zip file after downloading it from the SMART
-website.</p>
-
-<p>2) Copy the "plugins" folder from that zip file and paste it into your
-SMART install directory (where your smart.exe file is) so that the two "plugins"
-are merged.</p>
-
-<p>3) When you run SMART the next time, you will see a "CyberTracker" menu to
-confirm that the plug-in is installed correctly.</p>
+<p>The latest stable release of CyberTracker is available here:
+http://cybertracker.org/software/free-download</p>
 
 <p></p>
 
@@ -41,8 +31,9 @@ confirm that the plug-in is installed correctly.</p>
 number of properties that can be configured to modify the behavior of the
 exported mobile application. The "Application Name" is what the application
 will be called on the mobile device. It should be noted that exporting an
-application with the same name more than once will overwrite any existing CyberTracker
-data collection applications already on the device with the same name. </p>
+application with the same name more than once will overwrite any existing
+CyberTracker data collection applications already on the device with the same
+name. </p>
 
 <p>Hover your mouse over any property name or field to get a more detailed
 description of how it will affect the output application.</p>
@@ -57,16 +48,18 @@ width="525" height="571" /></p>
 
 <p>Selecting the "CyberTracker" -&gt; "Patrol Screens Configuration" menu
 option will allow you to customize the meta data collections screens that are
-shown on the mobile application at the beggining of each Patrol. The 11
-meta-data collection screens are shown at the left of the screen; select which one you would
-like to edit and find the relevant details on the right-hand side.</p>
+shown on the mobile application at the beginning of each Patrol. The 11
+meta-data collection screens are shown at the left of the screen; select which
+one you would like to edit and find the relevant details on the right-hand
+side.</p>
 
 <p>Uncheck "Page Visible" to disable the page from showing to the data
-collection users for any pages that you wish to exclude. You can also select a default value
-to set that option for all patrols if you wish. For example, on "Patrol Type"
-you can uncheck "Page Visible" and then select "Ground". Once that application
-is exported, and data is collected and uploaded back to the database, all the
-patrols from that device will have the patrol type set to "Ground".</p>
+collection users for any pages that you wish to exclude. You can also select a
+default value to set that option for all patrols if you wish. For example, on
+"Patrol Type" you can uncheck "Page Visible" and then select "Ground". Once
+that application is exported, and data is collected and uploaded back to the
+database, all the patrols from that device will have the patrol type set to
+"Ground".</p>
 
 <p><img alt="Patrol Screen Configuration"
 src="images/Patrol_metadata_screens.png"
@@ -92,17 +85,18 @@ width="525" height="575" /></p>
     your mobile device (Android requires this). Follow these instructions then
     return to step #1 and repeat the process.</li>
   <li>Press "OK" on the "Export Completed Successfully" message box.</li>
-  <li>Unplug your mobile device from your computer and test that you see a new CyberTracker data
-    collection application with the "Application Name" you specified on the
-    properties page (the default name is "SMART").</li>
+  <li>Unplug your mobile device from your computer and test that you see a new
+    CyberTracker data collection application with the "Application Name" you
+    specified on the properties page (the default name is "SMART").</li>
 </ol>
 
 <p></p>
 
 <h4><a id="importing">Importing Data from a Mobile Device</a></h4>
 
-<p>To import data back into your database from a mobile device run SMART, plug the mobile device
-into your computer, log into your CA and then do the following:</p>
+<p>To import data back into your database from a mobile device run SMART, plug
+the mobile device into your computer, log into your CA and then do the
+following:</p>
 <ol>
   <li>Select the "CyberTracker" -&gt; "Import ..." menu option. <img
     alt="Import Options" src="images/Import.png"
@@ -114,10 +108,68 @@ into your computer, log into your CA and then do the following:</p>
   <li>Select one or more (use ctrl or shift to select multiple lines at once)
     patrols and hit the "Add As New Patrol" button.</li>
   <li>&lt;optional&gt;Should you wish to combine patrols with existing ones,
-    use the "Add As New Leg" button and select the patrol that you wish to combine
-    them with. This is not usually necessary unless your team split into
-    multiple groups with more than a single mobile collection device.</li>
+    use the "Add As New Leg" button and select the patrol that you wish to
+    combine them with. This is not usually necessary unless your team split
+    into multiple groups with more than a single mobile collection device.</li>
 </ol>
+
+<p></p>
+
+<h4><a id="customDataModel">Creating Custom Data Models</a></h4>
+
+<p>The current data model is designed for data analysis flexibility and not
+field user data entry efficiency. For example, the default data model has a
+variety of higher level categories (Animals, Features, People) that the field
+data entry users don&rsquo;t necessarily want to select each time they make an
+observation. In order to improve data entry efficiency this document provides a
+collection of options to allows users to configure data entry aiming to make it
+more it more efficient.</p>
+
+<p>The options below are critical for the success of the SMART CyberTracker
+integration as they will allow the SMART data model to be quickly and easily
+deployed with CyberTracker in a way that leverages the richness and ease of use
+CyberTracker users already expect.</p>
+
+<p>An initial install of CyberTracker on a PDA requires an accompanying data
+model. Instead of using a pre-configured data model for the install you will
+create one in this module that will be part of the initial installation.</p>
+
+<p></p>
+
+<p><strong>Editing a Configurable Data Model</strong></p>
+
+<p>Edits to the Configurable Data Model does not affect the Conservation Area's
+data model. The custom edits will only be reflected when using CyberTracker to
+collect observations.</p>
+<ul>
+  <li><strong>Add Group -</strong> a group can be added at any level to provide
+    the equivalent to a sub-category.</li>
+  <li><strong>Add Category</strong> - this will add only the selected category
+    and its direct attributes. Any sub-categories below the selected category
+    will be ignored.</li>
+  <li><strong>Delete</strong> - deletion will affect sub-groups and categories
+    and any objects below them.</li>
+  <li><strong>Translate</strong> - opens a dialog box to allow for entering /
+    editing of translations of the selected item.</li>
+</ul>
+
+<p></p>
+
+<p><strong>Optional Configurable Data Model Edits</strong></p>
+<ul>
+  <li><strong>Flatten Tree</strong> - takes tree attribute and create a single
+    level (flattened) list rather than the original tree format</li>
+  <li><strong>Default Value</strong> - assigns a default value to the
+  attribute.</li>
+  <li><strong>Multi-select</strong> - allows for multiple items to be selected
+    in a single screen when collecting data with CyberTracker</li>
+</ul>
+
+<p></p>
+
+<p></p>
+
+<p></p>
 
 <p></p>
 </body>
