@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: SMART Swahili Independence Incident Fragment
-Bundle-SymbolicName: org.wcs.smart.independentincident.nl_sw
-Bundle-Version: 1.0.0
-Fragment-Host: org.wcs.smart.independentincident;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Vendor: org.wcs.smart

@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: SMART Swahili Intelligence.nl.Fragment
-Bundle-SymbolicName: org.wcs.smart.intelligence.nl_sw
-Bundle-Version: 3.0.0
-Fragment-Host: org.wcs.smart.intelligence;bundle-version="3.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Vendor: org.wcs.smart

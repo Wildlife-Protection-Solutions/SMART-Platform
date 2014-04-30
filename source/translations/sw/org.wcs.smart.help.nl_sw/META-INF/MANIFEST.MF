@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Swahili Help Translation
-Bundle-SymbolicName: org.wcs.smart.help.nl_sw
-Bundle-Version: 3.0.0
-Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.help;bundle-version="3.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
