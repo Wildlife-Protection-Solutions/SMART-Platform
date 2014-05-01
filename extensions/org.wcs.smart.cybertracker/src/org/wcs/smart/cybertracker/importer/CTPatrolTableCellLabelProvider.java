@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.importer;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +60,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 		if (element instanceof CyberTrackerPatrol) {
 			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
 			switch (column) {
+			case IMPORT_NOTE: return ""; //$NON-NLS-1$
 			case START_DATE:return dateAsString(ctPatrol.getStartDate());
 			case END_DATE: 	return dateAsString(ctPatrol.getEndDate());
 			case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName() : ""; //$NON-NLS-1$
@@ -80,6 +82,13 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
+		if (CTPatrolTableColumn.IMPORT_NOTE.equals(column)) {
+			if (element instanceof CyberTrackerPatrol) {
+				CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
+				return ctPatrol.getMissingKeys().isEmpty() ? null : WARN_IMAGE;
+			}
+			return null;
+		}
 		PatrolMeta meta = toMeta(column);
 		if (meta == null)
 			return null;
@@ -104,6 +113,16 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 		if (element instanceof CyberTrackerPatrol) {
 			String result = ""; //$NON-NLS-1$
 			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
+			if (CTPatrolTableColumn.IMPORT_NOTE.equals(column)) {
+				if (!ctPatrol.getMissingKeys().isEmpty()) {
+					String keys = ""; //$NON-NLS-1$
+					for (String key : ctPatrol.getMissingKeys()) {
+						keys += "\n" + key; //$NON-NLS-1$
+					}
+					return MessageFormat.format(Messages.CTPatrolTableCellLabelProvider_IngoreKeysWarning, keys);
+				}
+				return result;
+			}
 			if (column == CTPatrolTableColumn.MEMBERS) {
 				result = asString(ctPatrol.getCtMembers(), "\n"); //$NON-NLS-1$
 			} else {

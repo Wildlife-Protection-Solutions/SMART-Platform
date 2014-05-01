@@ -96,6 +96,7 @@ public class CTPatrolTableContainer extends Composite {
 	 * @since 1.0.0
 	 */
 	public enum CTPatrolTableColumn {
+		IMPORT_NOTE ("",	20), //$NON-NLS-1$
 		START_DATE	(Messages.CTPatrolTableColumn_StartDate,	120),
 		END_DATE	(Messages.CTPatrolTableColumn_EndDate,		120),
 		TYPE		(Messages.CTPatrolTableColumn_Type),
