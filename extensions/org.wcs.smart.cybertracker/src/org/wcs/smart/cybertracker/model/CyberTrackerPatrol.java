@@ -24,8 +24,10 @@ package org.wcs.smart.cybertracker.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
@@ -92,6 +94,8 @@ public class CyberTrackerPatrol {
 	private String ctLeader;
 	private String ctPilot;
 	private List<String> ctMembers;
+
+	private Set<String> missingKeys = new HashSet<String>();
 	
 	public CyberTrackerPatrol(Map<String, E> elementsMap, List<S> patrolData) {
 		this.elementsMap = elementsMap;
@@ -320,6 +324,13 @@ public class CyberTrackerPatrol {
 
 	public void setTimerTrackList(List<Coordinate> timerTrackList) {
 		this.timerTrackList = timerTrackList;
+	}
+	
+	public Set<String> getMissingKeys() {
+		return missingKeys;
+	}
+	public void addMissingKey(String i) {
+		missingKeys.add(i);
 	}
 	
 	/**

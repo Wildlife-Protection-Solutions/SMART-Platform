@@ -253,7 +253,12 @@ public class CyberTrackerImporter {
 			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
 				ctPatrol.setId(v);
 			} else {
-				recordPatrolData(ctPatrol, eMap.get(i), v, eMap, session);
+				E ei = eMap.get(i);
+				if (ei != null) {
+					recordPatrolData(ctPatrol, ei, v, eMap, session);
+				} else {
+					ctPatrol.addMissingKey(i);
+				}
 			}
 		}
 		
@@ -456,8 +461,10 @@ public class CyberTrackerImporter {
 		//true if at least one category or attribute was selected
 		for (S.A a : s.getA()) {
 			E e = eMap.get(a.getI());
-			if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
-				return true;
+			if (e != null) {
+				if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
+					return true;
+			}
 		}
 		return false;
 	}
