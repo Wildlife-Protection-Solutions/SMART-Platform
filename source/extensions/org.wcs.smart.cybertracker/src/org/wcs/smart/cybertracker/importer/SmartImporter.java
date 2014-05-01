@@ -316,6 +316,9 @@ public class SmartImporter {
 		A defaultValue = null;
 		for (A a : s.getA()) {
 			E e = eMap.get(a.getI());
+			if (e == null)
+				continue; //skip invalid records
+			
 			if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1())) {
 				categories.add(a);
 			} else if (ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1())) {
