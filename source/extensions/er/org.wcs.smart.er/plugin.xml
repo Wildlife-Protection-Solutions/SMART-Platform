@@ -19,5 +19,11 @@
             version="1.0.0">
       </action>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.er.upgrade.ERDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
