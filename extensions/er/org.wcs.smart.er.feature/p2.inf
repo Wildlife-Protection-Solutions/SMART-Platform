@@ -1,0 +1,10 @@
+metaRequirements.0.namespace=org.wcs.smart.er
+metaRequirements.0.name=onInstall
+metaRequirements.0.range=1.0.0
+
+metaRequirements.1.namespace=org.wcs.smart.er
+metaRequirements.1.name=onUninstall
+metaRequirements.1.range=1.0.0
+
+instructions.install=org.wcs.smart.er.onInstall();
+instructions.uninstall=org.wcs.smart.er.onUninstall();

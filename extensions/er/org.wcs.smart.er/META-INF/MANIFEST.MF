@@ -1,10 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecological Records Plug-in
-Bundle-SymbolicName: org.wcs.smart.er
+Bundle-SymbolicName: org.wcs.smart.er;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: org.wcs.smart.er.EcologicalRecordsPlugIn
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.wcs.smart.p2;bundle-version="3.0.0",
+ org.wcs.smart;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

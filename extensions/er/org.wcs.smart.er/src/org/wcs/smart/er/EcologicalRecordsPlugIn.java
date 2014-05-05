@@ -1,5 +1,7 @@
 package org.wcs.smart.er;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -11,6 +13,9 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.er"; //$NON-NLS-1$
 
+	//The current db version
+	public static final String DB_VERSION = "1.0"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static EcologicalRecordsPlugIn plugin;
 	
@@ -47,4 +52,9 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
+    public static void log(String message, Throwable t){
+		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
+        getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
+	}
+	
 }
