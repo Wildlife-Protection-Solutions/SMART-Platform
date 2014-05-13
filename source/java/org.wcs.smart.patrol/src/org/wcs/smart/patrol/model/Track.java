@@ -128,6 +128,12 @@ public class Track {
 	 * @param ls new linestring
 	 */
 	public void setLineString(LineString ls){
+		if (ls == null){
+			this.ls = null;
+			this.distance = 0.0f;
+			this.geom = null;
+			return;
+		}
 		this.distance = (float)(GeometryUtils.distanceInMeters(ls) / 1000.0);
 		
 		WKBWriter writer = new WKBWriter(3);
