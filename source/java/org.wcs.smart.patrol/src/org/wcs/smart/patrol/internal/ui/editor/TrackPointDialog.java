@@ -59,6 +59,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -83,8 +84,12 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.Style;
+import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -123,10 +128,17 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	private final static FilterFactory2 FACTORY = CommonFactoryFinder.getFilterFactory2(null);
-	private final static DateFormat DATEFORMAT = new SimpleDateFormat( ((SimpleDateFormat)DateFormat.getTimeInstance()).toPattern() + "   (" + ((SimpleDateFormat)DateFormat.getDateInstance()).toPattern() + ")");
+	private final static DateFormat DATEFORMAT = new SimpleDateFormat( ((SimpleDateFormat)DateFormat.getTimeInstance()).toPattern() + "   (" + ((SimpleDateFormat)DateFormat.getDateInstance()).toPattern() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 	static{
 		DATEFORMAT.setTimeZone(Track.ZTIMEZONE);
 	}
+
+	private final static String SELECTED_FIELD = "selected"; //$NON-NLS-1$
+	private final static String X_FIELD = "x"; //$NON-NLS-1$
+	private final static String Y_FIELD = "y"; //$NON-NLS-1$
+	private final static String DATETIME_FIELD = "datetime"; //$NON-NLS-1$
+	private final static String GEOM_FIELD = "geom"; //$NON-NLS-1$
+	private final static String INDEX_FIELD = "index"; //$NON-NLS-1$
 	
 	private Track track;
 	private Track editTrack;	//copy of track for editing
@@ -171,7 +183,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		
 		//map layers
 		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
-		layerListTabItem.setText("Map Layers");
+		layerListTabItem.setText(Messages.TrackPointDialog_MapLayersTableName);
 		
 		Composite layersTab = new Composite(tabFolder, SWT.NONE);
 		layersTab.setLayout(new GridLayout());
@@ -204,9 +216,12 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	}
 
 	
+	/*
+	 * setup point list and layer list
+	 */
 	private void createPointList(TabFolder tabFolder) {
 		TabItem pntsTabItem = new TabItem(tabFolder, SWT.NONE);
-		pntsTabItem.setText("Track Points");
+		pntsTabItem.setText(Messages.TrackPointDialog_TrackPointsTabName);
 		
 		Composite pntsTab = new Composite(tabFolder, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -217,6 +232,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		trackviewer = new TableViewer(pntsTab, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI );
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = 400;
+		gd.widthHint = 300;
 		trackviewer.getTable().setLayoutData(gd);
 		trackviewer.getTable().setLinesVisible(true);
 		trackviewer.getTable().setHeaderVisible(true);
@@ -232,13 +248,13 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 						Coordinate c2 = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.x);
 					}else if (element instanceof SimpleFeature){
-						Double x = (Double) (((SimpleFeature)element).getAttribute("x"));
-						Double y = (Double) (((SimpleFeature)element).getAttribute("y"));
+						Double x = (Double) (((SimpleFeature)element).getAttribute(X_FIELD));
+						Double y = (Double) (((SimpleFeature)element).getAttribute(Y_FIELD));
 						Coordinate c2 = ReprojectUtils.reproject(x, y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.x);
 					}
 				} catch (Exception e) {
-					return "Error Reprojecting Point";
+					return Messages.TrackPointDialog_ReprojectionError;
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -258,13 +274,13 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 						Coordinate c2 = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.y);
 					}else if (element instanceof SimpleFeature){
-						Double x = (Double) (((SimpleFeature)element).getAttribute("x"));
-						Double y = (Double) (((SimpleFeature)element).getAttribute("y"));
+						Double x = (Double) (((SimpleFeature)element).getAttribute(X_FIELD));
+						Double y = (Double) (((SimpleFeature)element).getAttribute(Y_FIELD));
 						Coordinate c2 = ReprojectUtils.reproject(x, y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.y);
 					}
 				} catch (Exception e) {
-					return "Error Reprojecting Point";
+					return Messages.TrackPointDialog_ReprojectionError;
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -282,7 +298,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					Date d = new Date( (long) ((Coordinate)element).z );
 					return DATEFORMAT.format(d);
 				}else if (element instanceof SimpleFeature){
-					return (String)(((SimpleFeature)element).getAttribute("datetime"));
+					return (String)(((SimpleFeature)element).getAttribute(DATETIME_FIELD));
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -290,7 +306,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		column.getColumn().setText(Messages.TrackPointDialog_ZColumnName);
 		column.getColumn().setResizable(true);
 		column.getColumn().setMoveable(false);
-		column.getColumn().setWidth(100);
+		column.getColumn().setWidth(150);
 		
 		
 		trackviewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -306,9 +322,9 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 				
 				try {
 					//clear all
-					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor("selected").getName(), false, org.opengis.filter.Filter.INCLUDE);
+					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), false, org.opengis.filter.Filter.INCLUDE);
 					//select items
-					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor("selected").getName(), true, FACTORY.id(ids));
+					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), true, FACTORY.id(ids));
 				} catch (IOException e) {
 					SmartPatrolPlugIn.log(e.getMessage(), e);
 				}
@@ -321,7 +337,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnDelete = new Button(buttonPanel, SWT.NONE);
-		btnDelete.setText("Delete");
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
 		btnDelete.addSelectionListener(new SelectionAdapter() {
@@ -333,7 +349,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 					Object x = (Object) iterator.next();
 					if (x instanceof SimpleFeature){
-						toDelete.add((Integer)((SimpleFeature) x).getAttribute("index"));
+						toDelete.add((Integer)((SimpleFeature) x).getAttribute(INDEX_FIELD));
 					}
 				}				
 				if (toDelete.size() == 0) return;
@@ -347,7 +363,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 						trackStore.removeFeatures(Filter.INCLUDE);
 						pointStore.removeFeatures(Filter.INCLUDE);
 					}catch(Exception ex){
-						ex.printStackTrace();
+						SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					}					
 					trackLayer.refresh(null);
 					pointLayer.refresh(null);
@@ -356,7 +372,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					getButton(IDialogConstants.OK_ID).setEnabled(true);
 					return;
 				}else if (newc.length == 1){
-					MessageDialog.openError(getShell(), "Modify Track", "A track cannot be comprised of a single point.  At least two points are required.");
+					MessageDialog.openError(getShell(), Messages.TrackPointDialog_ErrorDialogTitle, Messages.TrackPointDialog_TrackError);
 					return;
 				}
 				int newindex = 0;
@@ -371,11 +387,11 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 				
 				//update track and point layers
 				try {
-					trackStore.modifyFeatures(trackStore.getSchema().getDescriptor("geom").getName(),
+					trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
 							ls, Filter.INCLUDE);
 					trackLayer.refresh(null);
 				} catch (IOException e1) {
-					SmartPatrolPlugIn.displayLog("Error updating track map layers after saving modifications." + "\n\n" + e1.getMessage(), e1);
+					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
 				}
 				try {
 					pointStore.removeFeatures(Filter.INCLUDE);
@@ -384,7 +400,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					
 					trackviewer.setInput(pointStore.getFeatures().toArray());
 				} catch (IOException e1) {
-					SmartPatrolPlugIn.displayLog("Error updating track point map layers after saving modifications." + "\n\n" + e1.getMessage(), e1);
+					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
 				}
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 				
@@ -393,6 +409,9 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		});
 	}
 
+	/*
+	 * setup map area
+	 */
 	private void setupMap(Composite main) {
 		Composite mapComp = new Composite(main, SWT.NONE);
 		mapComp.setLayout(new GridLayout(2, false));
@@ -402,7 +421,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Map map = (Map) ProjectFactory.eINSTANCE.createMap();
-		map.setName("Track Point Map");
+		map.setName(Messages.TrackPointDialog_MapName);
 		mapViewer.setMap(map);
 		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
@@ -422,7 +441,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 				
 				createTrackPointLayer();
 				createTrackLayer();
-				
+
 			}
 		});
 		defaultLayer.schedule();
@@ -432,13 +451,48 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		String[] thisTools = new String[] {
 				ZoomExtentTool.ID,
 				PanTool.ID,
-				ZoomTool.ID};
+				ZoomTool.ID,
+				PointSelectionTool.ID};
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(mapComp);
 		new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
 
 		tools.selectTool(PanTool.ID);
+		PointSelectionTool tool = (PointSelectionTool) ApplicationGIS.getToolManager().findTool(PointSelectionTool.ID);
+		tool.addListener(new PointSelectionTool.PointSelectionListener() {
+			@Override
+			public void selection(ReferencedEnvelope bbox) {
+				try {
+					//update selection in table; this will automatically update
+					//the map.
+					//cannot simply use selected features as different objects are
+					//made for the layer, therefore we compare feature ids.
+					FeatureCollection selected = pointStore.getFeatures(
+							FACTORY.bbox(FACTORY.property(GEOM_FIELD), bbox));
+					HashSet<FeatureId> items = new HashSet<FeatureId>();
+					FeatureIterator<Feature> it = selected.features();
+					while(it.hasNext()){
+						Feature f = it.next();
+						items.add(f.getIdentifier());
+					}
+					
+					List<Object> newSelectionItems = new ArrayList<Object>();
+					Object[] xx = (Object[]) trackviewer.getInput();
+					for (Object x : xx){
+						if (items.contains( ((SimpleFeature)x).getIdentifier() )){
+							newSelectionItems.add(x);
+						}
+					}
+					IStructuredSelection newSelection = new StructuredSelection(newSelectionItems);
+					trackviewer.setSelection(newSelection);
+					
+					
+				} catch (IOException e) {
+					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_SelectionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+				}
+			}
+		});
 		
 		
 		//dispose of temporary layer when composite is disposed
@@ -454,18 +508,20 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					}
 				}catch (Exception ex){
 					SmartPlugIn.log("Error removing service", ex); //$NON-NLS-1$
-					}
-					
-				}
+				}		
+			}
 		});
 	}
 	
-	protected void createTrackLayer(){
+	/*
+	 * Creates and styles the track layer
+	 */
+	private void createTrackLayer(){
 		try{
-			SimpleFeatureType featureType = DataUtilities.createType("smart.PatrolTrack", "fid:String,geom:LineString:srid=4326");
+			SimpleFeatureType featureType = DataUtilities.createType("smart.PatrolTrack", "fid:String," + GEOM_FIELD + ":LineString:srid=4326"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	
 			final IGeoResource trackResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
-				
+			
 			trackStore = trackResource.resolve(FeatureStore.class, null);
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 			layers.add(trackResource);
@@ -492,18 +548,23 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					trackLayer.getStyleBlackboard().clear();
 					trackLayer.getStyleBlackboard().put(SLDContent.ID, style);
 					
-					mapViewer.getMap().sendCommandASync(new SetViewportBBoxCommand(trackLayer.getBounds(monitor, mapViewer.getMap().getViewportModel().getCRS())));
+					//zoom to buffered layer
+					ReferencedEnvelope bounds = trackLayer.getBounds(monitor, mapViewer.getMap().getViewportModel().getCRS());
+					bounds.expandBy(Math.max(bounds.getWidth(), bounds.getHeight()) * 0.1);
+					mapViewer.getMap().sendCommandASync(new SetViewportBBoxCommand(bounds));
 				}
 			};
 			getMap().sendCommandASync(command);
 						
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, "Error adding track to map", ex);
+			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingTrackLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	    
 	}
 	
-
+	/*
+	 * Creates the point features and adds them to the points layers
+	 */
 	private void createTrackPointFeatures(SimpleFeatureType featureType) throws IOException{
 		final List<SimpleFeature> features = new ArrayList<SimpleFeature>(1);
 		
@@ -511,7 +572,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			Coordinate c = editTrack.getLineString().getCoordinates()[i];
 		
 			Object[] data = new Object[7];
-			data[0] = SmartUtils.encodeHex(editTrack.getUuid()) + "." + i;
+			data[0] = SmartUtils.encodeHex(editTrack.getUuid()) + "." + i; //$NON-NLS-1$
 			data[1] = c.x;
 			data[2] = c.y;
 			data[3] = DATEFORMAT.format(new Date( (long) ((Coordinate)c).z ));
@@ -527,10 +588,12 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		pointStore.addFeatures(featureCollection);
 	}
 	
-	
-	protected void createTrackPointLayer(){
+	/*
+	 * Creates the point features layers and initializes the points
+	 */
+	private void createTrackPointLayer(){
 		try{
-			SimpleFeatureType featureType = DataUtilities.createType("smart.PatrolTrackPoint", "fid:String,x:Double,y:Double,datetime:String,index:Integer,selected:Boolean,geom:Point:srid=4326");
+			SimpleFeatureType featureType = DataUtilities.createType("smart.PatrolTrackPoint", "fid:String," + X_FIELD + ":Double," + Y_FIELD + ":Double," + DATETIME_FIELD + ":String," + INDEX_FIELD + ":Integer," + SELECTED_FIELD + ":Boolean," + GEOM_FIELD + ":Point:srid=4326"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 	
 			final IGeoResource trackResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
 			pointStore = trackResource.resolve(FeatureStore.class, null);
@@ -546,7 +609,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					//set custom style for points layer
 					
 					pointLayer = getLayers().get(0);
-					String sld = getStylingConfig();
+					String sld = getPointStyle();
 					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
 					SLDContent c = new SLDContent();
 					Style style = (Style)c.load(memento);
@@ -566,20 +629,17 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					try{
 						trackviewer.setInput(pointStore.getFeatures().toArray());
 					}catch(Exception ex){
-						ex.printStackTrace();
+						SmartPatrolPlugIn.log(ex.getMessage(), ex);
 					}
 				}});
 			
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, "Error adding track to map", ex);
+			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingPointLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	    
 	}
 	
 	
-	/** Only OK button is displayed
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
@@ -588,6 +648,11 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		btn.setEnabled(false);
 	}
 	
+	@Override
+	/*
+	 * Saves changes to track
+	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+	 */
 	protected void okPressed(){
 		Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
 		PatrolLegDay pld = track.getPatrolLegDay();
@@ -607,7 +672,6 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		try{
 			saveJob.join();
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pld);
-			
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 		}catch (InterruptedException ex){
 			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
@@ -619,6 +683,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	 * Dialog is resizable
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 */
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
@@ -649,7 +714,11 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		return null;
 	}
 
-	private String getStylingConfig() {
+	/**
+	 * point style
+	 * @return
+	 */
+	private String getPointStyle() {
 		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
 		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
 		"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
@@ -713,6 +782,10 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	
 	}
 	
+	/**
+	 * 
+	 * @return track style
+	 */
 	private String getTrackStyle() {
 		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
 		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$

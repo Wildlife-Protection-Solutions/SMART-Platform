@@ -65,7 +65,6 @@ public class LayerListComposite extends Composite implements IDropTargetProvider
 	private CheckboxTreeViewer viewer;
 	private Map currentMap;
 
-	
 	 private Adapter checkboxContextListener = new AdapterImpl(){
 		 
 		 private boolean requiresRefresh = false;
@@ -240,8 +239,10 @@ public class LayerListComposite extends Composite implements IDropTargetProvider
 				viewer.getControl().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
-						viewer.setCheckedElements(checkedLayers.toArray());
-						viewer.refresh();		
+						if (!viewer.getControl().isDisposed()){
+							viewer.setCheckedElements(checkedLayers.toArray());
+							viewer.refresh();
+						}
 					}});
 			}
 		}
