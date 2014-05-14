@@ -88,6 +88,7 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.geotools.styling.Style;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
@@ -95,6 +96,8 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
+import org.opengis.geometry.BoundingBox;
+import org.opengis.geometry.Envelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -112,6 +115,7 @@ import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.ZoomExtentTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -468,6 +472,8 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					//the map.
 					//cannot simply use selected features as different objects are
 					//made for the layer, therefore we compare feature ids.
+					Envelope env = CRS.transform(bbox, SmartDB.DATABASE_CRS);
+					bbox = new ReferencedEnvelope(env);
 					FeatureCollection selected = pointStore.getFeatures(
 							FACTORY.bbox(FACTORY.property(GEOM_FIELD), bbox));
 					HashSet<FeatureId> items = new HashSet<FeatureId>();
@@ -488,7 +494,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					trackviewer.setSelection(newSelection);
 					
 					
-				} catch (IOException e) {
+				} catch (Exception e) {
 					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_SelectionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 				}
 			}
