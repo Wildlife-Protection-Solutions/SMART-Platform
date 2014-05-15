@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.observation.ui;
 
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -69,10 +72,13 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 
 	private ObservationOptions patrolOption = null;
 	private Text txtEditTime;
+	private ControlDecoration cdEditTime;
 	private Button btnTrackDistanceDirection;
 	private ComboViewer projectionViewer;
 	
 	private Font boldFont;
+	
+	private String errorEditTimeMessage = MessageFormat.format(Messages.PatrolOptionsPropertyPage_Error_EditTime, -1, Short.MAX_VALUE);
 	
 	/**
 	 * @param parent
@@ -142,9 +148,9 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
-		final ControlDecoration cdEditTime =createDecoration(lbl);
+		cdEditTime = createDecoration(lbl);
+		cdEditTime.setDescriptionText(errorEditTimeMessage);
 		cdEditTime.hide();
-		
 		
 		txtEditTime = new Text(g, SWT.BORDER);
 		txtEditTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -153,19 +159,6 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			@Override
 			public void modifyText(ModifyEvent e) {
 				setChangesMade(true);
-				try{
-					int edittime = Integer.parseInt(txtEditTime.getText());
-					if (edittime < -1){
-						cdEditTime.show();
-						cdEditTime.setDescriptionText(Messages.PatrolOptionsPropertyPage_Error_EditTime);
-					}else{
-						cdEditTime.hide();
-					}
-					
-				}catch (Exception ex){
-					cdEditTime.show();
-					cdEditTime.setDescriptionText(Messages.PatrolOptionsPropertyPage_Error_InvalidInteger);
-				}
 			}
 		});
 		lbl = new Label(g, SWT.NONE);
@@ -253,6 +246,39 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		cd.setShowHover(true);
 		return cd;
 	}
+
+	protected void validate() {
+		if (!isEditTimeValid()) {
+			cdEditTime.show();
+			setErrorMessage(errorEditTimeMessage);
+			if (getButton(IDialogConstants.OK_ID) != null) {
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+			}
+			return;
+		}
+		cdEditTime.hide();
+		setErrorMessage(null);
+	}
+	
+	private boolean isEditTimeValid() {
+		try {
+			int edittime = Integer.parseInt(txtEditTime.getText());
+			if (edittime < -1 || edittime > Short.MAX_VALUE) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (Exception ex) {
+			return false;
+		}
+
+	}
+	
+	@Override
+	protected void setChangesMade(boolean ischanged) {
+		super.setChangesMade(ischanged);
+		validate();
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#performSave()
@@ -262,19 +288,13 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		if (patrolOption == null){
 			return false;
 		}
+		if (!isEditTimeValid()) {
+			//this should be impossible to be here, but added just in case
+			ObservationPlugIn.displayLog(errorEditTimeMessage, null);
+			return false;
+		}
 		patrolOption.setTrackDistanceDirection(btnTrackDistanceDirection.getSelection());
-		int edittime = -1;
-		try{
-			edittime = Integer.parseInt(txtEditTime.getText());
-		}catch (NumberFormatException ex){
-			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTimeNotInteger, ex);
-			return false;
-		}
-		if (edittime < -1){
-			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTime, null);
-			return false;
-		}
-		patrolOption.setEditTime(edittime);
+		patrolOption.setEditTime(Integer.parseInt(txtEditTime.getText()));
 		
 		Object prjSelection = ((IStructuredSelection)projectionViewer.getSelection()).getFirstElement();
 		if (prjSelection instanceof Projection) {
