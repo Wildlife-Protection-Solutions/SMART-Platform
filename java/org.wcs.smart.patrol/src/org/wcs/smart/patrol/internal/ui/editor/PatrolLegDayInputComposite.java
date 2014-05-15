@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -423,6 +425,7 @@ public class PatrolLegDayInputComposite {
 				//showImportWizard();
 				TrackPointDialog tpd = new TrackPointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getTrack());
 				tpd.open();
+				ApplicationGIS.getToolManager().setCurrentEditor(editor.getPatrolEditor());
 			}
 		});
 		

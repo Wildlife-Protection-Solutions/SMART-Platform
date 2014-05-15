@@ -9,7 +9,8 @@ Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
  org.eclipse.core.databinding.observable,
  org.eclipse.ui.forms,
  org.eclipse.gef,
- org.wcs.smart.observation;bundle-version="3.0.0";visibility:=reexport
+ org.wcs.smart.observation;bundle-version="3.0.0";visibility:=reexport,
+ net.refractions.udig.style.sld;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs

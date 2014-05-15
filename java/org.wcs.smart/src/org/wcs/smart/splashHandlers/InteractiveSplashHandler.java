@@ -46,6 +46,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
@@ -101,7 +102,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private Label progressLabel  = null;
 	private Link lblAdvanced = null;
 	
-//	private Font newFont;
+	private Cursor appStartCursor;
 	
 	//widgets to enable/disable
 	private ArrayList<Control> widgets = null;
@@ -152,8 +153,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		
 		//auto-login for testing
-		txtUserName.setText("smart"); //$NON-NLS-1$
-		txtPassword.setText("smart"); //$NON-NLS-1$
+//		txtUserName.setText("smart"); //$NON-NLS-1$
+//		txtPassword.setText("smart"); //$NON-NLS-1$
 		//handleButtonOKWidgetSelected();
 
 		doEventLoop();
@@ -438,15 +439,23 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private void startup(){
 		try {
 			progressLabel.setText(Messages.InteractiveSplashHandler_intiDbProcess);
-			
 			Job job = new Job(Messages.InteractiveSplashHandler_Progress_LoadingCa) {
 				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					DisplayAccess.accessDisplayDuringStartup();
-					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
+					try{
+					
+						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
+							
+							//setup cursor
+							appStartCursor = new Cursor(InteractiveSplashHandler.this.parent.getDisplay(), 
+									SWT.CURSOR_APPSTARTING);
+							
+							InteractiveSplashHandler.this.parent.getShell().setCursor(appStartCursor);
+							
 							//disable controls while we reload conservation area
 							enableControls(false);
 							progressLabel.setText(Messages.InteractiveSplashHandler_intiDbProcess);
@@ -492,6 +501,18 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 							}
 							
 						}});
+					}finally{
+						//revert cursor
+						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
+							public void run(){
+								InteractiveSplashHandler.this.parent.getShell().setCursor(null);
+								if (appStartCursor != null){
+									appStartCursor.dispose();
+								}
+							}
+						});
+						
+					}
 					return Status.OK_STATUS;
 				}
 			};

@@ -4,10 +4,10 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.wcs.smart.patrol.query;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.patrol.query.PatrolQueryPlugIn
-Require-Bundle: org.wcs.smart.query;bundle-version="3.0.0",
+Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
+ org.wcs.smart.query;bundle-version="3.0.0",
  org.eclipse.ui.forms,
- org.wcs.smart;bundle-version="3.0.0",
- org.wcs.smart.patrol;bundle-version="3.0.0",
+ org.wcs.smart.patrol;bundle-version="3.0.1",
  net.refractions.udig.catalog.rasterings;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
