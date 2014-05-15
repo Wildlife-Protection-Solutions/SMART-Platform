@@ -76,7 +76,7 @@ public class Messages extends NLS {
 	public static String PatrolOptionsPropertyPage_DistanceDirection_DescLabel;
 	public static String PatrolOptionsPropertyPage_DistanceDirection_OpLabel;
 	public static String PatrolOptionsPropertyPage_Error_CouldNotSave;
-	public static String PatrolOptionsPropertyPage_Error_EditTime;
+	public static String PatrolOptionsPropertyPage_Error_EditTimeInvalid;
 	public static String PatrolOptionsPropertyPage_PageName;
 	public static String PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel;
 	public static String PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel;

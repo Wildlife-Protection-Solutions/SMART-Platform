@@ -78,7 +78,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	
 	private Font boldFont;
 	
-	private String errorEditTimeMessage = MessageFormat.format(Messages.PatrolOptionsPropertyPage_Error_EditTime, -1, Short.MAX_VALUE);
+	private String errorEditTimeMessage = MessageFormat.format(Messages.PatrolOptionsPropertyPage_Error_EditTimeInvalid, -1, Short.MAX_VALUE);
 	
 	/**
 	 * @param parent
