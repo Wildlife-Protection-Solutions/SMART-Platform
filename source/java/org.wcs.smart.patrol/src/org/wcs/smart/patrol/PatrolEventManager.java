@@ -61,7 +61,7 @@ public class PatrolEventManager {
 	public static int PATROL_WAYPOINTS = 5;
 	
 	/**
-	 * Patrol tracks.  Fired whe track associated with any leg
+	 * Patrol tracks.  Fired when track associated with any leg
 	 * is modified.
 	 */
 	public static int PATROL_TRACKS = 6;

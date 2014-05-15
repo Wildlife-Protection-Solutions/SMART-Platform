@@ -483,12 +483,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			getEditor(i).doSave(new NullProgressMonitor());
 		}
 		SavePatrolPartJob saveJob = new SavePatrolPartJob(patrol, object);		
-			saveJob.schedule();
-			try{
-				saveJob.join();
-			}catch (InterruptedException ex){
-				throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
-			}
+		saveJob.schedule();
+		try{
+			saveJob.join();
+		}catch (InterruptedException ex){
+			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
+		}
 	}
 	
 	

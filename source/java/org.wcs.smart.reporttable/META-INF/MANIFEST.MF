@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.wcs.smart.reporttable;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.reporttable.Activator
 Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
- org.wcs.smart.patrol;bundle-version="3.0.0",
+ org.wcs.smart.patrol;bundle-version="3.0.1",
  org.wcs.smart.report.birt.query;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

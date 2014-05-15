@@ -105,6 +105,9 @@
    <feature url="features/org.wcs.smart.zh_3.0.0.jar" id="org.wcs.smart.zh" version="3.0.0">
       <category name="smart"/>
    </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature_3.0.1.jar" id="org.wcs.smart.cybertracker.feature" version="3.0.1">
+      <category name="cybertracker"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.

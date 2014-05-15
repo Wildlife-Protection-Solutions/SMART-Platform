@@ -672,6 +672,18 @@ public class Messages extends NLS {
 	public static String TrackFromWaypointEngine_GeneratedTracks;
 	public static String TrackPointDialog_DialogMessage;
 	public static String TrackPointDialog_DialogTitle;
+	public static String TrackPointDialog_ErrorAddingPointLayer;
+	public static String TrackPointDialog_ErrorAddingTrackLayer;
+	public static String TrackPointDialog_ErrorDialogTitle;
+	public static String TrackPointDialog_LayerUpdateError;
+	public static String TrackPointDialog_MapLayersTableName;
+	public static String TrackPointDialog_MapName;
+	public static String TrackPointDialog_ReprojectionError;
+	public static String TrackPointDialog_SelectionError;
+	public static String TrackPointDialog_TrackError;
+	public static String TrackPointDialog_TrackPointsTabName;
+	public static String TrackPointDialog_UpdatePointLayerError;
+	public static String TrackPointDialog_UpdateTrackLayerError;
 	public static String TrackPointDialog_XColumnName;
 	public static String TrackPointDialog_YColumnName;
 	public static String TrackPointDialog_ZColumnName;
