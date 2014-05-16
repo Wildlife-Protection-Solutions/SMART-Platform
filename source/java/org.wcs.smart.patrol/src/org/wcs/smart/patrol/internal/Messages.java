@@ -670,6 +670,9 @@ public class Messages extends NLS {
 	public static String TeamPropertyPage_PageName;
 	public static String TeamPropertyPage_TeamNameError;
 	public static String TrackFromWaypointEngine_GeneratedTracks;
+	public static String TrackPointDialog_DeletePoints;
+	public static String TrackPointDialog_DeletePointsDescription;
+	public static String TrackPointDialog_DeletePointsTooltip;
 	public static String TrackPointDialog_DialogMessage;
 	public static String TrackPointDialog_DialogTitle;
 	public static String TrackPointDialog_ErrorAddingPointLayer;
@@ -682,6 +685,7 @@ public class Messages extends NLS {
 	public static String TrackPointDialog_SelectionError;
 	public static String TrackPointDialog_TrackError;
 	public static String TrackPointDialog_TrackPointsTabName;
+	public static String TrackPointDialog_UndoButtonText;
 	public static String TrackPointDialog_UpdatePointLayerError;
 	public static String TrackPointDialog_UpdateTrackLayerError;
 	public static String TrackPointDialog_XColumnName;
