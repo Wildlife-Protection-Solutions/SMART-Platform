@@ -102,8 +102,6 @@ public class PatrolLegDay {
 		this.restMinutes = restMinutes;
 	}
 	
-	
-//	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay", orphanRemoval = true, cascade={CascadeType.ALL})
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrolLegDay")
 	@BatchSize(size=200)
 	public List<PatrolWaypoint> getWaypoints(){
