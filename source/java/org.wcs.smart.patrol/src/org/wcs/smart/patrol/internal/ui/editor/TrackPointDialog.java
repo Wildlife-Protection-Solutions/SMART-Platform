@@ -26,6 +26,8 @@ import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,10 +54,17 @@ import net.refractions.udig.style.sld.SLDContent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.action.AbstractAction;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -68,6 +77,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -76,6 +86,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -96,7 +108,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
-import org.opengis.geometry.BoundingBox;
 import org.opengis.geometry.Envelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
@@ -115,7 +126,6 @@ import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.ZoomExtentTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -156,6 +166,9 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	private Layer trackLayer = null;
 	private Layer pointLayer = null;
 	
+	private Button btnUndo;
+	private List<List<Coordinate>> undo = new ArrayList<List<Coordinate>>();
+		
 	
 	/**
 	 * @param parentShell parent shell
@@ -337,82 +350,146 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		});
 		
 		Composite buttonPanel = new Composite(pntsTab, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout());
+		buttonPanel.setLayout(new GridLayout(2, false));
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnUndo = new Button(buttonPanel, SWT.NONE);
+		btnUndo.setText(Messages.TrackPointDialog_UndoButtonText);
+		btnUndo.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		btnUndo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				undoDelete();
+			}
+		});
+		btnUndo.setEnabled(false);
 		
 		Button btnDelete = new Button(buttonPanel, SWT.NONE);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
+		btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (trackviewer.getSelection().isEmpty()) return;
-				StructuredSelection sel = (StructuredSelection) trackviewer.getSelection();
-				Set<Integer> toDelete = new HashSet<Integer>();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					Object x = (Object) iterator.next();
-					if (x instanceof SimpleFeature){
-						toDelete.add((Integer)((SimpleFeature) x).getAttribute(INDEX_FIELD));
-					}
-				}				
-				if (toDelete.size() == 0) return;
-				
-				Coordinate[] oldc = editTrack.getLineString().getCoordinates();
-				Coordinate[] newc = new Coordinate[oldc.length - toDelete.size()];
-				if (newc.length == 0){
-					//remove track entirely
-					editTrack.setLineString(null);
-					try{
-						trackStore.removeFeatures(Filter.INCLUDE);
-						pointStore.removeFeatures(Filter.INCLUDE);
-					}catch(Exception ex){
-						SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-					}					
-					trackLayer.refresh(null);
-					pointLayer.refresh(null);
-					trackviewer.setInput(null);
-					
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
-					return;
-				}else if (newc.length == 1){
-					MessageDialog.openError(getShell(), Messages.TrackPointDialog_ErrorDialogTitle, Messages.TrackPointDialog_TrackError);
-					return;
-				}
-				int newindex = 0;
-				for (int i = 0; i < oldc.length; i ++){
-					if (!toDelete.contains(i)){
-						newc[newindex++] = oldc[i];
-					}
-				}
-				GeometryFactory gf = new GeometryFactory();
-				LineString ls = gf.createLineString(newc);
-				editTrack.setLineString(ls);
-				
-				//update track and point layers
-				try {
-					trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
-							ls, Filter.INCLUDE);
-					trackLayer.refresh(null);
-				} catch (IOException e1) {
-					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
-				}
-				try {
-					pointStore.removeFeatures(Filter.INCLUDE);
-					createTrackPointFeatures((SimpleFeatureType)pointStore.getSchema());
-					pointLayer.refresh(null);
-					
-					trackviewer.setInput(pointStore.getFeatures().toArray());
-				} catch (IOException e1) {
-					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
-				}
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
-				
+				deleteSelectedPoints();
 				
 			}
 		});
 	}
 
+	private void undoDelete(){
+		if (undo.size() <= 0) return;
+		
+		List<Coordinate> toAdd = undo.remove(undo.size() - 1);
+	
+		List<Coordinate> allC = new ArrayList<Coordinate>();
+		for (Coordinate c : editTrack.getLineString().getCoordinates()){
+			allC.add(c);
+		}
+		allC.addAll(toAdd);
+		Collections.sort(allC, new Comparator<Coordinate>() {
+			@Override
+			public int compare(Coordinate o1, Coordinate o2) {
+				return ((Double)o1.z).compareTo(o2.z);
+			}
+		});
+		
+		GeometryFactory gf = new GeometryFactory();
+		LineString ls = gf.createLineString(allC.toArray(new Coordinate[allC.size()]));
+		editTrack.setLineString(ls);
+		
+		//update track and point layers
+		try {
+			trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
+					ls, Filter.INCLUDE);
+			trackLayer.refresh(null);
+		} catch (IOException e1) {
+			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+		}
+		try {
+			pointStore.removeFeatures(Filter.INCLUDE);
+			createTrackPointFeatures((SimpleFeatureType)pointStore.getSchema());
+			pointLayer.refresh(null);
+			
+			trackviewer.setInput(pointStore.getFeatures().toArray());
+		} catch (IOException e1) {
+			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+		}
+		
+		btnUndo.setEnabled(undo.size() > 0);
+	}
+	
+	
+	private void deleteSelectedPoints(){
+		if (trackviewer.getSelection().isEmpty()) return;
+		StructuredSelection sel = (StructuredSelection) trackviewer.getSelection();
+		Set<Integer> toDelete = new HashSet<Integer>();
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof SimpleFeature){
+				toDelete.add((Integer)((SimpleFeature) x).getAttribute(INDEX_FIELD));
+			}
+		}				
+		if (toDelete.size() == 0) return;
+		
+		Coordinate[] oldc = editTrack.getLineString().getCoordinates();
+		Coordinate[] newc = new Coordinate[oldc.length - toDelete.size()];
+		if (newc.length == 0){
+			//remove track entirely
+			editTrack.setLineString(null);
+			try{
+				trackStore.removeFeatures(Filter.INCLUDE);
+				pointStore.removeFeatures(Filter.INCLUDE);
+			}catch(Exception ex){
+				SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			}					
+			trackLayer.refresh(null);
+			pointLayer.refresh(null);
+			trackviewer.setInput(null);
+			
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
+			return;
+		}else if (newc.length == 1){
+			MessageDialog.openError(getShell(), Messages.TrackPointDialog_ErrorDialogTitle, Messages.TrackPointDialog_TrackError);
+			return;
+		}
+		int newindex = 0;
+		List<Coordinate> deleted = new ArrayList<Coordinate>();
+		for (int i = 0; i < oldc.length; i ++){
+			if (!toDelete.contains(i)){
+				newc[newindex++] = oldc[i];
+			}else{
+				deleted.add(oldc[i]);
+			}
+		}
+		if (deleted.size() > 0){
+			undo.add(deleted);
+			btnUndo.setEnabled(true);
+		}
+		GeometryFactory gf = new GeometryFactory();
+		LineString ls = gf.createLineString(newc);
+		editTrack.setLineString(ls);
+		
+		//update track and point layers
+		try {
+			trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
+					ls, Filter.INCLUDE);
+			trackLayer.refresh(null);
+		} catch (IOException e1) {
+			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+		}
+		try {
+			pointStore.removeFeatures(Filter.INCLUDE);
+			createTrackPointFeatures((SimpleFeatureType)pointStore.getSchema());
+			pointLayer.refresh(null);
+			
+			trackviewer.setInput(pointStore.getFeatures().toArray());
+		} catch (IOException e1) {
+			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+		}
+		getButton(IDialogConstants.OK_ID).setEnabled(true);
+	}
+	
+	
 	/*
 	 * setup map area
 	 */
@@ -430,6 +507,21 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
+		
+		final DeletePointAction deletePointAction = new DeletePointAction();
+		final MenuManager contextMenu = new MenuManager();
+        contextMenu.add(deletePointAction);
+        contextMenu.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager mgr) {
+				((ActionContributionItem)contextMenu.getItems()[0]).update();
+			}
+		});
+
+        // Create menu.
+       Menu menu = contextMenu.createContextMenu(mapViewer.getViewport().getControl());
+       mapViewer.setMenu(menu);
+		
+		
 		
 		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(), false, null);
 		// we need to do this because this map is in a dialog box and
@@ -819,4 +911,145 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	
 	}
 	
+	
+	class DeletePointAction extends AbstractAction{
+
+		@Override
+		public int getAccelerator() {
+			return 0;
+		}
+
+		@Override
+		public String getActionDefinitionId() {
+			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			return Messages.TrackPointDialog_DeletePointsDescription;
+		}
+
+		@Override
+		public ImageDescriptor getDisabledImageDescriptor() {
+			return null;
+		}
+
+		@Override
+		public HelpListener getHelpListener() {
+			return null;
+		}
+
+		@Override
+		public ImageDescriptor getHoverImageDescriptor() {
+			return null;
+		}
+
+		@Override
+		public String getId() {
+			return null;
+		}
+
+		@Override
+		public ImageDescriptor getImageDescriptor() {
+			return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON);
+		}
+
+		@Override
+		public IMenuCreator getMenuCreator() {
+			return null;
+		}
+
+		@Override
+		public int getStyle() {
+			return AS_PUSH_BUTTON;
+		}
+
+		@Override
+		public String getText() {
+			return Messages.TrackPointDialog_DeletePoints;
+		}
+
+		@Override
+		public String getToolTipText() {
+			return Messages.TrackPointDialog_DeletePointsTooltip;
+		}
+
+		@Override
+		public boolean isChecked() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return !trackviewer.getSelection().isEmpty();
+		}
+
+		@Override
+		public boolean isHandled() {
+			return false;
+		}
+
+		@Override
+		public void run() {
+			deleteSelectedPoints();
+		}
+
+		@Override
+		public void runWithEvent(Event event) {
+			deleteSelectedPoints();
+		}
+
+		@Override
+		public void setActionDefinitionId(String id) {
+		}
+
+		@Override
+		public void setChecked(boolean checked) {
+		}
+
+		@Override
+		public void setDescription(String text) {
+		}
+
+		@Override
+		public void setDisabledImageDescriptor(ImageDescriptor newImage) {
+		}
+		
+		@Override
+		public void setEnabled(boolean enabled) {
+		}
+
+		@Override
+		public void setHelpListener(HelpListener listener) {
+		}
+
+		@Override
+		public void setHoverImageDescriptor(ImageDescriptor newImage) {
+		}
+
+		@Override
+		public void setId(String id) {
+		}
+
+		@Override
+		public void setImageDescriptor(ImageDescriptor newImage) {
+		}
+
+		@Override
+		public void setMenuCreator(IMenuCreator creator) {
+		}
+
+		@Override
+		public void setText(String text) {
+		}
+
+		@Override
+		public void setToolTipText(String text) {
+		}
+
+		@Override
+		public void setAccelerator(int keycode) {
+		}
+	
+	}
 }
