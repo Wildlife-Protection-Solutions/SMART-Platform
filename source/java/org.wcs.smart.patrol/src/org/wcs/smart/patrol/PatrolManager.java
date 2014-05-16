@@ -38,6 +38,9 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -133,6 +136,15 @@ public class PatrolManager {
 			
 				runDeleteHandlers(patrol, session, monitor);
 				monitor.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
+				
+				//waypoint deletion is not cascaded; we must delete this explicitly
+				for (PatrolLeg pl : patrol.getLegs()){
+					for (PatrolLegDay pld : pl.getPatrolLegDays()){
+						for (PatrolWaypoint pw : pld.getWaypoints()){
+							session.delete(pw.getWaypoint());
+						}
+					}
+				}
 				session.delete(patrol);
 				session.getTransaction().commit();
 				monitor.worked(1);
