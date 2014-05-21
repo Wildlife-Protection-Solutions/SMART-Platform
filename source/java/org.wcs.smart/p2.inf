@@ -1,3 +1,3 @@
 instructions.configure=\
-  addRepository(name:Local Update Site (3.0.0),type:0,location:jar${#58}file${#58}./updatesite/site_3.0.0.v1.zip!/,enabled:true);\
-  addRepository(name:Local Update Site (3.0.0),type:1,location:jar${#58}file${#58}./updatesite/site_3.0.0.v1.zip!/,enabled:true);
+  addRepository(name:Local Update Site (3.0.1),type:0,location:jar${#58}file${#58}./updatesite/site_3.0.1.v1.zip!/,enabled:true);\
+  addRepository(name:Local Update Site (3.0.1),type:1,location:jar${#58}file${#58}./updatesite/site_3.0.1.v1.zip!/,enabled:true);
