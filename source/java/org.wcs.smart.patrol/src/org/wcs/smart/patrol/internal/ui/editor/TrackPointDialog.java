@@ -563,7 +563,8 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(mapComp);
-		new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
+		MapInfoAreaComposite infoComp = new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
+		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		tools.selectTool(PanTool.ID);
 		PointSelectionTool tool = (PointSelectionTool) ApplicationGIS.getToolManager().findTool(PointSelectionTool.ID);
