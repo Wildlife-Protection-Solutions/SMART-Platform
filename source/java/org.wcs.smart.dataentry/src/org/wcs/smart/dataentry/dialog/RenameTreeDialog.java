@@ -54,11 +54,15 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 
 	public RenameTreeDialog(Shell parentShell, Attribute attribute, ConfigurableModel editModel, Session currentSession) {
 		super(parentShell, attribute, editModel, currentSession);
+		
+		
 	}
 
 	protected Viewer createItemViewer(Composite parent) {
 		final TreeViewer tree = new TreeViewer(parent, SWT.MULTI | SWT.BORDER);
 		tree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tree.getTree().getLayoutData()).heightHint = 300;
+		
 		tree.setContentProvider(new AttributeTreeContentProvider(true, false));
 		tree.setLabelProvider(new CmTreeLabelProvider(currentSession, editModel));
 		tree.setInput(attribute);
@@ -77,6 +81,7 @@ public class RenameTreeDialog extends AbstractRenameDialog{
 			}
 		});
 		tree.expandToLevel(2);
+		
 		return tree;
 	}
 	

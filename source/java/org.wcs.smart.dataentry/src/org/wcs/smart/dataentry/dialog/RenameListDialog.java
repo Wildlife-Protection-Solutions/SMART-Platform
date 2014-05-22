@@ -64,13 +64,13 @@ public class RenameListDialog extends AbstractRenameDialog {
 	protected Viewer createItemViewer(Composite parent) {
 		Composite tableComp = new Composite(parent, SWT.NONE);
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tableComp.getLayoutData()).heightHint = 300;
 		
 		final TableViewer tree = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
-		
 		tree.setContentProvider(ArrayContentProvider.getInstance());
 		tree.setLabelProvider(new CmListItemLabelProvider(currentSession, editModel));
 		tree.setInput(attribute.getActiveListItems());
-
+		
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

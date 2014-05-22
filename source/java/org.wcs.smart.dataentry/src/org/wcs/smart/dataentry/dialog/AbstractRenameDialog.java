@@ -89,6 +89,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 		
 		setTitle(attribute.getName());
 		setMessage(getDialogMessage());
+		getShell().setText(Messages.ConfigurableModelEditDialog_Title);
 		
 		SashForm comp = new SashForm(parent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
