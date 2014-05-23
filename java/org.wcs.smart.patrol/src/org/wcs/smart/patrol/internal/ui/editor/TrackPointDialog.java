@@ -325,7 +325,16 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		column.getColumn().setMoveable(false);
 		column.getColumn().setWidth(150);
 		
-		
+		final DeletePointAction deletePointAction = new DeletePointAction();
+		final MenuManager contextMenu = new MenuManager();
+        contextMenu.add(deletePointAction);
+        contextMenu.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager mgr) {
+				((ActionContributionItem)contextMenu.getItems()[0]).update();
+			}
+		});
+        trackviewer.getTable().setMenu(contextMenu.createContextMenu(trackviewer.getTable()));
+        
 		trackviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -345,7 +354,9 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 				} catch (IOException e) {
 					SmartPatrolPlugIn.log(e.getMessage(), e);
 				}
-				pointLayer.refresh(null);
+				if (pointLayer != null){
+					pointLayer.refresh(null);
+				}
 			}
 		});
 		
@@ -552,7 +563,8 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(mapComp);
-		new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
+		MapInfoAreaComposite infoComp = new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
+		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		tools.selectTool(PanTool.ID);
 		PointSelectionTool tool = (PointSelectionTool) ApplicationGIS.getToolManager().findTool(PointSelectionTool.ID);
@@ -691,7 +703,14 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	 */
 	private void createTrackPointLayer(){
 		try{
-			SimpleFeatureType featureType = DataUtilities.createType("smart.PatrolTrackPoint", "fid:String," + X_FIELD + ":Double," + Y_FIELD + ":Double," + DATETIME_FIELD + ":String," + INDEX_FIELD + ":Integer," + SELECTED_FIELD + ":Boolean," + GEOM_FIELD + ":Point:srid=4326"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+			SimpleFeatureType featureType = DataUtilities.createType("smart.PatrolTrackPoint",  //$NON-NLS-1$
+					"fid:String," +  //$NON-NLS-1$
+					X_FIELD + ":Double," +  //$NON-NLS-1$
+					Y_FIELD + ":Double," + //$NON-NLS-1$
+					DATETIME_FIELD + ":String," + //$NON-NLS-1$
+					INDEX_FIELD + ":Integer," + //$NON-NLS-1$
+					SELECTED_FIELD + ":Boolean," + //$NON-NLS-1$
+					GEOM_FIELD + ":Point:srid=4326"); //$NON-NLS-1$
 	
 			final IGeoResource trackResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
 			pointStore = trackResource.resolve(FeatureStore.class, null);
