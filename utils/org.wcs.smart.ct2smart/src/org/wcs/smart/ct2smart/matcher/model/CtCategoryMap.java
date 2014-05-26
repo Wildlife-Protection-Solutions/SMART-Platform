@@ -16,17 +16,18 @@ import javax.xml.bind.annotation.XmlValue;
 
 
 /**
- * <p>Java class for Ct2AttributeValue complex type.
+ * <p>Java class for CtCategoryMap complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Ct2AttributeValue">
+ * &lt;complexType name="CtCategoryMap">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="i" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="n" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="mapTo" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="ai" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="an" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="vi" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="vn" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -35,19 +36,21 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Ct2AttributeValue", propOrder = {
+@XmlType(name = "CtCategoryMap", propOrder = {
     "value"
 })
-public class Ct2AttributeValue {
+public class CtCategoryMap {
 
     @XmlValue
     protected String value;
     @XmlAttribute
-    protected String i;
+    protected String ai;
     @XmlAttribute
-    protected String n;
+    protected String an;
     @XmlAttribute
-    protected String mapTo;
+    protected String vi;
+    @XmlAttribute
+    protected String vn;
 
     /**
      * Gets the value of the value property.
@@ -74,75 +77,99 @@ public class Ct2AttributeValue {
     }
 
     /**
-     * Gets the value of the i property.
+     * Gets the value of the ai property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getI() {
-        return i;
+    public String getAi() {
+        return ai;
     }
 
     /**
-     * Sets the value of the i property.
+     * Sets the value of the ai property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setI(String value) {
-        this.i = value;
+    public void setAi(String value) {
+        this.ai = value;
     }
 
     /**
-     * Gets the value of the n property.
+     * Gets the value of the an property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getN() {
-        return n;
+    public String getAn() {
+        return an;
     }
 
     /**
-     * Sets the value of the n property.
+     * Sets the value of the an property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setN(String value) {
-        this.n = value;
+    public void setAn(String value) {
+        this.an = value;
     }
 
     /**
-     * Gets the value of the mapTo property.
+     * Gets the value of the vi property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getMapTo() {
-        return mapTo;
+    public String getVi() {
+        return vi;
     }
 
     /**
-     * Sets the value of the mapTo property.
+     * Sets the value of the vi property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setMapTo(String value) {
-        this.mapTo = value;
+    public void setVi(String value) {
+        this.vi = value;
+    }
+
+    /**
+     * Gets the value of the vn property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getVn() {
+        return vn;
+    }
+
+    /**
+     * Sets the value of the vn property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setVn(String value) {
+        this.vn = value;
     }
 
 }
