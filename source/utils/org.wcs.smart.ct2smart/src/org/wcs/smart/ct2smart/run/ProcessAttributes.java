@@ -114,12 +114,12 @@ public class ProcessAttributes {
 			valueSet.clear();
 			valueSt.setString(1, attrName);
 			ResultSet valRs = valueSt.executeQuery();
-			Ct2AttributeType type = Ct2AttributeType.UNKNOWN;
+			Ct2AttributeType type = Ct2AttributeType.IGNORE;
 			while (valRs.next()) {
 				String value = valRs.getString(1);
 				valueSet.add(value);
 				switch (type) {
-				case UNKNOWN:
+				case IGNORE:
 				case BOOL:
 					if (BOOLEAN_PATTERN.matcher(value).matches()) {
 						type = Ct2AttributeType.BOOL;

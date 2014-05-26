@@ -12,11 +12,12 @@
 
 	<xs:simpleType name="Ct2AttributeType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="UNKNOWN" />
+			<xs:enumeration value="IGNORE" />
 			<xs:enumeration value="TEXT" />
 			<xs:enumeration value="NUMERIC" />
 			<xs:enumeration value="BOOL" />
 			<xs:enumeration value="REF" />
+			<xs:enumeration value="META" />
 			<xs:enumeration value="CATEGORY" />
 		</xs:restriction>
 	</xs:simpleType>
@@ -29,6 +30,24 @@
 		<xs:attribute type="xs:string" name="i" use="optional" />
 		<xs:attribute type="xs:string" name="n" use="optional" />
 		<xs:attribute type="xs:string" name="mapTo" use="optional" />
+	</xs:complexType>
+
+	<xs:complexType name="CtCategoryMap">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="ai" use="optional" />
+				<xs:attribute type="xs:string" name="an" use="optional" />
+				<xs:attribute type="xs:string" name="vi" use="optional" />
+				<xs:attribute type="xs:string" name="vn" use="optional" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="CtCategory">
+		<xs:sequence>
+			<xs:element name="CtCategoryMap" type="CtCategoryMap" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="categoryKey" use="optional" />
 	</xs:complexType>
 
   <xs:element name="Ct2Smart">
