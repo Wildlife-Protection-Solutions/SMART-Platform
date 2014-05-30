@@ -54,6 +54,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Ct2Attribute" type="Ct2Attribute" maxOccurs="unbounded" minOccurs="0" />
+        <xs:element name="CtCategory" type="CtCategory" maxOccurs="unbounded" minOccurs="0" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

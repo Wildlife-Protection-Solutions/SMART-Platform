@@ -35,6 +35,8 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
+import org.wcs.smart.ct2smart.matcher.model.CtCategory;
+import org.wcs.smart.ct2smart.matcher.model.CtCategoryMap;
 
 /**
  * @author elitvin
@@ -137,6 +139,25 @@ public class MatchFileBuilder {
 		}
 		attrRs.close();
 		c.close();
+		
+		CtCategory cat = new CtCategory();
+		ct2Smart.getCtCategory().add(cat);
+		cat.setCategoryKey("testkey");
+		
+		CtCategoryMap cmap = new CtCategoryMap();
+		cat.getCtCategoryMap().add(cmap);
+		cmap.setAi("ai1");
+		cmap.setAn("an1");
+		cmap.setVi("vi1");
+		cmap.setVn("vn1");
+		
+		cmap = new CtCategoryMap();
+		cat.getCtCategoryMap().add(cmap);
+		cmap.setAi("ai2");
+		cmap.setAn("an2");
+		cmap.setVi("vi2");
+		cmap.setVn("vn2");
+
 		return ct2Smart;
 	}
 
