@@ -3,6 +3,7 @@ package org.wcs.smart.ct2smart.patrol;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -13,8 +14,10 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
+import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
@@ -26,7 +29,7 @@ import org.wcs.smart.patrol.xml.model.WaypointType;
 
 public class PatrolBuilder {
 
-	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
 	
 	private Ct2SmartLookup lookup;
 	
@@ -57,7 +60,7 @@ public class PatrolBuilder {
 			legDay.getWaypoints().add(wp);
 			wp.setId(legDay.getWaypoints().size());
 
-			String defaultCategoryKey = null; //TODO: implement fetching
+			String defaultCategoryKey = getDefaultCategory(s);
 			WaypointObservationType obs = new WaypointObservationType();
 			wp.getObservations().add(obs);
 			obs.setCategoryKey(defaultCategoryKey); 
@@ -112,7 +115,22 @@ public class PatrolBuilder {
 
 		return patrol;
 	}
+
+	private String getDefaultCategory(TagS s) {
+		List<Ct2AttributeValuePair> data = new ArrayList<Ct2AttributeValuePair>();
+		for (TagA a : s) {
+			Ct2Attribute cta = lookup.findAttribute(a.getI());
+			if (cta != null && Ct2AttributeType.CATEGORY.equals(cta.getType())) {
+				Ct2AttributeValuePair pair = new Ct2AttributeValuePair();
+				pair.attribute = cta;
+				pair.value = a.getV();
+				data.add(pair);
+			}
+		}
+		return lookup.findCategory(data).getCategoryKey();
+	}
 	
+	//copy from SmartUtil
 	private XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
 		if (d == null) {
 			return null;

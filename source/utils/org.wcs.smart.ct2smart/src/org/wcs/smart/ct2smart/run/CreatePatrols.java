@@ -18,7 +18,7 @@ public class CreatePatrols {
 		long start = System.currentTimeMillis();
 		
 		PatrolExtractor extractor = new PatrolExtractor();
-		Ct2Smart ct2Smart = FileUtil.loadCt2Smart(new File("match_super.xml"));
+		Ct2Smart ct2Smart = FileUtil.loadCt2Smart(new File("match_super_x.xml"));
 		PatrolBuilder builder = new PatrolBuilder(ct2Smart);
 		
 		Connection c = ConnectionUtil.getConnection();
@@ -27,7 +27,7 @@ public class CreatePatrols {
 			System.out.println("Extracting patrol for date: " + date);
 			List<TagS> sList = extractor.extract(c, date);
 			PatrolType p = builder.createPatrol(sList, date);
-			FileUtil.write(new File("patrol" + date.replace('/', '-') + ".xml"), p);
+			FileUtil.write(new File("patrol-" + date.replace('/', '-') + ".xml"), p);
 		}
 
 		System.out.println("Done in "+ (double)(System.currentTimeMillis()-start)/1000 +" seconds!!!");
