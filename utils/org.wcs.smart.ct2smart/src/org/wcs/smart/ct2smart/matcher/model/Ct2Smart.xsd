@@ -17,8 +17,11 @@
 			<xs:enumeration value="NUMERIC" />
 			<xs:enumeration value="BOOL" />
 			<xs:enumeration value="REF" />
-			<xs:enumeration value="META" />
 			<xs:enumeration value="CATEGORY" />
+			<xs:enumeration value="META_DATE" />
+			<xs:enumeration value="META_TIME" />
+			<xs:enumeration value="META_LAT" />
+			<xs:enumeration value="META_LON" />
 		</xs:restriction>
 	</xs:simpleType>
 
