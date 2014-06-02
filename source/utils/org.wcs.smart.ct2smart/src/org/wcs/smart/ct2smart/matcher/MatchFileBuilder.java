@@ -44,21 +44,22 @@ import org.wcs.smart.ct2smart.matcher.model.CtCategoryMap;
  */
 public class MatchFileBuilder {
 
-	private static final Set<String> KNOWN_ATTRIBUTES;
+	private static final Map<String, Ct2AttributeType> KNOWN_ATTRIBUTES;
 	static {
-		KNOWN_ATTRIBUTES = new HashSet<String>();
-		KNOWN_ATTRIBUTES.add("Id"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("DeviceId"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("Date"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("Time"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("Latitude"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("Longitude"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("Altitude"); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.add("Accuracy"); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES = new HashMap<String, Ct2AttributeType>();
+		KNOWN_ATTRIBUTES.put("Id",		 Ct2AttributeType.IGNORE); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("DeviceId", Ct2AttributeType.IGNORE); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Date",	 Ct2AttributeType.META_DATE); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Time",	 Ct2AttributeType.META_TIME); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Latitude", Ct2AttributeType.META_LAT); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Longitude",Ct2AttributeType.META_LON); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Altitude", Ct2AttributeType.IGNORE); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Accuracy", Ct2AttributeType.IGNORE); //$NON-NLS-1$
 
-//		KNOWN_ATTRIBUTES.add("team_members"); //$NON-NLS-1$
+//		KNOWN_ATTRIBUTES.put("team_members"); //$NON-NLS-1$
 	}
 
+	
 	private static Pattern CT_ID_PATTERN = Pattern.compile("\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
 	private static Pattern BOOLEAN_PATTERN = Pattern.compile("True|False"); //$NON-NLS-1$
 	private static Pattern NUMERIC_PATTERN = Pattern.compile("\\d+(.\\d)?\\d?"); //$NON-NLS-1$
@@ -77,7 +78,8 @@ public class MatchFileBuilder {
 			ctAttr.setN(attrName);
 			ctAttr.setI(attrRs.getString(2));
 			ct2Smart.getCt2Attribute().add(ctAttr);
-			if (KNOWN_ATTRIBUTES.contains(attrName)) {
+			if (KNOWN_ATTRIBUTES.containsKey(attrName)) {
+				ctAttr.setType(KNOWN_ATTRIBUTES.get(attrName));
 				continue;
 			}
 			valueSet.clear();

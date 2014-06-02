@@ -1,5 +1,6 @@
 package org.wcs.smart.ct2smart.patrol;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,9 @@ public class PatrolBuilder {
 		leg.getDays().add(legDay);
 		legDay.setDate(date);
 
+		XMLGregorianCalendar startTime = null;
+		XMLGregorianCalendar endTime = null;
+		
 		for (TagS s : sights) {
 			WaypointType wp = new WaypointType();
 			legDay.getWaypoints().add(wp);
@@ -63,7 +67,8 @@ public class PatrolBuilder {
 			String defaultCategoryKey = getDefaultCategory(s);
 			WaypointObservationType obs = new WaypointObservationType();
 			wp.getObservations().add(obs);
-			obs.setCategoryKey(defaultCategoryKey); 
+			obs.setCategoryKey(defaultCategoryKey);
+			
 
 			for (TagA a : s) {
 				Ct2Attribute cta = lookup.findAttribute(a.getI());
@@ -107,12 +112,40 @@ public class PatrolBuilder {
 						}
 						break;
 					}
+					case META_TIME: {
+						Time time = Time.valueOf(a.getV());
+						XMLGregorianCalendar xmlTime = toXmlTime(time);
+						wp.setTime(xmlTime);
+						if (startTime != null) {
+							if (xmlTime.compare(startTime) == DatatypeConstants.LESSER)
+								startTime = xmlTime;
+						} else {
+							startTime = xmlTime;
+						}
+						
+						if (endTime != null) {
+							if (xmlTime.compare(endTime) == DatatypeConstants.GREATER)
+								endTime = xmlTime;
+						} else {
+							endTime = xmlTime;
+						}
+						break;
+					}
+					case META_LON:
+						wp.setX(Double.valueOf(a.getV()));
+						break;
+					case META_LAT:
+						wp.setY(Double.valueOf(a.getV()));
+						break;
 					default:
 						break;
 					}
 			}
 		}
 
+		legDay.setStartTime(startTime);
+		legDay.setEndTime(endTime);
+		
 		return patrol;
 	}
 
@@ -144,6 +177,21 @@ public class PatrolBuilder {
 		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
 		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
 		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
+		
+		return xgc;
+	}
+
+	//copy from PatrolToXmlConverter
+	private XMLGregorianCalendar toXmlTime(Date d) throws DatatypeConfigurationException{
+		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
+		cal.setTime(d);
+		
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setYear(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setMonth(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setDay(DatatypeConstants.FIELD_UNDEFINED);
 		
 		return xgc;
 	}
