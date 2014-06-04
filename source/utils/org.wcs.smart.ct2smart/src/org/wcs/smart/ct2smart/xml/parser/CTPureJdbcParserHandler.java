@@ -51,13 +51,16 @@ public class CTPureJdbcParserHandler extends DefaultHandler {
 	private int t_id;
 	private int a_id;
 	private boolean isS = true;
+	
+	private TagT t = null;
 
 	
 	public CTPureJdbcParserHandler(Connection connection) throws SQLException {
 		this.connection = connection;
 		stElement = connection.prepareStatement("insert into ct_to_smart.element (i, n, uuid) values (?, ?, ?)"); //$NON-NLS-1$
 		stSighting = connection.prepareStatement("insert into ct_to_smart.sighting (i, n, v, s_uuid, uuid) values (?, ?, ?, ?, ?)"); //$NON-NLS-1$
-		stTimertrack = connection.prepareStatement("insert into ct_to_smart.timertrack (i, n, v, t_uuid, uuid) values (?, ?, ?, ?, ?)"); //$NON-NLS-1$
+//		stTimertrack = connection.prepareStatement("insert into ct_to_smart.timertrack (i, n, v, t_uuid, uuid) values (?, ?, ?, ?, ?)"); //$NON-NLS-1$
+		stTimertrack = connection.prepareStatement("insert into ct_to_smart.timertrack (device_id, date, time, latitude, longitude, uuid) values (?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$		
 		e_id = a_id = 1;
 		s_id = t_id = 0;
 	}
@@ -66,11 +69,28 @@ public class CTPureJdbcParserHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		super.startElement(uri, localName, qName, attributes);
 		try {
-			if (E.equals(qName)) {
-				stElement.setString(1, attributes.getValue(TagE.I));
-				stElement.setString(2, attributes.getValue(TagE.N));
-				stElement.setInt(3, e_id++);
-				stElement.executeUpdate();
+			if (A.equals(qName)) {
+				if (isS) {
+					stSighting.setString(1, attributes.getValue(TagA.I));
+					stSighting.setString(2, attributes.getValue(TagA.N));
+					stSighting.setString(3, attributes.getValue(TagA.V));
+					stSighting.setInt(4, s_id);
+					stSighting.setInt(5, a_id++);
+					stSighting.executeUpdate();
+				} else {
+					String nv = attributes.getValue(TagA.N);
+					if (TagT.DEVICE_ID.equals(nv)) {
+						t.setDeviceId(attributes.getValue(TagA.V));
+					} else if (TagT.DATE.equals(nv)) {
+						t.setDate(attributes.getValue(TagA.V));
+					} else if (TagT.TIME.equals(nv)) {
+						t.setTime(attributes.getValue(TagA.V));
+					} else if (TagT.LATITUDE.equals(nv)) {
+						t.setLatitude(attributes.getValue(TagA.V));
+					} else if (TagT.LONGITUDE.equals(nv)) {
+						t.setLongitude(attributes.getValue(TagA.V));
+					}
+				}
 
 			} else if (S.equals(qName)) {
 				s_id++;
@@ -81,25 +101,13 @@ public class CTPureJdbcParserHandler extends DefaultHandler {
 			} else if (T.equals(qName)) {
 				t_id++;
 				isS = false;
-				if (t_id % 1000 == 0)
-					connection.commit();
+				t = new TagT();
 
-			} else if (A.equals(qName)) {
-				if (isS) {
-					stSighting.setString(1, attributes.getValue(TagA.I));
-					stSighting.setString(2, attributes.getValue(TagA.N));
-					stSighting.setString(3, attributes.getValue(TagA.V));
-					stSighting.setInt(4, s_id);
-					stSighting.setInt(5, a_id++);
-					stSighting.executeUpdate();
-				} else {
-					stTimertrack.setString(1, attributes.getValue(TagA.I));
-					stTimertrack.setString(2, attributes.getValue(TagA.N));
-					stTimertrack.setString(3, attributes.getValue(TagA.V));
-					stTimertrack.setInt(4, t_id);
-					stTimertrack.setInt(5, a_id++);
-					stTimertrack.executeUpdate();
-				}
+			} else if (E.equals(qName)) {
+				stElement.setString(1, attributes.getValue(TagE.I));
+				stElement.setString(2, attributes.getValue(TagE.N));
+				stElement.setInt(3, e_id++);
+				stElement.executeUpdate();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -107,4 +115,27 @@ public class CTPureJdbcParserHandler extends DefaultHandler {
 		
 	}
 	
+	@Override
+	public void endElement(String uri, String localName, String qName) throws SAXException {
+		super.endElement(uri, localName, qName);
+		if (T.equals(qName)) {
+			try {
+				if (t != null) {
+					stTimertrack.setString(1, t.getDeviceId());
+					stTimertrack.setString(2, t.getDate());
+					stTimertrack.setString(3, t.getTime());
+					stTimertrack.setString(4, t.getLatitude());
+					stTimertrack.setString(5, t.getLongitude());
+					stTimertrack.setInt(6, t_id);
+					stTimertrack.executeUpdate();
+				}
+				if (t_id % 1000 == 0)
+					connection.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}		
+		
+	}
 }
