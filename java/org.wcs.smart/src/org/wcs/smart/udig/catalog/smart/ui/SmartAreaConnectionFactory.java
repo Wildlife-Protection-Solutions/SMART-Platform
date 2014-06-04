@@ -26,8 +26,8 @@ public class SmartAreaConnectionFactory extends UDIGConnectionFactory {
 			return ((SmartService)context).getConnectionParams();
 		}
 		
-		if (context instanceof URL){
-			SmartServiceExtension.createParamsFromUrl((URL)context);
+		if (context instanceof URL ){
+			return SmartServiceExtension.createParamsFromUrl((URL)context);
 		}
 		
 		return null;
@@ -37,7 +37,10 @@ public class SmartAreaConnectionFactory extends UDIGConnectionFactory {
 	@Override
 	public URL createConnectionURL(Object context) {
 		if (context instanceof URL){
-			return (URL)context;
+			if (SmartServiceExtension.isValid((URL)context)){
+				return (URL)context;
+			}
+			return null;
 		}
 		if (context instanceof Map){
 			@SuppressWarnings("unchecked")

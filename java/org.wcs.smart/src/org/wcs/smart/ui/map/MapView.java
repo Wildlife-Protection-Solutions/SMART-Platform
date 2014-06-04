@@ -14,6 +14,7 @@
  */
 package org.wcs.smart.ui.map;
 
+import net.refractions.udig.internal.ui.IDropTargetProvider;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.render.ViewportModel;
@@ -24,10 +25,12 @@ import net.refractions.udig.project.ui.internal.tool.display.ToolProxy;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.viewers.MapViewer;
+import net.refractions.udig.ui.UDIGDragDropUtilities;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -45,7 +48,7 @@ import org.wcs.smart.map.internal.ZoomHandler;
  * @author Emily Gouge
  * @since 1.0.0
  */
-public class MapView extends ViewPart implements MapPart, IAdaptable {
+public class MapView extends ViewPart implements IDropTargetProvider, MapPart, IAdaptable {
 
 	public static final String ID = "org.wcs.smart.ui.map.MapView"; //$NON-NLS-1$
 	private static final String MAP_NAME = Messages.MapView_MapName;
@@ -123,6 +126,8 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 
 		getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         setTool(ZoomHandler.ZoomToolId);
+        
+        UDIGDragDropUtilities.addDropSupport(mapviewer.getViewport().getControl(), this);
     }
 
     public void setTool( String toolId ) {
@@ -193,5 +198,10 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 			return getMap();
 		}
 		return super.getAdapter(adaptee);
+	}
+
+	@Override
+	public Object getTarget(DropTargetEvent event) {
+		return this;
 	}
 }
