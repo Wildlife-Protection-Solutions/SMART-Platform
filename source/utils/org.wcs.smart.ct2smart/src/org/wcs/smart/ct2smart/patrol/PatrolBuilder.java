@@ -18,6 +18,7 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
+import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
@@ -165,7 +166,19 @@ public class PatrolBuilder {
 				data.add(pair);
 			}
 		}
-		return lookup.findCategory(data).getCategoryKey();
+		CtCategory c = lookup.findCategory(data);
+		if (c == null) {
+			String info = "";
+			for (Ct2AttributeValuePair pair : data) {
+				info += "\nattribute: " + pair.attribute.getN() + " " + pair.attribute.getI();
+				Ct2Attribute value = lookup.findAttribute(pair.value);
+				info += "  value: ";
+				info += value != null ? value.getN() : "null";
+				info += " " + pair.value;
+			}
+			System.out.println("Warning: No category defined for following items: " + info);
+		}
+		return c != null ? c.getCategoryKey() : null;
 	}
 	
 	//copy from SmartUtil
