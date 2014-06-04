@@ -23,25 +23,20 @@ public class CreatePatrols {
 		PatrolBuilder builder = new PatrolBuilder(ct2Smart);
 		
 		Connection c = ConnectionUtil.getConnection();
-		ResultSet rs = extractor.getUniqueDateUnitPairs(c);
+		String[] uniqueId = new String[] {"Date", "Unit_ID"};
+		String[] uniqueValues = new String[uniqueId.length];
+		ResultSet rs = extractor.getUniqueGroups(c, uniqueId);
 		while (rs.next()) {
-			String date = rs.getString(1);
-			String unitId = rs.getString(2);
-			System.out.println("Extracting patrol for date: " + date + " unitId: " + unitId);
-			List<TagS> sList = extractor.extract(c, date, unitId);
+			for (int i = 0; i < uniqueValues.length; i++) {
+				uniqueValues[i] = rs.getString(i+1);
+			}
+			System.out.println("Extracting patrol for date: " + uniqueValues[0] + " unitId: " + uniqueValues[1]);
+			List<TagS> sList = extractor.extract(c, uniqueId, uniqueValues);
 			PatrolType p = builder.createPatrol(sList);
-			FileUtil.write(new File(unitId + "-patrol-" + date.replace('/', '-') + ".xml"), p);
+			FileUtil.write(new File(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-') + ".xml"), p);
 		}
 		rs.close();
 		
-//		List<String> dates = extractor.getDates(c);
-//		for (String date : dates) {
-//			System.out.println("Extracting patrol for date: " + date);
-//			List<TagS> sList = extractor.extract(c, date);
-//			PatrolType p = builder.createPatrol(sList);
-//			FileUtil.write(new File("patrol-" + date.replace('/', '-') + ".xml"), p);
-//		}
-
 		System.out.println("Done in "+ (double)(System.currentTimeMillis()-start)/1000 +" seconds!!!");
 	}
 
