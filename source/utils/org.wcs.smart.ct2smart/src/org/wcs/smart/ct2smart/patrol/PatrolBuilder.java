@@ -38,24 +38,19 @@ public class PatrolBuilder {
 		lookup = new Ct2SmartLookup(ct2Smart);
 	}
 
-	public PatrolType createPatrol(List<TagS> sights, String dateStr) throws DatatypeConfigurationException, ParseException {
-		XMLGregorianCalendar date = toXmlDate(df.parse(dateStr));
+	public PatrolType createPatrol(List<TagS> sights) throws DatatypeConfigurationException, ParseException {
 
 		PatrolType patrol = new PatrolType();
 		patrol.setIsArmed(false);
-		patrol.setStartDate(date);
-		patrol.setEndDate(date);
 		
 		PatrolLegType leg = new PatrolLegType();
 		patrol.getLegs().add(leg);
 		leg.setId(String.valueOf(patrol.getLegs().size()));
-		leg.setStartDate(date);
-		leg.setEndDate(date);
 		
 		PatrolLegDayType legDay = new PatrolLegDayType();
 		leg.getDays().add(legDay);
-		legDay.setDate(date);
 
+		XMLGregorianCalendar date = null;
 		XMLGregorianCalendar startTime = null;
 		XMLGregorianCalendar endTime = null;
 		
@@ -112,6 +107,9 @@ public class PatrolBuilder {
 						}
 						break;
 					}
+					case META_DATE:
+						date = toXmlDate(df.parse(a.getV()));
+						break;
 					case META_TIME: {
 						Time time = Time.valueOf(a.getV());
 						XMLGregorianCalendar xmlTime = toXmlTime(time);
@@ -137,12 +135,19 @@ public class PatrolBuilder {
 					case META_LAT:
 						wp.setY(Double.valueOf(a.getV()));
 						break;
-					default:
+					case IGNORE:
 						break;
 					}
 			}
 		}
 
+		patrol.setStartDate(date);
+		patrol.setEndDate(date);
+
+		leg.setStartDate(date);
+		leg.setEndDate(date);
+
+		legDay.setDate(date);
 		legDay.setStartTime(startTime);
 		legDay.setEndTime(endTime);
 		
