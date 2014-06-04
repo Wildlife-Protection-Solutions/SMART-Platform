@@ -23,15 +23,17 @@ public class CreatePatrols {
 		PatrolBuilder builder = new PatrolBuilder(ct2Smart);
 		
 		Connection c = ConnectionUtil.getConnection();
-		String[] uniqueId = new String[] {"Date", "Unit_ID"};
+		String[] uniqueId = new String[] {"Date", "Unit_ID", "DeviceId"};
 		String[] uniqueValues = new String[uniqueId.length];
 		ResultSet rs = extractor.getUniqueGroups(c, uniqueId);
 		while (rs.next()) {
+			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < uniqueValues.length; i++) {
 				uniqueValues[i] = rs.getString(i+1);
+				sb.append(uniqueValues[i]).append("  ");
 			}
-			System.out.println("Extracting patrol for date: " + uniqueValues[0] + " unitId: " + uniqueValues[1]);
-			List<TagS> sList = extractor.extract(c, uniqueId, uniqueValues);
+			System.out.println("Extracting patrol for: " + sb);
+			List<TagS> sList = extractor.extractS(c, uniqueId, uniqueValues);
 			PatrolType p = builder.createPatrol(sList);
 			FileUtil.write(new File(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-') + ".xml"), p);
 		}
