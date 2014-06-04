@@ -78,4 +78,23 @@ public class PatrolExtractor {
 		rs.close();
 		return result;
 	}
+	
+//	public List<TagT> extractT(Connection c, String[] n, String[] v) throws SQLException {
+//		StringBuilder inSql = new StringBuilder("select s0.S_UUID from CT_TO_SMART.SIGHTING s0"); //$NON-NLS-1$
+//		StringBuilder where = new StringBuilder(" where s0.n='"); //$NON-NLS-1$
+//		where.append(n[0]).append("' and s0.v=?"); //$NON-NLS-1$
+//		
+//		for (int i = 1; i < n.length; i++) {
+//			inSql.append(" join CT_TO_SMART.SIGHTING s").append(i).append(" on s").append(i).append(".s_uuid=s0.s_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//			where.append(" and s").append(i).append(".n='").append(n[i]).append("' and s").append(i).append(".v=?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//		}
+//		inSql.append(where);
+//		
+//		PreparedStatement ps = c.prepareStatement("select s_uuid, i, n, v  from CT_TO_SMART.SIGHTING where s_uuid in ("+inSql+") order by uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+//		for (int i = 0; i < n.length; i++) {
+//			ps.setString(i+1, v[i]);
+//		}
+//		return extractS(ps);
+//	}
+	
 }
