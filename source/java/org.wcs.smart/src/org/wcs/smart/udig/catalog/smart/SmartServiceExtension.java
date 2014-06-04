@@ -66,7 +66,13 @@ public class SmartServiceExtension implements ServiceExtension {
 
 	}
 	
-	private boolean isValid(URL url){
+	/**
+	 * Dermines of the url is a valid smart service url
+	 * 
+	 * @param url url to test
+	 * @return <code>true</code> if valid, <code>false</code> otherwise
+	 */
+	public static boolean isValid(URL url){
 		if (url.getProtocol().equals(PROTOCOL)){
 			if (url.getHost().equals(HOST) && url.getPath().equals("/")){ //$NON-NLS-1$
 				return true;
@@ -75,8 +81,18 @@ public class SmartServiceExtension implements ServiceExtension {
 		return false;
 	}
 	
+	/**
+	 * Creates parameter map from url. Returns null if url invalid.
+	 * 
+	 * @param url
+	 * @return
+	 */
 	public static Map<String, Serializable> createParamsFromUrl(URL url){
-		/* determine conservation area */
+		if (!isValid(url)){
+			return null;
+		}
+		
+		// determine conservation area
 		String scauuid = url.getPath();
 		if (scauuid == null){
 			return null;
@@ -84,12 +100,14 @@ public class SmartServiceExtension implements ServiceExtension {
 		if (scauuid.charAt(0) == '/'){
 			scauuid = scauuid.substring(1);
 		}
+		
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		try{
 			byte[] buuid = SmartUtils.decodeHex(scauuid);
 			params.put(CA_UUID_KEY, buuid);
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			SmartPlugIn.log("Error parsing ca uuid.", ex); //$NON-NLS-1$
+			return null;
 		}
 		return params;
 	}

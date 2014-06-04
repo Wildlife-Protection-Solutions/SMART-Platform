@@ -24,6 +24,7 @@ package org.wcs.smart;
 import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.tool.info.internal.InfoView2;
+import net.refractions.udig.ui.UDIGDragDropUtilities;
 
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceNode;
@@ -116,18 +117,18 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
     public void preWindowOpen() {
         IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
-        //configurer.setInitialSize(new Point(1200, 800));
-//        Rectangle bounds = Display.getDefault().getPrimaryMonitor().getClientArea();
-//        configurer.setInitialSize(new Point(bounds.width, bounds.height));
-      	
+
         configurer.setShowCoolBar(true);
         configurer.setShowStatusLine(false);	//udig adds a bunch of tools to the status line which we don't want
         configurer.setShowProgressIndicator(true);
         
-        /* setup perspective tracker */
+        // setup perspective tracker
         IPartService service = (IPartService) configurer.getWindow().getService(IPartService.class);
         service.addPartListener(perspectiveTracker);
         configurer.getWindow().addPerspectiveListener(perspectiveListener);
+
+        // setup drag and drop support 
+        UDIGDragDropUtilities.registerUDigDND(configurer);
     }
     
     @Override

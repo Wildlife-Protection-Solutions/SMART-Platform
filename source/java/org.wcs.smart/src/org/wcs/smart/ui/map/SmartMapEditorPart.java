@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.internal.ui.IDropTargetProvider;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
@@ -48,6 +49,7 @@ import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 import net.refractions.udig.ui.IBlockingSelection;
+import net.refractions.udig.ui.UDIGDragDropUtilities;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,6 +61,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -90,7 +93,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author egouge
  * @since 1.0.0
  */
-public abstract class SmartMapEditorPart  extends EditorPart implements MapPart {
+public abstract class SmartMapEditorPart extends EditorPart implements MapPart, IDropTargetProvider {
 
 	/**
 	 * Coordinate text x,y separator
@@ -154,7 +157,6 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	    
     private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
     private boolean flashFeatureRegistered = false;
-    
   
     public abstract MultiPageEditorPart getParentEditor();
 	
@@ -359,8 +361,16 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         
         getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
+        
+        
+        UDIGDragDropUtilities.addDropSupport(mapViewer.getViewport().getControl(), this);
 	}
 
+	@Override
+	public Object getTarget(DropTargetEvent event) {
+		return this;
+	}
+	
 	private void updateLabel() {
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
@@ -377,7 +387,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
     public Map getMap() {
         return mapViewer.getMap();
     }
-
+	
     @Override
     public void dispose() {
         super.dispose();
