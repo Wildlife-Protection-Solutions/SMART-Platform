@@ -24,6 +24,7 @@ public class FullLaunch {
 		Connection c = ConnectionUtil.getConnection();
 		
 		DbLoader loader = new DbLoader();
+//		loader.load(new File("d:\\dev\\data\\CyberTracker Data_Jan-2014\\test_short_super.xml"), c);
 		loader.load(new File("d:\\dev\\data\\CyberTracker Data_Jan-2014\\test_short_super.xml"), c);
 
 		System.out.println("DB loaded in "+ (double)(System.currentTimeMillis()-start)/1000 +" seconds!!!");
