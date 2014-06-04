@@ -34,7 +34,7 @@ public class PatrolExtractor {
 	}
 	
 
-	public List<TagS> extract(Connection c, String[] n, String[] v) throws SQLException {
+	public List<TagS> extractS(Connection c, String[] n, String[] v) throws SQLException {
 		StringBuilder inSql = new StringBuilder("select s0.S_UUID from CT_TO_SMART.SIGHTING s0"); //$NON-NLS-1$
 		StringBuilder where = new StringBuilder(" where s0.n='"); //$NON-NLS-1$
 		where.append(n[0]).append("' and s0.v=?"); //$NON-NLS-1$
@@ -49,10 +49,10 @@ public class PatrolExtractor {
 		for (int i = 0; i < n.length; i++) {
 			ps.setString(i+1, v[i]);
 		}
-		return extract(ps);
+		return extractS(ps);
 	}
 	
-	public List<TagS> extract(PreparedStatement ps) throws SQLException {
+	private List<TagS> extractS(PreparedStatement ps) throws SQLException {
 		List<TagS> result = new ArrayList<TagS>();
 		ResultSet rs = ps.executeQuery();
 		int last_s_uuid = -1;
