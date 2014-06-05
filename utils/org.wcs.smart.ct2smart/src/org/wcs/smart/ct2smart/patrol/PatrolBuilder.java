@@ -5,15 +5,20 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.geotools.referencing.GeodeticCalculator;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
@@ -22,16 +27,24 @@ import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
+import org.wcs.smart.ct2smart.xml.parser.TagT;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
 import org.wcs.smart.patrol.xml.model.PatrolLegType;
 import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.wcs.smart.patrol.xml.model.TrackType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.WaypointType;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.WKBWriter;
+
 public class PatrolBuilder {
 
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
+	private static final TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	private Ct2SmartLookup lookup;
 	
@@ -155,6 +168,56 @@ public class PatrolBuilder {
 		return patrol;
 	}
 
+	public TrackType createTrack(List<TagT> tList) throws ParseException {
+		List<Coordinate> coordinates = new ArrayList<Coordinate>();
+		Date date;
+		Time time;
+		double x, y;
+		for (TagT t : tList) {
+			date = df.parse(t.getDate());
+			time = Time.valueOf(t.getTime());
+			y = Double.valueOf(t.getLatitude());
+			x = Double.valueOf(t.getLongitude());
+			coordinates.add(new Coordinate(x, y, combine(date, time).getTime()));
+		}
+		
+		//copy from PatrolUtils
+		if (coordinates.size() < 2) {
+			return null;
+		}
+		GeometryFactory gf = new GeometryFactory();
+		Collections.sort(coordinates, new Comparator<Coordinate>() {
+			@Override
+			public int compare(Coordinate o1, Coordinate o2) {
+				return ((Double) o1.z).compareTo((Double) o2.z);
+			}
+		});
+		
+		for (Coordinate c : coordinates){
+			//c.z is the date taking into account the current timezone.  We want to compute
+			//the date of GMT timezone and assign that to the point.
+			//we need to take the year,month,date, hour, min, sec and assign it to a date with
+			//a time zone of gmt
+			Calendar c1 = Calendar.getInstance();
+			c1.setTimeInMillis((long)c.z);
+			Calendar c2 = Calendar.getInstance();
+			c2.setTimeZone(ZTIMEZONE);
+			c2.setTimeInMillis(0);
+			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+			
+			c.z = c2.getTime().getTime();
+			
+		}
+		LineString line = gf.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]));
+		
+		TrackType track = new TrackType();
+		track.setDistance(distanceInMeters(line) / 1000.0);
+		WKBWriter writer = new WKBWriter(3);
+		track.setGeom(encodeHex(writer.write(line)));
+		
+		return track;
+	}
+	
 	private String getDefaultCategory(TagS s) {
 		List<Ct2AttributeValuePair> data = new ArrayList<Ct2AttributeValuePair>();
 		for (TagA a : s) {
@@ -213,5 +276,49 @@ public class PatrolBuilder {
 		
 		return xgc;
 	}
-	
+
+	//copy from SmartImporter
+	private static Date combine(Date date, Time time) {
+		if (date == null)
+			return time;
+		if (time == null)
+			return date;
+		Calendar timeCalendar = Calendar.getInstance();
+		timeCalendar.setTime(time);
+		Calendar dateCalendar = Calendar.getInstance();
+		dateCalendar.setTime(date);
+		dateCalendar.add(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
+		dateCalendar.add(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+		dateCalendar.add(Calendar.SECOND, timeCalendar.get(Calendar.SECOND));
+		return dateCalendar.getTime();
+	}
+
+	//copy from GeometryUtils
+	private static double distanceInMeters(LineString ls) {
+		GeodeticCalculator cal = new GeodeticCalculator();
+		double distance = 0;
+		for (int i = 1; i < ls.getCoordinates().length; i ++){
+			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y);
+			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
+			
+			distance +=cal.getOrthodromicDistance();
+		}
+		return distance;
+	}
+
+	//copy from SmartUtils
+	private static String encodeHex(byte[] data) {
+		if (data == null) return ""; //$NON-NLS-1$
+		char[] toDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+				'a', 'b', 'c', 'd', 'e', 'f' };
+		int l = data.length;
+		char[] out = new char[l << 1];
+		// two characters form the hex value.
+		for (int i = 0, j = 0; i < l; i++) {
+			out[j++] = toDigits[(0xF0 & data[i]) >>> 4];
+			out[j++] = toDigits[0x0F & data[i]];
+		}
+		return new String(out);
+	}
+
 }

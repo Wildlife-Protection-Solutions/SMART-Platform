@@ -11,7 +11,9 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.patrol.PatrolBuilder;
 import org.wcs.smart.ct2smart.patrol.PatrolExtractor;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
+import org.wcs.smart.ct2smart.xml.parser.TagT;
 import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.wcs.smart.patrol.xml.model.TrackType;
 
 public class CreatePatrols {
 
@@ -35,6 +37,10 @@ public class CreatePatrols {
 			System.out.println("Extracting patrol for: " + sb);
 			List<TagS> sList = extractor.extractS(c, uniqueId, uniqueValues);
 			PatrolType p = builder.createPatrol(sList);
+			List<TagT> tList = extractor.extractT(c, uniqueValues[2], uniqueValues[0]);
+			TrackType track = builder.createTrack(tList);
+			p.getLegs().get(0).getDays().get(0).setTrack(track);
+			
 			FileUtil.write(new File(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-') + ".xml"), p);
 		}
 		rs.close();

@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
+import org.wcs.smart.ct2smart.xml.parser.TagT;
 
 public class PatrolExtractor {
 
@@ -79,22 +80,26 @@ public class PatrolExtractor {
 		return result;
 	}
 	
-//	public List<TagT> extractT(Connection c, String[] n, String[] v) throws SQLException {
-//		StringBuilder inSql = new StringBuilder("select s0.S_UUID from CT_TO_SMART.SIGHTING s0"); //$NON-NLS-1$
-//		StringBuilder where = new StringBuilder(" where s0.n='"); //$NON-NLS-1$
-//		where.append(n[0]).append("' and s0.v=?"); //$NON-NLS-1$
-//		
-//		for (int i = 1; i < n.length; i++) {
-//			inSql.append(" join CT_TO_SMART.SIGHTING s").append(i).append(" on s").append(i).append(".s_uuid=s0.s_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//			where.append(" and s").append(i).append(".n='").append(n[i]).append("' and s").append(i).append(".v=?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//		}
-//		inSql.append(where);
-//		
-//		PreparedStatement ps = c.prepareStatement("select s_uuid, i, n, v  from CT_TO_SMART.SIGHTING where s_uuid in ("+inSql+") order by uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-//		for (int i = 0; i < n.length; i++) {
-//			ps.setString(i+1, v[i]);
-//		}
-//		return extractS(ps);
-//	}
+	public List<TagT> extractT(Connection c, String deviceId, String date) throws SQLException {
+		PreparedStatement ps = c.prepareStatement("select time, latitude, longitude from CT_TO_SMART.TIMERTRACK where device_id=? and date=?"); //$NON-NLS-1$
+		ps.setString(1, deviceId);
+		ps.setString(2, date);
+
+		ResultSet rs = ps.executeQuery();
+
+		List<TagT> result = new ArrayList<TagT>();
+		TagT t = null;
+		while (rs.next()) {
+			t = new TagT();
+			t.setDeviceId(deviceId);
+			t.setDate(date);
+			t.setTime(rs.getString(1));
+			t.setLatitude(rs.getString(2));
+			t.setLongitude(rs.getString(3));
+			result.add(t);
+		}
+		rs.close();
+		return result;
+	}
 	
 }
