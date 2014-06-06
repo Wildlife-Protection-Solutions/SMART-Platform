@@ -177,7 +177,11 @@ public class IncidentFilter {
 		query.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
 		if (stringComparator != null && incidentIdFilter != null){
 			if (stringComparator == StringComparison.EQUALS){
-				query.setParameter("pid", Integer.valueOf(this.incidentIdFilter.toLowerCase())); //$NON-NLS-1$
+				try{
+					query.setParameter("pid", Integer.valueOf(this.incidentIdFilter.toLowerCase())); //$NON-NLS-1$
+				}catch (Exception ex){
+					query.setParameter("pid", null); //$NON-NLS-1$
+				}
 //			}else{
 //				query.setParameter("pid", "%" + this.incidentIdFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
