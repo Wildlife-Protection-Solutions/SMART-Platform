@@ -189,7 +189,7 @@ public class StringFilterComposite extends Composite {
 			txtFilter.setText(text);
 			comparatorViewer.setSelection(new StructuredSelection(comparison));
 		} else {
-			comparatorViewer.setSelection(new StructuredSelection(StringComparison.CONTAINS));
+			comparatorViewer.setSelection(new StructuredSelection(compOptions[0]));
 		}
 		setFilteringEnabled(enabled);
 		if (field != null && searchField != null){
