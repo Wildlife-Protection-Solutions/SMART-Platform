@@ -6,12 +6,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -39,14 +36,12 @@ import org.wcs.smart.patrol.xml.model.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.WaypointType;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBWriter;
 
 public class PatrolBuilder {
 
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
-	private static final TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	private Ct2SmartLookup lookup;
 	
@@ -89,9 +84,11 @@ public class PatrolBuilder {
 		leg.getDays().add(legDay);
 		legDay.setTrack(track);
 
-		XMLGregorianCalendar date = null;
-		XMLGregorianCalendar startTime = null;
-		XMLGregorianCalendar endTime = null;
+		XMLGregorianCalendar xmlDate = null;
+		XMLGregorianCalendar xmlStartTime = null;
+		XMLGregorianCalendar xmlEndTime = null;
+		Date wpDate = null;
+		Time wpTime = null;
 		
 		for (TagS s : sList) {
 			WaypointType wp = new WaypointType();
@@ -147,24 +144,25 @@ public class PatrolBuilder {
 						break;
 					}
 					case META_DATE:
-						date = toXmlDate(df.parse(a.getV()));
+						wpDate = df.parse(a.getV());
+						xmlDate = toXmlDate(wpDate);
 						break;
 					case META_TIME: {
-						Time time = Time.valueOf(a.getV());
-						XMLGregorianCalendar xmlTime = toXmlTime(time);
+						wpTime = Time.valueOf(a.getV());
+						XMLGregorianCalendar xmlTime = toXmlTime(wpTime);
 						wp.setTime(xmlTime);
-						if (startTime != null) {
-							if (xmlTime.compare(startTime) == DatatypeConstants.LESSER)
-								startTime = xmlTime;
+						if (xmlStartTime != null) {
+							if (xmlTime.compare(xmlStartTime) == DatatypeConstants.LESSER)
+								xmlStartTime = xmlTime;
 						} else {
-							startTime = xmlTime;
+							xmlStartTime = xmlTime;
 						}
 						
-						if (endTime != null) {
-							if (xmlTime.compare(endTime) == DatatypeConstants.GREATER)
-								endTime = xmlTime;
+						if (xmlEndTime != null) {
+							if (xmlTime.compare(xmlEndTime) == DatatypeConstants.GREATER)
+								xmlEndTime = xmlTime;
 						} else {
-							endTime = xmlTime;
+							xmlEndTime = xmlTime;
 						}
 						break;
 					}
@@ -178,17 +176,29 @@ public class PatrolBuilder {
 						break;
 					}
 			}
+			
+			if (wp.getX() == null || wp.getY() == null) {
+				Coordinate c = CoordinateUtil.interpolate(line, combine(wpDate, wpTime));
+				if (c != null) {
+					if (wp.getX() == null)
+						wp.setX(c.x);
+					if (wp.getY() == null)
+						wp.setY(c.y);
+				}
+			}
+			
 		}
 
-		patrol.setStartDate(date);
-		patrol.setEndDate(date);
+			
+		patrol.setStartDate(xmlDate);
+		patrol.setEndDate(xmlDate);
 
-		leg.setStartDate(date);
-		leg.setEndDate(date);
+		leg.setStartDate(xmlDate);
+		leg.setEndDate(xmlDate);
 
-		legDay.setDate(date);
-		legDay.setStartTime(startTime);
-		legDay.setEndTime(endTime);
+		legDay.setDate(xmlDate);
+		legDay.setStartTime(xmlStartTime);
+		legDay.setEndTime(xmlEndTime);
 		
 		return patrol;
 	}
@@ -205,37 +215,9 @@ public class PatrolBuilder {
 			x = Double.valueOf(t.getLongitude());
 			coordinates.add(new Coordinate(x, y, combine(date, time).getTime()));
 		}
-		
-		//copy from PatrolUtils
-		if (coordinates.size() < 2) {
-			return null;
-		}
-		GeometryFactory gf = new GeometryFactory();
-		Collections.sort(coordinates, new Comparator<Coordinate>() {
-			@Override
-			public int compare(Coordinate o1, Coordinate o2) {
-				return ((Double) o1.z).compareTo((Double) o2.z);
-			}
-		});
-		
-		for (Coordinate c : coordinates){
-			//c.z is the date taking into account the current timezone.  We want to compute
-			//the date of GMT timezone and assign that to the point.
-			//we need to take the year,month,date, hour, min, sec and assign it to a date with
-			//a time zone of gmt
-			Calendar c1 = Calendar.getInstance();
-			c1.setTimeInMillis((long)c.z);
-			Calendar c2 = Calendar.getInstance();
-			c2.setTimeZone(ZTIMEZONE);
-			c2.setTimeInMillis(0);
-			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-			
-			c.z = c2.getTime().getTime();
-			
-		}
-		return gf.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]));
+		return CoordinateUtil.buildLineString(coordinates);
 	}
-	
+
 	private String getDefaultCategory(TagS s) {
 		List<Ct2AttributeValuePair> data = new ArrayList<Ct2AttributeValuePair>();
 		for (TagA a : s) {
