@@ -28,8 +28,10 @@ import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.ct2smart.xml.parser.TagT;
+import org.wcs.smart.patrol.xml.model.LabelType;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
 import org.wcs.smart.patrol.xml.model.PatrolLegType;
+import org.wcs.smart.patrol.xml.model.PatrolMemberType;
 import org.wcs.smart.patrol.xml.model.PatrolType;
 import org.wcs.smart.patrol.xml.model.TrackType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
@@ -52,23 +54,46 @@ public class PatrolBuilder {
 		lookup = new Ct2SmartLookup(ct2Smart);
 	}
 
-	public PatrolType createPatrol(List<TagS> sights) throws DatatypeConfigurationException, ParseException {
+	public PatrolType createPatrol(List<TagS> sList, List<TagT> tList) throws DatatypeConfigurationException, ParseException {
 
+		LineString line = createTrack(tList);
+		
+		TrackType track = null;
+		if (line != null) {
+			track = new TrackType();
+			track.setDistance(distanceInMeters(line) / 1000.0);
+			WKBWriter writer = new WKBWriter(3);
+			track.setGeom(encodeHex(writer.write(line)));
+		}
+		
 		PatrolType patrol = new PatrolType();
 		patrol.setIsArmed(false);
+		patrol.setPatrolType("GROUND");
 		
 		PatrolLegType leg = new PatrolLegType();
 		patrol.getLegs().add(leg);
 		leg.setId(String.valueOf(patrol.getLegs().size()));
+		LabelType transportType = new LabelType();
+		transportType.setLanguageCode("en");
+		transportType.setValue("Foot");
+		leg.setTransportType(transportType);
+		PatrolMemberType member = new PatrolMemberType();
+		leg.getMembers().add(member);
+		member.setIsLeader(true);
+		member.setIsPilot(false);
+		member.setEmployeeId("SMART5");
+		member.setFamilyName("Gordon");
+		member.setGivenName("Rawlston");
 		
 		PatrolLegDayType legDay = new PatrolLegDayType();
 		leg.getDays().add(legDay);
+		legDay.setTrack(track);
 
 		XMLGregorianCalendar date = null;
 		XMLGregorianCalendar startTime = null;
 		XMLGregorianCalendar endTime = null;
 		
-		for (TagS s : sights) {
+		for (TagS s : sList) {
 			WaypointType wp = new WaypointType();
 			legDay.getWaypoints().add(wp);
 			wp.setId(legDay.getWaypoints().size());
@@ -168,7 +193,7 @@ public class PatrolBuilder {
 		return patrol;
 	}
 
-	public TrackType createTrack(List<TagT> tList) throws ParseException {
+	private LineString createTrack(List<TagT> tList) throws ParseException {
 		List<Coordinate> coordinates = new ArrayList<Coordinate>();
 		Date date;
 		Time time;
@@ -208,14 +233,7 @@ public class PatrolBuilder {
 			c.z = c2.getTime().getTime();
 			
 		}
-		LineString line = gf.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]));
-		
-		TrackType track = new TrackType();
-		track.setDistance(distanceInMeters(line) / 1000.0);
-		WKBWriter writer = new WKBWriter(3);
-		track.setGeom(encodeHex(writer.write(line)));
-		
-		return track;
+		return gf.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]));
 	}
 	
 	private String getDefaultCategory(TagS s) {
