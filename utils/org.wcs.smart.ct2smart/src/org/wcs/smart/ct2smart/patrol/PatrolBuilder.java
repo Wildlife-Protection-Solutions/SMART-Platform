@@ -21,6 +21,7 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.matcher.model.CtCategory;
+import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
@@ -97,19 +98,29 @@ public class PatrolBuilder {
 			wp.setId(legDay.getWaypoints().size());
 
 			String defaultCategoryKey = getDefaultCategory(s);
-			WaypointObservationType obs = new WaypointObservationType();
-			wp.getObservations().add(obs);
-			obs.setCategoryKey(defaultCategoryKey);
+			WaypointObservationType defObs = new WaypointObservationType();
+			wp.getObservations().add(defObs);
+			defObs.setCategoryKey(defaultCategoryKey);
 			
 
 			for (TagA a : s) {
 				Ct2Attribute cta = lookup.findAttribute(a.getI());
-				//TODO: special cases for not default category
 				if (cta == null || cta.getType() == null) {
 					//attribute is unmapped; treat the same as ignore
-					//TOOD: warning?
+					System.out.println("Warning: No mapping for attribute: " + a.getN());
 					continue;
 				}
+				WaypointObservationType obs;
+				//determine if we use default observation or special
+				if (cta.getCategoryKey() == null) {
+					obs = defObs;
+				} else {
+					//special cases for not default category
+					obs = new WaypointObservationType();
+					wp.getObservations().add(obs);
+					obs.setCategoryKey(cta.getCategoryKey());
+				}
+
 				switch (cta.getType()) {
 					case BOOL: {
 						WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
@@ -175,7 +186,14 @@ public class PatrolBuilder {
 						break;
 					case IGNORE:
 						break;
-					}
+				}
+				
+				for (ExtraAttribute ea : cta.getExtraAttribute()) {
+					WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+					obs.getAttributes().add(obsAttr);
+					obsAttr.setAttributeKey(ea.getAttributeKey());
+					obsAttr.setItemKey(ea.getValueKey());
+				}
 			}
 			
 			if (wp.getX() == null || wp.getY() == null) {

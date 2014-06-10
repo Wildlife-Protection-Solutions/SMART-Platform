@@ -16,17 +16,16 @@ import javax.xml.bind.annotation.XmlValue;
 
 
 /**
- * <p>Java class for Ct2AttributeValue complex type.
+ * <p>Java class for ExtraAttribute complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Ct2AttributeValue">
+ * &lt;complexType name="ExtraAttribute">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="i" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="n" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="mapTo" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="valueKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -35,19 +34,17 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Ct2AttributeValue", propOrder = {
+@XmlType(name = "ExtraAttribute", propOrder = {
     "value"
 })
-public class Ct2AttributeValue {
+public class ExtraAttribute {
 
     @XmlValue
     protected String value;
     @XmlAttribute
-    protected String i;
+    protected String attributeKey;
     @XmlAttribute
-    protected String n;
-    @XmlAttribute
-    protected String mapTo;
+    protected String valueKey;
 
     /**
      * Gets the value of the value property.
@@ -74,75 +71,51 @@ public class Ct2AttributeValue {
     }
 
     /**
-     * Gets the value of the i property.
+     * Gets the value of the attributeKey property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getI() {
-        return i;
+    public String getAttributeKey() {
+        return attributeKey;
     }
 
     /**
-     * Sets the value of the i property.
+     * Sets the value of the attributeKey property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setI(String value) {
-        this.i = value;
+    public void setAttributeKey(String value) {
+        this.attributeKey = value;
     }
 
     /**
-     * Gets the value of the n property.
+     * Gets the value of the valueKey property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getN() {
-        return n;
+    public String getValueKey() {
+        return valueKey;
     }
 
     /**
-     * Sets the value of the n property.
+     * Sets the value of the valueKey property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setN(String value) {
-        this.n = value;
-    }
-
-    /**
-     * Gets the value of the mapTo property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getMapTo() {
-        return mapTo;
-    }
-
-    /**
-     * Sets the value of the mapTo property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setMapTo(String value) {
-        this.mapTo = value;
+    public void setValueKey(String value) {
+        this.valueKey = value;
     }
 
 }

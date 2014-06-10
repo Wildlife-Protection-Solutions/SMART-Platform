@@ -25,14 +25,25 @@
 		</xs:restriction>
 	</xs:simpleType>
 
+	<xs:complexType name="ExtraAttribute">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="attributeKey" use="optional" />
+				<xs:attribute type="xs:string" name="valueKey" use="optional" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
 	<xs:complexType name="Ct2Attribute">
 		<xs:sequence>
 			<xs:element name="Ct2AttributeValue" type="Ct2AttributeValue" maxOccurs="unbounded" minOccurs="0" />
+			<xs:element name="ExtraAttribute" type="ExtraAttribute" maxOccurs="unbounded" minOccurs="0" />
 		</xs:sequence>
 		<xs:attribute type="Ct2AttributeType" name="type" use="optional" />
 		<xs:attribute type="xs:string" name="i" use="optional" />
 		<xs:attribute type="xs:string" name="n" use="optional" />
 		<xs:attribute type="xs:string" name="mapTo" use="optional" />
+		<xs:attribute type="xs:string" name="categoryKey" use="optional" />
 	</xs:complexType>
 
 	<xs:complexType name="CtCategoryMap">
