@@ -37,8 +37,9 @@ public class CreatePatrols {
 			List<TagS> sList = extractor.extractS(c, uniqueId, uniqueValues);
 			List<TagT> tList = extractor.extractT(c, uniqueValues[2], uniqueValues[0]);
 			PatrolType p = builder.createPatrol(sList, tList);
+			p.setId(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-'));
 			
-			FileUtil.write(new File(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-') + ".xml"), p);
+			FileUtil.write(new File(p.getId() + ".xml"), p);
 		}
 		rs.close();
 		

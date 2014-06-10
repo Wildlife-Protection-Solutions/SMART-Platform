@@ -83,6 +83,7 @@ public class PatrolBuilder {
 		PatrolLegDayType legDay = new PatrolLegDayType();
 		leg.getDays().add(legDay);
 		legDay.setTrack(track);
+		legDay.setRestMinutes(0.0);
 
 		XMLGregorianCalendar xmlDate = null;
 		XMLGregorianCalendar xmlStartTime = null;
