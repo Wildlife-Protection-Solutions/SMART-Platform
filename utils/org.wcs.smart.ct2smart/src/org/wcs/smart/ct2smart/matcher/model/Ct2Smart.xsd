@@ -22,6 +22,8 @@
 			<xs:enumeration value="META_TIME" />
 			<xs:enumeration value="META_LAT" />
 			<xs:enumeration value="META_LON" />
+			<xs:enumeration value="META_MEMBERS" />
+			<xs:enumeration value="META_MANDATE" />
 		</xs:restriction>
 	</xs:simpleType>
 
