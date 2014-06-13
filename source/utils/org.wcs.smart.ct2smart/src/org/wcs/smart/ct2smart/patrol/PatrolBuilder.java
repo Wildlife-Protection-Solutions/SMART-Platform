@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -22,6 +24,7 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
+import org.wcs.smart.ct2smart.parser.TeamMembersParser;
 import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
@@ -41,10 +44,13 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBWriter;
 
 public class PatrolBuilder {
+	
+	private static final String LANGUAGE_CODE = "en";
 
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
 	
 	private Ct2SmartLookup lookup;
+	private TeamMembersParser membersParser = new TeamMembersParser();
 	
 	public PatrolBuilder(Ct2Smart ct2Smart) {
 		lookup = new Ct2SmartLookup(ct2Smart);
@@ -70,16 +76,16 @@ public class PatrolBuilder {
 		patrol.getLegs().add(leg);
 		leg.setId(String.valueOf(patrol.getLegs().size()));
 		LabelType transportType = new LabelType();
-		transportType.setLanguageCode("en");
+		transportType.setLanguageCode(LANGUAGE_CODE);
 		transportType.setValue("Foot");
 		leg.setTransportType(transportType);
-		PatrolMemberType member = new PatrolMemberType();
-		leg.getMembers().add(member);
-		member.setIsLeader(true);
-		member.setIsPilot(false);
-		member.setEmployeeId("SMART5");
-		member.setFamilyName("Gordon");
-		member.setGivenName("Rawlston");
+//		PatrolMemberType member = new PatrolMemberType();
+//		leg.getMembers().add(member);
+//		member.setIsLeader(true);
+//		member.setIsPilot(false);
+//		member.setEmployeeId("SMART5");
+//		member.setFamilyName("Gordon");
+//		member.setGivenName("Rawlston");
 		
 		PatrolLegDayType legDay = new PatrolLegDayType();
 		leg.getDays().add(legDay);
@@ -92,6 +98,10 @@ public class PatrolBuilder {
 		Date wpDate = null;
 		Time wpTime = null;
 		
+		Set<String> members = new HashSet<String>();
+		LabelType mandate = null;
+		
+				
 		for (TagS s : sList) {
 			WaypointType wp = new WaypointType();
 			legDay.getWaypoints().add(wp);
@@ -184,6 +194,26 @@ public class PatrolBuilder {
 					case META_LAT:
 						wp.setY(Double.valueOf(a.getV()));
 						break;
+					case META_MANDATE: {
+						String v = a.getV();
+						for (Ct2AttributeValue val : cta.getCt2AttributeValue()) {
+							if (v.equals(val.getI())) {
+								v = val.getMapTo();
+								break;
+							}
+						}
+						if (mandate == null) {
+							mandate = new LabelType();
+							mandate.setLanguageCode(LANGUAGE_CODE);
+							mandate.setValue(v);
+						} else if (!v.equals(mandate.getValue())) {
+							System.err.println("Two different mandates in one patrol: " + mandate.getValue() + " and " + v);
+						}
+						break;
+					}
+					case META_MEMBERS:
+						members.addAll(membersParser.parseMembers(a.getV()));
+						break;
 					case IGNORE:
 						break;
 				}
@@ -208,7 +238,31 @@ public class PatrolBuilder {
 			
 		}
 
-			
+		for (String fullName : members) {
+			PatrolMemberType member = new PatrolMemberType();
+			leg.getMembers().add(member);
+			member.setIsLeader(false);
+			member.setIsPilot(false);
+			String[] parts = fullName.split(" ");
+			switch (parts.length) {
+			case 2:
+				member.setFamilyName(parts[1]);
+				member.setGivenName(parts[0]);
+				break;
+			case 1:
+				member.setFamilyName(parts[0]);
+				break;
+
+			default:
+				break;
+			}
+		}
+		if (!leg.getMembers().isEmpty()) {
+			leg.getMembers().get(0).setIsLeader(true);
+		}
+
+		patrol.setMandate(mandate);
+
 		patrol.setStartDate(xmlDate);
 		patrol.setEndDate(xmlDate);
 

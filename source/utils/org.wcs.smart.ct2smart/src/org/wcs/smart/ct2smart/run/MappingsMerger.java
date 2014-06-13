@@ -17,10 +17,11 @@ public class MappingsMerger {
 
 	public static void main(String[] args) throws JAXBException, IOException {
 		Ct2Smart from = FileUtil.loadCt2Smart(new File("match_super_x.xml"));
-		Ct2Smart to = FileUtil.loadCt2Smart(new File("match_short.xml"));
+		Ct2Smart to = FileUtil.loadCt2Smart(new File("match_super.xml"));
 		MappingsMerger merger = new MappingsMerger();
 		merger.merge(from, to);
-		FileUtil.write(new File("match_short_merged.xml"), to);
+		FileUtil.write(new File("match_super_merged.xml"), to);
+		System.out.println("Merge done");
 	}
 	
 	public void merge(Ct2Smart from, Ct2Smart to) {
