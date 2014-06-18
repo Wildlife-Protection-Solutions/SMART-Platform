@@ -1068,6 +1068,11 @@
             id="org.wcs.smart.autobackup"
             name="%autobackup.preferencepage.name">
       </page>
+      <page
+            class="net.refractions.udig.project.ui.preferences.RenderPreferences"
+            id="org.wcs.smart.udig.preferenced.render"
+            name="Map Rendering Options">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
