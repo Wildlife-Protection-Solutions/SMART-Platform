@@ -230,8 +230,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		
 		setMessage(Messages.PatrolLegSplitDialog_Dialog_Message);
 		super.getShell().setText(Messages.PatrolLegSplitDialog_Dialog_Title);
-		setTitle(Messages.PatrolLegSplitDialog_Dialog_Title);
-		
+		setTitle(MessageFormat.format(Messages.PatrolLegSplitDialog_DialogTitle2, existingLeg.getId()));
 		return parent;
 	}
 	

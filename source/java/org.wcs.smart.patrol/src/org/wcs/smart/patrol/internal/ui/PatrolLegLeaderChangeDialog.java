@@ -32,8 +32,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,7 +56,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
+public class PatrolLegLeaderChangeDialog extends TitleAreaDialog implements SelectionListener{
 
 	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	private PatrolLeg existingLeg;
@@ -127,13 +127,8 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		lbl.setText(Messages.PatrolLegLeaderChangeDialog_DateChange_Label);
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
 		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		startDate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				validate();
-			}
-			
-		});
+		startDate.addSelectionListener(this);
+		
 		SmartUtils.initDateDateTimeWidget(startDate, existingLeg.getStartDate());
 		
 		//time of change
@@ -143,23 +138,18 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		Composite opComp = new Composite(timecomp, SWT.NONE);
 		opComp.setLayout(new GridLayout(3, false));
 		
-		SelectionAdapter opAdapter = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				startTime.setEnabled(opCustom.getSelection());
-			}
-		};
 		opStart = new Button(opComp, SWT.RADIO);
 		opStart.setText(Messages.PatrolLegLeaderChangeDialog_OpStartOfDay);
 		opStart.setSelection(true);
-		opStart.addSelectionListener(opAdapter);
+		opStart.addSelectionListener(this);
 		
 		opCustom = new Button(opComp, SWT.RADIO);
 		opCustom.setText(Messages.PatrolLegLeaderChangeDialog_OpCustome);
-		opCustom.addSelectionListener(opAdapter);
+		opCustom.addSelectionListener(this);
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
 		startTime.setTime(0, 0, 0);
+		startTime.addSelectionListener(this);
 		
 		/* new leader/pilot */
 		leaderPilotcomp = new LeaderPilotComposite();
@@ -173,7 +163,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 			}
 		});
 		
-		setTitle(Messages.PatrolLegLeaderChangeDialog_DialogTitle);
+		setTitle(MessageFormat.format(Messages.PatrolLegLeaderChangeDialog_DialogTitle2, existingLeg.getId()));
 		super.getShell().setText(Messages.PatrolLegLeaderChangeDialog_DialogTitle);
 		setMessage(Messages.PatrolLegLeaderChangeDialog_DialogMessage);
 		return parent;
@@ -243,6 +233,18 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		}
 		super.okPressed();
 		
+	}
+
+
+	@Override
+	public void widgetSelected(SelectionEvent e) {
+		startTime.setEnabled(opCustom.getSelection());
+		validate();
+	}
+
+
+	@Override
+	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 	
 }

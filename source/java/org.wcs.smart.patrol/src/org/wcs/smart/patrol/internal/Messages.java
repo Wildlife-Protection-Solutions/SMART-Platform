@@ -54,6 +54,7 @@ public class Messages extends NLS {
 	public static String EditPatrolLegDialog_AddEmployees_ToolTip;
 	public static String EditPatrolLegDialog_DialogMessage;
 	public static String EditPatrolLegDialog_DialogTitle;
+	public static String EditPatrolLegDialog_DialogTitle2;
 	public static String EditPatrolLegDialog_Error_EmptyId;
 	public static String EditPatrolLegDialog_Error_EndAfterPStart;
 	public static String EditPatrolLegDialog_Error_EndBeforePStart;
@@ -397,6 +398,7 @@ public class Messages extends NLS {
 	public static String PatrolLegLeaderChangeDialog_DateChange_Label;
 	public static String PatrolLegLeaderChangeDialog_DialogMessage;
 	public static String PatrolLegLeaderChangeDialog_DialogTitle;
+	public static String PatrolLegLeaderChangeDialog_DialogTitle2;
 	public static String PatrolLegLeaderChangeDialog_Error_StartDateAfterStart;
 	public static String PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd;
 	public static String PatrolLegLeaderChangeDialog_LegIdPostfix;
@@ -428,6 +430,7 @@ public class Messages extends NLS {
 	public static String PatrolLegSplitDialog_DateofSplit_Label;
 	public static String PatrolLegSplitDialog_Dialog_Message;
 	public static String PatrolLegSplitDialog_Dialog_Title;
+	public static String PatrolLegSplitDialog_DialogTitle2;
 	public static String PatrolLegSplitDialog_EndLeg_LegId_Postfix;
 	public static String PatrolLegSplitDialog_Error_DateError_1;
 	public static String PatrolLegSplitDialog_Error_DateError_2;
@@ -549,6 +552,7 @@ public class Messages extends NLS {
 	public static String PatrolTransportChangeDialog_DateLabel;
 	public static String PatrolTransportChangeDialog_DialogMessage;
 	public static String PatrolTransportChangeDialog_DialogTitle;
+	public static String PatrolTransportChangeDialog_DialogTitle2;
 	public static String PatrolTransportChangeDialog_Error_StartDateAfter;
 	public static String PatrolTransportChangeDialog_Error_StartDateBefore;
 	public static String PatrolTransportChangeDialog_NewTransportTypeError;

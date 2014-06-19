@@ -178,9 +178,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				}
 				PatrolTransportChangeDialog leaderDialg = new PatrolTransportChangeDialog(getShell(), 
 						pl, legs, session);
-				leaderDialg.open();
-				sortAndRefresh();
-				fireChangeListeners();
+				if (leaderDialg.open() == Window.OK){
+					sortAndRefresh();
+					fireChangeListeners();
+				}
 			}
 
 		});
@@ -198,9 +199,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				}
 				PatrolLegLeaderChangeDialog leaderDialg = new PatrolLegLeaderChangeDialog(getShell(),
 						pl, legs);
-				leaderDialg.open();
-				sortAndRefresh();
-				fireChangeListeners();
+				if (leaderDialg.open() == Window.OK){
+					sortAndRefresh();
+					fireChangeListeners();
+				}
 			}
 
 		});
@@ -290,6 +292,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			}
 		});
 		patrolLegViewer.refresh();
+		patrolLegViewer.getTable().setSelection(null);
 	}
 	
 	private void removeLeg(){
