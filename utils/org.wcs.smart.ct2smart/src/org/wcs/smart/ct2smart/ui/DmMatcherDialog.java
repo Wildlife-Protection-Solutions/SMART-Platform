@@ -1,0 +1,183 @@
+package org.wcs.smart.ct2smart.ui;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Tree;
+import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+
+public class DmMatcherDialog extends Composite {
+
+	private MatchSession session;
+	
+	private TableViewer viewer;
+	private Tree dmTree;
+	private Combo langSelector;
+
+	public DmMatcherDialog(Composite c, MatchSession session) {
+		super(c, SWT.NONE);
+		this.session = session;
+
+		GridLayout layout = new GridLayout(1, false);
+		this.setLayout(layout);
+
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		this.setLayoutData(gridData);
+
+		this.setSize(840, 640);
+
+		//main composite and layout
+		final Composite main = new Composite(this, SWT.NONE);
+		GridLayout mlayout = new GridLayout(1, true);
+		main.setLayout(mlayout);
+		GridData mainGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		main.setLayoutData(mainGridData);
+
+		//language selector
+		final Composite langCmp = new Composite(main, SWT.NONE);
+		langCmp.setLayout(new GridLayout(2, false));
+		langCmp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
+
+		Label languageLabel = new Label(langCmp, SWT.NONE);
+		languageLabel .setText("Language:" );
+		GridData langLabelData = new GridData(SWT.RIGHT,SWT.TOP, false, false);
+		languageLabel.setLayoutData(langLabelData);
+
+		langSelector =  new Combo (langCmp, SWT.READ_ONLY);
+		langSelector.setItems(new String[]{"a", "b", "c"});
+		langSelector.setLayoutData(new GridData(SWT.FILL,SWT.RIGHT, false, false));
+		langSelector.select(0);
+		
+		//attributes table
+		final Composite left = new Composite(main, SWT.NONE);
+		left.setLayout(new GridLayout(1, false));
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		viewer = new TableViewer(left, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+
+		// create the columns 
+		createColumns();
+
+		// make lines and header visible
+		final Table table = viewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true); 
+
+		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setInput(session.getCt2Smart().getCt2Attribute());
+
+		// define layout for the viewer
+		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 0);
+		//tgridData.widthHint = 510;
+		tgridData.heightHint = 350;
+		viewer.getControl().setLayoutData(tgridData);
+
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent arg0) {		
+				viewerSelectionChanged();
+			}
+		});
+
+		MatchAttributeComposite attrCmp = new MatchAttributeComposite(left);
+
+	}
+
+	protected void viewerSelectionChanged() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void createColumns() {
+
+		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 200, 0);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Ct2Attribute a = (Ct2Attribute) element;
+				return a.getN();
+			}
+		});
+
+		col = createTableViewerColumn("Type", 80, 1);
+		col.setLabelProvider(new Ct2AttributeTypeLabelProvider());
+		col.setEditingSupport(new TypeComboBoxTableEditor(viewer));
+
+		col = createTableViewerColumn("SMART Attribute", 200, 2);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Ct2Attribute a = (Ct2Attribute) element;
+				return a.getMapTo() != null ? a.getMapTo() : ""; //TODO: fix output
+			}
+		});
+
+		col = createTableViewerColumn("SMART Category", 200, 2);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Ct2Attribute a = (Ct2Attribute) element;
+				return a.getCategoryKey() != null ? a.getCategoryKey() : ""; //TODO: fix output
+			}
+		});
+	}
+
+	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
+		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
+		final TableColumn column = viewerColumn.getColumn();
+		column.setText(title);
+		column.setWidth(bound);
+		column.setResizable(true);
+		column.setMoveable(true);
+		return viewerColumn;
+	}
+
+	
+	private class ComboBoxTableEditor extends EditingSupport {
+		private ComboBoxCellEditor editor;
+
+		public ComboBoxTableEditor(ColumnViewer viewer) {
+			super(viewer);
+			editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[]{}, SWT.DROP_DOWN);
+			editor.setItems(new String[]{"No", "Yes", "Both"});
+		}
+
+		@Override
+		protected boolean canEdit(Object arg0) {
+			return true;
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object arg0) {
+			return editor;
+		}
+
+		@Override
+		protected Object getValue(Object arg0) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		protected void setValue(Object arg0, Object arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
+}
