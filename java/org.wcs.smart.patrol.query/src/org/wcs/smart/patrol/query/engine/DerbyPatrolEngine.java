@@ -137,23 +137,29 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(buildSelectClause());
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(buildFromClause());
-		sql.append(" ORDER BY p_id, pl_uuid "); //$NON-NLS-1$
+		sql.append(" ORDER BY p_id, pl_uuid, pld_uuid "); //$NON-NLS-1$
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
 		try {
 			byte[] lastPlUuid = null;
+			byte[] lastPldUuid = null;
 			PatrolQueryResultItem lastItem = null;
 			while (rs.next()) {
 				byte[] pluuid = rs.getBytes("r_pl_uuid"); //$NON-NLS-1$
+				byte[] plduuid = rs.getBytes("r_pld_uuid"); //$NON-NLS-1$
 				if (Arrays.equals(pluuid, lastPlUuid)){
-					lastItem.addTrack(rs.getBytes(20));
+					if (!Arrays.equals(plduuid, lastPldUuid)){
+						//same patrol; different leg
+						lastItem.addTrack(rs.getBytes(20));
+					}
 				}else{
 					PatrolQueryResultItem it = asQueryResultItem(rs, session);
 					items.add(it);
 					lastItem = it;
 				}
 				lastPlUuid = pluuid;
+				lastPldUuid = plduuid;
 			}
 		} finally {
 			rs.close();
@@ -178,7 +184,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				"pl_end_date", //$NON-NLS-1$
 				//"pld_patrol_day", 
 				"plm_leader",  //$NON-NLS-1$
-				"plm_pilot", "track", "pl_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"plm_pilot", "track", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < ca.length; i++) {
