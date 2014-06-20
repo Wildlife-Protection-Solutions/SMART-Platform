@@ -43,7 +43,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 public class SmartAttributeTableEditor extends EditingSupport {
 
 	private ComboBoxCellEditor editor;
-	private Map<Ct2AttributeType, List<AttributeType>> itemsMap;
+	private Map<Ct2AttributeType, String[]> itemsMap;
 	private SmartAttributeLabelProvider labelProvider;
 	
 	/**
@@ -54,7 +54,7 @@ public class SmartAttributeTableEditor extends EditingSupport {
 		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN);
 		this.labelProvider = labelProvider;
 		//building values map
-		itemsMap = new HashMap<Ct2AttributeType, List<AttributeType>>();
+		Map<Ct2AttributeType, List<String>> tempMap = new HashMap<Ct2AttributeType, List<String>>();
 		for (AttributeType a : attributes) {
 			String type = a.getType();
 			Ct2AttributeType ctType = Ct2AttributeType.IGNORE;
@@ -67,12 +67,17 @@ public class SmartAttributeTableEditor extends EditingSupport {
 			} else if ("BOOLEAN".equals(type)) { //$NON-NLS-1$
 				ctType = Ct2AttributeType.BOOL;
 			}
-			List<AttributeType> items = itemsMap.get(ctType);
+			List<String> items = tempMap.get(ctType);
 			if (items == null) {
-				items = new ArrayList<AttributeType>();
-				itemsMap.put(ctType, items);
+				items = new ArrayList<String>();
+				tempMap.put(ctType, items);
 			}
-			items.add(a);
+			items.add(a.getKey());
+		}
+		itemsMap = new HashMap<Ct2AttributeType, String[]>();
+		for (Ct2AttributeType key : tempMap.keySet()) {
+			List<String> list = tempMap.get(key);
+			itemsMap.put(key, list.toArray(new String[list.size()]));
 		}
 	}
 
@@ -97,11 +102,11 @@ public class SmartAttributeTableEditor extends EditingSupport {
 	protected CellEditor getCellEditor(Object arg0) {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
-			List<AttributeType> items = itemsMap.get(a.getType());
+			String[] items = itemsMap.get(a.getType());
 			if (items != null) {
-				String[] names = new String[items.size()];
-				for (int i = 0; i < items.size(); i++) {
-					names[i] = labelProvider.getText(items.get(i));
+				String[] names = new String[items.length];
+				for (int i = 0; i < items.length; i++) {
+					names[i] = labelProvider.getText(items[i]);
 				}
 				editor.setItems(names);
 			} else {
@@ -118,11 +123,11 @@ public class SmartAttributeTableEditor extends EditingSupport {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
 			String v = a.getMapTo();
-			List<AttributeType> items = itemsMap.get(a.getType());
+			String[] items = itemsMap.get(a.getType());
 			if (v == null || items == null)
 				return 0;
-			for (int i = 0; i < items.size(); i++) {
-				if (v.equals(items.get(i).getKey()))
+			for (int i = 0; i < items.length; i++) {
+				if (v.equals(items[i]))
 					return i;
 			}
 		}
@@ -134,8 +139,8 @@ public class SmartAttributeTableEditor extends EditingSupport {
 		if ((arg0 instanceof Ct2Attribute) && (arg1 instanceof Integer)) {
 			Integer i = (Integer) arg1;
 			Ct2Attribute a = (Ct2Attribute) arg0;
-			List<AttributeType> items = itemsMap.get(a.getType());
-			a.setMapTo(items.get(i).getKey());
+			String[] items = itemsMap.get(a.getType());
+			a.setMapTo(items[i]);
 			getViewer().refresh();
 		}
 	}

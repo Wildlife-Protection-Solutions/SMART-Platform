@@ -21,12 +21,10 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
-import java.io.StringWriter;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
-import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
 
@@ -58,19 +56,24 @@ public class SmartAttributeLabelProvider extends ColumnLabelProvider {
 				default:
 					return "--not aplicable--";
 			}
-			AttributeType a = key2Attribute.get(ct2a.getMapTo());
-			if (a == null)
-				return "?"; //TODO: empty string?
-			for (NameType nameType : a.getNames()) {
-				if (langCode.equals(nameType.getLanguageCode()))
-					return nameType.getValue();
-			}
-			if (!a.getNames().isEmpty())
-				return a.getNames().get(0).getValue();
+			return getNameForKey(ct2a.getMapTo());
+
 		} else if (element instanceof String) {
-			
+			return getNameForKey((String)element);
 		}
 		return super.getText(element);
 	}
 	
+	private String getNameForKey(String key) {
+		AttributeType a = key2Attribute.get(key);
+		if (a == null)
+			return "?"; //TODO: empty string?
+		for (NameType nameType : a.getNames()) {
+			if (langCode.equals(nameType.getLanguageCode()))
+				return nameType.getValue();
+		}
+		if (!a.getNames().isEmpty())
+			return a.getNames().get(0).getValue();
+		return "? " + key; //should never happen
+	}
 }
