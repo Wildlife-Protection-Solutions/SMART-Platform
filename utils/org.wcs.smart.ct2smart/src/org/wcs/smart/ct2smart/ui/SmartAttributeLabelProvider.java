@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
 
@@ -47,16 +48,7 @@ public class SmartAttributeLabelProvider extends ColumnLabelProvider {
 	public String getText(Object element) {
 		if (element instanceof Ct2Attribute) {
 			Ct2Attribute ct2a = (Ct2Attribute) element;
-			switch (ct2a.getType()) {
-				case TEXT:
-				case NUMERIC:
-				case BOOL:
-				case REF:
-					break;
-				default:
-					return "--not aplicable--";
-			}
-			return getNameForKey(ct2a.getMapTo());
+			return Ct2AttributeTypeUtil.canMap(ct2a.getType()) ? getNameForKey(ct2a.getMapTo()) : "--none--"; 
 
 		} else if (element instanceof String) {
 			return getNameForKey((String)element);

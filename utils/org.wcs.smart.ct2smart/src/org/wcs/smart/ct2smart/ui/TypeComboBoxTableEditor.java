@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
+import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 
 /**
  * @author elitvin
@@ -80,6 +81,10 @@ public class TypeComboBoxTableEditor extends EditingSupport {
 			Integer i = (Integer) arg1;
 			Ct2Attribute a = (Ct2Attribute) arg0;
 			a.setType(Ct2AttributeType.values()[i]);
+			if (!Ct2AttributeTypeUtil.canMap(a.getType())) {
+				a.setMapTo(null);
+				a.setCategoryKey(null);
+			}
 			getViewer().refresh();
 		}
 	}

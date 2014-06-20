@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
+import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 
 /**
@@ -85,15 +86,7 @@ public class SmartAttributeTableEditor extends EditingSupport {
 	protected boolean canEdit(Object arg0) {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
-			switch (a.getType()) {
-				case TEXT:
-				case NUMERIC:
-				case BOOL:
-				case REF:
-					return true;
-				default:
-					return false;
-			}
+			return Ct2AttributeTypeUtil.canMap(a.getType());
 		}
 		return false;
 	}
