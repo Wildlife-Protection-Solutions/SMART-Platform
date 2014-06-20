@@ -22,9 +22,12 @@
 package org.wcs.smart.ct2smart.ui;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -33,7 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ct2smart.matcher.FileUtil;
-import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 
 /**
  * @author elitvin
@@ -44,6 +47,7 @@ public class Ct2SmartMatcher {
 	public static void main(String[] args) throws Exception {
 		MatchSession session = new MatchSession();
 		session.setCt2Smart(FileUtil.loadCt2Smart(new File("match_super_x.xml")));
+		session.setDataModel(loadDataModel(new File("d:\\dev\\data\\mist\\datamodel.xml")));
 		
 		
 		Display display = new Display();
@@ -69,6 +73,19 @@ public class Ct2SmartMatcher {
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 		display.dispose();
+	}
+
+	private static DataModel loadDataModel(File file) throws JAXBException, FileNotFoundException {
+		FileInputStream is = new FileInputStream(file);
+
+		//read file directly instead of using the XmlSmartDataModelManager
+		//because that manager uses classes which require hibernate and
+		//we don't have to have to include hibernate in our build
+		//this.smartDataModel = XmlSmartDataModelManager.readDataModel(is);
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.internal.ca.datamodel.xml.generate");
+		Unmarshaller un = context.createUnmarshaller();	
+		Object o = un.unmarshal(is);
+		return (DataModel) o;
 	}
 
 }

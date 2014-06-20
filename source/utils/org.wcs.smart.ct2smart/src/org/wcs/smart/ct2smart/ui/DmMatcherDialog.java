@@ -1,5 +1,7 @@
 package org.wcs.smart.ct2smart.ui;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -20,6 +22,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
 public class DmMatcherDialog extends Composite {
 
@@ -58,9 +62,15 @@ public class DmMatcherDialog extends Composite {
 		GridData langLabelData = new GridData(SWT.RIGHT,SWT.TOP, false, false);
 		languageLabel.setLayoutData(langLabelData);
 
+		List<LanguageType> langs = session.getDataModel().getLanguages().getLanguages();
+		String[] langCodes = new String[langs.size()];
+		for (int i=0; i < langs.size(); i++){
+			langCodes[i] = langs.get(i).getCode();
+		}
+		
 		langSelector =  new Combo (langCmp, SWT.READ_ONLY);
-		langSelector.setItems(new String[]{"a", "b", "c"});
-		langSelector.setLayoutData(new GridData(SWT.FILL,SWT.RIGHT, false, false));
+		langSelector.setItems(langCodes);
+		langSelector.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		langSelector.select(0);
 		
 		//attributes table
@@ -119,13 +129,10 @@ public class DmMatcherDialog extends Composite {
 		col.setEditingSupport(new TypeComboBoxTableEditor(viewer));
 
 		col = createTableViewerColumn("SMART Attribute", 200, 2);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				Ct2Attribute a = (Ct2Attribute) element;
-				return a.getMapTo() != null ? a.getMapTo() : ""; //TODO: fix output
-			}
-		});
+		SmartAttributeLabelProvider labelProvider = new SmartAttributeLabelProvider(session.getKey2Attribute());
+		col.setLabelProvider(labelProvider);
+		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
+		col.setEditingSupport(new SmartAttributeTableEditor(viewer, attributes, labelProvider));
 
 		col = createTableViewerColumn("SMART Category", 200, 2);
 		col.setLabelProvider(new ColumnLabelProvider() {
