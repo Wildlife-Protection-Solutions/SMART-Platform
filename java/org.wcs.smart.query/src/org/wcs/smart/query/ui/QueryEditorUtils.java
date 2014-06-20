@@ -73,7 +73,7 @@ public class QueryEditorUtils {
 		if (query.getIsShared() && !QueryHibernateManager.getInstance().canModifyCaQueries()){			
 			boolean ret = MessageDialog.openQuestion(shell, SAVE_DIALOGTITLE, Messages.QueryEditorUtils_PermissionError);
 			if (ret){
-				return doSaveAs(editor,true);
+				return doSaveAs(editor,true).getQuery();
 			}
 			return null;
 		}
@@ -100,7 +100,7 @@ public class QueryEditorUtils {
 				monitor.setCanceled(true);
 				return null;
 			}else if (index == 0){
-				return doSaveAs(editor, false);
+				return doSaveAs(editor, false).getQuery();
 			}
 			//otherwise continue with save
 		}
@@ -160,14 +160,14 @@ public class QueryEditorUtils {
 	 * @param addNamePrefix
 	 * @return
 	 */
-	public static Query doSaveAs(final IEditorPart ieditor, 
+	public static QueryProxy doSaveAs(final IEditorPart ieditor, 
 			final boolean addNamePrefix) {
 		
 		if (!(ieditor instanceof IQueryEditor)){
 			throw new IllegalStateException("invalid editor"); //$NON-NLS-1$
 		}
 		
-		final Query[] result = {null};
+		final QueryProxy[] result = {null};
 		final Shell shell = ieditor.getEditorSite().getShell();
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
@@ -234,7 +234,7 @@ public class QueryEditorUtils {
 						//not saved
 						return;
 					}
-					result[0] = newQuery;
+					result[0] = newProxy;
 
 					QueryDefView view = (QueryDefView)ieditor.getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
 					//update the Query Def View; see if there is a better way to do this

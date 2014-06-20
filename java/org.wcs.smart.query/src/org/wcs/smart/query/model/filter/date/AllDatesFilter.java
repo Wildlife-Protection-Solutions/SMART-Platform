@@ -25,7 +25,8 @@ import java.sql.Date;
 
 import org.wcs.smart.query.internal.Messages;
 /**
- * All dates date filter
+ * All dates date filter.
+ * getDates will return null.
  * @author Emily
  *
  */

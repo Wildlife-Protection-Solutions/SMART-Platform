@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
-Bundle-Version: 3.0.0
+Bundle-Version: 3.0.2
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
 Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
  org.eclipse.ui.forms,

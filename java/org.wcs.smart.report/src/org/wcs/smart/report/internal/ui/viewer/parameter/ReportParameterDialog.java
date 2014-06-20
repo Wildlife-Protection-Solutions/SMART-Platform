@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 
 /**
@@ -106,8 +107,13 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void okPressed(){
-		updateValues();
-		super.okPressed();
+		try{
+			updateValues();
+			super.okPressed();
+		}catch (Exception ex){
+			ReportPlugIn.displayLog(ex.getMessage(), ex);
+		}
+		
 	}
 	
 	/**

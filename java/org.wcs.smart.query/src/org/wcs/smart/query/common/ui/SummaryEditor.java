@@ -336,13 +336,13 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 	 */
 	@Override
 	public void doSaveAs() {
-		Query savedQuery = QueryEditorUtils.doSaveAs(this, true);
+		QueryProxy savedQuery = QueryEditorUtils.doSaveAs(this, true);
 		if (savedQuery == null){
 			return;
 		}
 		
-		this.query = new QueryProxy( (SummaryQuery) savedQuery );
-		setInput(new QueryEditorInput(savedQuery));
+		this.query = savedQuery;
+		setInput(new QueryEditorInput(savedQuery.getQuery()));
 		updatePartName();
 		initQuery();
 		

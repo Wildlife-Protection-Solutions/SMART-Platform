@@ -419,12 +419,12 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	
 	@Override
 	public void doSaveAs() {
-		Query savedQuery = QueryEditorUtils.doSaveAs(this, true);
+		QueryProxy savedQuery = QueryEditorUtils.doSaveAs(this, true);
 		if (savedQuery == null){
 			return;
 		}
-		this.query = new QueryProxy( (SimpleQuery) savedQuery);
-		setInput(new QueryEditorInput(savedQuery));
+		this.query = savedQuery;
+		setInput(new QueryEditorInput(savedQuery.getQuery()));
 		updatePartName();
 		page1.getQueryResultsTable().clearColumns();
 		page1.initPage();
