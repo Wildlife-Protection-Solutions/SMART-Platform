@@ -185,43 +185,53 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		
 		IDateFilter op = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
+
+		if (op.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey())){
+			//update custom date filter with values from combo boxes
+			((CustomDateFilter) op).setDates(SmartUtils.getDate(startPicker), SmartUtils.getDate(endPicker));
+		}	
 		
 		java.sql.Date dates[] = op.getDates();
-		if (dates == null){
-			if (op.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey())){
-				params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(SmartUtils.getDate(startPicker).getTime()));
-				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date(SmartUtils.getDate(endPicker).getTime()));	
-			}else if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())){
-				params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(-2208998272375l));	//JAN 01 1900  
-				
+		if (dates == null) {
+			if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())) {
+				params.put(SmartReportParameters.PARAM_START_DATE_KEY,
+						new java.sql.Date(-2208998272375l)); // JAN 01 1900
+
 				Session session = HibernateManager.openSession();
-				try{
+				try {
 					session.beginTransaction();
-				
+
 					String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
 					Query q = session.createQuery(hql);
 					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					List<?> data = q.list();
 					Date startdate = null;
-					if (data != null && data.size() >= 1 && data.get(0) != null){
-						startdate = (java.sql.Timestamp)data.get(0);
-						params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(startdate.getTime()));	//JAN 01 1900
+					if (data != null && data.size() >= 1 && data.get(0) != null) {
+						startdate = (java.sql.Timestamp) data.get(0);
+						params.put(SmartReportParameters.PARAM_START_DATE_KEY,
+								new java.sql.Date(startdate.getTime()));
 					}
-					  
-				}catch (Exception ex){					
-					ReportPlugIn.log(Messages.SmartDateParameterComponent_EarliestDateError, ex);
-				}finally{
-					if (session.getTransaction().isActive()){
+
+				} catch (Exception ex) {
+					ReportPlugIn
+							.log(Messages.SmartDateParameterComponent_EarliestDateError,
+									ex);
+				} finally {
+					if (session.getTransaction().isActive()) {
 						session.getTransaction().commit();
 					}
 					session.close();
 				}
-				//today + one day
-				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
-			}else{
-				throw new UnsupportedOperationException(MessageFormat.format(Messages.SmartDateParameterComponent_DateFilterNotSupported, new Object[]{op.getGuiName()}));
+				// today + one day
+				// add one day just to make sure we get everything
+				params.put(SmartReportParameters.PARAM_END_DATE_KEY,
+						new java.sql.Date((new Date()).getTime() + 86400000)); 
+			} else {
+				throw new UnsupportedOperationException(
+						MessageFormat
+								.format(Messages.SmartDateParameterComponent_DateFilterNotSupported,
+										new Object[] { op.getGuiName() }));
 			}
-			
 		}else if (dates.length == 1){
 			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
 			params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything

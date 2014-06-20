@@ -362,12 +362,12 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	 */
 	@Override
 	public void doSaveAs() {
-		Query savedQuery = QueryEditorUtils.doSaveAs(this, true);
+		QueryProxy savedQuery = QueryEditorUtils.doSaveAs(this, true);
 		if (savedQuery == null){
 			return;
 		}
-		this.query = new QueryProxy((PatrolQuery) savedQuery);
-		setInput(new QueryEditorInput(savedQuery));
+		this.query = savedQuery;
+		setInput(new QueryEditorInput(savedQuery.getQuery()));
 		updatePartName();
 		page1.getQueryResultsTable().clearColumns();
 		page1.setQuery();

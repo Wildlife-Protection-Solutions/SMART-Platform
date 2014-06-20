@@ -89,6 +89,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		for (int i = 0; i <  ((ObservationWizard)getWizard()).getCategoryCount(); i ++){
 			searchTree.selectedList.add(((ObservationWizard)getWizard()).getCategoryToProcess(i));
 		}
+		searchTree.listViewer.refresh(true);
 		searchTree.addChangeListener(new IChangeListener() {
 			
 			@Override
@@ -99,6 +100,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 				getWizard().getContainer().updateButtons();
 			}
 		});
+		
 
 		
 		setMessage(Messages.ObservationWizardPage_PageMessage);

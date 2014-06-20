@@ -402,14 +402,12 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	 */
 	@Override
 	public void doSaveAs() {
-		Query savedQuery = QueryEditorUtils.doSaveAs(this, true);
+		QueryProxy savedQuery = QueryEditorUtils.doSaveAs(this, true);
 		if (savedQuery == null){
 			return;
 		}
-		
-		this.query = new QueryProxy((GriddedQuery) savedQuery);
-		
-		setInput(new QueryEditorInput(savedQuery));
+		this.query = savedQuery;
+		setInput(new QueryEditorInput(savedQuery.getQuery()));
 		updatePartName();
 		resultPage.getQueryResultsTable().clearColumns();
 		
