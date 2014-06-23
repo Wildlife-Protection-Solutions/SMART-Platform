@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ct2smart.ui;
+package org.wcs.smart.ct2smart.ui.support;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -35,14 +35,14 @@ import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
  * @author elitvin
  * @since 3.0.0
  */
-public class TypeComboBoxTableEditor extends EditingSupport {
+public class Ct2AttributeTypeTableEditor extends EditingSupport {
 
 	private ComboBoxCellEditor editor;
 	
 	/**
 	 * @param viewer
 	 */
-	public TypeComboBoxTableEditor(ColumnViewer viewer) {
+	public Ct2AttributeTypeTableEditor(TableViewer viewer) {
 		super(viewer);
 		Ct2AttributeType[] types = Ct2AttributeType.values();
 		String[] items = new String[types.length];
@@ -50,7 +50,7 @@ public class TypeComboBoxTableEditor extends EditingSupport {
 		for (int i = 0; i < types.length; i++) {
 			items[i] = labelProvider.getText(types[i]);
 		}
-		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), items, SWT.DROP_DOWN);
+		editor = new ComboBoxCellEditor(viewer.getTable(), items, SWT.DROP_DOWN);
 	}
 
 	@Override

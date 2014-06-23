@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ct2smart.ui;
+package org.wcs.smart.ct2smart.ui.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;

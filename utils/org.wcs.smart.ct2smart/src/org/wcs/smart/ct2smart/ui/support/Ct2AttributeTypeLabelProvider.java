@@ -1,4 +1,4 @@
-package org.wcs.smart.ct2smart.ui;
+package org.wcs.smart.ct2smart.ui.support;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;

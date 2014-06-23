@@ -19,36 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ct2smart.ui;
+package org.wcs.smart.ct2smart.ui.support;
 
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
 
 /**
  * @author elitvin
  * @since 3.0.0
  */
-public class SmartAttributeLabelProvider extends ColumnLabelProvider {
+public class SmartCategoryLabelProvider extends ColumnLabelProvider {
 	
 	private String langCode = "en"; //TODO: make customisable
-	private Map<String, AttributeType> key2Attribute;
+	private Map<String, CategoryType> key2Category;
 	
-
-	public SmartAttributeLabelProvider(Map<String, AttributeType> key2Attribute) {
+	public SmartCategoryLabelProvider(Map<String, CategoryType> key2Category) {
 		super();
-		this.key2Attribute = key2Attribute;
+		this.key2Category = key2Category;
 	}
 
 	@Override
 	public String getText(Object element) {
 		if (element instanceof Ct2Attribute) {
 			Ct2Attribute ct2a = (Ct2Attribute) element;
-			return Ct2AttributeTypeUtil.canMap(ct2a.getType()) ? getNameForKey(ct2a.getMapTo()) : "--none--"; 
+			return Ct2AttributeTypeUtil.canMap(ct2a.getType()) ? getNameForKey(ct2a.getCategoryKey()) : "--none--"; 
 
 		} else if (element instanceof String) {
 			return getNameForKey((String)element);
@@ -57,15 +56,16 @@ public class SmartAttributeLabelProvider extends ColumnLabelProvider {
 	}
 	
 	private String getNameForKey(String key) {
-		AttributeType a = key2Attribute.get(key);
-		if (a == null)
-			return "?"; //TODO: empty string?
-		for (NameType nameType : a.getNames()) {
+		CategoryType c = key2Category.get(key);
+		if (c == null)
+			return "--default--";
+		for (NameType nameType : c.getNames()) {
 			if (langCode.equals(nameType.getLanguageCode()))
 				return nameType.getValue();
 		}
-		if (!a.getNames().isEmpty())
-			return a.getNames().get(0).getValue();
+		if (!c.getNames().isEmpty())
+			return c.getNames().get(0).getValue();
 		return "? " + key; //should never happen
 	}
+	
 }

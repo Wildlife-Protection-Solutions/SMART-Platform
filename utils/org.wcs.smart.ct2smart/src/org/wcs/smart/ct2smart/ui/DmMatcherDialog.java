@@ -22,6 +22,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeTableEditor;
+import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
+import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.SmartCategoryTableEditor;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
@@ -126,22 +132,18 @@ public class DmMatcherDialog extends Composite {
 
 		col = createTableViewerColumn("Type", 80, 1);
 		col.setLabelProvider(new Ct2AttributeTypeLabelProvider());
-		col.setEditingSupport(new TypeComboBoxTableEditor(viewer));
+		col.setEditingSupport(new Ct2AttributeTypeTableEditor(viewer));
 
 		col = createTableViewerColumn("SMART Attribute", 200, 2);
-		SmartAttributeLabelProvider labelProvider = new SmartAttributeLabelProvider(session.getKey2Attribute());
-		col.setLabelProvider(labelProvider);
+		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(session.getKey2Attribute());
+		col.setLabelProvider(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
-		col.setEditingSupport(new SmartAttributeTableEditor(viewer, attributes, labelProvider));
+		col.setEditingSupport(new SmartAttributeTableEditor(viewer, attributes, attrLabelProvider));
 
 		col = createTableViewerColumn("SMART Category", 200, 2);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				Ct2Attribute a = (Ct2Attribute) element;
-				return a.getCategoryKey() != null ? a.getCategoryKey() : ""; //TODO: fix output
-			}
-		});
+		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(session.getKey2Category());
+		col.setLabelProvider(catLabelProvider);
+		col.setEditingSupport(new SmartCategoryTableEditor(viewer));
 	}
 
 	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
@@ -154,37 +156,4 @@ public class DmMatcherDialog extends Composite {
 		return viewerColumn;
 	}
 
-	
-	private class ComboBoxTableEditor extends EditingSupport {
-		private ComboBoxCellEditor editor;
-
-		public ComboBoxTableEditor(ColumnViewer viewer) {
-			super(viewer);
-			editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[]{}, SWT.DROP_DOWN);
-			editor.setItems(new String[]{"No", "Yes", "Both"});
-		}
-
-		@Override
-		protected boolean canEdit(Object arg0) {
-			return true;
-		}
-
-		@Override
-		protected CellEditor getCellEditor(Object arg0) {
-			return editor;
-		}
-
-		@Override
-		protected Object getValue(Object arg0) {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		protected void setValue(Object arg0, Object arg1) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-	}
 }
