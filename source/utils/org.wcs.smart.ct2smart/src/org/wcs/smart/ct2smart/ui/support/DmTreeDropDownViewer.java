@@ -23,10 +23,7 @@ package org.wcs.smart.ct2smart.ui.support;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -38,8 +35,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.dialogs.FilteredTree;
-import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 
 /**
@@ -54,8 +49,8 @@ public class DmTreeDropDownViewer {
 	private TreeViewer dmTreeViewer;
 	private Composite main;
 	private ISelectionListener onSelected;
-	private PatternFilter patternFilter;
-	private LocalFilteredTree fTree;
+	private DmTreePatternFilter patternFilter;
+	private DmFilteredTree fTree;
 	
 	private DmTreeContentProvider contentProvider;
 	private SmartCategoryLabelProvider labelProvider;
@@ -101,27 +96,9 @@ public class DmTreeDropDownViewer {
 	
 	private void createComposite(Composite parent) {
 		
-		patternFilter = new PatternFilter() {
-			protected boolean isChildMatch(Viewer viewer, Object element) {
-				Object parent = ((ITreeContentProvider) ((TreeViewer) viewer).getContentProvider()).getParent(element);
-				if (parent != null) {
-					return (isLeafMatch(viewer, parent) ? true : isChildMatch(
-							viewer, parent));
-				}
-				return false;
-			}
-
-			@Override
-			protected boolean isLeafMatch(Viewer viewer, Object element) {
-				String labelText = ((LabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
-				if (labelText == null) {
-					return false;
-				}
-				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
-			}
-
-		};
-		fTree = new LocalFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, false);
+		patternFilter = new DmTreePatternFilter();
+//		fTree = new LocalFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
+		fTree = new DmFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
 		
 		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
@@ -172,18 +149,8 @@ public class DmTreeDropDownViewer {
 	public void hide(){
 		main.setVisible(false);
 	}
-	
-	class LocalFilteredTree extends FilteredTree {
-		/**
-		 * @param parent
-		 */
-		protected LocalFilteredTree(Composite parent, int style, PatternFilter patternFilter, boolean newLook) {
-			super(parent, style, patternFilter, newLook);
-		}
 
-		public void clearText() {
-			super.clearText();
-		}
+	public SmartCategoryLabelProvider getLabelProvider() {
+		return labelProvider;
 	}
-	
 }

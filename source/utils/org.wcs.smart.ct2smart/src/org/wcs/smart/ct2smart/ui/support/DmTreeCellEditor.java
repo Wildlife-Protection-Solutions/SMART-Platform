@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 
 /**
  * @author elitvin
@@ -47,7 +48,7 @@ public class DmTreeCellEditor extends CellEditor {
 
 	private Composite main;
 	private DmTreeDropDownViewer treeEditor;
-	private String currentSelection = null;
+	private CategoryType currentSelection = null;
 
 	/**
 	 * @param parent
@@ -76,7 +77,6 @@ public class DmTreeCellEditor extends CellEditor {
 		Font smallerFont2 = new Font(Display.getCurrent(), fd);
 		lblitem.setFont(smallerFont2);
 		lblitem.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		lblitem.setText("test 1234567890 dada netnet");
 		
 		Button btnEdit = new Button(main, SWT.DOWN | SWT.ARROW);
 		fd = (btnEdit.getFont().getFontData()[0]);
@@ -88,21 +88,21 @@ public class DmTreeCellEditor extends CellEditor {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				treeEditor.positionAndShow(main, new ISelectionListener(){
+				treeEditor.positionAndShow(main, new ISelectionListener() {
 
 					@Override
 					public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 						if (selection != null && !selection.isEmpty()){
-							currentSelection = (String) ((IStructuredSelection) selection).getFirstElement();
+							currentSelection = (CategoryType) ((IStructuredSelection) selection).getFirstElement();
 						}
 						if (!lblitem.isDisposed()){
-							if (currentSelection != null){
-								lblitem.setText(currentSelection); //TODO: fix
+							if (currentSelection != null) {
+								lblitem.setText(treeEditor.getLabelProvider().getText(currentSelection));
 							}else{
 								lblitem.setText(""); //$NON-NLS-1$
 							}
 						}
-//						getTargetPanel().redraw();
+						
 //						AttributeTreeDropItem.this.queryChanged();
 					}});
 				
@@ -110,18 +110,17 @@ public class DmTreeCellEditor extends CellEditor {
 			}
 		});
 		
-//		if (currentSelection != null){
-//			lblitem.setText( formatStringForLabel(currentSelection.getName()));
-//		}else{
-//			lblitem.setText(""); //$NON-NLS-1$
-//		}
+		if (currentSelection != null) {
+			lblitem.setText(treeEditor.getLabelProvider().getText(currentSelection));
+		} else {
+			lblitem.setText(""); //$NON-NLS-1$
+		}
 		return main;
 	}
 
 	@Override
 	protected Object doGetValue() {
-		// TODO Auto-generated method stub
-		return "privet";
+		return currentSelection;
 	}
 
 	@Override
@@ -130,10 +129,12 @@ public class DmTreeCellEditor extends CellEditor {
 	}
 
 	@Override
-	protected void doSetValue(Object arg0) { //asd
-		return;
-		// TODO Auto-generated method stub
-
+	protected void doSetValue(Object arg0) {
+		if (arg0 instanceof CategoryType) {
+			currentSelection = (CategoryType) arg0;
+		} else {
+			currentSelection = null;
+		}
 	}
 
 }
