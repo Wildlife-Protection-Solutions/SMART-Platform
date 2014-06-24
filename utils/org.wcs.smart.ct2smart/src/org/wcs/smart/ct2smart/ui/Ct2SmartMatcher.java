@@ -30,6 +30,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -53,7 +54,7 @@ public class Ct2SmartMatcher {
 		//this is required for filtered trees to work
 		PrefUtil.setUICallback(new FakeCallback());
 		PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);		
-		
+
 		MatchSession session = new MatchSession();
 		session.setCt2Smart(FileUtil.loadCt2Smart(new File("match_super_x.xml")));
 		session.setDataModel(loadDataModel(new File("d:\\dev\\data\\mist\\datamodel.xml")));

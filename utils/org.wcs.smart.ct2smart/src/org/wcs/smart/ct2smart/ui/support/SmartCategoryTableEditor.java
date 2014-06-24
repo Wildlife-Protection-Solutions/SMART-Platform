@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Table;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 
 /**
  * @author elitvin
@@ -36,9 +37,13 @@ import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 public class SmartCategoryTableEditor extends EditingSupport {
 	
 	private CellEditor editor;
+	private DataModelLookup lookup;
+	private SmartCategoryLabelProvider labelProvider;
 
 	public SmartCategoryTableEditor(TableViewer viewer, DataModelLookup lookup, SmartCategoryLabelProvider labelProvider) {
 		super(viewer);
+		this.lookup = lookup;
+		this.labelProvider = labelProvider;
 		Table table = viewer.getTable();
 		DmTreeContentProvider contentProvider = new DmTreeContentProvider(true, lookup);
 		DmTreeDropDownViewer treeEditor = new DmTreeDropDownViewer(table.getShell(), contentProvider, labelProvider);
@@ -62,14 +67,21 @@ public class SmartCategoryTableEditor extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object arg0) {
-		// TODO Auto-generated method stub
-		return "asd";
+		if (arg0 instanceof Ct2Attribute) {
+			Ct2Attribute a = (Ct2Attribute) arg0;
+			return lookup.getCategory(a.getCategoryKey());
+		}
+		return null;
 	}
 
 	@Override
 	protected void setValue(Object arg0, Object arg1) {
-		// TODO Auto-generated method stub
-		
+		if (arg0 instanceof Ct2Attribute) {
+			Ct2Attribute a = (Ct2Attribute) arg0;
+			CategoryType c = (CategoryType) arg1;
+			a.setCategoryKey(lookup.getFullKey(c));
+		}
+		getViewer().refresh();
 	}
 
 }

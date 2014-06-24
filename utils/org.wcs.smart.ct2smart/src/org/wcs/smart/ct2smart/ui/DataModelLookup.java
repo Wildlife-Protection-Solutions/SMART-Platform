@@ -36,6 +36,8 @@ public class DataModelLookup {
 	}
 	
 	public CategoryType getCategory(String fullKey) {
+		if (fullKey == null)
+			return null;
 		return key2Category.get(fullKey);
 	}
 	
@@ -44,6 +46,8 @@ public class DataModelLookup {
 	}
 
 	public String getFullKey(CategoryType categoty) {
+		if (categoty == null)
+			return null;
 		return category2Key.get(categoty);
 	}
 	
