@@ -3,11 +3,7 @@ package org.wcs.smart.ct2smart.ui;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
@@ -23,9 +19,9 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeTableEditor;
-import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
 import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.SmartCategoryTableEditor;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
@@ -38,10 +34,13 @@ public class DmMatcherDialog extends Composite {
 	private TableViewer viewer;
 	private Tree dmTree;
 	private Combo langSelector;
+	private DataModelLookup dmLookup;
+	
 
 	public DmMatcherDialog(Composite c, MatchSession session) {
 		super(c, SWT.NONE);
 		this.session = session;
+		dmLookup = new DataModelLookup(session.getDataModel());
 
 		GridLayout layout = new GridLayout(1, false);
 		this.setLayout(layout);
@@ -135,15 +134,15 @@ public class DmMatcherDialog extends Composite {
 		col.setEditingSupport(new Ct2AttributeTypeTableEditor(viewer));
 
 		col = createTableViewerColumn("SMART Attribute", 200, 2);
-		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(session.getKey2Attribute());
+		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(dmLookup);
 		col.setLabelProvider(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
 		col.setEditingSupport(new SmartAttributeTableEditor(viewer, attributes, attrLabelProvider));
 
 		col = createTableViewerColumn("SMART Category", 200, 2);
-		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(session.getKey2Category());
+		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(dmLookup);
 		col.setLabelProvider(catLabelProvider);
-		col.setEditingSupport(new SmartCategoryTableEditor(viewer));
+		col.setEditingSupport(new SmartCategoryTableEditor(viewer, dmLookup, catLabelProvider));
 	}
 
 	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {

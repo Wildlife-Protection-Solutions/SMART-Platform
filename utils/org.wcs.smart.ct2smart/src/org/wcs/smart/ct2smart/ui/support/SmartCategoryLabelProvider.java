@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.ct2smart.ui.support;
 
-import java.util.Map;
-
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
@@ -36,11 +35,11 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
 public class SmartCategoryLabelProvider extends ColumnLabelProvider {
 	
 	private String langCode = "en"; //TODO: make customisable
-	private Map<String, CategoryType> key2Category;
+	private DataModelLookup lookup;
 	
-	public SmartCategoryLabelProvider(Map<String, CategoryType> key2Category) {
+	public SmartCategoryLabelProvider(DataModelLookup lookup) {
 		super();
-		this.key2Category = key2Category;
+		this.lookup = lookup;
 	}
 
 	@Override
@@ -56,7 +55,7 @@ public class SmartCategoryLabelProvider extends ColumnLabelProvider {
 	}
 	
 	private String getNameForKey(String key) {
-		CategoryType c = key2Category.get(key);
+		CategoryType c = lookup.getCategory(key);
 		if (c == null)
 			return "--default--";
 		for (NameType nameType : c.getNames()) {
