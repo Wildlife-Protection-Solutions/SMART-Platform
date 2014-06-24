@@ -29,12 +29,17 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.util.PrefUtil;
+import org.eclipse.ui.internal.util.PrefUtil.ICallback;
 import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 
@@ -45,6 +50,10 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 public class Ct2SmartMatcher {
 
 	public static void main(String[] args) throws Exception {
+		//this is required for filtered trees to work
+		PrefUtil.setUICallback(new FakeCallback());
+		PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);		
+		
 		MatchSession session = new MatchSession();
 		session.setCt2Smart(FileUtil.loadCt2Smart(new File("match_super_x.xml")));
 		session.setDataModel(loadDataModel(new File("d:\\dev\\data\\mist\\datamodel.xml")));

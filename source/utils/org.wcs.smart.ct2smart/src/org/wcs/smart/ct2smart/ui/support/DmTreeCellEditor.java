@@ -22,6 +22,8 @@
 package org.wcs.smart.ct2smart.ui.support;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
 
 /**
  * @author elitvin
@@ -42,11 +46,15 @@ import org.eclipse.swt.widgets.Label;
 public class DmTreeCellEditor extends CellEditor {
 
 	private Composite main;
+	private DmTreeDropDownViewer treeEditor;
+	private String currentSelection = null;
+
 	/**
 	 * @param parent
 	 */
-	public DmTreeCellEditor(Composite parent) {
+	public DmTreeCellEditor(Composite parent, DmTreeDropDownViewer treeViewer) {
 		super(parent);
+		treeEditor = treeViewer;
 	}
 
 	@Override
@@ -61,7 +69,7 @@ public class DmTreeCellEditor extends CellEditor {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		main.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
 		
-		Label lblitem = new Label(main, SWT.NONE);
+		final Label lblitem = new Label(main, SWT.NONE);
 		lblitem.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
 		FontData fd = (lblitem.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
@@ -80,34 +88,23 @@ public class DmTreeCellEditor extends CellEditor {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				try {
-//					loadItemsJobs.join();
-//				} catch (InterruptedException ex) {
-//					QueryPlugIn.log("error waiting for load items job", ex); //$NON-NLS-1$
-//				}
-//				 TreeDropDownViewer treeviewer = getTreeEditor();
-//				 if (treeviewer == null){
-//					 return;
-//				 }
-//				treeviewer.setAttribute(roots);
-//				treeviewer.positionAndShow(AttributeTreeDropItem.this.getWidget(), new ISelectionListener(){
-//
-//					@Override
-//					public void selectionChanged(IWorkbenchPart part,
-//							ISelection selection) {
-//						if (selection != null && !selection.isEmpty()){
-//							currentSelection = (AttributeTreeNode) ((IStructuredSelection) selection).getFirstElement();
-//						}
-//						if (!lblitem.isDisposed()){
-//							if (currentSelection != null){
-//								lblitem.setText( formatStringForLabel(currentSelection.getName()));
-//							}else{
-//								lblitem.setText(""); //$NON-NLS-1$
-//							}
-//						}
+				treeEditor.positionAndShow(main, new ISelectionListener(){
+
+					@Override
+					public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+						if (selection != null && !selection.isEmpty()){
+							currentSelection = (String) ((IStructuredSelection) selection).getFirstElement();
+						}
+						if (!lblitem.isDisposed()){
+							if (currentSelection != null){
+								lblitem.setText(currentSelection); //TODO: fix
+							}else{
+								lblitem.setText(""); //$NON-NLS-1$
+							}
+						}
 //						getTargetPanel().redraw();
 //						AttributeTreeDropItem.this.queryChanged();
-//					}});
+					}});
 				
 				
 			}
@@ -133,7 +130,7 @@ public class DmTreeCellEditor extends CellEditor {
 	}
 
 	@Override
-	protected void doSetValue(Object arg0) {
+	protected void doSetValue(Object arg0) { //asd
 		return;
 		// TODO Auto-generated method stub
 

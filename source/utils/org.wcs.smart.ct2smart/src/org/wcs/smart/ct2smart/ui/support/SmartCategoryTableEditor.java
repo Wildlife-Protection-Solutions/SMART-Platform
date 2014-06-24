@@ -22,11 +22,11 @@
 package org.wcs.smart.ct2smart.ui.support;
 
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.swt.widgets.Table;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 
 /**
@@ -37,9 +37,13 @@ public class SmartCategoryTableEditor extends EditingSupport {
 	
 	private CellEditor editor;
 
-	public SmartCategoryTableEditor(TableViewer viewer) {
+	public SmartCategoryTableEditor(TableViewer viewer, DataModelLookup lookup, SmartCategoryLabelProvider labelProvider) {
 		super(viewer);
-		editor = new DmTreeCellEditor(viewer.getTable());
+		Table table = viewer.getTable();
+		DmTreeContentProvider contentProvider = new DmTreeContentProvider(true, lookup);
+		DmTreeDropDownViewer treeEditor = new DmTreeDropDownViewer(table.getShell(), contentProvider, labelProvider);
+		treeEditor.setInput(lookup.getDataModel());
+		editor = new DmTreeCellEditor(table, treeEditor);
 	}
 
 	@Override
