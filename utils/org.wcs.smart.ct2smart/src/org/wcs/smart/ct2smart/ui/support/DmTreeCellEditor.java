@@ -46,7 +46,8 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
  */
 public class DmTreeCellEditor extends CellEditor {
 
-	private Composite main;
+	private Button btnEdit;
+	private Label lblitem;
 	private DmTreeDropDownViewer treeEditor;
 	private CategoryType currentSelection = null;
 
@@ -60,7 +61,7 @@ public class DmTreeCellEditor extends CellEditor {
 
 	@Override
 	protected Control createControl(Composite parent) {
-		main = new Composite(parent, SWT.BORDER);
+		final Composite main = new Composite(parent, SWT.BORDER);
 		GridLayout gl = new GridLayout(2, false);
 		gl.horizontalSpacing = 5;
 		gl.verticalSpacing = 5;
@@ -70,7 +71,7 @@ public class DmTreeCellEditor extends CellEditor {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		main.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
 		
-		final Label lblitem = new Label(main, SWT.NONE);
+		lblitem = new Label(main, SWT.NONE);
 		lblitem.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
 		FontData fd = (lblitem.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
@@ -78,7 +79,7 @@ public class DmTreeCellEditor extends CellEditor {
 		lblitem.setFont(smallerFont2);
 		lblitem.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Button btnEdit = new Button(main, SWT.DOWN | SWT.ARROW);
+		btnEdit = new Button(main, SWT.DOWN | SWT.ARROW);
 		fd = (btnEdit.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 2);
 		Font smallerFont = new Font(Display.getCurrent(), fd);
@@ -110,11 +111,6 @@ public class DmTreeCellEditor extends CellEditor {
 			}
 		});
 		
-		if (currentSelection != null) {
-			lblitem.setText(treeEditor.getLabelProvider().getText(currentSelection));
-		} else {
-			lblitem.setText(""); //$NON-NLS-1$
-		}
 		return main;
 	}
 
@@ -125,15 +121,17 @@ public class DmTreeCellEditor extends CellEditor {
 
 	@Override
 	protected void doSetFocus() {
-		main.setFocus();
+		btnEdit.setFocus();
 	}
 
 	@Override
 	protected void doSetValue(Object arg0) {
 		if (arg0 instanceof CategoryType) {
 			currentSelection = (CategoryType) arg0;
+			lblitem.setText(treeEditor.getLabelProvider().getText(currentSelection));
 		} else {
 			currentSelection = null;
+			lblitem.setText(""); //$NON-NLS-1$
 		}
 	}
 
