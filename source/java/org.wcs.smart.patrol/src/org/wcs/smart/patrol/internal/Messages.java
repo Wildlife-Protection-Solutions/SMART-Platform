@@ -125,6 +125,7 @@ public class Messages extends NLS {
 	public static String GPSDataImport_WaypointProgress_ReadingGpx;
 	public static String GPSDataImport_WaypointsImported;
 	public static String GPSDataImport_WaypointsImportedCurrentDay;
+	public static String GPSDataImport_WaypointsImportedLegs;
 	public static String GpsImportEngine_MultiTrackImport;
 	public static String GpsImportEngine_SingleImport;
 	public static String GpxImportEngine_ImportMultiTrack;

@@ -178,7 +178,12 @@ public class GPSDataImport {
 				//nothing imported; not date matched
 				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
 			}else{
-				message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{cnt, modified.size()});
+				if (patrol.getLegs().size() == 1){
+					//only one leg; so this is the number of dates
+					message = MessageFormat.format(Messages.GPSDataImport_WaypointsImported, new Object[]{cnt, modified.size()});
+				}else{
+					message = MessageFormat.format(Messages.GPSDataImport_WaypointsImportedLegs, new Object[]{cnt, modified.size()});
+				}
 			}	
 		}else{
 			modified.add(currentLeg);
