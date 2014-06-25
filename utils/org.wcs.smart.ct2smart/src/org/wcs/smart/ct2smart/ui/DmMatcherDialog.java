@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -35,7 +36,7 @@ public class DmMatcherDialog extends Composite {
 	private Tree dmTree;
 	private Combo langSelector;
 	private DataModelLookup dmLookup;
-	
+	private MatchAttributeComposite infoComposite;
 
 	public DmMatcherDialog(Composite c, MatchSession session) {
 		super(c, SWT.NONE);
@@ -109,13 +110,15 @@ public class DmMatcherDialog extends Composite {
 			}
 		});
 
-		MatchAttributeComposite attrCmp = new MatchAttributeComposite(left);
+		infoComposite = new MatchAttributeComposite(left, dmLookup);
 
 	}
 
 	protected void viewerSelectionChanged() {
-		// TODO Auto-generated method stub
-		
+		Object obj = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		if (obj instanceof Ct2Attribute) {
+			infoComposite.setInput((Ct2Attribute)obj);
+		}
 	}
 
 	private void createColumns() {
