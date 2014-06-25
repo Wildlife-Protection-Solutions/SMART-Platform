@@ -23,14 +23,15 @@ package org.wcs.smart.ct2smart.ui;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
+import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 
 /**
  * @author elitvin
@@ -42,10 +43,12 @@ public class MatchAttributeComposite extends Composite {
 	private ComboViewer typeComboViewer;
 	private ComboViewer mapToComboViewer;
 	
-	public MatchAttributeComposite(Composite parent) {
+	private ExtraAttributeComposite extraAttrCmp;
+	
+	public MatchAttributeComposite(Composite parent, DataModelLookup lookup) {
 		super(parent, SWT.NONE);
 
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(1, false);
 		this.setLayout(layout);
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -56,7 +59,7 @@ public class MatchAttributeComposite extends Composite {
 
 		typeComboViewer =  new ComboViewer(this, SWT.READ_ONLY);
 		typeComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		typeComboViewer.setLabelProvider(new TypeLabelProvider());
+		typeComboViewer.setLabelProvider(new Ct2AttributeTypeLabelProvider());
 		typeComboViewer.setInput(Ct2AttributeType.values());
 
 		mapToLabel = new Label(this, SWT.NONE);
@@ -64,42 +67,14 @@ public class MatchAttributeComposite extends Composite {
 		
 		mapToComboViewer =  new ComboViewer(this, SWT.READ_ONLY);
 		mapToComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		mapToComboViewer.setLabelProvider(new SmartAttributeLabelProvider());
-//		mapToComboViewer.setInput(Ct2AttributeType.values());
+		mapToComboViewer.setLabelProvider(new SmartAttributeLabelProvider(lookup));
+		
+		extraAttrCmp = new ExtraAttributeComposite(this, lookup);
 		
 	}
 
-
-	private class SmartAttributeLabelProvider extends LabelProvider {
-		@Override
-		public String getText(Object element) {
-			if (element instanceof Attribute) {
-				return ((Attribute)element).getName();
-			}
-			return super.getText(element);
-		}
-	}
-	
-	private class TypeLabelProvider extends LabelProvider {
-		@Override
-		public String getText(Object element) {
-			if (element instanceof Ct2AttributeType) {
-				switch ((Ct2AttributeType)element) {
-					case IGNORE: return "Ignore";
-					case TEXT: return "Text";
-					case NUMERIC: return "Numeric";
-					case BOOL: return "Boolean";
-					case REF: return "List or Tree";
-					case CATEGORY: return "Category";
-					case META_DATE: return "Date";
-					case META_TIME: return "Time";
-					case META_LAT: return "Latitude";
-					case META_LON: return "Longitude";
-					case META_MEMBERS: return "Members";
-					case META_MANDATE: return "Mandate";					
-				}
-			}
-			return super.getText(element);
-		}
+	public void setInput(Ct2Attribute attribute) {
+		extraAttrCmp.setInput(attribute);
+		
 	}
 }
