@@ -155,7 +155,9 @@ public class PatrolDayEditor extends EditorPart {
 					if (day.getWaypoints() != null){
 						for (PatrolWaypoint wp : day.getWaypoints()) {
 							session.update(wp.getWaypoint());
-							wp.getWaypoint().getObservations().size();
+							if (wp.getWaypoint().getObservations() != null){
+								wp.getWaypoint().getObservations().size();
+							}
 						}
 					}
 				}

@@ -221,7 +221,8 @@ public class QueryDefPanel {
 	 */
 	public void setQueryDefinitionPanel(String panelId){
 		currentPanel = panelId;
-		ISourceProviderService service = (ISourceProviderService)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getService(ISourceProviderService.class);
+		
+		ISourceProviderService service = (ISourceProviderService)parentView.getSite().getService(ISourceProviderService.class);
 		final QuerySourceProvider provider = (QuerySourceProvider) service.getSourceProvider(QuerySourceProvider.DEFINITION_PANEL_ID);
 		provider.setQueryDefinitionPanelId(panelId, queryType);
 	}
