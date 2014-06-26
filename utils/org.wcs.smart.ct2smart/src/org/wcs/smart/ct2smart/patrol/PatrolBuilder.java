@@ -222,7 +222,7 @@ public class PatrolBuilder {
 					WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
 					obs.getAttributes().add(obsAttr);
 					obsAttr.setAttributeKey(ea.getAttributeKey());
-					obsAttr.setItemKey(ea.getValueKey());
+					obsAttr.setItemKey(ea.getValueKey()); //TODO: numeric, text, boolean
 				}
 			}
 			

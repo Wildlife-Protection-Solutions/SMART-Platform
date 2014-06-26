@@ -24,7 +24,6 @@ package org.wcs.smart.ct2smart.ui;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -41,7 +40,10 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
+import org.wcs.smart.ct2smart.ui.support.ExtraAttributeEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeValueEditingSupport;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeValueLabelProvider;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 
 /**
@@ -147,13 +149,9 @@ public class ExtraAttributeComposite extends Composite {
 
 		
 		TableViewerColumn vCol = createTableViewerColumn("Value", 200, 0);
-		vCol.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				ExtraAttribute a = (ExtraAttribute) element;
-				return a.getValueKey();
-			}
-		});
+		SmartAttributeValueLabelProvider valLabelProvider = new SmartAttributeValueLabelProvider(lookup);
+		vCol.setLabelProvider(valLabelProvider);
+		vCol.setEditingSupport(new SmartAttributeValueEditingSupport(viewer, lookup, valLabelProvider));
 		
 	}
 

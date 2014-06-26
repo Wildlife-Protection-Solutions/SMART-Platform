@@ -1,4 +1,4 @@
-package org.wcs.smart.ct2smart.ui;
+package org.wcs.smart.ct2smart.ui.support;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,6 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
-import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 
 public class ExtraAttributeEditingSupport extends EditingSupport {
