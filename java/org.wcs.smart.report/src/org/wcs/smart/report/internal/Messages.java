@@ -190,13 +190,13 @@ public class Messages extends NLS {
 	public static String ReportView_PreviewReportJobName;
 	public static String ReportView_Progress_RunningReport;
 	public static String ReportView_ReportNotSelected;
-	public static String ReportView_RunReportError;
+	public static String ReportView_RunReportError1;
 	public static String ReportView_UTF8NotSupported;
 	public static String RootReportFolder_CaRootReportFolderName;
 	public static String RootReportFolder_UserRootReportFolderName;
 	public static String RunReportHandler_ParametersError;
 	public static String RunReportJob_Error_NoReportFile;
-	public static String RunReportJob_Error_RunningReport;
+	public static String RunReportJob_Error_RunningReport1;
 	public static String RunReportJob_JobName;
 	public static String SmartDateParameterComponent_DateFilterNotSupported;
 	public static String SmartDateParameterComponent_DateRangeLabel;

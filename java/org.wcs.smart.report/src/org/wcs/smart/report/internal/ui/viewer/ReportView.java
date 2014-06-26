@@ -24,6 +24,7 @@ package org.wcs.smart.report.internal.ui.viewer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -64,9 +65,6 @@ import org.wcs.smart.report.model.Report;
  * @since 1.0.0
  */
 public class ReportView extends ViewPart implements IReportListener{
-
-	private static final String REPORT_ERROR_MSG = Messages.ReportView_RunReportError;
-
 
 	/**
 	 * Report view id
@@ -115,7 +113,7 @@ public class ReportView extends ViewPart implements IReportListener{
 					bos.close();
 				}
 		} catch (Exception e) {
-			ReportPlugIn.displayLog(REPORT_ERROR_MSG + e.getLocalizedMessage(), e);
+			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
 		}			
 		return Status.OK_STATUS;
 	}};
@@ -177,7 +175,8 @@ public class ReportView extends ViewPart implements IReportListener{
 		try{
 			previewReport(refreshParameters);
 		}catch (Exception ex){
-			ReportPlugIn.log(REPORT_ERROR_MSG + ex.getLocalizedMessage(), ex);
+			ReportPlugIn.log(
+					MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + ex.getLocalizedMessage(), ex);
 		}
 	}
 		
