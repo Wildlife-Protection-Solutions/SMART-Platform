@@ -34,16 +34,14 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
  * @author elitvin
  * @since 3.0.0
  */
-public class SmartCategoryTableEditor extends EditingSupport {
+public class SmartCategoryEditingSupport extends EditingSupport {
 	
 	private CellEditor editor;
 	private DataModelLookup lookup;
-	private SmartCategoryLabelProvider labelProvider;
 
-	public SmartCategoryTableEditor(TableViewer viewer, DataModelLookup lookup, SmartCategoryLabelProvider labelProvider) {
+	public SmartCategoryEditingSupport(TableViewer viewer, DataModelLookup lookup, SmartCategoryLabelProvider labelProvider) {
 		super(viewer);
 		this.lookup = lookup;
-		this.labelProvider = labelProvider;
 		Table table = viewer.getTable();
 		DmTreeContentProvider contentProvider = new DmTreeContentProvider(true, lookup);
 		DmTreeDropDownViewer treeEditor = new DmTreeDropDownViewer(table.getShell(), contentProvider, labelProvider);

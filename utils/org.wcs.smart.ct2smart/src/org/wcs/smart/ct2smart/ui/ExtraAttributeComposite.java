@@ -143,7 +143,7 @@ public class ExtraAttributeComposite extends Composite {
 		};
 		aCol.setLabelProvider(attrLabelProvider);
 		List<AttributeType> attributes = lookup.getDataModel().getAttributes().getAttributes();
-		aCol.setEditingSupport(new ExtraAttributeTableEditor(viewer, attributes, attrLabelProvider));
+		aCol.setEditingSupport(new ExtraAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
 		
 		TableViewerColumn vCol = createTableViewerColumn("Value", 200, 0);

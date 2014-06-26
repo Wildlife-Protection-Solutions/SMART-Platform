@@ -41,7 +41,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
  * @author elitvin
  * @since 3.0.0
  */
-public class SmartAttributeTableEditor extends EditingSupport {
+public class SmartAttributeEditingSupport extends EditingSupport {
 
 	private ComboBoxCellEditor editor;
 	private Map<Ct2AttributeType, String[]> itemsMap;
@@ -50,7 +50,7 @@ public class SmartAttributeTableEditor extends EditingSupport {
 	/**
 	 * @param viewer
 	 */
-	public SmartAttributeTableEditor(ColumnViewer viewer, List<AttributeType> attributes, SmartAttributeLabelProvider labelProvider) {
+	public SmartAttributeEditingSupport(ColumnViewer viewer, List<AttributeType> attributes, SmartAttributeLabelProvider labelProvider) {
 		super(viewer);
 		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN);
 		this.labelProvider = labelProvider;
