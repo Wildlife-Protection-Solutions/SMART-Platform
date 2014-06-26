@@ -53,7 +53,7 @@ public class RunReportJob extends Job {
 	private File reportFile = null;
 	private File outputFile = null;
 	private EmitterInfo info = null;
-	
+	private Report report;
 	private HashMap<String, Object> reportParameters = null; 
 	
 	/**
@@ -67,7 +67,8 @@ public class RunReportJob extends Job {
 	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams){
 		super(MessageFormat.format(Messages.RunReportJob_JobName, new Object[]{report.getName()}));
 		
-		reportFile = report.getFullReportFilename();
+		this.report = report;
+		this.reportFile = report.getFullReportFilename();
 		this.outputFile = file;
 		this.info = info;
 		this.reportParameters = reportParams;
@@ -108,7 +109,8 @@ public class RunReportJob extends Job {
 
 		} catch (Exception e) {
 			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$
-			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.RunReportJob_Error_RunningReport + e.getLocalizedMessage() );
+			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID,
+					MessageFormat.format(Messages.RunReportJob_Error_RunningReport1, new Object[]{report.getName()}) + e.getLocalizedMessage() );
 		}
 		return Status.OK_STATUS;
 	}
