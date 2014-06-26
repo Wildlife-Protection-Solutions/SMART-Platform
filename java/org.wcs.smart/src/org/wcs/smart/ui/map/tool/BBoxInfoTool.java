@@ -142,7 +142,10 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 				if (!page.isPartVisible(infoView)) page.bringToTop(infoView);
                 
                 // we got here and info was null? Don't want to fail on first attempt
-                infoView=(InfoView2) ApplicationGIS.getView(false, InfoView2.VIEW_ID);                    
+                infoView=(InfoView2) ApplicationGIS.getView(false, InfoView2.VIEW_ID);
+                //this ensures the selection is passed along correctly
+                infoView.setFocus();
+                //run request
 				infoView.search( request );
             }
         }); 

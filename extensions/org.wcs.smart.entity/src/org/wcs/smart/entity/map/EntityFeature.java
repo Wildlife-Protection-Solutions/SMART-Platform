@@ -40,4 +40,10 @@ public class EntityFeature extends DecoratingFeature{
 	public EntityFeature(SimpleFeature wrapper){
 		super(wrapper);
 	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (this == other) return true;
+		return super.equals(other);
+	}
 }
