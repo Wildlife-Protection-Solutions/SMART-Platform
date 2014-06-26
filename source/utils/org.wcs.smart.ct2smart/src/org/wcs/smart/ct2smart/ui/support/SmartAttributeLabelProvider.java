@@ -49,6 +49,9 @@ public class SmartAttributeLabelProvider extends ColumnLabelProvider {
 			Ct2Attribute ct2a = (Ct2Attribute) element;
 			return Ct2AttributeTypeUtil.canMap(ct2a.getType()) ? getNameForKey(ct2a.getMapTo()) : "--none--"; 
 
+		} else if (element instanceof AttributeType) {
+			return getName((AttributeType)element);
+
 		} else if (element instanceof String) {
 			return getNameForKey((String)element);
 		}
@@ -56,7 +59,10 @@ public class SmartAttributeLabelProvider extends ColumnLabelProvider {
 	}
 	
 	private String getNameForKey(String key) {
-		AttributeType a = lookup.getAttribute(key);
+		return getName(lookup.getAttribute(key));
+	}
+
+	private String getName(AttributeType a) {
 		if (a == null)
 			return "?"; //TODO: empty string?
 		for (NameType nameType : a.getNames()) {
@@ -65,6 +71,6 @@ public class SmartAttributeLabelProvider extends ColumnLabelProvider {
 		}
 		if (!a.getNames().isEmpty())
 			return a.getNames().get(0).getValue();
-		return "? " + key; //should never happen
+		return "???"; //should never happen
 	}
 }
