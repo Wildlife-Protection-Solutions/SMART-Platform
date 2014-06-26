@@ -55,8 +55,10 @@ public class SmartAttributeValueLabelProvider extends ColumnLabelProvider {
 		return super.getText(element);
 	}
 	
-	private String getNameForKey(String attrKey, String valueKey) {
+	protected String getNameForKey(String attrKey, String valueKey) {
 		AttributeType a = lookup.getAttribute(attrKey);
+		if (a == null)
+			return ""; //$NON-NLS-1$
 		String type = a.getType();
 		if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
 			for (ListNode node : a.getValues()) {

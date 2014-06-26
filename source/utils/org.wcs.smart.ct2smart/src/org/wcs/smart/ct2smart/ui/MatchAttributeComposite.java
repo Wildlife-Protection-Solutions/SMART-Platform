@@ -44,6 +44,7 @@ public class MatchAttributeComposite extends Composite {
 	private ComboViewer mapToComboViewer;
 	
 	private ExtraAttributeComposite extraAttrCmp;
+	private ValueMapComposite valueMapCmp;
 	
 	public MatchAttributeComposite(Composite parent, DataModelLookup lookup) {
 		super(parent, SWT.NONE);
@@ -70,11 +71,13 @@ public class MatchAttributeComposite extends Composite {
 		mapToComboViewer.setLabelProvider(new SmartAttributeLabelProvider(lookup));
 		
 		extraAttrCmp = new ExtraAttributeComposite(this, lookup);
+		valueMapCmp = new ValueMapComposite(this, lookup);
 		
 	}
 
 	public void setInput(Ct2Attribute attribute) {
 		extraAttrCmp.setInput(attribute);
+		valueMapCmp.setInput(attribute);
 		
 	}
 }
