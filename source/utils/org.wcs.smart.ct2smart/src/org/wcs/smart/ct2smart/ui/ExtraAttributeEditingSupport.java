@@ -13,13 +13,13 @@ import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 
-public class ExtraAttributeTableEditor extends EditingSupport {
+public class ExtraAttributeEditingSupport extends EditingSupport {
 
 	private ComboBoxCellEditor editor;
 	List<AttributeType> attributes;
 	private SmartAttributeLabelProvider labelProvider;
 
-	public ExtraAttributeTableEditor(ColumnViewer viewer, List<AttributeType> attributes, SmartAttributeLabelProvider labelProvider) {
+	public ExtraAttributeEditingSupport(ColumnViewer viewer, List<AttributeType> attributes, SmartAttributeLabelProvider labelProvider) {
 		super(viewer);
 		this.attributes = attributes;
 		this.labelProvider = labelProvider;

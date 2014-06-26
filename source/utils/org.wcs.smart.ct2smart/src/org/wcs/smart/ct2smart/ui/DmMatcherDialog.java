@@ -22,9 +22,9 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
-import org.wcs.smart.ct2smart.ui.support.SmartAttributeTableEditor;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
-import org.wcs.smart.ct2smart.ui.support.SmartCategoryTableEditor;
+import org.wcs.smart.ct2smart.ui.support.SmartCategoryEditingSupport;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
@@ -140,12 +140,12 @@ public class DmMatcherDialog extends Composite {
 		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(dmLookup);
 		col.setLabelProvider(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
-		col.setEditingSupport(new SmartAttributeTableEditor(viewer, attributes, attrLabelProvider));
+		col.setEditingSupport(new SmartAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
 		col = createTableViewerColumn("SMART Category", 200, 2);
 		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(dmLookup);
 		col.setLabelProvider(catLabelProvider);
-		col.setEditingSupport(new SmartCategoryTableEditor(viewer, dmLookup, catLabelProvider));
+		col.setEditingSupport(new SmartCategoryEditingSupport(viewer, dmLookup, catLabelProvider));
 	}
 
 	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
