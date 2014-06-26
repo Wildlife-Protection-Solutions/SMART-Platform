@@ -69,12 +69,13 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 	protected CellEditor getCellEditor(Object arg0) {
 		if (arg0 instanceof ExtraAttribute) {
 			ExtraAttribute a = (ExtraAttribute) arg0;
-			return getValueEditor(lookup.getAttribute(a.getAttributeKey()));
+			return getAttributeEditor(a.getAttributeKey());
 		}
 		return null;
 	}
 
-	private CellEditor getValueEditor(AttributeType  a) {
+	protected CellEditor getAttributeEditor(String attributeKey) {
+		AttributeType a = lookup.getAttribute(attributeKey);
 		if (a == null)
 			return null;
 		
@@ -115,7 +116,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		return 0;
 	}
 
-	private Object getEditorValue(String attributeKey, String valueKey) {
+	protected Object getEditorValue(String attributeKey, String valueKey) {
 		AttributeType a = lookup.getAttribute(attributeKey);
 		String type = a.getType();
 		if ("LIST".equals(type)) { //$NON-NLS-1$
@@ -153,7 +154,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		getViewer().refresh();
 	}
 
-	private String getModelValue(String attributeKey, Object editorValue) {
+	protected String getModelValue(String attributeKey, Object editorValue) {
 		AttributeType a = lookup.getAttribute(attributeKey);
 		String type = a.getType();
 		if ("LIST".equals(type)) { //$NON-NLS-1$
