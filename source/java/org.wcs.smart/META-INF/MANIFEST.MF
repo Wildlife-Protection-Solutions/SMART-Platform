@@ -23,6 +23,8 @@ Bundle-ClassPath: .,
  lib/gson-2.2.4.jar
 Export-Package: au.com.bytecode.opencsv,
  au.com.bytecode.opencsv.bean,
+ com.google.gson,
+ com.google.gson.reflect,
  org.wcs.smart,
  org.wcs.smart.ca,
  org.wcs.smart.ca.advisors,
