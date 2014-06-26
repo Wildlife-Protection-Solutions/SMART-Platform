@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -40,6 +42,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 
 /**
  * @author elitvin
@@ -128,14 +131,21 @@ public class ExtraAttributeComposite extends Composite {
 	
 	private void createColumns() {
 		TableViewerColumn aCol = createTableViewerColumn("Attribute", 200, 0);
-		aCol.setLabelProvider(new SmartAttributeLabelProvider(lookup) {
+		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(lookup) {
 			@Override
 			public String getText(Object element) {
-				ExtraAttribute a = (ExtraAttribute) element;
-				return super.getText(a.getAttributeKey());
+				if (element instanceof ExtraAttribute) {
+					ExtraAttribute a = (ExtraAttribute) element;
+					return super.getText(a.getAttributeKey());
+				}
+				return super.getText(element);
 			}
-		});
+		};
+		aCol.setLabelProvider(attrLabelProvider);
+		List<AttributeType> attributes = lookup.getDataModel().getAttributes().getAttributes();
+		aCol.setEditingSupport(new ExtraAttributeTableEditor(viewer, attributes, attrLabelProvider));
 
+		
 		TableViewerColumn vCol = createTableViewerColumn("Value", 200, 0);
 		vCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
