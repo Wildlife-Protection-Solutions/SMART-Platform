@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,34 +107,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 		int iwidth = BirtMapUtils.getWidthInPx(modelHandle, dpi);
 		int iheight = BirtMapUtils.getHeightInPx(modelHandle, dpi);
 		
+		List<GeoSmart> layers = new ArrayList<GeoSmart>();
 		try {
-			// gdavis - ARGB won't output proper background color for non-alpha
-			// supporting
-			// image types like jpg. Since the resulting image contains no
-			// alpha, RGB works
-			// fine for all formats.
-			BufferedImage image = new BufferedImage(iwidth, iheight,
-					BufferedImage.TYPE_INT_ARGB); // .TYPE_INT_ARGB);
-			Graphics2D g = image.createGraphics();
-			IMap renderedMap = null;
-
-			String basemap = mapItem.getBasemapName();
-			List<GeoSmart> layers = new ArrayList<GeoSmart>();
-			
-			BasemapDefinition def = null;
-			
-			//we do not close the session as we assume this session object
-			//is managed by the SmartConnection
-			Session session = HibernateManager.openSession();
-			byte[] uuid = null;
-			try{
-				uuid = SmartUtils.decodeHex(basemap);
-			}catch (Exception ex){
-				//eatme
-			}
-			if (uuid != null){
-				def = HibernateManager.getBasemapDefinition(session,uuid);
-			}
+			BasemapDefinition def = getBasemap(mapItem.getBasemapName());
 			
 			List<String> mapqueries = mapItem.getLayers();
 			List<String> mapnames = mapItem.getLayerNames();
@@ -167,8 +145,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					}
 				}
 			}
-
-			renderedMap = ProjectFactory.eINSTANCE.createMap();
+			
+			// -- CREATE MAP --
+			//and add layers to the map
+			IMap renderedMap = ProjectFactory.eINSTANCE.createMap();
 			if (def != null) {
 				MapSettings.getInstance(def).applyTo((Map) renderedMap);
 			}
@@ -178,9 +158,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					toAdd.addAll(layer.georesource);
 				}
 			}
-			
 			AddLayersCommand cmd = new AddLayersCommand(toAdd);
 			renderedMap.executeSyncWithoutUndo(cmd);
+			StringBuilder layerErrors = new StringBuilder();
 			for (Layer l : cmd.getLayers()) {
 				//setup name and style
 				for (GeoSmart smrt : layers){
@@ -197,6 +177,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 						  }
 						}
 					}
+				}
+				if (l.getGeoResource().getMessage() != null){
+					layerErrors.append(l.getName() + ": " + l.getGeoResource().getMessage().getMessage()); //$NON-NLS-1$
+					layerErrors.append("\n"); //$NON-NLS-1$
 				}
 			}
 
@@ -226,46 +210,142 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 		    
 			renderedMap.sendCommandSync(new ChangeCRSCommand(bounds.getCoordinateReferenceSystem()));
 			renderedMap.sendCommandSync(new SetViewportBBoxCommand(bounds));
+			
+
+			BufferedImage image = new BufferedImage(iwidth, iheight,BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g = image.createGraphics();
 			try {
 				DrawMapParameter drawMapParameter = new DrawMapParameter(g,
 						new java.awt.Dimension(iwidth, iheight), renderedMap,
 						dpi, new NullProgressMonitor());
 
 				renderedMap = ApplicationGIS.drawMap(drawMapParameter);
+				
+				//write errors
+				if (layerErrors.length() > 0){
+					addErrorMessage(g, Messages.SmartMapPresentationImpl_ErrorLabel + "\n" + layerErrors.toString(), iwidth, iheight); //$NON-NLS-1$
+				}
 			} finally {
 				g.dispose();
 			}
 
-			NullProgressMonitor monitor = new NullProgressMonitor();
-			for (GeoSmart layer: layers) {
-				if (layer.georesource != null){
-					for (IGeoResource resource : layer.georesource){
-						IService service = resource.service(monitor);
-						if (service != null ){
-							service.dispose(monitor);
-							CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-						}
-						resource.dispose(monitor);
-					}
-				}
-				
-			}
-
-			ImageIO.setUseCache(false);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageOutputStream ios = ImageIO.createImageOutputStream(baos);
-			ImageIO.write(image, "png", ios); //$NON-NLS-1$
-			ios.flush();
-			ios.close();
-			ByteArrayInputStream bis = new ByteArrayInputStream(
-					baos.toByteArray());
-			return bis;
+			return writeImage(image);
+		
 		} catch (Exception ex) {
-			SmartMapItemPlugIn.displayLog(Messages.SmartMapPresentationImpl_ErrorRenderingMap + ex.getMessage(), ex);
+			SmartMapItemPlugIn.log(Messages.SmartMapPresentationImpl_ErrorRenderingMap + ex.getMessage(), ex);
+			//try to generate error image
+			try{
+				BufferedImage image = new BufferedImage(iwidth, iheight,BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g = image.createGraphics();
+				try{
+					addErrorMessage(g, Messages.SmartMapPresentationImpl_ErrorLabel + "\n" + ex.getMessage(), iwidth, iheight); //$NON-NLS-1$
+				}finally{
+					g.dispose();
+				}
+				return writeImage(image);
+			}catch (Exception ex2){
+				//display original error message to ensure users have info
+				SmartMapItemPlugIn.displayLog(Messages.SmartMapPresentationImpl_ErrorRenderingMap + ex.getMessage(), ex);	
+			}
 			return null;
+		}finally{
+			try{
+				cleanUp(layers);
+			}catch (Exception ex){
+				SmartMapItemPlugIn.log(ex.getMessage(), ex);
+			}
 		}
 	}
 	
+	/* 
+	 * write image to byte array and returns associated stream
+	 * 
+	 */
+	private ByteArrayInputStream writeImage(BufferedImage image) throws IOException{
+		ImageIO.setUseCache(false);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageOutputStream ios = ImageIO.createImageOutputStream(baos);
+		ImageIO.write(image, "png", ios); //$NON-NLS-1$
+		ios.flush();
+		ios.close();
+		ByteArrayInputStream bis = new ByteArrayInputStream(
+				baos.toByteArray());
+		return bis;
+	}
+	
+	
+	//draws the error string on the map starting at 0,0;
+	//can be a multi line string but will 
+	//truncate any one string that is longer than the width
+	private void addErrorMessage(Graphics2D g, String error, int width, int height){
+		g.setFont(g.getFont().deriveFont(Font.BOLD));
+		String[] bits = error.split("\n"); //$NON-NLS-1$
+		
+		int fh = g.getFontMetrics().getHeight();
+		int startx = 0;
+		int maxwidth = 0;
+		for (String bit : bits){
+			double fw = g.getFontMetrics().getStringBounds(bit, g).getWidth();
+			if (fw > maxwidth){
+				maxwidth = (int)fw;
+			}
+		}
+		if (maxwidth > width){
+			maxwidth = width;
+		}
+		
+		int starty = 0;
+		g.setColor(new Color(255, 255, 255, 230));
+		g.fillRect(startx, starty, maxwidth+3, fh * bits.length+3);
+		
+		g.setColor(Color.RED);
+		int y = starty + fh;
+		for (String bit: bits){
+			g.drawString(bit, startx+2, y);
+			y+= fh;
+		}
+	}
+	
+	
+	/*
+	 * looksup the basemap definition
+	 * basemap is the hex encoded uuid
+	 */
+	private BasemapDefinition getBasemap(String basemap){
+		//we do not close the session as we assume this session object
+		//is managed by the SmartConnection
+		Session session = HibernateManager.openSession();
+		byte[] uuid = null;
+		try{
+			uuid = SmartUtils.decodeHex(basemap);
+		}catch (Exception ex){
+			//eatme
+		}
+		if (uuid != null){
+			return HibernateManager.getBasemapDefinition(session,uuid);
+		}
+		return null;
+	}
+	
+	/*
+	 * cleans up resources, removing from catalog as required
+	 */
+	private void cleanUp(List<GeoSmart> layers) throws IOException{
+		NullProgressMonitor monitor = new NullProgressMonitor();
+		for (GeoSmart layer: layers) {
+			if (layer.georesource != null){
+				for (IGeoResource resource : layer.georesource){
+					IService service = resource.service(monitor);
+					if (service != null ){
+						service.dispose(monitor);
+						CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+					}
+					resource.dispose(monitor);
+				}
+			}
+			
+		}
+	}
 	
 	//structure for aggregating smart
 	class GeoSmart{

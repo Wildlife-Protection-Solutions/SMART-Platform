@@ -38,6 +38,7 @@ public class Messages extends NLS {
 	public static String SmartMapItemImageUi_ErrorCreatingMapItem;
 	public static String SmartMapItemPlugIn_ErrorDialogTitle;
 	public static String SmartMapPresentationImpl_ErrorCreatingMap;
+	public static String SmartMapPresentationImpl_ErrorLabel;
 	public static String SmartMapPresentationImpl_ErrorRenderingMap;
 	public static String StyleCellEditor_CreateMapLayerJobName;
 	public static String StyleCellEditor_Error_CouldNotCreateStyleEditor;
