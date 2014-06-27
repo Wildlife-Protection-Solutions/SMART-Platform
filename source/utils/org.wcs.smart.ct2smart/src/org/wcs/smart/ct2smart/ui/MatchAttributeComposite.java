@@ -21,17 +21,17 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
+import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 
 /**
  * @author elitvin
@@ -39,45 +39,71 @@ import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
  */
 public class MatchAttributeComposite extends Composite {
 
+	private Label typeLabel;
 	private Label mapToLabel;
-	private ComboViewer typeComboViewer;
-	private ComboViewer mapToComboViewer;
+	
+	private Ct2AttributeTypeLabelProvider typeLabelProvider;
+	private SmartAttributeLabelProvider attrLabelProvider;
 	
 	private ExtraAttributeComposite extraAttrCmp;
 	private ValueMapComposite valueMapCmp;
 	
 	public MatchAttributeComposite(Composite parent, DataModelLookup lookup) {
 		super(parent, SWT.NONE);
+		//TODO: set label providers from outside (language switch problem)
+		typeLabelProvider = new Ct2AttributeTypeLabelProvider();
+		attrLabelProvider = new SmartAttributeLabelProvider(lookup);
 
 		GridLayout layout = new GridLayout(1, false);
 		this.setLayout(layout);
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		this.setLayoutData(gridData);
-
-		Label typeLabel = new Label(this, SWT.NONE);
-		typeLabel.setText("Type");
-
-		typeComboViewer =  new ComboViewer(this, SWT.READ_ONLY);
-		typeComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		typeComboViewer.setLabelProvider(new Ct2AttributeTypeLabelProvider());
-		typeComboViewer.setInput(Ct2AttributeType.values());
-
-		mapToLabel = new Label(this, SWT.NONE);
-		mapToLabel.setText("Smart Attribute");
 		
-		mapToComboViewer =  new ComboViewer(this, SWT.READ_ONLY);
-		mapToComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		mapToComboViewer.setLabelProvider(new SmartAttributeLabelProvider(lookup));
+		Group group = new Group(this, SWT.NONE);
+		group.setText("Attribute details");
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		group.setLayout(new GridLayout(1, false));
+
+//		Composite labelContainer = new Composite(group, SWT.NONE);
+//		GridLayout gd = new GridLayout(2, true);
+//		gd.marginBottom = 0;
+//		gd.marginHeight = 0;
+//		gd.marginLeft = 0;
+//		gd.marginRight = 0;
+//		gd.marginTop = 0;
+//		gd.marginWidth = 0;
+//		labelContainer.setLayout(gd);
+//		labelContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		typeLabel = new Label(group, SWT.NONE);
+		mapToLabel = new Label(group, SWT.NONE);
 		
-		extraAttrCmp = new ExtraAttributeComposite(this, lookup);
-		valueMapCmp = new ValueMapComposite(this, lookup);
+		extraAttrCmp = new ExtraAttributeComposite(group, lookup);
+		valueMapCmp = new ValueMapComposite(group, lookup);
 		
 	}
 
 	public void setInput(Ct2Attribute attribute) {
-		extraAttrCmp.setInput(attribute);
-		valueMapCmp.setInput(attribute);
+		typeLabel.setText("Type: " + typeLabelProvider.getText(attribute.getType()));
+		mapToLabel.setText("Smart Attribute: " + attrLabelProvider.getText(attribute.getMapTo()));
 		
+		if (Ct2AttributeTypeUtil.canMap(attribute.getType())) {
+			mapToLabel.setText("Smart Attribute: " + attrLabelProvider.getText(attribute.getMapTo()));
+			mapToLabel.setVisible(true);
+			extraAttrCmp.setInput(attribute);
+			extraAttrCmp.setVisible(true);
+		} else {
+			mapToLabel.setVisible(false);
+			extraAttrCmp.setVisible(false);
+		}
+
+		if (Ct2AttributeType.REF.equals(attribute.getType())) {
+			valueMapCmp.setInput(attribute);
+			valueMapCmp.setVisible(true);
+		} else {
+			valueMapCmp.setVisible(false);
+		}
+
+		this.layout(true, true);
 	}
 }
