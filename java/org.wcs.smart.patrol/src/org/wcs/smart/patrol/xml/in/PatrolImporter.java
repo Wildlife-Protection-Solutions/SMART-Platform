@@ -43,10 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -199,11 +196,11 @@ public class PatrolImporter {
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			monitor.subTask(Messages.PatrolImporter_Progress_Validating);
-			//check if a patrol in the database with the given patorl id already exists
+			//check if a patrol in the database with the given patrol id already exists
 			if (xmlPatrol.getId() != null){
-				Criteria c = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("id", xmlPatrol.getId())).setProjection(Projections.rowCount()); //$NON-NLS-1$ //$NON-NLS-2$
-				Long cnt = (Long)c.uniqueResult();
-				if (cnt > 0){
+				if (PatrolHibernateManager.isDuplicateId(xmlPatrol.getId(), SmartDB.getCurrentConservationArea(), session)){
+					
+					//duplicate patrol id
 					final boolean[] cont = new boolean[]{true};
 					final String pid = xmlPatrol.getId();
 					Display.getDefault().syncExec(new Runnable(){

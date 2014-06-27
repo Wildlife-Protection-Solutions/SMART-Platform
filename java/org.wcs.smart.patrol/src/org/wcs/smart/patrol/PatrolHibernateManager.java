@@ -32,9 +32,11 @@ import java.util.Map;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -283,7 +285,26 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		
 	}
-	
+	/**
+	 * Determines if a patrol id already exists in the database
+	 * for the given conservation area.
+	 * 
+	 * @param newId patrol id to validate
+	 * @param ca conservation area
+	 * @param session session
+	 * @return <code>true</code> if id already exists; <code>false</code> otherwise
+	 */
+	public static boolean isDuplicateId(String newId, ConservationArea ca, Session session){
+		Criteria c = session.createCriteria(Patrol.class)
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$ 
+				.add(Restrictions.eq("id", newId)) //$NON-NLS-1$ 
+				.setProjection(Projections.rowCount()); 
+		Long cnt = (Long)c.uniqueResult();
+		if (cnt > 0){
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * Computes the next patrol id;
