@@ -37,8 +37,10 @@ import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
  * @author elitvin
  * @since 3.0.0
  */
-public class MatchAttributeComposite extends Composite {
+public class MatchAttributeComposite extends Composite implements ILanguageChangedListener {
 
+	private Ct2Attribute attribute;
+	
 	private Label typeLabel;
 	private Label mapToLabel;
 	
@@ -84,6 +86,7 @@ public class MatchAttributeComposite extends Composite {
 	}
 
 	public void setInput(Ct2Attribute attribute) {
+		this.attribute = attribute;
 		typeLabel.setText("Type: " + typeLabelProvider.getText(attribute.getType()));
 		mapToLabel.setText("Smart Attribute: " + attrLabelProvider.getText(attribute.getMapTo()));
 		
@@ -105,5 +108,16 @@ public class MatchAttributeComposite extends Composite {
 		}
 
 		this.layout(true, true);
+	}
+
+	@Override
+	public void languageChanged(String langCode) {
+		attrLabelProvider.languageChanged(langCode);
+		if (attribute != null) {
+			mapToLabel.setText("Smart Attribute: " + attrLabelProvider.getText(attribute.getMapTo()));
+		}
+		extraAttrCmp.languageChanged(langCode);
+		valueMapCmp.languageChanged(langCode);
+		
 	}
 }

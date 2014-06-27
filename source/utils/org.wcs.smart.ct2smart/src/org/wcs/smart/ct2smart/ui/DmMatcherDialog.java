@@ -1,5 +1,6 @@
 package org.wcs.smart.ct2smart.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -10,6 +11,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -17,14 +20,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Tree;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
-import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeEditingSupport;
-import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
+import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.SmartCategoryEditingSupport;
+import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
@@ -33,11 +35,12 @@ public class DmMatcherDialog extends Composite {
 	private MatchSession session;
 	
 	private TableViewer viewer;
-	private Tree dmTree;
 	private Combo langSelector;
 	private DataModelLookup dmLookup;
 	private MatchAttributeComposite infoComposite;
-
+	
+	private List<ILanguageChangedListener> langListeners = new ArrayList<ILanguageChangedListener>();
+	
 	public DmMatcherDialog(Composite c, MatchSession session) {
 		super(c, SWT.NONE);
 		this.session = session;
@@ -68,16 +71,21 @@ public class DmMatcherDialog extends Composite {
 		GridData langLabelData = new GridData(SWT.RIGHT,SWT.TOP, false, false);
 		languageLabel.setLayoutData(langLabelData);
 
-		List<LanguageType> langs = session.getDataModel().getLanguages().getLanguages();
-		String[] langCodes = new String[langs.size()];
-		for (int i=0; i < langs.size(); i++){
-			langCodes[i] = langs.get(i).getCode();
+		List<LanguageType> languages = session.getDataModel().getLanguages().getLanguages();
+		String[] langCodes = new String[languages.size()];
+		for (int i=0; i < languages.size(); i++){
+			langCodes[i] = languages.get(i).getCode();
 		}
 		
 		langSelector =  new Combo (langCmp, SWT.READ_ONLY);
 		langSelector.setItems(langCodes);
 		langSelector.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		langSelector.select(0);
+		langSelector.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				languageChanged();
+			}
+		});
 		
 		//attributes table
 		final Composite left = new Composite(main, SWT.NONE);
@@ -111,9 +119,23 @@ public class DmMatcherDialog extends Composite {
 		});
 
 		infoComposite = new MatchAttributeComposite(left, dmLookup);
+		addLanguageChangedListener(infoComposite);
 
+		langSelector.select(0); //to select default language and fire all listeners
 	}
 
+	protected void languageChanged() {
+		String langCode = langSelector.getItems()[langSelector.getSelectionIndex()];
+		for (ILanguageChangedListener listener : langListeners) {
+			listener.languageChanged(langCode);
+		}
+		viewer.refresh();
+	}
+
+	protected void addLanguageChangedListener(ILanguageChangedListener listener) {
+		langListeners.add(listener);
+	}
+	
 	protected void viewerSelectionChanged() {
 		Object obj = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (obj instanceof Ct2Attribute) {
@@ -139,12 +161,14 @@ public class DmMatcherDialog extends Composite {
 		col = createTableViewerColumn("SMART Attribute", 200, 2);
 		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(dmLookup);
 		col.setLabelProvider(attrLabelProvider);
+		addLanguageChangedListener(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
 		col.setEditingSupport(new SmartAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
 		col = createTableViewerColumn("SMART Category", 200, 2);
 		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(dmLookup);
 		col.setLabelProvider(catLabelProvider);
+		addLanguageChangedListener(catLabelProvider);
 		col.setEditingSupport(new SmartCategoryEditingSupport(viewer, dmLookup, catLabelProvider));
 	}
 
