@@ -50,7 +50,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
  * @author elitvin
  * @since 3.0.0
  */
-public class ExtraAttributeComposite extends Composite {
+public class ExtraAttributeComposite extends Composite implements ILanguageChangedListener {
 
 	private TableViewer viewer;
 	private DataModelLookup lookup;
@@ -58,6 +58,10 @@ public class ExtraAttributeComposite extends Composite {
 
 	private Button btnAdd;
 	private Button btnRemove;
+	
+	private SmartAttributeLabelProvider attrLabelProvider;
+	private SmartAttributeValueLabelProvider valLabelProvider;
+	
 	
 	public ExtraAttributeComposite(Composite parent, DataModelLookup lookup) {
 		super(parent, SWT.NONE);
@@ -133,7 +137,7 @@ public class ExtraAttributeComposite extends Composite {
 	
 	private void createColumns() {
 		TableViewerColumn aCol = createTableViewerColumn("Attribute", 200, 0);
-		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(lookup) {
+		attrLabelProvider = new SmartAttributeLabelProvider(lookup) {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof ExtraAttribute) {
@@ -149,7 +153,7 @@ public class ExtraAttributeComposite extends Composite {
 
 		
 		TableViewerColumn vCol = createTableViewerColumn("Value", 200, 0);
-		SmartAttributeValueLabelProvider valLabelProvider = new SmartAttributeValueLabelProvider(lookup);
+		valLabelProvider = new SmartAttributeValueLabelProvider(lookup);
 		vCol.setLabelProvider(valLabelProvider);
 		vCol.setEditingSupport(new SmartAttributeValueEditingSupport(viewer, lookup, valLabelProvider));
 		
@@ -163,6 +167,13 @@ public class ExtraAttributeComposite extends Composite {
 		column.setResizable(true);
 		column.setMoveable(true);
 		return viewerColumn;
+	}
+
+	@Override
+	public void languageChanged(String langCode) {
+		attrLabelProvider.languageChanged(langCode);
+		valLabelProvider.languageChanged(langCode);
+		viewer.refresh();
 	}
 	
 }

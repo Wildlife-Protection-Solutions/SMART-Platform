@@ -103,8 +103,6 @@ public class DmTreeCellEditor extends CellEditor {
 								lblitem.setText(""); //$NON-NLS-1$
 							}
 						}
-						
-//						AttributeTreeDropItem.this.queryChanged();
 					}});
 				
 				

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ct2smart.ui.support;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
@@ -32,9 +31,8 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
  * @author elitvin
  * @since 3.0.0
  */
-public class SmartCategoryLabelProvider extends ColumnLabelProvider {
+public class SmartCategoryLabelProvider extends LangColumnLabelProvider {
 	
-	private String langCode = "en"; //TODO: make customisable
 	private DataModelLookup lookup;
 	
 	public SmartCategoryLabelProvider(DataModelLookup lookup) {
@@ -64,6 +62,7 @@ public class SmartCategoryLabelProvider extends ColumnLabelProvider {
 	private String getName(CategoryType c) {
 		if (c == null)
 			return "--default--";
+		String langCode = getLanguageCode();
 		for (NameType nameType : c.getNames()) {
 			if (langCode.equals(nameType.getLanguageCode()))
 				return nameType.getValue();

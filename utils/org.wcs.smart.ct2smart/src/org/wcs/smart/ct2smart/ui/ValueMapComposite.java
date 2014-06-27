@@ -16,11 +16,13 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeValueEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeValueLabelProvider;
 
-public class ValueMapComposite extends Composite {
+public class ValueMapComposite extends Composite implements ILanguageChangedListener {
 
 	private TableViewer viewer;
 	private DataModelLookup lookup;
 	private Ct2Attribute attribute;
+	
+	private Ct2AttributeValueLabelProvider valLabelProvider;
 
 	public ValueMapComposite(Composite parent, DataModelLookup lookup) {
 		super(parent, SWT.NONE);
@@ -70,7 +72,7 @@ public class ValueMapComposite extends Composite {
 		ctCol.setLabelProvider(ctLabelProvider);
 		
 		TableViewerColumn vCol = createTableViewerColumn("SMART Value", 250, 0);
-		Ct2AttributeValueLabelProvider valLabelProvider = new Ct2AttributeValueLabelProvider(lookup);
+		valLabelProvider = new Ct2AttributeValueLabelProvider(lookup);
 		vCol.setLabelProvider(valLabelProvider);
 		vCol.setEditingSupport(new Ct2AttributeValueEditingSupport(viewer, lookup, valLabelProvider));
 		
@@ -136,5 +138,11 @@ public class ValueMapComposite extends Composite {
 				super.setValue(arg0, arg1);
 			}
 		}
+	}
+
+	@Override
+	public void languageChanged(String langCode) {
+		valLabelProvider.languageChanged(langCode);
+		viewer.refresh();
 	}
 }

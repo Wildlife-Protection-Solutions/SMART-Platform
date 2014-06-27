@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ct2smart.ui.support;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
@@ -32,11 +31,9 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
  * @author elitvin
  * @since 3.0.0
  */
-public class SmartAttributeValueLabelProvider extends ColumnLabelProvider {
+public class SmartAttributeValueLabelProvider extends LangColumnLabelProvider {
 
-	private String langCode = "en"; //TODO: make customisable
 	private DataModelLookup lookup;
-	
 
 	public SmartAttributeValueLabelProvider(DataModelLookup lookup) {
 		super();
@@ -57,7 +54,7 @@ public class SmartAttributeValueLabelProvider extends ColumnLabelProvider {
 	
 	protected String getNameForKey(String attrKey, String valueKey) {
 		AttributeType a = lookup.getAttribute(attrKey);
-		if (a == null)
+		if (a == null || valueKey == null)
 			return ""; //$NON-NLS-1$
 		String type = a.getType();
 		if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -78,6 +75,7 @@ public class SmartAttributeValueLabelProvider extends ColumnLabelProvider {
 	private String getName(ListNode node) {
 		if (node == null)
 			return "?"; //TODO: empty string?
+		String langCode = getLanguageCode();
 		for (NameType nameType : node.getNames()) {
 			if (langCode.equals(nameType.getLanguageCode()))
 				return nameType.getValue();
