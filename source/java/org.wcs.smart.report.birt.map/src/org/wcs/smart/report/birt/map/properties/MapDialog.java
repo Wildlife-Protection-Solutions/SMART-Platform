@@ -84,7 +84,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class MapDialog extends Dialog implements MapPart{
 
 	private MapViewer viewer;
-	private Map map;
 	private Label lblCoordinates;
 	private byte[] basemapUuid = null;
 	private ReferencedEnvelope  bounds = null;
@@ -92,7 +91,7 @@ public class MapDialog extends Dialog implements MapPart{
 	private Job refreshJob = new Job(Messages.MapDialog_ResizeJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			map.getRenderManager().refresh(null);
+			getMap().getRenderManager().refresh(null);
 			return Status.OK_STATUS;
 		}
 	};
@@ -121,7 +120,7 @@ public class MapDialog extends Dialog implements MapPart{
 	
 	@Override
 	public void okPressed(){
-		bounds = map.getViewportModel().getBounds();
+		bounds = getMap().getViewportModel().getBounds();
 		close();
 	}
 	
@@ -151,7 +150,7 @@ public class MapDialog extends Dialog implements MapPart{
 		viewer = new MapViewer(composite, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-	    map = (Map) ProjectFactory.eINSTANCE.createMap();
+		Map map = (Map) ProjectFactory.eINSTANCE.createMap();
         map.setName(Messages.MapDialog_MapName);
         viewer.setMap(map);
         
@@ -167,8 +166,8 @@ public class MapDialog extends Dialog implements MapPart{
 			@Override
 			public void done(IJobChangeEvent event) {
 				if (bounds == null) return;
-				map.getViewportModelInternal().setBounds(bounds);
-				map.getRenderManager().refresh(null);
+				getMap().getViewportModelInternal().setBounds(bounds);
+				getMap().getRenderManager().refresh(null);
 			}
 		});
 		layer.schedule();
@@ -201,9 +200,7 @@ public class MapDialog extends Dialog implements MapPart{
 				refreshJob.schedule(600);
 			}
 		});
-		ApplicationGIS.getToolManager().setCurrentEditor(this);
-		tools.selectTool(PanTool.ID);
-//		setModalTool(PanTool.ID); 
+
 		return composite;
 	}
 
@@ -235,7 +232,7 @@ public class MapDialog extends Dialog implements MapPart{
 		lblSeparator.setLayoutData(gd);
 
 		final Button lblSRID = new Button(infoArea, SWT.NONE);
-		lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
+		lblSRID.setText( getMap().getViewportModel().getCRS().getName().getCode());
 		lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		lblSRID.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -245,7 +242,7 @@ public class MapDialog extends Dialog implements MapPart{
 					try {
 						ChangeCRSCommand command = new ChangeCRSCommand(pd
 								.getSelection().getCrs());
-						map.sendCommandASync(command);
+						getMap().sendCommandASync(command);
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(
 								getShell(),
@@ -255,15 +252,15 @@ public class MapDialog extends Dialog implements MapPart{
 				}
 			}
 		});
-		final Map thisMap = map;
-        map.getViewportModelInternal().eAdapters().add(new AdapterImpl(){
+		
+		 getMap().getViewportModelInternal().eAdapters().add(new AdapterImpl(){
         	public void notifyChanged(Notification notification) {
         		if (notification.getEventType() == Notification.SET &&
-        				notification.getFeatureID(thisMap.getViewportModelInternal().getClass()) == RenderPackage.VIEWPORT_MODEL__CRS){
+        				notification.getFeatureID( getMap().getViewportModelInternal().getClass()) == RenderPackage.VIEWPORT_MODEL__CRS){
         			getShell().getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							lblSRID.setText(map.getViewportModel()
+							lblSRID.setText( getMap().getViewportModel()
 									.getCRS().getName().getCode());
 							lblSRID.getParent().layout();
 						}
@@ -279,8 +276,7 @@ public class MapDialog extends Dialog implements MapPart{
 					@Override
 					public void mouseMoved(MapMouseEvent event) {
 						event.getPoint();
-						Coordinate c = map.getViewportModelInternal()
-								.pixelToWorld(event.x, event.y);
+						Coordinate c =  getMap().getViewportModelInternal().pixelToWorld(event.x, event.y);
 						lblCoordinates
 								.setText(format(c.x) + ", " + format(c.y)); //$NON-NLS-1$
 						// see CursorPosition Tool
@@ -319,55 +315,18 @@ public class MapDialog extends Dialog implements MapPart{
 	protected boolean isResizable() {
 		return true;
 	}
-	
-//	
-//	 public void setModalTool( String toolId ) {
-//  	   if (activeTool != null) {
-//           // ask the current tool to stop listening etc...
-//		   activeTool.setActive(false);
-//		   //activeTool.setEnabled(false);
-//           activeTool = null;
-//       }
-//	   
-//	   Tool tool = ApplicationGIS.getToolManager().findTool(toolId);
-//		
-//       if( tool == null || !(tool instanceof ModalTool)){
-//           return;
-//       }
-//       activeTool = (ModalTool)tool;
-//       activeTool.setContext(getToolContext());
-//       activeTool.setActive(true);
-//       
-//       Cursor toolCursor = ApplicationGIS.getToolManager().findToolCursor(activeTool.getCursorID());
-//       if (toolCursor != null){
-//    	   activeTool.getContext().getViewportPane().setCursor(toolCursor);
-//       }
-//  }
-//  
-// 
-//  /**
-//   * @return tool context (used to teach tools about our MapViewer facilities.
-//   */
-//  protected synchronized ToolContext getToolContext(){
-//      if( toolcontext == null ){
-//          toolcontext = new ToolContextImpl();
-//          toolcontext.setMapInternal(map);        
-//          toolcontext.setRenderManagerInternal(map.getRenderManagerInternal());            
-//      }
-//      return toolcontext;
-//  }
   
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object getAdapter(Class adaptee) {
 		if (adaptee.isAssignableFrom(Map.class)) {
-			return map;
+			return viewer.getMap();
 		}
 		return null;
 	}
 
 	@Override
 	public Map getMap() {
-		return map;
+		return viewer.getMap();
 	}
 
 

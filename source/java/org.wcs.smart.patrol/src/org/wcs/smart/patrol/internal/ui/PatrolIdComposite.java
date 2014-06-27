@@ -37,9 +37,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
@@ -114,13 +113,13 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		String newPatrolId = txtPatrolId.getText().trim();
 		
 		session.beginTransaction();
-		long count = 0;
+		boolean isDup = false;
 		try{
-			count = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("id", newPatrolId)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
+			isDup = PatrolHibernateManager.isDuplicateId(newPatrolId, p.getConservationArea(), session);
 		}finally{
 			session.getTransaction().rollback();
 		}
-		if (count !=0){
+		if (isDup){
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
 					Messages.PatrolIdComposite_WarningDialogTitle, 
 					MessageFormat.format(Messages.PatrolIdComposite_DuplicateIdWarning, new Object[]{newPatrolId}))){

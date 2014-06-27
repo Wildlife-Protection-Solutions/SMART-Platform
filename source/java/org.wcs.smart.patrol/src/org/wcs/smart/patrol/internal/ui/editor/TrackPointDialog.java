@@ -123,8 +123,6 @@ import org.wcs.smart.ui.map.MapInfoAreaComposite;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.tool.PanTool;
-import org.wcs.smart.ui.map.tool.ZoomExtentTool;
-import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -556,9 +554,11 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		String[] thisTools = new String[] {
-				ZoomExtentTool.ID,
-				PanTool.ID,
-				ZoomTool.ID,
+				MapToolComposite.UDIG_ZOOM_EXTENT_ID,
+				MapToolComposite.UDIG_PAN_ID,
+				MapToolComposite.UDIG_ZOOM_ID,
+				MapToolComposite.UDIG_ZOOM_IN_ID,
+				MapToolComposite.UDIG_ZOOM_OUT_ID,
 				PointSelectionTool.ID};
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
