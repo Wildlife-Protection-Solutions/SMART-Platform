@@ -56,7 +56,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		super(viewer);
 		this.lookup = lookup;
 		this.labelProvider = labelProvider;
-		cbEditor = new ComboBoxCellEditor(viewer.getTable(), new String[0], SWT.DROP_DOWN);
+		cbEditor = new ComboBoxCellEditor(viewer.getTable(), new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
 		textEditor = new TextCellEditor(viewer.getTable());
 	}
 
