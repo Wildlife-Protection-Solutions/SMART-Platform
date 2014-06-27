@@ -52,7 +52,7 @@ public class SmartAttributeEditingSupport extends EditingSupport {
 	 */
 	public SmartAttributeEditingSupport(ColumnViewer viewer, List<AttributeType> attributes, SmartAttributeLabelProvider labelProvider) {
 		super(viewer);
-		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN);
+		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
 		this.labelProvider = labelProvider;
 		//building values map
 		Map<Ct2AttributeType, List<String>> tempMap = new HashMap<Ct2AttributeType, List<String>>();
