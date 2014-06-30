@@ -37,7 +37,8 @@ import org.eclipse.swt.widgets.Text;
  * @since 3.0.0
  */
 public class XmlFileComposite extends Composite {
-	
+
+	private Label label;
 	private Text fileName;
 	
 	public XmlFileComposite(Composite parent) {
@@ -48,8 +49,7 @@ public class XmlFileComposite extends Composite {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		this.setLayoutData(gridData);
 
-		Label label = new Label(this, SWT.NONE);
-		label.setText("file");
+		label = new Label(this, SWT.NONE);
 		
 	    fileName = new Text(this, SWT.BORDER);
 	    fileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -75,4 +75,7 @@ public class XmlFileComposite extends Composite {
 	    
 	}
 	
+	public void setLabelText(String text) {
+		label.setText(text);
+	}
 }
