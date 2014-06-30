@@ -74,8 +74,8 @@ public class Ct2SmartMatcher {
 	    shell.setLayoutData(gridData);
 		
 		shell.setText("CyberTracker to SMART - Data Model Matcher");
-		new DmMatcherDialog(shell, session);
-		//new SourceDialog(shell);
+		//new DmMatcherDialog(shell, session);
+		new SourceDialog(shell);
 
 		shell.pack();
 		shell.open();
