@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
+import java.io.File;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -77,5 +79,11 @@ public class XmlFileComposite extends Composite {
 	
 	public void setLabelText(String text) {
 		label.setText(text);
+	}
+	
+	public File getFile() {
+		if (fileName == null || fileName.getText() == null || fileName.getText().isEmpty())
+			return null;
+		return new File(fileName.getText());
 	}
 }

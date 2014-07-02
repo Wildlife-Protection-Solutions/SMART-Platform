@@ -57,7 +57,7 @@ public class Ct2SmartMatcher {
 
 		MatchSession session = new MatchSession();
 		session.setCt2Smart(FileUtil.loadCt2Smart(new File("match_super_x.xml")));
-		session.setDataModel(loadDataModel(new File("d:\\dev\\data\\mist\\datamodel.xml")));
+		session.setDataModel(FileUtil.loadDataModel(new File("d:\\dev\\data\\mist\\datamodel.xml")));
 		
 		
 		Display display = new Display();
@@ -74,7 +74,6 @@ public class Ct2SmartMatcher {
 	    shell.setLayoutData(gridData);
 		
 		shell.setText("CyberTracker to SMART - Data Model Matcher");
-		//new DmMatcherDialog(shell, session);
 		new SourceDialog(shell);
 
 		shell.pack();
@@ -83,19 +82,6 @@ public class Ct2SmartMatcher {
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 		display.dispose();
-	}
-
-	private static DataModel loadDataModel(File file) throws JAXBException, FileNotFoundException {
-		FileInputStream is = new FileInputStream(file);
-
-		//read file directly instead of using the XmlSmartDataModelManager
-		//because that manager uses classes which require hibernate and
-		//we don't have to have to include hibernate in our build
-		//this.smartDataModel = XmlSmartDataModelManager.readDataModel(is);
-		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.internal.ca.datamodel.xml.generate");
-		Unmarshaller un = context.createUnmarshaller();	
-		Object o = un.unmarshal(is);
-		return (DataModel) o;
 	}
 
 }
