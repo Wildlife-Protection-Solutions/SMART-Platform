@@ -142,23 +142,23 @@ public class MatchFileBuilder {
 		attrRs.close();
 		c.close();
 		
-		CtCategory cat = new CtCategory();
-		ct2Smart.getCtCategory().add(cat);
-		cat.setCategoryKey("testkey");
-		
-		CtCategoryMap cmap = new CtCategoryMap();
-		cat.getCtCategoryMap().add(cmap);
-		cmap.setAi("ai1");
-		cmap.setAn("an1");
-		cmap.setVi("vi1");
-		cmap.setVn("vn1");
-		
-		cmap = new CtCategoryMap();
-		cat.getCtCategoryMap().add(cmap);
-		cmap.setAi("ai2");
-		cmap.setAn("an2");
-		cmap.setVi("vi2");
-		cmap.setVn("vn2");
+//		CtCategory cat = new CtCategory();
+//		ct2Smart.getCtCategory().add(cat);
+//		cat.setCategoryKey("testkey");
+//		
+//		CtCategoryMap cmap = new CtCategoryMap();
+//		cat.getCtCategoryMap().add(cmap);
+//		cmap.setAi("ai1");
+//		cmap.setAn("an1");
+//		cmap.setVi("vi1");
+//		cmap.setVn("vn1");
+//		
+//		cmap = new CtCategoryMap();
+//		cat.getCtCategoryMap().add(cmap);
+//		cmap.setAi("ai2");
+//		cmap.setAn("an2");
+//		cmap.setVi("vi2");
+//		cmap.setVn("vn2");
 
 		return ct2Smart;
 	}
