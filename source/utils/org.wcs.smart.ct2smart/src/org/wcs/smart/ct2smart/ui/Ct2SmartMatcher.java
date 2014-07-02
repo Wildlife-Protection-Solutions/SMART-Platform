@@ -21,15 +21,12 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
-import java.io.File;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.ct2smart.matcher.FileUtil;
 
 /**
  * @author elitvin
@@ -38,12 +35,6 @@ import org.wcs.smart.ct2smart.matcher.FileUtil;
 public class Ct2SmartMatcher {
 
 	public static void main(String[] args) throws Exception {
-
-		MatchSession session = new MatchSession();
-		session.setCt2Smart(FileUtil.loadCt2Smart(new File("match_super_x.xml")));
-		session.setDataModel(FileUtil.loadDataModel(new File("d:\\dev\\data\\mist\\datamodel.xml")));
-		
-		
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		

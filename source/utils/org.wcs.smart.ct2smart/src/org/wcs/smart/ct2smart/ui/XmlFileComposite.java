@@ -86,4 +86,8 @@ public class XmlFileComposite extends Composite {
 			return null;
 		return new File(fileName.getText());
 	}
+	
+	public void setFileName(String text) {
+		fileName.setText(text);
+	}
 }

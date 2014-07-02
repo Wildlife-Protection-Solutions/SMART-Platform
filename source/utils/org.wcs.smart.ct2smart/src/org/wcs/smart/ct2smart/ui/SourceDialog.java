@@ -1,5 +1,6 @@
 package org.wcs.smart.ct2smart.ui;
 
+import java.io.File;
 import java.sql.Connection;
 
 import org.eclipse.swt.SWT;
@@ -78,6 +79,10 @@ public class SourceDialog extends Composite {
 				resumeSession();
 			}
 		});
+
+		//TODO: remove after testing is complete
+		xmlResumeMapping.setFileName("d:\\dev\\data\\mist\\match_super_x.xml");
+		xmlResumeDatamodel.setFileName("d:\\dev\\data\\mist\\datamodel.xml");
 	}
 
 	protected void startNewSession() {
