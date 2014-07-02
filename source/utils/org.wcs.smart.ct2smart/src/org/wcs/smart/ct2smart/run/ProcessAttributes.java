@@ -70,14 +70,6 @@ public class ProcessAttributes {
 	private static Pattern BOOLEAN_PATTERN = Pattern.compile("True|False"); //$NON-NLS-1$
 	private static Pattern NUMERIC_PATTERN = Pattern.compile("\\d+(.\\d)?\\d?"); //$NON-NLS-1$
 
-//	private static enum AttrType {
-//		UNKNOWN,
-//		TEXT,
-//		REF,
-//		BOOL,
-//		NUMERIC
-//	}
-	
 	/**
 	 * @param args
 	 * @throws SQLException 
