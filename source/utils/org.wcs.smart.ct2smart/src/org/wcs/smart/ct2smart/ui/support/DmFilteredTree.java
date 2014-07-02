@@ -232,8 +232,8 @@ public class DmFilteredTree extends Composite {
 	 */
 	protected void init(int treeStyle, DmTreePatternFilter filter) {
 		patternFilter = filter;
-		showFilterControls = PlatformUI.getPreferenceStore().getBoolean(
-				IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);
+		showFilterControls = true; //we don't want to refer to PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);
+		
 		createControl(parent, treeStyle);
 		createRefreshJob();
 		setInitialText(WorkbenchMessages.FilteredTree_FilterMessage);
