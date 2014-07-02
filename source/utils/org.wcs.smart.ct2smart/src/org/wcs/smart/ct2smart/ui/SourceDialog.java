@@ -1,5 +1,7 @@
 package org.wcs.smart.ct2smart.ui;
 
+import java.sql.Connection;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -7,12 +9,22 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ct2smart.dao.ConnectionUtil;
+import org.wcs.smart.ct2smart.db.DbLoader;
+import org.wcs.smart.ct2smart.matcher.FileUtil;
+import org.wcs.smart.ct2smart.matcher.MatchFileBuilder;
+import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 
 public class SourceDialog extends Composite {
 
 	private XmlFileComposite xmlNewRaw;
 	private XmlFileComposite xmlNewDatamodel;
+	
+	private XmlFileComposite xmlResumeMapping;
+	private XmlFileComposite xmlResumeDatamodel;
 	
 	public SourceDialog(Composite c) {
 		super(c, SWT.NONE);
@@ -42,8 +54,7 @@ public class SourceDialog extends Composite {
 		btnStart.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				super.widgetSelected(arg0);
+				startNewSession();
 			}
 		});
 		
@@ -52,11 +63,11 @@ public class SourceDialog extends Composite {
 		resumeGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		resumeGroup.setLayout(new GridLayout(1, false));
 
-		XmlFileComposite xmlRaw = new XmlFileComposite(resumeGroup);
-		xmlRaw.setLabelText("Data Matching XML: ");
+		xmlResumeMapping = new XmlFileComposite(resumeGroup);
+		xmlResumeMapping.setLabelText("Data Matching XML: ");
 
-		XmlFileComposite xmlDatamodel = new XmlFileComposite(resumeGroup);
-		xmlDatamodel.setLabelText("SMART Datamodel XML:");
+		xmlResumeDatamodel = new XmlFileComposite(resumeGroup);
+		xmlResumeDatamodel.setLabelText("SMART Datamodel XML:");
 		
 		Button btnResume = new Button(resumeGroup, SWT.PUSH);
 		btnResume.setText("Resume Session");
@@ -64,10 +75,68 @@ public class SourceDialog extends Composite {
 		btnResume.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				super.widgetSelected(arg0);
+				resumeSession();
 			}
 		});
-		
+	}
+
+	protected void startNewSession() {
+		try {
+			Connection c = ConnectionUtil.getConnection();
+			
+			DbLoader loader = new DbLoader();
+			loader.load(xmlNewRaw.getFile(), c);
+
+			MatchFileBuilder matchBuilder = new MatchFileBuilder();
+			Ct2Smart ct2Smart = matchBuilder.create(c);
+			
+			MatchSession session = new MatchSession();
+			session.setCt2Smart(ct2Smart);
+			session.setDataModel(FileUtil.loadDataModel(xmlNewDatamodel.getFile()));
+			
+			launch(session);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}	
+
+	protected void resumeSession() {
+		MatchSession session = new MatchSession();
+		try {
+			session.setCt2Smart(FileUtil.loadCt2Smart(xmlResumeMapping.getFile()));
+			session.setDataModel(FileUtil.loadDataModel(xmlResumeDatamodel.getFile()));
+			launch(session);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void launch(MatchSession session) {
+		Shell shell = getShell();
+		Display display = shell.getDisplay();
+		shell.dispose();
+		shell = new Shell(display);
+		shell.setText("CyberTracker to SMART - Data Model Matcher");
+
+		GridLayout layout = new GridLayout(1, false);
+		shell.setLayout(layout);
+
+		GridData gridData = new GridData(SWT.FILL,SWT.FILL, true, true);
+		shell.setLayoutData(gridData);
+
+		shell.setMinimumSize(840, 640);
+		
+		new DmMatcherDialog(shell, session);
+
+		shell.pack();
+		shell.open();
+		while (!shell.isDisposed ()) {
+			if (!display.readAndDispatch ()) display.sleep ();
+		}
+		display.dispose();
+		
+	}
 }
