@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.wcs.smart.ct2smart.dao.ConnectionUtil;
 import org.wcs.smart.ct2smart.xml.parser.CTParser;
 
+@Deprecated
 public class DbLoader {
 
 	public void load(File file, Connection c) throws SQLException {
