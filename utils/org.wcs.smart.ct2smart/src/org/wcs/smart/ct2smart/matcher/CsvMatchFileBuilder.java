@@ -1,28 +1,6 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.ct2smart.matcher;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -36,12 +14,7 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 
-/**
- * @author elitvin
- * @since 3.0.0
- */
-@Deprecated
-public class MatchFileBuilder {
+public class CsvMatchFileBuilder {
 
 	private static final Map<String, Ct2AttributeType> KNOWN_ATTRIBUTES;
 	static {
@@ -54,8 +27,6 @@ public class MatchFileBuilder {
 		KNOWN_ATTRIBUTES.put("Longitude",Ct2AttributeType.META_LON); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Altitude", Ct2AttributeType.IGNORE); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Accuracy", Ct2AttributeType.IGNORE); //$NON-NLS-1$
-
-//		KNOWN_ATTRIBUTES.put("team_members"); //$NON-NLS-1$
 	}
 
 	
@@ -64,9 +35,7 @@ public class MatchFileBuilder {
 	private static Pattern NUMERIC_PATTERN = Pattern.compile("\\d+(.\\d)?\\d?"); //$NON-NLS-1$
 	
 	public Ct2Smart create(Connection c) throws SQLException {
-		ResultSet attrRs = c.createStatement().executeQuery("select distinct e.n, e.i from CT_TO_SMART.ELEMENT e join CT_TO_SMART.SIGHTING s on e.i = s.i"); //$NON-NLS-1$
-		PreparedStatement valueSt = c.prepareStatement("select distinct v from CT_TO_SMART.SIGHTING where N = ?"); //$NON-NLS-1$
-		PreparedStatement elementsSt = c.prepareStatement("select distinct e.i, e.n from CT_TO_SMART.ELEMENT e join CT_TO_SMART.SIGHTING s on e.i = s.v where s.N = ?"); //$NON-NLS-1$
+		ResultSet attrRs = c.createStatement().executeQuery("select n, i, id from CT_TO_SMART.ATTRIBUTES"); //$NON-NLS-1$
 		Set<String> valueSet = new HashSet<String>();
 		Map<String, String> ref2Value = new HashMap<String, String>();
 		Ct2Smart ct2Smart = new Ct2Smart();
@@ -81,33 +50,35 @@ public class MatchFileBuilder {
 				ctAttr.setType(KNOWN_ATTRIBUTES.get(attrName));
 				continue;
 			}
+			String valuesSql = "select distinct a"+attrRs.getString(3)+" from CT_TO_SMART.CSV"; //$NON-NLS-1$ //$NON-NLS-2$
 			valueSet.clear();
-			valueSt.setString(1, attrName);
-			ResultSet valRs = valueSt.executeQuery();
+			ResultSet valRs = c.createStatement().executeQuery(valuesSql);
 			Ct2AttributeType type = Ct2AttributeType.IGNORE;
 			while (valRs.next()) {
 				String value = valRs.getString(1);
-				valueSet.add(value);
-				switch (type) {
-				case IGNORE:
-				case BOOL:
-					if (BOOLEAN_PATTERN.matcher(value).matches()) {
-						type = Ct2AttributeType.BOOL;
-						break;
+				if (value != null) {
+					valueSet.add(value);
+					switch (type) {
+						case IGNORE:
+						case BOOL:
+							if (BOOLEAN_PATTERN.matcher(value).matches()) {
+								type = Ct2AttributeType.BOOL;
+								break;
+							}
+						case NUMERIC:
+							if (NUMERIC_PATTERN.matcher(value).matches()) {
+								type = Ct2AttributeType.NUMERIC;
+								break;
+							}
+							type = Ct2AttributeType.TEXT;
+						case TEXT:
+							if (CT_ID_PATTERN.matcher(value).matches()) {
+								type = Ct2AttributeType.REF;
+								break;
+							}
+						case REF:
+							break;
 					}
-				case NUMERIC:
-					if (NUMERIC_PATTERN.matcher(value).matches()) {
-						type = Ct2AttributeType.NUMERIC;
-						break;
-					}
-					type = Ct2AttributeType.TEXT;
-				case TEXT:
-					if (CT_ID_PATTERN.matcher(value).matches()) {
-						type = Ct2AttributeType.REF;
-						break;
-					}
-				case REF:
-					break;
 				}
 			}
 			valRs.close();
@@ -116,8 +87,7 @@ public class MatchFileBuilder {
 			
 			if (Ct2AttributeType.REF.equals(type)) {
 				ref2Value.clear();
-				elementsSt.setString(1, attrName);
-				ResultSet elemRs = elementsSt.executeQuery();
+				ResultSet elemRs = c.createStatement().executeQuery("select distinct e.i, e.n from CT_TO_SMART.ELEMENT e where e.i in ("+valuesSql+")");  //$NON-NLS-1$//$NON-NLS-2$
 				while (elemRs.next()) {
 					String key = elemRs.getString(1);
 					String name = elemRs.getString(2);
@@ -128,6 +98,7 @@ public class MatchFileBuilder {
 					ctAttr.getCt2AttributeValue().add(ctAttrValue);
 					valueSet.remove(key);
 				}
+				//below are elements that do not have matches in ELEMENTS table
 				for (String s : valueSet) {
 					Ct2AttributeValue ctAttrValue = new Ct2AttributeValue();
 					ctAttrValue.setI(s);
@@ -140,26 +111,8 @@ public class MatchFileBuilder {
 		}
 		attrRs.close();
 		c.close();
-		
-//		CtCategory cat = new CtCategory();
-//		ct2Smart.getCtCategory().add(cat);
-//		cat.setCategoryKey("testkey");
-//		
-//		CtCategoryMap cmap = new CtCategoryMap();
-//		cat.getCtCategoryMap().add(cmap);
-//		cmap.setAi("ai1");
-//		cmap.setAn("an1");
-//		cmap.setVi("vi1");
-//		cmap.setVn("vn1");
-//		
-//		cmap = new CtCategoryMap();
-//		cat.getCtCategoryMap().add(cmap);
-//		cmap.setAi("ai2");
-//		cmap.setAn("an2");
-//		cmap.setVi("vi2");
-//		cmap.setVn("vn2");
 
 		return ct2Smart;
 	}
-
+	
 }
