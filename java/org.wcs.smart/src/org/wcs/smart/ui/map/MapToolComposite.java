@@ -48,6 +48,12 @@ import org.wcs.smart.ui.map.tool.BBoxInfoTool;
  */
 public class MapToolComposite {
 
+	//these tools will only work in a view or editor part.  If using in a dialog
+	//you need to use custom tools (see MapComposite.java)
+	//This is due to a rendering problem with uDig; the commands are not passed on
+	//to the map because the map is not in a "part" and therefore never
+	//a active or viewable map.
+	//see: https://locationtech.org/mhonarc/lists/udig-dev/msg22172.html
 	public static final String UDIG_ZOOM_EXTENT_ID = "org.wcs.smart.udig.ZoomExtents"; //$NON-NLS-1$
 	public static final String UDIG_PAN_ID = "net.refractions.udig.tools.Pan"; //$NON-NLS-1$
 	public static final String UDIG_ZOOM_ID = "net.refractions.udig.tools.Zoom"; //$NON-NLS-1$
