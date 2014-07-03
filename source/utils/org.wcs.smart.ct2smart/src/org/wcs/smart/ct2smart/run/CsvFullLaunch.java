@@ -12,8 +12,8 @@ public class CsvFullLaunch {
 		long start = System.currentTimeMillis();
 
 		Connection c = ConnectionUtil.getConnection();
-		File file = new File("d:\\dev\\data\\CyberTracker Data_Jan-2014\\test.xml");
-//		File file = new File("d:\\dev\\data\\CyberTracker Data_Jan-2014\\test_short_super.xml");
+//		File file = new File("d:\\dev\\data\\CyberTracker Data_Jan-2014\\test.xml");
+		File file = new File("d:\\dev\\data\\CyberTracker Data_Jan-2014\\test_short_super.xml");
 
 		CsvDbLoader.getInstance().load(file, c);
 
