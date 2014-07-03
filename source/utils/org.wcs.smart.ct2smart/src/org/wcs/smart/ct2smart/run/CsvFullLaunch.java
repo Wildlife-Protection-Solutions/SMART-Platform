@@ -5,6 +5,10 @@ import java.sql.Connection;
 
 import org.wcs.smart.ct2smart.dao.ConnectionUtil;
 import org.wcs.smart.ct2smart.db.CsvDbLoader;
+import org.wcs.smart.ct2smart.matcher.CsvMatchFileBuilder;
+import org.wcs.smart.ct2smart.matcher.FileUtil;
+import org.wcs.smart.ct2smart.matcher.MatchFileBuilder;
+import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 
 public class CsvFullLaunch {
 
@@ -18,6 +22,14 @@ public class CsvFullLaunch {
 		CsvDbLoader.getInstance().load(file, c);
 
 		System.out.println("CSV DB loaded in "+ (double)(System.currentTimeMillis()-start)/1000 +" seconds!!!");
+
+		start = System.currentTimeMillis();
+
+		CsvMatchFileBuilder matchBuilder = new CsvMatchFileBuilder();
+		Ct2Smart ct2Smart = matchBuilder.create(c);
+		FileUtil.write(new File("match_super_csv.xml"), ct2Smart);
+
+		System.out.println("CSV based file created in "+ (double)(System.currentTimeMillis()-start)/1000 +" seconds!!!");
 	}
 
 }
