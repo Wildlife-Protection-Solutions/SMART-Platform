@@ -39,3 +39,13 @@
         primary key (uuid)
     );
     
+
+    
+    
+    create table ct_to_smart.attributes (
+        id integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+        i varchar(38) not null,
+        n varchar(255),
+        primary key (id)
+    );
+    
