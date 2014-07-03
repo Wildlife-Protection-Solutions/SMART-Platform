@@ -29,6 +29,8 @@ import java.util.List;
 
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,7 +62,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class SmartDateParameterComponent implements IBirtParameterComponent{
+public class SmartDateParameterComponent implements IBirtParameterComponent, Listener{
 
 	
 	private DateTime startPicker = null;
@@ -69,6 +71,8 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 	private Label lblStart;
 	private Label lblEnd;
 	private ComboViewer cmbDatesOps;
+	
+	private ControlDecoration cdEnd;
 	
 	/**
 	 * 
@@ -119,6 +123,8 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				//eat me
 			}
 		}
+		startPicker.addListener(SWT.Selection, this);
+		
 		
 		lblEnd = new Label(param, SWT.NONE);
 		lblEnd.setText(Messages.SmartDateParameterComponent_EndDateLabel);
@@ -132,11 +138,15 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				//eat me
 			}
 		}
+		endPicker.addListener(SWT.Selection, this);
 		
+		cdEnd = new ControlDecoration(endPicker, SWT.LEFT | SWT.TOP);
+		cdEnd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+		cdEnd.setShowHover(true);
+		cdEnd.hide();
 		
 		cmbDatesOps.setInput(IDateFilter.DATE_FILTERS);
-		
-		
 		cmbDatesOps.getCombo().addListener(SWT.Modify, new Listener(){
 
 			@Override
@@ -241,6 +251,26 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		}
 		params.put("org.wcs.smart.report.parameter.dateOp", op.getQueryKey()); //$NON-NLS-1$
 		return params;
+	}
+
+	@Override
+	public void handleEvent(Event event) {
+		IDateFilter op = (IDateFilter) 
+				((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
+
+		if (op.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey())){
+			Date start = SmartUtils.getDate(startPicker);
+			Date end = SmartUtils.getDate(endPicker);
+			
+			if (end.before(start)){
+				//warning
+				cdEnd.setDescriptionText(Messages.SmartDateParameterComponent_DateWarning);
+				cdEnd.show();
+			}else{
+				cdEnd.hide();
+			}
+			
+		}
 	}
 
 }

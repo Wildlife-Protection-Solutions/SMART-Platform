@@ -200,6 +200,7 @@ public class Messages extends NLS {
 	public static String RunReportJob_JobName;
 	public static String SmartDateParameterComponent_DateFilterNotSupported;
 	public static String SmartDateParameterComponent_DateRangeLabel;
+	public static String SmartDateParameterComponent_DateWarning;
 	public static String SmartDateParameterComponent_EarliestDateError;
 	public static String SmartDateParameterComponent_EndDateLabel;
 	public static String SmartDateParameterComponent_StartDateLabel;
