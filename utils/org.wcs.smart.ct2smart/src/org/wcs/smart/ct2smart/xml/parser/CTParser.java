@@ -12,6 +12,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+@Deprecated
 public class CTParser {
 	
 	private static CTParser instance;
@@ -33,6 +34,7 @@ public class CTParser {
 			boolean autoCommit = c.getAutoCommit();
 			c.setAutoCommit(false);
 			DefaultHandler ctParserHandler = new CTPureJdbcParserHandler(c);
+//			DefaultHandler ctParserHandler = new CTPureJdbcCsvParserHandler(c);
 			saxParser.parse(file, ctParserHandler);
 			c.commit();
 			c.setAutoCommit(autoCommit);
