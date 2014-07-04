@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -224,18 +225,22 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						session.beginTransaction();
 						try {
 							monitor.worked(1);
-							session.delete(cm);
-							session.getTransaction().commit();
+							if (DeleteManager.canDelete(cm, session)){
+								session.delete(cm);
+							}
+							session.getTransaction().commit();							
 						}catch (Exception ex){
 							session.getTransaction().rollback();
 							SmartPlugIn.log("Error deleting configurable model", ex); //$NON-NLS-1$
-							throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + ex.getLocalizedMessage()));
+							throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + "\n\n" + ex.getMessage())); //$NON-NLS-1$
 						} finally {
 							session.close();
 							monitor.done();
 						}
 					}
 				});
+				}catch (InvocationTargetException ex){
+					MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getCause().getMessage());
 				}catch (Exception ex){
 					MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getMessage());
 				}
