@@ -136,7 +136,7 @@ public class ExtraAttributeComposite extends Composite implements ILanguageChang
 	}
 	
 	private void createColumns() {
-		TableViewerColumn aCol = createTableViewerColumn("Attribute", 200, 0);
+		TableViewerColumn aCol = createTableViewerColumn("Attribute", 200);
 		attrLabelProvider = new SmartAttributeLabelProvider(lookup) {
 			@Override
 			public String getText(Object element) {
@@ -152,14 +152,14 @@ public class ExtraAttributeComposite extends Composite implements ILanguageChang
 		aCol.setEditingSupport(new ExtraAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
 		
-		TableViewerColumn vCol = createTableViewerColumn("Value", 200, 0);
+		TableViewerColumn vCol = createTableViewerColumn("Value", 200);
 		valLabelProvider = new SmartAttributeValueLabelProvider(lookup);
 		vCol.setLabelProvider(valLabelProvider);
 		vCol.setEditingSupport(new SmartAttributeValueEditingSupport(viewer, lookup, valLabelProvider));
 		
 	}
 
-	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
+	private TableViewerColumn createTableViewerColumn(String title, int bound) {
 		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 		final TableColumn column = viewerColumn.getColumn();
 		column.setText(title);
