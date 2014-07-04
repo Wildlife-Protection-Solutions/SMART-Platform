@@ -47,14 +47,14 @@ public class DeleteManager {
 	
 	
 	/**
-	 * Each registered advisor of the class as the provided object is run and if
-	 *  one fails the error message is displayed to the user and the function returns false otherwise
-	 *  	the function return true;
+	 * Each registered advisor of the class of the provided object is run and if
+	 * one fails, and exception is thrown with an error message that describes the problem.
+	 * Otherwise true is returned.
 	 *  
 	 * @param x object to delete
 	 * @param session open database session
-	 * @return
-	 * @throws Exception
+	 * @return <code>true</code> if object can be deleted, <code>false</code> if not 
+	 * @throws Exception if item can no be deleted
 	 */
 	public static boolean canDelete(Object x, Session session) throws Exception{
 		Class<?> clazzz = HibernateProxyHelper.getClassWithoutInitializingProxy(x);
