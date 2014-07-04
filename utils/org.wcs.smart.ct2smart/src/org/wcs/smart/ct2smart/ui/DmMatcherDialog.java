@@ -145,7 +145,7 @@ public class DmMatcherDialog extends Composite {
 
 	private void createColumns() {
 
-		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 200, 0);
+		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 200);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -154,25 +154,25 @@ public class DmMatcherDialog extends Composite {
 			}
 		});
 
-		col = createTableViewerColumn("Type", 80, 1);
+		col = createTableViewerColumn("Type", 80);
 		col.setLabelProvider(new Ct2AttributeTypeLabelProvider());
 		col.setEditingSupport(new Ct2AttributeTypeTableEditor(viewer));
 
-		col = createTableViewerColumn("SMART Attribute", 200, 2);
+		col = createTableViewerColumn("SMART Attribute", 200);
 		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(dmLookup);
 		col.setLabelProvider(attrLabelProvider);
 		addLanguageChangedListener(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
 		col.setEditingSupport(new SmartAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
-		col = createTableViewerColumn("SMART Category", 200, 2);
+		col = createTableViewerColumn("SMART Category", 200);
 		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(dmLookup);
 		col.setLabelProvider(catLabelProvider);
 		addLanguageChangedListener(catLabelProvider);
 		col.setEditingSupport(new SmartCategoryEditingSupport(viewer, dmLookup, catLabelProvider));
 	}
 
-	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
+	private TableViewerColumn createTableViewerColumn(String title, int bound) {
 		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 		final TableColumn column = viewerColumn.getColumn();
 		column.setText(title);

@@ -58,7 +58,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 	}
 	
 	private void createColumns() {
-		TableViewerColumn ctCol = createTableViewerColumn("CyberTracker Value", 250, 0);
+		TableViewerColumn ctCol = createTableViewerColumn("CyberTracker Value", 250);
 		ColumnLabelProvider ctLabelProvider = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -71,14 +71,14 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		};
 		ctCol.setLabelProvider(ctLabelProvider);
 		
-		TableViewerColumn vCol = createTableViewerColumn("SMART Value", 250, 0);
+		TableViewerColumn vCol = createTableViewerColumn("SMART Value", 250);
 		valLabelProvider = new Ct2AttributeValueLabelProvider(lookup);
 		vCol.setLabelProvider(valLabelProvider);
 		vCol.setEditingSupport(new Ct2AttributeValueEditingSupport(viewer, lookup, valLabelProvider));
 		
 	}
 
-	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
+	private TableViewerColumn createTableViewerColumn(String title, int bound) {
 		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 		final TableColumn column = viewerColumn.getColumn();
 		column.setText(title);
