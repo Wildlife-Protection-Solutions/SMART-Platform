@@ -124,7 +124,7 @@ public class ConfigurableModelFactory {
 		
 		if (monitor.isCanceled()) return;
 		
-		if (c.getChildren().size() > 0){
+		if (c.getActiveChildren().size() > 0){
 			//there are kids so this needs to be converted to a group
 			CmNode node = new CmNode();
 			node.setModel(model);
