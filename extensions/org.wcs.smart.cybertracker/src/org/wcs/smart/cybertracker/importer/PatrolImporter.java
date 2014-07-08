@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -38,6 +39,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 
 /**
@@ -144,8 +147,19 @@ public class PatrolImporter extends SmartImporter {
 		}
 		@SuppressWarnings("unchecked")
 		List<Patrol> patrols = c.list(); 
+
+		boolean hasDuplicate = false;
+		if (patrols.size() > 0) {
+			//ensure that it is really a duplicate
+			for (Patrol p : patrols) {
+				if (isLegTimeMatch(p, patrol)) {
+					hasDuplicate = true;
+					break;
+				}
+			}
+		}
 		
-		if (patrols.size() > 0){
+		if (hasDuplicate) {
 			final StringBuilder smartPatrols = new StringBuilder();
 			for (Patrol p : patrols){
 				smartPatrols.append(p.getId());
@@ -169,5 +183,52 @@ public class PatrolImporter extends SmartImporter {
 		}
 		
 		return true;
+	}
+	
+	private boolean isLegTimeMatch(Patrol p1, Patrol p2) {
+		List<PatrolLeg> legs1 = p1.getLegs();
+		List<PatrolLeg> legs2 = p2.getLegs();
+		if (legs1 == null && legs2 == null)
+			return true;
+		if (legs1 == null || legs2 == null)
+			return false;
+		if (legs1.size() != legs2.size())
+			return false;
+		
+		for (int i = 0; i < legs1.size(); i++) {
+			PatrolLeg l1 = legs1.get(i);
+			PatrolLeg l2 = legs2.get(i);
+			if (!isLegDayTimeMatch(l1, l2))
+				return false;
+		}
+		return true;
+	}
+
+	private boolean isLegDayTimeMatch(PatrolLeg l1, PatrolLeg l2) {
+		List<PatrolLegDay> days1 = l1.getPatrolLegDays();
+		List<PatrolLegDay> days2 = l2.getPatrolLegDays();
+		if (days1 == null && days2 == null)
+			return true;
+		if (days1 == null || days2 == null)
+			return false;
+		if (days1.size() != days2.size())
+			return false;
+		
+		for (int i = 0; i < days1.size(); i++) {
+			PatrolLegDay d1 = days1.get(i);
+			PatrolLegDay d2 = days2.get(i);
+			if (!isEqual(d1.getStartTime(), d2.getStartTime()) || !isEqual(d1.getEndTime(), d2.getEndTime()))
+				return false;
+		}
+		return true;
+	}
+
+	@SuppressWarnings("deprecation")
+	private boolean isEqual(Time t1, Time t2) {
+		if (t1 == null && t2 == null)
+			return true;
+		if (t1 == null || t2 == null)
+			return false;
+		return t1.getHours() == t2.getHours() && t1.getMinutes() == t2.getMinutes() && t1.getSeconds() == t2.getSeconds();
 	}
 }
