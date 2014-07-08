@@ -71,12 +71,15 @@ import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapInfoAreaComposite;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.location.tool.SelectionTool;
 import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.ZoomExtentTool;
+import org.wcs.smart.ui.map.tool.ZoomInTool;
+import org.wcs.smart.ui.map.tool.ZoomOutTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -157,9 +160,12 @@ public class MapComposite extends Composite implements MapPart {
 
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		String[] thisTools = new String[] {
+				SetBasemapTool.ID,
 				ZoomExtentTool.ID,
 				PanTool.ID,
 				ZoomTool.ID,
+				ZoomInTool.ID,
+				ZoomOutTool.ID,
 				SelectionTool.ID };
 
 		MapToolComposite tools = new MapToolComposite(thisTools);

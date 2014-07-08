@@ -72,6 +72,8 @@ import org.wcs.smart.ui.map.ProjectionDialog;
 import org.wcs.smart.ui.map.ScaleRatioComposite;
 import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.ZoomExtentTool;
+import org.wcs.smart.ui.map.tool.ZoomInTool;
+import org.wcs.smart.ui.map.tool.ZoomOutTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -177,7 +179,9 @@ public class MapDialog extends Dialog implements MapPart{
 		String[] thisTools = new String[]{
 				ZoomExtentTool.ID,
 				PanTool.ID,
-				ZoomTool.ID};
+				ZoomTool.ID,
+				ZoomInTool.ID,
+				ZoomOutTool.ID};
 		
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(composite);

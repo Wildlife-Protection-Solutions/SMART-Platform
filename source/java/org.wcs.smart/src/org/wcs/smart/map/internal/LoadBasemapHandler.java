@@ -34,6 +34,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.LoadBasemapDialog;
@@ -55,22 +56,44 @@ public class LoadBasemapHandler extends AbstractHandler {
 			final Map map = view.getMap();
 			if(map == null) return null;
 		
-			final LoadBasemapDialog dialog = new LoadBasemapDialog(Display.getDefault().getActiveShell());
-			if (dialog.open() != IDialogConstants.OK_ID){
-				return null;
-			}
-			Job loadMap = new Job(Messages.LoadBasemapHandler_JobName){
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					MapSettings settings = MapSettings.getInstance(dialog.getBasemap()); 
-					settings.applyTo(map);
-					return Status.OK_STATUS;
-				}
-			};
-			loadMap.schedule();
+			loadBasemap(map);
 		}
 		return null;
 	}
+	
+	/**
+	 * Opens the basemap selection dialog and updates the basemap
+	 * of the current map.
+	 * 
+	 * @param map
+	 */
+	public static void loadBasemap(final Map map){
+		final BasemapDefinition[] def =  new BasemapDefinition[]{null};
+		
+		Display.getDefault().syncExec(new Runnable(){
 
+			@Override
+			public void run() {
+				final LoadBasemapDialog dialog = new LoadBasemapDialog(Display.getDefault().getActiveShell());
+				if (dialog.open() != IDialogConstants.OK_ID){
+					return ;
+				}
+
+				def[0] = dialog.getBasemap();
+			}});
+				
+		if (def[0] == null){
+			return;
+		}
+		
+		Job loadMap = new Job(Messages.LoadBasemapHandler_JobName){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				MapSettings settings = MapSettings.getInstance(def[0]); 
+				settings.applyTo(map);
+				return Status.OK_STATUS;
+			}
+		};
+		loadMap.schedule();
+	}
 }

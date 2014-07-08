@@ -908,26 +908,26 @@
             class="org.wcs.smart.udig.AddLayerTool"
             icon="images/icons/elcl16/layer_add.png"
             id="org.wcs.smart.udig.AddLayer"
-            name="Add Layer"
-            tooltip="Add Layer To Map">
+            name="%addlayer.tool.name"
+            tooltip="%addlayer.tool.tooltip">
       </actionTool>
       <actionTool
             categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.udig.ZoomLayersTool"
             icon="images/icons/elcl16/zoom_layers.png"
             id="org.wcs.smart.udig.ZoomExtents"
-            name="Zoom to map extents"
+            name="%zoomextents.tool.name"
             onToolbar="false"
-            tooltip="Zoom to map extents">
+            tooltip="%zoomextents.tool.tooltip">
       </actionTool>
       <actionTool
             categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.udig.SetBasemapTool"
             icon="images/icons/elcl16/load_map.png"
             id="org.wcs.smart.map.setBasemap"
-            name="Set Basemap"
+            name="%setbasemap.tool.name"
             onToolbar="false"
-            tooltip="Sets the map basemaps">
+            tooltip="%setbasemap.tool.tooltip">
       </actionTool>
       <category
             id="org.wcs.smart.location.maptools">
@@ -950,9 +950,9 @@
             class="org.wcs.smart.ui.map.tool.ZoomExtentTool"
             icon="images/icons/elcl16/zoom_layers.png"
             id="org.wcs.smart.ui.map.tool.ZoomExtentsTool"
-            name="Zoom Extents"
+            name="%zoomextents.tool.name"
             onToolbar="false"
-            tooltip="Zoom to map extents">
+            tooltip="%zoomextents.tool.tooltip">
       </actionTool>
       <modalTool
             categoryId="org.wcs.smart.ui.map.tool"
@@ -996,6 +996,24 @@
             id="org.wcs.smart.udig.bboxCursor"
             image="images/pointers/bbox_info.png">
       </toolCursor>
+      <actionTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.ZoomInTool"
+            icon="images/icons/elcl16/zoom_in_co.gif"
+            id="org.wcs.smart.ui.map.tool.ZoomInTool"
+            name="%zoomin.tool.name"
+            onToolbar="false"
+            tooltip="%zoomin.tool.tooltip">
+      </actionTool>
+      <actionTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.ZoomOutTool"
+            icon="images/icons/elcl16/zoom_out_co.gif"
+            id="org.wcs.smart.ui.map.tool.ZoomOutTool"
+            name="%zoomout.tool.name"
+            onToolbar="false"
+            tooltip="%zoomout.tool.tooltip">
+      </actionTool>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">
@@ -1071,7 +1089,7 @@
       <page
             class="net.refractions.udig.project.ui.preferences.RenderPreferences"
             id="org.wcs.smart.udig.preferenced.render"
-            name="Map Rendering Options">
+            name="%prefpage.render.name">
       </page>
    </extension>
    <extension
