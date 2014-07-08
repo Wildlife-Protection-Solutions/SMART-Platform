@@ -19,37 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.udig;
+package org.wcs.smart.ui.map.tool;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
-
-import org.wcs.smart.map.internal.LoadBasemapHandler;
+import net.refractions.udig.project.render.IViewportModelListener;
+import net.refractions.udig.project.render.ViewportModelEvent;
+import net.refractions.udig.tools.internal.ZoomIn;
 
 /**
- * Set basemap map tool
- * @author egouge
- * @since 1.0.0
+ * Extension of uDig tool that will work in
+ * a map dialog
+ * @author Emily
+ *
  */
-public class SetBasemapTool extends AbstractActionTool{
+public class ZoomInTool extends ZoomIn{
 
-	public static final String ID = "org.wcs.smart.map.setBasemap"; //$NON-NLS-1$
-	
-	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.tool.ActionTool#run()
-	 */
-	@Override
-	public void run() {
-		LoadBasemapHandler.loadBasemap((Map) getContext().getMap());
+	public static final String ID = "org.wcs.smart.ui.map.tool.ZoomInTool"; //$NON-NLS-1$
+ 
+	private IViewportModelListener listener;
+
+	public void run(){
+		if (listener == null){
+			listener = new IViewportModelListener() {
+				@Override
+				public void changed(ViewportModelEvent event) {
+					getContext().getMap().getViewportModel().removeViewportModelListener(this);
+					listener = null;
+					getContext().getMap().getRenderManager().refresh(null);
+				}
+			};
+			getContext().getMap().getViewportModel().addViewportModelListener(listener);
+				
+		}
+		super.run();
 	}
-
-	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.tool.Tool#dispose()
-	 */
-	@Override
-	public void dispose() {
-	}
 	
-	
-
 }
