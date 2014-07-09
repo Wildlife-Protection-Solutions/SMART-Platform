@@ -1,6 +1,5 @@
 package org.wcs.smart.ct2smart.ui;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,46 +9,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.wcs.smart.ct2smart.dao.ConnectionUtil;
-import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
-import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
-import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.matcher.model.CtCategoryMap;
 
-public class CategoryMapDataProvider {
-
-	public static void main(String[] args) throws Exception {
-		CategoryMapDataProvider test = new CategoryMapDataProvider();
-		Connection c = ConnectionUtil.getConnection();
-		Ct2Smart ct2Smart = FileUtil.loadCt2Smart(new File("d:\\dev\\data\\mist\\match_super_x.xml"));
-		List<Ct2Attribute> items = new ArrayList<Ct2Attribute>();
-		for (Ct2Attribute a : ct2Smart.getCt2Attribute()) {
-			if (Ct2AttributeType.CATEGORY.equals(a.getType()))
-				items.add(a);
-		}
-		
-		test.extractCategoryValues(items, c);
-		c.close();
-	}
-
-	private List<Ct2Attribute> categoryItems;
+/**
+ * @author elitvin
+ * @since 3.0.0
+ */
+public class CategoryMapBuilder {
 	
-	public void setSource(Ct2Smart source) {
-		List<Ct2Attribute> items = new ArrayList<Ct2Attribute>();
-		for (Ct2Attribute a : source.getCt2Attribute()) {
-			if (Ct2AttributeType.CATEGORY.equals(a.getType()))
-				items.add(a);
-		}
-		
-		if (!isEqual(categoryItems, items)) {
-			categoryItems = items;
-			
-		}
-	}
+	private Connection c;
+	private ElementsLookup elLookup;
+	
+	public CategoryMapBuilder(Connection c) throws SQLException {
+		this.c = c;
+		elLookup = new ElementsLookup(c);
+	}	
 
-	public List<CtCategory> extractCategoryValues(List<Ct2Attribute> attributes, Connection c) throws SQLException {
+	public List<CtCategory> extractCategoryValues(List<Ct2Attribute> attributes) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		int size = attributes.size();
 		for (int i = 0; i < size; i++) {
@@ -90,7 +68,7 @@ public class CategoryMapDataProvider {
 					cmap.setAi(a.getI());
 					cmap.setAn(a.getN());
 					cmap.setVi(value);
-					cmap.setVn(getN(value));
+					cmap.setVn(elLookup.getN(value));
 					ct.getCtCategoryMap().add(cmap);
 				}
 			}
@@ -99,25 +77,4 @@ public class CategoryMapDataProvider {
 		return catValues;
 	}
 
-	public String getN(String i) {
-		return i; //TODO: need proper element name
-	}
-	
-	private boolean isEqual(List<Ct2Attribute> source, List<Ct2Attribute> dest) {
-		if (source == null)
-			return dest == null;
-		if (dest == null)
-			return source == null;
-		
-		if (source.size() != dest.size())
-			return false;
-		
-		for (int i = 0; i < source.size(); i++) {
-			if (!source.get(i).equals(dest.get(i)))
-				return false;
-		}
-		
-		return true;
-	}
-	
 }

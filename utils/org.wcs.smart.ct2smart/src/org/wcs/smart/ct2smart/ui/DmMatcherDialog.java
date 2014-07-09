@@ -31,6 +31,10 @@ import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
+/**
+ * @author elitvin
+ * @since 3.0.0
+ */
 public class DmMatcherDialog extends Composite {
 
 	private MatchSession session;
