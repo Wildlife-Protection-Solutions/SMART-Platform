@@ -1,6 +1,5 @@
 package org.wcs.smart.ct2smart.ui;
 
-import java.io.File;
 import java.sql.Connection;
 
 import org.eclipse.swt.SWT;
