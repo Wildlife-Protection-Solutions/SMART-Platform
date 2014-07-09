@@ -8,6 +8,10 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 
+/**
+ * @author elitvin
+ * @since 3.0.0
+ */
 public class DataModelLookup {
 	
 	private DataModel dataModel;

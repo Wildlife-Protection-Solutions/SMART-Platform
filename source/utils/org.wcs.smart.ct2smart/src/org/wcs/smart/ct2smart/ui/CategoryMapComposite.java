@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.ct2smart.dao.ConnectionUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
@@ -51,6 +53,7 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 	private TableViewer viewer;
 	private DataModelLookup lookup;
 	private SmartCategoryLabelProvider catLabelProvider;
+	private CategoryMapBuilder catMapBuilder;
 	
 	private List<Ct2Attribute> columns;
 	
@@ -58,6 +61,12 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		super(parent, SWT.NONE);
 		this.lookup = lookup;
 		catLabelProvider = new SmartCategoryLabelProvider(lookup);
+		try {
+			catMapBuilder = new CategoryMapBuilder(ConnectionUtil.getConnection());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		GridLayout gd = new GridLayout(2, false);
 		gd.marginBottom = 0;
@@ -91,6 +100,13 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		
 		if (!isEqual(columns, items)) {
 			columns = items;
+			ct2Smart.getCtCategory().clear();
+			try {
+				ct2Smart.getCtCategory().addAll(catMapBuilder.extractCategoryValues(columns));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			rebuildColumns();
 		}
 		viewer.setInput(ct2Smart.getCtCategory());
