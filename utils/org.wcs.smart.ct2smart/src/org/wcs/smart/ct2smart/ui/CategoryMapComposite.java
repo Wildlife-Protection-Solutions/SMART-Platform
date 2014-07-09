@@ -57,10 +57,11 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 	
 	private List<Ct2Attribute> columns;
 	
-	public CategoryMapComposite(Composite parent, DataModelLookup lookup) {
+	public CategoryMapComposite(Composite parent, DataModelLookup lookup, Ct2Smart ct2Smart) {
 		super(parent, SWT.NONE);
 		this.lookup = lookup;
 		catLabelProvider = new SmartCategoryLabelProvider(lookup);
+			
 		try {
 			catMapBuilder = new CategoryMapBuilder(ConnectionUtil.getConnection());
 		} catch (SQLException e) {
@@ -88,15 +89,16 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		tgridData.heightHint = 150;
 		viewer.getControl().setLayoutData(tgridData);
+
+		if (ct2Smart != null) {
+			columns = extractColumns(ct2Smart);
+			rebuildColumns();
+		}
 		
 	}
 
 	public void setInput(Ct2Smart ct2Smart) {
-		List<Ct2Attribute> items = new ArrayList<Ct2Attribute>();
-		for (Ct2Attribute a : ct2Smart.getCt2Attribute()) {
-			if (Ct2AttributeType.CATEGORY.equals(a.getType()))
-				items.add(a);
-		}
+		List<Ct2Attribute> items = extractColumns(ct2Smart);
 		
 		if (!isEqual(columns, items)) {
 			columns = items;
@@ -112,6 +114,15 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		viewer.setInput(ct2Smart.getCtCategory());
 	}
 
+	public List<Ct2Attribute> extractColumns(Ct2Smart ct2Smart) {
+		List<Ct2Attribute> items = new ArrayList<Ct2Attribute>();
+		for (Ct2Attribute a : ct2Smart.getCt2Attribute()) {
+			if (Ct2AttributeType.CATEGORY.equals(a.getType()))
+				items.add(a);
+		}
+		return items;
+	}
+	
 	public void rebuildColumns() {
 		viewer.getTable().setRedraw(false);
 		for (TableColumn column : viewer.getTable().getColumns()) {

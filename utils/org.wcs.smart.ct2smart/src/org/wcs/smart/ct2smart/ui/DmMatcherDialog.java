@@ -127,7 +127,7 @@ public class DmMatcherDialog extends Composite {
 		infoComposite = new MatchAttributeComposite(left, dmLookup);
 		addLanguageChangedListener(infoComposite);
 
-		categoryComposite = new CategoryMapComposite(left, dmLookup);
+		categoryComposite = new CategoryMapComposite(left, dmLookup, session.getCt2Smart());
 		addLanguageChangedListener(categoryComposite);
 		
 		langSelector.select(0); //to select default language and fire all listeners
