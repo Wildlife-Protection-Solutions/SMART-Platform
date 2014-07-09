@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Table;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
@@ -54,6 +55,8 @@ public class SmartCategoryEditingSupport extends EditingSupport {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
 			return Ct2AttributeTypeUtil.canMap(a.getType());
+		} else if (arg0 instanceof CtCategory) {
+			return true;
 		}
 		return false;
 	}
@@ -68,6 +71,9 @@ public class SmartCategoryEditingSupport extends EditingSupport {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
 			return lookup.getCategory(a.getCategoryKey());
+		} else if (arg0 instanceof CtCategory) {
+			CtCategory c = (CtCategory) arg0;
+			return lookup.getCategory(c.getCategoryKey());
 		}
 		return null;
 	}
@@ -76,8 +82,12 @@ public class SmartCategoryEditingSupport extends EditingSupport {
 	protected void setValue(Object arg0, Object arg1) {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
-			CategoryType c = (CategoryType) arg1;
-			a.setCategoryKey(lookup.getFullKey(c));
+			CategoryType ct = (CategoryType) arg1;
+			a.setCategoryKey(lookup.getFullKey(ct));
+		} else if (arg0 instanceof CtCategory) {
+			CtCategory c = (CtCategory) arg0;
+			CategoryType ct = (CategoryType) arg1;
+			c.setCategoryKey(lookup.getFullKey(ct));
 		}
 		getViewer().refresh();
 	}
