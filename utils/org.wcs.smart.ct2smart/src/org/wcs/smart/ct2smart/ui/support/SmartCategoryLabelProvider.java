@@ -22,6 +22,7 @@
 package org.wcs.smart.ct2smart.ui.support;
 
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
@@ -48,6 +49,10 @@ public class SmartCategoryLabelProvider extends LangColumnLabelProvider {
 
 		} else if (element instanceof CategoryType) {
 			return getName((CategoryType)element);
+
+		} else if (element instanceof CtCategory) {
+			CtCategory ctc = (CtCategory)element;
+			return getNameForKey(ctc.getCategoryKey());
 			
 		} else if (element instanceof String) {
 			return getNameForKey((String)element);

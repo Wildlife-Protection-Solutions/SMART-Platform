@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
+import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeEditingSupport;
@@ -38,6 +39,7 @@ public class DmMatcherDialog extends Composite {
 	private Combo langSelector;
 	private DataModelLookup dmLookup;
 	private MatchAttributeComposite infoComposite;
+	private CategoryMapComposite categoryComposite;
 	
 	private List<ILanguageChangedListener> langListeners = new ArrayList<ILanguageChangedListener>();
 	
@@ -121,6 +123,9 @@ public class DmMatcherDialog extends Composite {
 		infoComposite = new MatchAttributeComposite(left, dmLookup);
 		addLanguageChangedListener(infoComposite);
 
+		categoryComposite = new CategoryMapComposite(left, dmLookup);
+		addLanguageChangedListener(categoryComposite);
+		
 		langSelector.select(0); //to select default language and fire all listeners
 	}
 
@@ -139,7 +144,13 @@ public class DmMatcherDialog extends Composite {
 	protected void viewerSelectionChanged() {
 		Object obj = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (obj instanceof Ct2Attribute) {
-			infoComposite.setInput((Ct2Attribute)obj);
+			Ct2Attribute a = (Ct2Attribute)obj;
+			infoComposite.setInput(a);
+			if (Ct2AttributeType.CATEGORY.equals(a.getType())) {
+				categoryComposite.setInput(session.getCt2Smart());
+			} else {
+				//TODO: hide
+			}
 		}
 	}
 
