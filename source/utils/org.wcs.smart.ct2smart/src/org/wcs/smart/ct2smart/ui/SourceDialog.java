@@ -13,11 +13,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ct2smart.dao.ConnectionUtil;
-import org.wcs.smart.ct2smart.db.DbLoader;
+import org.wcs.smart.ct2smart.db.CsvDbLoader;
+import org.wcs.smart.ct2smart.matcher.CsvMatchFileBuilder;
 import org.wcs.smart.ct2smart.matcher.FileUtil;
-import org.wcs.smart.ct2smart.matcher.MatchFileBuilder;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 
+/**
+ * @author elitvin
+ * @since 3.0.0
+ */
 public class SourceDialog extends Composite {
 
 	private XmlFileComposite xmlNewRaw;
@@ -88,10 +92,9 @@ public class SourceDialog extends Composite {
 		try {
 			Connection c = ConnectionUtil.getConnection();
 			
-			DbLoader loader = new DbLoader();
-			loader.load(xmlNewRaw.getFile(), c);
+			CsvDbLoader.getInstance().load(xmlNewRaw.getFile(), c);
 
-			MatchFileBuilder matchBuilder = new MatchFileBuilder();
+			CsvMatchFileBuilder matchBuilder = new CsvMatchFileBuilder();
 			Ct2Smart ct2Smart = matchBuilder.create(c);
 			
 			MatchSession session = new MatchSession();
