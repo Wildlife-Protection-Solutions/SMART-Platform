@@ -16,6 +16,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -70,8 +71,29 @@ public class DmMatcherDialog extends Composite {
 		GridData mainGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		main.setLayoutData(mainGridData);
 
+		Composite top = new Composite(main, SWT.NONE);
+		GridLayout gd = new GridLayout(2, false);
+		gd.marginBottom = 0;
+		gd.marginHeight = 0;
+		gd.marginLeft = 0;
+		gd.marginRight = 0;
+		gd.marginTop = 0;
+		gd.marginWidth = 0;
+		top.setLayout(gd);
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		Composite buttonsCmp = new Composite(top, SWT.NONE);
+		buttonsCmp.setLayout(new GridLayout(2, false));
+		buttonsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
+		
+		Button btnSave = new Button(buttonsCmp, SWT.PUSH);
+		btnSave.setText("Save");
+		
+		Button btnGenerate = new Button(buttonsCmp, SWT.PUSH);
+		btnGenerate.setText("Generate");
+		
 		//language selector
-		final Composite langCmp = new Composite(main, SWT.NONE);
+		final Composite langCmp = new Composite(top, SWT.NONE);
 		langCmp.setLayout(new GridLayout(2, false));
 		langCmp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 
@@ -86,7 +108,7 @@ public class DmMatcherDialog extends Composite {
 			langCodes[i] = languages.get(i).getCode();
 		}
 		
-		langSelector =  new Combo (langCmp, SWT.READ_ONLY);
+		langSelector =  new Combo(langCmp, SWT.READ_ONLY);
 		langSelector.setItems(langCodes);
 		langSelector.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		langSelector.addSelectionListener(new SelectionAdapter() {
@@ -163,7 +185,7 @@ public class DmMatcherDialog extends Composite {
 	}
 
 	private void createColumns() {
-		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 200);
+		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 220);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -172,18 +194,18 @@ public class DmMatcherDialog extends Composite {
 			}
 		});
 
-		col = createTableViewerColumn("Type", 80);
+		col = createTableViewerColumn("Type", 100);
 		col.setLabelProvider(new Ct2AttributeTypeLabelProvider());
 		col.setEditingSupport(new Ct2AttributeTypeTableEditor(viewer));
 
-		col = createTableViewerColumn("SMART Attribute", 200);
+		col = createTableViewerColumn("SMART Attribute", 220);
 		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(dmLookup);
 		col.setLabelProvider(attrLabelProvider);
 		addLanguageChangedListener(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
 		col.setEditingSupport(new SmartAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
-		col = createTableViewerColumn("SMART Category", 200);
+		col = createTableViewerColumn("SMART Category", 220);
 		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(dmLookup);
 		col.setLabelProvider(catLabelProvider);
 		addLanguageChangedListener(catLabelProvider);
