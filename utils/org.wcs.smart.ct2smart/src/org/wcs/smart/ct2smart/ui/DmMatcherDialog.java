@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -42,6 +43,8 @@ public class DmMatcherDialog extends Composite {
 	private TableViewer viewer;
 	private Combo langSelector;
 	private DataModelLookup dmLookup;
+	
+	private Composite innerPanel;
 	private MatchAttributeComposite infoComposite;
 	private CategoryMapComposite categoryComposite;
 	
@@ -94,13 +97,7 @@ public class DmMatcherDialog extends Composite {
 		});
 		
 		//attributes table
-		final Composite left = new Composite(main, SWT.NONE);
-		left.setLayout(new GridLayout(1, false));
-		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		viewer = new TableViewer(left, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-
-		// create the columns 
+		viewer = new TableViewer(main, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createColumns();
 
 		// make lines and header visible
@@ -124,10 +121,14 @@ public class DmMatcherDialog extends Composite {
 			}
 		});
 
-		infoComposite = new MatchAttributeComposite(left, dmLookup);
+		innerPanel = new Composite(main, SWT.NONE);
+		innerPanel.setLayout(new StackLayout());
+		innerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		infoComposite = new MatchAttributeComposite(innerPanel, dmLookup);
 		addLanguageChangedListener(infoComposite);
 
-		categoryComposite = new CategoryMapComposite(left, dmLookup, session.getCt2Smart());
+		categoryComposite = new CategoryMapComposite(innerPanel, dmLookup, session.getCt2Smart());
 		addLanguageChangedListener(categoryComposite);
 		
 		langSelector.select(0); //to select default language and fire all listeners
@@ -149,17 +150,19 @@ public class DmMatcherDialog extends Composite {
 		Object obj = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (obj instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute)obj;
-			infoComposite.setInput(a);
+			StackLayout stackLayout = ((StackLayout)innerPanel.getLayout());
 			if (Ct2AttributeType.CATEGORY.equals(a.getType())) {
 				categoryComposite.setInput(session.getCt2Smart());
+				stackLayout.topControl = categoryComposite;
 			} else {
-				//TODO: hide
+				infoComposite.setInput(a);
+				stackLayout.topControl = infoComposite;
 			}
+			innerPanel.layout();
 		}
 	}
 
 	private void createColumns() {
-
 		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 200);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override

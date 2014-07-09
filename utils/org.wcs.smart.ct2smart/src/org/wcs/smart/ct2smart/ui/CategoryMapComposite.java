@@ -33,6 +33,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.dao.ConnectionUtil;
@@ -79,7 +80,12 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		this.setLayout(gd);
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		viewer = new TableViewer(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		Group group = new Group(this, SWT.NONE);
+		group.setText("Category mappings");
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		group.setLayout(new GridLayout(1, false));
+		
+		viewer = new TableViewer(group, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
