@@ -5,6 +5,10 @@ import java.sql.Connection;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 
+/**
+ * @author elitvin
+ * @since 3.0.0
+ */
 public class MatchSession {
 	
 	private Ct2Smart ct2Smart;
