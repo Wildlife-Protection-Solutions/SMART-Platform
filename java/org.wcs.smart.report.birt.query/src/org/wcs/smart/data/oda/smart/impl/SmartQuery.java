@@ -65,15 +65,15 @@ public class SmartQuery implements IQuery {
 	private IQueryType queryType;
 	
 	//the loaded query
-	private Query smartQuery;
-	private ISmartQuery wrapperObject;
+	protected Query smartQuery;
+	protected ISmartQuery wrapperObject;
 
 	//dataset parameters
-	private HashMap<SmartParameterMetaData.Parameter, Object> parameters = null;
+	protected HashMap<Object, Object> parameters = null;
 	
 	//dataset metadata
-	private SmartParameterMetaData pMetadata = null;
-	private SmartConnection connection;
+	protected SmartParameterMetaData pMetadata = null;
+	protected SmartConnection connection;
 	
 	/**
 	 * Job to load the query from the database.
@@ -102,13 +102,14 @@ public class SmartQuery implements IQuery {
 	public SmartQuery(SmartConnection connection) {
 		this.queryType = null;
 		this.connection = connection;
+		
 	}
 
 	public Query getQuery(){
 		return this.smartQuery;
 	}
 	
-	public HashMap<SmartParameterMetaData.Parameter, Object> getParameters(){
+	public HashMap<Object, Object> getParameters(){
 		return parameters;
 	}
 	
@@ -122,8 +123,8 @@ public class SmartQuery implements IQuery {
 	 * </p>
 	 */
 	public void prepare(String queryText) throws OdaException {
-		
-		parameters = new HashMap<SmartParameterMetaData.Parameter, Object>();
+		parameters = new HashMap<Object, Object>();
+//		parameters = new HashMap<SmartParameterMetaData.Parameter, Object>();
 		
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
 		this.queryType = QueryTypeManager.getInstance().findQueryType(bits[0]);
@@ -187,15 +188,6 @@ public class SmartQuery implements IQuery {
 		if (metadata != null){
 			return metadata;
 		}
-//		if (smartQuery.getType().getKey().equals(PatrolObservationQueryType.KEY) ||
-//				smartQuery.getType().getKey().equals(PatrolWaypointQueryType.KEY) ||
-//				smartQuery.getType().getKey().equals(PatrolQueryType.KEY)){
-//			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery);
-//		} else if (smartQuery.getType().getKey().equals(PatrolSummaryQueryType.KEY)) {
-//			return new SummaryQueryResultSetMetadata((SummaryQuery) smartQuery);
-//		} else if (smartQuery.getType().getKey().equals(PatrolGridQueryType.KEY)){
-//			return new SimpleQueryResultSetMetadata( (GriddedQuery) smartQuery);
-//		}
 		throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadMetadata);
 	}
 
@@ -204,55 +196,6 @@ public class SmartQuery implements IQuery {
 	 */
 	public IResultSet executeQuery() throws OdaException {
 		return wrapperObject.executeQuery(this, connection);
-//		IResultSet resultSet = null;
-//
-//		//create date filter
-//		Date startDate = (Date) parameters.get(SmartParameterMetaData.Parameter.STARTDATE);
-//		Date endDate = (Date) parameters.get(SmartParameterMetaData.Parameter.ENDDATE);
-//		
-//		if (startDate == null || endDate == null){
-//			if (smartQuery.getType().getKey().equals(PatrolSummaryQueryType.KEY)){
-//				//we choose to run summaries in order to get 
-//				//all header information
-//				Calendar cal = Calendar.getInstance();
-//				cal.set(1900, Calendar.JANUARY, 1);
-//				startDate = new Date( cal.getTimeInMillis() );
-//				endDate = new Date(startDate.getTime());
-//			}else{
-//				//all others will just return an empty
-//				return EmptyResultSet.INSTANCE;
-//			}
-//			
-//		}
-//		
-//		CustomDateFilter cd = new CustomDateFilter();
-//		cd.setDates(startDate, endDate);
-//		DateFilter dateFilter = new DateFilter(
-//				WaypointDateField.INSTANCE,cd);
-//
-//
-//		//the result set
-//		
-//		if (smartQuery.getType().getKey().equals(PatrolObservationQueryType.KEY) ||
-//					smartQuery.getType().getKey().equals(PatrolWaypointQueryType.KEY)){
-//			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
-//			resultSet = new PagedQueryResultSet((IPagedQuery) smartQuery, (SimpleQueryResultSetMetadata)getMetaData());
-//		}else if (smartQuery.getType().getKey().equals(PatrolQueryType.KEY)){
-//			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
-//			resultSet = new MemoryQueryResultSet((IMemoryQuery) smartQuery,
-//					(SimpleQueryResultSetMetadata)getMetaData());
-//		}else  if (smartQuery.getType().getKey().equals(PatrolGridQueryType.KEY)){
-//			((GriddedQuery) smartQuery).setDateFilter(dateFilter);
-//			resultSet = new MemoryQueryResultSet((GriddedQuery) smartQuery,
-//					(SimpleQueryResultSetMetadata)getMetaData());
-//		} else if (smartQuery.getType().getKey().equals(PatrolSummaryQueryType.KEY)){
-//			((SummaryQuery) smartQuery).setDateFilter(dateFilter);
-//			resultSet = new SummaryQueryResultSet(
-//					(SummaryQuery) smartQuery,
-//					new SummaryQueryResultSetMetadata((SummaryQuery) smartQuery));
-//		}
-//		
-//		return resultSet;
 	}
 
 	/**
@@ -436,9 +379,7 @@ public class SmartQuery implements IQuery {
 	 */
 	public void setObject(String parameterName, Object value)
 			throws OdaException {
-		parameters
-				.put(getParameterMetaDataLocal().findParameter(parameterName),
-						value);
+		parameters.put(getParameterKey(parameterName), value);
 	}
 
 	/**
@@ -447,8 +388,7 @@ public class SmartQuery implements IQuery {
 	 * java.lang.Object)
 	 */
 	public void setObject(int parameterId, Object value) throws OdaException {
-		parameters.put(getParameterMetaDataLocal().findParameter(parameterId),
-				value);
+		parameters.put(getParameterKey(parameterId), value);
 	}
 
 	/**
@@ -474,28 +414,34 @@ public class SmartQuery implements IQuery {
 	 * .String)
 	 */
 	public int findInParameter(String parameterName) throws OdaException {
-		return getParameterMetaDataLocal().findParameter(parameterName).index;
+		return ((org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData.Parameter)
+				getParameterKey(parameterName)).index;
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#getParameterMetaData()
 	 */
 	public IParameterMetaData getParameterMetaData() throws OdaException {
+		return getParameterMetaDataLocal();
+	}
+
+	private IParameterMetaData getParameterMetaDataLocal() throws OdaException {
 		if (pMetadata == null) {
 			pMetadata = new SmartParameterMetaData();
 		}
 		return pMetadata;
 	}
-
-	/**
-	 * @return
-	 * @throws OdaException
-	 */
-	private SmartParameterMetaData getParameterMetaDataLocal()
-			throws OdaException {
-		return (SmartParameterMetaData) getParameterMetaData();
+	
+	public Object getParameterKey(int parameterId)  throws OdaException{
+		getParameterMetaDataLocal();
+		return pMetadata.findParameter(parameterId);
 	}
-
+	
+	public Object getParameterKey(String parameterName)  throws OdaException{
+		getParameterMetaDataLocal();
+		return pMetadata.findParameter(parameterName);
+	}
+	
 	/**
 	 * @see
 	 * org.eclipse.datatools.connectivity.oda.IQuery#setSortSpec(org.eclipse

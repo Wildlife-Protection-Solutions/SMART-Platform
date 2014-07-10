@@ -753,6 +753,50 @@
                odaScalarDataType="Timestamp">
          </dataTypeMapping>
       </dataSet>
+      <dataSet
+            defaultDisplayName="Plan Patrols"
+            id="org.wcs.smart.data.oda.smart.smartQueryDataset">
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+      </dataSet>
    </extension>
    <extension
          point="org.eclipse.datatools.connectivity.oda.design.ui.dataSource">
@@ -779,11 +823,29 @@
                wizardPageClass="org.wcs.smart.plan.report.oda.ui.SmartPlanTargetDatasetWizardPage">
          </dataSetPage>
       </dataSetUI>
+      <dataSetUI
+            id="org.wcs.smart.data.oda.smart.smartQueryDataset"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Plan Patrols">
+         </dataSetWizard>
+         <dataSetPage
+               displayName="Plan Patrols"
+               id="org.wcs.smart.plan.report.smartPlanPatrol.page1"
+               path="/"
+               wizardPageClass="org.wcs.smart.plan.report.oda.ui.PlanPatrolDatasetWizardPage">
+         </dataSetPage>
+      </dataSetUI>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.plan.report.PlanTargetMapLayer">
+      </MapLayer>
+      <MapLayer
+            maplayer="org.wcs.smart.plan.report.PlanPatrolMapLayer">
       </MapLayer>
    </extension>
    <extension

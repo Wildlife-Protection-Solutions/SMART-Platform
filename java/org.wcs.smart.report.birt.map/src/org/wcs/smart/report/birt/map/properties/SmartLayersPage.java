@@ -95,6 +95,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
+	private static final byte[] DEFAULT_BASEMAP = new byte[]{-1};
+	
 	private static final String ERROR_DIALOG_TITLE = Messages.SmartLayersPage_ErrorDialog_Title;
 	public static final String PAGE_KEY = "MapLayers"; //$NON-NLS-1$
 	protected FormToolkit toolkit;
@@ -469,9 +471,15 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		List<BasemapDefinition> maps = null;
 		try {
 			maps = HibernateManager.getBasemaps(session);
+			
 			BasemapDefinition defaultdef = new BasemapDefinition();
-			defaultdef.setName(Messages.SmartLayersPage_NoBasemapLabel);
+			defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
+			defaultdef.setUuid( DEFAULT_BASEMAP );
 			maps.add(defaultdef);
+			
+			BasemapDefinition nonedef = new BasemapDefinition();
+			nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
+			maps.add(nonedef);
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().commit();
@@ -532,6 +540,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				byte[] uuid = getSelectedBasemapUuid();
 				if (uuid == null){
 					mapItem.setBasemapName(null);
+				}else if (uuid.equals(DEFAULT_BASEMAP)){
+					mapItem.setBasemapName(SmartMapItem.DEFAULT_BASEMAP_KEY);
 				}else{
 					String name = SmartUtils.encodeHex(uuid);
 					mapItem.setBasemapName(name);
@@ -662,13 +672,14 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 		tblLayers.setInput(layerItems);
 		
-		String uuid =mapItem.getBasemapName();
+		String uuid = mapItem.getBasemapName();
 		Object[] data = (Object[]) basemapCombo.getInput();
 		Object selection = data[0];
 		for (int i = 0; i < data.length; i ++){
 			BasemapDefinition bm = (BasemapDefinition) data[i];
 			if ((uuid == null && bm.getUuid() == null) ||
-					(SmartUtils.encodeHex(bm.getUuid()).equals(uuid))){
+				(uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY) && bm.getUuid().equals(DEFAULT_BASEMAP)) || 
+					SmartUtils.encodeHex(bm.getUuid()).equals(uuid)){
 				selection = data[i];
 				break;
 			}

@@ -693,6 +693,8 @@ public class Messages extends NLS {
 	public static String TrackPointDialog_UndoButtonText;
 	public static String TrackPointDialog_UpdatePointLayerError;
 	public static String TrackPointDialog_UpdateTrackLayerError;
+	public static String TrackPointDialog_WarningMessage;
+	public static String TrackPointDialog_WarningTitle;
 	public static String TrackPointDialog_XColumnName;
 	public static String TrackPointDialog_YColumnName;
 	public static String TrackPointDialog_ZColumnName;

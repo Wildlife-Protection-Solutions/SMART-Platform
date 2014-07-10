@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_BasemapLabel;
 	public static String SmartLayersPage_ClearBoundsLink;
 	public static String SmartLayersPage_CRSLabel;
+	public static String SmartLayersPage_DefaultBasemapLabel;
 	public static String SmartLayersPage_DefaultStyleLabel;
 	public static String SmartLayersPage_Error_NoDatasets;
 	public static String SmartLayersPage_Error_QueryNotFound;

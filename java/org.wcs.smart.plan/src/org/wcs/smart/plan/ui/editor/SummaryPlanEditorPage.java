@@ -147,7 +147,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 			try{
 				myPatrols = PlanHibernateManager.getPatrols(parentEditor.getPlan(), s);
 				Plan thisPlan = (Plan) s.get(Plan.class, parentEditor.getPlan().getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
-				getChildPlanPatrols(thisPlan, childPatrols, s);
+				parentEditor.getChildPlanPatrols(thisPlan, childPatrols, s);
 				s.getTransaction().rollback();
 			}finally{
 				s.close();
@@ -737,21 +737,6 @@ public class SummaryPlanEditorPage extends EditorPart {
 	
 	public void refreshChildTargets(List<PlanTarget> childTargets){
 		targetList2.initValues(childTargets);
-	}
-	
-	
-	/**
-	 * 
-	 * @return the current plan associated with the editor
-	 */
-	private void getChildPlanPatrols(Plan plan, Set<PatrolEditorInput> kids, Session session){
-		if(plan.getChildren() == null){
-			return;
-		}
-		for (Plan p : plan.getChildren()){
-			kids.addAll(PlanHibernateManager.getPatrols(p, session));
-			getChildPlanPatrols(p, kids, session);
-		}
 	}
 
 	@Override

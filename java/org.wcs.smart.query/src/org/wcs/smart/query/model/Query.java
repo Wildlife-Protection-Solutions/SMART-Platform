@@ -262,6 +262,7 @@ public abstract class Query extends NamedItem {
 		}
 		return cachedResults;
 	}
+	
 	/**
 	 * If there are results cached it returns
 	 * the cached results otherwise it runs
@@ -273,5 +274,14 @@ public abstract class Query extends NamedItem {
 	 */
 	public Object getCachedResults(IProgressMonitor monitor)  throws Exception{
 		return getCachedResults(monitor, null);
+	}
+	
+	/**
+	 * Clears the cached results.  This will force
+	 * the query to be rerun when getCachedResults() is
+	 * called.
+	 */
+	public void clearCachedResults(){
+		this.cachedResults = null;
 	}
 }

@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.editor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -55,6 +56,7 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanEventManager;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.SmartPlanPlugIn;
@@ -93,12 +95,14 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 					//force reload plan to get latest changes
 					plan = loadPlan();
 					initEditor();
-					mapPage.refreshPlanTargets();				
+					mapPage.refreshPlanTargets();
+					mapPage.refreshPatrols();
 				}	
 			}
 			
 			if (type == PlanEventManager.PATROL_PLAN_ATTRIBUTE){
 				summaryPage.refreshPatrolLinks();
+				mapPage.refreshPatrols();
 			}
 		}
 	};
@@ -124,7 +128,11 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	private IPatrolEventListener patrolListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
-			summaryPage.refreshPatrolLinks();
+			if (attributeChanged < 0 || 
+					attributeChanged == PatrolEventManager.PATROL_TRACKS){
+				summaryPage.refreshPatrolLinks();
+				mapPage.refreshPatrols();
+			}
 		}
 	};
 	
@@ -196,6 +204,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		PlanEventManager.getInstance().addListener(EventType.PLAN_DELETED, deleteListener);
 		PatrolEventManager.getInstance().addListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().addListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_DELETED, patrolListener);
+		PatrolEventManager.getInstance().addListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_MODIFIED, patrolListener);
 	}
 
 	@Override
@@ -206,6 +215,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, deleteListener);
 		PatrolEventManager.getInstance().removeListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_DELETED, patrolListener);
+		PatrolEventManager.getInstance().removeListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_MODIFIED, patrolListener);
 		
 		super.dispose();
 	}
@@ -397,4 +407,17 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		return mapPage.getStatusLineManager();
 	}
 
+	/**
+	 * 
+	 * @return the current plan associated with the editor
+	 */
+	protected void getChildPlanPatrols(Plan plan, Set<PatrolEditorInput> kids, Session session){
+		if(plan.getChildren() == null){
+			return;
+		}
+		for (Plan p : plan.getChildren()){
+			kids.addAll(PlanHibernateManager.getPatrols(p, session));
+			getChildPlanPatrols(p, kids, session);
+		}
+	}
 }

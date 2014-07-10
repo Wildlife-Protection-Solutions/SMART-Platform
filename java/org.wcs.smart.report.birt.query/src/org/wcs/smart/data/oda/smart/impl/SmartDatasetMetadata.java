@@ -38,7 +38,7 @@ import org.wcs.smart.data.oda.smart.internal.Messages;
 public class SmartDatasetMetadata implements IDataSetMetaData {
 	private IConnection m_connection;
 
-	SmartDatasetMetadata(IConnection connection) {
+	public SmartDatasetMetadata(IConnection connection) {
 		m_connection = connection;
 	}
 

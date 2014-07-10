@@ -22,14 +22,22 @@
 package org.wcs.smart.plan.ui.editor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IService;
+import net.refractions.udig.project.command.AbstractCommand;
+import net.refractions.udig.project.command.UndoableMapCommand;
+import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
+import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,12 +48,31 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleFactory;
+import org.hibernate.Session;
+import org.opengis.filter.FilterFactory;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
+import org.wcs.smart.patrol.query.model.PatrolStartDateField;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.map.udig.PlanTargetService;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Map page for Plan editor.  Displays spatial targets on a map
@@ -67,6 +94,11 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	//for supporting the subplan spatial targets
 	//layer
 	private Plan subPlanLayer = null;
+	
+	//layer for patrol query which
+	//returns all tracklogs for patrols related
+	//to the query
+	private IGeoResource patrolLayer = null;
 	
 	/*
 	 * Job for adding or refreshing the
@@ -106,8 +138,8 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	};
 	
 	/*
-	 * Job for adding plan spatial target layer and
-	 * zooming the map.  This job waits until
+	 * Job for adding plan spatial target layer, patrol query layer
+	 *  and zooming the map.  This job waits until
 	 * the load default layers job is finished to add
 	 * the plan target layer to the map.
 	 */
@@ -120,10 +152,15 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	    	try {
 	    		loadDefaultLayers.join();
 	    		
-	    		List<IGeoResource> layers = (List<IGeoResource>) planTargetService.resources(monitor);
-	    		AddLayersCommand command = new AddLayersCommand(layers, getMap().getLayersInternal().size());
+	    		//target layer
+	    		final List<IGeoResource> layers = new ArrayList<IGeoResource>(planTargetService.resources(monitor));
+	    		IGeoResource tracks = createTrackPoints(monitor);
+	    		if (tracks != null){
+	    			layers.add(tracks);
+	    		}
+	    		AddPlanningLayers command = new AddPlanningLayers(layers);
 	    		getMap().sendCommandASync(command);
-    		
+	    		
 	    		initListener = new IViewportModelListener() {
 					@Override
 					public void changed(ViewportModelEvent event) {
@@ -144,9 +181,26 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			}
 			return Status.OK_STATUS;
 		}
+		
+		private IGeoResource createTrackPoints(IProgressMonitor monitor) throws IOException{
+			PatrolQuery pq = PatrolQueryFactory.createPatrolQuery();
+			pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName);
+			pq.setName(Messages.MapPlanEditorPage_QueryName);
+			pq.setDateFilter(new DateFilter(PatrolStartDateField.INSTANCE, AllDatesFilter.INSTANCE));
+			pq.setQueryFilter(generateQueryString());
+			
+			//add pq to map
+			IService service = QueryServiceFactory.generateQueryService(pq);
+			List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
+			if (layers.size() > 0){
+				patrolLayer = layers.get(0);
+				return patrolLayer;
+			}
+			return null;
+		}
 	};
 	
-	  
+	
     /*
      * Job to refresh the plan target service and map layer 
      */
@@ -166,6 +220,28 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		}
     };
         
+    /*
+     * Job to refresh the plan target service and map layer 
+     */
+    private Job refreshPatrolsJob = new Job(Messages.MapPlanEditorPage_RefreshMapJobName){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (patrolLayer != null){
+				try{
+					PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, monitor);
+					pq.clearCachedResults(); //clear cached results
+					if (pq != null){
+						pq.setQueryFilter(generateQueryString()); //update filter
+					}
+				}catch (IOException e){
+					SmartPlanPlugIn.log("Error refreshing patrols layers." + e.getMessage(), e); //$NON-NLS-1$
+				}
+				mapViewer.getRenderManager().refresh(null);
+			}
+			
+			return Status.OK_STATUS;
+		}
+    };
     /**
      * Creates a new map page
      * @param editor
@@ -197,6 +273,14 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		refreshJob.cancel();
 		refreshJob.schedule();
 	}
+	
+	/**
+	 * refreshes the patrol tracks layer
+	 */
+	public void refreshPatrols(){
+		refreshPatrolsJob.cancel();
+		refreshPatrolsJob.schedule();
+	}
 
 	private void addLayers(){
 		if (loadDefaultLayers != null){
@@ -227,8 +311,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
         addLayers();
 	}
 
-    
-
     @Override
     public void dispose() {
         super.dispose();
@@ -249,7 +331,109 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
         
         refreshJob.cancel();
         refreshJob = null;
+        
+        if (patrolLayer != null){
+        	try{
+        		IService service = patrolLayer.resolve(IService.class, null);
+        		CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+        		service.dispose(null);
+        		patrolLayer.dispose(null);
+        		patrolLayer = null;
+        	}catch(IOException ex){
+        		
+        	}
+        }
+        
+        
+        subPlanTargetService = null;
+        refreshPatrolsJob.cancel();
+        refreshPatrolsJob = null;
     }
 
 
+    private String generateQueryString(){
+    	final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>(); 
+		final List<PatrolEditorInput> myPatrols;
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			myPatrols = PlanHibernateManager.getPatrols(parentEditor.getPlan(), s);
+			Plan thisPlan = (Plan) s.get(Plan.class, parentEditor.getPlan().getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
+			parentEditor.getChildPlanPatrols(thisPlan, childPatrols, s);
+			s.getTransaction().rollback();
+		}finally{
+			s.close();
+		}
+
+		myPatrols.addAll(childPatrols);
+		
+		StringBuilder query = new StringBuilder();
+		
+		if (myPatrols.size() == 0){
+			return "observation|patrol:uuid equals \"\""; //$NON-NLS-1$
+		}
+		for (PatrolEditorInput i : myPatrols ){
+			if (query.length() > 0){
+				query.append(" OR "); //$NON-NLS-1$
+			}
+			query.append("patrol:uuid equals\"" + SmartUtils.encodeHex(i.getUuid()) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return "observation|" + query.toString(); //$NON-NLS-1$
+    }
+    
+    
+    /*
+     * Creates the layer default style
+     */
+    private Style createDefaultTrackStyle(){
+    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+    	FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+    	LineSymbolizer ls = sf.createLineSymbolizer();
+    	ls.setStroke(sf.createStroke(ff.literal("#0000FF"), ff.literal(1))); //$NON-NLS-1$
+    	
+    	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	
+    	Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+    	
+    	Rule r= sf.createRule();
+    	fts.rules().add(r);
+    	r.symbolizers().add(ls);
+    
+    	return style;
+    }
+    
+    
+    private class AddPlanningLayers extends AbstractCommand implements UndoableMapCommand{
+		
+    	private List<IGeoResource> layers = null;
+    	private AddLayersCommand command = null;
+    	
+    	private AddPlanningLayers(List<IGeoResource> layers){
+    		this.layers = layers;
+    	}
+		@Override
+		public void run(IProgressMonitor monitor) throws Exception {
+			command = new AddLayersCommand(layers, getMap().getLayersInternal().size());
+			command.setMap(getMap());
+			command.run(monitor);
+			
+			Layer trackLayer = command.getLayers().get(layers.size() - 1);
+			trackLayer.getStyleBlackboard().put(SLDContent.ID, createDefaultTrackStyle());
+			trackLayer.refresh(null);
+		}
+		
+		@Override
+		public String getName() {
+			return Messages.MapPlanEditorPage_CommandName;
+		}
+		
+		@Override
+		public void rollback(IProgressMonitor monitor) throws Exception {
+			if (command != null){
+				command.rollback(monitor);
+			}
+		}
+    }
 }
+

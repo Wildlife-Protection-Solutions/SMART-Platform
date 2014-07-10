@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Plan PlugIn
 Bundle-SymbolicName: org.wcs.smart.plan;singleton:=true
-Bundle-Version: 3.0.0
+Bundle-Version: 3.0.1
 Bundle-Activator: org.wcs.smart.plan.SmartPlanPlugIn
 Require-Bundle: org.wcs.smart.patrol;bundle-version="3.0.0",
  org.eclipse.ui.forms,
@@ -13,7 +13,8 @@ Require-Bundle: org.wcs.smart.patrol;bundle-version="3.0.0",
  net.refractions.udig.style.sld,
  org.wcs.smart.patrol.query;bundle-version="3.0.0",
  org.wcs.smart.query;bundle-version="3.0.0",
- org.wcs.smart.p2;bundle-version="3.0.0"
+ org.wcs.smart.p2;bundle-version="3.0.0",
+ org.wcs.smart.report.birt.query;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.plan,

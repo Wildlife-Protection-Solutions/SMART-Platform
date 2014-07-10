@@ -41,6 +41,7 @@ import org.wcs.smart.report.birt.map.internal.Messages;
  */
 public class SmartMapItem extends ReportItem {
 
+	public static final String DEFAULT_BASEMAP_KEY = "default"; //$NON-NLS-1$
 	/**
 	 * Smart map item extension name
 	 */

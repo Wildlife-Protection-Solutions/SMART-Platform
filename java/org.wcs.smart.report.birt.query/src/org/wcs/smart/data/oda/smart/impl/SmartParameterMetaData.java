@@ -23,8 +23,6 @@ public class SmartParameterMetaData implements IParameterMetaData {
 	 * Fixed start and end date parameters
 	 */
 	public enum Parameter {
-//		STARTDATE(Messages.SmartParameterMetaData_StartDate_ParameterName, 1, java.sql.Types.DATE), 
-//		ENDDATE(Messages.SmartParameterMetaData_EndDate_ParameterName, 2, java.sql.Types.DATE);
 		STARTDATE("Start Date", 1, java.sql.Types.DATE),  //$NON-NLS-1$
 		ENDDATE("End Date", 2, java.sql.Types.DATE); //$NON-NLS-1$
 		public String guiName;

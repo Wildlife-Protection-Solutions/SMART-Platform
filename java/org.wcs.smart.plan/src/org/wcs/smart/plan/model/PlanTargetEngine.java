@@ -66,38 +66,66 @@ public class PlanTargetEngine {
 		if (target instanceof AdministrativePlanTarget){
 			return computeAdministrativePlanTarget((AdministrativePlanTarget) target);
 		}else if (target instanceof NumericPlanTarget){
-			return computeNumericPlanTarget((NumericPlanTarget) target);
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try{
+				return computeNumericPlanTarget((NumericPlanTarget) target, session);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
 		}else if (target instanceof SpatialPlanTarget){
-			return computeSpatialPlanTarget((SpatialPlanTarget) target);
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try{
+				return computeSpatialPlanTarget((SpatialPlanTarget) target, session);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
 		}else{
 			//unknown
 			return new PlanTargetStatus(Status.INCOMPLETE);
 		}
 	}
 	
+	/**
+	 * Computes the current status of the given plan target.
+	 * <p>
+	 * This should be called outside of the main gui thread and outside
+	 * of a session.
+	 * </p>
+	 * @param target
+	 * @return
+	 */
+	public PlanTargetStatus computeTargetStatus(PlanTarget target, Session session){
+		if (target instanceof AdministrativePlanTarget){
+			return computeAdministrativePlanTarget((AdministrativePlanTarget) target);
+		}else if (target instanceof NumericPlanTarget){
+			return computeNumericPlanTarget((NumericPlanTarget) target, session);
+		}else if (target instanceof SpatialPlanTarget){
+			return computeSpatialPlanTarget((SpatialPlanTarget) target, session);
+		}else{
+			//unknown
+			return new PlanTargetStatus(Status.INCOMPLETE);
+		}
+	}
 	
-	private PlanTargetStatus computeSpatialPlanTarget(SpatialPlanTarget target) {
+	private PlanTargetStatus computeSpatialPlanTarget(SpatialPlanTarget target, Session session) {
 		SpatialPlanTarget thisTarget = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
 		PlanTargetStatus result = new PlanTargetStatus(Status.COMPLETE);
-		try {
-			thisTarget = (SpatialPlanTarget) session.load(SpatialPlanTarget.class, target.getUuid());
-			if (thisTarget == null) {
-				return new PlanTargetStatus(Status.INCOMPLETE);
-			}
-			List<SpatialPlanTargetPoint> points= target.getPoints();
-			for(SpatialPlanTargetPoint n : points){
-				//as soon as we see one point was not met, just break so we close the transaction properly;
-				if(!pointHasBeenVisited(thisTarget.getDistanceForCompletion(), thisTarget.getPlan(), n, session)){
-					result.setStatus(Status.INCOMPLETE);
-					break;
-				}
-			}
-			session.getTransaction().rollback();
-		} finally {
-			session.close();
 
+		thisTarget = (SpatialPlanTarget) session.load(SpatialPlanTarget.class, target.getUuid());
+		if (thisTarget == null) {
+			return new PlanTargetStatus(Status.INCOMPLETE);
+		}
+		List<SpatialPlanTargetPoint> points= target.getPoints();
+		for(SpatialPlanTargetPoint n : points){
+			//as soon as we see one point was not met, just break so we close the transaction properly;
+			if(!pointHasBeenVisited(thisTarget.getDistanceForCompletion(), thisTarget.getPlan(), n, session)){
+				result.setStatus(Status.INCOMPLETE);
+				break;
+			}
 		}
 		return result;
 	}
@@ -113,24 +141,16 @@ public class PlanTargetEngine {
 		}
 	}
 	
-	private PlanTargetStatus computeNumericPlanTarget(NumericPlanTarget target) {
+	private PlanTargetStatus computeNumericPlanTarget(NumericPlanTarget target, Session session) {
 		Double total = -9999d;
 		NumericPlanTarget thisTarget = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			thisTarget = (NumericPlanTarget) session.load(
-					NumericPlanTarget.class, target.getUuid());
-			if (thisTarget == null) {
-				return new PlanTargetStatus(Status.INCOMPLETE);
-			}
-			total = calculateTargetStatusValue(thisTarget.getPlan(),
-					thisTarget.getType());
-			session.getTransaction().rollback();
-		} finally {
-			session.close();
-
+		thisTarget = (NumericPlanTarget) session.load(
+				NumericPlanTarget.class, target.getUuid());
+		if (thisTarget == null) {
+			return new PlanTargetStatus(Status.INCOMPLETE);
 		}
+		total = calculateTargetStatusValue(thisTarget.getPlan(),
+				thisTarget.getType());
 		
 		String completeMsg = Status.COMPLETE.guiName + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		String incompleteMsg = Status.INCOMPLETE.guiName + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$

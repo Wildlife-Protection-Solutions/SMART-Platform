@@ -103,79 +103,81 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROL_ID_KEY = 50;
   /** RegularExpression Id. */
-  int PATROL_STATION_KEY = 51;
+  int PATROL_UUID_KEY = 51;
   /** RegularExpression Id. */
-  int PATROL_TEAM_KEY = 52;
+  int PATROL_STATION_KEY = 52;
   /** RegularExpression Id. */
-  int PATROL_TEAM_KEY_KEY = 53;
+  int PATROL_TEAM_KEY = 53;
   /** RegularExpression Id. */
-  int PATROL_MANDATE_KEY = 54;
+  int PATROL_TEAM_KEY_KEY = 54;
   /** RegularExpression Id. */
-  int PATROL_MANDATE_KEY_KEY = 55;
+  int PATROL_MANDATE_KEY = 55;
   /** RegularExpression Id. */
-  int PATROL_TYPE_KEY = 56;
+  int PATROL_MANDATE_KEY_KEY = 56;
   /** RegularExpression Id. */
-  int PATROL_CA_KEY = 57;
+  int PATROL_TYPE_KEY = 57;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY = 58;
+  int PATROL_CA_KEY = 58;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY_KEY = 59;
+  int PATROLLEG_TRANSPORT_KEY = 59;
   /** RegularExpression Id. */
-  int PATROLLEG_LEADER_KEY = 60;
+  int PATROLLEG_TRANSPORT_KEY_KEY = 60;
   /** RegularExpression Id. */
-  int PATROLLEG_PILOT_KEY = 61;
+  int PATROLLEG_LEADER_KEY = 61;
   /** RegularExpression Id. */
-  int PATROLLEG_MEMBER_KEY = 62;
+  int PATROLLEG_PILOT_KEY = 62;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION = 63;
+  int PATROLLEG_MEMBER_KEY = 63;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_BOOL_KEY = 64;
+  int PATROL_CONTRIBUTION = 64;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_STRING_KEY = 65;
+  int PATROL_CONTRIBUTION_BOOL_KEY = 65;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 66;
+  int PATROL_CONTRIBUTION_STRING_KEY = 66;
   /** RegularExpression Id. */
-  int AREA_KEY = 67;
+  int AREA_TYPE_KEY = 67;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 68;
+  int AREA_KEY = 68;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 69;
+  int OBSERVATION_FILTER_TYPE_KEY = 69;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 70;
+  int WAYPOINT_FILTER_TYPE_KEY = 70;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 71;
+  int PATROL_VALUE_ITEM = 71;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 72;
+  int PATROL_VALUE_KEY = 72;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 73;
+  int SUM_CAT_VALUE_KEY = 73;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 74;
+  int SUM_ATTRIBUTE_VALUE_KEY = 74;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 75;
+  int SUM_CAT_ATT_VALUE_KEY = 75;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 76;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 76;
   /** RegularExpression Id. */
-  int AGG = 77;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 77;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 78;
+  int AGG = 78;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 79;
+  int DATE_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 80;
+  int QUERY_SPLITTER = 80;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 81;
+  int PATROL_UUID_GROUPBY_OPTION = 81;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 82;
+  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 82;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 83;
+  int PATROL_STRING_GROUPBY_OPTION = 83;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 84;
+  int CATEGORY_GROUPBY_ITEM = 84;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 85;
+  int AREA_GROUPBY_ITEM = 85;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 86;
+  int ATTRIBUTE_GROUPBY_ITEM = 86;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 87;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 87;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 88;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -233,6 +235,7 @@ public interface ParserConstants {
     "<LETTER>",
     "<SPECIAL_CHARS>",
     "\"patrol:id\"",
+    "\"patrol:uuid\"",
     "\"patrol:station\"",
     "\"patrol:team\"",
     "\"patrol:teamkey\"",

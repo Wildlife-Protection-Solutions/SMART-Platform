@@ -41,6 +41,7 @@ public class Parser implements ParserConstants {
     case PATROL_BOOL_KEY:
     case DM_KEY:
     case PATROL_ID_KEY:
+    case PATROL_UUID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
     case PATROL_TEAM_KEY_KEY:
@@ -83,6 +84,7 @@ public class Parser implements ParserConstants {
       case PATROL_BOOL_KEY:
       case DM_KEY:
       case PATROL_ID_KEY:
+      case PATROL_UUID_KEY:
       case PATROL_STATION_KEY:
       case PATROL_TEAM_KEY:
       case PATROL_TEAM_KEY_KEY:
@@ -142,6 +144,7 @@ public class Parser implements ParserConstants {
     case PATROL_BOOL_KEY:
     case DM_KEY:
     case PATROL_ID_KEY:
+    case PATROL_UUID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
     case PATROL_TEAM_KEY_KEY:
@@ -182,6 +185,7 @@ public class Parser implements ParserConstants {
     case PATROL_BOOL_KEY:
     case DM_KEY:
     case PATROL_ID_KEY:
+    case PATROL_UUID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
     case PATROL_TEAM_KEY_KEY:
@@ -469,6 +473,7 @@ public class Parser implements ParserConstants {
     case CAT_ATT_DATE_KEY:
     case PATROL_BOOL_KEY:
     case PATROL_ID_KEY:
+    case PATROL_UUID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
     case PATROL_TEAM_KEY_KEY:
@@ -573,6 +578,7 @@ public class Parser implements ParserConstants {
     case ATT_STR_KEY:
     case CAT_ATT_STR_KEY:
     case PATROL_ID_KEY:
+    case PATROL_UUID_KEY:
     case PATROL_STATION_KEY:
     case PATROL_TEAM_KEY:
     case PATROL_TEAM_KEY_KEY:
@@ -770,6 +776,13 @@ public class Parser implements ParserConstants {
                          value = token.image;
                         filter = PatrolFilter.createStringFilter(key, op, value);
       break;
+    case PATROL_UUID_KEY:
+      jj_consume_token(PATROL_UUID_KEY);
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                         value = token.image;
+                        filter = PatrolUuidFilter.createStringFilter(op, value);
+      break;
     case PATROL_CONTRIBUTION_STRING_KEY:
       jj_consume_token(PATROL_CONTRIBUTION_STRING_KEY);
                          key = token.image;
@@ -912,10 +925,10 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x40100,0x40100,0x0,0x40100,0x40100,0x0,0x0,0x400,0x100000,0x0,0x0,0x400,0x0,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x7dfcbfff,0x7dfcbfff,0x0,0x7dfcbfff,0x7dfcbfff,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7dfc3fff,0x2208,0x104,0x7dfc3ffe,0x1040,0x7dfc0000,0x7dfc0082,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0xfbfcbfff,0xfbfcbfff,0x0,0xfbfcbfff,0xfbfcbfff,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfbfc3fff,0x2208,0x104,0xfbfc3ffe,0x1040,0xfbf40000,0xfbfc0082,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0xb,0xb,0x8000,0xb,0xb,0x0,0x1f40,0x0,0x0,0x1f40,0x7f4000,0x0,0x50000,0x7f4000,0x0,0x0,0xb,0x1,0x0,0x3,0x0,0x0,0x2,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x16,0x16,0x10000,0x16,0x16,0x0,0x3e80,0x0,0x0,0x3e80,0xfe8000,0x0,0xa0000,0xfe8000,0x0,0x0,0x16,0x2,0x0,0x6,0x0,0x0,0x4,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1032,7 +1045,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[88];
+    boolean[] la1tokens = new boolean[89];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1052,7 +1065,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 88; i++) {
+    for (int i = 0; i < 89; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

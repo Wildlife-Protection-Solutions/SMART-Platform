@@ -1413,6 +1413,7 @@
             <text-property name="text">Spatial Targets Map</text-property>
         </label>
         <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="324">
+            <property name="org.wcs.smart.birt.map.basemap">default</property>
             <simple-property-list name="org.wcs.smart.birt.map.layers">
                 <value>subplan</value>
                 <value>plan</value>

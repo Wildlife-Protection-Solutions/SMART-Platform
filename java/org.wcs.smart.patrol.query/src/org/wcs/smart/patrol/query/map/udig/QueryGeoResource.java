@@ -40,6 +40,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Georesource for a smart waypoint query.
@@ -126,6 +127,7 @@ public class QueryGeoResource extends IGeoResource {
 				|| adaptee.isAssignableFrom(FeatureStore.class)
 				|| adaptee.isAssignableFrom(SimpleFeatureStore.class)
 	            || adaptee.isAssignableFrom(SimpleFeatureSource.class)
+	            || adaptee.isAssignableFrom(Query.class)
 				|| super.canResolve(adaptee);
 	}
 
@@ -135,6 +137,9 @@ public class QueryGeoResource extends IGeoResource {
 	@Override
 	public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)
 			throws IOException {
+		if (adaptee.isAssignableFrom(((QueryService)service).getQuery().getClass())){
+			return adaptee.cast(((QueryService)service).getQuery());
+		}
 		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {
 			return adaptee.cast(super.getInfo(monitor));
 		}

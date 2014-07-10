@@ -22,100 +22,56 @@
 package org.wcs.smart.plan.report.oda;
 
 import java.text.MessageFormat;
-import java.util.Properties;
 
-import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.data.oda.smart.impl.SmartDatasetMetadata;
 import org.wcs.smart.plan.internal.Messages;
-
-import com.ibm.icu.util.ULocale;
 /**
- * Connection for the SMART plan driver
+ * Connection for the SMART plan driver.
+ * 
+ * Extends the query SmartConnection;
+ * 
  * @author Emily
  * @since 2.0.0
  *
  */
-public class SmartPlanConnection implements IConnection {
+public class SmartPlanConnection extends SmartConnection {
 
-	private boolean m_isOpen = false;
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
-	 */
-	public void open(Properties connProperties) throws OdaException {
-		m_isOpen = true;
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#setAppContext(java.lang.Object)
-	 */
-	public void setAppContext(Object context) throws OdaException {
-		// do nothing; assumes no support for pass-through context
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#close()
-	 */
-	public void close() throws OdaException {
-		m_isOpen = false;
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#isOpen()
-	 */
-	public boolean isOpen() throws OdaException {
-		return m_isOpen;
-	}
-
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#getMetaData(java.lang.String)
 	 */
+	@Override
 	public IDataSetMetaData getMetaData(String dataSetType) throws OdaException {
-		return new SmartPlanDatasetMetadata(this);
+		if (dataSetType.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)) {
+			return new SmartPlanDatasetMetadata(this);
+		}else if(dataSetType.equals(PlanPatrolQuery.SMART_DATASET_TYPE)){
+			return new SmartDatasetMetadata(this);
+		}
+		
+		throw new OdaException(
+				MessageFormat.format(Messages.SmartPlanConnection_UnsupportedDataset,
+						new Object[]{dataSetType}));
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#newQuery(java.lang.String)
 	 */
+	@Override
 	public IQuery newQuery(String dataSetType) throws OdaException {
 		try {
 			if (dataSetType.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)) {
-				return new PlanTargetQuery();
+				return new PlanTargetQuery(this);
+			}else if (dataSetType.equals(PlanPatrolQuery.SMART_DATASET_TYPE)){
+				return new PlanPatrolQuery(this);
 			}
 			throw new OdaException(MessageFormat.format(Messages.SmartPlanConnection_UnsupportedDataset,new Object[]{dataSetType}));
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#getMaxQueries()
-	 */
-	public int getMaxQueries() throws OdaException {
-		return 0; // no limit
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#commit()
-	 */
-	public void commit() throws OdaException {
-		// do nothing; assumes no transaction support needed
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#rollback()
-	 */
-	public void rollback() throws OdaException {
-		// do nothing; assumes no transaction support needed
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IConnection#setLocale(com.ibm.icu.util.ULocale)
-	 */
-	public void setLocale(ULocale locale) throws OdaException {
-		// do nothing; assumes no locale support
 	}
 
 }

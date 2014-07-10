@@ -48,8 +48,10 @@ public class Messages extends NLS {
 	public static String LoadPlanJob_LoadPlans_Task;
 	public static String LoadPlanJob_None;
 	public static String LoadPlanJob_Title;
+	public static String MapPlanEditorPage_CommandName;
 	public static String MapPlanEditorPage_ErrorInitializePlanTargets;
 	public static String MapPlanEditorPage_PlanJobName;
+	public static String MapPlanEditorPage_QueryName;
 	public static String MapPlanEditorPage_RefreshError;
 	public static String MapPlanEditorPage_RefreshMapJobName;
 	public static String MapPlanEditorPage_SubPlanError;
