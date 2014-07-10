@@ -29,10 +29,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -109,50 +114,68 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
 		
-		List<PlanTarget> pts = new ArrayList<PlanTarget>();
-		
-		String planUuid = (String)params.get(PLAN_UUID.key);
-		Boolean subPlans = (Boolean)params.get(SUB_PLANS.key);;
+		final String planUuid = (String)params.get(PLAN_UUID.key);
+		final Boolean subPlans = (Boolean)params.get(SUB_PLANS.key);;
 		
 		if (planUuid == null){
 			return new PlanTargetDataSource(null, subPlans);
 		}
-		Session session = HibernateManager.openSession();
-		Plan plan = null;
 		
-		try{
-			plan = (Plan)session.load(Plan.class, SmartUtils.decodeHex((String)params.get(PLAN_UUID.key)));
-			if (plan == null ){
-				throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
-			}
-			
-			if (!subPlans){
-				//load plan targets
-				for(PlanTarget pt : plan.getTargets()){
-					pts.add(pt);
-				}
-			}else{
-				List<Plan> toProcess = new ArrayList<Plan>();
-				toProcess.addAll(plan.getChildren());
-				while(toProcess.size() > 0){
-					Plan kid = toProcess.remove(0);
-					for(PlanTarget pt : kid.getTargets()){
-						pts.add(pt);
+		final Plan[] plan = {null};
+		//load plan in own job so has its own session
+		Job j = new Job("load plan"){ //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				try{
+					Plan temp = (Plan)session.load(Plan.class, SmartUtils.decodeHex(planUuid));
+					if (temp == null ){
+						throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
 					}
-					toProcess.addAll(kid.getChildren());
-				}
-			}
-			
-		}catch (Exception ex){
-			throw new IOException(ex);
-		}finally{
-			session.close();
-		}
-		for(PlanTarget pt : pts){
-			pt.refreshStatus();
-		}
 		
-		return new PlanTargetDataSource(plan, subPlans);
+					List<PlanTarget> pts = new ArrayList<PlanTarget>();
+					if (!subPlans){
+						//load plan targets
+						for(PlanTarget pt : temp.getTargets()){
+							pts.add(pt);
+						}
+					}else{
+						List<Plan> toProcess = new ArrayList<Plan>();
+						toProcess.addAll(temp.getChildren());
+						while(toProcess.size() > 0){
+							Plan kid = toProcess.remove(0);
+							for(PlanTarget pt : kid.getTargets()){
+								pts.add(pt);
+							}
+							toProcess.addAll(kid.getChildren());
+						}
+					}
+				
+					for(PlanTarget pt : pts){
+						pt.refreshStatus(session);
+					}
+					plan[0] = temp;
+				}catch (Exception ex){
+					 SmartPlanPlugIn.log(ex.getMessage(), ex);
+				}finally{
+					session.close();
+				}
+				return Status.OK_STATUS;
+			}};
+		
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			throw new IOException(e);
+			
+		}
+		if (plan[0] == null){
+			throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
+		}
+
+		return new PlanTargetDataSource(plan[0], subPlans);
 	}
 
 	/* (non-Javadoc)

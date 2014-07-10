@@ -684,7 +684,9 @@ public class HibernateManager extends SmartHibernateManager{
 	 * if no default specified
 	 */
 	public static BasemapDefinition getDefaultBasemapDefinition(Session session){
-		List<?> defaultmap = session.createCriteria(BasemapDefinition.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDefault", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<?> defaultmap = session.createCriteria(BasemapDefinition.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("isDefault", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		if (defaultmap.size() > 0){
 			return (BasemapDefinition) defaultmap.get(0);
 		}
@@ -698,7 +700,9 @@ public class HibernateManager extends SmartHibernateManager{
 	 * if no default specified
 	 */
 	public static BasemapDefinition getBasemapDefinition(Session session, byte[] uuid){
-		List<?> defaultmap = session.createCriteria(BasemapDefinition.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("uuid", uuid)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<?> defaultmap = session.createCriteria(BasemapDefinition.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("uuid", uuid)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		if (defaultmap.size() > 0){
 			return (BasemapDefinition) defaultmap.get(0);
 		}

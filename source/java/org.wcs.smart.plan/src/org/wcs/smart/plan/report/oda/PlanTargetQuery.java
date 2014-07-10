@@ -34,6 +34,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 
 /**
  * SMART Plan target query.
@@ -63,10 +64,14 @@ public class PlanTargetQuery implements IQuery {
 	//dataset parameters
 	private HashMap<Integer, Object> parameters = null;
 	private boolean onlySubplans = false;
+	
+	private SmartConnection connection;
+	
 	/**
 	 * Creates a new smart query
 	 */
-	public PlanTargetQuery() {
+	public PlanTargetQuery(SmartConnection connection) {
+		this.connection = connection;
 	}
 
 	/**
@@ -112,7 +117,8 @@ public class PlanTargetQuery implements IQuery {
 	public IResultSet executeQuery() throws OdaException {
 		String[] planUuids = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
 		
-		return new PlanTargetResultSet(planUuids, onlySubplans, (PlanTargetResultSetMetadata)getMetaData());
+		return new PlanTargetResultSet(planUuids, onlySubplans, 
+				(PlanTargetResultSetMetadata)getMetaData(), connection);
 	}
 
 	/**

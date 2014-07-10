@@ -21,78 +21,82 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IService;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.wcs.smart.plan.map.geotools.PlanTargetDataSourceFactory;
-import org.wcs.smart.plan.map.udig.PlanTargetService;
-import org.wcs.smart.plan.report.oda.PlanTargetQuery;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 
 /**
- * Converts Plan Target ID Oda Dataset Handle to a map
- * layer for a SMART Birt map layer. 
+ * Converts Patrol Plan Query into a map layer
+ * for adding to smart plan map. 
  * 
  * @author Emily
  *
  */
-public class PlanTargetMapLayer implements IBirtMapLayerManager {
+public class PlanPatrolMapLayer implements IBirtMapLayerManager {
+
+	public PlanPatrolMapLayer() {
+	}
 
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
 		if (!(handle instanceof OdaDataSetHandle)){
 			return false;
 		}
+		//only support queries without any query strings
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (odaHandle.getExtensionID().equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
-			return true;
+		if (odaHandle.getExtensionID().equals(PlanPatrolQuery.SMART_DATASET_TYPE)) {
+			String queryText = odaHandle.getQueryText();
+			if (queryText.length() == 0){
+				return true;
+			}
 		}
 		return false;
 	}
 
 	@Override
-	public List<IGeoResource> createLayer(DataSetHandle handle,
-			IReportContext context) throws Exception {
+	public List<IGeoResource> createLayer(DataSetHandle handle, IReportContext context) throws Exception {
 		if (!(handle instanceof OdaDataSetHandle)){
 			return null;
 		}
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (!odaHandle.getExtensionID().equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
-			return null;
-		}
 		
-		boolean onlySubplans = false;
-		if (odaHandle.getQueryText().equals(PlanTargetQuery.SUBPLAN_ONLY)){
-			onlySubplans = true;
+		PatrolQuery q = PlanPatrolQuery.createQuery();
+		if (context == null){
+			PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
 		}else{
-			onlySubplans= false;
+			String bits = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
+			if (bits == null || bits.length() == 0){
+				PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
+			}else{
+				PlanPatrolQuery.updateQueryFilter(q, bits.split(",")[0]); //$NON-NLS-1$
+			}
 		}
-		
-		String uuid = null;
-		if (context != null){
-			//The oda layer supports multiple plans
-			//here we only support a single plan so get only the first plan
-			String planUuids = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
-			String[] uuids = planUuids.split(","); //$NON-NLS-1$
-			uuid = uuids[0];
+		//do not close session as assume it is managed by SmartConnection is BIRT report
+		Session session = HibernateManager.openSession();
+		IService qs = QueryServiceFactory.generateQueryService(q);
+		ArrayList<IGeoResource> toAdd = new ArrayList<IGeoResource>();
+		if (qs != null) {
+			q.executeQuery(new NullProgressMonitor(), session);
+			List<? extends IGeoResource> resources = qs.resources(null);
+			if (resources.size() > 0){
+				toAdd.add(resources.get(0));
+			}
 		}
+		return toAdd;
 		
-		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, uuid);
-		params.put(PlanTargetDataSourceFactory.SUB_PLANS.key, onlySubplans);
-		
-		PlanTargetService service = new PlanTargetService(params);
-		List<IGeoResource> resources = new ArrayList<IGeoResource>();
-		resources.addAll(service.resources(null));
-		return resources;
 	}
+	
 
 }

@@ -38,6 +38,7 @@ import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -80,6 +81,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof PatrolFilter){
 			return asSql((PatrolFilter)filter, engine);
+		}else if (filter instanceof PatrolUuidFilter){
+			return asSql((PatrolUuidFilter)filter, engine);
 		}else if (filter instanceof IExtensionFilter){
 			return asSql((IExtensionFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
@@ -212,6 +215,26 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			
 		}
 		return ""; //$NON-NLS-1$	
+	}
+	
+	/**
+	 * Patrol uuid filter.
+	 * @param filter
+	 * @param engine
+	 * @return
+	 * @throws SQLException
+	 */
+	protected String asSql(PatrolUuidFilter filter, IQueryEngine engine) throws SQLException{
+		String prefix = engine.tablePrefix(Patrol.class);
+		if (filter.getOperator().equals(Operator.STR_EQUALS)){
+			if (filter.getValue().length() != 0){
+				return prefix + ".uuid = x'" +SmartUtils.stripQuotes(filter.getValue()) + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				return "false"; //$NON-NLS-1$
+			}
+		}else{
+			throw new SQLException("Only equals operator is supported for patrol uuid filters."); //$NON-NLS-1$
+		}
 	}
 	
 	/*

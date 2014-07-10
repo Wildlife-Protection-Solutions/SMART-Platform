@@ -158,14 +158,15 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	private TableViewer trackviewer;
 	private MapViewer mapViewer;
 
-	private FeatureStore pointStore;
-	private FeatureStore trackStore;
+	private FeatureStore<SimpleFeatureType, SimpleFeature> pointStore;
+	private FeatureStore<SimpleFeatureType, SimpleFeature> trackStore;
 
 	private Layer trackLayer = null;
 	private Layer pointLayer = null;
 	
 	private Button btnUndo;
 	private List<List<Coordinate>> undo = new ArrayList<List<Coordinate>>();
+	private boolean isModified = false;
 		
 	
 	/**
@@ -391,8 +392,11 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		List<Coordinate> toAdd = undo.remove(undo.size() - 1);
 	
 		List<Coordinate> allC = new ArrayList<Coordinate>();
-		for (Coordinate c : editTrack.getLineString().getCoordinates()){
-			allC.add(c);
+		boolean isUpdate = editTrack.getLineString() != null;
+		if (editTrack.getLineString() != null){
+			for (Coordinate c : editTrack.getLineString().getCoordinates()){
+				allC.add(c);
+			}
 		}
 		allC.addAll(toAdd);
 		Collections.sort(allC, new Comparator<Coordinate>() {
@@ -408,8 +412,13 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		
 		//update track and point layers
 		try {
-			trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
-					ls, Filter.INCLUDE);
+			if (isUpdate){
+				trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
+						ls, Filter.INCLUDE);
+			}else{
+				//was null, need to recreate it
+				createTrackFeatures((SimpleFeatureType)trackStore.getFeatures().getSchema());
+			}
 			trackLayer.refresh(null);
 		} catch (IOException e1) {
 			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
@@ -440,10 +449,27 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		}				
 		if (toDelete.size() == 0) return;
 		
+		
 		Coordinate[] oldc = editTrack.getLineString().getCoordinates();
 		Coordinate[] newc = new Coordinate[oldc.length - toDelete.size()];
+		
+		int newindex = 0;
+		List<Coordinate> deleted = new ArrayList<Coordinate>();
+		for (int i = 0; i < oldc.length; i ++){
+			if (!toDelete.contains(i)){
+				newc[newindex++] = oldc[i];
+			}else{
+				deleted.add(oldc[i]);
+			}
+		}
+		if (deleted.size() > 0){
+			undo.add(deleted);
+			btnUndo.setEnabled(true);
+		}
+		
 		if (newc.length == 0){
 			//remove track entirely
+			isModified = true;
 			editTrack.setLineString(null);
 			try{
 				trackStore.removeFeatures(Filter.INCLUDE);
@@ -461,19 +487,8 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			MessageDialog.openError(getShell(), Messages.TrackPointDialog_ErrorDialogTitle, Messages.TrackPointDialog_TrackError);
 			return;
 		}
-		int newindex = 0;
-		List<Coordinate> deleted = new ArrayList<Coordinate>();
-		for (int i = 0; i < oldc.length; i ++){
-			if (!toDelete.contains(i)){
-				newc[newindex++] = oldc[i];
-			}else{
-				deleted.add(oldc[i]);
-			}
-		}
-		if (deleted.size() > 0){
-			undo.add(deleted);
-			btnUndo.setEnabled(true);
-		}
+		
+		isModified = true;
 		GeometryFactory gf = new GeometryFactory();
 		LineString ls = gf.createLineString(newc);
 		editTrack.setLineString(ls);
@@ -578,10 +593,10 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					//made for the layer, therefore we compare feature ids.
 					Envelope env = CRS.transform(bbox, SmartDB.DATABASE_CRS);
 					bbox = new ReferencedEnvelope(env);
-					FeatureCollection selected = pointStore.getFeatures(
-							FACTORY.bbox(FACTORY.property(GEOM_FIELD), bbox));
+					FeatureCollection<SimpleFeatureType, SimpleFeature> selected = 
+							pointStore.getFeatures(FACTORY.bbox(FACTORY.property(GEOM_FIELD), bbox));
 					HashSet<FeatureId> items = new HashSet<FeatureId>();
-					FeatureIterator<Feature> it = selected.features();
+					FeatureIterator<SimpleFeature> it = selected.features();
 					while(it.hasNext()){
 						Feature f = it.next();
 						items.add(f.getIdentifier());
@@ -636,14 +651,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 			layers.add(trackResource);
 			
-			Object[] data = new Object[2];
-			data[0] = SmartUtils.encodeHex(editTrack.getUuid());
-			data[1] = editTrack.getLineString();
-			List<SimpleFeature> features = new ArrayList<SimpleFeature>(1);
-			features.add(SimpleFeatureBuilder.build(featureType, data, (String)data[0]));
-			ListFeatureCollection featureCollection = new ListFeatureCollection(featureType);
-			featureCollection.addAll(features);
-			trackStore.addFeatures(featureCollection);
+			createTrackFeatures(featureType);
 			
 			AddLayersCommand command = new AddLayersCommand(layers, mapViewer.getMap().getLayersInternal().size()) {
 				@Override
@@ -670,6 +678,17 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingTrackLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	    
+	}
+	
+	private void createTrackFeatures(SimpleFeatureType featureType) throws IOException{
+		Object[] data = new Object[2];
+		data[0] = SmartUtils.encodeHex(editTrack.getUuid());
+		data[1] = editTrack.getLineString();
+		List<SimpleFeature> features = new ArrayList<SimpleFeature>(1);
+		features.add(SimpleFeatureBuilder.build(featureType, data, (String)data[0]));
+		ListFeatureCollection featureCollection = new ListFeatureCollection(featureType);
+		featureCollection.addAll(features);
+		trackStore.addFeatures(featureCollection);
 	}
 	
 	/*
@@ -760,9 +779,21 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 		Button btn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		btn.setEnabled(false);
+	}
+	
+	@Override
+	protected void cancelPressed(){
+		if (isModified){
+			//warn users
+			if (!MessageDialog.openQuestion(getShell(), Messages.TrackPointDialog_WarningTitle, 
+					Messages.TrackPointDialog_WarningMessage)){
+				return ;
+			}
+		}
+		super.cancelPressed();
 	}
 	
 	@Override
@@ -790,6 +821,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			saveJob.join();
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pld);
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			isModified = false;
 		}catch (InterruptedException ex){
 			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
 		}

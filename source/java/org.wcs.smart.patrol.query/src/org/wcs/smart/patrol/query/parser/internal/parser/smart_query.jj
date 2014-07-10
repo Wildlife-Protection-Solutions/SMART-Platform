@@ -51,6 +51,7 @@ TOKEN :
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
  | < PATROL_ID_KEY : "patrol:id" >
+ | < PATROL_UUID_KEY : "patrol:uuid" >
  | < PATROL_STATION_KEY : "patrol:station" >
  | < PATROL_TEAM_KEY : "patrol:team" >
  | < PATROL_TEAM_KEY_KEY : "patrol:teamkey" >
@@ -618,6 +619,16 @@ IFilter StringExpression():
 		{
   			filter = PatrolFilter.createStringFilter(key, op, value);
 		}
+	|
+ 		(
+			< PATROL_UUID_KEY > 
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = PatrolUuidFilter.createStringFilter(op, value);
+		}		
 
 	|
  		(

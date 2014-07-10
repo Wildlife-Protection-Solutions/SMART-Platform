@@ -28,7 +28,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -63,8 +65,11 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.udig.catalog.smart.SmartService;
+import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -151,6 +156,18 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			IMap renderedMap = ProjectFactory.eINSTANCE.createMap();
 			if (def != null) {
 				MapSettings.getInstance(def).applyTo((Map) renderedMap);
+			}else{
+				if (mapItem.getBasemapName() != null &&
+						mapItem.getBasemapName().equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
+					//default basemap; but no default is set so use the SMART default of the 5 layers
+					HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+					params.put(SmartServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
+					SmartService ss = new SmartService(params);
+					List<IGeoResource> defaultLayers = (List<IGeoResource>) ss.resources(null);
+    				AddLayersCommand alCommand = new AddLayersCommand(defaultLayers, 0);
+    				renderedMap.sendCommandSync(alCommand);
+				}
+				
 			}
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 			for (GeoSmart layer : layers) {
@@ -312,9 +329,18 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	 * basemap is the hex encoded uuid
 	 */
 	private BasemapDefinition getBasemap(String basemap){
+		if (basemap == null || basemap.length() == 0){
+			return null;
+		}
+		
 		//we do not close the session as we assume this session object
 		//is managed by the SmartConnection
 		Session session = HibernateManager.openSession();
+		
+		if (basemap.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
+			return HibernateManager.getDefaultBasemapDefinition(session);
+		}
+		
 		byte[] uuid = null;
 		try{
 			uuid = SmartUtils.decodeHex(basemap);

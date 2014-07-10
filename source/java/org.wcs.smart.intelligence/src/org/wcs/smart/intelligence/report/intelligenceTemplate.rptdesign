@@ -541,6 +541,7 @@
             <text-property name="text">Location Map</text-property>
         </label>
         <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="415">
+            <property name="org.wcs.smart.birt.map.basemap">default</property>
             <simple-property-list name="org.wcs.smart.birt.map.layers">
                 <value></value>
             </simple-property-list>

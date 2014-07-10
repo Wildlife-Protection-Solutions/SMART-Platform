@@ -37,7 +37,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
@@ -58,7 +58,8 @@ public class PlanTargetResultSet  implements IResultSet {
 	private List<PlanTarget> plans;
 	private PlanTargetResultSetMetadata metadata;
 	
-	private Session session;
+	private Session session;	//connection session
+	
 	/**
 	 * Creates a new summary results set
 	 * 
@@ -68,14 +69,13 @@ public class PlanTargetResultSet  implements IResultSet {
 	 *            the metadata
 	 */
 	public PlanTargetResultSet(String[] planUuids, boolean onlyChildren,
-			PlanTargetResultSetMetadata metadata) {
+			PlanTargetResultSetMetadata metadata, SmartConnection connection) {
 
 		this.metadata = metadata;
 		plans = new ArrayList<PlanTarget>();
 		
-		session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
+		session = connection.getSession();
+
 		Set<Plan> addedPlans = new HashSet<Plan>();
 		for (int i = 0; i < planUuids.length; i ++){
 			try{
@@ -104,9 +104,6 @@ public class PlanTargetResultSet  implements IResultSet {
 			}catch (Exception ex){
 				SmartPlanPlugIn.log("Error creating plan target result set", ex); //$NON-NLS-1$
 			}
-		}
-		}finally{
-			session.getTransaction().commit();
 		}
 	}
 
@@ -150,12 +147,6 @@ public class PlanTargetResultSet  implements IResultSet {
 	 */
 	public void close() throws OdaException {
 		currentRow = 0;
-		
-		if (session != null && session.isOpen()){
-			
-			session.close();
-		}
-		session = null;
 	}
 
 	/**
@@ -186,7 +177,8 @@ public class PlanTargetResultSet  implements IResultSet {
 		PlanTarget pt = plans.get(currentRow);
 		
 		if ((colIndex == 3 || colIndex == 4) &&pt.getCurrentStatus() == null){
-			pt.refreshStatus();
+			// recompute the status using the current session
+			pt.refreshStatus(session);
 		}
 		
 		switch (colIndex) {

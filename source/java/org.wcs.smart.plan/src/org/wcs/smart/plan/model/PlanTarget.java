@@ -37,6 +37,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
@@ -148,11 +149,22 @@ public abstract class PlanTarget{
 	}
 	
 	/**
-	 * Recomputes the target status
+	 * Recomputes the target status.  Creates a new session.  This
+	 * should not be called within a session.  Use refreshStatus(session)
+	 * if you have an active session.
 	 */
 	@Transient
 	public void refreshStatus(){
 		this.currentStatus = PlanTargetEngine.getInstance().computeTargetStatus(this);
+	}
+
+	/**
+	 * Recomputes the target status using
+	 * the given session
+	 */
+	@Transient
+	public void refreshStatus(Session session){
+		this.currentStatus = PlanTargetEngine.getInstance().computeTargetStatus(this, session);
 	}
 	
 	/**
