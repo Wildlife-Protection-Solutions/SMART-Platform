@@ -2,11 +2,14 @@ package org.wcs.smart.ct2smart.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -23,13 +26,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
+import org.wcs.smart.ct2smart.patrol.CsvPatrolExtractor;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeEditingSupport;
@@ -193,8 +199,19 @@ public class DmMatcherDialog extends Composite {
 	}
 
 	protected void generatePatrols() {
-		// TODO Auto-generated method stub
-		
+		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		String f = dd.open();
+		if (f != null) {
+			CsvPatrolExtractor exporter;
+			try {
+				exporter = new CsvPatrolExtractor(session.getConnection());
+				exporter.extract(f, session.getCt2Smart());
+				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	protected void languageChanged() {

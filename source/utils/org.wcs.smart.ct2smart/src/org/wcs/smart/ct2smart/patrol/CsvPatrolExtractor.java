@@ -21,20 +21,27 @@
  */
 package org.wcs.smart.ct2smart.patrol;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+
+import org.wcs.smart.ct2smart.matcher.FileUtil;
+import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagE;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.ct2smart.xml.parser.TagT;
+import org.wcs.smart.patrol.xml.model.PatrolType;
 
 /**
  * @author elitvin
@@ -63,6 +70,32 @@ public class CsvPatrolExtractor {
 		rs.close();
 	}
 
+
+	public void extract(String folder, Ct2Smart ct2Smart) throws Exception {
+		PatrolBuilder builder = new PatrolBuilder(ct2Smart);
+		
+		String[] uniqueId = new String[] {"Date", "Unit_ID", "DeviceId"};
+		String[] columnNames = getCsvColumns(uniqueId);
+		String[] uniqueValues = new String[uniqueId.length];
+		ResultSet rs = getUniqueGroups(columnNames);
+		while (rs.next()) {
+//			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < uniqueValues.length; i++) {
+				uniqueValues[i] = rs.getString(i+1);
+//				sb.append(uniqueValues[i]).append("  ");
+			}
+//			System.out.println("Extracting patrol for: " + sb);
+			List<TagS> sList = extractS(columnNames, uniqueValues);
+			List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
+			PatrolType p = builder.createPatrol(sList, tList);
+			p.setId(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-'));
+			
+			FileUtil.write(new File(folder + "\\" + p.getId() + ".xml"), p); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		rs.close();
+
+	}
+	
 	public String[] getCsvColumns(String... n) throws SQLException {
 		String[] columns = new String[n.length];
 //		PreparedStatement ps = c.prepareStatement("select id from ct_to_smart.attributes where n = ?"); //$NON-NLS-1$

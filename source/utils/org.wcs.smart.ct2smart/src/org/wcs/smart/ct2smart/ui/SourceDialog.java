@@ -111,6 +111,7 @@ public class SourceDialog extends Composite {
 	protected void resumeSession() {
 		MatchSession session = new MatchSession();
 		try {
+			session.setConnection(ConnectionUtil.getConnection());
 			session.setCt2Smart(FileUtil.loadCt2Smart(xmlResumeMapping.getFile()));
 			session.setDataModel(FileUtil.loadDataModel(xmlResumeDatamodel.getFile()));
 			launch(session);
