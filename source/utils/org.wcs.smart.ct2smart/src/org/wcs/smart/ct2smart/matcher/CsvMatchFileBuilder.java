@@ -110,7 +110,7 @@ public class CsvMatchFileBuilder {
 			
 		}
 		attrRs.close();
-		c.close();
+//		c.close();
 
 		return ct2Smart;
 	}
