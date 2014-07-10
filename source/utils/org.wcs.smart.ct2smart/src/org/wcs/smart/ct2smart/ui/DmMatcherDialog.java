@@ -1,7 +1,11 @@
 package org.wcs.smart.ct2smart.ui;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -19,9 +23,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
@@ -87,10 +93,22 @@ public class DmMatcherDialog extends Composite {
 		buttonsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		
 		Button btnSave = new Button(buttonsCmp, SWT.PUSH);
-		btnSave.setText("Save");
+		btnSave.setText("Save mapping");
+		btnSave.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performSave();
+			}
+		});
 		
 		Button btnGenerate = new Button(buttonsCmp, SWT.PUSH);
-		btnGenerate.setText("Generate");
+		btnGenerate.setText("Generate patrols");
+		btnGenerate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				generatePatrols();
+			}
+		});
 		
 		//language selector
 		final Composite langCmp = new Composite(top, SWT.NONE);
@@ -156,6 +174,29 @@ public class DmMatcherDialog extends Composite {
 		langSelector.select(0); //to select default language and fire all listeners
 	}
 
+	protected void performSave() {
+		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+		dlg.setFilterNames(new String[] {"XML file"});
+		dlg.setFilterExtensions(new String[] {"*.xml"}); //$NON-NLS-1$
+		String fn = dlg.open();
+		if (fn != null) {
+			if (!fn.endsWith(".xml")) { //$NON-NLS-1$
+				fn += ".xml"; //$NON-NLS-1$
+			}
+			try {
+				FileUtil.write(new File(fn), session.getCt2Smart());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected void generatePatrols() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	protected void languageChanged() {
 		String langCode = langSelector.getItems()[langSelector.getSelectionIndex()];
 		for (ILanguageChangedListener listener : langListeners) {

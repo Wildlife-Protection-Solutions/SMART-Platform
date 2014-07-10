@@ -11,6 +11,7 @@ import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.ct2smart.xml.parser.TagT;
 
+@Deprecated
 public class PatrolExtractor {
 
 	public ResultSet getUniqueGroups(Connection c, String... n) throws SQLException {
