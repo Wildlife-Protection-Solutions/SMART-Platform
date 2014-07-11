@@ -412,6 +412,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 		resultPage.getQueryResultsTable().clearColumns();
 		
 		resultPage.setQuery();
+		mapPage.reset();
 		
 		setDirty(false);
 		

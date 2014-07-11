@@ -5,8 +5,8 @@ Bundle-SymbolicName: org.wcs.smart.independentincident;singleton:=true
 Bundle-Version: 1.0.1
 Bundle-Activator: org.wcs.smart.incident.IncidentPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
- org.wcs.smart.observation;bundle-version="3.0.0",
+Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
+ org.wcs.smart.observation;bundle-version="3.0.2",
  org.eclipse.ui.forms,
  net.refractions.udig.style.sld,
  org.eclipse.help;bundle-version="3.5.100"
