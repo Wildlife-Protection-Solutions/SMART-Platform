@@ -7,8 +7,8 @@ Bundle-Activator: org.wcs.smart.entity.EntityPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,
  net.refractions.udig.style.sld,
- org.wcs.smart.observation;bundle-version="3.0.0",
- org.wcs.smart.query;bundle-version="3.0.0",
+ org.wcs.smart.observation;bundle-version="3.0.2",
+ org.wcs.smart.query;bundle-version="3.0.2",
  org.wcs.smart.report.birt.query;bundle-version="3.0.0",
  org.wcs.smart.report.birt.map;bundle-version="3.0.0",
  org.wcs.smart.p2;bundle-version="3.0.0",
