@@ -35,7 +35,6 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
  */
 public class DmTreeContentProvider implements ITreeContentProvider {
 
-//	private RootNode root ;
 	private List<CategoryType> rootNodes;
 	private boolean active;
 
@@ -45,7 +44,6 @@ public class DmTreeContentProvider implements ITreeContentProvider {
 	 * @param active <code>true</code> if only active elements to be included; otherwise <code>false</code> includes all
 	 */
 	public DmTreeContentProvider(boolean active, DataModelLookup lookup) {
-//		root = new RootNode();
 		this.active = active;
 		this.lookup = lookup;
 	}
@@ -120,9 +118,4 @@ public class DmTreeContentProvider implements ITreeContentProvider {
 		return children.length > 0;
 	}
 	
-//	/**
-//	 * Empty class to represent root node of data tree.
-//	 * 
-//	 */
-//	public class RootNode{}
 }
