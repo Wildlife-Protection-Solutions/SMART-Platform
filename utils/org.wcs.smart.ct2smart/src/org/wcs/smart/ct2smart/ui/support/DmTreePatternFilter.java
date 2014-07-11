@@ -11,8 +11,7 @@ public class DmTreePatternFilter extends PatternFilter {
 	protected boolean isChildMatch(Viewer viewer, Object element) {
 		Object parent = ((ITreeContentProvider) ((TreeViewer) viewer).getContentProvider()).getParent(element);
 		if (parent != null) {
-			return (isLeafMatch(viewer, parent) ? true : isChildMatch(
-					viewer, parent));
+			return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
 		}
 		return false;
 	}
