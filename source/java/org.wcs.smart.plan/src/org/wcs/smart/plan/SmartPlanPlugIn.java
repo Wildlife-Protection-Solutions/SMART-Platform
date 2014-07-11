@@ -89,10 +89,11 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	
 	private IPatrolDeleteHandler deletePatrol =  new IPatrolDeleteHandler() {
 		@Override
-		public void beforeDelete(Patrol patrol, Session session,
+		public boolean beforeDelete(Patrol patrol, Session session,
 				IProgressMonitor monitor) throws Exception {
 			Query q = session.createQuery("DELETE FROM PatrolPlan where id.patrol = :patrol").setParameter("patrol", patrol);  //$NON-NLS-1$//$NON-NLS-2$
 			q.executeUpdate();
+			return true;
 		}
 		
 		@Override

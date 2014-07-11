@@ -371,6 +371,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		updatePartName();
 		page1.getQueryResultsTable().clearColumns();
 		page1.setQuery();
+		page2.reset();
 		
 		setDirty(false);
 		//this is a bit of a hack to get the querylistview to be updated

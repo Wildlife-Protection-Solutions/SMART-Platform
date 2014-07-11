@@ -6,7 +6,7 @@ Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.p2.Activator
 Require-Bundle: org.eclipse.equinox.p2.ui,
  org.eclipse.compare;resolution:=optional,
- org.wcs.smart;bundle-version="3.0.0",
+ org.wcs.smart;bundle-version="3.0.2",
  org.eclipse.equinox.p2.core,
  org.eclipse.equinox.p2.engine;visibility:=reexport,
  org.eclipse.equinox.p2.metadata,

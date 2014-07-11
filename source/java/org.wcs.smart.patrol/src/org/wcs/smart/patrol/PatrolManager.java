@@ -109,7 +109,7 @@ public class PatrolManager {
 	 * @param monitor the progress monitor; cannot be null
 	 * @throws Exception if conservation area not deleted
 	 */
-	public void deletePatrol(byte[] patrolUuid, IProgressMonitor monitor) throws Exception{
+	public boolean deletePatrol(byte[] patrolUuid, IProgressMonitor monitor) throws Exception{
 		
 		int work = 1;
 		for (ArrayList<IPatrolDeleteHandler> data : deleteHandlers.values()){
@@ -134,7 +134,9 @@ public class PatrolManager {
 			try{
 				File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath());
 			
-				runDeleteHandlers(patrol, session, monitor);
+				if (!runDeleteHandlers(patrol, session, monitor)){
+					return false;
+				}
 				monitor.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
 				
 				//waypoint deletion is not cascaded; we must delete this explicitly
@@ -173,23 +175,29 @@ public class PatrolManager {
 			PatrolEventManager.getInstance().patrolDeleted(patrol);
 		}
 		monitor.done();
+		
+		return true;
 	}
 	
 	/**
 	 * Runs all the delete handlers in the order provided.
 	 * 
 	 */
-	private void runDeleteHandlers(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception{
+	private boolean runDeleteHandlers(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception{
 		ArrayList<Integer> items = new ArrayList<Integer> ();
 		items.addAll(deleteHandlers.keySet());
 		Collections.sort(items);
 		for(int i = items.size() -1; i >= 0; i --){
 			ArrayList<IPatrolDeleteHandler> listeners = deleteHandlers.get(items.get(i));
 			for (IPatrolDeleteHandler listener : listeners){
-				listener.beforeDelete(patrol, session, monitor);
+				boolean canDelete = listener.beforeDelete(patrol, session, monitor);
+				if (!canDelete){
+					return false;
+				}
 				monitor.worked(1);
 			}
 		}
+		return true;
 	}
 
 	/**

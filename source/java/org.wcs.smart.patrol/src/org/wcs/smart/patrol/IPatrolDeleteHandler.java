@@ -37,12 +37,18 @@ public interface IPatrolDeleteHandler {
 	 * Throw an exception if you cannot delete and the delete
 	 * should be cancelled.
 	 * 
+	 * If the users returns false, the user should display a message
+	 * to the user informing why it cannot be removed.  Otherwise the user
+	 * can throw an exception and the delete manager will display the exception 
+	 * to the user.
+	 * 
 	 * @param patrol the patrol to delete
 	 * @param session the delete session in transaction
 	 * @param monitor the progress monitor
+	 * @return true if the patrol can be removed, false if it should not be removed
 	 * @throws Exception if error occurs and the patrol information could not be removed
 	 */
-	public void beforeDelete(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception;
+	public boolean beforeDelete(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception;
 
 	/**
 	 * Perform some operation if needed after patrol was actually removed from database.

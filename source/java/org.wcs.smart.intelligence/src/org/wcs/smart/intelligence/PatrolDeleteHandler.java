@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.intelligence;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -47,11 +50,37 @@ public class PatrolDeleteHandler implements IPatrolDeleteHandler {
 	public PatrolDeleteHandler() {}
 
 	@Override
-	public void beforeDelete(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception {
+	public boolean beforeDelete(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.PatrolDeleteHandler_Task_FetchIds);
 		removedList = getIntelligenceIds(patrol, session);
+		
+		if (removedList.size() > 0){
+			//confirm delete
+			final String message = 
+					MessageFormat.format(Messages.PatrolDeleteHandler_DeleteWarningMessage,
+							new Object[]{patrol.getId(), removedList.size()});
+			final boolean info[] = {false};
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					info[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
+							Messages.PatrolDeleteHandler_DeleteWarningTitle,
+							message);
+					
+				}
+			});
+			
+			if (!info[0]){
+				return false;
+			}
+		}
+		
 		monitor.subTask(Messages.PatrolDeleteHandler_Task_DeleteIntelligence);
 		deleteIntelligences(patrol, session);
+		return true;
+		
+		
 	}
 
 	@Override

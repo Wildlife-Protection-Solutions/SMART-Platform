@@ -22,12 +22,14 @@
 
 package org.wcs.smart.query.common.ui;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
@@ -35,6 +37,7 @@ import net.refractions.udig.project.internal.command.navigation.ZoomExtentComman
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayerCommand;
+import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -64,48 +67,64 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
  * 
  * @author Mauricio Pazos
  */
-public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
-	
+public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
+
 	private GriddedEditor parentEditor;
-	private RasterService rasterService = null; 
+	private RasterService rasterService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
-	
+
 	/*
 	 * Job for adding Raster layer to map
 	 */
-	private Job addLayerJob = new Job(Messages.GriddedResultsMapEditorPage_AddLayersJobeName) {
+	private Job addLayerJob = new Job(
+			Messages.GriddedResultsMapEditorPage_AddLayersJobeName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 
-	    	try {
-	    		// retrieves the last query result
-				GriddedQuery query = (GriddedQuery) parentEditor.getQuery(); 
-				Collection<GridResultItem> queryResults = (Collection<GridResultItem>) parentEditor.getQuery().getCachedResults(monitor);
-	    		if( (queryResults == null) || queryResults.isEmpty() ) return Status.OK_STATUS;
-	    		
-	    		Map map = getMap();
-	    		if (rasterService == null){
-	    			String id = query.getId();
-	    			if (id == null){
-	    				id = String.valueOf(System.nanoTime());
-	    			}
-	    			rasterService = new RasterService(query);
-	    			rasterService.getReader(monitor);	//this will create the raster
-	    			if (rasterService.getMessage() != null){
-	    				QueryPlugIn.displayLog(Messages.GriddedResultsMapEditorPage_ErrorCreatingRaster + rasterService.getMessage().getMessage(), rasterService.getMessage());
-	    				return Status.OK_STATUS;
-	    			}
-	    		}
-				List<? extends IGeoResource> rasterResourceList = rasterService.resources(monitor);
+			try {
+				// retrieves the last query result
+				GriddedQuery query = (GriddedQuery) parentEditor.getQuery();
+				Collection<GridResultItem> queryResults = (Collection<GridResultItem>) parentEditor
+						.getQuery().getCachedResults(monitor);
+				if ((queryResults == null) || queryResults.isEmpty())
+					return Status.OK_STATUS;
+
+				Map map = getMap();
+				if (rasterService == null) {
+					String id = query.getId();
+					if (id == null) {
+						id = String.valueOf(System.nanoTime());
+					}
+					rasterService = new RasterService(query);
+					rasterService.getReader(monitor); // this will create the
+														// raster
+					if (rasterService.getMessage() != null) {
+						QueryPlugIn
+								.displayLog(
+										Messages.GriddedResultsMapEditorPage_ErrorCreatingRaster
+												+ rasterService.getMessage()
+														.getMessage(),
+										rasterService.getMessage());
+						return Status.OK_STATUS;
+					}
+				}
+				List<? extends IGeoResource> rasterResourceList = rasterService
+						.resources(monitor);
 				assert !rasterResourceList.isEmpty();
-				
-	    		if (map == null) return Status.CANCEL_STATUS;
+
+				if (map == null)
+					return Status.CANCEL_STATUS;
 				updateMap(map, rasterResourceList);
-				
+
 			} catch (Exception e) {
-				
-				return new Status(IStatus.ERROR, Messages.GriddedResultsMapEditorPage_UnknownLabel, IStatus.ERROR, Messages.GriddedResultsMapEditorPage_LoadingErrorMessage, e);
+
+				return new Status(
+						IStatus.ERROR,
+						Messages.GriddedResultsMapEditorPage_UnknownLabel,
+						IStatus.ERROR,
+						Messages.GriddedResultsMapEditorPage_LoadingErrorMessage,
+						e);
 			}
 			return Status.OK_STATUS;
 		}
@@ -116,64 +135,71 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 		 * @param map
 		 * @param rasterResourceList
 		 */
-		private void updateMap(final Map map, final List<? extends IGeoResource> rasterResourceList) {
-			
-    		List<IGeoResource> layers = new LinkedList<IGeoResource>();
+		private void updateMap(final Map map,
+				final List<? extends IGeoResource> rasterResourceList) {
+
+			List<IGeoResource> layers = new LinkedList<IGeoResource>();
 			layers.addAll(rasterResourceList);
 
 			map.getRenderManagerInternal().disableRendering();
 			// add the new layers to the map
 			AddLayersCommand command = new AddLayersCommand(layers);
-    		map.sendCommandSync(command);
-    		//setup styles
-    		map.getRenderManagerInternal().enableRendering();
-    		map.getRenderManager().refresh(null);
-    		
-    		try{
-    			CatalogPlugin.getDefault().getLocalCatalog().remove(rasterService);
-    		}catch (Exception ex){}
-    		
+			map.sendCommandSync(command);
+			// setup styles
+			map.getRenderManagerInternal().enableRendering();
+			map.getRenderManager().refresh(null);
+
+			try {
+				CatalogPlugin.getDefault().getLocalCatalog()
+						.remove(rasterService);
+			} catch (Exception ex) {
+			}
+
 		}
 	};
-	
-	
-	  
-    /**
-     * Job to refresh the service and map.
-     */
-    private Job refreshJob = new Job(Messages.GriddedResultsMapEditorPage_RefreshJobName){
+
+	/**
+	 * Job to refresh the service and map.
+	 */
+	private Job refreshJob = new Job(
+			Messages.GriddedResultsMapEditorPage_RefreshJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (rasterService != null){
+			if (rasterService != null) {
 				try {
-					//remove existing layers
-					List<? extends IGeoResource> layers = rasterService.resources(monitor);
-					if (layers.size() > 0){
+					// remove existing layers
+					List<? extends IGeoResource> layers = rasterService
+							.resources(monitor);
+					if (layers.size() > 0) {
 						IGeoResource rasterLayers = layers.get(0);
-						for( ILayer layer : getMap().getLayersInternal() ) {
-		                	//if(layer.getID().equals(rasterLayers.getIdentifier() + "@type@geotiff")){
-							if (layer.getID().sameFile(rasterLayers.getIdentifier())){
-		                		DeleteLayerCommand cmd = new DeleteLayerCommand((Layer)layer);
-		                		getMap().sendCommandASync(cmd);
-		                		break;
-		                	}
-		                }
+						for (ILayer layer : getMap().getLayersInternal()) {
+							// if(layer.getID().equals(rasterLayers.getIdentifier()
+							// + "@type@geotiff")){
+							if (layer.getID().sameFile(
+									rasterLayers.getIdentifier())) {
+								DeleteLayerCommand cmd = new DeleteLayerCommand(
+										(Layer) layer);
+								getMap().sendCommandASync(cmd);
+								break;
+							}
+						}
 					}
-					//refresh and add new layers
+					// refresh and add new layers
 					rasterService.refresh(null);
-					addLayerJob.schedule();				
+					addLayerJob.schedule();
 				} catch (Exception ex) {
-					String message = Messages.GriddedResultsMapEditorPage_Error_CreatingMapRaster + ex.getLocalizedMessage();
+					String message = Messages.GriddedResultsMapEditorPage_Error_CreatingMapRaster
+							+ ex.getLocalizedMessage();
 					QueryPlugIn.displayLog(message, ex);
 				}
 			}
-			//clear selection
+			// clear selection
 			mapViewer.getRenderManager().refresh(null);
 			return Status.OK_STATUS;
 		}
 
-    };
-    
+	};
+
 	/**
 	 * Creates a new query map editor page
 	 * 
@@ -192,35 +218,35 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 		return this.parentEditor;
 	}
 
-	
 	/**
-	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
+	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite,
+	 *      org.eclipse.ui.IEditorInput)
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
-		if (!(input instanceof QueryEditorInput)){
+		if (!(input instanceof QueryEditorInput)) {
 			throw new RuntimeException("Invalid editor input."); //$NON-NLS-1$
 		}
 		super.init(site, input);
-		
-		
+
 		final IPageChangedListener initZoom = new IPageChangedListener() {
-			
+
 			@Override
 			public void pageChanged(PageChangedEvent event) {
-				if (event.getSelectedPage() == GriddedResultsMapEditorPage.this){
+				if (event.getSelectedPage() == GriddedResultsMapEditorPage.this) {
 					getMap().sendCommandASync(new ZoomExtentCommand());
 					parentEditor.removePageChangedListener(this);
 				}
-				
+
 			}
 		};
 		parentEditor.addPageChangedListener(initZoom);
 	}
 
-	
-	/** Creates the map
+	/**
+	 * Creates the map
+	 * 
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
@@ -231,82 +257,129 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 		loadDefaultLayers.schedule();
 	}
 
-    
+	/**
+	 * @see org.wcs.smart.ui.map.SmartMapEditorPart#dispose()
+	 */
+	@Override
+	public void dispose() {
+		super.dispose();
 
-    /**
-     * @see org.wcs.smart.ui.map.SmartMapEditorPart#dispose()
-     */
-    @Override
-    public void dispose() {
-        super.dispose();
-        
-        if (loadDefaultLayers != null){
-        	loadDefaultLayers.cancel();
-        	loadDefaultLayers = null;
-        }
-        addLayerJob.cancel();
-        
-        if (rasterService != null){
-        	this.rasterService.dispose(null);
-        	this.rasterService = null;
-        }
-        refreshJob.cancel();
-        refreshJob = null;
-    }
-    
-    /**
-     * Refresh the service on the map
-     */
-    public void refresh(boolean firstRun){
-    	if (rasterService == null){
-    		addLayerJob.schedule();
-    	}else{
-    		refreshJob.schedule();
-    	}
-    	
-    	//update the map CRS as necessary
-    	if (firstRun){
-    		//set crs of map to crs of query
-    		//only do this on the first run;
-    		Job setCrs = new Job(Messages.GriddedResultsMapEditorPage_SetCrsJobName){
+		if (loadDefaultLayers != null) {
+			loadDefaultLayers.cancel();
+			loadDefaultLayers = null;
+		}
+		addLayerJob.cancel();
+
+		if (rasterService != null) {
+			this.rasterService.dispose(null);
+			this.rasterService = null;
+		}
+		refreshJob.cancel();
+		refreshJob = null;
+	}
+
+	/**
+	 * Refresh the service on the map
+	 */
+	public void refresh(boolean firstRun) {
+		if (rasterService == null) {
+			addLayerJob.schedule();
+		} else {
+			refreshJob.schedule();
+		}
+
+		// update the map CRS as necessary
+		if (firstRun) {
+			// set crs of map to crs of query
+			// only do this on the first run;
+			Job setCrs = new Job(
+					Messages.GriddedResultsMapEditorPage_SetCrsJobName) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					try{
-					loadDefaultLayers.join();
-					if (!CRS.equalsIgnoreMetadata(getMap().getViewportModel().getCRS(), parentEditor.getQueryInternal().getCoordinateReferenceSystem() )){
-						ChangeCRSCommand crs = new ChangeCRSCommand(parentEditor.getQueryInternal().getCoordinateReferenceSystem());
-						getMap().sendCommandASync(crs);
-					}
-					}catch (Exception ex){
+					try {
+						loadDefaultLayers.join();
+						if (!CRS.equalsIgnoreMetadata(getMap()
+								.getViewportModel().getCRS(), parentEditor
+								.getQueryInternal()
+								.getCoordinateReferenceSystem())) {
+							ChangeCRSCommand crs = new ChangeCRSCommand(
+									parentEditor.getQueryInternal()
+											.getCoordinateReferenceSystem());
+							getMap().sendCommandASync(crs);
+						}
+					} catch (Exception ex) {
 						// we will just log these
-						QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_ErrorSettingCrs + ex.getLocalizedMessage(), ex);
+						QueryPlugIn
+								.log(Messages.GriddedResultsMapEditorPage_ErrorSettingCrs
+										+ ex.getLocalizedMessage(), ex);
 					}
 					return Status.OK_STATUS;
 				}
-    		
-    		};
-    		setCrs.schedule();
-    	}else{
-    		//if map crs != query crs ask user if they want to update
-    		try{
-    			final CoordinateReferenceSystem querycrs = parentEditor.getQueryInternal().getCoordinateReferenceSystem();
-    			if (!CRS.equalsIgnoreMetadata(getMap().getViewportModel().getCRS(), querycrs)){
-    				parentEditor.getSite().getShell().getDisplay().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							if ( MessageDialog.openQuestion(parentEditor.getSite().getShell(), Messages.GriddedResultsMapEditorPage_CRS_DialogTitle, Messages.GriddedResultsMapEditorPage_CRS_DialogMessage)){
-		    					ChangeCRSCommand crs = new ChangeCRSCommand(querycrs);
-								getMap().sendCommandASync(crs);
-		    				}
-						}});
-    				
-    			}
-    		}catch (Exception ex){
-    			QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_Error_CheckingCrs + ex.getLocalizedMessage(), ex);
-    		}
-    		
-    	}
-    }
 
+			};
+			setCrs.schedule();
+		} else {
+			// if map crs != query crs ask user if they want to update
+			try {
+				final CoordinateReferenceSystem querycrs = parentEditor
+						.getQueryInternal().getCoordinateReferenceSystem();
+				if (!CRS.equalsIgnoreMetadata(getMap().getViewportModel()
+						.getCRS(), querycrs)) {
+					parentEditor.getSite().getShell().getDisplay()
+							.syncExec(new Runnable() {
+								@Override
+								public void run() {
+									if (MessageDialog
+											.openQuestion(
+													parentEditor.getSite()
+															.getShell(),
+													Messages.GriddedResultsMapEditorPage_CRS_DialogTitle,
+													Messages.GriddedResultsMapEditorPage_CRS_DialogMessage)) {
+										ChangeCRSCommand crs = new ChangeCRSCommand(
+												querycrs);
+										getMap().sendCommandASync(crs);
+									}
+								}
+							});
+
+				}
+			} catch (Exception ex) {
+				QueryPlugIn.log(
+						Messages.GriddedResultsMapEditorPage_Error_CheckingCrs
+								+ ex.getLocalizedMessage(), ex);
+			}
+
+		}
+	}
+
+	/**
+	 * Dispose of current query service and refresh to create a new one as
+	 * required.
+	 */
+	public void reset() {
+		// remove layers
+		if (rasterService != null) {
+			try {
+				List<ILayer> toRemove = new ArrayList<ILayer>();
+				for (ILayer layer : getMap().getLayersInternal()){
+					if (  ((IService)layer.getGeoResource().resolve(IService.class,null)) == rasterService){
+						toRemove.add(layer);
+					}
+				}
+				if (toRemove.size() > 0) {
+					getMap().sendCommandSync(
+							new DeleteLayersCommand(toRemove.toArray(new ILayer[toRemove.size()])));
+				}
+			} catch (Exception ex) {
+				QueryPlugIn.log(ex.getMessage(), ex);
+			}
+
+			CatalogPlugin.getDefault().getLocalCatalog().remove(rasterService);
+			rasterService.dispose(null);
+			rasterService = null;
+
+			refresh(false);
+		}
+	}
 }

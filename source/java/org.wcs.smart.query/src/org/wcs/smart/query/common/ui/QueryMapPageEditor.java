@@ -22,13 +22,16 @@
 package org.wcs.smart.query.common.ui;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 
@@ -205,4 +208,34 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
     	}
     }
 
+    /**
+     * Dispose of current query service
+     * and refresh to create a new one as required.
+     */
+    public void reset() {
+		if (queryService != null) {
+			// remove layers
+			try{
+				List<ILayer> toRemove = new ArrayList<ILayer>();
+				for (ILayer layer : getMap().getLayersInternal()){
+					if (  ((IService)layer.getGeoResource().resolve(IService.class,null)) == queryService){
+						toRemove.add(layer);
+					}
+				}
+				if (toRemove.size() > 0) {
+					getMap().sendCommandSync(
+							new DeleteLayersCommand(toRemove.toArray(new ILayer[toRemove.size()])));
+				}
+			}catch (Exception ex){
+				QueryPlugIn.log(ex.getMessage(), ex);
+			}
+			
+			CatalogPlugin.getDefault().getLocalCatalog().remove(queryService);
+			queryService.dispose(null);
+			queryService = null;
+			
+			refresh();
+		}
+		
+	}
 }

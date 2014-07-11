@@ -5,10 +5,10 @@ Bundle-SymbolicName: org.wcs.smart.observation.query;singleton:=true
 Bundle-Version: 3.0.0
 Bundle-Activator: org.wcs.smart.observation.query.ObservationQueryPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.wcs.smart;bundle-version="3.0.0",
- org.wcs.smart.query;bundle-version="3.0.0",
+Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
+ org.wcs.smart.query;bundle-version="3.0.2",
  org.eclipse.ui.forms,
- org.wcs.smart.observation;bundle-version="3.0.0",
+ org.wcs.smart.observation;bundle-version="3.0.2",
  net.refractions.udig.catalog.rasterings;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

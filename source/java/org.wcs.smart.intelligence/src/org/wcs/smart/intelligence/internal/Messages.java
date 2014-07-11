@@ -380,6 +380,10 @@ public class Messages extends NLS {
 
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
+	public static String PatrolDeleteHandler_DeleteWarningMessage;
+
+	public static String PatrolDeleteHandler_DeleteWarningTitle;
+
 	public static String PatrolDeleteHandler_Task_DeleteFilestore;
 
 	public static String PatrolDeleteHandler_Task_DeleteIntelligence;

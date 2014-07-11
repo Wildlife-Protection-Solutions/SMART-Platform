@@ -85,8 +85,9 @@ public class DeletePatrolHandler extends AbstractHandler {
 					monitor.beginTask(Messages.DeletePatrolHandler_ProgressTaskName, toDelete.size());
 					for (PatrolEditorInput delete : toDelete){
 						try {
-							PatrolManager.getInstance().deletePatrol(delete.getUuid(), new SubProgressMonitor(monitor, 1));
-							deleted++;
+							if (PatrolManager.getInstance().deletePatrol(delete.getUuid(), new SubProgressMonitor(monitor, 1))){
+								deleted++;
+							}
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog(
 									MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_ErrorMessage, new Object[]{delete.getPatrolId()}) + "\n\n" + ex.getLocalizedMessage(),ex); //$NON-NLS-1$

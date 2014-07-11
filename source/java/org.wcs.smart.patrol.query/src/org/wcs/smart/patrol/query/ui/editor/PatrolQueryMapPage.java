@@ -22,13 +22,16 @@
 package org.wcs.smart.patrol.query.ui.editor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 
@@ -42,6 +45,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
@@ -73,7 +77,6 @@ public class PatrolQueryMapPage  extends SmartMapEditorPart{
 	    		AddLayersCommand command = new AddLayersCommand(layers);
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
 	    		getMap().sendCommandASync(command);
-	    		
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, Messages.PatrolQueryMapPage_UnknownStatus, IStatus.ERROR, Messages.PatrolQueryMapPage_ErrorLoadingPage, e);
 			}
@@ -202,5 +205,36 @@ public class PatrolQueryMapPage  extends SmartMapEditorPart{
     		refreshJob.schedule();
     	}
     }
+    
+    /**
+     * Dispose of current query service
+     * and refresh to create a new one as required.
+     */
+	public void reset() {
+		if (queryService != null) {
+			// remove layers
+			try{
+				List<ILayer> toRemove = new ArrayList<ILayer>();
+				for (ILayer layer : getMap().getLayersInternal()){
+					if (  ((IService)layer.getGeoResource().resolve(IService.class,null)) == queryService){
+						toRemove.add(layer);
+					}
+				}
+				if (toRemove.size() > 0) {
+					getMap().sendCommandSync(
+							new DeleteLayersCommand(toRemove.toArray(new ILayer[toRemove.size()])));
+				}
+			}catch (Exception ex){
+				PatrolQueryPlugIn.log(ex.getMessage(), ex);
+			}
+			
+			CatalogPlugin.getDefault().getLocalCatalog().remove(queryService);
+			queryService.dispose(null);
+			queryService = null;
+			
+			refresh();
+		}
+		
+	}
 
 }

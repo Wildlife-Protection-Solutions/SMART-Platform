@@ -428,6 +428,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		updatePartName();
 		page1.getQueryResultsTable().clearColumns();
 		page1.initPage();
+		page2.reset();
 		
 		setDirty(false);
 		
