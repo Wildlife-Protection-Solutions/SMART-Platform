@@ -52,7 +52,6 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 	
 	public MatchAttributeComposite(Composite parent, DataModelLookup lookup) {
 		super(parent, SWT.NONE);
-		//TODO: set label providers from outside (language switch problem)
 		typeLabelProvider = new Ct2AttributeTypeLabelProvider();
 		attrLabelProvider = new SmartAttributeLabelProvider(lookup);
 

@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -60,11 +59,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.IWorkbenchPreferenceConstants;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.internal.WorkbenchMessages;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
@@ -1095,101 +1091,5 @@ public class DmFilteredTree extends Composite {
 		}
 		return null;
 	}
-
-//	/**
-//	 * Custom tree viewer subclass that clears the caches in patternFilter on
-//	 * any change to the tree. See bug 187200.
-//	 * 
-//	 * @since 3.3
-//	 * 
-//	 */
-//	class NotifyingTreeViewer extends TreeViewer {
-//
-//		/**
-//		 * @param parent
-//		 * @param style
-//		 */
-//		public NotifyingTreeViewer(Composite parent, int style) {
-//			super(parent, style);
-//		}
-//
-//		public void add(Object parentElementOrTreePath, Object childElement) {
-//			getPatternFilter().clearCaches();
-//			super.add(parentElementOrTreePath, childElement);
-//		}
-//
-//		public void add(Object parentElementOrTreePath, Object[] childElements) {
-//			getPatternFilter().clearCaches();
-//			super.add(parentElementOrTreePath, childElements);
-//		}
-//
-//		protected void inputChanged(Object input, Object oldInput) {
-//			getPatternFilter().clearCaches();
-//			super.inputChanged(input, oldInput);
-//		}
-//
-//		public void insert(Object parentElementOrTreePath, Object element,
-//				int position) {
-//			getPatternFilter().clearCaches();
-//			super.insert(parentElementOrTreePath, element, position);
-//		}
-//
-//		public void refresh() {
-//			getPatternFilter().clearCaches();
-//			super.refresh();
-//		}
-//
-//		public void refresh(boolean updateLabels) {
-//			getPatternFilter().clearCaches();
-//			super.refresh(updateLabels);
-//		}
-//
-//		public void refresh(Object element) {
-//			getPatternFilter().clearCaches();
-//			super.refresh(element);
-//		}
-//
-//		public void refresh(Object element, boolean updateLabels) {
-//			getPatternFilter().clearCaches();
-//			super.refresh(element, updateLabels);
-//		}
-//
-//		public void remove(Object elementsOrTreePaths) {
-//			getPatternFilter().clearCaches();
-//			super.remove(elementsOrTreePaths);
-//		}
-//
-//		public void remove(Object parent, Object[] elements) {
-//			getPatternFilter().clearCaches();
-//			super.remove(parent, elements);
-//		}
-//
-//		public void remove(Object[] elementsOrTreePaths) {
-//			getPatternFilter().clearCaches();
-//			super.remove(elementsOrTreePaths);
-//		}
-//
-//		public void replace(Object parentElementOrTreePath, int index,
-//				Object element) {
-//			getPatternFilter().clearCaches();
-//			super.replace(parentElementOrTreePath, index, element);
-//		}
-//
-//		public void setChildCount(Object elementOrTreePath, int count) {
-//			getPatternFilter().clearCaches();
-//			super.setChildCount(elementOrTreePath, count);
-//		}
-//
-//		public void setContentProvider(IContentProvider provider) {
-//			getPatternFilter().clearCaches();
-//			super.setContentProvider(provider);
-//		}
-//
-//		public void setHasChildren(Object elementOrTreePath, boolean hasChildren) {
-//			getPatternFilter().clearCaches();
-//			super.setHasChildren(elementOrTreePath, hasChildren);
-//		}
-//
-//	}
 
 }
