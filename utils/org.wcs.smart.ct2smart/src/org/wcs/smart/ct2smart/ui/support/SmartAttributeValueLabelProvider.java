@@ -26,6 +26,7 @@ import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 /**
  * @author elitvin
@@ -45,6 +46,9 @@ public class SmartAttributeValueLabelProvider extends LangColumnLabelProvider {
 		if (element instanceof ListNode) {
 			return getName((ListNode) element);
 
+		} else if (element instanceof TreeNodeType) {
+			return getName((TreeNodeType) element);
+			
 		} else if (element instanceof ExtraAttribute) {
 			ExtraAttribute a = (ExtraAttribute) element;
 			return getNameForKey(a.getAttributeKey(), a.getValueKey());
@@ -85,4 +89,17 @@ public class SmartAttributeValueLabelProvider extends LangColumnLabelProvider {
 		return "???"; //should never happen //$NON-NLS-1$
 	}
 
+	private String getName(TreeNodeType node) {
+		if (node == null)
+			return "?"; //TODO: empty string?
+		String langCode = getLanguageCode();
+		for (NameType nameType : node.getNames()) {
+			if (langCode.equals(nameType.getLanguageCode()))
+				return nameType.getValue();
+		}
+		if (!node.getNames().isEmpty())
+			return node.getNames().get(0).getValue();
+		return "???"; //should never happen //$NON-NLS-1$
+	}
+	
 }

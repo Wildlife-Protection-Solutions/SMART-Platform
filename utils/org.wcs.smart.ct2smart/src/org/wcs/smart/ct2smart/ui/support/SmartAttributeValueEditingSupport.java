@@ -29,10 +29,12 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Table;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 /**
  * @author elitvin
@@ -47,7 +49,8 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 	
 	private ComboBoxCellEditor cbEditor;
 	private TextCellEditor textEditor;
-	private ComboBoxCellEditor treeEditor;
+	private AttributeTreeDropDownViewer treeViewer;
+	private TreeCellEditor treeEditor;
 
 	/**
 	 * @param viewer
@@ -56,8 +59,13 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		super(viewer);
 		this.lookup = lookup;
 		this.labelProvider = labelProvider;
-		cbEditor = new ComboBoxCellEditor(viewer.getTable(), new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
-		textEditor = new TextCellEditor(viewer.getTable());
+		Table table = viewer.getTable();
+		cbEditor = new ComboBoxCellEditor(table, new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
+		textEditor = new TextCellEditor(table);
+
+		AttributeTreeContentProvider contentProvider = new AttributeTreeContentProvider(true);
+		treeViewer = new AttributeTreeDropDownViewer(table.getShell(), contentProvider, labelProvider);
+		treeEditor = new TreeCellEditor(table, treeViewer);
 	}
 
 	@Override
@@ -91,7 +99,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			
 			
 		} else if ("TREE".equals(type)) { //$NON-NLS-1$
-			//TODO: impl
+			treeViewer.setInput(a);
 			return treeEditor;
 			
 		} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
@@ -162,8 +170,10 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			return a.getValues().get(i).getKey();
 			
 		} else if ("TREE".equals(type)) { //$NON-NLS-1$
-			//TODO: impl
-			return null;
+			TreeNodeType nt = (TreeNodeType) editorValue;
+			if (nt != null) {
+				return nt.getKey(); //TODO: need full key
+			}
 			
 		} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
 			return (String) editorValue;
