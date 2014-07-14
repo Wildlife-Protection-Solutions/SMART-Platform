@@ -47,7 +47,7 @@ public class SmartCategoryEditingSupport extends EditingSupport {
 		DmTreeContentProvider contentProvider = new DmTreeContentProvider(true, lookup);
 		DmTreeDropDownViewer treeEditor = new DmTreeDropDownViewer(table.getShell(), contentProvider, labelProvider);
 		treeEditor.setInput(lookup.getDataModel());
-		editor = new DmTreeCellEditor(table, treeEditor);
+		editor = new TreeCellEditor(table, treeEditor);
 	}
 
 	@Override

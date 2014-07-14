@@ -21,66 +21,21 @@
  */
 package org.wcs.smart.ct2smart.ui.support;
 
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.ISelectionListener;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
 
 /**
  * Tree viewer that displays a tree in a box similar
  * to a combo box.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author elitvin
+ * @since 3.0.0
  */
-public class DmTreeDropDownViewer {
+public class DmTreeDropDownViewer extends TreeDropDownViewer {
 
-	private TreeViewer dmTreeViewer;
-	private Composite main;
-	private ISelectionListener onSelected;
-	private DmTreePatternFilter patternFilter;
-	private DmFilteredTree fTree;
-	
-	private DmTreeContentProvider contentProvider;
-	private SmartCategoryLabelProvider labelProvider;
-	
-	/**
-	 * Creates a new tree drop down viewer 
-	 * @param parent outer shell
-	 */
 	public DmTreeDropDownViewer(Shell parent, DmTreeContentProvider contentProvider, SmartCategoryLabelProvider labelProvider) {
-		this.contentProvider = contentProvider;
-		this.labelProvider = labelProvider;
-		
-		main = new Shell(parent, SWT.SINGLE |SWT.BORDER | SWT.RESIZE);
-		
-		// close dialog if user selects outside of the shell
-		main.addListener(SWT.Deactivate, new Listener() {
-			public void handleEvent(Event e){
-				hide();
-			}
-		});
-		
-		GridLayout gl = new GridLayout(1, false);
-		gl.horizontalSpacing = 0;
-		gl.verticalSpacing = 0;
-		gl.marginWidth = 0;
-		gl.marginHeight = 0;
-		main.setLayout(gl);
-		createComposite(main);
+		super(parent, contentProvider, labelProvider);
 	}
-	
 	
 	/**
 	 * Sets the current datamodel attribute to display
@@ -89,68 +44,8 @@ public class DmTreeDropDownViewer {
 	 * @param att
 	 */
 	public void setInput(DataModel model) {
-		dmTreeViewer.setInput(model.getCategories().getCategories());
-		dmTreeViewer.expandToLevel(1);
-		dmTreeViewer.refresh();
-	}
-	
-	private void createComposite(Composite parent) {
-		
-		patternFilter = new DmTreePatternFilter();
-//		fTree = new LocalFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		fTree = new DmFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		
-		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		
-		dmTreeViewer = fTree.getViewer();
-		//attributeTreeViewer = new TreeViewer(main, SWT.H_SCROLL | SWT.V_SCROLL);
-		dmTreeViewer.setContentProvider(contentProvider);
-		dmTreeViewer.setLabelProvider(labelProvider);
-		
-		dmTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		dmTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				fireSelection();
-				hide();
-			}
-		});
-	}
-	
-	/**
-	 * Moves the shell to the required location and displays the tree.
-	 * 
-	 * @param obj the parent object (used for positioning)
-	 * @param onSelected selection listener to fire when item from tree is selected
-	 */
-	public void positionAndShow(Composite obj, ISelectionListener onSelected){
-		fTree.clearText();
-		this.onSelected = onSelected;
-		Rectangle r = obj.getBounds();
-		Point pnt = obj.getParent().toDisplay(r.x, r.y);
-		
-		main.setBounds(pnt.x + 25, pnt.y + r.height, 200, 150);
-		main.setVisible(true);
-		
-		dmTreeViewer.getTree().setFocus();
-	}
-	
-	/**
-	 * Fires selection listener
-	 */
-	private void fireSelection(){
-		onSelected.selectionChanged(null, dmTreeViewer.getSelection());
-	}
-	
-	/**
-	 * Hides the dialog
-	 */
-	public void hide(){
-		main.setVisible(false);
-	}
-
-	public SmartCategoryLabelProvider getLabelProvider() {
-		return labelProvider;
+		getDmTreeViewer().setInput(model.getCategories().getCategories());
+		getDmTreeViewer().expandToLevel(1);
+		getDmTreeViewer().refresh();
 	}
 }

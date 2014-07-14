@@ -38,23 +38,22 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 
 /**
  * @author elitvin
  * @since 3.0.0
  */
-public class DmTreeCellEditor extends CellEditor {
+public class TreeCellEditor extends CellEditor {
 
 	private Button btnEdit;
 	private Label lblitem;
-	private DmTreeDropDownViewer treeEditor;
-	private CategoryType currentSelection = null;
+	private TreeDropDownViewer treeEditor;
+	private Object currentSelection = null;
 
 	/**
 	 * @param parent
 	 */
-	public DmTreeCellEditor(Composite parent, DmTreeDropDownViewer treeViewer) {
+	public TreeCellEditor(Composite parent, TreeDropDownViewer treeViewer) {
 		super(parent);
 		treeEditor = treeViewer;
 	}
@@ -94,7 +93,7 @@ public class DmTreeCellEditor extends CellEditor {
 					@Override
 					public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 						if (selection != null && !selection.isEmpty()){
-							currentSelection = (CategoryType) ((IStructuredSelection) selection).getFirstElement();
+							currentSelection = ((IStructuredSelection) selection).getFirstElement();
 						}
 						if (!lblitem.isDisposed()){
 							if (currentSelection != null) {
@@ -124,13 +123,8 @@ public class DmTreeCellEditor extends CellEditor {
 
 	@Override
 	protected void doSetValue(Object arg0) {
-		if (arg0 instanceof CategoryType) {
-			currentSelection = (CategoryType) arg0;
-			lblitem.setText(treeEditor.getLabelProvider().getText(currentSelection));
-		} else {
-			currentSelection = null;
-			lblitem.setText(""); //$NON-NLS-1$
-		}
+		currentSelection = arg0;
+		lblitem.setText(treeEditor.getLabelProvider().getText(currentSelection));
 	}
 
 }
