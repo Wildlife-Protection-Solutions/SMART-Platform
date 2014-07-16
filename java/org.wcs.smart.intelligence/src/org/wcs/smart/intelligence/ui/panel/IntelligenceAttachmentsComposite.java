@@ -93,9 +93,9 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite impl
 	}
 
 	@Override
-	public void initFromModel(Intelligence intelligence) {
+	public void initFromModel(Intelligence intelligence) {		
 		attachmentComposite.getAttchments().clear();
-		attachmentComposite.getAttchments().addAll(intelligence.getAttachments());
+		attachmentComposite.initAttachments(intelligence.getAttachments());
 	}
 
 	@Override
