@@ -42,6 +42,7 @@ import org.wcs.smart.ct2smart.ui.support.SmartAttributeEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.SmartCategoryEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartCategoryLabelProvider;
+import org.wcs.smart.ct2smart.validate.MappingValidator;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
@@ -95,7 +96,7 @@ public class DmMatcherDialog extends Composite {
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Composite buttonsCmp = new Composite(top, SWT.NONE);
-		buttonsCmp.setLayout(new GridLayout(2, false));
+		buttonsCmp.setLayout(new GridLayout(3, false));
 		buttonsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		
 		Button btnSave = new Button(buttonsCmp, SWT.PUSH);
@@ -113,6 +114,19 @@ public class DmMatcherDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				generatePatrols();
+			}
+		});
+
+		Button btnValidate = new Button(buttonsCmp, SWT.PUSH);
+		btnValidate.setText("Validate mapping");
+		btnValidate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				MappingValidator validator = new MappingValidator();
+				List<String> errors = validator.validate(DmMatcherDialog.this.session.getCt2Smart(), dmLookup);
+				for (String error : errors) {
+					System.out.println(error);
+				}
 			}
 		});
 		
