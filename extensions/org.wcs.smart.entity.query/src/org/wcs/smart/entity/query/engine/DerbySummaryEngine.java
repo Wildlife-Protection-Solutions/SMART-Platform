@@ -270,7 +270,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	private void addCategoryHkey(String tableName, GroupByPart groupByPart, ValuePart values, Connection c) throws SQLException{
 		boolean add = false;
 		for (IGroupBy groupBy : groupByPart.getGroupBys()){
-			if (groupBy instanceof CategoryGroupBy){
+			if (groupBy instanceof CategoryGroupBy ||
+					(groupBy instanceof AttributeGroupBy && ((AttributeGroupBy) groupBy).getCategoryHkey() != null) ){
 				add = true;
 				break;
 			}
