@@ -3,6 +3,7 @@ package org.wcs.smart.ct2smart.ui;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,6 +128,7 @@ public class DmMatcherDialog extends Composite {
 				for (String error : errors) {
 					System.out.println(error);
 				}
+				MessageDialog.openInformation(getShell(), "Mapping validation", MessageFormat.format("Mapping validation completed with {0} errors.", errors.size()));
 			}
 		});
 		

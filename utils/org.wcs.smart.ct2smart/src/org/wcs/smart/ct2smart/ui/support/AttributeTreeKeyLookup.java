@@ -3,6 +3,7 @@ package org.wcs.smart.ct2smart.ui.support;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
@@ -32,5 +33,9 @@ public class AttributeTreeKeyLookup {
 
 	public TreeNodeType getTreeNode(String fullKey) {
 		return key2Node.get(fullKey);
+	}
+	
+	public Set<String> getKeysSet() {
+		return key2Node.keySet();
 	}
 }
