@@ -51,6 +51,9 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 	private TextCellEditor textEditor;
 	private AttributeTreeDropDownViewer treeViewer;
 	private TreeCellEditor treeEditor;
+	
+	private AttributeTreeKeyLookup treeNodeLookup;
+
 
 	/**
 	 * @param viewer
@@ -99,6 +102,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			
 			
 		} else if ("TREE".equals(type)) { //$NON-NLS-1$
+			treeNodeLookup = new AttributeTreeKeyLookup(a);
 			treeViewer.setInput(a);
 			return treeEditor;
 			
@@ -138,8 +142,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			return 0;
 			
 		} else if ("TREE".equals(type)) { //$NON-NLS-1$
-			//TODO: impl
-			return null;
+			return treeNodeLookup.getTreeNode(valueKey);
 			
 		} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
 			return valueKey != null ? valueKey : ""; //$NON-NLS-1$
@@ -172,7 +175,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		} else if ("TREE".equals(type)) { //$NON-NLS-1$
 			TreeNodeType nt = (TreeNodeType) editorValue;
 			if (nt != null) {
-				return nt.getKey(); //TODO: need full key
+				return treeNodeLookup.getFullKey(nt);
 			}
 			
 		} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
