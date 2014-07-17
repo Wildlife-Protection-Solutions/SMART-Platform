@@ -61,12 +61,16 @@ public class SmartAttributeValueLabelProvider extends LangColumnLabelProvider {
 		if (a == null || valueKey == null)
 			return ""; //$NON-NLS-1$
 		String type = a.getType();
-		if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
+		if ("LIST".equals(type)) { //$NON-NLS-1$
 			for (ListNode node : a.getValues()) {
 				if (valueKey.equals(node.getKey()))
 					return getName(node);
 			}
 			
+		} else if ("TREE".equals(type)) { //$NON-NLS-1$
+			AttributeTreeKeyLookup treeNodeLookup = new AttributeTreeKeyLookup(a);
+			return getName(treeNodeLookup.getTreeNode(valueKey));
+
 		} else if ("NUMERIC".equals(type) || "TEXT".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
 			return valueKey != null ? valueKey : ""; //$NON-NLS-1$
 			
