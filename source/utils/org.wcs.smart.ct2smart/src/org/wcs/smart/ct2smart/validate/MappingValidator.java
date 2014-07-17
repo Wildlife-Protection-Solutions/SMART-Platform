@@ -41,6 +41,7 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.matcher.model.CtCategoryMap;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
+import org.wcs.smart.ct2smart.ui.support.AttributeTreeKeyLookup;
 import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryAttributeLink;
@@ -189,12 +190,11 @@ public class MappingValidator {
 		for (ListNode node : a.getValues()) {
 			result.add(node.getKey());
 		}
-		for (TreeNodeType node : a.getTrees()) {
-			result.add(node.getKey()); //TODO: need full keys!!!!!!!
-		}
+		AttributeTreeKeyLookup treeNodeLookup = new AttributeTreeKeyLookup(a);
+		result.addAll(treeNodeLookup.getKeysSet());
 		return result;
 	}
-	
+
 	private String pairsToString(CtCategory ctc) {
 		StringBuilder sb = new StringBuilder();
 		for (CtCategoryMap m : ctc.getCtCategoryMap()) {
