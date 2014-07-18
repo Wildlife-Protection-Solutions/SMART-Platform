@@ -80,7 +80,7 @@ public class PatrolLegImporter extends SmartImporter {
 			
 
 			PatrolLeg tmpLeg = new PatrolLeg();
-			initLegData(tmpLeg, ctPatrol);
+			initLegData(tmpLeg, ctPatrol, session);
 			if (!checkDuplicate(ctPatrol, tmpLeg, patrol, session)){
 				return false;
 			}
@@ -98,7 +98,7 @@ public class PatrolLegImporter extends SmartImporter {
 			}
 			
 			PatrolLeg leg = patrol.addLeg();
-			initLegData(leg, ctPatrol);
+			initLegData(leg, ctPatrol, session);
 		
 			if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
 				if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))

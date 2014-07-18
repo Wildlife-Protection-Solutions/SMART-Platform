@@ -67,7 +67,7 @@ public class PatrolImporter extends SmartImporter {
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			session.beginTransaction();
-			Patrol patrol = buildPatrol(ctPatrol);
+			Patrol patrol = buildPatrol(ctPatrol, session);
 			
 			//check if duplicate of existing patrol
 			if (!checkDuplicate(ctPatrol, patrol, session)){
@@ -110,7 +110,7 @@ public class PatrolImporter extends SmartImporter {
 		}
 	}
 	
-	private Patrol buildPatrol(CyberTrackerPatrol ctPatrol) {
+	private Patrol buildPatrol(CyberTrackerPatrol ctPatrol, Session session) {
 		Patrol p = new Patrol();
 		p.setConservationArea(SmartDB.getCurrentConservationArea());
 		p.setPatrolType(ctPatrol.getPatrolType());
@@ -123,7 +123,7 @@ public class PatrolImporter extends SmartImporter {
 		p.setStartDate(ctPatrol.getStartDate());
 		p.setEndDate(ctPatrol.getEndDate());
 		
-		initLegData(p.getFirstLeg(), ctPatrol);
+		initLegData(p.getFirstLeg(), ctPatrol, session);
 
 		return p;
 	}

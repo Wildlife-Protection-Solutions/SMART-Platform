@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.feature"
       label="Core SMART CyberTracker Module (Required)"
-      version="3.0.1"
+      version="3.0.2"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
