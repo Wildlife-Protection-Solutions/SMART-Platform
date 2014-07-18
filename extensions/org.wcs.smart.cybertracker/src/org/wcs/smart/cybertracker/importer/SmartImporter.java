@@ -237,7 +237,7 @@ public class SmartImporter {
 		return leg.getPilot() != null;
 	}
 	
-	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol) {
+	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol, Session session) {
 		if (ctPatrol.getPatrolTransportType() != null) {
 			leg.setType(ctPatrol.getPatrolTransportType());
 		}
@@ -254,7 +254,7 @@ public class SmartImporter {
 		}
 		leg.setMembers(legMembers);
 		
-		leg.createLegDays();
+		leg.createLegDays(session);
 		
 		List<Coordinate> timerTrackList = ctPatrol.getTimerTrackList();
 		if (timerTrackList == null || timerTrackList.isEmpty())
