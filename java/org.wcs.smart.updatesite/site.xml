@@ -90,9 +90,6 @@
    <feature url="features/org.wcs.smart.zh_3.0.0.jar" id="org.wcs.smart.zh" version="3.0.0">
       <category name="smart"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.feature_3.0.1.jar" id="org.wcs.smart.cybertracker.feature" version="3.0.1">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.ms_3.0.0.jar" id="org.wcs.smart.ms" version="3.0.0">
       <category name="smart"/>
    </feature>
@@ -107,6 +104,9 @@
    </feature>
    <feature url="features/org.wcs.smart.entity.feature_1.0.1.jar" id="org.wcs.smart.entity.feature" version="1.0.1">
       <category name="entity"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature_3.0.2.jar" id="org.wcs.smart.cybertracker.feature" version="3.0.2">
+      <category name="cybertracker"/>
    </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>

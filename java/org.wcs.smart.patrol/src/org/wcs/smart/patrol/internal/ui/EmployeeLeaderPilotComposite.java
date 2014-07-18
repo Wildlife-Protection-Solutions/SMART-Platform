@@ -148,6 +148,8 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	public boolean updatePatrol(Patrol p, Session session) {
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
+		session.flush();
+		
 		if (empListComposite.getSelectedItems().size() <= 0){
 			SmartPatrolPlugIn.displayLog(Messages.EmployeeLeaderPilotComposite_Error_AtLeastOneMember, null);
 			return false;

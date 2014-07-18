@@ -51,7 +51,7 @@ public class PatrolLegDayTest {
 		leg2.setEndDate(getDate(2011, 0, 29, 23, 59, 59));
 		p.getLegs().add(leg2);
 		
-		p.createLegDays();
+		p.createLegDays(null);
 		
 		Assert.assertEquals(2, leg1.getPatrolLegDays().size());
 		Assert.assertEquals(6, leg2.getPatrolLegDays().size());
@@ -136,7 +136,7 @@ public class PatrolLegDayTest {
 		p.getLegs().add(leg9);
 		
 		
-		p.createLegDays();
+		p.createLegDays(null);
 		
 		////create a patrol leg from start to 3rd [end of day]
 		//leg1 (1 @ 8AM to 3 [end of day]

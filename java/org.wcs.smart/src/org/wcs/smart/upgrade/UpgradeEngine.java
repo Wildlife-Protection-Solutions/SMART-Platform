@@ -17,11 +17,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.v200.Upgrader112To200;
 import org.wcs.smart.upgrade.v300.Upgrader200To300;
+import org.wcs.smart.upgrade.v300.Upgrader300To302;
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -37,7 +39,8 @@ public class UpgradeEngine {
 	private enum UpgradeFromVersion {
 		V112,
 		V200,
-		V300
+		V300,
+		V301
 	}
 	
 	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
@@ -46,14 +49,15 @@ public class UpgradeEngine {
 		try {
 			final String version = getSmartVersion(s);
 			final boolean[] isOk = {false};
-			if (!SmartPlugIn.PLUGIN_VERSION.equals(version)) {
+			final String currentDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
+			if (!currentDbVersion.equals(version)) {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						isOk[0] = MessageDialog.openQuestion(
 								Display.getDefault().getActiveShell(),
 								Messages.UpgradeEngine_Confirm_Title,
-								MessageFormat.format(Messages.UpgradeEngine_Confirm_Message, version, SmartPlugIn.PLUGIN_VERSION));
+								MessageFormat.format(Messages.UpgradeEngine_Confirm_Message, version, currentDbVersion));
 					}
 				});
 				if (!isOk[0]) {
@@ -67,6 +71,8 @@ public class UpgradeEngine {
 					fromVersion = UpgradeFromVersion.V200;
 				} else if ("1.1.2".equals(version)) { //$NON-NLS-1$
 					fromVersion = UpgradeFromVersion.V112;
+				}else if ("3.0.1".equals(version)){ //$NON-NLS-1$
+					fromVersion = UpgradeFromVersion.V301;
 				}
 				
 				if (fromVersion == null) {
@@ -87,6 +93,8 @@ public class UpgradeEngine {
 					Upgrader112To200.upgrade(s, monitor);
 				case V200:
 					Upgrader200To300.upgrade(s, monitor);
+				case V300:
+					Upgrader300To302.upgrade(s, monitor);
 				default:
 					break;
 				}

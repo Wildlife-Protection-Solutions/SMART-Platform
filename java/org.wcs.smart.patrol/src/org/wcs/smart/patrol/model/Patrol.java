@@ -42,6 +42,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
@@ -291,9 +292,9 @@ public class Patrol {
 	 * for the patrol.
 	 */
 	@Transient
-	public Collection<PatrolLegDay> createLegDays(){
+	public Collection<PatrolLegDay> createLegDays(Session session){
 		for (PatrolLeg leg : getLegs()){
-			leg.createLegDays();
+			leg.createLegDays(session);
 		}
 		return null;
 	}

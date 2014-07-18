@@ -58,6 +58,8 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -361,9 +363,18 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         
         getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
-        
-        
+
         UDIGDragDropUtilities.addDropSupport(mapViewer.getViewport().getControl(), this);
+        
+        getParentEditor().addPageChangedListener(new IPageChangedListener() {			
+			@Override
+			public void pageChanged(PageChangedEvent event) {
+				if (event.getSelectedPage().equals(SmartMapEditorPart.this)){
+					tools.selectLastTool();
+				}
+			}
+		});
+
 	}
 
 	@Override
