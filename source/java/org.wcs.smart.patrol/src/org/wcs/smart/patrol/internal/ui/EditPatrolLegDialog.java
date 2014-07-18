@@ -168,6 +168,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		final TableViewer emplList = new TableViewer(compEmployees, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)emplList.getTable().getLayoutData()).heightHint = 100;
 		emplList.setLabelProvider(new EmployeeLabelProvider());
 		emplList.setContentProvider(new ObservableListContentProvider());
 		emplList.setInput(new WritableList(employeeList, Employee.class));
@@ -239,6 +240,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		groupList.setContentProvider(new ObservableListContentProvider());
 		groupList.setInput(list);
 		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)groupList.getTable().getLayoutData()).heightHint = 100;
 		
 		btnAddA.addSelectionListener(new SelectionAdapter() {
 			@Override

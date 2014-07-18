@@ -43,6 +43,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
@@ -142,8 +143,11 @@ public class PatrolLeg {
 
 	@Transient
 	public void clearPatrolLegMembers(){
-		if (this.members != null){
-			this.members.clear();
+		if (this.getMembers() != null){
+			for (PatrolLegMember m : getMembers()){
+				m.setId(null);
+			}
+			getMembers().clear();
 		}
 	}
 	
@@ -236,7 +240,7 @@ public class PatrolLeg {
 	 * 
 	 */
 	@Transient
-	public void createLegDays(){
+	public void createLegDays(Session session){
 		if (this.days == null){
 			this.days = new ArrayList<PatrolLegDay>();
 		}
@@ -299,6 +303,14 @@ public class PatrolLeg {
 	
 		//remove old legs that weren't used
 		for (PatrolLegDay day : current.values()){
+			//we need to make sure we delete all waypoints here
+			if (day.getWaypoints() != null){
+				for (PatrolWaypoint pw : day.getWaypoints()){
+					session.delete(pw.getWaypoint());
+				}
+				session.flush();
+			}
+			
 			day.setPatrolLeg(null);
 			this.days.remove(day);
 		}

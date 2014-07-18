@@ -148,7 +148,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		if (p.getLegs().size() == 1){
 			p.getFirstLeg().setStartDate(p.getStartDate());
 			p.getFirstLeg().setEndDate(p.getEndDate());
-			p.createLegDays();
+			p.createLegDays(session);
 		}
 		return true;
 	}

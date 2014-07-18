@@ -300,7 +300,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append("ALTER TABLE "); //$NON-NLS-1$
 			sql.append(tableName);
 			sql.append(" ADD column cat_hkey varchar(32672)"); //$NON-NLS-1$
-			PatrolQueryPlugIn.log(sql.toString(), null);
+			QueryPlugIn.logSql(sql.toString());
 			
 			c.createStatement().execute(sql.toString());
 			
@@ -324,7 +324,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(tablePrefix(WaypointObservation.class));
 			sql.append(".category_uuid )"); //$NON-NLS-1$
 			
-			PatrolQueryPlugIn.log(sql.toString(), null);
+			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 		}
 	}

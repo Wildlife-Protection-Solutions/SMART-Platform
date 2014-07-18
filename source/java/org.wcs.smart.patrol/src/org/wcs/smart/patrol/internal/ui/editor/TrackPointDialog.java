@@ -587,6 +587,9 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			@Override
 			public void selection(ReferencedEnvelope bbox) {
 				try {
+					if (mapViewer.getControl().isDisposed()){
+						return;
+					}
 					//update selection in table; this will automatically update
 					//the map.
 					//cannot simply use selected features as different objects are

@@ -112,13 +112,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	public boolean updatePatrol(Patrol p, Session session) {
 		String newPatrolId = txtPatrolId.getText().trim();
 		
-		session.beginTransaction();
-		boolean isDup = false;
-		try{
-			isDup = PatrolHibernateManager.isDuplicateId(newPatrolId, p.getConservationArea(), session);
-		}finally{
-			session.getTransaction().rollback();
-		}
+		boolean isDup = PatrolHibernateManager.isDuplicateId(newPatrolId, p.getConservationArea(), session);
 		if (isDup){
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
 					Messages.PatrolIdComposite_WarningDialogTitle, 
@@ -126,7 +120,6 @@ public class PatrolIdComposite extends PatrolItemComposite {
 				return false;
 			}
 		}
-		
 		if(validate()){
 			p.setId(newPatrolId);
 			return true;

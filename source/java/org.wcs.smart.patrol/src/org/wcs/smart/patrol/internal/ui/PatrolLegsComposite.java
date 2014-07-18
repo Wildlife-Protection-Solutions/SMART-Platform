@@ -61,8 +61,10 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolDateLegsDialog;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -318,9 +320,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		//clone the legs
 		for (PatrolLeg leg : p.getLegs()){
-			PatrolLeg tmpLeg = new PatrolLeg();
-			tmpLeg.setPatrol(p);
-			tmpLeg.setId(leg.getId());
+			PatrolLeg tmpLeg = clonePatrolLeg(leg);
 			
 			//start time
 			Date date = null;
@@ -339,17 +339,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				date = SmartUtils.getDatePart(leg.getEndDate(), true);
 			}
 			tmpLeg.setEndDate(date);
-			//type
-			tmpLeg.setType(leg.getType());
-			//members
-			tmpLeg.setMembers(new ArrayList<PatrolLegMember>());
-			for (PatrolLegMember mem : leg.getMembers()){
-				PatrolLegMember clone = mem.clone();
-				clone.setPatrolLeg(tmpLeg);
-				tmpLeg.getMembers().add(clone);
-			}
-			//uuid
-			tmpLeg.setUuid(leg.getUuid());
+			
 			this.legs.add(tmpLeg);
 		}
 		
@@ -361,7 +351,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.PatrolLegsComposite_Error_LoadingPatrolTypes, ex);
 			session.getTransaction().rollback();
-			session.close();
 		}
 		patrolLegViewer.setInput(legs);
 		
@@ -373,6 +362,27 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		sortAndRefresh();
 	}
 
+	private PatrolLeg clonePatrolLeg(PatrolLeg leg){
+		PatrolLeg tmpLeg = new PatrolLeg();
+		tmpLeg.setPatrol(leg.getPatrol());
+		tmpLeg.setId(leg.getId());
+		
+		//start time
+		tmpLeg.setStartDate(leg.getStartDate());
+		tmpLeg.setEndDate(leg.getEndDate());
+		//type
+		tmpLeg.setType(leg.getType());
+		//members
+		tmpLeg.setMembers(new ArrayList<PatrolLegMember>());
+		for (PatrolLegMember mem : leg.getMembers()){
+			PatrolLegMember clone = mem.clone();
+			clone.setPatrolLeg(tmpLeg);
+			tmpLeg.getMembers().add(clone);
+		}
+		//uuid
+		tmpLeg.setUuid(leg.getUuid());
+		return tmpLeg;
+	}
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
@@ -394,7 +404,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>();
 		allLegs.addAll(legs);
-		
+		session.flush();
 		for (Iterator<PatrolLeg> iterator = allLegs.iterator(); iterator.hasNext();) {
 			PatrolLeg updatedLeg = (PatrolLeg) iterator.next();
 			if (updatedLeg.getUuid() != null){
@@ -407,10 +417,18 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 						existing.setStartDate(updatedLeg.getStartDate());
 						existing.setType(updatedLeg.getType());
 						
+						//remove existing members
+						for (PatrolLegMember m : existing.getMembers()){
+							m.setId(null);
+						}
 						existing.getMembers().clear();
+						session.flush();
+						
+						//replace with new members
 						for (PatrolLegMember newmember : updatedLeg.getMembers()) {
-							newmember.setPatrolLeg(existing);
-							existing.getMembers().add(newmember);
+							PatrolLegMember m = newmember.clone();
+							m.setPatrolLeg(existing);
+							existing.getMembers().add(m);
 						}
 						
 						currentLegs.remove(existing);
@@ -424,18 +442,30 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		//new legs
 		for (Iterator<PatrolLeg> iterator = allLegs.iterator(); iterator.hasNext();) {
 			PatrolLeg newLeg = (PatrolLeg) iterator.next();
-			newLeg.setPatrol(p);
-			p.getLegs().add(newLeg);
+			
+			PatrolLeg clone = clonePatrolLeg(newLeg);
+			clone.setPatrol(p);
+			p.getLegs().add(clone);
 		}
 		
 		//legs no longer used; these must be removed
 		for (PatrolLeg toRemove: currentLegs){
+			//we need to make sure we delete all waypoints here
+			if(toRemove.getPatrolLegDays() != null){
+				for (PatrolLegDay pld : toRemove.getPatrolLegDays()){
+					if (pld.getWaypoints() != null){
+						for (PatrolWaypoint pw : pld.getWaypoints()){
+							session.delete(pw.getWaypoint());
+						}
+					}
+				}
+			}
 			toRemove.setPatrol(null);
 			p.getLegs().remove(toRemove);
 		}
 		
 		//create leg days
-		p.createLegDays();
+		p.createLegDays(session);
 		return true;
 			
 	}

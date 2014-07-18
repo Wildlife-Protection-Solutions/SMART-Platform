@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
@@ -91,6 +90,9 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	public boolean close(){
 		if (super.close()){
 			item.removeChangeListener(listener);
+			if (session != null && session.isOpen()){
+				session.close();
+			}
 			return true;
 		}
 		return false;
@@ -104,13 +106,8 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		item.addChangeListener(listener);
 		
 		Session s = getSession();
-		try{
-			item.setValues(patrol, s);
-		}finally{
-			if (s.isOpen()){
-				s.close();
-			}
-		}
+		item.setValues(patrol, s);
+		
 		setTitle(item.getTitle());
 		setChangesMade(false);
 		return comp;
@@ -140,16 +137,22 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 
 	private boolean savePatrolInternal() {
 		Session s = getSession();
+		
 		try{
+			s.beginTransaction();
 			try{
+				s.saveOrUpdate(patrol);
 				if (!item.updatePatrol(patrol, s)){
 					return false;
 				}
+				s.getTransaction().commit();
+				return true;
 			}catch (PatrolSaveException ex){
+				s.getTransaction().rollback();
+				
 				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getLocalizedMessage());
 				return false;
 			}
-			return PatrolHibernateManager.savePatrolInTransaction(patrol, s, false);
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getLocalizedMessage(), ex);
 		}finally{
