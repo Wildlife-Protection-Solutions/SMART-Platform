@@ -22,6 +22,8 @@
 package org.wcs.smart.ct2smart.ui.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +98,12 @@ public class SmartAttributeEditingSupport extends EditingSupport {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
 			String[] items = itemsMap.get(a.getType());
+			Arrays.sort(items, new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return labelProvider.getText(o1).toLowerCase().compareTo(labelProvider.getText(o2).toLowerCase());
+				}
+			});
 			if (items != null) {
 				String[] names = new String[items.length];
 				for (int i = 0; i < items.length; i++) {
