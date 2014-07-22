@@ -359,9 +359,12 @@ public class PatrolLegDayInputComposite {
 					if (patrolLegDate.getRestMinutes() != null && x == patrolLegDate.getRestMinutes()){
 						return;
 					}
+					if (x < 0){
+						throw new Exception("Rest minutes cannot be negative."); //$NON-NLS-1$
+					}
 				}catch (Exception ex){
 					restMinutes.setText(String.valueOf(oldValue));
-					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage);
+					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1);
 					Display.getCurrent().asyncExec(new Runnable() {
 						@Override
 						public void run() {
