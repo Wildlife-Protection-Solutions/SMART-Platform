@@ -49,6 +49,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -68,7 +69,7 @@ public class PatrolLegImporter extends SmartImporter {
 				return false;
 		}
 		
-		Session session = HibernateManager.openSession();
+		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			session.beginTransaction();
 			
