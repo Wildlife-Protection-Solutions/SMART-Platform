@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 
 /**
  * The Survey Design Editor
@@ -33,10 +34,19 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 public class SurveyDesignEditor extends MultiPageEditorPart {
 
 	public static final String ID = "org.wcs.smart.er.SurveyDesignEditor"; //$NON-NLS-1$
-	
+
+	private SurveyDesignSummaryEditorPage summaryPage;
 	@Override
 	protected void createPages() {
-		// TODO Auto-generated method stub
+		try {
+			summaryPage = new SurveyDesignSummaryEditorPage(this);
+			int i = addPage(summaryPage, getEditorInput());
+			setPageText(i, "Summary");
+		
+//			super.setPartName(getSurveyDesign().getName());
+		}catch (Exception ex) {
+			EcologicalRecordsPlugIn.log("Error creating pages.", ex);
+		}
 		
 	}
 
