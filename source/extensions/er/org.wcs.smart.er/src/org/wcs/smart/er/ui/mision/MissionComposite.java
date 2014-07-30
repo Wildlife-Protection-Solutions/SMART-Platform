@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 
@@ -72,15 +73,15 @@ public abstract class MissionComposite {
 	 * Initializes the gui elements with data
 	 * from the mission.
 	 * 
-	 * @param design
+	 * @param mission
 	 */
-	public abstract void init(Mission mission);
+	public abstract void init(Mission mission, Session session);
 	
 	/**
 	 * Updates the mission with info from
 	 * the gui.
 	 * 
-	 * @param design
+	 * @param mission
 	 */
 	public abstract void updateDesign(Mission mission);
 	

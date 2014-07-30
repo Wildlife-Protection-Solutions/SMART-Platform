@@ -128,7 +128,7 @@ public class SurveyComposite extends MissionComposite{
 	 * @param s current session
 	 */
 	public void init(Mission mission, SurveyDesign parentSurvey, Session s){
-		init(mission);
+		init(mission, s);
 		
 		this.parentSurvey = parentSurvey;
 		this.session = s;
@@ -143,7 +143,7 @@ public class SurveyComposite extends MissionComposite{
 	 * Does nothing; users should call init(mission, parentSurvey, s)
 	 */
 	@Override
-	public void init(Mission design) {
+	public void init(Mission design, Session session) {
 	}
 
 	@Override

@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
@@ -85,7 +86,7 @@ public class SurveyDesignComposite extends MissionComposite{
 	 * Does nothing
 	 */
 	@Override
-	public void init(Mission design) {
+	public void init(Mission design, Session session) {
 
 	}
 

@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 /**
  * Mission comment composite.
@@ -65,7 +66,7 @@ public class CommentComposite extends MissionComposite {
 	}
 
 	@Override
-	public void init(Mission mission) {
+	public void init(Mission mission, Session session) {
 		if (mission.getComment() == null){
 			txtComment.setText(""); //$NON-NLS-1$
 		}else{

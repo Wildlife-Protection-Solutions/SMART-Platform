@@ -30,6 +30,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.component.DatesComponent;
 /**
@@ -60,7 +61,7 @@ public class DateComposite extends MissionComposite {
 	}
 
 	@Override
-	public void init(Mission mission) {
+	public void init(Mission mission, Session session) {
 		this.mission = mission;
 		dates.setStartDate(mission.getStartDate());
 		dates.setEndDate(mission.getEndDate());
