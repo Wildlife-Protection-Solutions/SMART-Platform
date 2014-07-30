@@ -29,8 +29,8 @@ import org.hibernate.Session;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignInput;
 import org.wcs.smart.er.ui.SurveyDesignListFilter;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -97,7 +97,7 @@ public class CcaaFieldSurveyHibernateManager implements IFieldSurveyHibernateMan
 	 * 
 	 */
 	@Override
-	public List<SurveyDesignInput> getSurveys(Session s,
+	public List<SurveyDesignEditorInput> getSurveys(Session s,
 			SurveyDesignListFilter filter) {
 		
 		// TODO Auto-generated method stub

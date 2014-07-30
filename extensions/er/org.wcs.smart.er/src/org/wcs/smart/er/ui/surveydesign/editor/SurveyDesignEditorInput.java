@@ -34,12 +34,14 @@ import org.eclipse.ui.IPersistableElement;
 public class SurveyDesignEditorInput implements IEditorInput {
 
 	private byte[] uuid;
+	private String name;
 	
 	/**
 	 * Constructor
 	 */
-	public SurveyDesignEditorInput(byte[] uuid) {
+	public SurveyDesignEditorInput(String name, byte[] uuid) {
 		this.uuid = uuid;
+		this.name = name;
 	}
 	
 	public byte[] getUuid() {
@@ -64,7 +66,7 @@ public class SurveyDesignEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
-		return ""; //$NON-NLS-1$
+		return this.name; 
 	}
 
 	@Override

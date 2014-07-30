@@ -83,7 +83,7 @@ public class MissionAttributeListItem extends NamedKeyItem {
 	 * @return the attribute this list item is associated with
 	 */
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="attribute_uuid_id", referencedColumnName="uuid")
+	@JoinColumn(name="mission_attribute_uuid", referencedColumnName="uuid")
 	public MissionAttribute getAttribute(){
 		return this.attribute;
 	}

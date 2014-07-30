@@ -27,8 +27,8 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
  * Label provider and image provder for survey designs,
@@ -53,8 +53,8 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 		if (element instanceof SurveyDesign){
 			return ((SurveyDesign) element).getName();
 		}
-		if (element instanceof SurveyDesignInput){
-			return ((SurveyDesignInput) element).getName();
+		if (element instanceof SurveyDesignEditorInput){
+			return ((SurveyDesignEditorInput) element).getName();
 		}
 		return super.getText(element);
 	}
@@ -71,7 +71,7 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_ICON);
 		}
 		if(element instanceof SurveyDesign || 
-				element instanceof SurveyDesignInput){
+				element instanceof SurveyDesignEditorInput){
 			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_DESIGN_ICON);
 			
 		}
