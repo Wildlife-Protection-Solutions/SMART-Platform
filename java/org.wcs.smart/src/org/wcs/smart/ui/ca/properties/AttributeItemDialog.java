@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.ca.properties;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -34,9 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.internal.ca.properties.NameKeyComposite;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -48,9 +47,9 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AttributeItemDialog  extends TitleAreaDialog{
 
-	private DmObject toUpdate = null;
+	private NamedKeyItem toUpdate = null;
 	private Language lang = null;
-	private List<? extends DmObject> siblings;
+	private List<? extends NamedKeyItem> siblings;
 	
 	private NameKeyComposite comp;
 	
@@ -62,7 +61,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	 * @param siblings list of sibling attribute list items
 	 * @param language current display language
 	 */
-	public AttributeItemDialog(Shell parent, DmObject toUpdate, List<? extends DmObject> siblings, Language language) {
+	public AttributeItemDialog(Shell parent, NamedKeyItem toUpdate, List<? extends NamedKeyItem> siblings, Language language) {
 		super(parent);
 		this.toUpdate = toUpdate;
 		this.lang = language;
@@ -87,25 +86,19 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		gd.widthHint = 300;
 		container.setLayoutData(gd);
 		
-		comp = new NameKeyComposite(parent, SWT.NONE) {			
+		comp = new NameKeyComposite();
+		
+		comp.createControls(container, true, toUpdate.getKeyId() == null, new IChangeListener() {			
 			@Override
-			protected Collection<? extends DmObject> getSiblings() {
-				return siblings;
-			}
-			
-			@Override
-			public boolean validate(){
-				boolean ok = super.validate();
+			public void itemModified() {
+				boolean ok = comp.validate();
 				Button btn = getButton(IDialogConstants.OK_ID);
 				if (btn != null){
 					btn.setEnabled(!ok);
 				}
-				return ok;
 			}
-		};
-		
-		comp.createNameKeyFields(container, true, toUpdate.getKeyId() == null);
-		comp.initFields(toUpdate, lang);
+		});
+		comp.initFields(toUpdate, siblings, lang);
 	
 		setMessage(Messages.AttributeItemDialog_Dialog_Message1);
 		setTitle(Messages.AttributeItemDialog_Dialog_Title);
