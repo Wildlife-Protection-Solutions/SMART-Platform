@@ -108,6 +108,7 @@ public class ScreensObjectFactory {
 			a1Data.setBigTab(ctBooleanValue(properties.isUseLargeTabs()));
 
 			a1Data.setKioskMode(ctBooleanValue(properties.isKioskMode()));
+			a1Data.setSimpleCamera(ctBooleanValue(properties.isSimpleCamera()));
 			a1Data.setDisableEditing(ctBooleanValue(properties.isDisableEditing()));
 			a1Data.setUseSD(ctBooleanValue(properties.isUseSdCard()));
 			a1Data.setTestTime(ctBooleanValue(properties.isTestTime()));

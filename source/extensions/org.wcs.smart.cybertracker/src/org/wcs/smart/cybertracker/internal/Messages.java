@@ -218,6 +218,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_SightingFixCount;
 	public static String CyberTrackerPropertiesDialog_SightingFixCount_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SightingFixCountInvalid;
+	public static String CyberTrackerPropertiesDialog_SimpleCamera;
+	public static String CyberTrackerPropertiesDialog_SimpleCamera_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SkipButtonTimeout;
 	public static String CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SkipButtonTimeoutInvalid;
