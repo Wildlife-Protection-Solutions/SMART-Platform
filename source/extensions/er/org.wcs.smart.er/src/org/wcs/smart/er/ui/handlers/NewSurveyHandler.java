@@ -33,10 +33,10 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignInput;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.survey.NewSurveyDialog;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -75,8 +75,8 @@ public class NewSurveyHandler extends AbstractHandler {
 		if (parent == null){
 			if (HandlerUtil.getActiveEditor(event) != null){
 				IEditorInput in = HandlerUtil.getActiveEditor(event).getEditorInput();
-				if (in instanceof SurveyDesignInput){
-					parent = ((SurveyDesignInput)in).getUuid();
+				if (in instanceof SurveyDesignEditorInput){
+					parent = ((SurveyDesignEditorInput)in).getUuid();
 				}
 			}
 		}

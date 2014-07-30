@@ -39,7 +39,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
@@ -98,7 +97,7 @@ public class SurveyDesignListView extends ViewPart{
 						IWorkbenchPage page = getSite().getPage();
 						switch (node.getType()) {
 							case SURVEY_DESIGN:
-								page.openEditor(new SurveyDesignEditorInput(node.getUuid()), SurveyDesignEditor.ID);						
+								page.openEditor(new SurveyDesignEditorInput(node.getLabel(), node.getUuid()), SurveyDesignEditor.ID);						
 								break;
 							case SURVEY:
 								//TODO: implement SURVEY

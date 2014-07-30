@@ -25,8 +25,8 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignInput;
 import org.wcs.smart.er.ui.SurveyDesignListFilter;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 public interface IFieldSurveyHibernateManager {
 
@@ -53,6 +53,6 @@ public interface IFieldSurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	public List<SurveyDesignInput> getSurveys(Session s, SurveyDesignListFilter filter);
+	public List<SurveyDesignEditorInput> getSurveys(Session s, SurveyDesignListFilter filter);
 	
 }

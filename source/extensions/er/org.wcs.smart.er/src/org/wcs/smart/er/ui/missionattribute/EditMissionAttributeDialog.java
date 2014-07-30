@@ -1,27 +1,45 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.ui.missionattribute;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,33 +50,33 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.ui.properties.KeyInputDialog;
-import org.wcs.smart.ui.properties.LanguageViewer;
 
-public class EditMissionAttributeDialog extends TitleAreaDialog {
+/**
+ * Dialog for editing specific mission attribute.
+ * 
+ * @author Emily
+ *
+ */
+public class EditMissionAttributeDialog extends TitleAreaDialog implements SelectionListener{
 	
 	
 	private Collection<? extends NamedKeyItem> siblings;	//attributes that are siblings to the current attribute being updated/created
 	private MissionAttribute toUpdate;	//attribute to update
 	
-	private Session currentSession;
-	
+	private NameKeyComposite nameKeyControls;
 	
 	private ComboViewer cmbType;
 	private TableViewer lstViewer;
@@ -67,18 +85,11 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 	private Button btnEdit;
 	private Button btnDelete;
 	
-	private Text txtName;
-	private Text txtKey;
-	
-	private ControlDecoration cdKey;
-	private ControlDecoration cdTxt;
-	
 	private Composite listPanel;
 	
 	private HashMap<Language, String> copyNames;
-	
-	private boolean generateKey = true;
-	
+	private List<MissionAttributeListItem> copyItems;
+
 	/**
 	 * creates a new dialog
 	 * 
@@ -90,18 +101,35 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 	 */
 	public EditMissionAttributeDialog(Shell parentShell,  
 			MissionAttribute toUpdate,  
-			Collection<? extends NamedKeyItem> siblings, 
-			Session currentSession) {
+			Collection<? extends NamedKeyItem> siblings) {
 		
 		super(parentShell);
 		this.toUpdate = toUpdate;
-		this.siblings = siblings;
-		this.currentSession = currentSession;
 		
+		this.siblings = new ArrayList<NamedKeyItem>(siblings);
+		this.siblings.remove(toUpdate);
+
 		copyNames = new HashMap<Language, String>();
 		for (org.wcs.smart.ca.Label l : toUpdate.getNames()){
 			copyNames.put(l.getLanguage(), l.getValue());
 		}
+		
+		copyItems = new ArrayList<MissionAttributeListItem>();
+		if (toUpdate.getAttributeList() != null){
+			for (MissionAttributeListItem i : toUpdate.getAttributeList()){
+				MissionAttributeListItem item = new MissionAttributeListItem();
+				item.setKeyId( i.getKeyId() );
+				item.setAttribute(toUpdate);
+				item.setListOrder(i.getListOrder());
+				item.setName(i.getName());
+				for (org.wcs.smart.ca.Label l : i.getNames()){
+					item.updateName(l.getLanguage(), l.getValue());
+				}
+				copyItems.add(item);
+			}
+		}
+		
+		
 	}
 	
 	@Override
@@ -157,81 +185,16 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Label l = new Label(composite, SWT.NONE);
-		l.setText("Language:");
-		
-		final LanguageViewer lang = new LanguageViewer(composite, SWT.NONE, SmartDB.getCurrentConservationArea());
-		lang.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		lang.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				generateKey = false;
-				if (copyNames.get(lang.getCurrentSelection()) == null){
-					txtName.setText("");
-				}else{
-					txtName.setText(copyNames.get(lang.getCurrentSelection()));
-				}
-			}
-		});
-		/* Name & Key */
-		l = new Label(composite, SWT.NONE);
-		l.setText("Name:");
-		
-		txtName = new Text(composite, SWT.BORDER);
-		if (toUpdate.getName() != null){
-			txtName.setText(toUpdate.getName());
-		}
-		if (toUpdate.getKeyId() == null){
-			txtName.addListener(SWT.Modify, new Listener(){
-				@Override
-				public void handleEvent(Event event) {
-					if (generateKey || (!generateKey && txtKey.getText().isEmpty())){
-						generateKey = true;
-						txtKey.setText(toUpdate.generateKey(txtName.getText(), siblings));
-					}
-					copyNames.put(lang.getCurrentSelection(), txtName.getText());
-					validate();
-				}});
-		}
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		cdTxt = createDecoration(txtName);
-		
-		l = new Label(composite, SWT.NONE);
-		l.setText("Key ID:");
-		
-		txtKey = new Text(composite, SWT.BORDER);
-		if (toUpdate.getKeyId() != null){
-			txtKey.setText(toUpdate.getKeyId());
-		}
-		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtKey.setEditable(false);
-		cdKey = createDecoration(txtKey);
-		
-		Button btnEditKey = new Button(composite, SWT.PUSH);
-		btnEditKey.setText("Change");
-		btnEditKey.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (!MessageDialog
-						.openConfirm(
-								getShell(),
-								"Edit Key",
-								"Modifying the keys will affect Cross Conservation Area analysis. Are you sure you want to continue?")) {
-					return;
-				}
-				InputDialog id = new KeyInputDialog(getShell(), 
-						txtKey.getText(), siblings);
-				int ret = id.open();
-				if (ret != Window.CANCEL) {
-					txtKey.setText(id.getValue());
-				}
-				validate();
-			}
+		nameKeyControls = new NameKeyComposite();
+		nameKeyControls.createControls(composite, true, toUpdate.getUuid() == null, new IChangeListener() {
 			
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void itemModified() {
+				//TODO: language label provider for list
+				validate();
 			}
 		});
+		nameKeyControls.initFields(toUpdate, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		
 		listPanel = new Composite(composite, SWT.NONE);
 		listPanel.setLayout(new GridLayout(2, false));
@@ -240,8 +203,14 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.setLabelProvider(AttributeLabelProvider.getInstance());
-		lstViewer.setInput(toUpdate.getAttributeList());
+		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				editListItem();
+			}
+		});
 		
 		Composite buttonPnl = new Composite(listPanel, SWT.NONE);
 		buttonPnl.setLayout(new GridLayout(1, false));
@@ -250,57 +219,38 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 		btnAdd = new Button(buttonPnl, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
+		btnAdd.addSelectionListener(this);
+		
 		btnEdit = new Button(buttonPnl, SWT.PUSH);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnEdit.addSelectionListener(this);
 		
 		btnDelete = new Button(buttonPnl, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnDelete.addSelectionListener(this);
 		
 		
 		if (toUpdate.getKeyId() == null){
 			getShell().setText("New Mission Attribute");
-			setMessage("New Mission Attribute");
-			setTitle("Create a new attribute for use with survey missions");
+			setTitle("New Mission Attribute");
+			setMessage("Create a new attribute for use with survey missions");
 		}else{
 			getShell().setText("Edit Mission Attribute");
-			setMessage(MessageFormat.format("Edit: {0}", new Object[]{toUpdate.getName()}));
-			setTitle("Modify the mission attribute.");
+			setTitle(toUpdate.getName());
+			setMessage("Modify the mission attribute.");
 		}
 		
-		cmbType.setSelection(new StructuredSelection(AttributeType.NUMERIC));
-		listPanel.setVisible(false);
+		cmbType.setSelection(new StructuredSelection(toUpdate.getType()));
+		listPanel.setVisible(toUpdate.getType() == AttributeType.LIST);
 		return composite;
 	}
 	
 	
 	private void validate(){
-		boolean error = false;
-		String errormsg = NamedKeyItem.validateKey(txtKey.getText(), siblings);
-		if (errormsg != null){
-			cdKey.setDescriptionText(errormsg);
-			cdKey.show();
-			error = true;
-		}else{
-			cdKey.hide();
-		}
-		
-		boolean hide = true;
-		for (Entry<Language, String> entry : copyNames.entrySet()){
-			errormsg = DataModel.validateName(entry.getValue(), entry.getKey());
-			if (errormsg != null){
-				cdTxt.setDescriptionText(errormsg);
-				cdTxt.show();
-				error = true;
-				hide = false;
-			}
-		}
-		if (hide){
-			cdTxt.hide();
-		}
-		
+		boolean error = nameKeyControls.validate();
+
 		if (getButton(OK) != null){
 			getButton(OK).setEnabled(!error);
 		}
@@ -337,23 +287,26 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 	 * information in the attribute panel
 	 */
 	private void updateAttribute(){
+		nameKeyControls.updateFields(toUpdate);
 		
-		toUpdate.setKeyId(txtKey.getText());
-		for (Language l : toUpdate.getConservationArea().getLanguages()){
-			toUpdate.updateName(l, copyNames.get(l));
-		}
-		
-		toUpdate.setName(txtName.getText());
 		toUpdate.setType(getType());
 		
+		//remove existing items
+		if (toUpdate.getAttributeList() != null){
+			for (MissionAttributeListItem mi : toUpdate.getAttributeList()){
+				mi.setAttribute(null);
+			}
+			toUpdate.getAttributeList().clear();
+		}
+		
 		if (toUpdate.getType() == AttributeType.LIST){
-			toUpdate.setAttributeList(new ArrayList<MissionAttributeListItem>());
-		}else{
-			if (toUpdate.getAttributeList() != null){
-				for (MissionAttributeListItem mi : toUpdate.getAttributeList()){
-					mi.setAttribute(null);
-				}
-				toUpdate.getAttributeList().clear();
+			if (toUpdate.getAttributeList() == null){
+				toUpdate.setAttributeList(new ArrayList<MissionAttributeListItem>());
+			}
+			//TODO:: add new items
+			for (MissionAttributeListItem li : copyItems){
+				toUpdate.getAttributeList().add(li);
+				li.setAttribute(toUpdate);
 			}
 		}
 	}
@@ -368,5 +321,55 @@ public class EditMissionAttributeDialog extends TitleAreaDialog {
 		}
 		
 		close();
+	}
+	
+	private void addListItem(){
+		MissionAttributeListItem item = new MissionAttributeListItem();
+		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), item, copyItems,nameKeyControls.getSelectedLanguage());
+		if (dialog.open() == OK){
+			copyItems.add(item);
+			lstViewer.refresh();
+		}
+		
+	}
+	private void deleteListItem(){
+		MissionAttributeListItem mi = (MissionAttributeListItem)((IStructuredSelection)lstViewer.getSelection()).getFirstElement();
+		if (mi == null){
+			return;
+		}
+		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the list item {0}?", new Object[]{mi.getName()}))){
+			return;
+		}
+		copyItems.remove(mi);
+	}
+	
+	private void editListItem(){
+		MissionAttributeListItem mi = (MissionAttributeListItem)((IStructuredSelection)lstViewer.getSelection()).getFirstElement();
+		if (mi == null){
+			return;
+		}
+		List<MissionAttributeListItem> siblings = new ArrayList<MissionAttributeListItem>();
+		siblings.addAll(copyItems);
+		siblings.remove(mi);
+		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), mi, siblings,nameKeyControls.getSelectedLanguage());
+		if (dialog.open() == OK){
+			lstViewer.refresh();
+		}
+	}
+
+	@Override
+	public void widgetSelected(SelectionEvent e) {
+		if (e.getSource() == btnEdit){
+			editListItem();
+		}else if (e.getSource() == btnAdd){
+			addListItem();
+		}else if (e.getSource() == btnDelete){
+			deleteListItem();
+		}
+	}
+
+	@Override
+	public void widgetDefaultSelected(SelectionEvent e) {
+		
 	}
 }

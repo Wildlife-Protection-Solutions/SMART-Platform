@@ -29,11 +29,11 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.MissionTrack.TrackType;
-import org.wcs.smart.er.ui.SurveyDesignInput;
 import org.wcs.smart.er.ui.SurveyDesignListFilter;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -132,14 +132,14 @@ public class CaFieldSurveyHibernateManager implements IFieldSurveyHibernateManag
 	 * is null with return all survey designs.
 	 */
 	@Override
-	public List<SurveyDesignInput> getSurveys(Session s, SurveyDesignListFilter filter) {
+	public List<SurveyDesignEditorInput> getSurveys(Session s, SurveyDesignListFilter filter) {
 		if (filter == null){
 			//get all
 			List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-			List<SurveyDesignInput> all = new ArrayList<SurveyDesignInput>();
+			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			
 			for (SurveyDesign d : ds){
-				SurveyDesignInput ii = new SurveyDesignInput(d.getName(), d.getUuid(), d.getState());
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput(d.getName(), d.getUuid());
 				all.add(ii);
 			}
 			return all;
@@ -148,9 +148,9 @@ public class CaFieldSurveyHibernateManager implements IFieldSurveyHibernateManag
 //			str.append("SELECT s.uuid, s.state, s.startDate, s.endDate, lbl.value "); //$NON-NLS-1$
 			Query q = filter.buildQuery(s);
 			List<Object[]> data = q.list();
-			List<SurveyDesignInput> all = new ArrayList<SurveyDesignInput>();
+			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			for (Object[] x : data){
-				SurveyDesignInput ii = new SurveyDesignInput((String)x[4], (byte[])x[0], (SurveyDesign.State)x[1]);
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[4], (byte[])x[0]);
 				all.add(ii);
 			}
 			return all;
