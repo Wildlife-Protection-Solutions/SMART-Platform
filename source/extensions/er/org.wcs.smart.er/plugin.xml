@@ -305,6 +305,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
+            class="org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor"
             default="false"
             icon="images/icons/obj16/survey_design.png"
             id="org.wcs.smart.er.SurveyDesignEditor"
