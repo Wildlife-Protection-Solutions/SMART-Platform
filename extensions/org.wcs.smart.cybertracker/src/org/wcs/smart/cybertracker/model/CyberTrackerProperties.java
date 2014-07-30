@@ -98,6 +98,7 @@ public class CyberTrackerProperties extends UuidItem {
 	//default properties
 	private static final boolean largeScrollBars = false;
 	private static final boolean kioskMode = true;
+	private static final boolean simpleCamera = true;
 	private static final boolean canPause = true;
 	private static final int exitPin = 1234;
 	
@@ -190,6 +191,13 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setKioskMode(boolean kioskMode) {
 		getOption(OptionID.KIOSK_MODE).setBooleanValue(kioskMode);
+	}
+
+	public boolean isSimpleCamera() {
+		return getBooleanValue(OptionID.SIMPLE_CAMERA, simpleCamera);
+	}
+	public void setSimpleCamera(boolean simpleCamera) {
+		getOption(OptionID.SIMPLE_CAMERA).setBooleanValue(simpleCamera);
 	}
 	
 	public boolean isCanPause() {

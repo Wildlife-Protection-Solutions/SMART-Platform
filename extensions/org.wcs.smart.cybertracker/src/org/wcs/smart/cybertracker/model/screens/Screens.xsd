@@ -46,6 +46,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="MovingMapFileName" />
 						<xs:element type="xs:string" name="MovingMapLock100" />
 						<xs:element type="xs:string" name="MovingMapOnSkip" />
+						<xs:element type="xs:string" name="SimpleCamera" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>

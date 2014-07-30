@@ -48,6 +48,7 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 		APP_NAME,
 		LARGE_SCROLL_BARS,
 		KIOSK_MODE,
+		SIMPLE_CAMERA,
 		EXIT_PIN,
 		
 		SIGHTING_ACCURACY,

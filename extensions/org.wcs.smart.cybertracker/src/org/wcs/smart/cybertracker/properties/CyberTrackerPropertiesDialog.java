@@ -87,6 +87,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private Button btnShowEdit;
 	private Button btnShowGPS;
 	private Button btnKioskMode;
+	private Button btnSimpleCamera;
 	private Button btnCanPause;
 	private Text txtExitPin;
 
@@ -317,7 +318,26 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});
 
+		
+		Label lblSimpleCamera = new Label(generalContainer, SWT.NONE);
+		lblSimpleCamera.setText(Messages.CyberTrackerPropertiesDialog_SimpleCamera);
+		lblSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesDialog_SimpleCamera_Tooltip);
 
+		btnSimpleCamera = new Button(generalContainer, SWT.CHECK);
+		btnSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesDialog_SimpleCamera_Tooltip);
+		btnSimpleCamera.setSelection(ctProperties.isSimpleCamera());
+		btnSimpleCamera.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+
+		
 		Label lblCanPause = new Label(generalContainer, SWT.NONE);
 		lblCanPause.setText(Messages.CyberTrackerPropertiesDialog_CanPause);
 		lblCanPause.setToolTipText(Messages.CyberTrackerPropertiesDialog_CanPause_Tooltip);
@@ -904,6 +924,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		
 		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
+		ctProperties.setSimpleCamera(btnSimpleCamera.getSelection());
 		ctProperties.setCanPause(btnCanPause.getSelection());
 		ctProperties.setExitPin(Integer.valueOf(txtExitPin.getText()));
 		
