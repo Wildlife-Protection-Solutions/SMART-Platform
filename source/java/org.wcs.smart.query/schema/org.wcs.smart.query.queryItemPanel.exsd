@@ -63,7 +63,7 @@ When definiting a new query type developers must also define the query definitio
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.ui.filter.IQueryItemPanel"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.ui.itempanel.IQueryItemPanel"/>
                </appinfo>
             </annotation>
          </attribute>
