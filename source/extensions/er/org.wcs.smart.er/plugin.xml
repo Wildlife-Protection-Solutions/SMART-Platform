@@ -122,10 +122,6 @@
                id="org.wcs.smart.er.menu.survey"
                label="Survey">
             <command
-                  commandId="org.wcs.smart.er.missionattributes.show"
-                  style="push">
-            </command>
-            <command
                   commandId="org.wcs.smart.er.mission.new"
                   style="push"
                   tooltip="creates a new mission">
@@ -138,6 +134,14 @@
                   commandId="org.wcs.smart.er.surveydesign.new"
                   style="push"
                   tooltip="creates a new survey design">
+            </command>
+            <separator
+                  name="org.wcs.smart.er.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.er.missionattributes.show"
+                  style="push">
             </command>
             <separator
                   name="org.wcs.smart.er.separator1"

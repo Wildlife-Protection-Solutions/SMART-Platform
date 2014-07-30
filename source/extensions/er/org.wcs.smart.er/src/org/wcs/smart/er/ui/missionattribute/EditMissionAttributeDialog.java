@@ -52,8 +52,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -89,6 +91,8 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 	
 	private HashMap<Language, String> copyNames;
 	private List<MissionAttributeListItem> copyItems;
+	
+	private Session session;
 
 	/**
 	 * creates a new dialog
@@ -101,9 +105,11 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 	 */
 	public EditMissionAttributeDialog(Shell parentShell,  
 			MissionAttribute toUpdate,  
-			Collection<? extends NamedKeyItem> siblings) {
+			Collection<? extends NamedKeyItem> siblings,
+			Session session) {
 		
 		super(parentShell);
+		this.session = session;
 		this.toUpdate = toUpdate;
 		
 		this.siblings = new ArrayList<NamedKeyItem>(siblings);
@@ -190,11 +196,12 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 			
 			@Override
 			public void itemModified() {
-				//TODO: language label provider for list
+				((AttributeLabelProvider)lstViewer.getLabelProvider()).setLanguage(nameKeyControls.getSelectedLanguage());
+				lstViewer.refresh();
+				
 				validate();
 			}
 		});
-		nameKeyControls.initFields(toUpdate, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		
 		listPanel = new Composite(composite, SWT.NONE);
 		listPanel.setLayout(new GridLayout(2, false));
@@ -202,7 +209,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-		lstViewer.setLabelProvider(AttributeLabelProvider.getInstance());
+		lstViewer.setLabelProvider(new AttributeLabelProvider());
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -241,9 +248,12 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 			setTitle(toUpdate.getName());
 			setMessage("Modify the mission attribute.");
 		}
-		
+
+		//init fields
+		nameKeyControls.initFields(toUpdate, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		cmbType.setSelection(new StructuredSelection(toUpdate.getType()));
 		listPanel.setVisible(toUpdate.getType() == AttributeType.LIST);
+		
 		return composite;
 	}
 	
@@ -340,7 +350,16 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the list item {0}?", new Object[]{mi.getName()}))){
 			return;
 		}
-		copyItems.remove(mi);
+		
+		try{
+			if (mi.getUuid() == null || DeleteManager.canDelete(mi, session)){
+				copyItems.remove(mi);
+				lstViewer.refresh();		
+			}
+		}catch (Exception ex){
+			MessageDialog.openError(getShell(), "Delete", MessageFormat.format("The list item {0} cannot be removed.", new Object[]{mi.getName()}) + "\n\n" + ex.getMessage());
+		}
+		
 	}
 	
 	private void editListItem(){
