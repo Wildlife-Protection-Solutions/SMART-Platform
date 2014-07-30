@@ -23,7 +23,6 @@ package org.wcs.smart.ui.ca.properties;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -335,12 +334,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		}
 
 		final AttributeInfoPanel attributeInfo = new AttributeInfoPanel(
-				compAddExisting, SWT.NONE, false, false, null) {
-			@Override
-			public Collection<Attribute> getSiblings() {
-				return null;
-			}
-		};
+				compAddExisting, SWT.NONE, false, false, null);
 		attributeInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		checkboxTableViewer
@@ -351,7 +345,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 						if (x!= null && x instanceof Attribute){
 							Attribute sel = (Attribute)x ;
 							attributeInfo.setVisible(true);
-							attributeInfo.setAttribute(sel, lang);
+							attributeInfo.setAttribute(sel, null, lang);	//don't care about siblings; only viewing
 						} else {
 							attributeInfo.setVisible(false);
 						}

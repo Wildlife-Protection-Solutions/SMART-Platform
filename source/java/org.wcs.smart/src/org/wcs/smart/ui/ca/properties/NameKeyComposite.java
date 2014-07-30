@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.ca.properties;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +51,6 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.HkeyObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -64,7 +63,7 @@ import org.wcs.smart.ui.properties.LanguageViewer;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class NameKeyComposite extends Composite {
+public class NameKeyComposite {
 
 	
 	protected Text txtName;
@@ -77,33 +76,41 @@ public abstract class NameKeyComposite extends Composite {
 	private Language currentSelection = null;
 	private HashMap<Language, String> values = null;
 	
+	private Collection<? extends NamedKeyItem> siblings;
 	
 	/**
 	 * 
 	 */
-	public NameKeyComposite(Composite parent, int style) {
-		super(parent, style);
+	public NameKeyComposite(){
 	}
 
 	/**
+	 * 
+	 * @return the current selected language
+	 */
+	public Language getSelectedLanguage(){
+		return langViewer.getCurrentSelection();
+	}
+	
+	/**
 	 * Updates the data model object with the values
 	 * from the composite fields
-	 * @param dmObject object to update
+	 * @param item object to update
 	 */
-	public void updateFields(DmObject dmObject){
+	public void updateFields(NamedKeyItem item){
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
 			if (type.getValue() != null){
-				dmObject.updateName(type.getKey(), type.getValue());
+				item.updateName(type.getKey(), type.getValue());
 			}
 			if (type.getKey().equals(SmartDB.getCurrentLanguage())){
-				dmObject.setName(type.getValue());
+				item.setName(type.getValue());
 			}
 		}
 		
-		dmObject.setKeyId(txtKey.getText());
-		if (dmObject instanceof HkeyObject){
-			((HkeyObject)dmObject).updateHkey();
+		item.setKeyId(txtKey.getText());
+		if (item instanceof HkeyObject){
+			((HkeyObject)item).updateHkey();
 		}
 	}
 	
@@ -111,26 +118,27 @@ public abstract class NameKeyComposite extends Composite {
 	 * Initializes the name and key values with the 
 	 * data from the data model object
 	 * 
-	 * @param dmObject data model object
+	 * @param item data model object
 	 * @param defaultLang language
 	 */
-	public void initFields(DmObject dmObject, Language defaultLang){
+	public void initFields(NamedKeyItem item, Collection<? extends NamedKeyItem> siblings, Language defaultLang){
+		this.siblings = siblings;
 		currentSelection = null;
 		values = new HashMap<Language, String>();
-		if (dmObject.getNames() != null){
-			for (org.wcs.smart.ca.Label lbl : dmObject.getNames()){
+		if (item.getNames() != null){
+			for (org.wcs.smart.ca.Label lbl : item.getNames()){
 				values.put(lbl.getLanguage(), lbl.getValue());
 			}
 		}
 		
-		if (txtKey != null && dmObject.getKeyId() != null){
-			txtKey.setText(dmObject.getKeyId());
+		if (txtKey != null && item.getKeyId() != null){
+			txtKey.setText(item.getKeyId());
 		}
 		
 		if (txtName != null ){
-			String x = dmObject.findNameNull(defaultLang);
+			String x = item.findNameNull(defaultLang);
 			if (x == null){
-				x = dmObject.getName();
+				x = item.getName();
 				if (x == null){
 					x = ""; //$NON-NLS-1$
 				}
@@ -147,23 +155,28 @@ public abstract class NameKeyComposite extends Composite {
 	 * Creates name and key fields, adding them to the parent.
 	 * <p>
 	 * Assumption is that the parent layout is 
-	 * a grid layout with two columns.</p>
+	 * a grid layout with three columns.</p>
 	 * 
 	 * @param parent parent composite to add fields to
 	 * @param canEdit if fields can be editing
 	 * @param createNew <code>true</code> if a new object is being created or <code>false</code> if exisitng object being modified
+	 * @param onChange event fired when a name or key has been modified. Can be null. Only fired if canEdit is true.
 	 */
-	public void createNameKeyFields(Composite parent, final boolean canEdit, boolean createNew){
+	public void createControls(
+			final Composite parent,final boolean canEdit, 
+			boolean createNew, final IChangeListener onChange){
+		
 		values = new HashMap<Language, String>();
 		final KeyListener generateKeyListener = new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (currentSelection.isDefault()){
-					String newKey = NamedKeyItem.generateKey(txtName.getText(), getSiblings());
+					String newKey = NamedKeyItem.generateKey(txtName.getText(), siblings);
 					txtKey.setText(newKey);
 				}
-				if (canEdit){
-					validate();
+				
+				if (canEdit && onChange != null){
+					onChange.itemModified();
 				}
 			}
 			
@@ -223,7 +236,9 @@ public abstract class NameKeyComposite extends Composite {
 			txtName.addListener(SWT.Modify, new Listener() {
 				@Override
 				public void handleEvent(Event event) {
-					validate();					
+					if (onChange != null){
+						onChange.itemModified();
+					}
 				}
 			});
 		}
@@ -257,18 +272,21 @@ public abstract class NameKeyComposite extends Composite {
 
 					if (!MessageDialog
 							.openConfirm(
-									getShell(),
+									parent.getShell(),
 									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Title,
 									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Message)) {
 						return;
 					}
-					InputDialog id = new KeyInputDialog(getShell(), txtKey.getText(),getSiblings());
+					InputDialog id = new KeyInputDialog(parent.getShell(), txtKey.getText(), siblings);
 					int ret = id.open();
 					if (ret != Window.CANCEL) {
 						txtKey.setText(id.getValue());
 						txtName.removeKeyListener(generateKeyListener);
 					}
-					validate();
+					
+					if (onChange != null){
+						onChange.itemModified();
+					}
 				}
 			});
 		}
@@ -287,7 +305,8 @@ public abstract class NameKeyComposite extends Composite {
 	}
 	
 	/**
-	 * Validate the name and key fields.  
+	 * Validate the name and key fields.
+	 *   
 	 * @return <code>true</code> if error on page; <code>false</code> otherwise
 	 */
 	public boolean validate(){
@@ -297,7 +316,7 @@ public abstract class NameKeyComposite extends Composite {
 			values.put(currentSelection, txtName.getText());
 		}
 						
-		String errormsg = NamedKeyItem.validateKey(txtKey.getText(), new ArrayList<DmObject>());
+		String errormsg = NamedKeyItem.validateKey(txtKey.getText(), new ArrayList<NamedKeyItem>());
 		if (errormsg != null){
 			cdKey.setDescriptionText(errormsg);
 			cdKey.show();
@@ -308,7 +327,7 @@ public abstract class NameKeyComposite extends Composite {
 		boolean hide = true;
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
-			errormsg = DataModel.validateName(type.getValue(), type.getKey());
+			errormsg = validateName(type.getKey(), type.getValue());
 			if (errormsg != null){
 				cdTxt.setDescriptionText(errormsg);
 				cdTxt.show();
@@ -319,14 +338,23 @@ public abstract class NameKeyComposite extends Composite {
 		if (hide){
 			cdTxt.hide();
 		}
-		
 		return error;
 	}
-	/**
-	 * 
-	 * @return the siblings of the current dmobject being modified
-	 */
-	protected abstract Collection<? extends DmObject> getSiblings();
 
+	/**
+	 * Validates the name for the given language. 
+	 * Users can override if necessary.
+	 * 
+	 * @param l
+	 * @param name
+	 * @return
+	 */
+	public String validateName(Language l, String name){
+		return DataModel.validateName(name, l);
+	}
+	
+	public interface IChangeListener{
+		public void itemModified();
+	}
 }
 

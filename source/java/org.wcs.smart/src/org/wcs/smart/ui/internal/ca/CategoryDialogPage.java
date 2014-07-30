@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.internal.ca;
 
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -91,13 +90,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
-		cip = new CategoryInfoPanel(composite, SWT.NONE, true, toUpdate.getKeyId() == null) {			
-			@Override
-			protected Collection<Category> getSiblings() {
-				return sibilings;
-			}
-			
-			
+		cip = new CategoryInfoPanel(composite, SWT.NONE, true, toUpdate.getKeyId() == null) {	
 			@Override
 			public boolean validate(){
 				boolean valid = super.validate();
@@ -110,7 +103,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.widthHint = 300;
 		cip.setLayoutData(gd);
-		cip.setCategory(toUpdate, this.defaultLang);
+		cip.setCategory(toUpdate, sibilings, this.defaultLang);
 		
 		if (toUpdate.getKeyId() == null){
 			setMessage(Messages.CategoryDialogPage_New_DialogMessage);

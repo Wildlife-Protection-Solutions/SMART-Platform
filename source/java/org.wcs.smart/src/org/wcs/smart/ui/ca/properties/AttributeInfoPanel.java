@@ -24,6 +24,7 @@ package org.wcs.smart.ui.ca.properties;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -63,6 +65,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -72,6 +75,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -81,8 +85,8 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.internal.ca.properties.AttributeTree;
-import org.wcs.smart.ui.internal.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -92,11 +96,12 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class AttributeInfoPanel extends NameKeyComposite {
+public class AttributeInfoPanel extends Composite {
 
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
+	private NameKeyComposite nameKeyValues;
 	
 	private Text txtMinValue;
 	private Text txtMaxValue;
@@ -179,12 +184,19 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		});
 		
 		/* Name & Key */
-		createNameKeyFields(this, canEdit, createNew);
-		txtKey.addListener(SWT.Modify, new Listener(){
+		nameKeyValues = new NameKeyComposite();
+		nameKeyValues.createControls(this, canEdit, createNew, new IChangeListener() {
+			@Override
+			public void itemModified() {
+				validate();	
+			}
+		});
+		
+		nameKeyValues.txtKey.addListener(SWT.Modify, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
 				if (AttributeInfoPanel.this.attTree != null){
-					AttributeInfoPanel.this.attTree.updateAttributeKey(txtKey.getText());
+					AttributeInfoPanel.this.attTree.updateAttributeKey(nameKeyValues.txtKey.getText());
 				}
 			}});
 		
@@ -311,7 +323,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			lstAttributeList.getTable().setEnabled(false);
 		}
 		if (canEdit){
-			langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			nameKeyValues.langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					lstAttributeList.refresh();
@@ -352,7 +364,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					if (it == null) return;
 					@SuppressWarnings("unchecked")
-					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, langViewer.getCurrentSelection());
+					
+					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList,   nameKeyValues.langViewer.getCurrentSelection());
 					int ret = dd.open();
 					if (ret == Window.CANCEL){
 						return;
@@ -392,7 +405,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					final AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					boolean ret = MessageDialog.openConfirm(getShell(), Messages.AttributeInfoPanel_Delete_DialogTitle, 
 							MessageFormat.format(Messages.AttributeInfoPanel_Delete_DialogMessage, 
-									new Object[]{it.findName(langViewer.getCurrentSelection())}));
+									new Object[]{it.findName(nameKeyValues.langViewer.getCurrentSelection())}));
 					if (!ret){
 						return;
 					}
@@ -519,14 +532,14 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					validate();	
 				}
 			});
-			langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			nameKeyValues.langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					attTree.refresh(langViewer.getCurrentSelection());
+					attTree.refresh(nameKeyValues.langViewer.getCurrentSelection());
 				}
 			});
-			attTree.refresh(langViewer.getCurrentSelection());
+			attTree.refresh(nameKeyValues.langViewer.getCurrentSelection());
 		}
 
 		/*   Boolean Attribute Options */
@@ -563,9 +576,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * Validates attribute input
 	 * @return <code>true</code> if all fields validate correctly, <code>false</code> if error exists
 	 */
-	@Override
 	public boolean validate(){
-		boolean error = super.validate();
+		boolean error = nameKeyValues.validate();
 
 		Attribute.AttributeType type = (Attribute.AttributeType)(((IStructuredSelection)cmbType.getSelection()).getFirstElement());
 		if (type.equals(AttributeType.BOOLEAN)){
@@ -691,13 +703,24 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		optionComposite.layout();
 	}
 
+	/*
+	 * Creates a control decoration for a wizard page field.
+	 */
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT | SWT.TOP);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+	
 	/**
 	 * Updates the fields with the values from the associated attribute
 	 * @param att attribute
 	 * @param language current display language
 	 */
-	public void setAttribute(Attribute att, Language language){
-		initFields(att, language);
+	public void setAttribute(Attribute att, Collection<? extends NamedKeyItem> siblings, Language language){
+		nameKeyValues.initFields(att, siblings, language);
 		this.currentDisplayLang = language;
 		
 		chRequired.setSelection(att.getIsRequired());
@@ -825,7 +848,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * @param att attribute to update
 	 */
 	public <T> void updateAttribute(Attribute att, final Session session){
-		updateFields(att);
+		nameKeyValues.updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
 		if (att.getUuid() == null){
@@ -1028,15 +1051,13 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	/*
 	 * Label provided for attribute list
 	 */
-	class AttributeListLabelProvider extends LabelProvider implements IColorProvider { 
-
-		
+	class AttributeListLabelProvider extends LabelProvider implements IColorProvider {
 		@Override
 		public String getText(Object element) {
 			AttributeListItem it = (AttributeListItem) element;
 			Language lang = currentDisplayLang;
-			if (langViewer != null){
-				lang = langViewer.getCurrentSelection();
+			if (nameKeyValues.langViewer != null){
+				lang = nameKeyValues.langViewer.getCurrentSelection();
 			}
 			String name = it.findNameNull(lang);
 			if (name == null){

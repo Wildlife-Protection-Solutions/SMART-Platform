@@ -26,7 +26,6 @@ import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -363,19 +362,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		catInfoPanel = new CategoryInfoPanel(infoInnerPanel, SWT.NONE, false, false) {
-			@Override
-			protected List<Category> getSiblings() {
-				return null;
-			}
-		};
+		catInfoPanel = new CategoryInfoPanel(infoInnerPanel, SWT.NONE, false, false);
 		
-		attInfoPanel = new AttributeInfoPanel(infoInnerPanel, SWT.NONE, false, false, getSession()) {
-			@Override
-			public Collection<Attribute> getSiblings() {
-				return null;
-			}
-		};
+		attInfoPanel = new AttributeInfoPanel(infoInnerPanel, SWT.NONE, false, false, getSession());
 		attInfoPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		
 		Composite infoButtonPanel = new Composite(infoPanel , SWT.NONE);
@@ -907,7 +896,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		if (o instanceof Category){
 			((StackLayout)infoInnerPanel.getLayout()).topControl = catInfoPanel;
-			catInfoPanel.setCategory((Category)o, getLanguage());
+			//just a viewer we don't care about siblings
+			catInfoPanel.setCategory((Category)o, null, getLanguage());
 
 			btnAddAttribute.setEnabled( ((Category)o).getIsActive() );
 			btnAddCategory.setEnabled( ((Category)o).getIsActive() );
@@ -921,7 +911,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			btnDisableElement.setEnabled(true);
 		}else if (o instanceof CategoryAttribute){
-			attInfoPanel.setAttribute( ((CategoryAttribute)o).getAttribute(), getLanguage() );
+			attInfoPanel.setAttribute( ((CategoryAttribute)o).getAttribute(), null, getLanguage() ); //readonly, don't care about siblings
 			((StackLayout)infoInnerPanel.getLayout()).topControl = attInfoPanel;
 			btnAddCategory.setEnabled(false);
 			btnAddAttribute.setEnabled(false);

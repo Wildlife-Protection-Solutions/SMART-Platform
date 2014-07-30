@@ -22,6 +22,8 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 
+import java.util.Collection;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,8 +33,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 
 /**
  * Category information panel for displaying and editing
@@ -41,9 +45,10 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class CategoryInfoPanel extends NameKeyComposite {
+public class CategoryInfoPanel extends Composite {
 
 	protected Button chMultiple;
+	private NameKeyComposite nameKeyFields;
 
 	/**
 	 * Creates a new category information panel
@@ -53,11 +58,19 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	 * @param createNew if the current category is being modified or created 
 	 * @param lang
 	 */
-	public CategoryInfoPanel(Composite parent, int style, boolean canEdit, boolean createNew) {
+	public CategoryInfoPanel(Composite parent, int style, 
+			boolean canEdit, boolean createNew) {
 		super(parent, style);
 		setLayout(new GridLayout(3, false));
 		
-		createNameKeyFields(this, canEdit, createNew);
+		nameKeyFields = new NameKeyComposite();
+		nameKeyFields.createControls(this, canEdit, createNew, 
+				new NameKeyComposite.IChangeListener() {
+			@Override
+			public void itemModified() {
+				validate();
+			}
+		});
 		
 		new Label(this, SWT.NONE);
 		
@@ -85,8 +98,8 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	 * @param c the category
 	 * @param language display language
 	 */
-	public void setCategory(Category c, Language language){
-		initFields(c, language);
+	public void setCategory(Category c, Collection<? extends NamedKeyItem> siblings, Language language){
+		nameKeyFields.initFields(c, siblings, language);
 		chMultiple.setSelection(c.getIsMultiple());
 	}
 	
@@ -97,12 +110,12 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	 * @param c the category to update
 	 */
 	public void updateCategory(Category c){
-		updateFields(c);
+		nameKeyFields.updateFields(c);
 		c.setIsMultiple(chMultiple.getSelection());
 	}
 	
-	@Override
 	public boolean validate(){
-		return super.validate();
+		return nameKeyFields.validate();
 	}
+	
 }

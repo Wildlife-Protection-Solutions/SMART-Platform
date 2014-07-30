@@ -110,11 +110,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 
 
 		attributePanel = new AttributeInfoPanel(composite, SWT.NONE, 
-				true, toUpdate.getKeyId() == null, currentSession){
-			@Override
-			public Collection<Attribute> getSiblings() {
-				return siblings;
-			}};
+				true, toUpdate.getKeyId() == null, currentSession);
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.widthHint = 200;
@@ -136,7 +132,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 			}
 		});
 		
-		attributePanel.setAttribute(toUpdate, defaultLang);
+		attributePanel.setAttribute(toUpdate, siblings, defaultLang);
 		
 		scrolled.setContent(composite);
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
