@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.missionattribute;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -74,19 +75,41 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 	}
 
 	@Override
-	protected void okPressed() {
-		try{
-			session.getTransaction().commit();			
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Error saving mission attribute modifications." + " \n\n" + ex.getMessage(), ex);
-			return;
-		}
-		
-		super.okPressed();
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
+	@Override
+	protected void okPressed() {
+		if (saveChanges()){
+			session.getTransaction().begin();
+		};
+		
+	}
+	
+	private boolean saveChanges(){
+		try{
+			//commit changes
+			session.getTransaction().commit();			
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			return true;
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.displayLog("Error saving mission attribute modifications." + " \n\n" + ex.getMessage(), ex);
+			return false;
+		}
+	}
 	
 	public boolean close(){
+		if (getButton(IDialogConstants.OK_ID).isEnabled()){
+			if (MessageDialog.openQuestion(getShell(), "Close", "There are unsaved changes.  Would you like to save your changes before closing?")){
+				if (!saveChanges()){
+					return false;
+				}
+			}
+		}
 		if (session.getTransaction().isActive()){
 			session.getTransaction().rollback();
 		}
@@ -104,7 +127,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		
 		lstAttributes = new TableViewer(main, SWT.BORDER);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(AttributeLabelProvider.getInstance());
+		lstAttributes.setLabelProvider(new AttributeLabelProvider());
 		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -154,7 +177,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		ma.setConservationArea(SmartDB.getCurrentConservationArea());
 		
 		EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(
-				getShell(), ma, attributes);
+				getShell(), ma, attributes, session);
 		if (dialog.open() == OK){
 			attributes.add(ma);
 			session.save(ma);
@@ -188,7 +211,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 	private void editAttribute(){
 		MissionAttribute ma = (MissionAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma != null){
-			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes);
+			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes, session);
 			dialog.open();
 			lstAttributes.refresh();
 		}
@@ -202,7 +225,9 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 	}
 	
 	private void initData(){
-		attributes = session.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+		attributes = session.createCriteria(MissionAttribute.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.list(); 
 		lstAttributes.setInput(attributes);
 	}
 	
@@ -220,6 +245,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		}else if (e.widget == btnEdit){
 			editAttribute();
 		}
+		getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
 
 	@Override
