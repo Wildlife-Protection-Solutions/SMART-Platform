@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -79,7 +80,7 @@ public class IdComposite extends MissionComposite{
 	}
 
 	@Override
-	public void init(Mission mission) {
+	public void init(Mission mission, Session session) {
 		if (mission.getId() != null){
 			txtName.setText(mission.getId());
 		}else{

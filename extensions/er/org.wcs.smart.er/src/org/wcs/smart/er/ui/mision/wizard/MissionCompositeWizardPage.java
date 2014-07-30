@@ -83,7 +83,7 @@ public class MissionCompositeWizardPage extends WizardPage {
 		if (composite instanceof SurveyComposite){
 			((SurveyComposite)composite).init(mission, survey, session);
 		}else{
-			composite.init(mission);	
+			composite.init(mission, session);	
 		}
 		
 		

@@ -41,6 +41,7 @@ import org.wcs.smart.er.ui.mision.CommentComposite;
 import org.wcs.smart.er.ui.mision.DateComposite;
 import org.wcs.smart.er.ui.mision.IdComposite;
 import org.wcs.smart.er.ui.mision.MissionComposite;
+import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
@@ -172,6 +173,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     	
     	localPages.add(new IdComposite());
     	localPages.add(new DateComposite());
+    	localPages.add(new MissionEmployeeComposite());
     	localPages.add(new CommentComposite());
     	
 		for (MissionComposite m : localPages){

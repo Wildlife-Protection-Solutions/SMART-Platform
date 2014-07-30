@@ -71,6 +71,10 @@
             ca_property=".surveyDesign.conservationArea"
             class="org.wcs.smart.er.model.Survey">
       </class>
+      <class
+            ca_property=".id.member.conservationArea"
+            class="org.wcs.smart.er.model.MissionMember">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.observation.ObservationSource">

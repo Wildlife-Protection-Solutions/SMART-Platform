@@ -60,7 +60,8 @@ public class Mission extends UuidItem{
 	private List<SurveyWaypoint> waypoints;
 	private List<MissionTrack> tracks;
 	
-	//TODO: members
+	private List<MissionMember> members;
+	
 	
 	public Mission(){
 		
@@ -128,6 +129,15 @@ public class Mission extends UuidItem{
 	
 	public void setTracks(List<MissionTrack> tracks){
 		this.tracks = tracks;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true)
+	public List<MissionMember> getMembers(){
+		return this.members;
+	}
+	
+	public void setMembers(List<MissionMember> members){
+		this.members = members;
 	}
 	
 	/**
