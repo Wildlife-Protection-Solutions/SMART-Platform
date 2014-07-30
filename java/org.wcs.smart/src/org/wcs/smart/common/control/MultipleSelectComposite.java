@@ -306,6 +306,16 @@ public class MultipleSelectComposite<T> extends Composite {
 		WritableList list = (WritableList) this.selectedItemsListViewer.getInput();
 		return list != null ? list : new WritableList();
 	}
+	
+	/**
+	 * Creates a list out of the selected items
+	 * @return
+	 */
+	public List<T> getSelectedItemsAsList() {
+		ArrayList<T> items = new ArrayList<T>();
+		items.addAll(getSelectedItems());
+		return items;
+	}
 
 	/**
 	 * Change listener fired when the list of
