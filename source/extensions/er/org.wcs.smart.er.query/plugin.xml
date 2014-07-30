@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.query.queryType">
+      <QueryCategory
+            html_description="&lt;b&gt;TODO&lt;/b&gt;"
+            id="org.wcs.smart.er.query.category.survey"
+            name="Survey Queries">
+      </QueryCategory>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.SurveyObservationQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.query.common.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+         </DefinitionPanel>
+      </QueryType>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryItemPanel">
+      <QueryItemPanel
+            id="org.wcs.smart.er.query.survey.filterItemPanel"
+            panel="org.wcs.smart.er.query.ui.filter.SurveyFilterItemPanel">
+      </QueryItemPanel>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryDefinitionPanel">
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
+         <menu
+               id="org.wcs.smart.query.createquery.surveyquery"
+               label="Survey Queries"
+               tooltip="%patrolquery.menu.tooltip">
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  label="New Survey Observation Query ..."
+                  style="pulldown"
+                  tooltip="creates a new observation query for survey elements">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveyobservation">
+               </parameter>
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
+         <menu
+               id="org.wcs.smart.query.createquery.surveyquery"
+               label="Survey Queries"
+               tooltip="%patrolquery.menu.tooltip">
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.er.query.model.SurveyObservationQuery">
+      </class>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor"
+            default="false"
+            id="org.wcs.smart.er.query.ui.SimpleQueryResultsEditor"
+            name="Survey Observation Query Editor">
+      </editor>
+   </extension>
+
+</plugin>

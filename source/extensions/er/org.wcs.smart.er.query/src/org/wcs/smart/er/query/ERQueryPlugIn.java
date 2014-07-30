@@ -1,5 +1,9 @@
 package org.wcs.smart.er.query;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -46,5 +50,31 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	public static ERQueryPlugIn getDefault() {
 		return plugin;
 	}
+	
+	/**
+	 * Displays an error message to the user and logs the
+	 * message.
+	 * 
+	 * @param message  Error message to display
+	 * @param t exception to log
+	 */
+	public static void displayLog(final String message, Throwable t){
+		log(message, t);
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+			}
+			
+		});
+		
+	}
+	
+    public static void log(String message, Throwable t){
+		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
+        getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
+	}
+	
 
 }
