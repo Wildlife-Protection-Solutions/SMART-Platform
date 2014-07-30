@@ -29,7 +29,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -37,12 +39,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -83,6 +89,31 @@ public class SurveyDesignListView extends ViewPart{
 		lstViewer.setContentProvider(new LazySurveyDesignTreeContentProvider());
 		lstViewer.setInput(null);
 		getSite().setSelectionProvider(lstViewer);
+		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				SurveyListTreeNode node = (SurveyListTreeNode)((IStructuredSelection)lstViewer.getSelection()).getFirstElement();
+				if (node != null) {
+					try {
+						IWorkbenchPage page = getSite().getPage();
+						switch (node.getType()) {
+							case SURVEY_DESIGN:
+								page.openEditor(new SurveyDesignEditorInput(node.getUuid()), SurveyDesignEditor.ID);						
+								break;
+							case SURVEY:
+								//TODO: implement SURVEY
+								break;
+							case MISSION:
+								//TODO: implement MISSION
+								break;
+						}
+					} catch (Throwable t) {
+						EcologicalRecordsPlugIn.displayLog(t.getLocalizedMessage(), t);
+					}
+				}
+			}
+		});
+
 		
 		refresh();
 		

@@ -294,5 +294,14 @@
             icon="images/icons/obj16/mission_add.png">
       </image>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            default="false"
+            icon="images/icons/obj16/survey_design.png"
+            id="org.wcs.smart.er.SurveyDesignEditor"
+            name="Survey Design Editor">
+      </editor>
+   </extension>
 
 </plugin>
