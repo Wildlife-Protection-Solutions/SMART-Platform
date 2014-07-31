@@ -19,63 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.filter;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
+package org.wcs.smart.er.query.filter;
+
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
- * Tree node for data model.
+ * Waypoint date field filter
  * @author Emily
  *
  */
-public class SurveyItemPanel implements IItemTreeNode{
+public class MissionEndDateField implements IDateFieldFilter {
 
-	public static final String KEY = "surveyitem"; //$NON-NLS-1$
+	public static MissionEndDateField INSTANCE = new MissionEndDateField();
 	
-	private ITreeContentProvider provider;
-	private LabelProvider labelprovider;
+	private MissionEndDateField(){}
 	
-	private String name;
-	
-	
-	/**
-	 * type of node
-	 * @param type
-	 */
-	public SurveyItemPanel(){
-		provider = new SurveyItemContentProvider();
-		labelprovider = new LabelProvider(){
-			public String getText(Object element){
-				return ((SurveyItemContentProvider.Node)element).guiName;
-			}
-		};
-	}
 	@Override
-	public String getName() {
-		return name;
+	public String getGuiName() {
+		return "Mission Start Date";
 	}
 
-	@Override
-	public ITreeContentProvider getContentProvider() {
-		return provider;
-	}
-
-	@Override
-	public ILabelProvider getLabelProvider() {
-		return labelprovider;
-	}
 	@Override
 	public String getKey() {
-		return KEY;
-	}
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
+		return "missionstartdate"; //$NON-NLS-1$
 	}
 
 }

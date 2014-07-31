@@ -135,8 +135,13 @@ public class SurveyObservationQuery extends ObservationQuery{
 	
 	@Transient
 	public void setSurveyDesign(SurveyDesign design){
-		setSurveyDesign(design.getKeyId());
-		this.surveyDesign = design;
+		if (design == null){
+			this.surveyDesign = null;
+			this.surveyDesignKey = null;
+		}else{
+			setSurveyDesign(design.getKeyId());
+			this.surveyDesign = design;
+		}
 	}
 	/**
 	 * 

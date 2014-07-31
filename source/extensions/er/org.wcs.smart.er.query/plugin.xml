@@ -12,7 +12,7 @@
             QueryCategory="org.wcs.smart.er.query.category.survey"
             class="org.wcs.smart.er.query.model.SurveyObservationQueryType">
          <DefinitionPanel
-               id="org.wcs.smart.query.common.definition.filter"
+               id="org.wcs.smart.query.er.survey.definition.filter"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
          </DefinitionPanel>
       </QueryType>
@@ -26,6 +26,12 @@
    </extension>
    <extension
          point="org.wcs.smart.query.queryDefinitionPanel">
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.er.survey.definition.filter"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel">
+      </QueryDefinitionPanel>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
