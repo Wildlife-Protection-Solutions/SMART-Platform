@@ -21,9 +21,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -33,6 +37,8 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
 import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.ui.QuerySourceProvider;
+import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 
 public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
@@ -66,6 +72,8 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		
 	}
 
+	private SurveyItemTreeNode surveyNode;
+	
 	protected Composite createPanel(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -81,12 +89,13 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		});
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new SurveyItemPanel());
+		surveyNode =  new SurveyItemTreeNode();
+		nodes.add(surveyNode);
 		
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		
 		if (!SmartDB.isMultipleAnalysis()){
-			areaNode = new AreaTreeNode("Areas");
+			areaNode = new AreaTreeNode("Area Filters");
 			nodes.add(areaNode);
 		}
 		nodes.add(new OperatorsTreeNode());
@@ -103,7 +112,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		filterTreeViewer.setAutoExpandLevel(2);
 		filterTreeViewer.setInput(LOADING_TEXT);
 		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText("Add");
+		btnAdd.setText("Add to Query");
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -115,8 +124,25 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	}
 	
 	private void addItem(){
+		
 		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
+	
+	private SurveyDesign currentDesign;
+	
+	public void refreshPanel(SurveyDesign currentDesign){
+		this.currentDesign = currentDesign;
+		Object input = filterTreeViewer.getInput();
+		
+		if (input instanceof HashMap){
+			HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
+			input2.put(SurveyItemTreeNode.KEY, new Object[]{currentDesign, surveyNode});
+		
+			filterTreeViewer.setInput(input2);
+			filterTreeViewer.refresh();
+		}
+	}
+	
 	
 	@Override
 	public void refreshPanel(){
@@ -141,6 +167,8 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 			
 			input.put(OperatorsTreeNode.KEY, ops);
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
+			
+			input.put(SurveyItemTreeNode.KEY, new Object[]{currentDesign, surveyNode});
 			
 //			if (SmartDB.isMultipleAnalysis()){
 //				List<Object> options = new ArrayList<Object>();

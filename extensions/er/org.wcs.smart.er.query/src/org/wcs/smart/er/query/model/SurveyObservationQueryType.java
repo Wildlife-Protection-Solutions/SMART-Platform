@@ -4,11 +4,16 @@ import java.net.URL;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.er.query.filter.MissionEndDateField;
+import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.ui.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
+import org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 
@@ -41,7 +46,6 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -57,25 +61,38 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public IDropItemFactory getDropItemFactory() {
-		// TODO Auto-generated method stub
-		return null;
+		return SurveyDropItemFactory.INSTANCE;
 	}
 
 	@Override
 	public void updateQueryDefinition(Query query,
 			List<IDefinitionPanel> components) {
-		// TODO Auto-generated method stub
+		SurveyObservationQuery squery = (SurveyObservationQuery)query;
+		for (IDefinitionPanel panel : components){
+			if (panel.getId().equals(SurveyFilterDefintionPanel.ID)){
+				squery.setSurveyDesign(  ((SurveyFilterDefintionPanel)panel).getSurveyDesign()  );
+				squery.setQueryFilter(  ((SurveyFilterDefintionPanel)panel).getQueryPart()  );
+			}else if (panel.getId().equals(ConservationAreaFilterPanel.ID)){
+				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter() );
+			}
+		}
 
 	}
 
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
-		// TODO Auto-generated method stub
+		for (IDefinitionPanel panel : components){
+			String msg = panel.validate();
+			if (msg != null){
+				return msg;
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public URL getDescription() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -84,7 +101,7 @@ public class SurveyObservationQueryType implements IQueryType {
 	 * @return
 	 */
 	public static IDateFieldFilter[] validDateFields(){
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
+		return new IDateFieldFilter[]{WaypointDateField.INSTANCE, MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
 	}
 
 }

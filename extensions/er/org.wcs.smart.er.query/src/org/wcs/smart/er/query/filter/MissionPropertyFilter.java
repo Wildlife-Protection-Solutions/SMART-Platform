@@ -41,7 +41,7 @@ public class MissionPropertyFilter implements IFilter {
 	
 	@Override
 	public String asString() {
-		String key = "survey:property:" + type.typeKey  + ":" + missionAttributeKey + " " + op.asSmartValue() ;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		String key = "s:missionproperty:" + type.typeKey  + ":" + missionAttributeKey + " " + op.asSmartValue() ;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		 if (type == AttributeType.NUMERIC){
 			return key + " " + ((Double)value).toString();  //$NON-NLS-1$  
 		}else if (type == AttributeType.TEXT){
