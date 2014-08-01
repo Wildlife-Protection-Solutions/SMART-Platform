@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -73,8 +74,9 @@ public abstract class SurveyDesignComposite {
 	 * from the survey design.
 	 * 
 	 * @param design
+	 * @parma session
 	 */
-	public abstract void init(SurveyDesign design);
+	public abstract void init(SurveyDesign design, Session session);
 	
 	/**
 	 * Updates the survey design with info from

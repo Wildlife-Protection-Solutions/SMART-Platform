@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
@@ -39,6 +40,19 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
  */
 public class SurveyDesignLabelProvider extends LabelProvider {
 
+	private static SurveyDesignLabelProvider instance;
+	
+	public static SurveyDesignLabelProvider getInstance(){
+		synchronized (SurveyDesignLabelProvider.class) {
+			if (instance == null){
+				instance = new SurveyDesignLabelProvider();
+			}
+			return instance;
+		}
+	}
+	private SurveyDesignLabelProvider(){
+		
+	}
 	@Override
 	public String getText(Object element){
 		if (element instanceof SurveyListTreeNode){

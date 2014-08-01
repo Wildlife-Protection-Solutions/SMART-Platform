@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 
@@ -98,7 +99,7 @@ public class ConfigurableModelComposite  extends SurveyDesignComposite {
 
 
 	@Override
-	public void init(SurveyDesign design) {
+	public void init(SurveyDesign design, Session session) {
 		if (design.getConfigurableModel() != null){
 			cmbConfig.setSelection(new StructuredSelection(design.getConfigurableModel()));
 		}else{

@@ -22,7 +22,9 @@
 package org.wcs.smart.er.model;
 
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,6 +32,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -79,6 +82,9 @@ public class SurveyDesign extends NamedKeyItem{
 	private ConfigurableModel cm;
 	
 	private State state;
+	
+	private List<MissionProperty> missionProperties;
+	
 	
 //	private List<Survey> surveys;
 	
@@ -151,6 +157,16 @@ public class SurveyDesign extends NamedKeyItem{
 	public void setState(State state){
 		this.state = state;
 	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.surveyDesign", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<MissionProperty> getMissionProperties(){
+		return this.missionProperties;
+	}
+	
+	public void setMissionProperties(List<MissionProperty> properties){
+		this.missionProperties = properties;
+	}
+	
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy="survey", cascade={CascadeType.ALL}, orphanRemoval = true)
 //	@OrderBy(clause="start_date")
 //	public List<Survey> getSurveys(){

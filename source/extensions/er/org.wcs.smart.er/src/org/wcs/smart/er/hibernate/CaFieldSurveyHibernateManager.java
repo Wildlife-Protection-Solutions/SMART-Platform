@@ -156,5 +156,16 @@ public class CaFieldSurveyHibernateManager implements IFieldSurveyHibernateManag
 			return all;
 		}
 	}
+
+	@Override
+	public List<SurveyDesign> getActiveSurveys(Session s) {
+		//get all
+		@SuppressWarnings("unchecked")
+		List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("state", SurveyDesign.State.ACTIVE)) //$NON-NLS-1$
+				.list();
+		return ds;
+	}
 	
 }

@@ -70,7 +70,7 @@ public class SurveyComposite extends MissionComposite{
 		
 		cmbSurveys = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbSurveys.setContentProvider(ArrayContentProvider.getInstance());
-		cmbSurveys.setLabelProvider(new SurveyDesignLabelProvider());
+		cmbSurveys.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbSurveys.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbSurveys.getControl().getLayoutData()).widthHint = 100;
 		cmbSurveys.addSelectionChangedListener(new ISelectionChangedListener() {

@@ -39,6 +39,7 @@ import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
 import org.wcs.smart.er.ui.surveydesign.DateComposites;
 import org.wcs.smart.er.ui.surveydesign.DescriptionComposite;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
+import org.wcs.smart.er.ui.surveydesign.MissionPropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -157,6 +158,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     			new NameIdComposite(others),
     			new DateComposites(),
     			new ConfigurableModelComposite(models),
+    			new MissionPropertiesComposite(),
     			new DescriptionComposite()
     	};
 		for (SurveyDesignComposite c : comps){
@@ -182,5 +184,9 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 			
 			canFinish =  (event.getTargetPage().equals(getPages()[getPageCount()-1]));
 		}
+	}
+
+	public Session getSession() {
+		return this.session;
 	}
 }

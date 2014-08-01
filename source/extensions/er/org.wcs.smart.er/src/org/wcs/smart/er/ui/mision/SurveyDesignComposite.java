@@ -67,7 +67,7 @@ public class SurveyDesignComposite extends MissionComposite{
 		
 		cmbDesigns = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbDesigns.setContentProvider(ArrayContentProvider.getInstance());
-		cmbDesigns.setLabelProvider(new SurveyDesignLabelProvider());
+		cmbDesigns.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbDesigns.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbDesigns.getControl().getLayoutData()).widthHint = 100;
 		cmbDesigns.setInput(surveys);

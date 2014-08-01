@@ -27,6 +27,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.component.DatesComponent;
 
@@ -58,7 +59,7 @@ public class DateComposites extends SurveyDesignComposite {
 	}
 
 	@Override
-	public void init(SurveyDesign design) {
+	public void init(SurveyDesign design, Session session) {
 		this.design = design;
 		dates.setStartDate(design.getStartDate());
 		dates.setEndDate(design.getEndDate());
