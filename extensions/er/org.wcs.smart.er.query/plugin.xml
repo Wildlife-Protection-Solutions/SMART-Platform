@@ -39,11 +39,13 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
          <menu
+               icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
                label="Survey Queries"
                tooltip="%patrolquery.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/survey_observation_query.png"
                   label="New Survey Observation Query ..."
                   style="pulldown"
                   tooltip="creates a new observation query for survey elements">
@@ -58,6 +60,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
+               icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
                label="Survey Queries"
                tooltip="%patrolquery.menu.tooltip">
@@ -75,6 +78,7 @@
       <editor
             class="org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor"
             default="false"
+            icon="images/icons/obj16/survey_observation_query.png"
             id="org.wcs.smart.er.query.ui.SimpleQueryResultsEditor"
             name="Survey Observation Query Editor">
       </editor>

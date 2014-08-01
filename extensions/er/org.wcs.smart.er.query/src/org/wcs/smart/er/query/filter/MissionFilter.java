@@ -5,7 +5,8 @@ import java.text.MessageFormat;
 import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.ui.SurveyDropItemFactory;
+import org.wcs.smart.er.query.filter.SurveyFilter.Type;
+import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
@@ -23,7 +24,7 @@ public class MissionFilter implements IFilter {
 	 * 
 	 * @return
 	 */
-	public static MissionFilter createIdFilter(Operator op, String id){
+	public static MissionFilter createIdFilter(Operator op, String value){
 		boolean ok = false;
 		for (Operator s : Operator.STRING_OPS){
 			if (s.equals(op)){
@@ -34,7 +35,7 @@ public class MissionFilter implements IFilter {
 		if (!ok){
 			throw new RuntimeException("String operator not supported for survey id filter."); //$NON-NLS-1$
 		}
-		return new MissionFilter(Type.ID, op, id);
+		return new MissionFilter(Type.ID, op, value);
 	}
 
 	/**
@@ -56,6 +57,30 @@ public class MissionFilter implements IFilter {
 		this.type = type;
 		this.op = op;
 		this.value = value;
+	}
+	
+	/**
+	 * Get survey filter type
+	 * @return
+	 */
+	public Type getType(){
+		return this.type;
+	}
+	
+	/**
+	 * get operator
+	 * @return
+	 */
+	public Operator getOperator(){
+		return this.op;
+	}
+	
+	/**
+	 * get value associated with filter
+	 * @return
+	 */
+	public String getValue(){
+		return this.value;
 	}
 	
 	@Override

@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.ui.editor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
+import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnCache;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
@@ -57,8 +58,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	}
 	
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column){
-//		return PatrolTableColumn.getLabelProvider(column);
-		return null;
+		return SurveyQueryColumnCache.getLabelProvider(column);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package org.wcs.smart.er.query;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -15,6 +16,8 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.er.query"; //$NON-NLS-1$
 
+	public static final String OBSERVATION_ICON = "org.wcs.smart.er.query.observation"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static ERQueryPlugIn plugin;
 	
@@ -76,5 +79,10 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
 	}
 	
+    @Override
+    protected void initializeImageRegistry(ImageRegistry reg) {
+    	reg.put(OBSERVATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_observation_query.png")); //$NON-NLS-1$)
+    }
+    
 
 }

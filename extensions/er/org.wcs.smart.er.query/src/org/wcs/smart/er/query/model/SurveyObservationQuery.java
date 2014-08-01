@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.er.query.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -36,13 +39,16 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.DerbyObservationEngine;
+import org.wcs.smart.er.query.internal.parser.Parser;
+import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnCache;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
@@ -58,7 +64,23 @@ public class SurveyObservationQuery extends ObservationQuery{
 
 	@Transient
 	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
-		return null;
+		
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
+		try {
+			DerbyObservationEngine engine = new DerbyObservationEngine();
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
+			}
+		}
+		
 	}
 	
 	/**
@@ -78,6 +100,8 @@ public class SurveyObservationQuery extends ObservationQuery{
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
+		
+		q.setSurveyDesign(getSurveyDesign());
 		return q;
 	}
 	/**
@@ -91,25 +115,29 @@ public class SurveyObservationQuery extends ObservationQuery{
 	
 	@Override
 	protected void initQueryColumns() {
+		synchronized (LOCK) {
+			this.queryColumns = new ArrayList<QueryColumn>();
+			for (QueryColumn q : SurveyQueryColumnCache.getInstance().getObservationQueryColumns(getSurveyDesignAsObject())){
+				queryColumns.add(q);
+			}	
+		}
 	}
 	
 	
 	@Override
 	protected QueryFilter parseQueryFilter() throws Exception {
-//		if (strQueryFilter == null || strQueryFilter.length() == 0){
+		if (strQueryFilter == null || strQueryFilter.length() == 0){
 			return new QueryFilter(EmptyFilter.INSTANCE);
-//		}
-//		if(queryFilter != null){
-//			return queryFilter;
-//		}
-//		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
-//		Parser parser = new Parser(is);
-//		QueryFilter myQuery = parser.QueryFilter();
-//		is.close();
-//		queryFilter = myQuery;
-//		return myQuery;
-		//TODO:
-//		return null;
+		}
+		if(queryFilter != null){
+			return queryFilter;
+		}
+		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
+		Parser parser = new Parser(is);
+		QueryFilter myQuery = parser.QueryFilter();
+		is.close();
+		queryFilter = myQuery;
+		return myQuery;
 	}
 	
 	
@@ -123,6 +151,10 @@ public class SurveyObservationQuery extends ObservationQuery{
 	public void setSurveyDesign(String key){
 		this.surveyDesignKey = key;
 		this.surveyDesign = null;
+		synchronized (LOCK) {
+			this.queryColumns = null;	
+		}
+		
 	}
 	
 	/**
@@ -136,8 +168,7 @@ public class SurveyObservationQuery extends ObservationQuery{
 	@Transient
 	public void setSurveyDesign(SurveyDesign design){
 		if (design == null){
-			this.surveyDesign = null;
-			this.surveyDesignKey = null;
+			setSurveyDesign((String)null);
 		}else{
 			setSurveyDesign(design.getKeyId());
 			this.surveyDesign = design;

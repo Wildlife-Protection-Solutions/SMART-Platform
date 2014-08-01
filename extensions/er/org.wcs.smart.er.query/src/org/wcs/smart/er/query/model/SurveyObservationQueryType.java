@@ -1,12 +1,17 @@
 package org.wcs.smart.er.query.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
-import org.wcs.smart.er.query.ui.SurveyDropItemFactory;
+import org.wcs.smart.er.query.internal.parser.Parser;
+import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
 import org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel;
 import org.wcs.smart.query.model.IQueryType;
@@ -46,7 +51,7 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public Image getImage() {
-		return null;
+		return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.OBSERVATION_ICON);
 	}
 
 	@Override
@@ -61,7 +66,7 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public IDropItemFactory getDropItemFactory() {
-		return SurveyDropItemFactory.INSTANCE;
+		return SurveyDropItemFactory.INSTANCE;		
 	}
 
 	@Override
@@ -81,10 +86,32 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
+		String filter = ""; //$NON-NLS-1$
 		for (IDefinitionPanel panel : components){
 			String msg = panel.validate();
 			if (msg != null){
 				return msg;
+			}
+			
+			if (panel.getId().equals(SurveyFilterDefintionPanel.ID)){
+				filter = panel.getQueryPart();
+			}	
+		}
+		
+		//validate query
+		String queryString = filter;
+		if (queryString.isEmpty()) return null;
+		InputStream is = new ByteArrayInputStream(queryString.getBytes());
+		try{
+			Parser parser = new Parser(is);
+			parser.QueryFilter();
+		}catch (Exception ex){
+			return ex.getMessage();
+		}finally{
+			try {
+				is.close();
+			} catch (IOException e) {
+				//eatme
 			}
 		}
 		return null;

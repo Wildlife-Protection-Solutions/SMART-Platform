@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
-import org.wcs.smart.er.query.ui.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
+import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
@@ -52,6 +52,10 @@ import org.wcs.smart.query.ui.model.DropItem;
 public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
 
 	public static final String ID = "org.wcs.smart.query.er.survey.definition.filter"; //$NON-NLS-1$
+	
+private Link surveyDesignLabel;
+	private IQueryType currentType;
+	private SurveyDesign currentDesign;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -110,9 +114,6 @@ public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
 	}
 	
 	
-	private Link surveyDesignLabel;
-	private IQueryType currentType;
-	private SurveyDesign currentDesign;
 	
 	public SurveyDesign getSurveyDesign(){
 		return this.currentDesign;
@@ -180,9 +181,12 @@ public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
 				SurveyDesignDialog dialog = new SurveyDesignDialog(outer.getShell());
 				if (dialog.open() == SurveyDesignDialog.OK){
 					//update query
-					currentDesign = dialog.getSelectedDesign();
-					updateDesignLabel();
-					surveyDesignModified();
+					SurveyDesign newDesign = dialog.getSelectedDesign();
+					if ((currentDesign == null && newDesign != null) || (currentDesign != null && !currentDesign.equals(newDesign))){
+						currentDesign = newDesign;
+						updateDesignLabel();
+						surveyDesignModified();
+					}
 				}
 			}
 		});
@@ -201,6 +205,8 @@ public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
 				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
 			}
 		}
+		
+		super.fireQueryChangedListeners();
 	}
 	
 }

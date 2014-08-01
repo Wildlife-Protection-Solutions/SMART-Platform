@@ -1,0 +1,674 @@
+ /*=============================================
+SMART Query Engine Language Syntax & Semantic actions 
+=============================================*/options{  LOOKAHEAD= 1;  CHOICE_AMBIGUITY_CHECK = 2;  OTHER_AMBIGUITY_CHECK = 1;  STATIC = false;  DEBUG_PARSER = false;  DEBUG_LOOKAHEAD = false;  DEBUG_TOKEN_MANAGER = false;  ERROR_REPORTING = true;  JAVA_UNICODE_ESCAPE = false;  UNICODE_INPUT = false;  IGNORE_CASE = false;  USER_TOKEN_MANAGER = false;  USER_CHAR_STREAM = false;  BUILD_PARSER = true;  BUILD_TOKEN_MANAGER = true;  SANITY_CHECK = true;  FORCE_LA_CHECK = false;}PARSER_BEGIN(Parser)package org.wcs.smart.er.query.internal.parser;
+import java.util.*;import org.wcs.smart.er.query.filter.*;
+import org.wcs.smart.query.model.filter.*;
+
+public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >}
+
+
+TOKEN :
+{
+  < COMMA : "," >
+| < LESS : "<" >
+| < LESSEQUAL : "<=" >
+| < GREATER : ">" >
+| < GREATEREQUAL : ">=" >
+| < EQUAL : "=" >
+| < NOTEQUAL : "!=" >
+| < NOTEQUAL2 : "<>" >
+| < OPENPAREN : "(" >
+| < CLOSEPAREN : ")" >
+| < SLASH : "/" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < CONTAINS : "contains" >
+| < NOT_CONTAINS : "notcontains" >
+| < STREQUALS : "equals" >
+| < BETWEEN : "between" >
+| < QUERY_SPLITTER : "|" >
+}TOKEN : /* Numeric Constants */{  < NUMBER :
+  	(["-","+"])?< FLOAT >  | (["-","+"])?< FLOAT >    (      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >    )?     >| < #FLOAT :    < INTEGER >  | < INTEGER > ("." < INTEGER >)?  | "." < INTEGER >     >| < #INTEGER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}TOKEN : /* Literal Constants */{  < S_CONST_LITERAL :    "true"  | "false"  | "null" >}
+/* Query Filters */
+TOKEN : 
+{
+ < CATEGORY_KEY : "category:"< DM_KEY > >
+ | < ATT_STR_KEY : "attribute:s:"< DM_KEY > >
+ | < ATT_VALUE_KEY : "attribute:n:"< DM_KEY > >
+ | < ATT_BOOL_KEY : "attribute:b:"< DM_KEY > >
+ | < ATT_LIST_KEY : "attribute:l:"< DM_KEY > >
+ | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
+ | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+ | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
+ | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
+ | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
+ | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
+ | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
+ | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | < #LETTER : [ "a"-"z", "A"-"Z" ] >
+ | < #SPECIAL_CHARS : ("." | "_")>
+ | < SURVEY_ID_KEY : "s:survey:id" >
+ | < SURVEY_UUID_KEY : "s:survey:uuid:" < DM_KEY > >
+ | < MISSION_ID_KEY : "s:mission:id" >
+ | < MISSION_UUID_KEY : "s:mission:uuid:" < DM_KEY > >
+ | < MISSION_PROPERTY_KEY : "s:missionproperty:" ("n" | "s" | "l") ":" <  DM_KEY > > 
+ | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
+ | < AREA_KEY : "area:" ("wp" | "t") ":" < AREA_TYPE_KEY > ":" < DM_KEY > >
+ | < OBSERVATION_FILTER_TYPE_KEY : "observation" >
+ | < WAYPOINT_FILTER_TYPE_KEY : "waypoint" >}
+/* Summary Query */
+/*
+TOKEN :
+{
+    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
+|    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
+|    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
+|    < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
+|    < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
+|    < AGG  : ("sum" | "avg" | "min" | "max" ) >
+| 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" ) >
+|    < QUERY_SPLITTER : "|" >
+| 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+| 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+| 	<  ATTRIBUTE_GROUPBY_ITEM :
+			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+			( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
+| 	<  CATEGORY_ATTRIBUTE_GROUPBY_ITEM :
+			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > 
+}*/
+TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
+/*
+SumQueryDefinition SumQuery() :
+{	ValuePart values = null;
+	GroupByPart rowGroupBy = null;
+	GroupByPart colGroupBy = null;
+	QueryFilter vFilter = null;
+	QueryFilter rFilter = null;
+}
+{
+	values = ValuePart()
+	< QUERY_SPLITTER > 
+	rowGroupBy = GroupByPart()
+	< QUERY_SPLITTER >
+	colGroupBy = GroupByPart()
+	< QUERY_SPLITTER >
+	(	  vFilter = QueryFilterInternal()
+	)?
+	(
+	  < QUERY_SPLITTER >
+	  (	    	rFilter = QueryFilterInternal()
+	   )?
+	)?
+	< EOF >
+	{    	return SumQueryDefinition.createQuery(values, rowGroupBy, colGroupBy, vFilter, rFilter);
+	}
+}
+
+GridQueryDefinition GridQuery() :
+{
+	IValueItem value = null;
+	QueryFilter valueFilter = null;
+	QueryFilter rateFilter = null;
+	Double gridSize = null;
+}
+{
+	(
+		value = ValueItem()
+	)
+	< QUERY_SPLITTER >
+	< NUMBER > { gridSize = Double.parseDouble(token.image);}
+	< QUERY_SPLITTER > 
+	(
+	  valueFilter = QueryFilterInternal()
+	)?
+	< QUERY_SPLITTER > 
+	(
+	  rateFilter = QueryFilterInternal()
+	)?
+	< EOF >
+	{
+    	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter);
+	}
+}
+*/
+
+QueryFilter QueryFilter() :
+{
+	QueryFilter expr;
+}
+{
+	expr = QueryFilterInternal()
+	< EOF >
+  	{
+    	return expr;
+  	}
+}
+
+QueryFilter QueryFilterInternal():
+{
+	IFilter.FilterType filterType = IFilter.FilterType.OBSERVATION;
+	IFilter expr = EmptyFilter.INSTANCE;
+}
+{
+	(
+	    < DM_KEY >
+	    {
+			filterType = IFilter.FilterType.parse(token.image);
+		}
+	  	< QUERY_SPLITTER >
+	)?
+	(  
+		expr = ExpressionPart()
+	)
+  	{
+    	return QueryFilter.createFilter(expr, filterType);
+  	}
+}
+/*
+ValuePart ValuePart() :
+{
+	IValueItem item;
+	List<IValueItem> items = new ArrayList<IValueItem >();}
+{
+	(	  	item = ValueItem()
+		{
+			items.add(item);
+		}
+	)?
+	(		< COMMA >
+		item = ValueItem()
+		{
+			items.add(item);
+		}
+	)*
+	{		return ValuePart.createValuePart(items);
+	}  }
+
+IValueItem ValueItem() :
+{
+	IValueItem item = null;
+	IValueItem item2 = null;
+}
+{
+	(		item = SingleValueItem()
+		(		  
+			< SLASH >
+			item2 = SingleValueItem()
+		)?
+	 )
+	
+
+	{
+	  	if (item2 != null)	  	{
+	    	item = CombinedValueItem.createValueItem(item, item2);
+	  	}
+		 return item;
+	}
+}
+
+IValueItem SingleValueItem() :
+{
+	IValueItem item;
+}
+{
+	(
+		< PATROL_VALUE_ITEM >
+		{	
+			item = PatrolValueItem.createItem( token.image );
+		}
+		
+	| 
+		< SUM_CAT_VALUE_KEY >
+		{
+			item = PatrolCategoryValueItem.createItem( token.image );
+		}
+	| 
+		< SUM_ATTRIBUTE_VALUE_KEY >
+		{
+			item = PatrolAttributeValueItem.createAttributeItem( token.image );
+		}
+	| 
+		< SUM_CAT_ATT_VALUE_KEY >
+		{
+			item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
+		}
+	| 
+		< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
+		{
+			item = PatrolAttributeValueItem.createAttributeItem( token.image );
+		}
+	| 
+		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
+		{
+			item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
+		} 
+	)
+	{
+		 return item;
+	}
+}
+
+GroupByPart GroupByPart() :
+{
+	IGroupBy item;
+	List<IGroupBy> items = new ArrayList<IGroupBy>();
+}
+{
+	(
+	  	item = GroupByItem()
+		{
+			items.add(item);
+		}
+	)?
+	(
+		< COMMA >
+		item = GroupByItem()
+		{
+			items.add(item);
+		}
+	)*
+	{
+		return GroupByPart.createGroupBy(items);
+	}  
+}
+
+IGroupBy GroupByItem() :
+{
+	IGroupBy item;
+}
+{
+	(
+		(
+		  < PATROL_STRING_GROUPBY_OPTION > |
+		  < PATROL_UUID_GROUPBY_OPTION >
+		) 
+		{
+			item = PatrolGroupBy.createGroupBy( token.image );
+		}
+	|
+		< PATROL_CONTRIBUTION_GROUPBY_OPTION > 
+		{
+		   item = PatrolContributionFactory.createGroupBy( token.image );
+		}		   
+	|
+		< DATE_GROUPBY_ITEM >
+		{
+		  	item = DateGroupBy.createGroupBy(token.image);		}
+	|
+		< CATEGORY_GROUPBY_ITEM >
+		{		  
+		  	item = CategoryGroupBy.createGroupBy(token.image);
+		}
+	|
+		< AREA_GROUPBY_ITEM >
+		{		  
+		  	item = AreaGroupBy.createGroupBy(token.image);
+		} 
+	|
+		< ATTRIBUTE_GROUPBY_ITEM >
+		{
+		  	item = AttributeGroupBy.createAttributeGroupBy(token.image);
+		}
+	|
+		< CATEGORY_ATTRIBUTE_GROUPBY_ITEM >
+		{
+		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
+		}	
+			 
+	)
+	{
+		 return item;
+	}
+}
+*/
+
+
+
+
+
+
+IFilter ExpressionPart():
+{
+  IFilter expr = null;
+  Operator op = null;
+  IFilter expr2 = null;}
+{
+  expr = BooleanPart()
+ 	(
+ 	 op = BooleanOp()
+	  expr2 = BooleanPart()
+		{
+		  expr = BooleanExpression.create(expr, expr2, op);
+		}
+
+	  )*
+	{
+	  return expr;
+	}}
+
+IFilter BooleanPart() :
+{
+  IFilter filter = null;
+  boolean hasNot = false;
+  }
+{
+	(< K_NOT > {hasNot = true;} )?
+	(
+		/* Category Key */
+		filter = CategoryKey()
+		|
+		filter = AttributeExpression()
+ 		|	 
+		filter = AreaFilter()
+		|
+		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
+		{	  		filter = BracketFilter.createFilter(filter);
+		}
+	)	{
+		if (hasNot){
+	      filter = NotExpression.createNotExpression(filter);	    }
+  		return filter;
+	}}
+
+IFilter BooleanItemExpression():
+{
+  IFilter filter = null;}
+{	(    	< ATT_BOOL_KEY >  		{
+    		filter = AttributeFilter.createBooleanFilter(token.image);  		}
+   |
+    	< CAT_ATT_BOOL_KEY >
+  		{
+    		filter = CategoryAttributeFilter.createBooleanFilter(token.image);
+  		}
+	)	
+ {   return filter;
+ } 
+}
+
+
+
+
+IFilter NumberExpression():
+{
+  IFilter filter = null;
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	(
+		( 
+			< ATT_VALUE_KEY> {key = token.image;}
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = AttributeFilter.createValueFilter(key, op, value);
+		}
+	| 
+		(
+			< CAT_ATT_VALUE_KEY> {key = token.image;}
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = CategoryAttributeFilter.createValueFilter(key, op, value);
+		}
+	)
+	{
+  		return filter;
+	}
+}
+
+
+IFilter AttributeExpression():
+{
+	IFilter filter = null;
+	String key;
+	Operator op;
+	String value;	
+}
+{
+	(/* String comparison */
+	filter = StringExpression()
+	|
+	/* Numeric comparison */
+	filter = NumberExpression()
+	| 
+	/* boolean */
+	filter = BooleanItemExpression()
+	| 
+	/* date */
+	filter = DateItemExpression()
+	| 
+	/* attribute list items */
+	(
+		< ATT_LIST_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = AttributeFilter.createListItemFilter(key,op,value);
+	}
+	| 
+	/* category-attribute list items */
+	(
+		< CAT_ATT_LIST_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
+	}
+	
+	
+	| 
+	/* attribute tree items */
+	(
+		< ATT_TREE_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = AttributeFilter.createTreeItemFilter(key,op,value);
+	} 	
+	| 
+	/* category-attribute tree items */
+	(
+		< CAT_ATT_TREE_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
+	} 	
+	)
+	{
+		return filter;
+	}
+}
+IFilter DateItemExpression():
+{
+  IFilter filter = null;
+  String key = null;
+  String date1 = null;
+  String date2 = null;
+  Operator op = null;
+}
+{
+	(		(
+			< ATT_DATE_KEY > {key = token.image;}
+			op = DateOp()
+			< DATE_STRING >  {date1 = token.image;}
+			< K_AND >
+			< DATE_STRING > {date2 = token.image;}
+		)
+		{
+  			filter = AttributeFilter.createDateFilter(key, date1, date2, op);
+		}
+	|
+	  	(
+			< CAT_ATT_DATE_KEY > {key = token.image;}
+			op = DateOp()
+			< DATE_STRING >  {date1 = token.image;}
+			< K_AND >
+			< DATE_STRING > {date2 = token.image;}
+		)
+		{
+  			filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
+		}
+	)
+	{		return filter;
+	}
+}
+
+
+IFilter StringExpression():
+{
+  IFilter filter = null;
+  Operator op = null;
+  String key = null;
+  String value = null;}
+{	(		( 
+			< ATT_STR_KEY > {key = token.image;}
+			op = StringOp()
+			< QUOTED_STRING > {value = token.image;}
+		)
+		{
+  			filter = AttributeFilter.createStringFilter(key, op, value);		}
+
+	|
+	
+		( 
+			< CAT_ATT_STR_KEY > {key = token.image;}
+			op = StringOp()
+			< QUOTED_STRING > {value = token.image;}
+		)
+		{
+  			filter = CategoryAttributeFilter.createStringFilter(key, op, value);
+		}
+
+	|
+ 		(
+			< SURVEY_ID_KEY > 
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = SurveyFilter.createIdFilter(op, value);
+		}
+	|
+ 		< SURVEY_UUID_KEY >
+		{
+  			filter = SurveyFilter.createUuidFilter(token.image);
+		}
+	|
+ 		(
+			< MISSION_ID_KEY >
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = MissionFilter.createIdFilter(op, value);
+		}
+	|
+		(
+ 			< MISSION_UUID_KEY >
+		) 
+		{
+  			filter = MissionFilter.createUuidFilter(token.image);
+		}
+	|
+ 		(
+			< MISSION_PROPERTY_KEY >
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = MissionPropertyFilter.createFilter(key, op, value);
+		}
+	{  		return filter;
+	}
+)
+}
+
+CategoryFilter CategoryKey() :
+{}
+{  < CATEGORY_KEY >
+
+{  return CategoryFilter.createFilter(token.image);
+}
+}
+
+AreaFilter AreaFilter():
+{}
+{
+  < AREA_KEY >
+  {
+    return AreaFilter.createFilter(token.image);  }  }
+
+Operator NumberOp() :
+{}
+{
+   (
+    < EQUAL >
+  | < NOTEQUAL >
+  | < NOTEQUAL2 >
+  | < GREATER >
+  | < GREATEREQUAL >
+  | < LESS >
+  | < LESSEQUAL >
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
+
+Operator StringOp() :
+{}
+{
+  (
+   < CONTAINS >
+  | < STREQUALS >
+	| < NOT_CONTAINS >
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
+
+Operator DateOp() :
+{
+  String fulltoken = null;
+}
+{
+  (
+   < BETWEEN > {fulltoken = token.image;}
+  |
+  	< K_NOT > {fulltoken = token.image;}
+  	< BETWEEN > {fulltoken = fulltoken + " " + token.image;}
+ )
+  {
+    return Operator.parseOperator(fulltoken);
+  }
+}
+
+Operator BooleanOp() :
+{}
+{
+  (
+   < K_AND >
+  | < K_OR>
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
