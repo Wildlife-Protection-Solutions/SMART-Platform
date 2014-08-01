@@ -336,25 +336,14 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	}
 	
 	/**
-	 * Creates the drop target composite
+	 * Adds the filter type options to the parent composite.
 	 * @param parent
 	 * @return
 	 */
-	@Override
-	public Composite createComposite(Composite parent) {
-		
-		mainComposite = new Composite(parent, SWT.NONE);
-		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayout layout = new GridLayout();
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		mainComposite.setLayout(layout);
-		
-		Composite filterTypeComp = new Composite(mainComposite, SWT.NONE);
+	protected void createFilterTypeComposite(Composite parent){
+		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(4, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -383,6 +372,27 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 		btnObservation.setToolTipText(Messages.FilterDropTargetPanel_observationtooltip);
 		Label lspacer = new Label(filterTypeComp, SWT.NONE);
 		lspacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+	}
+	
+	/**
+	 * Creates the drop target composite
+	 * @param parent
+	 * @return
+	 */
+	@Override
+	public Composite createComposite(Composite parent) {
+		
+		mainComposite = new Composite(parent, SWT.NONE);
+		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout();
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		mainComposite.setLayout(layout);
+		
+		createFilterTypeComposite(mainComposite);
 		
 		dropTarget = new ScrolledComposite(mainComposite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NONE);
 		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
