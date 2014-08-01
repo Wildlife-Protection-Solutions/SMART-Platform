@@ -33,8 +33,10 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Survey Design Summary Editor Page
@@ -45,6 +47,11 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 
 	private Form form;
 	private Text txtName;
+	private Text txtStartDate;
+	private Text txtEndDate;
+	private Text txtStatus;
+	private Text txtKey;
+	private Text txtDescription;
 	
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
@@ -83,8 +90,62 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-//		createEditLink(toolkit, content, PanelType.RECIEVED); 
+		createEditLink(content); 
 		
+		toolkit.createLabel(content, "Start Date:");
+		txtStartDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		txtStartDate.setEditable(false);
+		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(content); 
+
+		toolkit.createLabel(content, "End Date:");
+		txtEndDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		txtEndDate.setEditable(false);
+		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(content); 
+
+		toolkit.createLabel(content, "Status:");
+		txtStatus = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		txtStatus.setEditable(false);
+		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(content); 
+
+		toolkit.createLabel(content, "Key:");
+		txtKey = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		txtKey.setEditable(false);
+		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(content);
+		
+		toolkit.createLabel(content, "Description:");
+		txtDescription = toolkit.createText(content, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
+		txtDescription.setEditable(false);
+		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
+		gd.heightHint = 40;
+		gd.widthHint = 100;
+		txtDescription.setLayoutData(gd);
+		Hyperlink lnk = createEditLink(content);
+		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		
+	}
+
+	private Hyperlink createEditLink(Composite parent) {
+		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
+		
+//		if (!this.parentEditor.canEdit()) {
+//			editLink.setEnabled(false);
+//			editLink.setVisible(false);
+//		}
+//		
+//		if (panelType != null){
+//			editLink.addHyperlinkListener(new HyperlinkAdapter() {
+//				@Override
+//				public void linkActivated(HyperlinkEvent e) {
+//					showEditDialog(panelType);
+//				}
+//			});
+//		}
+		return editLink;
 	}
 
 	@Override
