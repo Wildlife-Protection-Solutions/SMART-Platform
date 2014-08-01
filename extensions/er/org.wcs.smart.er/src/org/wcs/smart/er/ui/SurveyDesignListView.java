@@ -84,7 +84,7 @@ public class SurveyDesignListView extends ViewPart{
 		
 		lstViewer = new TreeViewer(part);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		lstViewer.setLabelProvider(new SurveyDesignLabelProvider());
+		lstViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		lstViewer.setContentProvider(new LazySurveyDesignTreeContentProvider());
 		lstViewer.setInput(null);
 		getSite().setSelectionProvider(lstViewer);

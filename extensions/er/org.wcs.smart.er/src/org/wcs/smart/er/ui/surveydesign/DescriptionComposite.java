@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -66,7 +67,7 @@ public class DescriptionComposite extends SurveyDesignComposite {
 	}
 
 	@Override
-	public void init(SurveyDesign design) {
+	public void init(SurveyDesign design, Session session) {
 		if (design.getDescription() == null){
 			txtDescription.setText(""); //$NON-NLS-1$
 		}else{

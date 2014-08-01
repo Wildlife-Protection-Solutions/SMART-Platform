@@ -106,5 +106,11 @@ public class CcaaFieldSurveyHibernateManager implements IFieldSurveyHibernateMan
 		//
 		return null;
 	}
+
+	@Override
+	public List<SurveyDesign> getActiveSurveys(Session s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

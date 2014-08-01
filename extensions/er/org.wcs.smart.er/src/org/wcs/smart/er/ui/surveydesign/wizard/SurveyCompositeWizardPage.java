@@ -76,7 +76,7 @@ public class SurveyCompositeWizardPage extends WizardPage {
 	 * @param design
 	 */
 	public void initPage(SurveyDesign design){
-		composite.init(design);
+		composite.init(design, ((NewSurveyDesignWizard)getWizard()).getSession()  );
 	}
 	
 	@Override

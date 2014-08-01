@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -155,7 +156,7 @@ public class NameIdComposite extends SurveyDesignComposite {
 	}
 
 	@Override
-	public void init(SurveyDesign design) {
+	public void init(SurveyDesign design, Session session) {
 		if (design.getKeyId() == null){
 			txtName.addKeyListener(generateKeyListener);
 			txtKey.setText(""); //$NON-NLS-1$

@@ -127,7 +127,7 @@ public class NewSurveyDialog extends TitleAreaDialog{
 		l.setText("Parent Survey Design:");
 		
 		cmbDesign = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbDesign.setLabelProvider(new SurveyDesignLabelProvider());
+		cmbDesign.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbDesign.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDesign.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbDesign.getControl().getLayoutData()).widthHint = 100;

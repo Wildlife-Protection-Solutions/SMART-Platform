@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.surveydesign.wizard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -36,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 
@@ -83,7 +85,7 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		
 		cmbDesigns = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbDesigns.setContentProvider(ArrayContentProvider.getInstance());
-		cmbDesigns.setLabelProvider(new SurveyDesignLabelProvider());
+		cmbDesigns.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbDesigns.setInput(templates);
 		cmbDesigns.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -124,6 +126,19 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			design.setConfigurableModel(copy.getConfigurableModel());
 			design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
 			design.setConservationArea(copy.getConservationArea());
+			
+			design.setMissionProperties(new ArrayList<MissionProperty>());
+			if (copy.getMissionProperties() != null){
+				for (MissionProperty mp : copy.getMissionProperties()){
+					MissionProperty clone = new MissionProperty();
+					clone.setSurveyDesign(design);
+					clone.setOrder(mp.getOrder());
+					clone.setAttribute(mp.getAttribute());
+					
+					design.getMissionProperties().add(clone);
+				}
+			}
+			
 		}else{
 			//clear
 			design.setStartDate(null);
@@ -131,6 +146,7 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			design.setDescription(null);
 			design.setConfigurableModel(null);
 			design.setTrackDistanceDirection(false);
+			design.setMissionProperties(null);
 		}
 	}
 	

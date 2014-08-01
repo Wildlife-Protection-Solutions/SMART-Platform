@@ -55,4 +55,12 @@ public interface IFieldSurveyHibernateManager {
 	 */
 	public List<SurveyDesignEditorInput> getSurveys(Session s, SurveyDesignListFilter filter);
 	
+	/**
+	 * Returns all active surveys for the current conservation area.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public List<SurveyDesign> getActiveSurveys(Session s);
+	
 }
