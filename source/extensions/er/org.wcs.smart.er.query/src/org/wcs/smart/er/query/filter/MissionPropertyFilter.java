@@ -39,6 +39,38 @@ public class MissionPropertyFilter implements IFilter {
 		this.type = type;
 	}
 	
+	/**
+	 * 
+	 * @return the mission attribute key
+	 */
+	public String getAttributeKey(){
+		return this.missionAttributeKey;
+	}
+	
+	/**
+	 * mission attribute type
+	 * @return
+	 */
+	public Attribute.AttributeType getAttributeType(){
+		return this.type;
+	}
+	
+	/**
+	 * filter value
+	 * @return
+	 */
+	public Object getValue(){
+		return this.value;
+	}
+	
+	/**
+	 * filter operator
+	 * @return
+	 */
+	public Operator getOperator(){
+		return this.op;
+	}
+	
 	@Override
 	public String asString() {
 		String key = "s:missionproperty:" + type.typeKey  + ":" + missionAttributeKey + " " + op.asSmartValue() ;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
