@@ -107,6 +107,13 @@ public abstract class ObservationQuery extends SimpleQuery implements IPagedQuer
 		return getPagedQueryResults(monitor, session);
 	}
 	
+	/**
+	 * The session may be null, in which case you need to open a new one.
+	 * @param progressMonitor
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
 	@Transient
 	protected abstract IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception;
 	

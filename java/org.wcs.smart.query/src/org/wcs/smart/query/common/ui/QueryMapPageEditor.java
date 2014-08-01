@@ -72,6 +72,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			queryService = parentEditor.createQueryService();
+			if (queryService == null){
+				return Status.OK_STATUS;
+			}
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 	    		AddLayersCommand command = new AddLayersCommand(layers);
