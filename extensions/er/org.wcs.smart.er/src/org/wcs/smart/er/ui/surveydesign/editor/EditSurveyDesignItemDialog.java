@@ -26,6 +26,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
@@ -77,7 +81,25 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected boolean performSave() {
-		// TODO Auto-generated method stub
+		content.updateDesign(surveyDesign);
+
+		Session session = getSession();
+		session.beginTransaction();
+		try{
+			session.save(surveyDesign);
+			session.getTransaction().commit();
+			
+			setChangesMade(false);
+			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);
+			return true;
+		}catch (Exception ex){
+			try{
+				session.getTransaction().rollback();
+			}catch (Exception ex2){
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex2);
+			}
+			EcologicalRecordsPlugIn.displayLog("Error saving new survey design." + "\n\n" + ex.getMessage(), ex);
+		}
 		return false;
 	}
 
