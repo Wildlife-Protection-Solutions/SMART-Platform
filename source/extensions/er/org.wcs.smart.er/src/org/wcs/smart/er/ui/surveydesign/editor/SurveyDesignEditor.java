@@ -23,7 +23,10 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * The Survey Design Editor
@@ -35,7 +38,9 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 
 	public static final String ID = "org.wcs.smart.er.SurveyDesignEditor"; //$NON-NLS-1$
 
+	private SurveyDesign surveyDesign;
 	private SurveyDesignSummaryEditorPage summaryPage;
+
 	@Override
 	protected void createPages() {
 		try {
@@ -50,6 +55,21 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 		
 	}
 
+	public SurveyDesign getSurveyDesign() {
+		if (surveyDesign == null){
+			byte[] puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
+			Session session = HibernateManager.openSession();
+			//load patrol items so don't have lazy loading issues later.
+			session.beginTransaction();
+			surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
+			surveyDesign.getNames().size();
+			surveyDesign.getConfigurableModel().getNames().size();
+			session.getTransaction().commit();
+			session.close();
+		}
+		return surveyDesign;
+	}
+	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// nothing
