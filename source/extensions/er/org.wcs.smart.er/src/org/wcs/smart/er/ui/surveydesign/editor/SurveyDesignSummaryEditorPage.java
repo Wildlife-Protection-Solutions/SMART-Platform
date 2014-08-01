@@ -127,6 +127,11 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Hyperlink lnk = createEditLink(content);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
+		toolkit.createLabel(content, "Configurable Model:");
+		txtKey = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		txtKey.setEditable(false);
+		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(content);
 	}
 
 	private Hyperlink createEditLink(Composite parent) {
