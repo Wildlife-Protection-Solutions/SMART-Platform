@@ -34,6 +34,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -86,7 +87,10 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 		Session session = getSession();
 		session.beginTransaction();
 		try{
-			session.save(surveyDesign);
+			if (surveyDesign.getName() != null) {
+				surveyDesign.updateName(SmartDB.getCurrentLanguage(), surveyDesign.getName());
+			}
+			session.saveOrUpdate(surveyDesign);
 			session.getTransaction().commit();
 			
 			setChangesMade(false);
