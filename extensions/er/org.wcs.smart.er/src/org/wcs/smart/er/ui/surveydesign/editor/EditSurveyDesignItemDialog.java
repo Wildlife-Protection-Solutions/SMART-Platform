@@ -21,20 +21,18 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Session;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -83,27 +81,20 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 		content.updateDesign(surveyDesign);
+		
+		SaveSurveyDesignJob saveIntelligenceJob = new SaveSurveyDesignJob(surveyDesign);    
+    	saveIntelligenceJob.schedule();
+    	try {
+			saveIntelligenceJob.join(); //we don't want to close editor if save failed
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
-		Session session = getSession();
-		session.beginTransaction();
-		try{
-			if (surveyDesign.getName() != null) {
-				surveyDesign.updateName(SmartDB.getCurrentLanguage(), surveyDesign.getName());
-			}
-			session.saveOrUpdate(surveyDesign);
-			session.getTransaction().commit();
-			
+    	if (Status.OK_STATUS.equals(saveIntelligenceJob.getResult())) {
 			setChangesMade(false);
 			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);
 			return true;
-		}catch (Exception ex){
-			try{
-				session.getTransaction().rollback();
-			}catch (Exception ex2){
-				EcologicalRecordsPlugIn.log(ex.getMessage(), ex2);
-			}
-			EcologicalRecordsPlugIn.displayLog("Error saving new survey design." + "\n\n" + ex.getMessage(), ex);
-		}
+    	}
 		return false;
 	}
 
