@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.ISurveyEventListener;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -40,7 +45,56 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 
 	private SurveyDesign surveyDesign;
 	private SurveyDesignSummaryEditorPage summaryPage;
+	
+	private ISurveyEventListener modifiedListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			if (o instanceof SurveyDesign) {
+				SurveyDesign source = (SurveyDesign) o;
+				byte[] uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
+				if (Arrays.equals(source.getUuid(), uuid)) {
+					surveyDesign = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
+					summaryPage.initValues();
+				}
+			}
+		}
+	};
 
+	private ISurveyEventListener deleteListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			if (o instanceof SurveyDesign) {
+				SurveyDesign source = (SurveyDesign) o;
+				byte[] uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
+				if (Arrays.equals(source.getUuid(), uuid)) {
+					//close this editor
+					SurveyDesignEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							SurveyDesignEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(SurveyDesignEditor.this, false);					
+						}
+					});
+				}
+			}
+		}
+	};
+	
+	/**
+	 * Default constructor
+	 */
+	public SurveyDesignEditor() {
+		super();
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_MODIFIED, modifiedListener);
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_DELETED, deleteListener);
+	}
+
+	@Override
+	public void dispose() {
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, modifiedListener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_DELETED, deleteListener);
+		super.dispose();
+	}
+	
 	@Override
 	protected void createPages() {
 		try {
@@ -48,7 +102,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 			int i = addPage(summaryPage, getEditorInput());
 			setPageText(i, "Summary");
 		
-//			super.setPartName(getSurveyDesign().getName());
+			super.setPartName(getSurveyDesign().getName());
 		}catch (Exception ex) {
 			EcologicalRecordsPlugIn.log("Error creating pages.", ex);
 		}
@@ -56,7 +110,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 	}
 
 	public SurveyDesign getSurveyDesign() {
-		if (surveyDesign == null){
+		if (surveyDesign == null) {
 			byte[] puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			//load patrol items so don't have lazy loading issues later.

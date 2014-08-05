@@ -45,7 +45,13 @@ public class SurveyEventHandler {
 		list.add(listener);
 	}
 	
-	
+	public void removeListener(EventType type, ISurveyEventListener listener) {
+		List<ISurveyEventListener> list = events.get(type);
+		if (list != null) {
+			list.remove(listener);
+		}
+	}
+
 	public void fireEvent(EventType type, Object object){
 		List<ISurveyEventListener> l = events.get(type);
 		if (l != null){
@@ -54,4 +60,5 @@ public class SurveyEventHandler {
 			}
 		}
 	}
+
 }
