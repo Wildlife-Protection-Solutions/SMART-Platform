@@ -70,7 +70,7 @@ public class StatusComposite extends SurveyDesignComposite {
 			}
 		});
 		
-		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		part.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		return part;
 	}
 
