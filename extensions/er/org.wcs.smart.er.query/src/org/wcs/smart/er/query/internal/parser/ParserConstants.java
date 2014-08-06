@@ -109,17 +109,21 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MISSION_UUID_KEY = 53;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_KEY = 54;
+  int MISSION_PROPERTY_STR_KEY = 54;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 55;
+  int MISSION_PROPERTY_VALUE_KEY = 55;
   /** RegularExpression Id. */
-  int AREA_KEY = 56;
+  int MISSION_PROPERTY_LIST_KEY = 56;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 57;
+  int AREA_TYPE_KEY = 57;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 58;
+  int AREA_KEY = 58;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 59;
+  int OBSERVATION_FILTER_TYPE_KEY = 59;
+  /** RegularExpression Id. */
+  int WAYPOINT_FILTER_TYPE_KEY = 60;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 61;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -180,7 +184,9 @@ public interface ParserConstants {
     "<SURVEY_UUID_KEY>",
     "\"s:mission:id\"",
     "<MISSION_UUID_KEY>",
-    "<MISSION_PROPERTY_KEY>",
+    "<MISSION_PROPERTY_STR_KEY>",
+    "<MISSION_PROPERTY_VALUE_KEY>",
+    "<MISSION_PROPERTY_LIST_KEY>",
     "<AREA_TYPE_KEY>",
     "<AREA_KEY>",
     "\"observation\"",

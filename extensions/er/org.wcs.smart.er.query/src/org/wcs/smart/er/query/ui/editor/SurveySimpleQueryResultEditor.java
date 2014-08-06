@@ -24,16 +24,19 @@ package org.wcs.smart.er.query.ui.editor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
-import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnCache;
+import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.event.IQueryListener;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
- * Editor for displaying query results.  The editor includes two pages
+ * Editor for displaying survey query results.  The editor includes two pages
  * a tabular results page and a map results page.
  * 
  * @author Emily
@@ -43,6 +46,32 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	public static final String ID = "org.wcs.smart.er.query.ui.SimpleQueryResultsEditor";  //$NON-NLS-1$
 
+	IQueryListener updateTable = new QueryListenerAdapter(){
+		@Override
+		public void queryModified(int eventType, Object object) {
+			if (eventType == IQueryListener.QUERY_DEFINITION_MODIFIED &&
+					object.equals(query.getQuery())){
+				//TODO: figure out how to only do this if the survey design associated
+				//with the query has changed.
+				getQueryResultsTable().clearColumns();
+				getQueryResultsTable().initQuery(getQueryInternal());
+				
+			}
+		}
+	};
+	public SurveySimpleQueryResultEditor(){
+		super();
+		
+		QueryEventManager.getInstance().addListener(updateTable);
+	}
+	
+	
+	@Override
+	public void dispose(){
+		super.dispose();
+		QueryEventManager.getInstance().removeListener(updateTable);
+	}
+	
 	
 	/**
 	 * Creates a new query of the given type
@@ -58,7 +87,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	}
 	
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column){
-		return SurveyQueryColumnCache.getLabelProvider(column);
+		return SurveyQueryColumnManager.getLabelProvider(column);
 	}
 
 	@Override

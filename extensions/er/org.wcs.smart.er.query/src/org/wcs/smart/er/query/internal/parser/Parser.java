@@ -302,7 +302,9 @@ IGroupBy GroupByItem() :
     case SURVEY_UUID_KEY:
     case MISSION_ID_KEY:
     case MISSION_UUID_KEY:
-    case MISSION_PROPERTY_KEY:
+    case MISSION_PROPERTY_STR_KEY:
+    case MISSION_PROPERTY_VALUE_KEY:
+    case MISSION_PROPERTY_LIST_KEY:
       filter = AttributeExpression();
       break;
     case AREA_KEY:
@@ -360,6 +362,14 @@ IGroupBy GroupByItem() :
                             value = Double.parseDouble(token.image);
                         filter = AttributeFilter.createValueFilter(key, op, value);
       break;
+    case MISSION_PROPERTY_VALUE_KEY:
+      jj_consume_token(MISSION_PROPERTY_VALUE_KEY);
+                                                       key = token.image;
+      op = NumberOp();
+      jj_consume_token(NUMBER);
+                            value = Double.parseDouble(token.image);
+                        filter = MissionPropertyFilter.createFilter(key, op, value);
+      break;
     case CAT_ATT_VALUE_KEY:
       jj_consume_token(CAT_ATT_VALUE_KEY);
                                               key = token.image;
@@ -389,12 +399,13 @@ IGroupBy GroupByItem() :
     case SURVEY_UUID_KEY:
     case MISSION_ID_KEY:
     case MISSION_UUID_KEY:
-    case MISSION_PROPERTY_KEY:
+    case MISSION_PROPERTY_STR_KEY:
       /* String comparison */
               filter = StringExpression();
       break;
     case ATT_VALUE_KEY:
     case CAT_ATT_VALUE_KEY:
+    case MISSION_PROPERTY_VALUE_KEY:
       /* Numeric comparison */
               filter = NumberExpression();
       break;
@@ -443,6 +454,15 @@ IGroupBy GroupByItem() :
       jj_consume_token(DM_KEY);
                              value = token.image;
                 filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
+      break;
+    case MISSION_PROPERTY_LIST_KEY:
+      jj_consume_token(MISSION_PROPERTY_LIST_KEY);
+                                               key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(DM_KEY);
+                             value = token.image;
+                filter = MissionPropertyFilter.createFilter(key,op,value);
       break;
     default:
       jj_la1[6] = jj_gen;
@@ -537,20 +557,20 @@ IGroupBy GroupByItem() :
       jj_consume_token(MISSION_UUID_KEY);
                         filter = MissionFilter.createUuidFilter(token.image);
       break;
-    case MISSION_PROPERTY_KEY:
-      jj_consume_token(MISSION_PROPERTY_KEY);
+    case MISSION_PROPERTY_STR_KEY:
+      jj_consume_token(MISSION_PROPERTY_STR_KEY);
                          key = token.image;
       op = StringOp();
       jj_consume_token(QUOTED_STRING);
                          value = token.image;
                         filter = MissionPropertyFilter.createFilter(key, op, value);
-                {if (true) return filter;}
       break;
     default:
       jj_la1[8] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+                {if (true) return filter;}
     throw new Error("Missing return statement in function");
   }
 
@@ -677,7 +697,7 @@ IGroupBy GroupByItem() :
       jj_la1_0 = new int[] {0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x8000,0x0,0x0,0x17c3ffe,0x410,0x208,0x7c3ffc,0x2080,0x7c0104,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x8000,0x0,0x0,0x5fc3ffe,0x410,0x800208,0x1fc3ffc,0x2080,0x7c0104,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -794,7 +814,7 @@ IGroupBy GroupByItem() :
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[60];
+    boolean[] la1tokens = new boolean[62];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -811,7 +831,7 @@ IGroupBy GroupByItem() :
         }
       }
     }
-    for (int i = 0; i < 60; i++) {
+    for (int i = 0; i < 62; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

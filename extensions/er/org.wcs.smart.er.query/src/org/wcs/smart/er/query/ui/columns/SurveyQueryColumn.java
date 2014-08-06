@@ -21,15 +21,17 @@
  */
 package org.wcs.smart.er.query.ui.columns;
 
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Class represents one of the fixed table columns that
- * do not change from conservation area to conservation area.
+ * do not change from conservation area to conservation area
+ * specific to survey queries.
  * 
- * <p>This includes items such as the patrol id, patrol type etc
- * but not items related to the datamodel.</p>
+ * <p>This includes items such as the survey design, survey id etc.</p>
  * 
  * @author Emily
  * @since 1.0.0
@@ -40,31 +42,31 @@ public class SurveyQueryColumn extends QueryColumn {
 	 * The defined fixed columns.
 	 */
 	public enum FixedColumns{
-		CA_ID("Conservation Area Id", ColumnType.STRING,"ca:id"), 
-		CA_NAME("Conservation Area Name", ColumnType.STRING,"ca:name"), 
-		SURVEY_DESIGN("Survey Design", ColumnType.STRING, "surveydesign:id"), 
-		SURVEY_DESIGN_START("Survey Design Start Date", ColumnType.DATE, "surveydesign:startdate"), 
-		SURVEY_DESIGN_END("Survey Design End Date", ColumnType.DATE, "surveydesign:enddate"), 
+		CA_ID(Messages.SurveyQueryColumn_CaIdLabel, ColumnType.STRING,"ca:id"),  //$NON-NLS-1$
+		CA_NAME(Messages.SurveyQueryColumn_CaNameLabel, ColumnType.STRING,"ca:name"),  //$NON-NLS-1$
+		SURVEY_DESIGN(Messages.SurveyQueryColumn_SurveyDesignLabel, ColumnType.STRING, "surveydesign:id"),  //$NON-NLS-1$
+		SURVEY_DESIGN_START(Messages.SurveyQueryColumn_SurveyDesignStartdateLabel, ColumnType.DATE, "surveydesign:startdate"),  //$NON-NLS-1$
+		SURVEY_DESIGN_END(Messages.SurveyQueryColumn_SurveyDesignEnddateLabel, ColumnType.DATE, "surveydesign:enddate"),  //$NON-NLS-1$
 		
-		SURVEY("Survey Id", ColumnType.STRING, "survey:id"), 
-		SURVEY_START("Survey Start Date", ColumnType.DATE, "survey:startdate"), 
-		SURVEY_END("Survey End Date", ColumnType.DATE, "survey:enddate"), 
+		SURVEY(Messages.SurveyQueryColumn_SurveyIdLabel, ColumnType.STRING, "survey:id"),  //$NON-NLS-1$
+		SURVEY_START(Messages.SurveyQueryColumn_SurveyStartLabel, ColumnType.DATE, "survey:startdate"),  //$NON-NLS-1$
+		SURVEY_END(Messages.SurveyQueryColumn_SurveyEndLabel, ColumnType.DATE, "survey:enddate"),  //$NON-NLS-1$
 		
-		MISSION("Mission Id", ColumnType.STRING, "mission:id"), 
-		MISSION_START("Mission Start Date", ColumnType.DATE, "mission:startdate"), 
-		MISSION_END("Mission End Date", ColumnType.DATE, "mission:enddate"),
+		MISSION(Messages.SurveyQueryColumn_MissionIdLabel, ColumnType.STRING, "mission:id"),  //$NON-NLS-1$
+		MISSION_START(Messages.SurveyQueryColumn_MissionStartLabel, ColumnType.DATE, "mission:startdate"),  //$NON-NLS-2$ //$NON-NLS-1$
+		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		SAMPLING_UNIT("Sampling Unit", ColumnType.STRING, "su:id"), 
-		SMAPLING_UNIT_BUFFER("Sampling Unit Buffer", ColumnType.DATE, "su:buffer"), 
+		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
+		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.DATE, "su:buffer"),  //$NON-NLS-1$
 		
-		WAYPOINT_ID("Waypoint ID", ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
-		WAYPOINT_DATE("Waypoint Date", ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
-		WAYPOINT_TIME("Waypoint Type", ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
-		WAYPOINT_X("X", ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
-		WAYPOINT_Y("Y", ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
-		WAYPOINT_DIRECTION("Direction", ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
-		WAYPOINT_DISTANCE("Distance", ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
-		WAYPOINT_COMMENT("Comment", ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
+		WAYPOINT_ID(Messages.SurveyQueryColumn_WaypointIdLabel, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_DATE(Messages.SurveyQueryColumn_WpDateLabel, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
+		WAYPOINT_TIME(Messages.SurveyQueryColumn_WaypointTypeLabel, ColumnType.TIME,"waypoint:time"),  //$NON-NLS-1$
+		WAYPOINT_X(Messages.SurveyQueryColumn_XLabel, ColumnType.NUMBER,"waypoint:x"),  //$NON-NLS-1$
+		WAYPOINT_Y(Messages.SurveyQueryColumn_YLabel, ColumnType.NUMBER, "waypoint:y"),  //$NON-NLS-1$
+		WAYPOINT_DIRECTION(Messages.SurveyQueryColumn_DirectionLabel, ColumnType.NUMBER,"waypoint:direction"),  //$NON-NLS-1$
+		WAYPOINT_DISTANCE(Messages.SurveyQueryColumn_DistanceLabel, ColumnType.NUMBER,"waypoint:distance"),  //$NON-NLS-1$
+		WAYPOINT_COMMENT(Messages.SurveyQueryColumn_CommentLabel, ColumnType.STRING,"waypoint:comment");  //$NON-NLS-1$
 		
 		private String guiName;
 		private ColumnType type;
@@ -99,7 +101,32 @@ public class SurveyQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-		//	TODO:
+		if (queryResultItem instanceof SurveyQueryResultItem){
+			SurveyQueryResultItem item = (SurveyQueryResultItem)queryResultItem;
+			switch(column){
+				case CA_ID: return item.getConservationAreaId();
+				case CA_NAME: return item.getConservationAreaName();
+				case SURVEY_DESIGN: return item.getSurveyDesign();
+				case SURVEY_DESIGN_START: return item.getSurveyDesignStart();
+				case SURVEY_DESIGN_END: return item.getSurveyDesignEnd();
+				case SURVEY: return item.getSurveyId();
+				case SURVEY_START: return item.getSurveyStart();
+				case SURVEY_END: return item.getSurveyEnd();
+				case MISSION: return item.getMissionId();
+				case MISSION_START: return item.getMissionStart();
+				case MISSION_END: return item.getMissionEnd();
+				case SAMPLING_UNIT: return item.getSamplingUnitId();
+				case SMAPLING_UNIT_BUFFER: return item.getSmaplingUnitBuffer();
+				case WAYPOINT_ID: return item.getWaypointId();
+				case WAYPOINT_DATE: return item.getWaypointTime();
+				case WAYPOINT_TIME: return item.getWaypointTime(); 
+				case WAYPOINT_X: return item.getWaypointX(); 
+				case WAYPOINT_Y: return item.getWaypointY(); 
+				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
+				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
+				case WAYPOINT_COMMENT: return item.getWaypointComment(); 
+			}
+		}
 		return ""; //$NON-NLS-1$
 	}
 

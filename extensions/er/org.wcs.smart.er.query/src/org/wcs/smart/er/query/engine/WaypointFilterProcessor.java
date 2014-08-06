@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -109,7 +110,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			boolean includeEmptyObservations,
 			IProgressMonitor monitor) throws SQLException{
 		
-		monitor.subTask("creating observation tables");
+		monitor.subTask(Messages.WaypointFilterProcessor_progress1);
 		
 		IFilter qFilter = queryFilter;
 		
@@ -122,7 +123,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			return;
 		}
 
-		monitor.subTask("creating temp tables");
+		monitor.subTask(Messages.WaypointFilterProcessor_progress2);
 		createTemporaryTable(c);
 		
 		monitor.worked(1);
@@ -305,7 +306,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
 		
-		monitor.subTask("processing waypoint");
+		monitor.subTask(Messages.WaypointFilterProcessor_progress3);
 		//HashMap<IFilter, String> filter2Column = new HashMap<IFilter, String>();
 		
 		// -- build temporary table
@@ -391,7 +392,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			IFilter lfilter = cols.getKey();
 			String colName = cols.getValue();
 			
-			monitor.subTask("Processing filter: "  + lfilter.asString() );
+			monitor.subTask(Messages.WaypointFilterProcessor_progress4  + lfilter.asString() );
 			
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -546,9 +547,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					
 				}
 			}
-			
-			
-			//TODO: process mission properties
 			
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());

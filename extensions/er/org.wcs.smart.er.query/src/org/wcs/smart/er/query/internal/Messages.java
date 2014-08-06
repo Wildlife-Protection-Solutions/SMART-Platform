@@ -1,0 +1,98 @@
+package org.wcs.smart.er.query.internal;
+
+import org.eclipse.osgi.util.NLS;
+
+public class Messages extends NLS {
+	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
+	public static String DerbyObservationEngine_progress1;
+	public static String DerbyObservationEngine_progress2;
+	public static String DerbyObservationEngine_progress3;
+	public static String DerbyObservationEngine_progress4;
+	public static String DerbyObservationEngine_progress5;
+	public static String DerbyObservationEngine_progress6;
+	public static String DerbyObservationEngine_progress7;
+	public static String DerbyObservationEngine_progress8;
+	public static String DerbyObservationEngine_SurveyDesignNotFound;
+	public static String DerbyPagedObservationResult_cleanupjobname;
+	public static String ERQueryPlugIn_ErrorDialogTitle;
+	public static String FilterProcessor_progress1;
+	public static String FilterProcessor_progress2;
+	public static String FilterProcessor_progress3;
+	public static String FilterProcessor_progress4;
+	public static String FilterProcessor_progress5;
+	public static String MissionAttributeDropItem_LoadingLabel;
+	public static String MissionAttributeDropItem_loadListItemsJob;
+	public static String MissionAttributeFilter_AttributeNotFoundError;
+	public static String MissionAttributeFilter_ListItemNotFoundError;
+	public static String MissionDropItem_Label;
+	public static String MissionDropItem_MissionLabel;
+	public static String MissionEndDateField_Name;
+	public static String MissionFilter_MissionNotFound;
+	public static String MissionIdDropItem_JobName;
+	public static String MissionIdDropItem_MissionIdLabel;
+	public static String MissionStartDateField_Name;
+	public static String SurveyDesignDialog_AllDesignsLabel;
+	public static String SurveyDesignDialog_DesignLabel;
+	public static String SurveyDesignDialog_Message;
+	public static String SurveyDesignDialog_Title;
+	public static String SurveyDropItem_SurveyLabel;
+	public static String SurveyDropItemFactory_ParseError;
+	public static String SurveyFilter_SurveyNotFound;
+	public static String SurveyFilterDefintionPanel_AllSurveyLabel;
+	public static String SurveyFilterDefintionPanel_SurveyDesignLabel;
+	public static String SurveyFilterItemPanel_AddToQueryButton;
+	public static String SurveyFilterItemPanel_AreaFilterTreeNode;
+	public static String SurveyFilterItemPanel_JobName;
+	public static String SurveyFilterSqlGenerator_DateFilterNotSupported;
+	public static String SurveyFilterSqlGenerator_missionAttributeError;
+	public static String SurveyFilterSqlGenerator_missionPropertyError;
+	public static String SurveyIdDropItem_LoadIdsJobName;
+	public static String SurveyIdDropItem_SurveyIdLabel;
+	public static String SurveyItemContentProvider_AllMissionsAndSurveysLabel;
+	public static String SurveyItemContentProvider_ErrorLabel;
+	public static String SurveyItemContentProvider_LoadingLabel;
+	public static String SurveyItemContentProvider_LoadSurveyJobName;
+	public static String SurveyItemContentProvider_loadMissionJobName;
+	public static String SurveyItemContentProvider_MissionIDLabel;
+	public static String SurveyItemContentProvider_MissionPropertiesLabel;
+	public static String SurveyItemContentProvider_SurveyIdLabel;
+	public static String SurveyItemTreeNode_SurveyFiltersNode;
+	public static String SurveyObservationQuery_loadingDesignJobName;
+	public static String SurveyObservationQueryType_QueryTypeName;
+	public static String SurveyQueryColumn_CaIdLabel;
+	public static String SurveyQueryColumn_CaNameLabel;
+	public static String SurveyQueryColumn_CommentLabel;
+	public static String SurveyQueryColumn_DirectionLabel;
+	public static String SurveyQueryColumn_DistanceLabel;
+	public static String SurveyQueryColumn_MissionEndLabel;
+	public static String SurveyQueryColumn_MissionIdLabel;
+	public static String SurveyQueryColumn_MissionStartLabel;
+	public static String SurveyQueryColumn_SuBufferLabel;
+	public static String SurveyQueryColumn_SuLabel;
+	public static String SurveyQueryColumn_SurveyDesignEnddateLabel;
+	public static String SurveyQueryColumn_SurveyDesignLabel;
+	public static String SurveyQueryColumn_SurveyDesignStartdateLabel;
+	public static String SurveyQueryColumn_SurveyEndLabel;
+	public static String SurveyQueryColumn_SurveyIdLabel;
+	public static String SurveyQueryColumn_SurveyStartLabel;
+	public static String SurveyQueryColumn_WaypointIdLabel;
+	public static String SurveyQueryColumn_WaypointTypeLabel;
+	public static String SurveyQueryColumn_WpDateLabel;
+	public static String SurveyQueryColumn_XLabel;
+	public static String SurveyQueryColumn_YLabel;
+	public static String SurveyQueryColumnManager_CategoryColumnLabel;
+	public static String SurveyQueryColumnManager_datamodelcolumnjobname;
+	public static String SurveyQueryColumnManager_missionattributejobname;
+	public static String SurveyQueryFactory_DefaultQueryName;
+	public static String WaypointFilterProcessor_progress1;
+	public static String WaypointFilterProcessor_progress2;
+	public static String WaypointFilterProcessor_progress3;
+	public static String WaypointFilterProcessor_progress4;
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+	}
+
+	private Messages() {
+	}
+}

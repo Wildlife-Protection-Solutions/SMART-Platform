@@ -19,13 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package org.wcs.smart.er.query.filter;
 
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
- * Waypoint date field filter
+ * Mission start date field filter
+ * 
  * @author Emily
  *
  */
@@ -37,12 +38,12 @@ public class MissionStartDateField implements IDateFieldFilter {
 	
 	@Override
 	public String getGuiName() {
-		return "Mission End Date";
+		return Messages.MissionStartDateField_Name;
 	}
 
 	@Override
 	public String getKey() {
-		return "missionenddate"; //$NON-NLS-1$
+		return "missionstartdate"; //$NON-NLS-1$
 	}
 
 }

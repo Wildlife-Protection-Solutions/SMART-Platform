@@ -38,12 +38,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
@@ -52,10 +52,8 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -86,7 +84,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask("Running Query.", 70);
+				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 70);
 				IFilterProcessor filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 				
 				//create a date filter that caches the dates so the same
@@ -104,7 +102,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 					populateTemporaryTableExtra(c, session, query, monitor);
 					
 					if (monitor.isCanceled()) return;
-					monitor.subTask("Fetching size data");
+					monitor.subTask(Messages.DerbyObservationEngine_progress2);
 					//setting result size
 					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
 					try {
@@ -256,7 +254,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			return;
 		}
 
-		monitor.subTask("updating survey design name");
+		monitor.subTask(Messages.DerbyObservationEngine_progress3);
 		populateTemporaryTableNameObjExtra("survey_design_uuid", "survey_design_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		monitor.worked(2);
 		if (monitor.isCanceled()){
@@ -266,7 +264,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		//ca information
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
-			monitor.subTask("add conservation area information");
+			monitor.subTask(Messages.DerbyObservationEngine_progress4);
 			StringBuilder sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
@@ -287,14 +285,14 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		}
 		
 		//populating categories
-		monitor.subTask("populating category names");
+		monitor.subTask(Messages.DerbyObservationEngine_progress5);
 		populateTemporaryTableCategory(c, session);
 		monitor.worked(13);
 		if (monitor.isCanceled()){
 			return;
 		}
 
-		monitor.subTask("populating list attributes");
+		monitor.subTask(Messages.DerbyObservationEngine_progress6);
 		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, byte[] cauuid, byte[] uuid) {
@@ -307,7 +305,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			return;
 		}
 		
-		monitor.subTask("populating tree attributes");
+		monitor.subTask(Messages.DerbyObservationEngine_progress7);
 		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, byte[] cauuid, byte[] uuid) {
@@ -318,7 +316,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		if (monitor.isCanceled()) return;
 		
 		
-		monitor.subTask("populating mission properties");
+		monitor.subTask(Messages.DerbyObservationEngine_progress8);
 		if (query.getSurveyDesign() != null){
 			SurveyDesign sd = null;
 			try{
@@ -328,39 +326,42 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				throw new SQLException(ex);
 			}
 			if (sd == null){
-				throw new SQLException(MessageFormat.format("Survey design {0} not found", new Object[]{query.getSurveyDesign()} ));
+				throw new SQLException(MessageFormat.format(Messages.DerbyObservationEngine_SurveyDesignNotFound, new Object[]{query.getSurveyDesign()} ));
 			}
 			for (MissionProperty mp : sd.getMissionProperties()){
 				missionAttributes.add(mp.getAttribute());
 				//add column & populate
-				String sql = "";
+				String sql = ""; //$NON-NLS-1$
 				if (mp.getAttribute().getType() == AttributeType.NUMERIC){
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " double";
+					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " double"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					QueryPlugIn.logSql(sql);
 					c.createStatement().execute(sql);
 					
-					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".number_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)";
+					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".number_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 					QueryPlugIn.logSql(sql);
 					c.createStatement().execute(sql);
 				}else if (mp.getAttribute().getType() == AttributeType.TEXT){
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)";
+					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					QueryPlugIn.logSql(sql);
 					c.createStatement().execute(sql);
 					
-					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".string_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)";
+					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".string_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 					QueryPlugIn.logSql(sql);
 					c.createStatement().execute(sql);
 				}else if (mp.getAttribute().getType() == AttributeType.LIST){						
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  "_lst char(16) for bit data";
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)";
+					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  "_lst char(16) for bit data"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					QueryPlugIn.logSql(sql);
 					c.createStatement().execute(sql);
 					
-					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".list_element_uuid FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)";
+					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					QueryPlugIn.logSql(sql);
 					c.createStatement().execute(sql);
 					
-					populateTemporaryTableNameObjExtra("ma_" + mp.getAttribute().getKeyId() + "_lst", "ma_" + mp.getAttribute().getKeyId(), c, session);  //$NON-NLS-1$//$NON-NLS-2$
+					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + "_lst = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".list_element_uuid FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+					QueryPlugIn.logSql(sql);
+					c.createStatement().execute(sql);
+					
+					populateTemporaryTableNameObjExtra("ma_" + mp.getAttribute().getKeyId(), "ma_" + mp.getAttribute().getKeyId(), c, session);  //$NON-NLS-1$//$NON-NLS-2$
 					monitor.worked(2);
 					if (monitor.isCanceled()){
 						return;
@@ -541,20 +542,20 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
-		it.setMissionEnd(rs.getDate("mission_end"));
-		it.setMissionId(rs.getString("mission_id"));
-		it.setMissionStart(rs.getDate("mission_start"));
+		it.setMissionEnd(rs.getDate("mission_end")); //$NON-NLS-1$
+		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_start")); //$NON-NLS-1$
 		
-		it.setSurveyDesign(rs.getString("survey_design_name"));
-		it.setSurveyDesignEnd(rs.getDate("survey_design_end"));
-		it.setSurveyDesignStart(rs.getDate("survey_design_start"));
+		it.setSurveyDesign(rs.getString("survey_design_name")); //$NON-NLS-1$
+		it.setSurveyDesignEnd(rs.getDate("survey_design_end")); //$NON-NLS-1$
+		it.setSurveyDesignStart(rs.getDate("survey_design_start")); //$NON-NLS-1$
 		
-		it.setSurveyId(rs.getString("survey_id"));
-		it.setSurveyEnd(rs.getDate("survey_end"));
-		it.setSurveyStart(rs.getDate("survey_start"));
+		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
+		it.setSurveyEnd(rs.getDate("survey_end")); //$NON-NLS-1$
+		it.setSurveyStart(rs.getDate("survey_start")); //$NON-NLS-1$
 		
-		it.setSmaplingUnitBuffer(rs.getDouble("sampling_unit_buffer"));
-		it.setSamplingUnitId(rs.getString("sampling_unit_id"));
+		it.setSmaplingUnitBuffer(rs.getDouble("sampling_unit_buffer")); //$NON-NLS-1$
+		it.setSamplingUnitId(rs.getString("sampling_unit_id")); //$NON-NLS-1$
 		
 		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
 		
@@ -582,7 +583,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setCategory(categories.toArray(new String[categories.size()]));
 		
 		for (MissionAttribute ma : missionAttributes){
-			it.addAttribute(ma.getKeyId(), rs.getObject("ma_" + ma.getKeyId()));
+			it.addAttribute(ma.getKeyId(), rs.getObject("ma_" + ma.getKeyId())); //$NON-NLS-1$
 		}
 		
 		return it;

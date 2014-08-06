@@ -40,15 +40,13 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -62,13 +60,6 @@ import com.vividsolutions.jts.geom.Envelope;
  * @since 1.0.0
  */
 public class DerbyPagedObservationResult implements IObservationPagedQueryResultSet{
-	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
-		{"patrolleg", "pl"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"patrol", "p"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
 	
 	private String queryTempTable;
 
@@ -364,7 +355,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	}
 	
 	private String buildSortSql() {
-		return "";
+		return ""; //$NON-NLS-1$
 //		if (sortColumn == null || direction == SWT.NONE)
 //			return ""; //$NON-NLS-1$
 //		
@@ -624,7 +615,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	private class CleanUpJob extends Job {
 
 		public CleanUpJob() {
-			super("Clean up query tables.");
+			super(Messages.DerbyPagedObservationResult_cleanupjobname);
 		}
 
 		@Override

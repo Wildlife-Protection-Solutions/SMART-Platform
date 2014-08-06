@@ -31,11 +31,15 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.filter.SurveyItemContentProvider.Node;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
- * Tree node for data model.
+ * Tree node for the filter list that represents the 
+ * survey filter options.
+ * 
  * @author Emily
  *
  */
@@ -80,6 +84,8 @@ public class SurveyItemTreeNode implements IItemTreeNode{
 						return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 					}else if (node == Node.SURVEY_ID){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
+					}else if (node == Node.SURVEY_MISSION){
+						return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.ALL_SURVEY_ICON);
 					}
 				}
 				if (element instanceof MissionProperty){
@@ -100,7 +106,7 @@ public class SurveyItemTreeNode implements IItemTreeNode{
 	}
 	@Override
 	public String getName() {
-		return "Survey Filters";
+		return Messages.SurveyItemTreeNode_SurveyFiltersNode;
 	}
 
 	@Override

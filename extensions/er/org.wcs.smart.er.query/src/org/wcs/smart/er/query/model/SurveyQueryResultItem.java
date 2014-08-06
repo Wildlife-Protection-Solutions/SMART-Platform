@@ -29,10 +29,12 @@ import java.util.List;
 import org.wcs.smart.query.model.IResultItem;
 
 /**
- * A class to hold the results of a waypoint 
+ * A class to hold the results of a survey waypoint 
  * query.  Each class contains the results for
  * a single observation.  The observation contains
- * a single category and all attributes.
+ * a single category and all attributes. Also
+ * included are all mission attributes in the query.
+ * 
  * 
  * 
  * @author Emily
