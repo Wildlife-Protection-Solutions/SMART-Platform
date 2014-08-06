@@ -172,7 +172,11 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 
 		txtDescription.setText(design.getDescription() != null ? design.getDescription() : ""); //$NON-NLS-1$
 		
-		txtConfigurableModel.setText(design.getConfigurableModel().getName());
+		if (design.getConfigurableModel() != null) {
+			txtConfigurableModel.setText(design.getConfigurableModel().getName());
+		} else {
+			txtConfigurableModel.setText("SMART DataModel");
+		}
 	}
 	
 	private Hyperlink createEditLink(Composite parent, final PanelType panelType) {
