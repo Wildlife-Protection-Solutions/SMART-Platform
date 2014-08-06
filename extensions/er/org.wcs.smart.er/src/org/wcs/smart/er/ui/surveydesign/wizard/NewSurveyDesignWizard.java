@@ -62,6 +62,8 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	
 	private SurveyDesignComposite[] comps;
 	
+	private Object lastPage;
+	
 	/**
 	 * Creates a new wizard
 	 */
@@ -112,6 +114,9 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	
 	@Override
 	public boolean performFinish() {
+        if (lastPage instanceof SurveyCompositeWizardPage) {
+            ((SurveyCompositeWizardPage) lastPage).updateModel(newDesign);
+        }
 		session.beginTransaction();
 		try{
 			session.save(newDesign);
@@ -184,6 +189,11 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 			
 			canFinish =  (event.getTargetPage().equals(getPages()[getPageCount()-1]));
 		}
+		
+        if (event.doit) {
+            lastPage = event.getTargetPage();
+        }
+
 	}
 
 	public Session getSession() {
