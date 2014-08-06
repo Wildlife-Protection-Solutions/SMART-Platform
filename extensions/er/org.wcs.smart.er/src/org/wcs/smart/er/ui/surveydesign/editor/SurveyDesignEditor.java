@@ -118,7 +118,9 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 			session.beginTransaction();
 			surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
 			surveyDesign.getNames().size();
-			surveyDesign.getConfigurableModel().getNames().size();
+			if (surveyDesign.getConfigurableModel() != null) {
+				surveyDesign.getConfigurableModel().getNames().size();
+			}
 			session.getTransaction().commit();
 			session.close();
 		}
