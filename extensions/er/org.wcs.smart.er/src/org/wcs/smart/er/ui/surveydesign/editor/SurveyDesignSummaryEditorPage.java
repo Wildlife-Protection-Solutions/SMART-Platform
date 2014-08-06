@@ -104,7 +104,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtStatus = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtStatus.setEditable(false);
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(content, PanelType.NAME); 
+		createEditLink(content, PanelType.STATUS); 
 
 		toolkit.createLabel(content, "Start Date:");
 		txtStartDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
