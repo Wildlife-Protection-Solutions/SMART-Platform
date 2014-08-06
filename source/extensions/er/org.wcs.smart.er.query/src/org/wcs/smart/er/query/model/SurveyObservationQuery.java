@@ -40,8 +40,9 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.engine.DerbyObservationEngine;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
-import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnCache;
+import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
@@ -52,11 +53,18 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
+/**
+ * Survey observation query.
+ * 
+ * @author Emily
+ *
+ */
 @Entity
 @Table(name="smart.survey_observation_query")
 public class SurveyObservationQuery extends ObservationQuery{
 
 	protected String surveyDesignKey;
+	
 	protected SurveyDesign surveyDesign;
 	
 	
@@ -117,7 +125,7 @@ public class SurveyObservationQuery extends ObservationQuery{
 	protected void initQueryColumns() {
 		synchronized (LOCK) {
 			this.queryColumns = new ArrayList<QueryColumn>();
-			for (QueryColumn q : SurveyQueryColumnCache.getInstance().getObservationQueryColumns(getSurveyDesignAsObject())){
+			for (QueryColumn q : SurveyQueryColumnManager.getInstance().getObservationQueryColumns(getSurveyDesignAsObject())){
 				queryColumns.add(q);
 			}	
 		}
@@ -186,14 +194,14 @@ public class SurveyObservationQuery extends ObservationQuery{
 				if (surveyDesign == null){
 					if (surveyDesignKey == null) return null;
 					
-					Job j = new Job("load survey design"){
+					Job j = new Job(Messages.SurveyObservationQuery_loadingDesignJobName){
 
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							Session s = HibernateManager.openSession();
 							List<?> results = s.createCriteria(SurveyDesign.class)
-								.add(Restrictions.eq("keyId", surveyDesignKey))
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+								.add(Restrictions.eq("keyId", surveyDesignKey)) //$NON-NLS-1$
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 							if (results.size() > 0){
 								surveyDesign = (SurveyDesign) results.get(0);
 							}

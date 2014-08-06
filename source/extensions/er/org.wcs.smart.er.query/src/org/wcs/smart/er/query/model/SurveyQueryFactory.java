@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.model;
 
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -28,7 +29,8 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 
 /**
- * Factory class for creating new queries
+ * Factory class for creating new survey queries.
+ * 
  * @author egouge
  *
  */
@@ -36,7 +38,7 @@ public class SurveyQueryFactory {
 
 	private static void initQuery(Query q, String defaultName){
 		if (defaultName == null){
-			defaultName = "<No Name>";
+			defaultName = Messages.SurveyQueryFactory_DefaultQueryName;
 		}
 		q.setConservationArea(SmartDB.getCurrentConservationArea());
 		q.setOwner(SmartDB.getCurrentEmployee());

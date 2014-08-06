@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.query.ui.filter;
 
 import java.util.ArrayList;
@@ -21,13 +42,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -37,10 +56,14 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.query.ui.QuerySourceProvider;
-import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 
+/**
+ * The filter item panel for survey queries.
+ * 
+ * @author Emily
+ *
+ */
 public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	
 	public static final String ID = "org.wcs.smart.er.query.survey.filterItemPanel"; //$NON-NLS-1$
@@ -49,6 +72,8 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	private TreeViewer filterTreeViewer;
 	
 	private AreaTreeNode areaNode;
+	private SurveyItemTreeNode surveyNode;
+	private SurveyDesign currentDesign;
 	
 	/*
 	 * listener for refreshing areas
@@ -69,11 +94,8 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	};
 	
 	public SurveyFilterItemPanel() {
-		
 	}
 
-	private SurveyItemTreeNode surveyNode;
-	
 	protected Composite createPanel(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -95,7 +117,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		
 		if (!SmartDB.isMultipleAnalysis()){
-			areaNode = new AreaTreeNode("Area Filters");
+			areaNode = new AreaTreeNode(Messages.SurveyFilterItemPanel_AreaFilterTreeNode);
 			nodes.add(areaNode);
 		}
 		nodes.add(new OperatorsTreeNode());
@@ -112,7 +134,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		filterTreeViewer.setAutoExpandLevel(2);
 		filterTreeViewer.setInput(LOADING_TEXT);
 		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText("Add to Query");
+		btnAdd.setText(Messages.SurveyFilterItemPanel_AddToQueryButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -124,12 +146,15 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	}
 	
 	private void addItem(){
-		
 		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 	
-	private SurveyDesign currentDesign;
-	
+	/**
+	 * Refreshes the panel contents
+	 * 
+	 * @param currentDesign the current survey design 
+	 */
+	@SuppressWarnings("unchecked")
 	public void refreshPanel(SurveyDesign currentDesign){
 		this.currentDesign = currentDesign;
 		Object input = filterTreeViewer.getInput();
@@ -155,7 +180,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	}
 
 	
-	private Job refreshJob = new Job("Refresh Job") {
+	private Job refreshJob = new Job(Messages.SurveyFilterItemPanel_JobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -167,7 +192,6 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 			
 			input.put(OperatorsTreeNode.KEY, ops);
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
-			
 			input.put(SurveyItemTreeNode.KEY, new Object[]{currentDesign, surveyNode});
 			
 //			if (SmartDB.isMultipleAnalysis()){

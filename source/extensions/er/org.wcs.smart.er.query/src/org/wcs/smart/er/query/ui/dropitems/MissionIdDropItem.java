@@ -42,25 +42,25 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.MissionFilter;
-import org.wcs.smart.er.query.filter.SurveyFilter;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 
 /**
- * Patrol id drop item. This consists of a list of 
- * all the patrol ids along that can also be typed into.
- *  
+ * Mission id drop item.
+ * <p>This drop item allows users to select a mission id from
+ * a list (if the current survey design is set) or
+ * manually enter a string</p>.
+ *   
  * @author Emily
- * @since 1.0.0
+ * 
  */
 public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISurveyDesignDropItem{
 
-	
 	private Label lblAttribute;
 	private Combo value;
 	private Combo operators;
@@ -76,7 +76,8 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 	/*
 	 * job to load all patrol ids
 	 */
-	private Job loadIdsJob = new Job("Load Mission Ids"){
+	private Job loadIdsJob = new Job(Messages.MissionIdDropItem_JobName){
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (value.isDisposed() || design == null){
@@ -87,8 +88,8 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 			Session s = HibernateManager.openSession();
 			try{
 				List<Mission> ss = s.createCriteria(Mission.class)
-						.createAlias("survey", "s")
-						.add(Restrictions.eq("s.surveyDesign", design)).list();
+						.createAlias("survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+						.add(Restrictions.eq("s.surveyDesign", design)).list(); //$NON-NLS-1$
 				for (Mission sy : ss){
 					data.add(sy.getId());
 				}
@@ -159,7 +160,6 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
-		
 		lblAttribute = new Label(main, SWT.NONE);
 		operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		
@@ -207,7 +207,7 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 		initDrag(lblAttribute);
 		
 		
-		lblAttribute.setText(formatStringForLabel("Mission ID"));
+		lblAttribute.setText(formatStringForLabel(Messages.MissionIdDropItem_MissionIdLabel));
 		
 		int index = 0;
 		for (int i = 0; i < Operator.STRING_OPS.length; i ++){

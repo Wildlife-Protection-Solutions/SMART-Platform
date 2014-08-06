@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -36,9 +37,14 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel;
+import org.wcs.smart.er.query.ui.filter.SurveyFilterItemPanel;
 import org.wcs.smart.er.query.ui.filter.SurveyItemContentProvider;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
@@ -52,7 +58,7 @@ import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
- * Drop item factory for patrol queries.
+ * Drop item factory for survey queries.
  * @author Emily
  *
  */
@@ -88,7 +94,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		
 		} else if (source instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
-			
+		}else if (source instanceof Area){
+			if (queryItemPanelId.equals(SurveyFilterItemPanel.ID)){
+				items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+			}
 //		}else if (source instanceof AreaType){
 //			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 //				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
@@ -179,19 +188,36 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		return null;
 	}
 
-	
+	/**
+	 * Creates a survey id drop item
+	 * @return
+	 */
 	public DropItem createSurveyIdDropItem(){
 		return new SurveyIdDropItem();
 	}
 
+	/**
+	 * Creates a survey uuid drop item
+	 * @param survey
+	 * @return
+	 */
 	public DropItem createSurveyUuidIdDropItem(Survey survey){
 		return new SurveyDropItem(survey);
 	}
 	
+	/**
+	 * Creates a mission uuid drop item
+	 * @param mission
+	 * @return
+	 */
 	public DropItem createMissionUuidIdDropItem(Mission mission){
 		return new MissionDropItem(mission);
 	}
 	
+	/**
+	 * Creates a mission id drop item
+	 * @return
+	 */
 	public DropItem createMissionIdDropItem(){
 		return new MissionIdDropItem();
 	}
@@ -278,12 +304,12 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public void generateDropItems(QueryProxy proxy, Session session) {
-//		
-//		if (proxy.getQuery() instanceof SimpleQuery){
-//			
-//			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-//			proxy.setDropItems(BasicFilterDefintionPanel.ID, asDropItems(queryFilter, session));
-//					
+		
+		if (proxy.getQuery() instanceof SimpleQuery){
+			
+			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
+			proxy.setDropItems(SurveyFilterDefintionPanel.ID, asDropItems(queryFilter, session));
+					
 //		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
 //			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
 //			SumQueryDefinition def = q.getQueryDefinition();
@@ -336,7 +362,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 //					Collections.singletonList(valueItem));
 //					
 //			
-//		}
+		}
 	}
 	
 	/*
@@ -351,7 +377,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			}
 			
 		}catch (Exception ex){
-			items.add(new ErrorDropItem(MessageFormat.format("Error parsing query: {0}", new Object[]{ex.getMessage()})));
+			items.add(new ErrorDropItem(MessageFormat.format(Messages.SurveyDropItemFactory_ParseError, new Object[]{ex.getMessage()})));
 		}
 		return items;
 	}

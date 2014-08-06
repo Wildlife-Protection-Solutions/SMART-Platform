@@ -22,10 +22,11 @@
 
 package org.wcs.smart.er.query.filter;
 
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
- * Waypoint date field filter
+ * Mission end date field filter
  * @author Emily
  *
  */
@@ -37,12 +38,12 @@ public class MissionEndDateField implements IDateFieldFilter {
 	
 	@Override
 	public String getGuiName() {
-		return "Mission Start Date";
+		return Messages.MissionEndDateField_Name;
 	}
 
 	@Override
 	public String getKey() {
-		return "missionstartdate"; //$NON-NLS-1$
+		return "missionenddate"; //$NON-NLS-1$
 	}
 
 }

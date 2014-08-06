@@ -52,6 +52,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.Operator;
@@ -61,7 +62,8 @@ import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Attribute drop item for numeric, text, and boolean attributes in observation
+ * Attribute drop item for numeric, text, and list mission 
+ * attributes in survey query
  * filters
  * 
  * @author Emily
@@ -86,15 +88,13 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 	private MissionAttribute ma;
 	private ComboViewer listViewer;
 	private ListItem currentSelection = null;
-	
-//	private Attribute attribute = null;
-		
+			
 	private Font smallerFont;
 	
 	/*
 	 * Job to load the attribute list options
 	 */
-	private Job loadItemsJobs = new Job("Load list items"){
+	private Job loadItemsJobs = new Job(Messages.MissionAttributeDropItem_loadListItemsJob){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -150,7 +150,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 		this.ma = attribute;
 		this.type = attribute.getType();
 		this.text = attribute.getName();
-		this.key = "s:missionproperty:" + type.typeKey + ":" + attribute.getKeyId();
+		this.key = "s:missionproperty:" + type.typeKey + ":" + attribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	
@@ -428,7 +428,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 				}
 			}
 		});
-		listViewer.setInput(new ListItem[]{new ListItem("Loading...")});
+		listViewer.setInput(new ListItem[]{new ListItem(Messages.MissionAttributeDropItem_LoadingLabel)});
 		
 		initDrag(main);
 		initDrag(lblAttribute);

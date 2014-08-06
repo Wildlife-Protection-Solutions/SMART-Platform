@@ -44,17 +44,20 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyFilter;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 
 /**
- * Patrol id drop item. This consists of a list of 
- * all the patrol ids along that can also be typed into.
- *  
+ * Survey id drop item.
+ * <p>This drop item allows users to select a survey id from
+ * a list (if the current survey design is set) or
+ * manually enter a string</p>.
+ *   
  * @author Emily
- * @since 1.0.0
+ * 
  */
 public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISurveyDesignDropItem{
 	
@@ -73,7 +76,8 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 	/*
 	 * job to load all patrol ids
 	 */
-	private Job loadIdsJob = new Job("Load Survey Ids"){
+	private Job loadIdsJob = new Job(Messages.SurveyIdDropItem_LoadIdsJobName){
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (value.isDisposed() || design == null){
@@ -83,7 +87,8 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 			final List<String> data = new ArrayList<String>();
 			Session s = HibernateManager.openSession();
 			try{
-				List<Survey> ss = s.createCriteria(Survey.class).add(Restrictions.eq("surveyDesign", design)).list();
+				List<Survey> ss = s.createCriteria(Survey.class)
+						.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
 				for (Survey sy : ss){
 					data.add(sy.getId());
 				}
@@ -202,7 +207,7 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 		initDrag(lblAttribute);
 		
 		
-		lblAttribute.setText(formatStringForLabel("Survey ID"));
+		lblAttribute.setText(formatStringForLabel(Messages.SurveyIdDropItem_SurveyIdLabel));
 		
 		int index = 0;
 		for (int i = 0; i < Operator.STRING_OPS.length; i ++){
