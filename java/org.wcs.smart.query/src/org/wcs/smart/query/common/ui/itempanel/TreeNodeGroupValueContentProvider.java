@@ -79,10 +79,10 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		this.values = values;
 		
 		roots = new ArrayList<RootNode>();
-		if (groupbys.size() > 0){
+		if (groupbys != null && groupbys.size() > 0){
 			roots.add(RootNode.GROUPBY_OPS);
 		}
-		if (values.size() > 0){
+		if (values != null && values.size() > 0){
 			roots.add(RootNode.VALUES_OPS);
 		}
 	}
@@ -101,22 +101,30 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		msg = null;
 		if (newInput == null){
-			for (IItemTreeNode n : groupbys){
-				n.getContentProvider().inputChanged(viewer, oldInput, newInput);
+			if (groupbys  != null){
+				for (IItemTreeNode n : groupbys){
+					n.getContentProvider().inputChanged(viewer, oldInput, newInput);
+				}
 			}
-			for (IItemTreeNode n : values){
-				n.getContentProvider().inputChanged(viewer, oldInput, newInput);
+			if (values != null){
+				for (IItemTreeNode n : values){
+					n.getContentProvider().inputChanged(viewer, oldInput, newInput);
+				}
 			}
 		}else if (newInput instanceof String){
 			msg = (String) newInput;
 		}else{
 			Map<String, Object> keys = (Map<String, Object>) newInput;
 			
-			for (IItemTreeNode n : groupbys){
-				n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
+			if (groupbys != null){
+				for (IItemTreeNode n : groupbys){
+					n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
+				}
 			}
-			for (IItemTreeNode n : values){
-				n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
+			if (values != null){
+				for (IItemTreeNode n : values){
+					n.getContentProvider().inputChanged(viewer, oldInput, keys.get(n.getKey()));
+				}
 			}
 		}
 	}
