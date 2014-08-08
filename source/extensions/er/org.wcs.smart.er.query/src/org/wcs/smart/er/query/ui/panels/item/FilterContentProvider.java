@@ -33,9 +33,12 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
@@ -57,9 +60,11 @@ public class FilterContentProvider implements ITreeContentProvider{
 	
 	private List<MissionAttribute> allMissionAttributes = null;
 	private List<Survey> allSurveys = null;
+	private List<Object> sunits = null;
 	
 	private boolean triedMission = false;
 	private boolean triedSurveys = false;
+	private boolean triedUnits = false;
 	
 	private Viewer viewer;
 	
@@ -125,12 +130,46 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}
 	};
 	
+	@SuppressWarnings("unchecked")
+	private Job loadSamplingUnits = new Job("Sampling Units"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			Session s = HibernateManager.openSession();
+			try{
+				if (design != null){
+					sunits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s);
+					for (Object x : sunits){
+						if (x instanceof SamplingUnit){
+							((SamplingUnit) x).getId();
+							((SamplingUnit) x).getType();
+						}else if (x instanceof MissionTrack){
+							((MissionTrack) x).getId();
+						}
+					}
+				}else{
+					sunits = null;
+				}
+			}finally{
+				s.close();
+			}
+			
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNITS), Node.SAMPLING_UNITS));
+					
+				}});
+			return Status.OK_STATUS;
+		}
+	};
+	
 	public enum Node{
-		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
 		SURVEY_ID(Messages.SurveyItemContentProvider_SurveyIdLabel),
 		MISSION_ID(Messages.SurveyItemContentProvider_MissionIDLabel),
-		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel);
-		
+		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
+		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel),
+		SAMPLING_UNITS("Sampling Units");
 		public String guiName;
 		
 		private Node(String guiName){
@@ -154,8 +193,10 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}
 		triedMission = false;
 		triedSurveys = false;
+		triedUnits = false;
 		allMissionAttributes = null;
 		allSurveys = null;
+		sunits = null;
 	}
 
 	@Override
@@ -182,6 +223,17 @@ public class FilterContentProvider implements ITreeContentProvider{
 						return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
 					}
 				}
+			}
+		}else if (parentElement == Node.SAMPLING_UNITS){
+			if (sunits != null){
+				return sunits.toArray();
+			}
+			if(triedUnits){
+				return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
+			}else{
+				triedUnits = true;
+				loadSamplingUnits.schedule();
+				return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
 			}
 		}else if (parentElement == Node.MISSION_ID){
 			return null;
@@ -233,6 +285,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 	public boolean hasChildren(Object element) {
 		if (element == Node.SURVEY_MISSION ||
 				element == Node.MISSION_PROP ||
+				element == Node.SAMPLING_UNITS || 
 				element instanceof Survey){
 			return true;
 		}

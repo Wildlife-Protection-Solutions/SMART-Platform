@@ -37,10 +37,14 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -54,6 +58,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Processes an query filter creating a temporary table
@@ -69,6 +74,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private String missionTable;
 	
 	private DerbySurveyQueryEngine engine;
+	private SurveyDesignFilter designFilter;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	MissionPropertyFilterCollectorVisitor mpcollector = new MissionPropertyFilterCollectorVisitor();
@@ -80,10 +86,11 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessor(String tableName, DerbySurveyQueryEngine engine){
+	public FilterProcessor(String tableName, DerbySurveyQueryEngine engine, SurveyDesignFilter designFilter ){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.observationTable = engine.createTempTableName();
+		this.designFilter = designFilter;
 	}
 	
 	/**
@@ -250,6 +257,14 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(prefix(Survey.class));
 		sql.append(".survey_design_uuid "); //$NON-NLS-1$
 		
+		if (designFilter != null){
+			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(designFilter, engine);
+			if (filter.length() > 0){
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		
 		if (caFilter != null) {
 			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
 			if (filter.length() > 0) {
@@ -369,6 +384,31 @@ public class FilterProcessor implements IFilterProcessor {
 					+ prefix(MissionAttribute.class)
 					+ ".uuid "); //$NON-NLS-1$
 			usedTables.add(MissionPropertyValue.class);
+		}
+		
+		//do need join mission tracks?
+		final boolean[] needstracks = new boolean[]{false};
+		IFilterVisitor missionTracks = new IFilterVisitor() {
+			
+			@Override
+			public void visit(IFilter filter) {
+				if (needstracks[0]) return;
+				if (filter instanceof SamplingUnitFilter &&
+						((SamplingUnitFilter) filter).getType() == Type.TRACK){
+					needstracks[0] = true;
+				}
+				
+			}
+		};
+		queryFilter.accept(missionTracks);
+		if (needstracks[0]){
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(namePrefix(MissionTrack.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(MissionTrack.class));
+			sql.append(".mission_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(Mission.class));
+			sql.append(".uuid "); //$NON-NLS-1$
 		}
 		
 		// area filters

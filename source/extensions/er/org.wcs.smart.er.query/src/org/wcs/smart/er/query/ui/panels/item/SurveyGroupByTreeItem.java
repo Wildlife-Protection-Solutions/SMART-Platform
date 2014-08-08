@@ -80,7 +80,7 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 			}else if (element instanceof MissionAttribute){
 				return ((MissionAttribute)element).getName();
 			}else if (element instanceof MissionProperty){
-				((MissionProperty) element).getAttribute().getName();
+				return ((MissionProperty) element).getAttribute().getName();
 			}
 			return super.getText(element);
 		}
@@ -98,6 +98,8 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 					return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 				}else if (node == Node.SURVEY_ID){
 					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
+				}else if (node == Node.SAMPLING_UNITS){
+					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ICON);
 				}
 			}
 			return super.getImage(element);

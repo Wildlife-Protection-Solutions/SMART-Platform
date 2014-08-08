@@ -43,6 +43,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
@@ -52,7 +53,10 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -85,7 +89,11 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 70);
-				IFilterProcessor filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				SurveyDesignFilter filter = null;
+				if (query.getSurveyDesign() != null){
+					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+				}
+				IFilterProcessor filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -93,7 +101,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
-				try {			
+				try {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
 							true, true, monitor);

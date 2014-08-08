@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -155,11 +156,13 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	 * @param queryDataTable
 	 * @return
 	 */
-	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable){
+	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, 
+			String queryDataTable,
+			SurveyDesignFilter designFilter){
 		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new FilterProcessor(queryDataTable, this);
+			return new FilterProcessor(queryDataTable, this, designFilter);
 		}else{
-			return new WaypointFilterProcessor(queryDataTable, this);
+			return new WaypointFilterProcessor(queryDataTable, this, designFilter);
 		}
 	}
 }

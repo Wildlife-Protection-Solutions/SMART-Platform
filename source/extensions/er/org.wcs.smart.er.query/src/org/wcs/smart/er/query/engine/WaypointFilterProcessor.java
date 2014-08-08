@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -63,7 +64,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 
 	private String tableName;
 	private String waypointTable;
-	
+	private SurveyDesignFilter designFilter;
 	private DerbySurveyQueryEngine engine;
 
 	/**
@@ -72,7 +73,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public WaypointFilterProcessor(String tableName, DerbySurveyQueryEngine engine){
+	public WaypointFilterProcessor(String tableName, DerbySurveyQueryEngine engine,SurveyDesignFilter designFilter){
+		this.designFilter = designFilter;
 		this.tableName = tableName;
 		this.engine = engine;
 		this.waypointTable = engine.createTempTableName();
@@ -224,6 +226,13 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(Survey.class));
 		sql.append(".survey_design_uuid "); //$NON-NLS-1$
 		
+		if (designFilter != null){
+			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(designFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
 		if (caFilter != null) {
 			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
 			if (filter.length() > 0) {

@@ -37,6 +37,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
@@ -155,10 +157,34 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createMissionIdGroupByDropItem()};
 		}else if (source == SurveyGroupByContentProvider.Node.SURVEY_ID){
 			items = new DropItem[]{createSurveyIdGroupByDropItem()};
+		}else if (source == SurveyGroupByContentProvider.Node.SAMPLING_UNITS){
+			items = new DropItem[]{createSamplingUnitGroupByDropItem()};
+		
+		}else if (source instanceof SamplingUnit){
+			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+				items = new DropItem[]{createSamplingUnitDropItem((SamplingUnit)source)};
+			}
+			
+		}else if (source instanceof MissionTrack){
+			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+				items = new DropItem[]{createSamplingUnitDropItem((MissionTrack)source)};
+			}
+			
 		}
+		
 		return items;	
 	}
-
+	public DropItem createSamplingUnitGroupByDropItem(){
+		return new SamplingUnitGroupByDropItem();
+	}
+	public DropItem createSamplingUnitDropItem(SamplingUnit unit){
+		return new SamplingUnitDropItem(unit);
+	}
+	
+	public DropItem createSamplingUnitDropItem(MissionTrack mt){
+		return new SamplingUnitDropItem(mt);
+	}
+	
 	public DropItem createMissionAttributeGroupByDropItem(MissionAttribute attribute){
 		return new MissionAttributeGroupByDropItem(attribute);
 	}
