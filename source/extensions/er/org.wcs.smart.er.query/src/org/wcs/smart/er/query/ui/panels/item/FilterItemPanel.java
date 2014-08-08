@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.filter;
+package org.wcs.smart.er.query.ui.panels.item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +47,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -55,6 +56,7 @@ import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 
@@ -64,7 +66,7 @@ import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
  * @author Emily
  *
  */
-public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
+public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPanel {
 	
 	public static final String ID = "org.wcs.smart.er.query.survey.filterItemPanel"; //$NON-NLS-1$
 
@@ -72,7 +74,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	private TreeViewer filterTreeViewer;
 	
 	private AreaTreeNode areaNode;
-	private SurveyItemTreeNode surveyNode;
+	private FiltersTreeNode surveyNode;
 	private SurveyDesign currentDesign;
 	
 	/*
@@ -93,7 +95,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		}
 	};
 	
-	public SurveyFilterItemPanel() {
+	public FilterItemPanel() {
 	}
 
 	protected Composite createPanel(Composite parent) {
@@ -111,7 +113,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 		});
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		surveyNode =  new SurveyItemTreeNode();
+		surveyNode =  new FiltersTreeNode();
 		nodes.add(surveyNode);
 		
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
@@ -157,14 +159,16 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 	@SuppressWarnings("unchecked")
 	public void refreshPanel(SurveyDesign currentDesign){
 		this.currentDesign = currentDesign;
-		Object input = filterTreeViewer.getInput();
+		if (filterTreeViewer != null){
+			Object input = filterTreeViewer.getInput();
 		
-		if (input instanceof HashMap){
-			HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
-			input2.put(SurveyItemTreeNode.KEY, new Object[]{currentDesign, surveyNode});
+			if (input instanceof HashMap){
+				HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
+				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
 		
-			filterTreeViewer.setInput(input2);
-			filterTreeViewer.refresh();
+				filterTreeViewer.setInput(input2);
+				filterTreeViewer.refresh();
+			}
 		}
 	}
 	
@@ -192,7 +196,7 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 			
 			input.put(OperatorsTreeNode.KEY, ops);
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
-			input.put(SurveyItemTreeNode.KEY, new Object[]{currentDesign, surveyNode});
+			input.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
 			
 //			if (SmartDB.isMultipleAnalysis()){
 //				List<Object> options = new ArrayList<Object>();
@@ -230,6 +234,11 @@ public class SurveyFilterItemPanel extends AbstractQueryItemPanel {
 			main = createPanel(parent);
 		}
 		return main;
+	}
+
+	@Override
+	public Query getQuery() {
+		return null;
 	}
 }
 

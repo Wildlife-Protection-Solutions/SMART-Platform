@@ -59,14 +59,14 @@ public class SurveyQueryFactory {
 	public static Query createBlankQuery(IQueryType querytype){
 		if (querytype.getClass().equals(SurveyObservationQueryType.class)){
 			return new SurveyObservationQuery();
-//		}else if (querytype.getClass().equals(PatrolGridQueryType.class)){
-//			return new PatrolGriddedQuery();
+		}else if (querytype.getClass().equals(SurveyGridQueryType.class)){
+			return new SurveyGriddedQuery();
 //		}else if (querytype.getClass().equals(PatrolQueryType.class)){
 //			return new PatrolQuery();
 //		}else if (querytype.getClass().equals(PatrolWaypointQueryType.class)){
 //			return new PatrolWaypointQuery();
-//		}else if (querytype.getClass().equals(PatrolSummaryQueryType.class)){
-//			return new PatrolSummaryQuery();
+		}else if (querytype.getClass().equals(SurveySummaryQueryType.class)){
+			return new SurveySummaryQuery();
 		}
 		return null;
 	}
@@ -81,14 +81,14 @@ public class SurveyQueryFactory {
 	public static Query createQuery(IQueryType querytype){
 		if (querytype.getClass().equals(SurveyObservationQueryType.class)){
 			return createObservationQuery();
-//		}else if (querytype.getClass().equals(PatrolGridQueryType.class)){
-//			return createGriddedQuery();
+		}else if (querytype.getClass().equals(SurveyGridQueryType.class)){
+			return createGriddedQuery();
 //		}else if (querytype.getClass().equals(PatrolQueryType.class)){
 //			return createPatrolQuery();
 //		}else if (querytype.getClass().equals(PatrolWaypointQueryType.class)){
 //			return createWaypointQuery();
-//		}else if (querytype.getClass().equals(PatrolSummaryQueryType.class)){
-//			return createSummaryQuery();
+		}else if (querytype.getClass().equals(SurveySummaryQueryType.class)){
+			return createSummaryQuery();
 		}
 		return null;
 	}
@@ -117,20 +117,20 @@ public class SurveyQueryFactory {
 //	}
 //	
 //	
-//	public static PatrolGriddedQuery createGriddedQuery(){
-//		PatrolGriddedQuery query = new PatrolGriddedQuery();
-//		initQuery(query, Messages.GriddedQuery_DefaultQueryName);
-//		query.setConservationAreaFilter(new ConservationAreaFilter(true));
-//		query.setDateFilter(null);
-//		return query;
-//	}
-//	
-//	public static PatrolSummaryQuery createSummaryQuery(){
-//		PatrolSummaryQuery query = new PatrolSummaryQuery();
-//		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
-//		
-//		query.setConservationAreaFilter(new ConservationAreaFilter(true));
-//		query.setDateFilter(null);
-//		return query;
-//	}
+	public static SurveyGriddedQuery createGriddedQuery(){
+		SurveyGriddedQuery query = new SurveyGriddedQuery();
+		initQuery(query, null);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setDateFilter(null);
+		return query;
+	}
+	
+	public static SurveySummaryQuery createSummaryQuery(){
+		SurveySummaryQuery query = new SurveySummaryQuery();
+		initQuery(query, null);
+		
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setDateFilter(null);
+		return query;
+	}
 }

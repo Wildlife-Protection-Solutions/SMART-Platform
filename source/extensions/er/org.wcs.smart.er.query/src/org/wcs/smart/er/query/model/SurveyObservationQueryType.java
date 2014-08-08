@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
@@ -35,7 +37,8 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
-import org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -102,9 +105,9 @@ public class SurveyObservationQueryType implements IQueryType {
 			List<IDefinitionPanel> components) {
 		SurveyObservationQuery squery = (SurveyObservationQuery)query;
 		for (IDefinitionPanel panel : components){
-			if (panel.getId().equals(SurveyFilterDefintionPanel.ID)){
-				squery.setSurveyDesign(  ((SurveyFilterDefintionPanel)panel).getSurveyDesign()  );
-				squery.setQueryFilter(  ((SurveyFilterDefintionPanel)panel).getQueryPart()  );
+			if (panel.getId().equals(FilterDefintionPanel.ID)){
+				squery.setSurveyDesign(  ((FilterDefintionPanel)panel).getSurveyDesign()  );
+				squery.setQueryFilter(  ((FilterDefintionPanel)panel).getQueryPart()  );
 			}else if (panel.getId().equals(ConservationAreaFilterPanel.ID)){
 				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter() );
 			}
@@ -121,7 +124,7 @@ public class SurveyObservationQueryType implements IQueryType {
 				return msg;
 			}
 			
-			if (panel.getId().equals(SurveyFilterDefintionPanel.ID)){
+			if (panel.getId().equals(FilterDefintionPanel.ID)){
 				filter = panel.getQueryPart();
 			}	
 		}
@@ -148,8 +151,8 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public URL getDescription() {
-		// TODO Auto-generated method stub
-		return null;
+		IPath path = new Path("src/org/wcs/smart/er/query/model/types/surveyobservation.html"); //$NON-NLS-1$
+		return QueryPlugIn.findHelpURL(path, ERQueryPlugIn.getDefault().getBundle());
 	}
 	
 	/**

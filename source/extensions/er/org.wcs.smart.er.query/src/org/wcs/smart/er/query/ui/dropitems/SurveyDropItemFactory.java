@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -38,9 +39,11 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel;
-import org.wcs.smart.er.query.ui.filter.SurveyFilterItemPanel;
-import org.wcs.smart.er.query.ui.filter.SurveyItemContentProvider;
+import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
+import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider;
+import org.wcs.smart.er.query.ui.panels.item.FilterItemPanel;
+import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
+import org.wcs.smart.er.query.ui.panels.item.GroupByValueItemPanel;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
@@ -95,38 +98,79 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		} else if (source instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 		}else if (source instanceof Area){
-			if (queryItemPanelId.equals(SurveyFilterItemPanel.ID)){
+			if (queryItemPanelId.equals(FilterItemPanel.ID)){
 				items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
+				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
+				
+//				if (items != null){
+//				for (int i = 0; i < items.length; i ++){
+//					if (items[i] instanceof AbstractValueDropItem){
+//						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+//					}
+//				}
+//			}
 			}
-//		}else if (source instanceof AreaType){
-//			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
-//				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
+		}else if (source instanceof AreaType){
+			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
+				
+//				if (items != null){
+//				for (int i = 0; i < items.length; i ++){
+//					if (items[i] instanceof AbstractValueDropItem){
+//						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+//					}
+//				}
 //			}
-//		}else if (source instanceof Area){
-//			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
-//				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
-//			}
+			}
+
 //		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
 //			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ||
 //					queryItemPanelId.equals(GriddedFilterPanel.ID)){
 //				items = new DropItem[]{createCategoryValueDropItem(null)};
 //			}
-		}else if (source == SurveyItemContentProvider.Node.SURVEY_ID){
+		}else if (source == FilterContentProvider.Node.SURVEY_ID){
 			items = new DropItem[]{createSurveyIdDropItem()};
-		}else if (source == SurveyItemContentProvider.Node.MISSION_ID){
+		}else if (source == FilterContentProvider.Node.MISSION_ID){
 			items = new DropItem[]{createMissionIdDropItem()};
 		}else if (source instanceof Survey){
 			items = new DropItem[]{createSurveyUuidIdDropItem((Survey)source)};
 		}else if (source instanceof Mission){
 			items = new DropItem[]{createMissionUuidIdDropItem((Mission)source)};
+			
 		}else if (source instanceof MissionAttribute){
-			items = new DropItem[]{createMissionAttributeDropItem((MissionAttribute)source)};
+			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+				items = new DropItem[]{createMissionAttributeDropItem((MissionAttribute)source)};
+			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
+				items = new DropItem[]{createMissionAttributeGroupByDropItem((MissionAttribute)source)};
+			}
+			
 		}else if (source instanceof MissionProperty){
-			items = new DropItem[]{createMissionAttributeDropItem(((MissionProperty)source).getAttribute())};
+			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+				items = new DropItem[]{createMissionAttributeDropItem(((MissionProperty)source).getAttribute())};
+			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
+				items = new DropItem[]{createMissionAttributeGroupByDropItem(((MissionProperty)source).getAttribute())};
+			}
+		}else if (source == SurveyGroupByContentProvider.Node.MISSION_ID){
+			items = new DropItem[]{createMissionIdGroupByDropItem()};
+		}else if (source == SurveyGroupByContentProvider.Node.SURVEY_ID){
+			items = new DropItem[]{createSurveyIdGroupByDropItem()};
 		}
 		return items;	
 	}
 
+	public DropItem createMissionAttributeGroupByDropItem(MissionAttribute attribute){
+		return new MissionAttributeGroupByDropItem(attribute);
+	}
+	
+	public DropItem createSurveyIdGroupByDropItem(){
+		return new SurveyIdGroupByDropItem();
+	}
+	
+	public DropItem createMissionIdGroupByDropItem(){
+		return new MissionIdGroupByDropItem();
+	}
+	
 	public DropItem createMissionAttributeDropItem(MissionAttribute ma) {
 		return new MissionAttributeDropItem(ma);
 	}
@@ -308,7 +352,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		if (proxy.getQuery() instanceof SimpleQuery){
 			
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-			proxy.setDropItems(SurveyFilterDefintionPanel.ID, asDropItems(queryFilter, session));
+			proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(queryFilter, session));
 					
 //		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
 //			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();

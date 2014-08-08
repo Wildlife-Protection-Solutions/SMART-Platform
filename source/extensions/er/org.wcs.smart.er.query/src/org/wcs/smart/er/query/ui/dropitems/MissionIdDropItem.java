@@ -83,6 +83,7 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 			if (value.isDisposed() || design == null){
 				return Status.OK_STATUS;
 			}
+			final String lCurrentValue = currentValue;
 			
 			final List<String> data = new ArrayList<String>();
 			Session s = HibernateManager.openSession();
@@ -105,7 +106,11 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 					value.removeAll();
 					for (String id : data){
 						value.add(id);
-					}		
+					}
+					if (lCurrentValue != null){
+						value.setText(lCurrentValue);
+						currentValue = lCurrentValue;
+					}
 				}});
 			return Status.OK_STATUS;
 		}};

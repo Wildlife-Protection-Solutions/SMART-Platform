@@ -19,8 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.filter;
+package org.wcs.smart.er.query.ui.panels.item;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,7 +34,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.Survey;
@@ -46,20 +48,17 @@ import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNode;
 
 /**
- * Content provider for the survey filter items tree node.
- * 
+ * Content provider for survey group by options.
  * @author Emily
  *
  */
-public class SurveyItemContentProvider implements ITreeContentProvider{
+public class SurveyGroupByContentProvider implements ITreeContentProvider{
 
 	private SurveyDesign design;
 	
 	private List<MissionAttribute> allMissionAttributes = null;
-	private List<Survey> allSurveys = null;
 	
 	private boolean triedMission = false;
-	private boolean triedSurveys = false;
 	
 	private Viewer viewer;
 	
@@ -79,6 +78,7 @@ public class SurveyItemContentProvider implements ITreeContentProvider{
 				}else{
 					allMissionAttributes = s.createCriteria(MissionAttribute.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+							.add(Restrictions.eq("type", Attribute.AttributeType.LIST)) //$NON-NLS-1$
 							.list();
 				}
 			}finally{
@@ -94,42 +94,14 @@ public class SurveyItemContentProvider implements ITreeContentProvider{
 			return Status.OK_STATUS;
 		}
 	};
-	@SuppressWarnings("unchecked")
-	private Job loadSurveyJob = new Job(Messages.SurveyItemContentProvider_LoadSurveyJobName){
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				if (design != null){
-					allSurveys = s.createCriteria(Survey.class)
-							.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
-					for (Survey survey : allSurveys){
-						for (Mission m : survey.getMissions()){
-							m.getId();	
-						}
-					}
-				}else{
-					allSurveys = null;
-				}
-			}finally{
-				s.close();
-			}
-			
-			Display.getDefault().asyncExec(new Runnable(){
-				@Override
-				public void run() {
-					((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SURVEY_MISSION), Node.SURVEY_MISSION));
-					
-				}});
-			return Status.OK_STATUS;
-		}
-	};
+	
 	
 	public enum Node{
-		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
-		SURVEY_ID(Messages.SurveyItemContentProvider_SurveyIdLabel),
-		MISSION_ID(Messages.SurveyItemContentProvider_MissionIDLabel),
-		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel);
+		SURVEY_ID("Survey Id"),
+		MISSION_ID("Mission Id"),
+		MISSION_PROP("Mission Properties"),
+		SAMPLING_UNITS("Sampling Units"),
+		STRATA("Strata");
 		
 		public String guiName;
 		
@@ -153,42 +125,30 @@ public class SurveyItemContentProvider implements ITreeContentProvider{
 			this.design = null;
 		}
 		triedMission = false;
-		triedSurveys = false;
 		allMissionAttributes = null;
-		allSurveys = null;
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (this.design != null){
-			return Node.values();
-		}else{
-			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP};
-		}
+		return Node.values();
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement == Node.SURVEY_MISSION){
-			if (design != null){
-				if (allSurveys != null){
-					return allSurveys.toArray();
-				}else{
-					if (triedSurveys){
-						return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
-					}else{
-						triedSurveys = true;
-						loadSurveyJob.schedule();
-						return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
-					}
-				}
-			}
-		}else if (parentElement == Node.MISSION_ID){
+		if (parentElement == Node.MISSION_ID){
+			return null;
+		}else if (parentElement == Node.SURVEY_ID){
 			return null;
 		}else if (parentElement == Node.MISSION_PROP){
 			if (design != null){
 				try{
-					return design.getMissionProperties().toArray();
+					List<MissionProperty> numerics = new ArrayList<MissionProperty>();
+					for (MissionProperty mp : design.getMissionProperties()){
+						if (mp.getAttribute().getType() == AttributeType.LIST){
+							numerics.add(mp);
+						}
+					}
+					return numerics.toArray();
 				}catch (Exception ex){
 					if (triedMission){
 						ERQueryPlugIn.log(ex.getMessage(), ex);
@@ -231,15 +191,10 @@ public class SurveyItemContentProvider implements ITreeContentProvider{
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element == Node.SURVEY_MISSION ||
-				element == Node.MISSION_PROP ||
-				element instanceof Survey){
+		if (element == Node.MISSION_PROP){
 			return true;
 		}
 		return false;
 	}
 
-	
-
-	
 }

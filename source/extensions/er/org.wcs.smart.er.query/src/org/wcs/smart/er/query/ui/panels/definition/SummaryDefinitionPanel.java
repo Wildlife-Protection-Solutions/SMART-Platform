@@ -1,0 +1,188 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.er.query.ui.panels.definition;
+
+import java.text.MessageFormat;
+
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
+import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
+import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.ui.definition.AbstractSummaryGroupByValuePanel;
+import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
+import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
+import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
+import org.wcs.smart.query.ui.model.DropItem;
+
+/**
+ * Summary patrol query definition panel. This panel allows
+ * users to specify row, column group by and values to compute.
+ * 
+ * @author Emily
+ *
+ */
+public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
+	implements ISurveyPanel {
+
+	public static final String ID = "org.wcs.smart.query.er.survey.definition.summary"; //$NON-NLS-1$
+	
+//	private Link surveyDesignLabel;
+	private SurveyDesign currentDesign;
+	
+	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
+	
+	
+	public SummaryDefinitionPanel() {
+		super();
+		
+		listener = new DefinitionListener(this);
+		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(listener);
+	}
+
+	@Override
+	public void dispose(){
+		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(listener);
+		super.dispose();
+		
+	}
+	
+	@Override
+	public String getId() {
+		return ID;
+	}
+
+	@Override
+	public String getGuiName() {
+		return "Group By and Values";
+	}
+
+	@Override
+	public void addItem(DropItem item) {
+		if (item instanceof ISurveyDesignDropItem) {
+			((ISurveyDesignDropItem) item).setSurveyDesign(currentDesign);
+		}
+		super.addItem(item);
+	}
+
+	@Override
+	public String validate() {
+		//update the simple value rate filter panel
+//		((SimpleValueRateFilterPanel)currentQuery.getQueryDefinitionPanel().findQueryDefinitionPanel(SimpleValueRateFilterPanel.ID)).updateFilterPanel(hasRate());
+		
+		String error = super.lstColumnGroupBy.validate();
+		if (error != null) return error;
+		
+		
+		error = super.lstRowGroupBy.validate();
+		if (error != null) return error;
+		
+		error = super.lstValues.validate();
+		if (error != null) return error;
+		
+		return null;
+	}
+
+	
+	@Override
+	public String getQueryPart() {
+		return  lstValues.getQueryPart() + "|" + lstRowGroupBy.getQueryPart() + "|" + lstColumnGroupBy.getQueryPart(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+
+	@Override
+	public ListDefinitionPanel createListDropTargetPanel(final ListTargetType type) {
+		boolean unique = (type == ListTargetType.COLUMN || type == ListTargetType.ROW);
+		
+		return new ListDefinitionPanel(unique) {
+			
+			@Override
+			public String validate() {
+				if (type == ListTargetType.VALUE){
+					if (super.items.size() == 0){
+						return "At least one value must be selected.";
+					}
+				}
+				return null;
+			}
+						
+			@Override
+			public String getId() {
+				return ID + "." + type.name(); //$NON-NLS-1$
+			}
+			
+			@Override
+			public String getGuiName() {
+				return MessageFormat.format ("Group By {0}", new Object[]{type.name()});
+			}
+		};
+	}
+	
+	/**
+	 * 
+	 * @return true if one of the values has an encounter rate
+	 */
+	public boolean hasRate(){
+//		for (DropItem it : lstValues.getItems()){
+//			if (it instanceof AbstractValueDropItem && ((AbstractValueDropItem)it).hasEncounterRatio()){
+//				return true;
+//			}
+//		}
+//		return false;
+		return false;
+	}
+
+	
+	@Override
+	public void refreshPanel(SurveyDesign newDesign) {
+		this.currentDesign = newDesign;
+//		updateDesignLabel();
+				
+		
+		for (DropItem di : super.lstValues.getItems()) {
+			if (di instanceof ISurveyDesignDropItem) {
+				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
+			}
+		}
+		for (DropItem di : super.lstColumnGroupBy.getItems()) {
+			if (di instanceof ISurveyDesignDropItem) {
+				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
+			}
+		}
+		for (DropItem di : super.lstRowGroupBy.getItems()) {
+			if (di instanceof ISurveyDesignDropItem) {
+				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
+			}
+		}
+		
+		//update associated item panel
+		IQueryItemPanel pnl = DefinitionPanelManager.getInstance().getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+		if (pnl instanceof ISurveyPanel){
+			((ISurveyPanel) pnl).refreshPanel(currentDesign);
+		}
+	}
+
+	@Override
+	public Query getQuery() {
+		return currentQuery.getQuery();
+	}
+}

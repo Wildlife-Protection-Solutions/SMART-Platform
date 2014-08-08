@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.filter;
+package org.wcs.smart.er.query.ui.panels.definition;
 
 import java.util.Collection;
 
@@ -33,13 +33,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
-import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
+import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
+import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 
 /**
@@ -49,19 +52,30 @@ import org.wcs.smart.query.ui.model.DropItem;
  * @author Emily
  * 
  */
-public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
+public class FilterDefintionPanel extends BasicFilterDefintionPanel implements ISurveyPanel{
 
 	public static final String ID = "org.wcs.smart.query.er.survey.definition.filter"; //$NON-NLS-1$
 
 	private Link surveyDesignLabel;
-	private IQueryType currentType;
 	private SurveyDesign currentDesign;
 
+	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
+	
 	/**
 	 * Creates a new drop target panel.
 	 * 
 	 */
-	public SurveyFilterDefintionPanel() {
+	public FilterDefintionPanel() {
+		super();
+		listener = new DefinitionListener(this);
+		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(listener);
+	}
+
+	@Override
+	public void dispose(){
+		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(listener);
+		super.dispose();
+		
 	}
 
 	/**
@@ -114,12 +128,12 @@ public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
 
 	@Override
 	public void initItems(QueryProxy q) {
-		this.currentType = q.getQuery().getType();
-		SurveyObservationQuery sq = (SurveyObservationQuery) q.getQuery();
-		currentDesign = sq.getSurveyDesignAsObject();
-		updateDesignLabel();
 		super.initItems(q);
-		surveyDesignModified();
+		
+		if (q.getQuery() instanceof ISurveyQuery){
+			ISurveyQuery sq = (ISurveyQuery) q.getQuery();
+			refreshPanel(sq.getSurveyDesignAsObject());
+		}
 	}
 
 	private void updateDesignLabel() {
@@ -167,31 +181,38 @@ public class SurveyFilterDefintionPanel extends BasicFilterDefintionPanel {
 					if ((currentDesign == null && newDesign != null)
 							|| (currentDesign != null && !currentDesign
 									.equals(newDesign))) {
-						currentDesign = newDesign;
-						updateDesignLabel();
-						surveyDesignModified();
+						SurveyQueryEventManager.getInstance().fireSurveyDesignChange(newDesign, currentQuery.getQuery());
+						fireQueryChangedListeners();
 					}
 				}
 			}
 		});
+		updateDesignLabel();
 	}
 
-	/*
-	 * Called when the survey design associated with the query has been
-	 * modified. This needs to refresh the survey filter item panel
-	 */
-	private void surveyDesignModified() {
-		((SurveyFilterItemPanel) DefinitionPanelManager.getInstance()
-				.getQueryItemPanel(getId(), currentType))
-				.refreshPanel(currentDesign);
 
+
+	@Override
+	public void refreshPanel(SurveyDesign newDesign) {
+		this.currentDesign = newDesign;
+		
+		updateDesignLabel();
+		
 		for (DropItem di : super.items) {
 			if (di instanceof ISurveyDesignDropItem) {
 				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
 			}
 		}
+		
+		IQueryItemPanel pnl = DefinitionPanelManager.getInstance().getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+		if (pnl instanceof ISurveyPanel){
+			((ISurveyPanel) pnl).refreshPanel(currentDesign);
+		}
+	}
 
-		super.fireQueryChangedListeners();
+	@Override
+	public Query getQuery() {
+		return currentQuery.getQuery();
 	}
 
 }
