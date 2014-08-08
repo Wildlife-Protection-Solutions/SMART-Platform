@@ -42,7 +42,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class CaFieldSurveyHibernateManager implements IFieldSurveyHibernateManager{
+public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	
 	/**

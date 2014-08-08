@@ -28,7 +28,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignListFilter;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
-public interface IFieldSurveyHibernateManager {
+public interface ISurveyHibernateManager {
 
 	/**
 	 * Gets all sampling units for a conservation area and survey.

@@ -23,16 +23,16 @@ package org.wcs.smart.er.hibernate;
 
 import org.wcs.smart.hibernate.SmartDB;
 
-public class FieldSurveyHibernateManager {
+public class SurveyHibernateManager {
 
-	private static IFieldSurveyHibernateManager instance;
+	private static ISurveyHibernateManager instance;
 	
-	public static IFieldSurveyHibernateManager getInstance(){
+	public static ISurveyHibernateManager getInstance(){
 		if (instance == null){
 			if (SmartDB.isMultipleAnalysis()){
-				instance = new CcaaFieldSurveyHibernateManager();
+				instance = new CcaaSurveyHibernateManager();
 			}else{
-				instance = new CaFieldSurveyHibernateManager();
+				instance = new CaSurveyHibernateManager();
 			}
 		}
 		return instance;
