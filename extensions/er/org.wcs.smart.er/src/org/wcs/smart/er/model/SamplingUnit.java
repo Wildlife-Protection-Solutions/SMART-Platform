@@ -33,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.util.GeometryUtils;
@@ -59,17 +60,23 @@ public class SamplingUnit extends UuidItem {
 	 *
 	 */
 	public enum SamplingUnitType{
-		STRIP_TRANSECT ("Strip Transect"),
-		OPEN_TRANSECT("Open Transect"),
-		PLOT ("Plot");
+		STRIP_TRANSECT ("Strip Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
+		OPEN_TRANSECT("Open Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
+		PLOT ("Plot", EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON);
 		
 		private String guiName;
+		private String imageKey;
 		
-		private SamplingUnitType(String gui){
+		private SamplingUnitType(String gui, String imageKey){
 			this.guiName = gui;
+			this.imageKey = imageKey;
 		}
 		public String getGuiName(){
 			return this.guiName;
+		}
+		
+		public Image getImage(){
+			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(imageKey);
 		}
 	}
 

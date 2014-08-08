@@ -67,6 +67,8 @@ public class MissionTrack extends UuidItem{
 	private LineString ls;
 	private Date trackDate;
 	
+	private String id;
+	
 	private SamplingUnit unit;
 	
 	public MissionTrack(){	
@@ -128,6 +130,15 @@ public class MissionTrack extends UuidItem{
 	
 	public void setDate(Date trackDate){
 		this.trackDate = trackDate;
+	}
+	
+	@Column(name="id")
+	public String getId(){
+		return this.id;
+	}
+	
+	public void setId(String id){
+		this.id = id;
 	}
 	
 	@Transient
