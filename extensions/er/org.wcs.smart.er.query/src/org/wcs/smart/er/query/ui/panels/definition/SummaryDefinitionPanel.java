@@ -23,7 +23,17 @@ package org.wcs.smart.er.query.ui.panels.definition;
 
 import java.text.MessageFormat;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
@@ -46,7 +56,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 
 	public static final String ID = "org.wcs.smart.query.er.survey.definition.summary"; //$NON-NLS-1$
 	
-//	private Link surveyDesignLabel;
+	private Link surveyDesignLabel;
 	private SurveyDesign currentDesign;
 	
 	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
@@ -137,6 +147,53 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 		};
 	}
 	
+	@Override
+	protected void createValuesHeader(Composite rightInner){
+		Composite c = new Composite(rightInner, SWT.NONE);
+		GridLayout gl = new GridLayout(3, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		c.setLayout(gl);
+		
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		super.createValuesHeader(c);
+		
+		final Composite parent = new Composite(c, SWT.NONE);
+		gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		parent.setLayout(gl);
+		parent.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText("Survey Design:");
+		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		
+		surveyDesignLabel = new Link(parent, SWT.NONE);
+		surveyDesignLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		surveyDesignLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		surveyDesignLabel.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SurveyDesignDialog dialog = new SurveyDesignDialog(parent.getShell());
+				if (dialog.open() == SurveyDesignDialog.OK) {
+					// update query
+					SurveyDesign newDesign = dialog.getSelectedDesign();
+					if ((currentDesign == null && newDesign != null)
+							|| (currentDesign != null && !currentDesign
+									.equals(newDesign))) {
+						
+						SurveyQueryEventManager.getInstance().fireSurveyDesignChange(newDesign, getQuery());
+						fireQueryChangedListeners();
+					}
+				}
+			}
+		});
+		
+		updateDesignLabel();
+	}
+	
 	/**
 	 * 
 	 * @return true if one of the values has an encounter rate
@@ -151,11 +208,19 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 		return false;
 	}
 
+	private void updateDesignLabel() {
+		String text = "All";
+		if (currentDesign != null) {
+			text = currentDesign.getName();
+		}
+		surveyDesignLabel.setText("<a>" + text + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		surveyDesignLabel.getParent().getParent().layout(true);
+	}
 	
 	@Override
 	public void refreshPanel(SurveyDesign newDesign) {
 		this.currentDesign = newDesign;
-//		updateDesignLabel();
+		updateDesignLabel();
 				
 		
 		for (DropItem di : super.lstValues.getItems()) {

@@ -51,7 +51,13 @@ public class SurveyDesignFilter implements IFilter {
 		this.surveyDesignKey = key;
 	}
 	
-	
+	/**
+	 * 
+	 * @return the survey design key represented by the filter
+	 */
+	public String getKey(){
+		return this.surveyDesignKey;
+	}
 	/**
 	 * @see org.wcs.smart.patrol.query.parser.filter.IFilter#asString()
 	 */

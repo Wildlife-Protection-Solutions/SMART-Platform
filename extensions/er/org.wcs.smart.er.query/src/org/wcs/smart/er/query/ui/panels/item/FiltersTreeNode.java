@@ -30,6 +30,8 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
@@ -70,6 +72,10 @@ public class FiltersTreeNode implements IItemTreeNode{
 					return ((Survey)element).getId();
 				}else if (element instanceof Mission){
 					return ((Mission)element).getId();
+				}else if (element instanceof SamplingUnit){
+					return ((SamplingUnit) element).getId();
+				}else if (element instanceof MissionTrack){
+					return ((MissionTrack) element).getId();
 				}
 				return super.getText(element);
 			}
@@ -86,7 +92,15 @@ public class FiltersTreeNode implements IItemTreeNode{
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
 					}else if (node == Node.SURVEY_MISSION){
 						return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.ALL_SURVEY_ICON);
+					}else if (node == Node.SAMPLING_UNITS){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ICON);
 					}
+				}
+				if (element instanceof SamplingUnit){
+					return ((SamplingUnit) element).getType().getImage();
+				}
+				if (element instanceof MissionTrack){
+					return SamplingUnit.SamplingUnitType.OPEN_TRANSECT.getImage();
 				}
 				if (element instanceof MissionProperty){
 					element = ((MissionProperty) element).getAttribute();

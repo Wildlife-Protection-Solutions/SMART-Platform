@@ -30,13 +30,17 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SurveyFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -87,6 +91,10 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return asSql((MissionPropertyFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(SurveyDesign.class));
+		}else if (filter instanceof SamplingUnitFilter){
+			return asSql((SamplingUnitFilter)filter, engine);
+		}else if (filter instanceof SurveyDesignFilter){
+			return asSql((SurveyDesignFilter)filter, engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
@@ -125,6 +133,13 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
 		return super.asSql(filter, engine);
+	}
+	
+	/*
+	 * Survey design filter
+	 */
+	protected String asSql(SurveyDesignFilter filter, IQueryEngine engine) throws SQLException{
+		return engine.tablePrefix(SurveyDesign.class) + ".keyId = '" + filter.getKey() + "'";
 	}
 	
 	
@@ -168,6 +183,18 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return x;
 		}else if (filter.getType() == SurveyFilter.Type.UUID){
 			return engine.tablePrefix(Survey.class) + ".uuid = x'" + filter.getValue() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	/*
+	 * Sampling unit filter
+	 */
+	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{
+		if (filter.getType() == Type.SAMPLINGUNIT){
+			return engine.tablePrefix(SamplingUnit.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		}else if (filter.getType() == Type.TRACK){
+			return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		return ""; //$NON-NLS-1$
 	}
