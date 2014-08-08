@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
@@ -76,16 +77,17 @@ public abstract class QueryResultsTable {
 	}
 	
 	public void clearColumns(){
+		if(table.getTable().isDisposed()) return;
+		
 		table.getTable().setRedraw(false);
-		for (QueryTableViewerColumn column : tableViewerColumns){
-			column.getTableColumn().getColumn().dispose();
+		for (TableColumn tc : table.getTable().getColumns()){
+			tc.dispose();
 		}
 		tableViewerColumns = null;
 		if (getColumnSorter() != null){
 			getColumnSorter().setSortColumn(null);
 		}
 		table.getTable().setRedraw(true);
-		
 	}
 	
 	
@@ -104,7 +106,8 @@ public abstract class QueryResultsTable {
 						if (table.getTable().isDisposed()){
 							return;
 						}
-						tableViewerColumns = createColumns(table,query.getQueryColumns());
+						List<QueryColumn> cols = query.getQueryColumns();
+						tableViewerColumns = createColumns(table,cols);
 						table.refresh(true);
 					}
 				});

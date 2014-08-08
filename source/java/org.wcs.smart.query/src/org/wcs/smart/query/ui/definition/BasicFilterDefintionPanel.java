@@ -79,7 +79,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	private ProxyItem proxy = null;	//drag proxy item
 
 	protected ArrayList<DropItem> items = new ArrayList<DropItem>();	//list of controls in formula
-	private QueryProxy currentQuery = null;
+	protected QueryProxy currentQuery = null;
 	
 	private TreeDropDownViewer treeEditor = null;
 	private Set<IDefinitionPanel> targetPanels;

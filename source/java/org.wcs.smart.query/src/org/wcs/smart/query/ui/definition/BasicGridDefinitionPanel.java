@@ -209,6 +209,21 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		lstValues.redraw();
 	}
 
+	/**
+	 * Creates the grid definition panel.  
+	 * 
+	 * @param outer
+	 */
+	protected void createGridDefinitionPanel(Composite outer){
+		Composite leftMain = new Composite(outer, SWT.NONE);
+		leftMain.setLayout(new GridLayout(3, false));
+		leftMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		leftMain.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		
+		createProjection(leftMain);
+		createGridSize(leftMain);
+		createOrigin(leftMain);
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#createComposite(org.eclipse.swt.widgets.Composite)
@@ -241,16 +256,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		Label lblSep = new Label(leftInner, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lblSep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		
-		Composite leftMain = new Composite(left, SWT.NONE);
-		leftMain.setLayout(new GridLayout(3, false));
-		leftMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		leftMain.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		
-		createProjection(leftMain);
-		createGridSize(leftMain);
-		createOrigin(leftMain);
-		
+		createGridDefinitionPanel(left);
 		
 		Composite right = new Composite(main, SWT.BORDER);
 		GridLayout rgl = new GridLayout(2, false);
@@ -356,7 +362,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		return main;
 	}
 
-	private void createOrigin(Composite parent){
+	protected void createOrigin(Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.GriddedValuePanel_GridOriginLabel);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -369,7 +375,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		
 	}
 	
-	private void createGridSize(Composite parent){
+	protected void createGridSize(Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.GriddedValuePanel_GridSizeLabel);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -396,7 +402,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		
 		
 	}
-	private void createProjection(Composite parent){
+	protected void createProjection(Composite parent){
 		
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.GriddedValuePanel_ProjectionsLabel);
