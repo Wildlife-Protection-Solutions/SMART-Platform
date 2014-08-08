@@ -127,6 +127,8 @@ public class MandateComboBoxCellEditor extends CellEditor {
 		populateComboBoxItems();
 	}
 
+	//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=230398#c2
+	private int lastArrow = -1;
 	/*
 	 * (non-Javadoc) Method declared on CellEditor.
 	 */
@@ -140,17 +142,25 @@ public class MandateComboBoxCellEditor extends CellEditor {
 		comboBox.addKeyListener(new KeyAdapter() {
 			// hook key pressed - see PR 14201
 			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.ARROW_UP || e.keyCode== SWT.ARROW_DOWN){
+					lastArrow = e.time;
+				}
 				keyReleaseOccured(e);
 			}
 		});
 
 		comboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				applyEditorValueAndDeactivate();
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
-				selection = comboBox.getSelectionIndex();
+				if (lastArrow != event.time){
+					applyEditorValueAndDeactivate();
+				}
+				
 			}
 		});
 
@@ -162,7 +172,6 @@ public class MandateComboBoxCellEditor extends CellEditor {
 				}
 			}
 		});
-
 		comboBox.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				MandateComboBoxCellEditor.this.focusLost();
