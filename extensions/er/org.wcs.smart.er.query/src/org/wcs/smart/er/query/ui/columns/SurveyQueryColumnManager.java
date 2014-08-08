@@ -46,6 +46,7 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -226,7 +227,20 @@ public class SurveyQueryColumnManager {
 			}
 		}
 		return dataModelColumns;
-		
+	}
+	
+	
+	/**
+	 * Columns for gridded query.
+	 * @return
+	 */
+	public QueryColumn[] getGridColumns() {
+		QueryColumn[] tmp = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
+		for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
+			GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
+			tmp[i] = new GridQueryColumn(item); 
+		}
+		return tmp;
 	}
 
 	/**

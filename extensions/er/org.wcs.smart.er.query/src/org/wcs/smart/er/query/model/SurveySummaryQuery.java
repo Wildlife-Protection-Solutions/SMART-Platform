@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,66 +37,91 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.engine.DerbyObservationEngine;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.internal.parser.Parser;
-import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.ObservationQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
 /**
- * Survey observation query.
+ * A class to represent a summary query.
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
 @Entity
-@Table(name="smart.survey_observation_query")
-public class SurveyObservationQuery extends ObservationQuery implements ISurveyQuery{
+@Table(name="smart.survey_summary_query")
+public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 
 	protected String surveyDesignKey;
 	
 	protected SurveyDesign surveyDesign;
 	
-	
 	private Object LOCK = new Object();
-
+	
+	/**
+	 * Parse the string format of the query
+	 * into the filter format.
+	 * @return 
+	 */
 	@Transient
-	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
-		
-		Session lsession = session;
-		if (session == null){
-			lsession = HibernateManager.openSession();
-			lsession.beginTransaction();
-		}
-		try {
-			DerbyObservationEngine engine = new DerbyObservationEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
-			return lastResult;
-		} finally {
-			if (session == null && lsession.isOpen()){
-				lsession.getTransaction().commit();
-				lsession.close();
-			}
-		}
-		
+	protected SumQueryDefinition parseQuery() throws Exception {
+		//TODO:
+//		if (getQuery() == null || getQuery().length() == 0){
+			return null;
+//		}
+//		InputStream is = new ByteArrayInputStream(getQuery().getBytes());
+//		Parser parser = new Parser(is);
+//		SumQueryDefinition myQuery = parser.SumQuery();
+//		is.close();
+//		return myQuery;
+	}
+
+
+	/**
+	 * @see org.wcs.smart.query.model.Query#getType()
+	 */
+	@Override
+	@Transient
+	public IQueryType getType() {
+		return QueryTypeManager.getInstance().findQueryType(SurveySummaryQueryType.KEY);
+	}
+	
+	@Transient
+	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+//		Session lsession = session;
+//		if (session == null){
+//			lsession = HibernateManager.openSession();
+//			lsession.beginTransaction();
+//		}
+//		try{
+//			DerbySummaryEngine engine = new DerbySummaryEngine();
+//			SummaryQueryResult lastResults = engine.executeQuery(this, lsession, monitor);
+//			return lastResults;
+//		}finally{
+//			if (session == null && lsession.isOpen()){
+//				lsession.getTransaction().commit();
+//				lsession.close();
+//			}
+//		}
+		//TODO:
+		return null;
 	}
 	
 	/**
+	 * Creates a copy of the summary query
+	 * with a null uuid, and null id;
+	 * 
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
 	@Transient
-	@Override
-	public SurveyObservationQuery clone(){
-		SurveyObservationQuery q = new SurveyObservationQuery();
+	public SurveySummaryQuery clone(){
+		SurveySummaryQuery q = SurveyQueryFactory.createSummaryQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());
@@ -106,49 +129,63 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		q.setConservationAreaFilter(getConservationAreaFilter());
 		q.setDateFilter(getDateFilter());
 		q.setOwner(SmartDB.getCurrentEmployee());
-		q.setQueryFilter(getQueryFilter());
-		q.setVisibleColumns(getVisibleColumns());
-		
-		q.setSurveyDesign(getSurveyDesign());
+		q.setQuery(getQuery());
 		return q;
 	}
+	
 	/**
-	 * @see org.wcs.smart.query.model.Query#getType()
+	 * Validates the query parts.  Assumes the query
+	 * definition is formed from a valid string.
+	 * <p>
+	 * This validates the items in the query.
+	 * </p>
+	 * 
+	 * @param def the summary query definition
+	 * @return error string or null if query validates okay
 	 */
-	@Override
-	@Transient
-	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY);
-	}
-	
-	@Override
-	protected void initQueryColumns() {
-		synchronized (LOCK) {
-			this.queryColumns = new ArrayList<QueryColumn>();
-			for (QueryColumn q : SurveyQueryColumnManager.getInstance().getObservationQueryColumns(getSurveyDesignAsObject())){
-				queryColumns.add(q);
-			}	
+	public static String validateQueryParts(SumQueryDefinition def){
+		List<IGroupBy> groupBys = new ArrayList<IGroupBy>();
+		if (def.getRowGroupByPart() != null){
+			groupBys.addAll(def.getRowGroupByPart().getGroupBys());
 		}
-	}
-	
-	
-	@Override
-	protected QueryFilter parseQueryFilter() throws Exception {
-		if (strQueryFilter == null || strQueryFilter.length() == 0){
-			return new QueryFilter(EmptyFilter.INSTANCE);
+		if (def.getColumnGroupByPart().getGroupBys() != null){
+			groupBys.addAll(def.getColumnGroupByPart().getGroupBys());
 		}
-		if(queryFilter != null){
-			return queryFilter;
-		}
-		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
-		Parser parser = new Parser(is);
-		QueryFilter myQuery = parser.QueryFilter();
-		is.close();
-		queryFilter = myQuery;
-		return myQuery;
+		
+//		for (IValueItem valueIt : def.getValuePart().getValueItems()){
+//			if (valueIt instanceof PatrolValueItem){
+//				PatrolValueItem pIt = (PatrolValueItem) valueIt;
+//				if (pIt.getOption() == PatrolValueOption.NUM_NIGHTS){
+//					//cannot group by patrol leader, patrol memeber, time period, or transport
+//					for (IGroupBy groupBy : groupBys){
+//						if (groupBy instanceof CategoryGroupBy ){
+//							return MessageFormat.format(
+//									Messages.SummaryQuery_CannotGroupByCategory, new Object[]{pIt.getOption().getGuiName()});
+//									
+//						}else if (groupBy instanceof AttributeGroupBy){
+//							return MessageFormat.format(
+//									Messages.SummaryQuery_CannotGroupByAttribute, new Object[]{pIt.getOption().getGuiName()});
+//						}
+//					}
+//				}else if (pIt.getOption() == PatrolValueOption.MAN_DAYS ||
+//						pIt.getOption() == PatrolValueOption.MAN_HOURS || 
+//						pIt.getOption() == PatrolValueOption.NUM_MEMBERS ){
+//					
+//					for (IGroupBy groupBy : groupBys){
+//						if (groupBy instanceof PatrolGroupBy){
+//							if (((PatrolGroupBy)groupBy).getOption() == PatrolQueryOption.EMPLOYEE){
+//								return MessageFormat.format(
+//										Messages.SummaryQuery_GroupByError3 , new Object[]{pIt.getOption().getGuiName(), ((PatrolGroupBy)groupBy).getOption().getGuiName()});
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+		return null;
 	}
-	
-	
+
+
 	/**
 	 * Sets the query string.  At this point the
 	 * filter is not parsed.
@@ -158,11 +195,7 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 	 */
 	public void setSurveyDesign(String key){
 		this.surveyDesignKey = key;
-		this.surveyDesign = null;
-		synchronized (LOCK) {
-			this.queryColumns = null;	
-		}
-		
+		this.surveyDesign = null;		
 	}
 	
 	/**
@@ -220,4 +253,5 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		}
 		return surveyDesign;
 	}
+	
 }

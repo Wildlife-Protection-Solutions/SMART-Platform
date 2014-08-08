@@ -16,12 +16,44 @@
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
          </DefinitionPanel>
       </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.SurveyGridQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.grid"
+               itemPanelId="org.wcs.smart.er.query.survey.gridValueItemPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.SurveySummaryQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.summary"
+               itemPanelId="org.wcs.smart.er.query.survey.summaryItemPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+         </DefinitionPanel>
+      </QueryType>
    </extension>
    <extension
          point="org.wcs.smart.query.queryItemPanel">
       <QueryItemPanel
             id="org.wcs.smart.er.query.survey.filterItemPanel"
-            panel="org.wcs.smart.er.query.ui.filter.SurveyFilterItemPanel">
+            panel="org.wcs.smart.er.query.ui.panels.item.FilterItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.er.query.survey.gridValueItemPanel"
+            panel="org.wcs.smart.er.query.ui.panels.item.GriddedValueItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.er.query.survey.summaryItemPanel"
+            panel="org.wcs.smart.er.query.ui.panels.item.GroupByValueItemPanel">
       </QueryItemPanel>
    </extension>
    <extension
@@ -30,7 +62,19 @@
             id="org.wcs.smart.query.er.survey.definition.filter"
             isMultiCa="true"
             isSingleCa="true"
-            panel="org.wcs.smart.er.query.ui.filter.SurveyFilterDefintionPanel">
+            panel="org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.er.survey.definition.grid"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.er.survey.definition.summary"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel">
       </QueryDefinitionPanel>
    </extension>
    <extension
@@ -54,6 +98,28 @@
                      value="surveyobservation">
                </parameter>
             </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/survey_gridded_query.png"
+                  label="New Survey Grid Query"
+                  style="push"
+                  tooltip="creates a new gridded query for survey elements">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveygrid">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/survey_summary_query.png"
+                  label="New Suvery Summary Query ..."
+                  style="push"
+                  tooltip="creates a new summary query for survey elements">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveysummary">
+               </parameter>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -72,6 +138,12 @@
       <class
             class="org.wcs.smart.er.query.model.SurveyObservationQuery">
       </class>
+      <class
+            class="org.wcs.smart.er.query.model.SurveyGriddedQuery">
+      </class>
+      <class
+            class="org.wcs.smart.er.query.model.SurveySummaryQuery">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -81,6 +153,20 @@
             icon="images/icons/obj16/survey_observation_query.png"
             id="org.wcs.smart.er.query.ui.SimpleQueryResultsEditor"
             name="Survey Observation Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.er.query.ui.editor.SurveyGriddedEditor"
+            default="false"
+            icon="images/icons/obj16/survey_gridded_query.png"
+            id="org.wcs.smart.er.query.ui.GriddedEditor"
+            name="Survey Gridded Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.er.query.ui.editor.SurveySummaryEditor"
+            default="false"
+            icon="images/icons/obj16/survey_summary_query.png"
+            id="org.wcs.smart.er.query.ui.SummaryEditor"
+            name="Survey Summary Query Editor">
       </editor>
    </extension>
 

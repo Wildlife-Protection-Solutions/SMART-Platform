@@ -19,6 +19,9 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 
 	public static final String OBSERVATION_ICON = "org.wcs.smart.er.query.observation"; //$NON-NLS-1$
 	
+	public static final String GRIDDED_ICON = "org.wcs.smart.er.query.grid"; //$NON-NLS-1$
+	public static final String SUMMARY_ICON = "org.wcs.smart.er.query.summary"; //$NON-NLS-1$
+	
 	public static final String ALL_SURVEY_ICON = "org.wcs.smart.er.query.allsurvey"; //$NON-NLS-1$
 	
 	// The shared instance
@@ -90,6 +93,8 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
     	reg.put(OBSERVATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_observation_query.png")); //$NON-NLS-1$)
+    	reg.put(GRIDDED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_gridded_query.png")); //$NON-NLS-1$)
+    	reg.put(SUMMARY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_summary_query.png")); //$NON-NLS-1$)
     	reg.put(ALL_SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/all_survey.png")); //$NON-NLS-1$
     }
     

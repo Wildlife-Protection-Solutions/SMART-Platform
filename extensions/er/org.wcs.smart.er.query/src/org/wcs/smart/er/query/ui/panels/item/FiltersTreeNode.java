@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.filter;
+package org.wcs.smart.er.query.ui.panels.item;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -33,7 +33,7 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.ui.filter.SurveyItemContentProvider.Node;
+import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider.Node;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -43,7 +43,7 @@ import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
  * @author Emily
  *
  */
-public class SurveyItemTreeNode implements IItemTreeNode{
+public class FiltersTreeNode implements IItemTreeNode{
 
 	public static final String KEY = "surveyitem"; //$NON-NLS-1$
 	
@@ -55,13 +55,13 @@ public class SurveyItemTreeNode implements IItemTreeNode{
 	 * type of node
 	 * @param type
 	 */
-	public SurveyItemTreeNode(){
-		provider = new SurveyItemContentProvider();
+	public FiltersTreeNode(){
+		provider = new FilterContentProvider();
 		labelprovider = new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof SurveyItemContentProvider.Node){
-					return ((SurveyItemContentProvider.Node)element).guiName;
+				if (element instanceof FilterContentProvider.Node){
+					return ((FilterContentProvider.Node)element).guiName;
 				}else if (element instanceof MissionProperty){
 					return ((MissionProperty) element).getAttribute().getName();
 				}else if (element instanceof MissionAttribute){
@@ -76,8 +76,8 @@ public class SurveyItemTreeNode implements IItemTreeNode{
 			
 			@Override
 			public Image getImage(Object element){
-				if (element instanceof SurveyItemContentProvider.Node){
-					SurveyItemContentProvider.Node node = (Node) element;
+				if (element instanceof FilterContentProvider.Node){
+					FilterContentProvider.Node node = (Node) element;
 					if (node == Node.MISSION_ID){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_ICON);
 					}else if (node == Node.MISSION_PROP){

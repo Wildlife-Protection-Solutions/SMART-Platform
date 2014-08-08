@@ -83,7 +83,7 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 			if (value.isDisposed() || design == null){
 				return Status.OK_STATUS;
 			}
-			
+			final String lcurrentValue = currentValue;
 			final List<String> data = new ArrayList<String>();
 			Session s = HibernateManager.openSession();
 			try{
@@ -105,6 +105,10 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 					for (String id : data){
 						value.add(id);
 					}		
+					if (lcurrentValue != null){
+						value.setText(lcurrentValue);
+						currentValue = lcurrentValue;
+					}
 				}});
 			return Status.OK_STATUS;
 		}};

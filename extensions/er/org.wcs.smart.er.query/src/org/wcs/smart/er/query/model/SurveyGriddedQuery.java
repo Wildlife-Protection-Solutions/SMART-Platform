@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -39,66 +40,95 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.engine.DerbyObservationEngine;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.ObservationQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
 
 /**
- * Survey observation query.
+ * A class to represent a survey summary query.
  * 
  * @author Emily
- *
  */
 @Entity
-@Table(name="smart.survey_observation_query")
-public class SurveyObservationQuery extends ObservationQuery implements ISurveyQuery{
-
-	protected String surveyDesignKey;
+@Table(name="smart.survey_gridded_query")
+public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
+	private Object LOCK = new Object();
 	
+	protected String surveyDesignKey;
 	protected SurveyDesign surveyDesign;
 	
-	
-	private Object LOCK = new Object();
-
+	/**
+	 * @see org.wcs.smart.query.model.Query#getType()
+	 */
+	@Override
 	@Transient
-	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
-		
-		Session lsession = session;
-		if (session == null){
-			lsession = HibernateManager.openSession();
-			lsession.beginTransaction();
-		}
-		try {
-			DerbyObservationEngine engine = new DerbyObservationEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
-			return lastResult;
-		} finally {
-			if (session == null && lsession.isOpen()){
-				lsession.getTransaction().commit();
-				lsession.close();
-			}
-		}
-		
+	public IQueryType getType() {
+		return QueryTypeManager.getInstance().findQueryType(SurveyGridQueryType.KEY);
 	}
 	
 	/**
+	 * Parse the string format of the query
+	 * into the filter format.
+	 * @return 
+	 */
+	@Transient
+	protected GridQueryDefinition parseQuery() throws Exception {
+		//TODO:
+//		if (strQuery == null || strQuery.length() == 0){
+			return null;
+//		}
+//		InputStream is = new ByteArrayInputStream(strQuery.getBytes());
+//		Parser parser = new Parser(is);
+//		GridQueryDefinition myQuery = parser.GridQuery();
+//		is.close();
+//		return myQuery;
+	}
+
+	@Transient
+	public Collection<GridResultItem> executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		//TODO:
+//		resultMetadata = null;
+//		Session lsession = session;
+//		if (lsession == null){
+//			lsession = HibernateManager.openSession();
+//			lsession.beginTransaction();
+//		}
+//		try{
+//			
+//			DerbyGridEngine engine = new DerbyGridEngine();
+//			Collection<GridResultItem> lastResults = engine.executeQuery(this, lsession, monitor);
+//			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
+//			return lastResults;
+//		}finally{
+//			if (session == null && lsession.isOpen()){
+//				lsession.getTransaction().commit();
+//				lsession.close();
+//			}
+//		}
+		return null;
+	}
+	
+	
+	/**
+	 * Creates a copy of the summary query
+	 * with a null uuid, and null id;
+	 * 
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
 	@Transient
 	@Override
-	public SurveyObservationQuery clone(){
-		SurveyObservationQuery q = new SurveyObservationQuery();
+	public SurveyGriddedQuery clone(){
+		SurveyGriddedQuery q = new SurveyGriddedQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());
@@ -106,48 +136,23 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		q.setConservationAreaFilter(getConservationAreaFilter());
 		q.setDateFilter(getDateFilter());
 		q.setOwner(SmartDB.getCurrentEmployee());
-		q.setQueryFilter(getQueryFilter());
-		q.setVisibleColumns(getVisibleColumns());
-		
+		q.setQuery(getQuery());
+		q.setCrsDefinition(getCrsDefinition());
 		q.setSurveyDesign(getSurveyDesign());
 		return q;
 	}
+
 	/**
-	 * @see org.wcs.smart.query.model.Query#getType()
+	 * Loads the query columns
 	 */
-	@Override
-	@Transient
-	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY);
-	}
-	
-	@Override
-	protected void initQueryColumns() {
-		synchronized (LOCK) {
-			this.queryColumns = new ArrayList<QueryColumn>();
-			for (QueryColumn q : SurveyQueryColumnManager.getInstance().getObservationQueryColumns(getSurveyDesignAsObject())){
-				queryColumns.add(q);
-			}	
+	protected synchronized void initQueryColumns(){
+		QueryColumn[] cols = SurveyQueryColumnManager.getInstance().getGridColumns();
+		
+		queryColumns = new ArrayList<QueryColumn>();
+		for (int i = 0; i < cols.length; i ++){
+			queryColumns.add(cols[i]);
 		}
 	}
-	
-	
-	@Override
-	protected QueryFilter parseQueryFilter() throws Exception {
-		if (strQueryFilter == null || strQueryFilter.length() == 0){
-			return new QueryFilter(EmptyFilter.INSTANCE);
-		}
-		if(queryFilter != null){
-			return queryFilter;
-		}
-		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
-		Parser parser = new Parser(is);
-		QueryFilter myQuery = parser.QueryFilter();
-		is.close();
-		queryFilter = myQuery;
-		return myQuery;
-	}
-	
 	
 	/**
 	 * Sets the query string.  At this point the

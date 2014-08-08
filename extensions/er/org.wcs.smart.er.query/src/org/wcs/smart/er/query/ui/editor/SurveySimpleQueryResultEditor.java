@@ -22,6 +22,8 @@
 package org.wcs.smart.er.query.ui.editor;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
@@ -46,30 +48,28 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	public static final String ID = "org.wcs.smart.er.query.ui.SimpleQueryResultsEditor";  //$NON-NLS-1$
 
-	IQueryListener updateTable = new QueryListenerAdapter(){
+	SurveyQueryEventManager.SurveyDesignChangeListener updateTable = new SurveyQueryEventManager.SurveyDesignChangeListener(){
 		@Override
-		public void queryModified(int eventType, Object object) {
-			if (eventType == IQueryListener.QUERY_DEFINITION_MODIFIED &&
-					object.equals(query.getQuery())){
-				//TODO: figure out how to only do this if the survey design associated
-				//with the query has changed.
-				getQueryResultsTable().clearColumns();
-				getQueryResultsTable().initQuery(getQueryInternal());
-				
-			}
+		public void surveyDesignChange(SurveyDesign newDesign, Query query) {
+			if (!getQuery().equals(query)) return;
+			
+			System.out.println("clear columns");
+			getQueryResultsTable().clearColumns();
+			getQueryResultsTable().initQuery(getQueryInternal());
 		}
 	};
+	
+	
 	public SurveySimpleQueryResultEditor(){
 		super();
-		
-		QueryEventManager.getInstance().addListener(updateTable);
+		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(updateTable);	
 	}
 	
 	
 	@Override
 	public void dispose(){
 		super.dispose();
-		QueryEventManager.getInstance().removeListener(updateTable);
+		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(updateTable);
 	}
 	
 	
@@ -92,7 +92,6 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	@Override
 	public IQueryService createQueryService() {
-//		return new QueryService(getQuery());
-		return null;
+		return new QueryService(getQuery());
 	}
 }
