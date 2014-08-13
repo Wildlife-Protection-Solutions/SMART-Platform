@@ -97,37 +97,69 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int DM_KEY = 47;
   /** RegularExpression Id. */
-  int LETTER = 48;
+  int UUID = 48;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 49;
+  int LETTER = 49;
   /** RegularExpression Id. */
-  int SURVEY_ID_KEY = 50;
+  int SPECIAL_CHARS = 50;
   /** RegularExpression Id. */
-  int SURVEY_UUID_KEY = 51;
+  int SURVEY_ID_KEY = 51;
   /** RegularExpression Id. */
-  int MISSION_ID_KEY = 52;
+  int SURVEY_UUID_KEY = 52;
   /** RegularExpression Id. */
-  int MISSION_UUID_KEY = 53;
+  int MISSION_ID_KEY = 53;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_STR_KEY = 54;
+  int MISSION_UUID_KEY = 54;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_VALUE_KEY = 55;
+  int MISSION_PROPERTY_STR_KEY = 55;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_LIST_KEY = 56;
+  int MISSION_PROPERTY_VALUE_KEY = 56;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_KEY = 57;
+  int MISSION_PROPERTY_LIST_KEY = 57;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_TRACK_KEY = 58;
+  int SAMPLING_UNIT_KEY = 58;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 59;
+  int SAMPLING_UNIT_TRACK_KEY = 59;
   /** RegularExpression Id. */
-  int AREA_KEY = 60;
+  int AREA_TYPE_KEY = 60;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 61;
+  int AREA_KEY = 61;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 62;
+  int OBSERVATION_FILTER_TYPE_KEY = 62;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 63;
+  int WAYPOINT_FILTER_TYPE_KEY = 63;
+  /** RegularExpression Id. */
+  int SUM_CAT_VALUE_KEY = 64;
+  /** RegularExpression Id. */
+  int SUM_ATTRIBUTE_VALUE_KEY = 65;
+  /** RegularExpression Id. */
+  int SUM_CAT_ATT_VALUE_KEY = 66;
+  /** RegularExpression Id. */
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 67;
+  /** RegularExpression Id. */
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 68;
+  /** RegularExpression Id. */
+  int AGG = 69;
+  /** RegularExpression Id. */
+  int DATE_GROUPBY_ITEM = 70;
+  /** RegularExpression Id. */
+  int CATEGORY_GROUPBY_ITEM = 71;
+  /** RegularExpression Id. */
+  int AREA_GROUPBY_ITEM = 72;
+  /** RegularExpression Id. */
+  int ATTRIBUTE_GROUPBY_ITEM = 73;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 74;
+  /** RegularExpression Id. */
+  int SURVEY_ID_GROUPBY_ITEM = 75;
+  /** RegularExpression Id. */
+  int MISSION_ID_GROUPBY_ITEM = 76;
+  /** RegularExpression Id. */
+  int MISSION_PROPERTY_GROUPBY_ITEM = 77;
+  /** RegularExpression Id. */
+  int SAMPLINGUNIT_GROUPBY_ITEM = 78;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 79;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -182,6 +214,7 @@ public interface ParserConstants {
     "<CAT_ATT_DATE_KEY>",
     "<DATE_STRING>",
     "<DM_KEY>",
+    "<UUID>",
     "<LETTER>",
     "<SPECIAL_CHARS>",
     "\"s:survey:id\"",
@@ -197,6 +230,21 @@ public interface ParserConstants {
     "<AREA_KEY>",
     "\"observation\"",
     "\"waypoint\"",
+    "<SUM_CAT_VALUE_KEY>",
+    "<SUM_ATTRIBUTE_VALUE_KEY>",
+    "<SUM_CAT_ATT_VALUE_KEY>",
+    "<SUM_ATTRIBUTE_VALUE_LISTTREE_KEY>",
+    "<SUM_CAT_ATT_VALUE_LISTTREE_KEY>",
+    "<AGG>",
+    "<DATE_GROUPBY_ITEM>",
+    "<CATEGORY_GROUPBY_ITEM>",
+    "<AREA_GROUPBY_ITEM>",
+    "<ATTRIBUTE_GROUPBY_ITEM>",
+    "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
+    "<SURVEY_ID_GROUPBY_ITEM>",
+    "<MISSION_ID_GROUPBY_ITEM>",
+    "<MISSION_PROPERTY_GROUPBY_ITEM>",
+    "<SAMPLINGUNIT_GROUPBY_ITEM>",
     "<QUOTED_STRING>",
   };
 

@@ -30,10 +30,10 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.ca.Area;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySummaryEditor;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
@@ -41,11 +41,9 @@ import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 /**
@@ -169,21 +167,21 @@ public class SurveySummaryQueryType implements IQueryType {
 			
 		}
 		
-//		//validate query
-//		String queryString = definition + "|" + filters; //$NON-NLS-1$
-//		InputStream is = new ByteArrayInputStream(queryString.getBytes());
-//		try{
-//			Parser parser = new Parser(is);
-//			parser.SumQuery();
-//		}catch (Exception ex){
-//			return ex.getMessage();
-//		}finally{
-//			try {
-//				is.close();
-//			} catch (IOException e) {
-//				//eatme
-//			}
-//		}
+		//validate query
+		String queryString = definition + "|" + filters; //$NON-NLS-1$
+		InputStream is = new ByteArrayInputStream(queryString.getBytes());
+		try{
+			Parser parser = new Parser(is);
+			parser.SumQuery();
+		}catch (Exception ex){
+			return ex.getMessage();
+		}finally{
+			try {
+				is.close();
+			} catch (IOException e) {
+				//eatme
+			}
+		}
 		return null;
 	}
 

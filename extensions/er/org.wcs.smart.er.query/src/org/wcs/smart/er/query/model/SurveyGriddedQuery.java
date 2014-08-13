@@ -82,15 +82,14 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 	 */
 	@Transient
 	protected GridQueryDefinition parseQuery() throws Exception {
-		//TODO:
-//		if (strQuery == null || strQuery.length() == 0){
+		if (strQuery == null || strQuery.length() == 0){
 			return null;
-//		}
-//		InputStream is = new ByteArrayInputStream(strQuery.getBytes());
-//		Parser parser = new Parser(is);
-//		GridQueryDefinition myQuery = parser.GridQuery();
-//		is.close();
-//		return myQuery;
+		}
+		InputStream is = new ByteArrayInputStream(strQuery.getBytes());
+		Parser parser = new Parser(is);
+		GridQueryDefinition myQuery = parser.GridQuery();
+		is.close();
+		return myQuery;
 	}
 
 	@Transient
