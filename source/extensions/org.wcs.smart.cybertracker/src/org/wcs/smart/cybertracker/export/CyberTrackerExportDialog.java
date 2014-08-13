@@ -349,7 +349,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 	
 	private void handleExport(final boolean toDevice) {
 		if (!isCyberTrackerInstalled()) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION), null);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION), null);
 			return;
 		}
 		final boolean launch = !toDevice && btnLaunchCT.getSelection();
@@ -432,19 +432,24 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			version = WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
 					ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_VERSION);
 		} catch (Exception e) {
-			String message = MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION);
+			String message = MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION);
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, message, e);
 			return message;
 		}
 		String[] parts = version.split("\\."); //$NON-NLS-1$
-		String[] reqParts = ICyberTrackerConstants.MIN_VERSION.split("\\."); //$NON-NLS-1$
+		String[] reqParts = ICyberTrackerConstants.INSTALL_MIN_VERSION.split("\\."); //$NON-NLS-1$
+		//create a display version from the current version
+		//this removes the second part and the first 0 of the third part
+		//IE 3.00.0345 becomes 3.345
+		//this is an artifact of the CT installer.
+		String displayVersion = parts[0] + "." + (parts[2].startsWith("0") ? parts[2].substring(1) : parts[2]); //$NON-NLS-1$ //$NON-NLS-2$
 		if (parts.length > reqParts.length)
-			return MessageFormat.format(Messages.CyberTrackerExportDialog_Warn_CT_Version, version, ICyberTrackerConstants.MIN_VERSION);
+			return MessageFormat.format(Messages.CyberTrackerExportDialog_Warn_CT_Version, displayVersion, ICyberTrackerConstants.DISPLAY_MIN_VERSION);
 		for (int i = 0; i < reqParts.length; i++) {
 			Integer val = Integer.valueOf(parts[i]);
 			Integer reqVal = Integer.valueOf(reqParts[i]);
 			if (val < reqVal) {
-				return MessageFormat.format(Messages.CyberTrackerExportDialog_Warn_CT_Version, version, ICyberTrackerConstants.MIN_VERSION);
+				return MessageFormat.format(Messages.CyberTrackerExportDialog_Warn_CT_Version, displayVersion, ICyberTrackerConstants.DISPLAY_MIN_VERSION);
 			}
 		}
 		return null;
