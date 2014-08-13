@@ -29,7 +29,7 @@ package org.wcs.smart.cybertracker.model;
  */
 public interface ICyberTrackerConstants {
 
-	public static final String MIN_VERSION = "3.00.0319"; //$NON-NLS-1$
+	public static final String MIN_VERSION = "3.366.0"; //$NON-NLS-1$
 	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
