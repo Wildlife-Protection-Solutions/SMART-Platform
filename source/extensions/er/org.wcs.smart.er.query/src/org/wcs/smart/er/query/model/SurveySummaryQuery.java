@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
@@ -70,15 +73,14 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 	 */
 	@Transient
 	protected SumQueryDefinition parseQuery() throws Exception {
-		//TODO:
-//		if (getQuery() == null || getQuery().length() == 0){
+		if (getQuery() == null || getQuery().length() == 0){
 			return null;
-//		}
-//		InputStream is = new ByteArrayInputStream(getQuery().getBytes());
-//		Parser parser = new Parser(is);
-//		SumQueryDefinition myQuery = parser.SumQuery();
-//		is.close();
-//		return myQuery;
+		}
+		InputStream is = new ByteArrayInputStream(getQuery().getBytes());
+		Parser parser = new Parser(is);
+		SumQueryDefinition myQuery = parser.SumQuery();
+		is.close();
+		return myQuery;
 	}
 
 

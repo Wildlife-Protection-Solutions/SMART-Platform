@@ -2,7 +2,9 @@
 SMART Query Engine Language Syntax & Semantic actions 
 =============================================*/options{  LOOKAHEAD= 1;  CHOICE_AMBIGUITY_CHECK = 2;  OTHER_AMBIGUITY_CHECK = 1;  STATIC = false;  DEBUG_PARSER = false;  DEBUG_LOOKAHEAD = false;  DEBUG_TOKEN_MANAGER = false;  ERROR_REPORTING = true;  JAVA_UNICODE_ESCAPE = false;  UNICODE_INPUT = false;  IGNORE_CASE = false;  USER_TOKEN_MANAGER = false;  USER_CHAR_STREAM = false;  BUILD_PARSER = true;  BUILD_TOKEN_MANAGER = true;  SANITY_CHECK = true;  FORCE_LA_CHECK = false;}PARSER_BEGIN(Parser)package org.wcs.smart.er.query.internal.parser;
 import java.util.*;import org.wcs.smart.er.query.filter.*;
+import org.wcs.smart.er.query.filter.summary.*;
 import org.wcs.smart.query.model.filter.*;
+import org.wcs.smart.query.model.summary.*;
 
 public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >}
 
@@ -45,24 +47,25 @@ TOKEN :
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
- | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | < UUID : (< LETTER > | < DIGIT >)+ >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
  | < SURVEY_ID_KEY : "s:survey:id" >
- | < SURVEY_UUID_KEY : "s:survey:uuid:" (< DIGIT > | < LETTER >)* >
+ | < SURVEY_UUID_KEY : "s:survey:uuid:" < UUID > >
  | < MISSION_ID_KEY : "s:mission:id" >
- | < MISSION_UUID_KEY : "s:mission:uuid:" (< DIGIT > | < LETTER >)* >
+ | < MISSION_UUID_KEY : "s:mission:uuid:" < UUID > >
  | < MISSION_PROPERTY_STR_KEY : "s:missionproperty:s:" <  DM_KEY > >
  | < MISSION_PROPERTY_VALUE_KEY : "s:missionproperty:n:" <  DM_KEY > >
  | < MISSION_PROPERTY_LIST_KEY : "s:missionproperty:l:" <  DM_KEY > >
- | < SAMPLING_UNIT_KEY : "s:samplingunit:" (< DIGIT > | < LETTER >)* >
- | < SAMPLING_UNIT_TRACK_KEY : "s:samplingunittrack:" (< DIGIT > | < LETTER >)* >
+ | < SAMPLING_UNIT_KEY : "s:samplingunit:" < UUID > >
+ | < SAMPLING_UNIT_TRACK_KEY : "s:samplingunittrack:" < UUID > >
  | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
  | < AREA_KEY : "area:" ("wp" | "t") ":" < AREA_TYPE_KEY > ":" < DM_KEY > >
  | < OBSERVATION_FILTER_TYPE_KEY : "observation" >
  | < WAYPOINT_FILTER_TYPE_KEY : "waypoint" >}
 /* Summary Query */
-/*
+
 TOKEN :
 {
     < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
@@ -72,18 +75,21 @@ TOKEN :
 |    < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" ) >
 | 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" ) >
-|    < QUERY_SPLITTER : "|" >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :
-			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
-			( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
+		( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+		( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
 | 	<  CATEGORY_ATTRIBUTE_GROUPBY_ITEM :
-			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
-			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > 
-}*/
+		( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+		( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |  < SURVEY_ID_GROUPBY_ITEM : "s:survey:id:" (< UUID >)? (":" < UUID > )* > 
+|  < MISSION_ID_GROUPBY_ITEM : "s:mission:id:" (< UUID >)? (":" < UUID > )* >
+|  < MISSION_PROPERTY_GROUPBY_ITEM : " s:missionproperty:l:" < DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+|  < SAMPLINGUNIT_GROUPBY_ITEM : " s:samplingunit:" (< UUID >)? (":" < UUID > )* > 
+
+}
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
-/*
+
 SumQueryDefinition SumQuery() :
 {	ValuePart values = null;
 	GroupByPart rowGroupBy = null;
@@ -136,7 +142,7 @@ GridQueryDefinition GridQuery() :
     	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter);
 	}
 }
-*/
+
 
 QueryFilter QueryFilter() :
 {
@@ -170,7 +176,7 @@ QueryFilter QueryFilterInternal():
     	return QueryFilter.createFilter(expr, filterType);
   	}
 }
-/*
+
 ValuePart ValuePart() :
 {
 	IValueItem item;
@@ -197,17 +203,19 @@ IValueItem ValueItem() :
 }
 {
 	(		item = SingleValueItem()
+/*
 		(		  
 			< SLASH >
 			item2 = SingleValueItem()
 		)?
+		*/
 	 )
 	
 
 	{
-	  	if (item2 != null)	  	{
-	    	item = CombinedValueItem.createValueItem(item, item2);
-	  	}
+	  	//if (item2 != null)	  	//{
+	    //	item = CombinedValueItem.createValueItem(item, item2);
+	  	//}
 		 return item;
 	}
 }
@@ -218,35 +226,29 @@ IValueItem SingleValueItem() :
 }
 {
 	(
-		< PATROL_VALUE_ITEM >
-		{	
-			item = PatrolValueItem.createItem( token.image );
-		}
-		
-	| 
 		< SUM_CAT_VALUE_KEY >
 		{
-			item = PatrolCategoryValueItem.createItem( token.image );
+			item = CategoryValueItem.createItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_KEY >
 		{
-			item = PatrolAttributeValueItem.createAttributeItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_KEY >
 		{
-			item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
 		{
-			item = PatrolAttributeValueItem.createAttributeItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
 		{
-			item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		} 
 	)
 	{
@@ -283,20 +285,6 @@ IGroupBy GroupByItem() :
 	IGroupBy item;
 }
 {
-	(
-		(
-		  < PATROL_STRING_GROUPBY_OPTION > |
-		  < PATROL_UUID_GROUPBY_OPTION >
-		) 
-		{
-			item = PatrolGroupBy.createGroupBy( token.image );
-		}
-	|
-		< PATROL_CONTRIBUTION_GROUPBY_OPTION > 
-		{
-		   item = PatrolContributionFactory.createGroupBy( token.image );
-		}		   
-	|
 		< DATE_GROUPBY_ITEM >
 		{
 		  	item = DateGroupBy.createGroupBy(token.image);		}
@@ -320,13 +308,31 @@ IGroupBy GroupByItem() :
 		{
 		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
 		}	
-			 
-	)
+	|
+		< SURVEY_ID_GROUPBY_ITEM >
+		{
+		  item = SurveyIdGroupBy.createGroupBy(token.image);		} 
+	|
+		< MISSION_ID_GROUPBY_ITEM >
+		{
+		  item = MissionIdGroupBy.createGroupBy(token.image);
+		}
+	|
+		< MISSION_PROPERTY_GROUPBY_ITEM >
+		{
+		  item = MissionAttributeGroupBy.createGroupBy(token.image);
+		}
+	|
+		< SAMPLINGUNIT_GROUPBY_ITEM >
+		{
+		  item = SamplingUnitGroupBy.createGroupBy(token.image);
+		} 
+	
 	{
 		 return item;
 	}
 }
-*/
+
 
 
 
