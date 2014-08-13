@@ -84,7 +84,7 @@ public class CyberTrackerImporter {
 		List<CyberTrackerPatrol> patrols = new ArrayList<CyberTrackerPatrol>();
 		String appPath = PdaUtil.getCTAppPath();
 		if (appPath == null) {
-			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION), null);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION), null);
 			return patrols;
 		}
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -140,7 +140,7 @@ public class CyberTrackerImporter {
 			monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 			String appPath = PdaUtil.getCTAppPath();
 			if (appPath == null) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.MIN_VERSION), null);
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION), null);
 				return new ArrayList<CyberTrackerPatrol>();
 			}
 			File xmlFile = extractRawXml(appPath, file, xmlTempDir);
