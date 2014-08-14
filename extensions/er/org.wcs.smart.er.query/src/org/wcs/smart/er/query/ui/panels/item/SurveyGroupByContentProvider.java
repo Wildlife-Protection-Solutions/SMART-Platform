@@ -97,11 +97,11 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 	
 	
 	public enum Node{
-		SURVEY_ID("Survey Id"),
-		MISSION_ID("Mission Id"),
-		MISSION_PROP("Mission Properties"),
-		SAMPLING_UNITS("Sampling Units"),
-		STRATA("Strata");
+		SURVEY_ID(Messages.SurveyGroupByContentProvider_SurveyIdNode),
+		MISSION_ID(Messages.SurveyGroupByContentProvider_MissionIdNode),
+		MISSION_PROP(Messages.SurveyGroupByContentProvider_MissionPropertiesNode),
+		SAMPLING_UNITS(Messages.SurveyGroupByContentProvider_SamplingUnitNode),
+		STRATA(Messages.SurveyGroupByContentProvider_StrataNode);
 		
 		public String guiName;
 		

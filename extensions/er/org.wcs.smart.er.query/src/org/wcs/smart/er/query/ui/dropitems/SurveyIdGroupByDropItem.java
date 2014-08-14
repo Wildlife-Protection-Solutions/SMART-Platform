@@ -1,7 +1,27 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.query.ui.dropitems;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -26,6 +46,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -34,6 +55,12 @@ import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Survey id group by drop item.
+ * 
+ * @author Emily
+ *
+ */
 public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropItem, ISurveyDesignDropItem {
 
 	private Font smallerFont;
@@ -51,7 +78,6 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 	@Override
 	public void setSurveyDesign(SurveyDesign design) {
 		this.currentDesign = design;
-		//TODO: update list items??
 	}
 
 	/**
@@ -60,6 +86,7 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem#getListItem()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
@@ -68,22 +95,22 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 		s.beginTransaction();
 		try{
 			Criteria q = s.createCriteria(Survey.class)
-					.createAlias("surveyDesign", "sd")
-					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()));
+					.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			if (currentDesign != null){
-				q.add(Restrictions.eq("surveyDesign", currentDesign));
+				q.add(Restrictions.eq("surveyDesign", currentDesign)); //$NON-NLS-1$
 			}
-			q.addOrder(Order.desc("sd.startDate"));
-			q.addOrder(Order.desc("startDate"));
+			q.addOrder(Order.desc("sd.startDate")); //$NON-NLS-1$
+			q.addOrder(Order.desc("startDate")); //$NON-NLS-1$
 			
 			List<Survey> ss = q.list();
 			for (Survey survey : ss){
-				items.add(new ListItem(survey.getUuid(), survey.getId() + " [" + survey.getSurveyDesign().getName() + "]"));
+				items.add(new ListItem(survey.getUuid(), survey.getId() + " [" + survey.getSurveyDesign().getName() + "]")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){
-			ERQueryPlugIn.displayLog("Error loading survey id items.", ex);
+			ERQueryPlugIn.displayLog(Messages.SurveyIdGroupByDropItem_LoadError, ex);
 			s.close();
 		}
 		
@@ -92,17 +119,17 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 
 	@Override
 	public String getText() {
-		return "Survey Id";
+		return Messages.SurveyIdGroupByDropItem_Text;
 	}
 
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("s:survey:");
+		sb.append("sgb:survey:id:"); //$NON-NLS-1$
 		if (filteredValues != null && filteredValues.size() > 0){
 			for (ListItem id: filteredValues){
 				sb.append(SmartUtils.encodeHex(id.getUuid()));
-				sb.append(":");
+				sb.append(":"); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 		}
@@ -133,12 +160,12 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 		comp.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText( formatStringForLabel("Survey ID"));
+		lbl.setText( formatStringForLabel(Messages.SurveyIdGroupByDropItem_Label));
 		initDrag(lbl);
 		
 		final Link link = new Link(comp,  SWT.NONE);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("<a>" + "Filters..." + "</a>");
+		link.setText("<a>" + Messages.SurveyIdGroupByDropItem_FiltersLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -167,7 +194,7 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.SurveyIdGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -186,8 +213,8 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 	
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
-		if (filteredValues == null){
-			tipStr.append("All");
+		if (filteredValues == null || filteredValues.size() == 0){
+			tipStr.append(Messages.SurveyIdGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filteredValues){
 				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

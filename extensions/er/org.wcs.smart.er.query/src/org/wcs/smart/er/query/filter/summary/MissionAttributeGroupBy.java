@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.query.filter.summary;
 
 import java.text.MessageFormat;
@@ -8,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
@@ -16,6 +38,13 @@ import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
+/**
+ * Mission attribute group by.  Only applicable for list
+ * mission attributes.
+ * 
+ * @author Emily
+ *
+ */
 public class MissionAttributeGroupBy implements IGroupBy{
 	
 	/**
@@ -66,7 +95,7 @@ public class MissionAttributeGroupBy implements IGroupBy{
 
 	@Override
 	public String getKeyPart() {
-		return "s:missionproperty:l:"; //$NON-NLS-1$
+		return "sgb:missionproperty:l:"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -105,9 +134,9 @@ public class MissionAttributeGroupBy implements IGroupBy{
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		if (items.size() == 0){
-			throw new Exception(MessageFormat.format("Mission attribute with key {0} not found.", new Object[]{attributeKey}));
+			throw new Exception(MessageFormat.format(Messages.MissionAttributeGroupBy_AttributeNotFound, new Object[]{attributeKey}));
 		}else if (items.size() > 1){
-			throw new Exception(MessageFormat.format("Mission attribute key {0} invalid.", new Object[]{attributeKey}));
+			throw new Exception(MessageFormat.format(Messages.MissionAttributeGroupBy_InvalidKey, new Object[]{attributeKey}));
 		}
 		MissionAttribute ma = (MissionAttribute) items.get(0);
 		return ma;
@@ -121,7 +150,7 @@ public class MissionAttributeGroupBy implements IGroupBy{
 		}catch (Exception ex){
 			return new ErrorDropItem(ex.getMessage());
 		}
-		DropItem di = SurveyDropItemFactory.INSTANCE.createMissionAttributeDropItem(ma);
+		DropItem di = SurveyDropItemFactory.INSTANCE.createMissionAttributeGroupByDropItem(ma);
 		di.initializeData(getItems(session));
 		return di;
 	}

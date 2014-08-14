@@ -163,7 +163,6 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
-		
 		lblAttribute = new Label(main, SWT.NONE);
 		operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		
@@ -209,7 +208,6 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 		
 		initDrag(main);
 		initDrag(lblAttribute);
-		
 		
 		lblAttribute.setText(formatStringForLabel(Messages.SurveyIdDropItem_SurveyIdLabel));
 		

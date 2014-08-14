@@ -82,10 +82,10 @@ TOKEN :
 		( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
 | 	<  CATEGORY_ATTRIBUTE_GROUPBY_ITEM :
 		( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
-		( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |  < SURVEY_ID_GROUPBY_ITEM : "s:survey:id:" (< UUID >)? (":" < UUID > )* > 
-|  < MISSION_ID_GROUPBY_ITEM : "s:mission:id:" (< UUID >)? (":" < UUID > )* >
-|  < MISSION_PROPERTY_GROUPBY_ITEM : " s:missionproperty:l:" < DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
-|  < SAMPLINGUNIT_GROUPBY_ITEM : " s:samplingunit:" (< UUID >)? (":" < UUID > )* > 
+		( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |  < SURVEY_ID_GROUPBY_ITEM : "sgb:survey:id:" (< UUID >)? (":" < UUID > )* > 
+|  < MISSION_ID_GROUPBY_ITEM : "sgb:mission:id:" (< UUID >)? (":" < UUID > )* >
+|  < MISSION_PROPERTY_GROUPBY_ITEM : "sgb:missionproperty:l:" <  DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+|  < SAMPLINGUNIT_GROUPBY_ITEM : "sgb:samplingunit:" (< UUID >)? (":" < UUID > )* > 
 
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
@@ -133,13 +133,13 @@ GridQueryDefinition GridQuery() :
 	(
 	  valueFilter = QueryFilterInternal()
 	)?
-	< QUERY_SPLITTER > 
-	(
-	  rateFilter = QueryFilterInternal()
-	)?
+	//< QUERY_SPLITTER > 
+	//(
+	//  rateFilter = QueryFilterInternal()
+	//)?
 	< EOF >
 	{
-    	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter);
+    	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, null);
 	}
 }
 
@@ -285,7 +285,7 @@ IGroupBy GroupByItem() :
 	IGroupBy item;
 }
 {
-		< DATE_GROUPBY_ITEM >
+	(	  	< DATE_GROUPBY_ITEM >
 		{
 		  	item = DateGroupBy.createGroupBy(token.image);		}
 	|
@@ -327,7 +327,7 @@ IGroupBy GroupByItem() :
 		{
 		  item = SamplingUnitGroupBy.createGroupBy(token.image);
 		} 
-	
+	)
 	{
 		 return item;
 	}

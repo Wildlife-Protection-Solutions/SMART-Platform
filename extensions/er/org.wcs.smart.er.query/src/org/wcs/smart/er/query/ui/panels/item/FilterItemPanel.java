@@ -240,5 +240,10 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	public Query getQuery() {
 		return null;
 	}
+	
+	@Override
+	public SurveyDesign getSurveyDesign() {
+		return null;
+	}
 }
 

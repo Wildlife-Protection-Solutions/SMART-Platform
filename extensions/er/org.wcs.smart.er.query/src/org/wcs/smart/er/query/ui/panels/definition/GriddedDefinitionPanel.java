@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
@@ -106,7 +107,7 @@ public class GriddedDefinitionPanel extends
 	
 	protected void createSurveyDef(final Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Survey Design:");
+		lbl.setText(Messages.GriddedDefinitionPanel_Label);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
@@ -137,7 +138,7 @@ public class GriddedDefinitionPanel extends
 	}
 	
 	private void updateDesignLabel() {
-		String text = "All";
+		String text = Messages.GriddedDefinitionPanel_AllLabel;
 		if (currentDesign != null) {
 			text = currentDesign.getName();
 		}
@@ -175,5 +176,10 @@ public class GriddedDefinitionPanel extends
 	@Override
 	public Query getQuery() {
 		return currentQuery.getQuery();
+	}
+	
+	@Override
+	public SurveyDesign getSurveyDesign() {
+		return currentDesign;
 	}
 }

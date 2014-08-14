@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.query.ui.dropitems;
 
 import java.util.ArrayList;
@@ -18,24 +39,26 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolTip;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Sampling unit group by drop item.
+ * 
+ * @author Emily
+ *
+ */
 public class SamplingUnitGroupByDropItem extends DropItem 
 	implements IGroupByDropItem, ISurveyDesignDropItem {
 
@@ -82,7 +105,7 @@ public class SamplingUnitGroupByDropItem extends DropItem
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){
-			ERQueryPlugIn.displayLog("Error loading mission id items.", ex);
+			ERQueryPlugIn.displayLog(Messages.SamplingUnitGroupByDropItem_LoadingError, ex);
 			s.close();
 		}
 		
@@ -91,17 +114,17 @@ public class SamplingUnitGroupByDropItem extends DropItem
 
 	@Override
 	public String getText() {
-		return "Sampling Units";
+		return Messages.SamplingUnitGroupByDropItem_Text;
 	}
 
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("s:samplingunit:");
+		sb.append("sgb:samplingunit:"); //$NON-NLS-1$
 		if (filteredValues != null && filteredValues.size() > 0){
 			for (ListItem id: filteredValues){
 				sb.append(SmartUtils.encodeHex(id.getUuid()));
-				sb.append(":");
+				sb.append(":"); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 		}
@@ -132,12 +155,12 @@ public class SamplingUnitGroupByDropItem extends DropItem
 		comp.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText( formatStringForLabel("Sampling Units"));
+		lbl.setText( formatStringForLabel(Messages.SamplingUnitGroupByDropItem_Label));
 		initDrag(lbl);
 		
 		final Link link = new Link(comp,  SWT.NONE);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("<a>" + "Filters..." + "</a>");
+		link.setText("<a>" + Messages.SamplingUnitGroupByDropItem_FiltersLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -166,7 +189,7 @@ public class SamplingUnitGroupByDropItem extends DropItem
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.SamplingUnitGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -185,8 +208,8 @@ public class SamplingUnitGroupByDropItem extends DropItem
 	
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
-		if (filteredValues == null){
-			tipStr.append("All");
+		if (filteredValues == null || filteredValues.size() == 0){
+			tipStr.append(Messages.SamplingUnitGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filteredValues){
 				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

@@ -40,6 +40,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -91,7 +92,7 @@ public class GriddedValueItemPanel  extends AbstractQueryItemPanel{
 		filterTreeViewer.setAutoExpandLevel(2);
 		filterTreeViewer.setInput(LOADING_TEXT);
 		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText("Add to Query");
+		btnAdd.setText(Messages.GriddedValueItemPanel_ButtonText);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -118,7 +119,7 @@ public class GriddedValueItemPanel  extends AbstractQueryItemPanel{
 	}
 	
 	// job for refreshing the tree
-	private Job refreshJob = new Job("refreshing"){
+	private Job refreshJob = new Job(Messages.GriddedValueItemPanel_RefreshingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

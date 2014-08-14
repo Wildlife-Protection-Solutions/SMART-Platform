@@ -35,9 +35,10 @@ import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * A patrol group by option
+ * Survey id group by option.
+ * 
  * @author egouge
- * @since 1.0.0
+ * 
  */
 public class SurveyIdGroupBy implements IGroupBy {
 
@@ -79,7 +80,7 @@ public class SurveyIdGroupBy implements IGroupBy {
 
 	@Override
 	public String getKeyPart() {
-		return "s:survey:id:"; //$NON-NLS-1$
+		return "sgb:survey:id:"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -112,7 +113,8 @@ public class SurveyIdGroupBy implements IGroupBy {
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
 		DropItem di = SurveyDropItemFactory.INSTANCE.createSurveyIdGroupByDropItem();
-		di.initializeData(getItems(session));
+		List<ListItem> items = getItems(session);
+		di.initializeData(items.toArray(new ListItem[items.size()]));
 		return di;
 	}
 

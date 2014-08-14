@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.query.ui.dropitems;
 
 import java.util.ArrayList;
@@ -23,12 +44,20 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
 
+/**
+ * Mission attribute group by drop item.  Applicable for only
+ * list mission attributes.
+ * 
+ * @author Emily
+ *
+ */
 public class MissionAttributeGroupByDropItem extends DropItem implements
 		IGroupByDropItem {
 
@@ -56,6 +85,7 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem#getListItem()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
@@ -63,7 +93,7 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		session.beginTransaction();
 		try {
 			Criteria c = session.createCriteria(MissionAttributeListItem.class)
-					.add(Restrictions.eq("attribute", attribute));
+					.add(Restrictions.eq("attribute", attribute)); //$NON-NLS-1$
 			List<MissionAttributeListItem> listitems = c.list();
 			
 			for (MissionAttributeListItem it : listitems) {
@@ -81,7 +111,7 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		} catch (Exception ex) {
 			ERQueryPlugIn
 					.displayLog(
-							"Error loading attribute list items",
+							Messages.MissionAttributeGroupByDropItem_ListItemLoadError,
 							ex);
 		}finally{
 			session.close();
@@ -112,10 +142,11 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
 	 */
+	//s:missionproperty:l:" < DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) 
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("s:missionattribute:"); //$NON-NLS-1$
+		sb.append("sgb:missionproperty:"); //$NON-NLS-1$
 		sb.append(attribute.getType().typeKey);
 		sb.append(":"); //$NON-NLS-1$
 		sb.append(attribute.getKeyId());
@@ -160,7 +191,7 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		initDrag(lbl);
 
 		final Link link = new Link(comp, SWT.NONE);
-		link.setText("<a>" + "Filters..." + "</a>");
+		link.setText("<a>" + Messages.MissionAttributeGroupByDropItem_FiltersLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -192,7 +223,7 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		});
 
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.MissionAttributeGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener() {
@@ -212,8 +243,8 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 
 	private void updateToolTipMessage() {
 		StringBuilder tipStr = new StringBuilder();
-		if (filters == null) {
-			tipStr.append("All");
+		if (filters == null || filters.size() == 0) {
+			tipStr.append(Messages.MissionAttributeGroupByDropItem_AllLabel);
 		} else {
 			for (ListItem item : filters) {
 				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

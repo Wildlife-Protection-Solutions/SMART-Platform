@@ -53,8 +53,8 @@ public class SurveyQueryColumn extends QueryColumn {
 		SURVEY_END(Messages.SurveyQueryColumn_SurveyEndLabel, ColumnType.DATE, "survey:enddate"),  //$NON-NLS-1$
 		
 		MISSION(Messages.SurveyQueryColumn_MissionIdLabel, ColumnType.STRING, "mission:id"),  //$NON-NLS-1$
-		MISSION_START(Messages.SurveyQueryColumn_MissionStartLabel, ColumnType.DATE, "mission:startdate"),  //$NON-NLS-2$ //$NON-NLS-1$
-		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-2$ //$NON-NLS-1$
+		MISSION_START(Messages.SurveyQueryColumn_MissionStartLabel, ColumnType.DATE, "mission:startdate"),  //$NON-NLS-1$
+		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
 		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
 		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.DATE, "su:buffer"),  //$NON-NLS-1$

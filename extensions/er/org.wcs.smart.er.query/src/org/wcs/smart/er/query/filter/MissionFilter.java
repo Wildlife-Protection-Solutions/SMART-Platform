@@ -62,7 +62,7 @@ public class MissionFilter implements IFilter {
 		if (!ok){
 			throw new RuntimeException("String operator not supported for survey id filter."); //$NON-NLS-1$
 		}
-		return new MissionFilter(Type.ID, op, value);
+		return new MissionFilter(Type.ID, op, SmartUtils.stripQuotes(value));
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class MissionFilter implements IFilter {
 	public DropItem[] getDropItems(Session session) throws Exception {
 		if (type == Type.ID){
 			DropItem di = SurveyDropItemFactory.INSTANCE.createMissionIdDropItem();
-			di.initializeData(new Object[]{op.asSmartValue(), value});
+			di.initializeData(new String[]{op.asSmartValue(), value});
 			return new DropItem[]{di};
 		}else if (type == Type.UUID){
 			try{
@@ -136,6 +136,7 @@ public class MissionFilter implements IFilter {
 				if (mission == null){
 					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionFilter_MissionNotFound, new Object[]{value}))};
 				}
+				mission.getId();
 				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createMissionUuidIdDropItem(mission)};
 			}catch (Exception ex){
 				ERQueryPlugIn.log(ex.getMessage(), ex);
