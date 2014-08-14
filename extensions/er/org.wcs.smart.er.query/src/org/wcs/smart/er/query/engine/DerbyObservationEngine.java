@@ -53,10 +53,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**

@@ -224,6 +224,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	protected String asSql(MissionPropertyFilter filter, IQueryEngine engine)
 			throws SQLException {
+		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (col != null){
+			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		}
+		
 		String attprefix = engine.tablePrefix(MissionAttribute.class);
 		if (attprefix == null) {
 			throw new IllegalStateException(

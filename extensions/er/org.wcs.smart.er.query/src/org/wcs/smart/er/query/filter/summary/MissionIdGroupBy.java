@@ -25,11 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
-import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
@@ -40,7 +43,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class MissionIdGroupBy implements IGroupBy {
+public class MissionIdGroupBy implements ISurveyGroupBy {
 
 	public static MissionIdGroupBy createGroupBy(String key){
 		String bits[] = key.split(":"); //$NON-NLS-1$
@@ -95,7 +98,7 @@ public class MissionIdGroupBy implements IGroupBy {
 		}
 		
 		allItems = new ArrayList<ListItem>();
-		if (items != null){
+		if (items != null && items.length > 0){
 			for (String it : items){
 				try{
 					Mission m = (Mission) session.load(Mission.class, SmartUtils.decodeHex(it));
@@ -106,6 +109,8 @@ public class MissionIdGroupBy implements IGroupBy {
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				}
 			}
+		}else{
+			//get all mission ids associated with survey design
 		}
 		return allItems;
 	}
@@ -121,6 +126,42 @@ public class MissionIdGroupBy implements IGroupBy {
 	@Override
 	public void visit(IGroupByVisitor visitor) {
 		visitor.visit(this);		
+	}
+
+	@Override
+	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
+		
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		if (filter == null){
+			//get all surveys for the current ca
+			
+			List<Mission> missions = session.createCriteria(Mission.class, "m")
+					.createAlias("m.survey", "s")
+					.createAlias("survey.surveyDesign", "sd")
+					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+					.addOrder(Order.asc("sd.keyId"))
+					.addOrder(Order.asc("s.id"))
+					.list();
+			for (Mission m : missions){
+				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + " - " + m.getSurvey().getSurveyDesign().getName() + "]");
+				items.add(li);
+			}			
+		}else{
+			List<Mission> missions = session.createCriteria(Mission.class, "m")
+				.createAlias("m.survey", "s")
+				.createAlias("survey.surveyDesign", "sd")
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("sd.keyId", filter.getKey()))
+				.addOrder(Order.asc("sd.keyId"))
+					.addOrder(Order.asc("s.id"))
+				.list();
+			for (Mission m : missions){
+				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + "]");
+				items.add(li);
+			}			
+		}
+		
+		return items;
 	}
 
 }

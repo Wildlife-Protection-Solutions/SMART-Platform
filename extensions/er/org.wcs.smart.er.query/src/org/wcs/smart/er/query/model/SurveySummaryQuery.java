@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.DerbySummaryEngine;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -95,23 +96,21 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 	
 	@Transient
 	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
-//		Session lsession = session;
-//		if (session == null){
-//			lsession = HibernateManager.openSession();
-//			lsession.beginTransaction();
-//		}
-//		try{
-//			DerbySummaryEngine engine = new DerbySummaryEngine();
-//			SummaryQueryResult lastResults = engine.executeQuery(this, lsession, monitor);
-//			return lastResults;
-//		}finally{
-//			if (session == null && lsession.isOpen()){
-//				lsession.getTransaction().commit();
-//				lsession.close();
-//			}
-//		}
-		//TODO:
-		return null;
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
+		try{
+			DerbySummaryEngine engine = new DerbySummaryEngine();
+			SummaryQueryResult lastResults = engine.executeQuery(this, lsession, monitor);
+			return lastResults;
+		}finally{
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
+			}
+		}
 	}
 	
 	/**
