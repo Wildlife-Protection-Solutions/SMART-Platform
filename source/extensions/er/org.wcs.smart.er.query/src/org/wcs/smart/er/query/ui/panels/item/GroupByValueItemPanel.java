@@ -46,6 +46,7 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -121,7 +122,7 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		groupbynodes.add(surveyNode);
 		groupbynodes.add(new DateTreeNode());
 		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode("Area Group By");
+			areaTreeNode = new AreaTreeNode(Messages.GroupByValueItemPanel_AreaGroupByNode);
 			groupbynodes.add(areaTreeNode);
 		}
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
@@ -142,7 +143,7 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		filterTreeViewer.setAutoExpandLevel(2);
 		filterTreeViewer.setInput(LOADING_TEXT);
 		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText("Add to Query");
+		btnAdd.setText(Messages.GroupByValueItemPanel_AddToQueryButtonText);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -166,7 +167,7 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		}
 	}
 	
-	private Job refreshJob = new Job("refreshing"){
+	private Job refreshJob = new Job(Messages.GroupByValueItemPanel_RefreshingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -245,6 +246,11 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 
 	@Override
 	public Query getQuery() {
+		return null;
+	}
+	
+	@Override
+	public SurveyDesign getSurveyDesign() {
 		return null;
 	}
 	

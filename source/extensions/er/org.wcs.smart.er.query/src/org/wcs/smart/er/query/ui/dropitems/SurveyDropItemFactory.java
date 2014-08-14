@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.ui.dropitems;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -34,6 +35,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
@@ -41,18 +43,28 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyGridQueryType;
+import org.wcs.smart.er.query.model.SurveyGriddedQuery;
+import org.wcs.smart.er.query.model.SurveySummaryQuery;
+import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.FilterItemPanel;
-import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
+import org.wcs.smart.er.query.ui.panels.item.GriddedValueItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.GroupByValueItemPanel;
+import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
@@ -126,11 +138,11 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 //			}
 			}
 
-//		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
-//			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ||
-//					queryItemPanelId.equals(GriddedFilterPanel.ID)){
-//				items = new DropItem[]{createCategoryValueDropItem(null)};
-//			}
+		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
+			if (queryItemPanelId.equals(GroupByValueItemPanel.ID) ||
+					queryItemPanelId.equals(GriddedValueItemPanel.ID)){
+				items = new DropItem[]{createCategoryValueDropItem(null)};
+			}
 		}else if (source == FilterContentProvider.Node.SURVEY_ID){
 			items = new DropItem[]{createSurveyIdDropItem()};
 		}else if (source == FilterContentProvider.Node.MISSION_ID){
@@ -380,56 +392,57 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
 			proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(queryFilter, session));
 					
-//		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
-//			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
-//			SumQueryDefinition def = q.getQueryDefinition();
-//			
-//			//value filter panel
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, //$NON-NLS-1$
-//					def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session));
+		}else if (proxy.getQuery().getType().getKey().equals(SurveySummaryQueryType.KEY)){
+			SurveySummaryQuery q = (SurveySummaryQuery) proxy.getQuery();
+			SumQueryDefinition def = q.getQueryDefinition();
+			
+			//value filter panel
+			proxy.setDropItems(FilterDefintionPanel.ID, //+ "." + FilterDefintionPanel.PanelType.RATE, 
+					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
 //			//rate filter panel
 //			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, //$NON-NLS-1$
 //					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
-//			//column group by
-//			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-//					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
-//			//row group by
-//			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-//					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
-//
-//			//values
-//			List<DropItem> items = null;
+			//column group by
+			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
+					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+			//row group by
+			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.ROW.name(), //$NON-NLS-1$
+					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
+
+			//values
+			List<DropItem> items = null;
 //			if (def != null && def.getValuePart() != null){
-//				items = def.getValuePart().getDropItems(session);
+				items = def.getValuePart().getDropItems(session);
 //				for (DropItem i : items){
 //					if (i instanceof AbstractValueDropItem){
 //						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
 //					}
 //				}
 //			}
-//			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
-//					
+			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
+					
 //			
-//		}else if(proxy.getQuery().getType().getClass().equals(PatrolGridQueryType.class)){
-//			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();
-//			GridQueryDefinition def = q.getQueryDefinition();
-//			
-//			
+		}else if(proxy.getQuery().getType().getKey().equals(SurveyGridQueryType.KEY)){
+			SurveyGriddedQuery q = (SurveyGriddedQuery) proxy.getQuery();
+			GridQueryDefinition def = q.getQueryDefinition();
+			
+			proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(def.getValueFilter().getFilter(), session)); 
+			
 //			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
 //			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
 //			
-//			DropItem valueItem = null;
-//			try{
-//				valueItem = def.getValuePart().asDropItem(session);
+			DropItem valueItem = null;
+			try{
+				valueItem = def.getValuePart().asDropItem(session);
 //				if (valueItem instanceof AbstractValueDropItem){
 //					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
 //				}
-//			}catch(Exception ex){
-//				QueryPlugIn.log(ex.getMessage(), ex);
-//				valueItem = new ErrorDropItem(ex.getMessage());
-//			}
-//			proxy.setDropItems(PatrolGriddedQueryDefinitionPanel.VALUE_PANEL_ID,
-//					Collections.singletonList(valueItem));
+			}catch(Exception ex){
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+				valueItem = new ErrorDropItem(ex.getMessage());
+			}
+			proxy.setDropItems(GriddedDefinitionPanel.VALUE_PANEL_ID,
+					Collections.singletonList(valueItem));
 //					
 //			
 		}

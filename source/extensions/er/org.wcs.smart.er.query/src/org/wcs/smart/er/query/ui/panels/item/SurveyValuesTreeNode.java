@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -105,7 +106,7 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 	}
 	@Override
 	public String getName() {
-		return "Survey Values";
+		return Messages.SurveyValuesTreeNode_SurveyValuesNodeLabel;
 	}
 
 	@Override

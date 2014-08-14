@@ -33,11 +33,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.AbstractSummaryGroupByValuePanel;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
@@ -83,7 +86,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 
 	@Override
 	public String getGuiName() {
-		return "Group By and Values";
+		return Messages.SummaryDefinitionPanel_Name;
 	}
 
 	@Override
@@ -129,7 +132,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 			public String validate() {
 				if (type == ListTargetType.VALUE){
 					if (super.items.size() == 0){
-						return "At least one value must be selected.";
+						return Messages.SummaryDefinitionPanel_ValueRequiredError;
 					}
 				}
 				return null;
@@ -142,7 +145,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 			
 			@Override
 			public String getGuiName() {
-				return MessageFormat.format ("Group By {0}", new Object[]{type.name()});
+				return MessageFormat.format (Messages.SummaryDefinitionPanel_GroupByLabel, new Object[]{type.name()});
 			}
 		};
 	}
@@ -164,7 +167,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 		parent.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Survey Design:");
+		lbl.setText(Messages.SummaryDefinitionPanel_SurveyDesignLabel);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
@@ -194,6 +197,16 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 		updateDesignLabel();
 	}
 	
+	@Override
+	public void initItems(QueryProxy q) {
+		super.initItems(q);
+		
+		if (q.getQuery() instanceof ISurveyQuery){
+			ISurveyQuery sq = (ISurveyQuery) q.getQuery();
+			refreshPanel(sq.getSurveyDesignAsObject());
+		}
+	}
+	
 	/**
 	 * 
 	 * @return true if one of the values has an encounter rate
@@ -209,7 +222,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 	}
 
 	private void updateDesignLabel() {
-		String text = "All";
+		String text = Messages.SummaryDefinitionPanel_AllLabels;
 		if (currentDesign != null) {
 			text = currentDesign.getName();
 		}
@@ -249,5 +262,10 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 	@Override
 	public Query getQuery() {
 		return currentQuery.getQuery();
+	}
+	
+	@Override
+	public SurveyDesign getSurveyDesign() {
+		return currentDesign;
 	}
 }

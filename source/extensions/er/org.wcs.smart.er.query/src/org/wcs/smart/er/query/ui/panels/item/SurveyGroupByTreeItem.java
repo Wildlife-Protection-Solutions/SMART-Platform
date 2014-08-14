@@ -29,6 +29,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider.Node;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
@@ -46,7 +47,7 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 	
 	@Override
 	public String getName() {
-		return "Survey Group Bys";
+		return Messages.SurveyGroupByTreeItem_TreeNodeLabel;
 	}
 
 	@Override

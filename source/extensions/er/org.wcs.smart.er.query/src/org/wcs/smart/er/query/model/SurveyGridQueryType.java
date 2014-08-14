@@ -33,9 +33,11 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveyGriddedEditor;
+import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
@@ -77,7 +79,7 @@ public class SurveyGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Survey Gridded Query";
+		return Messages.SurveyGridQueryType_QueryTypeName;
 	}
 
 	/**
@@ -142,6 +144,9 @@ public class SurveyGridQueryType implements IQueryType {
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
 			}
+			if (p instanceof ISurveyPanel){
+				summary.setSurveyDesign(((ISurveyPanel) p).getSurveyDesign());
+			}
 		}
 		summary.setQuery(definition + "|" + filters); //$NON-NLS-1$
 	}
@@ -167,8 +172,8 @@ public class SurveyGridQueryType implements IQueryType {
 			}else if (p.getId().equals(GriddedDefinitionPanel.ID)){
 				definition = p.getQueryPart();
 			}
-			
 		}
+		
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());

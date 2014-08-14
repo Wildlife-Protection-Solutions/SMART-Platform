@@ -29,9 +29,6 @@ import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
-import org.wcs.smart.query.event.IQueryListener;
-import org.wcs.smart.query.event.QueryEventManager;
-import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -53,19 +50,24 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 		public void surveyDesignChange(SurveyDesign newDesign, Query query) {
 			if (!getQuery().equals(query)) return;
 			
-			System.out.println("clear columns");
 			getQueryResultsTable().clearColumns();
 			getQueryResultsTable().initQuery(getQueryInternal());
 		}
 	};
 	
 	
+	/**
+	 * Creates a new results editor
+	 */
 	public SurveySimpleQueryResultEditor(){
 		super();
 		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(updateTable);	
 	}
 	
 	
+	/**
+	 * Disposes editor
+	 */
 	@Override
 	public void dispose(){
 		super.dispose();
@@ -82,10 +84,12 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 		return SurveyQueryFactory.createQuery(type);
 	}
 	
+	@Override
 	protected IDateFieldFilter[] getDateFilterOptions(){
 		return SurveyObservationQueryType.validDateFields();
 	}
 	
+	@Override
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column){
 		return SurveyQueryColumnManager.getLabelProvider(column);
 	}

@@ -33,9 +33,11 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySummaryEditor;
+import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
@@ -54,8 +56,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
 public class SurveySummaryQueryType implements IQueryType {
 	
 	public static final String KEY = "surveysummary"; //$NON-NLS-1$
-	
-	private static IDropItemFactory dropItemFactory = null;
 	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
@@ -78,7 +78,7 @@ public class SurveySummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return "Survey Summary Query";
+		return Messages.SurveySummaryQueryType_QueryTypeName;
 	}
 
 	/**
@@ -140,6 +140,10 @@ public class SurveySummaryQueryType implements IQueryType {
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
 			}
+			
+			if (p instanceof ISurveyPanel){
+				summary.setSurveyDesign(((ISurveyPanel)p).getSurveyDesign());
+			}
 		}
 		summary.setQuery(definition + "|" + filters); //$NON-NLS-1$
 	}
@@ -169,11 +173,13 @@ public class SurveySummaryQueryType implements IQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
+		System.out.println(queryString);
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
 			Parser parser = new Parser(is);
 			parser.SumQuery();
 		}catch (Exception ex){
+			ex.printStackTrace();
 			return ex.getMessage();
 		}finally{
 			try {

@@ -130,8 +130,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}
 	};
 	
-	@SuppressWarnings("unchecked")
-	private Job loadSamplingUnits = new Job("Sampling Units"){
+	private Job loadSamplingUnits = new Job(Messages.FilterContentProvider_LoadSuJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -169,7 +168,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		MISSION_ID(Messages.SurveyItemContentProvider_MissionIDLabel),
 		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
 		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel),
-		SAMPLING_UNITS("Sampling Units");
+		SAMPLING_UNITS(Messages.FilterContentProvider_SuLabel);
 		public String guiName;
 		
 		private Node(String guiName){
