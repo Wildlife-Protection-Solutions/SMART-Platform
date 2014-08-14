@@ -72,6 +72,7 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 	private String currentOp = null;
 	
 	private SurveyDesign design = null;
+	private boolean fireEvents = true;
 	
 	/*
 	 * job to load all patrol ids
@@ -103,13 +104,18 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 					if (value.isDisposed()){
 						return ;
 					}
-					value.removeAll();
-					for (String id : data){
-						value.add(id);
-					}
-					if (lCurrentValue != null){
-						value.setText(lCurrentValue);
-						currentValue = lCurrentValue;
+					fireEvents = false;
+					try{
+						value.removeAll();
+						for (String id : data){
+							value.add(id);
+						}
+						if (lCurrentValue != null){
+							value.setText(lCurrentValue);
+							currentValue = lCurrentValue;
+						}
+					}finally{
+						fireEvents = true;
 					}
 				}});
 			return Status.OK_STATUS;
@@ -188,13 +194,16 @@ public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISu
 		value.addModifyListener(new ModifyListener() {			
 			@Override
 			public void modifyText(ModifyEvent e) {
+				if (!fireEvents){
+					return;
+				}
 				if (currentValue != null && currentValue.equals(value.getText())){
 					//ignore; not changed
-				}else{
-					queryChanged();
-					value.setToolTipText(value.getText());
-					currentValue = value.getText();
+					return;
 				}
+				queryChanged();
+				value.setToolTipText(value.getText());
+				currentValue = value.getText();
 			}
 		});
 		

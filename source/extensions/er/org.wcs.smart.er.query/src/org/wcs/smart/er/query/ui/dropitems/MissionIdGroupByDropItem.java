@@ -101,6 +101,7 @@ public class MissionIdGroupByDropItem extends DropItem implements IGroupByDropIt
 			if (currentDesign != null){
 				q.add(Restrictions.eq("s.surveyDesign", currentDesign)); //$NON-NLS-1$ 
 			}
+			q.addOrder(Order.asc("sd.keyId")); //$NON-NLS-1$ 
 			q.addOrder(Order.desc("sd.startDate")); //$NON-NLS-1$ 
 			q.addOrder(Order.desc("startDate")); //$NON-NLS-1$ 
 			

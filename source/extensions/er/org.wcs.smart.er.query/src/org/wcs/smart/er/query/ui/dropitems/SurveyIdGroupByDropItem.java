@@ -100,6 +100,7 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 			if (currentDesign != null){
 				q.add(Restrictions.eq("surveyDesign", currentDesign)); //$NON-NLS-1$
 			}
+			q.addOrder(Order.asc("sd.keyId")); //$NON-NLS-1$ 
 			q.addOrder(Order.desc("sd.startDate")); //$NON-NLS-1$
 			q.addOrder(Order.desc("startDate")); //$NON-NLS-1$
 			

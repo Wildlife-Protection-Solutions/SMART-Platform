@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -67,8 +68,6 @@ public class MissionAttributeGroupBy implements IGroupBy{
 		}
 	}
 	
-	private List<ListItem> allItems;
-	
 	private String attributeKey; 
 	private String[] items;
 	
@@ -92,6 +91,10 @@ public class MissionAttributeGroupBy implements IGroupBy{
 		}
 		return sb.toString();
 	}
+	
+	public String getAttributeKey(){
+		return this.attributeKey;
+	}
 
 	@Override
 	public String getKeyPart() {
@@ -105,24 +108,24 @@ public class MissionAttributeGroupBy implements IGroupBy{
 
 	@Override
 	public List<ListItem> getItems(Session session) {
-		if (allItems != null){
-			return allItems;
-		}
-		
 		MissionAttribute ma = null;
 		try{
 			ma = getMissionAttribute(session);
 		}catch (Exception ex){
 			throw new RuntimeException(ex.getMessage());
 		}
-		allItems = new ArrayList<ListItem>();
-		if (items != null){
+		ArrayList<ListItem> allItems = new ArrayList<ListItem>();
+		if (items != null && items.length > 0){
 			for (String it : items){
 				for (MissionAttributeListItem mli : ma.getAttributeList()){
 					if (mli.getKeyId().equals(it)){
 						allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 					}
 				}
+			}
+		}else{
+			for (MissionAttributeListItem mli : ma.getAttributeList()){
+				allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 			}
 		}
 		return allItems;
@@ -151,7 +154,11 @@ public class MissionAttributeGroupBy implements IGroupBy{
 			return new ErrorDropItem(ex.getMessage());
 		}
 		DropItem di = SurveyDropItemFactory.INSTANCE.createMissionAttributeGroupByDropItem(ma);
-		di.initializeData(getItems(session));
+		if (items != null && items.length > 0){
+			di.initializeData(getItems(session));
+		}else{
+			di.initializeData(new ArrayList<ListItem>());
+		}
 		return di;
 	}
 
@@ -159,5 +166,7 @@ public class MissionAttributeGroupBy implements IGroupBy{
 	public void visit(IGroupByVisitor visitor) {
 		visitor.visit(this);		
 	}
+
+
 
 }

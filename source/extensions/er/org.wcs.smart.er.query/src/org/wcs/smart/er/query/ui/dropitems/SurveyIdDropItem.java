@@ -73,6 +73,7 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 	
 	private SurveyDesign design = null;
 	
+	private boolean fireEvents = true;
 	/*
 	 * job to load all patrol ids
 	 */
@@ -101,13 +102,18 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 					if (value.isDisposed()){
 						return ;
 					}
-					value.removeAll();
-					for (String id : data){
-						value.add(id);
-					}		
-					if (lcurrentValue != null){
-						value.setText(lcurrentValue);
-						currentValue = lcurrentValue;
+					fireEvents = false;
+					try{
+						value.removeAll();
+						for (String id : data){
+							value.add(id);
+						}
+						if (lcurrentValue != null){
+							value.setText(lcurrentValue);
+							currentValue = lcurrentValue;
+						}
+					}finally{
+						fireEvents = true;
 					}
 				}});
 			return Status.OK_STATUS;
@@ -183,18 +189,6 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 		});
 		
 		value = new Combo(main, SWT.BORDER | SWT.DROP_DOWN);
-		value.addModifyListener(new ModifyListener() {			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (currentValue != null && currentValue.equals(value.getText())){
-					//ignore; not changed
-				}else{
-					queryChanged();
-					value.setToolTipText(value.getText());
-					currentValue = value.getText();
-				}
-			}
-		});
 		
 		fd = (value.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
@@ -205,6 +199,22 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 		gd.minimumWidth = 50;
 		gd.widthHint = 100;
 		value.setLayoutData(gd);
+		value.addModifyListener(new ModifyListener() {			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (!fireEvents){
+					return;		
+				}
+				if (currentValue != null && currentValue.equals(value.getText())){
+					//ignore; not changed
+					return;
+				}
+
+				queryChanged();
+				value.setToolTipText(value.getText());
+				currentValue = value.getText();
+			}
+		});
 		
 		initDrag(main);
 		initDrag(lblAttribute);
@@ -223,6 +233,7 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 			value.setText(currentValue);
 		}
 		
+
 		loadIdsJob.schedule();
 	}
 

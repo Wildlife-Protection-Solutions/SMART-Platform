@@ -25,11 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
-import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
@@ -40,7 +43,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * 
  */
-public class SurveyIdGroupBy implements IGroupBy {
+public class SurveyIdGroupBy implements ISurveyGroupBy {
 
 	public static SurveyIdGroupBy createGroupBy(String key){
 		String bits[] = key.split(":"); //$NON-NLS-1$
@@ -121,6 +124,38 @@ public class SurveyIdGroupBy implements IGroupBy {
 	@Override
 	public void visit(IGroupByVisitor visitor) {
 		visitor.visit(this);		
+	}
+
+	@Override
+	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
+		
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		if (filter == null){
+			//get all surveys for the current ca
+			
+			List<Survey> surveys = session.createCriteria(Survey.class, "survey")
+					.createAlias("survey.surveyDesign", "sd")
+					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+					.addOrder(Order.asc("sd.keyId"))
+					.list();
+			for (Survey s : surveys){
+				ListItem li = new ListItem(s.getUuid(), s.getId() + " [" + s.getSurveyDesign().getName() + "]");
+				items.add(li);
+			}			
+		}else{
+			List<Survey> surveys = session.createCriteria(Survey.class, "survey")
+				.createAlias("survey.surveyDesign", "sd")
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("sd.keyId", filter.getKey()))
+				.addOrder(Order.asc("sd.keyId"))
+				.list();
+			for (Survey s : surveys){
+				ListItem li = new ListItem(s.getUuid(), s.getId() );
+				items.add(li);
+			}			
+		}
+		
+		return items;
 	}
 
 }
