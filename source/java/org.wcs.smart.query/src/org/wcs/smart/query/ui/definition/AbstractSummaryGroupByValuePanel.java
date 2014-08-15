@@ -154,14 +154,8 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 		Composite rightInner = new Composite(right, SWT.NONE);
 		gl = new GridLayout(2, false);
 		rightInner.setLayout(gl);
-		
-		Label lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
-		
-		lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setText(Messages.SummaryValueGroupByPanel_ValuesSectionHeader);
-		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblValues.setToolTipText(Messages.SummaryValueGroupByPanel_ValuesSectionTooltip);
+		rightInner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		createValuesHeader(rightInner);
 
 		Composite leftInner = new Composite(left, SWT.NONE);
 		gl = new GridLayout(2, false);
@@ -180,6 +174,16 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		return main;
+	}
+	
+	protected void createValuesHeader(Composite rightInner){
+		Label lblValues = new Label(rightInner, SWT.NONE);
+		lblValues.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
+		
+		lblValues = new Label(rightInner, SWT.NONE);
+		lblValues.setText(Messages.SummaryValueGroupByPanel_ValuesSectionHeader);
+		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblValues.setToolTipText(Messages.SummaryValueGroupByPanel_ValuesSectionTooltip);
 	}
 
 	private void createInnerGroupByComposite(Composite parent){

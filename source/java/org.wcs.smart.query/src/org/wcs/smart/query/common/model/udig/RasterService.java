@@ -279,6 +279,24 @@ public class RasterService extends AbstractRasterService {
 				}
  				
 			 }
+
+			 @Override
+			 public <T> boolean canResolve(Class<T> adaptee) {
+				if (adaptee == null) return false;
+			
+				return adaptee.isAssignableFrom(RasterService.class) || 
+							super.canResolve(adaptee);
+			}
+			 
+			 @Override
+			 public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor) throws IOException {
+			 	if (adaptee == null) return null;
+			 	
+			 	if (adaptee.isAssignableFrom(RasterService.class)){
+			 		return adaptee.cast(RasterService.this);
+			 	}
+			 	return super.resolve(adaptee, monitor);
+			 }
 		};
 	}
 	

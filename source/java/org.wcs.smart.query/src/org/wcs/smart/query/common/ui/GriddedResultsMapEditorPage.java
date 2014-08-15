@@ -130,7 +130,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 		}
 
 		/**
-		 * Adds the new raster resource to the mapraster it will be deleted.
+		 * Adds the new raster resource to the map
 		 * 
 		 * @param map
 		 * @param rasterResourceList
@@ -149,11 +149,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 			map.getRenderManagerInternal().enableRendering();
 			map.getRenderManager().refresh(null);
 
-			try {
-				CatalogPlugin.getDefault().getLocalCatalog()
-						.remove(rasterService);
-			} catch (Exception ex) {
-			}
+			
 
 		}
 	};
@@ -271,11 +267,17 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 		addLayerJob.cancel();
 
 		if (rasterService != null) {
+			try {
+				CatalogPlugin.getDefault().getLocalCatalog().remove(rasterService);
+			} catch (Exception ex) {
+			}
 			this.rasterService.dispose(null);
 			this.rasterService = null;
 		}
 		refreshJob.cancel();
 		refreshJob = null;
+		
+		
 	}
 
 	/**
