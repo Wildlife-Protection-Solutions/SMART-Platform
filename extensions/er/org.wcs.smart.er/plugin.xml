@@ -311,6 +311,13 @@
             id="org.wcs.smart.er.SurveyDesignEditor"
             name="Survey Design Editor">
       </editor>
+      <editor
+            class="org.wcs.smart.er.ui.mision.editor.MissionEditor"
+            default="false"
+            icon="images/icons/obj16/mission.png"
+            id="org.wcs.smart.er.ui.mission.MissionEditor"
+            name="Mission Editor">
+      </editor>
    </extension>
 
 </plugin>

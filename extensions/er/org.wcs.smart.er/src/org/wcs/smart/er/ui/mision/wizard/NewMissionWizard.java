@@ -59,11 +59,9 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class NewMissionWizard extends Wizard implements IPageChangingListener{
 
-	
 	private Session session;
 	
 	private Mission newMission;
-	
 	private SurveyDesign parentDesign;
 	private Survey parentSurvey;
 	
@@ -134,6 +132,9 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	
 	@Override
 	public boolean performFinish() {
+		//update last page
+		((MissionCompositeWizardPage)getPages()[getPageCount() - 1]).updateModel(newMission);
+		
 		session.beginTransaction();
 		try{
 			session.save(newMission);

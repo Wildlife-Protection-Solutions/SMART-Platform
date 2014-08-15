@@ -46,6 +46,8 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.ui.mision.editor.MissionEditor;
+import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -103,7 +105,7 @@ public class SurveyDesignListView extends ViewPart{
 								//TODO: implement SURVEY
 								break;
 							case MISSION:
-								//TODO: implement MISSION
+								page.openEditor(new MissionEditorInput(node.getLabel(), node.getUuid()), MissionEditor.ID);
 								break;
 						}
 					} catch (Throwable t) {

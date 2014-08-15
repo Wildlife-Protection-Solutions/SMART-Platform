@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -123,7 +124,7 @@ public class Mission extends UuidItem{
 		this.waypoints = waypoints;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<MissionTrack> getTracks(){
 		return this.tracks;
 	}
@@ -138,7 +139,7 @@ public class Mission extends UuidItem{
 	 * 
 	 * @return
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<MissionPropertyValue> getMissionPropertyValues(){
 		return this.properties;
 	}
@@ -147,7 +148,7 @@ public class Mission extends UuidItem{
 		this.properties = properties;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<MissionMember> getMembers(){
 		return this.members;
 	}

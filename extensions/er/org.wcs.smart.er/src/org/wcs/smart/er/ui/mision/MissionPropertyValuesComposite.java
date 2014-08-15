@@ -175,7 +175,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 						//not a double
 					}
 				}
-			}else if (mpv.getMissionAttribute().getType() == AttributeType.TEXT){
+			}else if (mpv.getMissionAttribute().getType() == AttributeType.LIST){
 				ComboViewer cmbViewer = (ComboViewer)entry.getValue();
 				if (!cmbViewer.getSelection().isEmpty()){
 					MissionAttributeListItem mali = (MissionAttributeListItem) ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();

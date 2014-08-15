@@ -1,0 +1,418 @@
+package org.wcs.smart.er.ui.mision.editor;
+
+import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.List;
+
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.ISurveyEventListener;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.hibernate.HibernateManager;
+
+public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
+
+	public static final String ID = "org.wcs.smart.er.ui.mission.MissionEditor"; //$NON-NLS-1$
+
+	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
+	
+	private Mission mission = null;
+	
+	private MissionSummaryPage summaryEditor;
+	private MissionMapPage mapPage;
+	
+	private Projection[] projections;
+	
+//	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
+	
+//	private ISurveyEventListener saveListener = new ISurveyEventListener() {
+//		@Override
+//		public void event(Object o) {
+//			Patrol p = null;
+//			if (source instanceof PatrolLegDay){
+//				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
+//			}else if (source instanceof Patrol){
+//				p = (Patrol)source;
+//			}
+//			if (p != null && p.equals(patrol)){
+//				if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG){
+//					//reload patrol & update summary and day pages
+//					Job j = new Job("load patrol"){ //$NON-NLS-1$
+//						@Override
+//						protected IStatus run(IProgressMonitor monitor) {
+//							patrol = null;
+//							getPatrol();
+//							Session s = HibernateManager.openSession();
+//							s.beginTransaction();
+//							try{
+//								s.update(patrol);
+//								updateSummaryPage();
+//							}finally{
+//								s.close();
+//							}
+//							Display.getDefault().syncExec(new Runnable(){
+//								@Override
+//								public void run() {
+//									createDayPages();
+//									mapPage.refresh();
+//								}});
+//							return Status.OK_STATUS;
+//						}					
+//					};
+//					j.setSystem(true);
+//					j.schedule();
+//				
+//				}else{
+//					updateSummaryPage();
+//				}
+//
+//			}
+//		}
+//	};
+	
+	
+	private ISurveyEventListener missionDeleteListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			Mission mission = (Mission)o;
+			if (mission.equals(MissionEditor.this.mission)){
+				MissionEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						MissionEditor.this.getEditorSite().getWorkbenchWindow()
+							.getActivePage().closeEditor(MissionEditor.this, false);
+					}});
+			}
+		}
+	};
+	
+	/**
+	 * Converts a double that represents a time range into
+	 * and hours and minutes string.  For example: 20.5 is 
+	 * converted into "20h 30m"
+	 * 
+	 * @param hrs time range in hours
+	 * @return formatted string
+	 */
+	public static String formatTimeRange(Double hrs){
+		boolean minus = false;
+		if (hrs < 0){
+			minus = true;
+			hrs = -hrs;
+		}
+		int lhrs = (int)Math.floor(hrs);
+		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
+		
+		if (lmin == 60){
+			lmin = 0;
+			lhrs++;
+		}
+		if (minus){
+			return "-" + lhrs + " hour " + " " + lmin + " min"; //$NON-NLS-1$ //$NON-NLS-2$
+		}else{
+			return lhrs + " hour "  + " " + lmin + " min"; //$NON-NLS-1$
+		}
+	}
+	
+	public MissionEditor() {
+		super();
+
+		SurveyEventHandler.getInstance().addListener(EventType.MISSION_DELETED, missionDeleteListener);
+	}
+
+	public Projection[] getAvailableProjections(){
+		return this.projections;
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_DELETED, missionDeleteListener);
+
+	}
+	
+//	/**
+//	 * 
+//	 * @return null if the patrol can be editted, otherwise a string
+//	 * that described reason why can't be edited.
+//	 */
+//	public String canEdit(){
+//		return PatrolManager.getInstance().canEdit(patrol, ops);
+//	}
+	
+	public Mission getMission(){
+		if (this.mission == null){
+			
+			byte[] muuid = ((MissionEditorInput) getEditorInput()).getUuid();
+			Session session = HibernateManager.openSession();
+			//load patrol items so don't have lazy loading issues later.
+			
+			this.mission = (Mission) session.load(Mission.class, muuid);
+
+			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+			this.projections = tmp.toArray(new Projection[tmp.size()]);
+			
+		}
+		return this.mission;
+	}
+
+	public void updatePartName(){
+		MissionEditorInput input = ((MissionEditorInput) getEditorInput());
+		super.setPartName("Mission: " + input.getName());
+	}
+	
+	
+	@Override
+	protected void createPages() {
+		MissionEditorInput input = ((MissionEditorInput) getEditorInput());
+		super.setPartName(input.getName());
+		showBusy(true);
+		try {
+			
+			getMission();
+			
+			summaryEditor = new MissionSummaryPage(this);
+			int i = addPage(summaryEditor, getEditorInput());
+			setPageText(i, "Summary");
+			createDayPages();
+//			
+//			mapPage = new PatrolMapPageEditor(PatrolEditor.this);
+//			int mapIndex = addPage(mapPage, getEditorInput());
+//			setPageText(mapIndex, Messages.PatrolEditor_PatrolMapPageName);
+//			
+//			
+//			if (PatrolContributionPageEditor.hasContributions()){
+//				PatrolContributionPageEditor contributionPage = new PatrolContributionPageEditor(PatrolEditor.this);
+//				int index = addPage(contributionPage, getEditorInput());
+//				setPageText(index, Messages.PatrolEditor_OtherPatrolTabName);
+//			}
+//			
+//			getSite().setSelectionProvider(selectionProvider);
+		} catch (final Throwable t) {
+			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+				@Override
+						public void run() {
+							try {
+								MissionEditor.this.dispose();
+								MissionEditor.this.getSite().getPage().closeEditor(MissionEditor.this, false);
+								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
+									EcologicalRecordsPlugIn.displayLog("Mission editor could not be created.  Please try closing existing open editors and try again." + t.getLocalizedMessage(), t);
+								} else {
+									EcologicalRecordsPlugIn.displayLog("Error occurred while loading editor." + t.getLocalizedMessage(), t);
+								}
+							} catch (Exception ex) {
+								EcologicalRecordsPlugIn.log("Failure",ex); //$NON-NLS-1$
+							}
+
+						}
+			});
+
+		}finally{
+			showBusy(false);
+		}
+	}
+	
+//	public CombinedSelectionProvider getSelectionProvider(){
+//		return this.selectionProvider;
+//	}
+	
+	public void updateSummaryPage(){
+//		summaryEditor.refreshPatrolSummaryTable();
+	}
+	
+	
+	public void createDayPages( ) {
+		
+	}
+	
+
+	@Override
+	public boolean isSaveAsAllowed() {
+		return false;
+	}
+	
+//	public void save(Mission mission){
+//		savePatrolPart(patrol);
+//	}
+//	
+//	public void save(PatrolLegDay patrolLegDay){
+//		patrolLegDay.getTrack();
+//		savePatrolPart(patrolLegDay);
+//	}
+	
+	
+//	public Job moveWaypoints(final Collection<SurveyWaypoint> toSave, final Collection<SurveyWaypoint> toDelete){
+//		Job moveJob = new Job("Moving waypoints job") {
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+//				Session saveSession = HibernateManager
+//						.openSession(new WaypointAttachmentInterceptor());
+//				try{
+//					saveSession.beginTransaction();
+//					
+//					/* delete waypoints */
+//					for (SurveyWaypoint wp : toDelete) {
+//						saveSession.delete(wp);
+//						saveSession.delete(wp.getWaypoint());					
+//					}
+//					/* save waypoints */
+//					for (SurveyWaypoint wp : toSave) {
+//						wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+//						wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
+//						saveSession.saveOrUpdate(wp.getWaypoint());
+//						saveSession.saveOrUpdate(wp);
+//						
+//						// remove observations with no data
+//						if (wp.getWaypoint().getObservations() != null) {
+//							for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
+//								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+//								for (WaypointObservationAttribute att : wo.getAttributes()) {
+//									if (!att.hasValue()) {
+//										toDelete.add(att);
+//									}
+//								}
+//								wo.getAttributes().removeAll(toDelete);
+//							}
+//						}
+//					}
+//					
+//					saveSession.getTransaction().commit();
+//				}catch (Exception ex){
+//					if (saveSession.getTransaction().isActive()){
+//						saveSession.getTransaction().rollback();
+//					}
+//					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
+//				}finally{
+//					saveSession.close();
+//				}
+//				
+//				/* fire events */
+//				for (PatrolWaypoint wp : toDelete){
+//					try{
+//						PatrolEventManager.getInstance().waypointDeleted(wp);
+//					}catch (Exception ex){
+//						SmartPatrolPlugIn.log("Error firing event after waypoint delete.", ex); //$NON-NLS-1$
+//					}
+//				}
+//				for (PatrolWaypoint wp : toSave){
+//					try{
+//						PatrolEventManager.getInstance().waypointModified(wp);
+//					}catch (Exception ex){
+//						SmartPatrolPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
+//					}
+//				}
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		moveJob.schedule();
+//		return moveJob;
+//		
+//	}
+	/**
+	 * Saves the collection of waypoints.
+	 * 
+	 * @param waypoints
+	 */
+	public Job save(Collection<SurveyWaypoint> waypoints) {
+		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
+		saveWaypointJob.setWaypoints(waypoints);
+		saveWaypointJob.schedule();
+		return saveWaypointJob;
+	}
+	
+	/**
+	 * Deletes the collection of waypoints in a separate thread.
+	 * 
+	 * @param waypoints
+	 * @return the job responsible for deleting waypoints
+	 */
+	public Job delete(final Collection<SurveyWaypoint> waypoints) {
+		DeleteWaypointJob job = new DeleteWaypointJob();
+		job.setWaypoints(waypoints);
+		job.schedule();
+		return job;
+	}
+	
+	
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+				
+	}
+
+	@Override
+	public void doSaveAs() {
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 */
+	@Override
+	public Map getMap() {
+		if (mapPage == null){
+			return null;
+		}
+		return 	mapPage.getMap();
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 */
+	@Override
+	public void openContextMenu() {
+		mapPage.openContextMenu();
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 */
+	@Override
+	public void setFont(Control textArea) {
+		mapPage.setFont(textArea);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 */
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapPage.setSelectionProvider(selectionProvider);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 */
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return mapPage.getStatusLineManager();
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getAdapter(Class adaptee) {
+		if (adaptee.isAssignableFrom(Map.class)) {
+			return getMap();
+		}
+		return super.getAdapter(adaptee);
+	}
+	
+}
