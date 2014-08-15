@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.ui.EmployeeLabelProvider;
@@ -63,8 +64,8 @@ public class MissionEmployeeComposite extends MissionComposite {
 		
 		composite = new MultipleSelectComposite<Employee>(c, SWT.NONE);
 		composite.setLabelProvider(EmployeeLabelProvider.getInstance());
-		composite.setLabelAllText("All Employees:");
-		composite.setLabelSelectedText("Mission Members:");
+		composite.setLabelAllText(Messages.MissionEmployeeComposite_AllEmployeesLabel);
+		composite.setLabelSelectedText(Messages.MissionEmployeeComposite_MissionMemberLabel);
 		
 		composite.addSelectionChangedListener(new IListChanged<Employee>() {
 
@@ -123,12 +124,12 @@ public class MissionEmployeeComposite extends MissionComposite {
 
 	@Override
 	public String getTitle() {
-		return "Mission Members";
+		return Messages.MissionEmployeeComposite_Title;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Members involved in the mission.";
+		return Messages.MissionEmployeeComposite_Description;
 	}
 
 }

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -60,7 +61,7 @@ public class IdComposite extends MissionComposite{
 		
 		Label lblNewLabel = new Label(part, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel.setText("Mission ID:");
+		lblNewLabel.setText(Messages.IdComposite_IdLabel);
 		
 		txtName = new Text(part, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -112,7 +113,7 @@ public class IdComposite extends MissionComposite{
 		String name = txtName.getText();
 		if (!SmartUtils.isSimpleString(name, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Mission.MAX_LENGTH_ID)){
 			error = true;
-			cdTxt.setDescriptionText(MessageFormat.format("The id must be between 1 and {0} characters and only contain {1}", new Object[]{Mission.MAX_LENGTH_ID, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+			cdTxt.setDescriptionText(MessageFormat.format(Messages.IdComposite_IdError, new Object[]{Mission.MAX_LENGTH_ID, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			cdTxt.show();
 		}else{
 			cdTxt.hide();
@@ -127,11 +128,11 @@ public class IdComposite extends MissionComposite{
 	
 	@Override
 	public String getTitle(){
-		return "Mission ID";
+		return Messages.IdComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Enter the mission identifier.";
+		return Messages.IdComposite_Description;
 	}
 }

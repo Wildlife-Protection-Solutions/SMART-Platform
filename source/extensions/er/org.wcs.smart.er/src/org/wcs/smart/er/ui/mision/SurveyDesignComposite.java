@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
@@ -63,7 +64,7 @@ public class SurveyDesignComposite extends MissionComposite{
 		part.setLayout(new GridLayout(2, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label l = new Label(part, SWT.NONE);
-		l.setText("Survey Design:");
+		l.setText(Messages.SurveyDesignComposite_SdLabel);
 		
 		cmbDesigns = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbDesigns.setContentProvider(ArrayContentProvider.getInstance());
@@ -123,12 +124,12 @@ public class SurveyDesignComposite extends MissionComposite{
 
 	@Override
 	public String getTitle() {
-		return "Survey Design";
+		return Messages.SurveyDesignComposite_Title;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Select the survey design associated with this mission.";
+		return Messages.SurveyDesignComposite_Description;
 	}
 
 }

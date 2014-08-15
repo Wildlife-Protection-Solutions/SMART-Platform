@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.component.DatesComponent;
 /**
@@ -88,7 +89,7 @@ public class DateComposite extends MissionComposite {
 			dates.getStartDate().after(mission.getSurvey().getEndDate())){
 			
 			dates.setError(MessageFormat.format(
-					"The missions dates do not fall within the survey dates ({0} to {1}).",
+					Messages.DateComposite_DateError,
 					new Object[]{DateFormat.getDateInstance().format(mission.getSurvey().getStartDate()),
 							DateFormat.getDateInstance().format(mission.getSurvey().getEndDate())}));
 					
@@ -99,11 +100,11 @@ public class DateComposite extends MissionComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Mission Dates";
+		return Messages.DateComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Enter the time frame for the mission.";
+		return Messages.DateComposite_Description;
 	}
 }
