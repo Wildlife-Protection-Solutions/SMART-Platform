@@ -40,12 +40,14 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.DerbyGridEngine;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IQueryType;
@@ -93,26 +95,24 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 
 	@Transient
 	public Collection<GridResultItem> executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
-		//TODO:
-//		resultMetadata = null;
-//		Session lsession = session;
-//		if (lsession == null){
-//			lsession = HibernateManager.openSession();
-//			lsession.beginTransaction();
-//		}
-//		try{
-//			
-//			DerbyGridEngine engine = new DerbyGridEngine();
-//			Collection<GridResultItem> lastResults = engine.executeQuery(this, lsession, monitor);
-//			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
-//			return lastResults;
-//		}finally{
-//			if (session == null && lsession.isOpen()){
-//				lsession.getTransaction().commit();
-//				lsession.close();
-//			}
-//		}
-		return null;
+		resultMetadata = null;
+		Session lsession = session;
+		if (lsession == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
+		try{
+			
+			DerbyGridEngine engine = new DerbyGridEngine();
+			Collection<GridResultItem> lastResults = engine.executeQuery(this, lsession, monitor);
+			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
+			return lastResults;
+		}finally{
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
+			}
+		}
 	}
 	
 	
