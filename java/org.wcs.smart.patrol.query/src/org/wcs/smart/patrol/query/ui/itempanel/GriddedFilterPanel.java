@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -127,7 +127,7 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
-			input.put(PatrolValueTreeItem.KEY, PatrolValueOption.values());
+			input.put(PatrolValueTreeItem.KEY, PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
 			
 			Display.getDefault().asyncExec(new Runnable(){
 
