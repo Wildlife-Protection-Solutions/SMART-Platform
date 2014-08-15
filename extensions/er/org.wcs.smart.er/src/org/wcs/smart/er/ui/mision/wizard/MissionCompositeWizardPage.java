@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision.wizard;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -30,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.mision.MissionComposite;
+import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 
 /**
@@ -102,4 +104,18 @@ public class MissionCompositeWizardPage extends WizardPage {
 	public boolean isPageComplete() {
 		return composite.isValid();
 	}
+	
+	@Override
+	public IWizardPage getNextPage() {
+		IWizardPage next = super.getNextPage();
+		if (next == null) return null;
+		if ( ((MissionCompositeWizardPage)next).getComposite() instanceof MissionPropertyValuesComposite){
+			//we only want to show this page if there is something to show
+			if (((NewMissionWizard)getWizard()).getNewMission().getSurvey().getSurveyDesign().getMissionProperties().size() == 0){
+				return getWizard().getNextPage(next);
+			}
+		}
+		return next;
+	}
+
 }

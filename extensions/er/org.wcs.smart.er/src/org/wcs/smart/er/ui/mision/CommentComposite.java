@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 /**
  * Mission comment composite.
@@ -49,7 +50,7 @@ public class CommentComposite extends MissionComposite {
 		part.setLayout(new GridLayout(1, false));
 		
 		Label l = new Label(part, SWT.NONE);
-		l.setText("Comment");
+		l.setText(Messages.CommentComposite_CommentLabel);
 		
 		txtComment = new Text(part, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -91,12 +92,12 @@ public class CommentComposite extends MissionComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Comment";
+		return Messages.CommentComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Enter any comments associated with the mission.";
+		return Messages.CommentComposite_Description;
 	}
 
 }

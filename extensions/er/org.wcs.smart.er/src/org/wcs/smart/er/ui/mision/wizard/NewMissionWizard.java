@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -34,6 +35,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -42,6 +44,7 @@ import org.wcs.smart.er.ui.mision.DateComposite;
 import org.wcs.smart.er.ui.mision.IdComposite;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
+import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
@@ -87,6 +90,10 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 			newMission.setStartDate(parentSurvey.getStartDate());
 			newMission.setEndDate(parentSurvey.getEndDate());
 		}
+	}
+	
+	public Mission getNewMission(){
+		return this.newMission;
 	}
 	
 	@Override
@@ -140,7 +147,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 			}catch (Exception ex2){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex2);
 			}
-			EcologicalRecordsPlugIn.displayLog("Error saving new survey design." + "\n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.NewMissionWizard_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		return false;
 	}
@@ -155,7 +162,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     @SuppressWarnings("unchecked")
 	public void addPages() {
     	
-    	setWindowTitle("New Mission");
+    	setWindowTitle(Messages.NewMissionWizard_WizardTitle);
 
     	localPages = new ArrayList<MissionComposite>();
     	if (parentDesign == null){
@@ -167,14 +174,17 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     		
     		localPages.add(new SurveyDesignComposite(others));
     	}
-    	if (parentSurvey == null){
-    		localPages.add(new SurveyComposite());
+    	
+    	if (parentSurvey != null){
+    		newMission.setSurvey(parentSurvey);
     	}
     	
+    	localPages.add(new SurveyComposite());
     	localPages.add(new IdComposite());
     	localPages.add(new DateComposite());
     	localPages.add(new MissionEmployeeComposite());
     	localPages.add(new CommentComposite());
+    	localPages.add(new MissionPropertyValuesComposite());
     	
 		for (MissionComposite m : localPages){
     		super.addPage(new MissionCompositeWizardPage(m));
@@ -200,7 +210,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		if (event.getTargetPage() instanceof MissionCompositeWizardPage){
 			((MissionCompositeWizardPage)event.getTargetPage()).initPage(newMission, parentDesign, session);
 			
-			canFinish =  (event.getTargetPage().equals(getPages()[getPageCount()-1]));
+			canFinish = ((IWizardPage)event.getTargetPage()).getNextPage() == null;
 		}
 	}
 }

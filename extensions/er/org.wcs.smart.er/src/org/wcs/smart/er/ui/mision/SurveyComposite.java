@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -66,7 +67,7 @@ public class SurveyComposite extends MissionComposite{
 		part.setLayout(new GridLayout(2, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label l = new Label(part, SWT.NONE);
-		l.setText("Survey:");
+		l.setText(Messages.SurveyComposite_SurveyLabel);
 		
 		cmbSurveys = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbSurveys.setContentProvider(ArrayContentProvider.getInstance());
@@ -81,7 +82,7 @@ public class SurveyComposite extends MissionComposite{
 		});
 		
 		Link lnkCreate = new Link(part, SWT.NONE);
-		lnkCreate.setText("<a>" + "Create New Survey..." + "</a>");
+		lnkCreate.setText("<a>" + Messages.SurveyComposite_NewSurveyLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		lnkCreate.addSelectionListener(new SelectionListener() {
 			
@@ -113,6 +114,7 @@ public class SurveyComposite extends MissionComposite{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void refreshSurveys(Session s){
 		Query q = s.createQuery("FROM Survey where surveyDesign.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
 		q.setParameter("uuid", parentSurvey.getUuid()); //$NON-NLS-1$
@@ -174,12 +176,12 @@ public class SurveyComposite extends MissionComposite{
 
 	@Override
 	public String getTitle() {
-		return "Mission Survey";
+		return Messages.SurveyComposite_Title;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Select the survey associated with this mission.";
+		return Messages.SurveyComposite_Description;
 	}
 
 }

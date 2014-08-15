@@ -61,6 +61,7 @@ public class Mission extends UuidItem{
 	private List<MissionTrack> tracks;
 	
 	private List<MissionMember> members;
+	private List<MissionPropertyValue> properties;
 	
 	
 	public Mission(){
@@ -129,6 +130,21 @@ public class Mission extends UuidItem{
 	
 	public void setTracks(List<MissionTrack> tracks){
 		this.tracks = tracks;
+	}
+	
+	/**
+	 * The mission property values associated with the
+	 * mission.
+	 * 
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true)
+	public List<MissionPropertyValue> getMissionPropertyValues(){
+		return this.properties;
+	}
+	
+	public void setMissionPropertyValues(List<MissionPropertyValue> properties){
+		this.properties = properties;
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true)
