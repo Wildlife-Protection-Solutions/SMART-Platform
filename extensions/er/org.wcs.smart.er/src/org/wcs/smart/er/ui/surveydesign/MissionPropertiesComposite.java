@@ -16,7 +16,6 @@ import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.missionattribute.AttributeLabelProvider;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -44,7 +43,8 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 
 	@Override
 	public void init(SurveyDesign design, Session session) {
-		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+		@SuppressWarnings("unchecked")
+		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 		List<MissionAttribute> selectedAttributes = new ArrayList<MissionAttribute>();
 		
 		if (design.getMissionProperties() != null){
