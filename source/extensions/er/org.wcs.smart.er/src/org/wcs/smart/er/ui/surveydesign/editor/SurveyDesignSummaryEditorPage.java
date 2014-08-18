@@ -24,12 +24,15 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 import java.text.DateFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -61,6 +64,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	private Text txtKey;
 	private Text txtDescription;
 	private Text txtConfigurableModel;
+	private TableViewer missionPropertiesList;
 	
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
@@ -148,6 +152,14 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
 		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
+		Table missionPropertiesTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
+		missionPropertiesList = new TableViewer(missionPropertiesTable);
+		missionPropertiesList.setContentProvider(ArrayContentProvider.getInstance());
+		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider());
+		missionPropertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
+		Hyperlink locLink = createEditLink(content, PanelType.PROPERTIES);
+		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
 		initValues();
 	}
@@ -178,6 +190,9 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		} else {
 			txtConfigurableModel.setText(Messages.ConfigurableModelComposite_DataModel);
 		}
+		
+		missionPropertiesList.setInput(design.getMissionProperties().toArray());
+
 	}
 	
 	private Hyperlink createEditLink(Composite parent, final PanelType panelType) {
