@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.common.control.MultipleSelectComposite;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -34,8 +35,8 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 		part.setLayout(new GridLayout(3, false));
 		
 		attributesComposite = new MultipleSelectComposite<MissionAttribute>(part, SWT.NONE);
-		attributesComposite.setLabelAllText("All Mission Attributes:");
-		attributesComposite.setLabelSelectedText("Selected Mission Attributes:");
+		attributesComposite.setLabelAllText(Messages.MissionPropertiesComposite_AllMissionAttributes);
+		attributesComposite.setLabelSelectedText(Messages.MissionPropertiesComposite_SelectedMissionAttributes);
 		
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		return part;
@@ -96,12 +97,12 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Mission Properties";
+		return Messages.MissionPropertiesComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Select the properties you want to record about the missions associated with this survey design.";
+		return Messages.MissionPropertiesComposite_Description;
 	}
 }
 

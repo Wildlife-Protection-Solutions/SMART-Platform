@@ -41,6 +41,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -94,31 +95,31 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)content.getLayout()).marginRight = 10;
 
-		toolkit.createLabel(content, "Name:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Name);
 		txtName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(content, PanelType.NAME); 
 		
-		toolkit.createLabel(content, "Status:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Status);
 		txtStatus = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtStatus.setEditable(false);
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(content, PanelType.STATUS); 
 
-		toolkit.createLabel(content, "Start Date:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_StartDate);
 		txtStartDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
 		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
-		toolkit.createLabel(content, "Key:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Key);
 		txtKey = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(content, PanelType.NAME);
 
-		toolkit.createLabel(content, "End Date:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_EndDate);
 		txtEndDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtEndDate.setEditable(false);
 		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -127,7 +128,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Label emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
-		toolkit.createLabel(content, "Description:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Description);
 		txtDescription = toolkit.createText(content, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtDescription.setEditable(false);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1);
@@ -137,7 +138,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Hyperlink lnk = createEditLink(content, PanelType.DESCRIPTION);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
-		toolkit.createLabel(content, "Configurable Model:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_ConfigurableModel);
 		txtConfigurableModel = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtConfigurableModel.setEditable(false);
 		txtConfigurableModel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -146,7 +147,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-		toolkit.createLabel(content, "Properties:");
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
 		
 		initValues();
 	}
@@ -175,7 +176,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		if (design.getConfigurableModel() != null) {
 			txtConfigurableModel.setText(design.getConfigurableModel().getName());
 		} else {
-			txtConfigurableModel.setText("SMART DataModel");
+			txtConfigurableModel.setText(Messages.ConfigurableModelComposite_DataModel);
 		}
 	}
 	

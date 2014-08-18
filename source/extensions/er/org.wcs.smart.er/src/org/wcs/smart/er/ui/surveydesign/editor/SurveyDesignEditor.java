@@ -30,6 +30,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -100,11 +101,11 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 		try {
 			summaryPage = new SurveyDesignSummaryEditorPage(this);
 			int i = addPage(summaryPage, getEditorInput());
-			setPageText(i, "Summary");
+			setPageText(i, Messages.SurveyDesignEditor_Page_Summary);
 		
 			super.setPartName(getSurveyDesign().getName());
 		}catch (Exception ex) {
-			EcologicalRecordsPlugIn.log("Error creating pages.", ex);
+			EcologicalRecordsPlugIn.log(Messages.SurveyDesignEditor_Error_Pages, ex);
 		}
 		
 	}

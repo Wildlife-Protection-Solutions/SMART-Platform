@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * SurveyDesignCompositeFactory
+ * 
  * @author elitvin
  * @since 3.0.0
  */
@@ -56,12 +57,12 @@ public class SurveyDesignCompositeFactory {
 
 	public SurveyDesignComposite createComposite(PanelType type, Session session) {
 		switch (type) {
-		case NAME:    return new NameIdComposite(getSurveyDesigns(session));
-		case DATES:      return new DateComposites();
-		case MODEL:       return new ConfigurableModelComposite(getConfigurableModels(session));
+		case NAME:			return new NameIdComposite(getSurveyDesigns(session));
+		case DATES:			return new DateComposites();
+		case MODEL:			return new ConfigurableModelComposite(getConfigurableModels(session));
 		case STATUS:		return new StatusComposite();
-		case PROPERTIES: return new MissionPropertiesComposite();
-		case DESCRIPTION:    return new DescriptionComposite();
+		case PROPERTIES:	return new MissionPropertiesComposite();
+		case DESCRIPTION:	return new DescriptionComposite();
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
 		}
 	}
