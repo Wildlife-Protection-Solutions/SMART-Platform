@@ -64,6 +64,12 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	@Override
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		shell.setText(content.getTitle());
+	}
+	
+	@Override
 	protected Composite createContent(Composite parent) {
 		Composite center = new Composite(parent, SWT.NONE);
 		center.setLayout(new GridLayout(1, false));
