@@ -63,19 +63,7 @@ public class SurveyDesignCompositeFactory {
 		case STATUS:		return new StatusComposite();
 		case PROPERTIES:	return new MissionPropertiesComposite();
 		case DESCRIPTION:	return new DescriptionComposite();
-		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
-		}
-	}
-
-	public String getTitle(PanelType type) {
-		switch (type) {
-		case NAME:			return "name";
-		case DATES:			return "dates";
-		case MODEL:			return "";
-		case STATUS:		return "";
-		case PROPERTIES:	return "";
-		case DESCRIPTION:	return "";
-		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
+		default: throw new UnsupportedOperationException(type + " is not supported"); //$NON-NLS-1$
 		}
 	}
 
