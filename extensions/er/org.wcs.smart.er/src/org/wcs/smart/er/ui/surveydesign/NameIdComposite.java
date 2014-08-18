@@ -47,6 +47,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -93,7 +94,7 @@ public class NameIdComposite extends SurveyDesignComposite {
 		
 		Label lblNewLabel = new Label(part, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel.setText("Name:");
+		lblNewLabel.setText(Messages.NameIdComposite_Name);
 		
 		txtName = new Text(part, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -110,8 +111,8 @@ public class NameIdComposite extends SurveyDesignComposite {
 		/* Key */
 		Label lblKey = new Label(part, SWT.NONE);
 		lblKey.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblKey.setText("Key");
-		lblKey.setToolTipText("The key is used for cross conservation area analysis.");
+		lblKey.setText(Messages.NameIdComposite_Key);
+		lblKey.setToolTipText(Messages.NameIdComposite_Key_Duplicate);
 		
 		
 		txtKey = new Text(part, SWT.BORDER);
@@ -119,15 +120,15 @@ public class NameIdComposite extends SurveyDesignComposite {
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		cdKey = createDecoration(txtKey);
-		cdKey.setDescriptionText("Invalid Key.  It must not be blank");
+		cdKey.setDescriptionText(Messages.NameIdComposite_Invalid_Key);
 			
 		cdTxt = createDecoration(txtName);
-		cdTxt.setDescriptionText("Invalid Name.  It must not be blank");
+		cdTxt.setDescriptionText(Messages.NameIdComposite_Invalid_Name);
 			
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 		Button btnChangeKey = new Button(part, SWT.NONE);
-		btnChangeKey.setText("Change");
+		btnChangeKey.setText(Messages.NameIdComposite_Button_Change);
 		btnChangeKey.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -135,8 +136,8 @@ public class NameIdComposite extends SurveyDesignComposite {
 				if (!MessageDialog
 						.openConfirm(
 								parent.getShell(),
-								"Edit Key",
-								"Modifying the keys will affect cross conservation area analysis. Are you sure you want to continue?")) {
+								Messages.NameIdComposite_EditKey_Title,
+								Messages.NameIdComposite_EditKey_Message)) {
 					return;
 				}
 				InputDialog id = new KeyInputDialog(parent.getShell(), 
@@ -225,11 +226,11 @@ public class NameIdComposite extends SurveyDesignComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Survey Design Name";
+		return Messages.NameIdComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Enter the name for the survey design.";
+		return Messages.NameIdComposite_Description;
 	}
 }

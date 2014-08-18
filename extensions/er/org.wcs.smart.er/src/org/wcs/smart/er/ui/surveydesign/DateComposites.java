@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.component.DatesComponent;
 
@@ -41,7 +42,6 @@ public class DateComposites extends SurveyDesignComposite {
 
 	private DatesComponent dates;
 	
-	private SurveyDesign design;
 	@Override
 	public Control createControl(Composite parent) {
 		dates = new DatesComponent(true);
@@ -60,7 +60,6 @@ public class DateComposites extends SurveyDesignComposite {
 
 	@Override
 	public void init(SurveyDesign design, Session session) {
-		this.design = design;
 		dates.setStartDate(design.getStartDate());
 		dates.setEndDate(design.getEndDate());
 	}
@@ -82,11 +81,11 @@ public class DateComposites extends SurveyDesignComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Survey Dates";
+		return Messages.DateComposites_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Enter the time frame for the survey design (optional).";
+		return Messages.DateComposites_Description;
 	}
 }

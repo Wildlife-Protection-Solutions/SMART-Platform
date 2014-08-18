@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -50,7 +51,7 @@ public class DescriptionComposite extends SurveyDesignComposite {
 		part.setLayout(new GridLayout(1, false));
 		
 		Label l = new Label(part, SWT.NONE);
-		l.setText("Description");
+		l.setText(Messages.DescriptionComposite_Label_Description);
 		
 		txtDescription = new Text(part, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -92,12 +93,12 @@ public class DescriptionComposite extends SurveyDesignComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Description";
+		return Messages.DescriptionComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Enter a brief description for the survey design.";
+		return Messages.DescriptionComposite_Description;
 	}
 
 }

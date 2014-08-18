@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -48,7 +49,7 @@ import org.wcs.smart.er.model.SurveyDesign;
  */
 public class ConfigurableModelComposite  extends SurveyDesignComposite {
 	
-	private static final String dataModelObject = "SMART DataModel";
+	private static final String dataModelObject = Messages.ConfigurableModelComposite_DataModel;
 	private ComboViewer cmbConfig;
 	private List<ConfigurableModel> models;
 	
@@ -64,7 +65,7 @@ public class ConfigurableModelComposite  extends SurveyDesignComposite {
 		part.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(part, SWT.NONE);
-		l.setText("Configurable Model:");
+		l.setText(Messages.ConfigurableModelComposite_ConfigurableModel);
 		
 		cmbConfig = new ComboViewer(part);
 		cmbConfig.setContentProvider(ArrayContentProvider.getInstance());
@@ -129,11 +130,11 @@ public class ConfigurableModelComposite  extends SurveyDesignComposite {
 	
 	@Override
 	public String getTitle(){
-		return "Data Model";
+		return Messages.ConfigurableModelComposite_Title;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Select the configurable model which represents the survey design data.";
+		return Messages.ConfigurableModelComposite_Description;
 	}
 }

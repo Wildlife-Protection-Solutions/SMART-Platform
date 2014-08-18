@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 
@@ -19,7 +20,7 @@ public class SaveSurveyDesignJob extends Job {
 	private SurveyDesign design;
 	
     public SaveSurveyDesignJob(SurveyDesign design) {
-        super("Saving survey design");
+        super(Messages.SaveSurveyDesignJob_Title);
         this.design = design;
     }
 
@@ -38,7 +39,7 @@ public class SaveSurveyDesignJob extends Job {
 			}catch (Exception ex2){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex2);
 			}
-			EcologicalRecordsPlugIn.displayLog("Error saving new survey design." + "\n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.SaveSurveyDesignJob_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		} finally {
 			session.close();
 		}

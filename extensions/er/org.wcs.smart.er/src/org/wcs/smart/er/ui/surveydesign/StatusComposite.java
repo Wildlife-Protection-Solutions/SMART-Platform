@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
 
@@ -50,7 +51,7 @@ public class StatusComposite extends SurveyDesignComposite {
 		part.setLayout(new GridLayout(1, false));
 
 		btnActive = new Button(part, SWT.RADIO);
-		btnActive.setText("Active");
+		btnActive.setText(Messages.StatusComposite_Active);
 		btnActive.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnActive.setSelection(true);
 		btnActive.addSelectionListener(new SelectionAdapter() {
@@ -61,7 +62,7 @@ public class StatusComposite extends SurveyDesignComposite {
 		});
 		
 		btnInactive = new Button(part, SWT.RADIO);
-		btnInactive.setText("Inactive");
+		btnInactive.setText(Messages.StatusComposite_Inactive);
 		btnInactive.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnInactive.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -104,12 +105,12 @@ public class StatusComposite extends SurveyDesignComposite {
 
 	@Override
 	public String getTitle() {
-		return "Survey Design Status";
+		return Messages.StatusComposite_Title;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Specify the status for the survey design.";
+		return Messages.StatusComposite_Description;
 	}
 
 }
