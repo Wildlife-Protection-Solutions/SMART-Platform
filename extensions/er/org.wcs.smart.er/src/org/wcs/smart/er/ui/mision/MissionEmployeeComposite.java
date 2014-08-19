@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -66,7 +68,12 @@ public class MissionEmployeeComposite extends MissionComposite {
 		composite.setLabelProvider(EmployeeLabelProvider.getInstance());
 		composite.setLabelAllText(Messages.MissionEmployeeComposite_AllEmployeesLabel);
 		composite.setLabelSelectedText(Messages.MissionEmployeeComposite_MissionMemberLabel);
-		
+		composite.setItemComparator(new Comparator<Employee>() {
+			@Override
+			public int compare(Employee o1, Employee o2) {
+				return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
+			}
+		});
 		composite.addSelectionChangedListener(new IListChanged<Employee>() {
 
 			@Override
@@ -98,14 +105,25 @@ public class MissionEmployeeComposite extends MissionComposite {
 			mission.setMembers(new ArrayList<MissionMember>());
 		}
 		
-		// remove existing members
+		List<Employee> copy = composite.getSelectedItemsAsList();
+		
+//		// remove existing members
+		List<MissionMember> toDelete = new ArrayList<MissionMember>();
 		for (MissionMember mm: mission.getMembers()){
-			mm.setMission(null);
+			if (!copy.contains(mm.getMember())){
+				toDelete.add(mm);
+				
+			}else{
+				copy.remove(mm.getMember());
+			}
 		}
-		mission.getMembers().clear();
+		mission.getMembers().removeAll(toDelete);
+		for (MissionMember mm : toDelete){
+			mm.setId(null);
+		}
 		
 		//add new members
-		for(Employee e : composite.getSelectedItemsAsList()){
+		for(Employee e : copy){
 			MissionMember mm = new MissionMember();
 			mm.setMember(e);
 			mm.setMission(mission);

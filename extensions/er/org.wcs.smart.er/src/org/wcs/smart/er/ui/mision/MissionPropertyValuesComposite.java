@@ -30,8 +30,11 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
@@ -46,6 +49,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -59,8 +63,8 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 
 	private Composite parts;
 	private ScrolledComposite sc;
-	private HashMap<MissionProperty, Object> controls;
-	private HashMap<MissionProperty, ControlDecoration> decorations;
+	private HashMap<MissionAttribute, Object> controls;
+	private HashMap<MissionAttribute, ControlDecoration> decorations;
 	
 	@Override
 	public Control createControl(Composite parent) {
@@ -79,8 +83,8 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 
 	@Override
 	public void init(Mission mission, Session session) {
-		controls = new HashMap<MissionProperty, Object>();
-		decorations = new HashMap<MissionProperty, ControlDecoration>();
+		controls = new HashMap<MissionAttribute, Object>();
+		decorations = new HashMap<MissionAttribute, ControlDecoration>();
 		for (Control kid : parts.getChildren()){
 			kid.dispose();
 		}
@@ -90,6 +94,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 		outer.setLayout(new GridLayout(2, false));
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		//create controls for all properties
 		for (MissionProperty mp : properties){
 			Label l = new Label(outer, SWT.NONE);
 			l.setText(mp.getAttribute().getName() + ":"); //$NON-NLS-1$
@@ -97,16 +102,16 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 			if (mp.getAttribute().getType() == AttributeType.TEXT){
 				Text txt = new Text(outer, SWT.BORDER);
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				controls.put(mp, txt);
+				controls.put(mp.getAttribute(), txt);
 				txt.addModifyListener(this);
 			} else if(mp.getAttribute().getType() == AttributeType.NUMERIC){
 				Text txt = new Text(outer, SWT.BORDER);
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				txt.addModifyListener(this);
-				controls.put(mp, txt);
+				controls.put(mp.getAttribute(), txt);
 				
 				ControlDecoration cd = createDecoration(txt);
-				decorations.put(mp, cd);
+				decorations.put(mp.getAttribute(), cd);
 			} else if(mp.getAttribute().getType() == AttributeType.LIST){
 				ComboViewer cmbViewer = new ComboViewer(outer, SWT.DROP_DOWN | SWT.READ_ONLY);
 				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -120,14 +125,37 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 						return super.getText(element);
 					}
 				});
+				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+					
+					@Override
+					public void selectionChanged(SelectionChangedEvent event) {
+						validate();
+						fireChangeListeners();
+					}
+				});
+				List<Object> items = new ArrayList<Object>();
+				items.add(""); //$NON-NLS-1$
+				items.addAll(mp.getAttribute().getAttributeList());
 				
-				
-				cmbViewer.setInput(mp.getAttribute().getAttributeList());
-				controls.put(mp, cmbViewer);
+				cmbViewer.setInput(items);
+				controls.put(mp.getAttribute(), cmbViewer);
 			}
 		}
 		parts.layout(true);
 		
+		// init controls with values
+		for (MissionPropertyValue mpv : mission.getMissionPropertyValues()){
+			Object control = controls.get(mpv.getMissionAttribute());
+			AttributeType type = mpv.getMissionAttribute().getType();
+			if (type == AttributeType.TEXT){
+				((Text)control).setText(mpv.getStringValue());
+			}else if (type == AttributeType.NUMERIC){
+				((Text)control).setText(mpv.getNumberValue().toString());
+			}else if (type == AttributeType.LIST){
+				((ComboViewer)control).setSelection(new StructuredSelection(mpv.getAttributeListItem()));
+			}
+		}
+		validate();
 		sc.setMinSize(parts.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
@@ -144,19 +172,11 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 	
 	@Override
 	public void updateDesign(Mission mission) {
-		if (mission.getMissionPropertyValues() != null){
-			for (MissionPropertyValue mpv : mission.getMissionPropertyValues()){
-				mpv.setMission(null);
-			}
-			mission.getMissionPropertyValues().clear();
-		}else{
-			mission.setMissionPropertyValues(new ArrayList<MissionPropertyValue>());
-		}
-		
-		for (Entry<MissionProperty, Object> entry : controls.entrySet()){
+		List<MissionPropertyValue> newValues = new ArrayList<MissionPropertyValue>();
+		for (Entry<MissionAttribute, Object> entry : controls.entrySet()){
 			MissionPropertyValue mpv = new MissionPropertyValue();
 			mpv.setMission(mission);
-			mpv.setMissionAttribute(entry.getKey().getAttribute());
+			mpv.setMissionAttribute(entry.getKey());
 
 			boolean add = false;
 			if (mpv.getMissionAttribute().getType() == AttributeType.TEXT){
@@ -178,22 +198,57 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 			}else if (mpv.getMissionAttribute().getType() == AttributeType.LIST){
 				ComboViewer cmbViewer = (ComboViewer)entry.getValue();
 				if (!cmbViewer.getSelection().isEmpty()){
-					MissionAttributeListItem mali = (MissionAttributeListItem) ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
-					mpv.setAttributeListItem(mali);
-					add = true;
+					Object mali = (Object) ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
+					if (mali instanceof MissionAttributeListItem){
+						mpv.setAttributeListItem((MissionAttributeListItem)mali);
+						add = true;
+					}
 				}
 			}
 			if (add){
-				mission.getMissionPropertyValues().add(mpv);
+				newValues.add(mpv);
 			}
 		}
+		
+		
+		if (mission.getMissionPropertyValues() != null){
+			List<MissionPropertyValue> toDelete = new ArrayList<MissionPropertyValue>();
+			
+			for (MissionPropertyValue mpv : mission.getMissionPropertyValues()){
+				MissionPropertyValue f = null;
+				
+				for (MissionPropertyValue mmm : newValues){
+					if (mmm.getMissionAttribute().equals(mpv.getMissionAttribute())){
+						f = mmm;
+						break;
+					}
+				}
+				if (f == null){
+					toDelete.add(mpv);
+				}else{
+					newValues.remove(f);
+					mpv.setValue(f.getValue());
+				}	
+			}
+			
+			mission.getMissionPropertyValues().removeAll(toDelete);
+			for (MissionPropertyValue mpv : toDelete){
+				mpv.setId(null);
+			}
+			mission.getMissionPropertyValues().addAll(newValues);
+		}else{
+			mission.setMissionPropertyValues(new ArrayList<MissionPropertyValue>());
+			mission.getMissionPropertyValues().addAll(newValues);
+		}
+		
+		
 	}
 
 	private boolean validate(){
 		if (controls == null) return false;
 		boolean error = false;
-		for (Entry<MissionProperty, Object> entry : controls.entrySet()){
-			if (entry.getKey().getAttribute().getType() == AttributeType.NUMERIC){
+		for (Entry<MissionAttribute, Object> entry : controls.entrySet()){
+			if (entry.getKey().getType() == AttributeType.NUMERIC){
 				String txt = ((Text)entry.getValue()).getText();
 				ControlDecoration cd = decorations.get(entry.getKey());
 				if (!txt.isEmpty()){
@@ -230,6 +285,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 
 	@Override
 	public void modifyText(ModifyEvent e) {
+		fireChangeListeners();
 		validate();
 	}
 

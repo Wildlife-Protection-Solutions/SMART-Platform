@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.ui.mision.editor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -16,17 +37,29 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.ca.Employee;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.ui.mision.CommentComposite;
+import org.wcs.smart.er.ui.mision.IdComposite;
+import org.wcs.smart.er.ui.mision.MissionComposite;
+import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
+import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 
-public class MissionSummaryPage extends EditorPart {
+/**
+ * Mission editor summary page.
+ * @author Emily
+ *
+ */
+public class MissionSummaryPage extends EditorPart implements IHyperlinkListener{
 
 	private MissionEditor missionEditor;
 
@@ -102,14 +135,18 @@ public class MissionSummaryPage extends EditorPart {
 		txtId.setEditable(false);
 		Hyperlink edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
 		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-
+		edit.setData(IdComposite.class);
+		edit.addHyperlinkListener(this);
+		
 		//survey id
 		toolkit.createLabel(left, "Survey ID:");
 		txtSurveyId = toolkit.createText(left, "");
 		txtSurveyId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtSurveyId.setEditable(false);
-		edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
-		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		//edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
+		//edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		new Label(left, SWT.NONE);
+		
 		
 		//members id
 		Label l = toolkit.createLabel(left, "Members:");
@@ -126,9 +163,12 @@ public class MissionSummaryPage extends EditorPart {
 				return super.getText(element);
 			}
 		});
-		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
 		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		edit.setData(MissionEmployeeComposite.class);
+		edit.addHyperlinkListener(this);
 		
 		Composite right = toolkit.createComposite(comp, SWT.NONE);
 		right.setLayout(new GridLayout(3, false));
@@ -142,7 +182,8 @@ public class MissionSummaryPage extends EditorPart {
 		txtComment.setEditable(false);
 		edit = toolkit.createHyperlink(right, "edit...", SWT.NONE);
 		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-
+		edit.setData(CommentComposite.class);
+		edit.addHyperlinkListener(this);
 
 		//mission properties
 		Section propSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
@@ -150,7 +191,7 @@ public class MissionSummaryPage extends EditorPart {
 		propSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite prop = toolkit.createComposite(propSection);
-		prop.setLayout(new GridLayout());
+		prop.setLayout(new GridLayout(2, false));
 		prop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		propSection.setClient(prop);
 		
@@ -191,10 +232,16 @@ public class MissionSummaryPage extends EditorPart {
 			}
 		});
 		
+		edit = toolkit.createHyperlink(prop, "edit...", SWT.NONE);
+		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		edit.setData(MissionPropertyValuesComposite.class);
+		edit.addHyperlinkListener(this);
+		
 		initControls(missionEditor.getMission());
 	}
 	
-	private void initControls(Mission mission){
+	
+	public void initControls(Mission mission){
 		form.setText("Mission: " + mission.getId());
 		txtSurveyId.setText(mission.getSurvey().getId());
 		txtComment.setText(mission.getComment() == null ? "" : mission.getComment());
@@ -206,5 +253,38 @@ public class MissionSummaryPage extends EditorPart {
 	@Override
 	public void setFocus() {
 		txtSurveyId.setFocus();
+	}
+	
+	private void editCompoent(MissionComposite component){
+		MissionEditorDialog dialog = new MissionEditorDialog(getSite().getShell(), component, missionEditor.getMission());
+		dialog.open();
+	}
+
+
+	@Override
+	public void linkEntered(HyperlinkEvent e) {
+		
+	}
+
+	@Override
+	public void linkExited(HyperlinkEvent e) {
+	}
+
+	@Override
+	public void linkActivated(HyperlinkEvent e) {
+		Object x = e.widget.getData();
+		if (x == null) return;
+		if ( !(x instanceof Class)) return;
+		
+		Object component = null;
+		try {
+			component = ((Class)x).newInstance();
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+		}
+		if (component != null && component instanceof MissionComposite){
+			editCompoent((MissionComposite)component);
+		}
+		
 	}
 }
