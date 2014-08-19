@@ -21,51 +21,35 @@
  */
 package org.wcs.smart.er.model;
 
-import java.util.List;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 
 /**
- * The sampling group object.
+ * A sampling unit attributes.
  * 
  * @author Emily
  *
  */
 @Entity
-@Table(name="smart.sampling_group")
-public class SamplingGroup extends NamedItem{
+@Table(name="smart.sampling_unit_attribute")
+public class SamplingUnitAttribute extends NamedKeyItem{
 
-	private SurveyDesign design;
+	private AttributeType type;
 	
-	private List<SamplingGroupItem> children;
-	
-	public SamplingGroup(){
-		
+	/**
+	 * 
+	 * @return the attribute type
+	 */
+	@Column(name = "att_type")
+	public AttributeType getType(){
+		return this.type;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="survey_uuid", referencedColumnName="uuid")
-	public SurveyDesign getSurveyDesign(){
-		return this.design;
-	}
-	
-	public void setSurveyDesign(SurveyDesign survey){
-		this.design = survey;
-	}
-	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent")
-	public List<SamplingGroupItem> getChildren(){
-		return this.children;
-	}
-	
-	public void setChildren(List<SamplingGroupItem> children){
-		this.children = children;
+	public void setType(AttributeType type){
+		this.type = type;
 	}
 }

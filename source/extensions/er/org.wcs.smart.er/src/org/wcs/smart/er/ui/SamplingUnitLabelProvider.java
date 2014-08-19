@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.model.SamplingGroup;
 import org.wcs.smart.er.model.SamplingUnit;
 
 /**
@@ -42,9 +41,6 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 		if (element instanceof SamplingUnit){
 			SamplingUnit su = (SamplingUnit)element;
 			return su.getId();
-		}else if (element instanceof SamplingGroup){
-			SamplingGroup g = (SamplingGroup)element;
-			return g.getName();
 		}else if (element instanceof MissionTrack){
 			MissionTrack t = (MissionTrack)element;
 			return SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getDate());
