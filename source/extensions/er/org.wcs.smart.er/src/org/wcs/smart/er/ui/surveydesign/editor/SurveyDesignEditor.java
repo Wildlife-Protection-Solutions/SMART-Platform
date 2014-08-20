@@ -123,6 +123,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 				surveyDesign.getConfigurableModel().getNames().size();
 			}
 			surveyDesign.getMissionProperties().size();
+			surveyDesign.getProperties().size();
 			session.getTransaction().commit();
 			session.close();
 		}

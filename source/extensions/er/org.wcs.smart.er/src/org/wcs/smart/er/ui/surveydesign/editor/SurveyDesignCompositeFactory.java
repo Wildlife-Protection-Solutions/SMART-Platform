@@ -32,6 +32,7 @@ import org.wcs.smart.er.ui.surveydesign.DateComposites;
 import org.wcs.smart.er.ui.surveydesign.DescriptionComposite;
 import org.wcs.smart.er.ui.surveydesign.MissionPropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
+import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.StatusComposite;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.hibernate.SmartDB;
@@ -57,12 +58,13 @@ public class SurveyDesignCompositeFactory {
 
 	public SurveyDesignComposite createComposite(PanelType type, Session session) {
 		switch (type) {
-		case NAME:			return new NameIdComposite(getSurveyDesigns(session));
-		case DATES:			return new DateComposites();
-		case MODEL:			return new ConfigurableModelComposite(getConfigurableModels(session));
-		case STATUS:		return new StatusComposite();
-		case PROPERTIES:	return new MissionPropertiesComposite();
-		case DESCRIPTION:	return new DescriptionComposite();
+		case NAME:					return new NameIdComposite(getSurveyDesigns(session));
+		case DATES:					return new DateComposites();
+		case MODEL:					return new ConfigurableModelComposite(getConfigurableModels(session));
+		case STATUS:				return new StatusComposite();
+		case MISSION_PROPERTIES:	return new MissionPropertiesComposite();
+		case PROPERTIES:			return new PropertiesComposite();
+		case DESCRIPTION:			return new DescriptionComposite();
 		default: throw new UnsupportedOperationException(type + " is not supported"); //$NON-NLS-1$
 		}
 	}
@@ -89,6 +91,7 @@ public class SurveyDesignCompositeFactory {
 		DATES,
 		MODEL,
 		STATUS,
+		MISSION_PROPERTIES,
 		PROPERTIES,
 		DESCRIPTION;
 	}
