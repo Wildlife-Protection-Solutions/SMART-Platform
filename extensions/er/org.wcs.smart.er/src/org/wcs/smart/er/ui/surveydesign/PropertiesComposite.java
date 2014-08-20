@@ -34,6 +34,9 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -84,9 +87,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
 		
-
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(tableViewer, new FocusCellHighlighter(tableViewer){});
-		
 		
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(tableViewer) {
 			protected boolean isEditorActivationEvent(ColumnViewerEditorActivationEvent event) {
@@ -101,8 +102,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 
 		Composite btnCmp = new Composite(part, SWT.NONE);
 		btnCmp.setLayout(new GridLayout(1, false));
-		btnCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
-				1, 1));
+		btnCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 
 		Button btnAdd = new Button(btnCmp, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -115,7 +115,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 
 		});
 		
-		Button btnDelete = new Button(btnCmp, SWT.NONE);
+		final Button btnDelete = new Button(btnCmp, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setEnabled(false);
@@ -126,6 +126,13 @@ public class PropertiesComposite extends SurveyDesignComposite {
 			}
 		});
 		
+		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnDelete.setEnabled(!tableViewer.getSelection().isEmpty());
+			}
+		});
+
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		return part;
 	}
@@ -200,8 +207,9 @@ public class PropertiesComposite extends SurveyDesignComposite {
 	}
 
 	protected void deleteProperty() {
-		// TODO Auto-generated method stub
-		
+		Object obj = ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		input.remove(obj);
+		tableViewer.refresh();
 	}
 
 
