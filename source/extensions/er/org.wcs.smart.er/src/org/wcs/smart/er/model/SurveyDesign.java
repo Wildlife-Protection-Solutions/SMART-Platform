@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +48,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 @Entity
 @Table(name="smart.survey_design")
-public class SurveyDesign extends NamedKeyItem{
+public class SurveyDesign extends NamedKeyItem {
 	
 	/**
 	 * Survey states.
@@ -58,7 +59,7 @@ public class SurveyDesign extends NamedKeyItem{
 
 		private String guiName;
 	
-		private State(String guiName){
+		private State(String guiName) {
 			this.guiName = guiName;
 		}
 		
@@ -85,6 +86,7 @@ public class SurveyDesign extends NamedKeyItem{
 	
 	private List<MissionProperty> missionProperties;
 	
+	private List<SurveyDesignProperty> properties;
 	
 //	private List<Survey> surveys;
 	
@@ -165,6 +167,17 @@ public class SurveyDesign extends NamedKeyItem{
 	
 	public void setMissionProperties(List<MissionProperty> properties){
 		this.missionProperties = properties;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="design", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<SurveyDesignProperty> getProperties() {
+		if (properties == null) {
+			properties = new ArrayList<SurveyDesignProperty>();
+		}
+		return properties;
+	}
+	public void setProperties(List<SurveyDesignProperty> properties) {
+		this.properties = properties;
 	}
 	
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy="survey", cascade={CascadeType.ALL}, orphanRemoval = true)
