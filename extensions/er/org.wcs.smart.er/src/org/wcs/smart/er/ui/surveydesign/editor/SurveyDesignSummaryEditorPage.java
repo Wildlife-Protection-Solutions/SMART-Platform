@@ -24,8 +24,12 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 import java.text.DateFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -46,6 +51,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -65,6 +71,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	private Text txtDescription;
 	private Text txtConfigurableModel;
 	private TableViewer missionPropertiesList;
+	private TableViewer propertiesList;
 	
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
@@ -151,19 +158,74 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
+		toolkit.createLabel(content, "Mission Properties:");
 		Table missionPropertiesTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
 		missionPropertiesList = new TableViewer(missionPropertiesTable);
 		missionPropertiesList.setContentProvider(ArrayContentProvider.getInstance());
 		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider());
 		missionPropertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
-		Hyperlink locLink = createEditLink(content, PanelType.PROPERTIES);
+		Hyperlink locLink = createEditLink(content, PanelType.MISSION_PROPERTIES);
 		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+
+		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
+		Composite propertiesTableCmp = new Composite(content, SWT.NONE);
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		propertiesTableCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+		propertiesTableCmp.setLayout(tableLayout);
+		Table propertiesTable = toolkit.createTable(propertiesTableCmp, SWT.V_SCROLL | SWT.H_SCROLL);
+		propertiesTable.setHeaderVisible(true);
+		propertiesTable.setLinesVisible(true);
+		propertiesList = new TableViewer(propertiesTable);
+		propertiesList.setContentProvider(ArrayContentProvider.getInstance());
+		createPropertyColumns(propertiesList);
+		propertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)propertiesTable.getLayoutData()).minimumHeight = 60;
+		Hyperlink pLink = createEditLink(content, PanelType.PROPERTIES);
+		pLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
 		initValues();
 	}
 
+	private void createPropertyColumns(TableViewer viewer) {
+		final TableViewerColumn colName = createTableViewerColumn(viewer, "Name", 180);
+		colName.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof SurveyDesignProperty) {
+					SurveyDesignProperty p = (SurveyDesignProperty) element;
+					return p.getName();
+				}
+				return super.getText(element);
+			}
+		});
+
+		final TableViewerColumn colValue = createTableViewerColumn(viewer, "Value", 180);
+		colValue.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof SurveyDesignProperty) {
+					SurveyDesignProperty p = (SurveyDesignProperty) element;
+					return p.getValue();
+				}
+				return super.getText(element);
+			}
+		});
+	}
+
+	private TableViewerColumn createTableViewerColumn(TableViewer viewer, String title, int weight) {
+		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
+		final TableColumn column = viewerColumn.getColumn();
+		column.setText(title);
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		TableColumnLayout layout = (TableColumnLayout) viewer.getTable() .getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(weight, ColumnWeightData.MINIMUM_WIDTH, true));
+
+		return viewerColumn;
+	}
+	
 	/**
 	 * Updates the widgets with the value from the intelligence.
 	 */
@@ -192,6 +254,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		}
 		
 		missionPropertiesList.setInput(design.getMissionProperties().toArray());
+		propertiesList.setInput(design.getProperties().toArray());
 
 	}
 	
