@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.common.control.MultipleSelectComposite;
+import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
@@ -57,10 +58,15 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 		attributesComposite.setLabelProvider(new AttributeLabelProvider());
 		attributesComposite.setItemsData(allAttributes, selectedAttributes);
 		attributesComposite.setItemComparator(new Comparator<MissionAttribute>() {
-			
 			@Override
 			public int compare(MissionAttribute arg0, MissionAttribute arg1) {
 				return Collator.getInstance().compare(arg0.getName(), arg1.getName());
+			}
+		});
+		attributesComposite.addSelectionChangedListener(new IListChanged<MissionAttribute>() {
+			@Override
+			public void listChanged(List<MissionAttribute> items) {
+				fireChangeListeners();
 			}
 		});
 		
