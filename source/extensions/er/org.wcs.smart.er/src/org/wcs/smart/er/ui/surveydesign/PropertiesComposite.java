@@ -204,12 +204,14 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		p.setValue("Value");
 		input.add(p);
 		tableViewer.refresh();
+		fireChangeListeners();
 	}
 
 	protected void deleteProperty() {
 		Object obj = ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 		input.remove(obj);
 		tableViewer.refresh();
+		fireChangeListeners();
 	}
 
 
@@ -231,7 +233,6 @@ public class PropertiesComposite extends SurveyDesignComposite {
 
 	@Override
 	public boolean isValid() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
@@ -260,6 +261,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 				set((SurveyDesignProperty) element, (String) value);
 			}
 			tableViewer.refresh();
+			fireChangeListeners();
 		}
 
 		protected abstract void set(SurveyDesignProperty p, String value);
