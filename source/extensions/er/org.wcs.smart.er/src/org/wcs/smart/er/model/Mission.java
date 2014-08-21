@@ -22,6 +22,7 @@
 package org.wcs.smart.er.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -141,6 +142,9 @@ public class Mission extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<MissionPropertyValue> getMissionPropertyValues(){
+		if (this.properties == null) {
+			this.properties = new ArrayList<MissionPropertyValue>();
+		}
 		return this.properties;
 	}
 	
