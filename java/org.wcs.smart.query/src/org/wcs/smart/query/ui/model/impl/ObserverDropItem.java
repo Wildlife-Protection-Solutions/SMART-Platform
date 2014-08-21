@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.ui.definition;
+package org.wcs.smart.query.ui.model.impl;
 
 import java.text.Collator;
 import java.util.Collections;
@@ -49,7 +49,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -69,7 +69,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 	
 	private Employee currentSelection = null;
 	
-	private Job loadEmployees = new Job(Messages.ObserverDropItem_loadingList){
+	private Job loadEmployees = new Job(Messages.ObserverDropItem_loadingEmployeeJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -182,7 +182,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText(Messages.ObserverDropItem_ObserverLabel + " " + Operator.EQUALS.getGuiValue()); //$NON-NLS-1$
+		l.setText(Messages.ObserverDropItem_ObserverLabel + " " + Operator.EQUALS.getGuiValue());   //$NON-NLS-1$
 		
 		/* -- list viewer **/
 		listViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);

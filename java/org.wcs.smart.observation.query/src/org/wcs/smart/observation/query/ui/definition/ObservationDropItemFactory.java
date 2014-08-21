@@ -60,6 +60,7 @@ import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.query.ui.model.impl.ObserverDropItem;
 /**
  * Drop item factory for observation queries
  * @author Emily

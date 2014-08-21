@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.query.model.filter.ObserverFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -67,8 +65,6 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class));
 		}else if (filter instanceof WaypointSourceFilter){
 			return asSql((WaypointSourceFilter)filter, engine);
-		}else if (filter instanceof ObserverFilter){
-			return asSql((ObserverFilter)filter, engine);
 		}
 		return super.toSql(filter, engine);
 		
@@ -85,19 +81,6 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 		sb.append(asSql(filter.getOperator()));
 		//TODO: escape waypoint source key
 		sb.append(" '" + SmartUtils.stripQuotes(filter.getWaypointSourceKey()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-		return sb.toString();
-	}
-	
-	/*
-	 * Observer source filter
-	 */
-	protected String asSql(ObserverFilter filter, IQueryEngine engine) throws SQLException{
-		StringBuilder sb = new StringBuilder();
-		sb.append(engine.tablePrefix(WaypointObservation.class));
-		sb.append(".employee_uuid "); //$NON-NLS-1$
-		sb.append(" = x'"); //$NON-NLS-1$
-		sb.append(filter.getValue());
-		sb.append("'"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	

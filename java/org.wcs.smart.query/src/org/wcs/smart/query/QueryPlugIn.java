@@ -55,7 +55,7 @@ import org.wcs.smart.query.ui.QueryPerspective;
  */
 public class QueryPlugIn extends AbstractUIPlugin {
 
-	private static final boolean LOG_QUERY = false;
+	private static final boolean LOG_QUERY = true;
 
 	
 	// The plug-in ID

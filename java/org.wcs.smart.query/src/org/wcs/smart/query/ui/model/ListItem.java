@@ -169,7 +169,6 @@ public class ListItem implements Comparable<ListItem>{
 		}else if (uuid != null && other.uuid != null){
 			return Arrays.equals(uuid, other.uuid);
 		}
-		System.out.println(false);
 		return false;
 	}
 
