@@ -173,7 +173,6 @@ public class SurveySummaryQueryType implements IQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
-		System.out.println(queryString);
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
 			Parser parser = new Parser(is);

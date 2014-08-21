@@ -68,6 +68,7 @@ public class SurveyQueryResultItem implements IResultItem{
 	private Float waypointDistance;
 	private Float waypointDirection;
 	private String waypointComment;
+	private String waypointObserver;
 	
 	private String[] observationCategory;
 	private HashMap<String, Object> properties = new HashMap<String, Object>();
@@ -452,4 +453,16 @@ public class SurveyQueryResultItem implements IResultItem{
 		this.smaplingUnitBuffer = smaplingUnitBuffer;
 	}
 	
+	
+	/**
+	 * the waypoint observer
+	 * @return
+	 */
+	public String getWaypointObserver(){
+		return this.waypointObserver;
+	}
+	
+	public void setWaypointObserver(String observer){
+		this.waypointObserver = observer;
+	}
 }
