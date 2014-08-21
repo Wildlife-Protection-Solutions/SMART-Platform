@@ -42,6 +42,7 @@ public class WaypointEventManager {
 	public static enum EventType{
 		WAYPOINT_MODIFIED,
 		WAYPOINT_DELETED,
+		WAYPOINT_OPTIONS_MODIFIED,
 	}
 
 	
@@ -105,6 +106,14 @@ public class WaypointEventManager {
 	 */
 	public void waypointDeleted(Waypoint wp){
 		fireListeners(EventType.WAYPOINT_DELETED,wp);
+	}
+	
+	/**
+	 * Fires waypoint options changed event
+	 * @param wp
+	 */
+	public void waypointOptionsModified(){
+		fireListeners(EventType.WAYPOINT_OPTIONS_MODIFIED,null);
 	}
 	
 	/*

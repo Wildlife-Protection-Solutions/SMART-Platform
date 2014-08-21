@@ -44,6 +44,7 @@ import org.wcs.smart.ca.Projection;
 public class ObservationOptions {
 
 	private boolean trackDistanceDirection;
+	private boolean trackObserver;
 	private Integer editTime;
 	private Projection viewProjection;
 	private byte[] ca_uuid;
@@ -109,4 +110,16 @@ public class ObservationOptions {
 		this.viewProjection = viewProjection;
 	}
 
+	@Column(name="observer")
+	public boolean getTrackObserver(){
+		return this.trackObserver;
+	}
+	
+	/**
+	 * 
+	 * @param track the observer property
+	 */
+	public void setTrackObserver(boolean track){
+		this.trackObserver = track;
+	}
 }

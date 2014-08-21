@@ -35,6 +35,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -42,10 +43,12 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -76,21 +79,26 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	
 	//categories to process
 	private List<Category> toProcess;
+	private List<Employee> observers;
 	
+	private ObservationOptions ops = null;
 	/**
 	 * Creates a new wizard. 
 	 * 
 	 * @param wp Waypoint to gather observations for
 	 */
-	public ObservationWizard(Waypoint wp){
+	public ObservationWizard(Waypoint wp, List<Employee> observers){
 		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(wp.getId())}));
 		
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
 		
+		this.observers = observers;
+		
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		
+		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
 		session.update(wp);
 		
 		this.wp = wp;
@@ -116,6 +124,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		this.workingObservations.putAll(observations);
 	}
 	
+	/**
+	 * 
+	 * @return the observation options
+	 */
+	public ObservationOptions getObservationOptions(){
+		return this.ops;
+	}
 	
 	/**
 	 * Initial categories to process.  This must be called
@@ -407,5 +422,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
      */
     public Waypoint getWaypoint(){
     	return this.wp;
+    }
+    
+    /**
+     * 
+     * @return list of possible observers
+     */
+    public List<Employee> getObservers(){
+    	return this.observers;
     }
 }

@@ -124,7 +124,7 @@ public class Label  {
 						ResultSet rs = c.createStatement().executeQuery(
 								"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
 								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-								"' and a.code = '" + SmartDB.getConservationAreaConfiguration().getLanguage().getCode() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"' and a.code = '" + SmartDB.getConservationAreaConfiguration().getLanguage().getCode() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ 
 						try{
 							if (rs.next()){
 								temp[0] = rs.getString(1);
@@ -138,7 +138,7 @@ public class Label  {
 									"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
 									"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
 									"' and a.code = '" +  //$NON-NLS-1$
-									SmartDB.getConservationAreaConfiguration().getLanguage().getCode().split("_")[0] + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+									SmartDB.getConservationAreaConfiguration().getLanguage().getCode().split("_")[0] + "'"); //$NON-NLS-1$ //$NON-NLS-2$ 
 							if (rs.next()){
 								temp[0] = rs.getString(1);
 								return;

@@ -71,6 +71,7 @@ public class PatrolQueryResultItem implements IResultItem{
 	private Float waypointDistance;
 	private Float waypointDirection;
 	private String waypointComment;
+	private String waypointObserver;
 	
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
@@ -488,4 +489,15 @@ public class PatrolQueryResultItem implements IResultItem{
 		return this.caName;
 	}
 	
+	/**
+	 * the waypoint observer
+	 * @return
+	 */
+	public String getWaypointObserver(){
+		return this.waypointObserver;
+	}
+	
+	public void setWaypointObserver(String observer){
+		this.waypointObserver = observer;
+	}
 }

@@ -53,8 +53,6 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  */
 public class QueryItemView extends ViewPart {
 
-	
-
 	public static final String ID ="org.wcs.smart.query.ui.QueryItemView"; //$NON-NLS-1$
 
 	private Composite main;

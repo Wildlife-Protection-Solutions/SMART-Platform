@@ -118,7 +118,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 					items = new DropItem[]{super.createConservationAreaGroupByDropItem()};
 				}
 			}else{
-				if (source == GeneralItem.WAYPOINT_SOURCE){
+				if (source == GeneralItem.WAYPOINT_SOURCE ||
+						source == GeneralItem.OBSERVER){
 					items = new DropItem[]{createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItem)source)};
 				}
 			}
@@ -133,6 +134,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItem source){
 		if (source == GeneralContentProvider.GeneralItem.WAYPOINT_SOURCE){
 			return new WaypointSourceFilterDropItem();
+		}else if (source == GeneralContentProvider.GeneralItem.OBSERVER){
+			return new ObserverDropItem();
 		}
 		throw new IllegalStateException(MessageFormat.format(Messages.ObservationDropItemFactory_QueryItemNotSupported, new Object[]{source.guiName}));
 	}

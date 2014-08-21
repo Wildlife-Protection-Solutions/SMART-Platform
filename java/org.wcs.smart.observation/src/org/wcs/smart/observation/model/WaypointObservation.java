@@ -37,6 +37,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.io.FileUtils;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -57,10 +58,11 @@ public class WaypointObservation extends UuidItem {
 	private List<WaypointObservationAttribute> attributes = null; 
 	private List<ObservationAttachment> attachments;
 	
+	private Employee observer;
+	
 	public WaypointObservation(){
 		
 	}
-	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="wp_uuid", referencedColumnName="uuid")
@@ -69,6 +71,15 @@ public class WaypointObservation extends UuidItem {
 	}
 	public void setWaypoint(Waypoint waypoint){
 		this.waypoint = waypoint;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="employee_uuid", referencedColumnName="uuid")
+	public Employee getObserver(){
+		return this.observer;
+	}
+	public void setObserver(Employee observer){
+		this.observer = observer;
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)

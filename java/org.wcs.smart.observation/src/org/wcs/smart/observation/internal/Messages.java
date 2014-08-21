@@ -52,13 +52,21 @@ public class Messages extends NLS {
 
 	public static String ObservationCloner_TaskName;
 
+	public static String ObservationOptionsPropertyPage_ObserverDescription;
+
+	public static String ObservationOptionsPropertyPage_ObserverLabel;
+
 	public static String ObservationOptionsPropertyPage_Projection_LoadError;
 
 	public static String ObservationOptionsPropertyPage_ViewProjectionDescr;
 
 	public static String ObservationOptionsPropertyPage_ViewProjectionGroupTitle;
 
+	public static String ObservationOptionsPropertyPage_WaypointOptionsLbl;
+
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
+	public static String ObservationSummaryWizardPage_ObserverLabel;
+
 	public static String ObservationSummaryWizardPage_PageMessage;
 	public static String ObservationSummaryWizardPage_PageName;
 	public static String ObservationSummaryWizardPage_PageTitle;
