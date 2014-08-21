@@ -44,7 +44,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Georesource for fixed entity types.

@@ -61,8 +61,8 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	 */
 	public String getText(Object element) {
 		if (element instanceof EntityQueryResultItem) {
-			return asString(column.getValue((EntityQueryResultItem) element),
-					column.getType());
+			String value = asString(column.getValue((EntityQueryResultItem) element), column.getType());
+			return value;
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}

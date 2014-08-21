@@ -38,7 +38,6 @@ import org.geotools.feature.SchemaException;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -60,12 +59,10 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class FixedEntityDataSource extends AbstractDataStore{
 
-	private ConservationArea ca;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	private HashMap<String, EntityType> cachedTypes = new HashMap<String, EntityType>();
 	
-	public FixedEntityDataSource(ConservationArea ca){
-		this.ca = ca;
+	public FixedEntityDataSource(){
 	}
 
 	@Override

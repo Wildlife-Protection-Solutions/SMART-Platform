@@ -47,6 +47,8 @@ public class SightingResultItem implements IResultItem{
 	private Float waypointDirection;
 	private String waypointComment;
 	private String entityId;
+
+	private String waypointObserver;
 	
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
@@ -295,6 +297,19 @@ public class SightingResultItem implements IResultItem{
 	 */
 	public String getConservationAreaName(){
 		return this.caName;
+	}
+	
+	
+	/**
+	 * the waypoint observer
+	 * @return
+	 */
+	public String getWaypointObserver(){
+		return this.waypointObserver;
+	}
+	
+	public void setWaypointObserver(String observer){
+		this.waypointObserver = observer;
 	}
 	
 }

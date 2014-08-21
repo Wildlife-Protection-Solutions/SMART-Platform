@@ -62,7 +62,8 @@ public class SightingQueryColumn extends QueryColumn{
 		WAYPOINT_Y(Messages.SightingQueryColumn_yColumnName, ColumnType.NUMBER, "waypoint:y", "wp_y"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_DIRECTION(Messages.SightingQueryColumn_DirectionColumnName, ColumnType.NUMBER,"waypoint:direction", "wp_direction"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_DISTANCE(Messages.SightingQueryColumn_DistanceColumnName, ColumnType.NUMBER,"waypoint:distance", "wp_distance"), //$NON-NLS-1$ //$NON-NLS-2$
-		WAYPOINT_COMMENT(Messages.SightingQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment", "wp_comment"); //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_COMMENT(Messages.SightingQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment", "wp_comment"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_OBSERVER(Messages.SightingQueryColumn_ObserverColumnName, ColumnType.STRING,"ob:observer", "ob_observer");  //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private String guiName;
 		private ColumnType type;
@@ -137,6 +138,8 @@ public class SightingQueryColumn extends QueryColumn{
 			return ri.getWaypointDistance();
 		}else if (getKey().equals(FixedColumns.WAYPOINT_COMMENT.getKey())){
 			return ri.getWaypointComment();
+		}else if (getKey().equals(FixedColumns.WAYPOINT_OBSERVER.getKey())){
+			return ri.getWaypointObserver();
 		}else if (getKey().startsWith("cat:")){ //$NON-NLS-1$
 			Integer index = Integer.parseInt(getKey().substring(getKey().lastIndexOf(':')+1));
 			if (index < ri.getCategories().length){

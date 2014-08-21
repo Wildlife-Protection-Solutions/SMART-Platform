@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String AddEntityQueryJob_InstallError2;
 	public static String AddEntityQueryJob_Progress1;
 	public static String ConservationAreaTreeNode_Name;
+	public static String DerbyEntityObservationEngine_ObserverProgress;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;
 	public static String DerbyGridEngine_Progress_RunningQuery;
@@ -34,6 +35,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_CommentColumnName;
 	public static String FixedQueryColumn_DirectionColumnName;
 	public static String FixedQueryColumn_DistanceColumnName;
+	public static String FixedQueryColumn_ObserverColumnName;
 	public static String FixedQueryColumn_WaypointDateColumnName;
 	public static String FixedQueryColumn_WaypointIdColumnName;
 	public static String FixedQueryColumn_WaypointSourceColumnName;

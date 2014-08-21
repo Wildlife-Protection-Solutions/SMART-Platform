@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -102,13 +101,10 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		ConservationArea ca = null;
-		if (Arrays.equals(SmartDB.getCurrentConservationArea().getUuid(), ((byte[])params.get(CAUUID.key)))){
-			ca = SmartDB.getCurrentConservationArea();
-		}else{
+		if (!Arrays.equals(SmartDB.getCurrentConservationArea().getUuid(), ((byte[])params.get(CAUUID.key)))){
 			throw new IOException(Messages.FixedEntityDataSourceFactory_CaNotFoundError);
 		}
-		return new FixedEntityDataSource(ca);
+		return new FixedEntityDataSource();
 	}
 
 	/* (non-Javadoc)

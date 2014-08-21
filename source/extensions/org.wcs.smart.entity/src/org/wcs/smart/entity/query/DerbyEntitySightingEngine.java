@@ -118,7 +118,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				monitor.worked(1);
 
 				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress2);
-				populateDataTable(c);
+				populateDataTable(c, session);
 				monitor.worked(1);
 				
 				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress3);
@@ -166,7 +166,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	}
 
 
-	protected void populateDataTable(Connection c) throws SQLException {
+	protected void populateDataTable(Connection c, Session session) throws SQLException {
 		
 		String lastSightingReport = null;
 		
@@ -232,7 +232,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append(" INSERT INTO " + queryDataTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_category_uuid,entity_uuid,entity_id,entity_status) "); //$NON-NLS-1$
+		sql.append(" (ca_uuid,ca_id,ca_name,wp_uuid,wp_source,wp_id,wp_x,wp_y,wp_direction,wp_distance,wp_time,wp_comment,ob_uuid,ob_observer_uuid,ob_category_uuid,entity_uuid,entity_id,entity_status) "); //$NON-NLS-1$
 		sql.append(" SELECT "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -248,6 +248,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Entity.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Entity.class) + ".id, "); //$NON-NLS-1$
@@ -332,6 +333,45 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
+		//update observer
+		sql = new StringBuilder();
+		sql.append("ALTER TABLE "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		sql.append (" ADD COLUMN ob_observer VARCHAR(512)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+		
+		sql = new StringBuilder();
+		sql.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		QueryPlugIn.logSql(sql.toString());
+
+		ResultSet rs1 = c.createStatement().executeQuery(sql.toString());
+		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		String q1 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
+		QueryPlugIn.logSql(q1);
+		PreparedStatement observerSt = c.prepareStatement(q1);
+		int cnt = 0;
+		try {
+			while (rs1.next()) {
+				byte[] uuid = rs1.getBytes(1);
+				String name = getEmployeeName(uuid, session);
+						
+				if (name != null) {
+					observerSt.setString(1, name);
+					observerSt.setBytes(2, uuid);
+					observerSt.addBatch();
+					cnt++;
+					if (cnt >= 100){
+						observerSt.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			observerSt.executeBatch();
+		} finally {
+			rs1.close();
+		}
 		
 		//update entity values
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
@@ -483,6 +523,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(FixedColumns.WAYPOINT_TIME.dbColName + " timestamp,"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_COMMENT.dbColName + " varchar(4096),"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("entity_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append(FixedColumns.ENTITY_ID.dbColName + " varchar(32), "); //$NON-NLS-1$
@@ -520,7 +561,8 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setWaypointDateTime(rs.getTimestamp(FixedColumns.WAYPOINT_TIME.dbColName));
 		it.setWaypointDirection(rs.getFloat(FixedColumns.WAYPOINT_DIRECTION.dbColName)); 
 		it.setWaypointDistance(rs.getFloat(FixedColumns.WAYPOINT_DISTANCE.dbColName)); 
-		it.setWaypointComment(rs.getString(FixedColumns.WAYPOINT_COMMENT.dbColName)); 
+		it.setWaypointComment(rs.getString(FixedColumns.WAYPOINT_COMMENT.dbColName));
+		it.setWaypointObserver(rs.getString(FixedColumns.WAYPOINT_OBSERVER.dbColName)); 
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
 		it.setEntityId(rs.getString(FixedColumns.ENTITY_ID.dbColName));
 		it.setEntityStatus(EntityType.Status.valueOf(rs.getString(FixedColumns.ENTITY_STATUS.dbColName))); 
