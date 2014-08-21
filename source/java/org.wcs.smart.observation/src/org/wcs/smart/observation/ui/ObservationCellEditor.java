@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -87,6 +88,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	private Display focusDisplay;
 	
 	private List<Category> currentSelection = null;	//current catetory selected from tree drop down
+	private List<Employee> observers;
 	
 	/**
 	 * Job for loading data model for tree drop down
@@ -137,7 +139,6 @@ public class ObservationCellEditor extends DialogCellEditor {
 	 */
 	public ObservationCellEditor(Composite parent) {
 		super(parent);
-		
 		super.addListener(new ICellEditorListener() {
 			@Override
 			public void editorValueChanged(boolean oldValidState, boolean newValidState) {
@@ -174,6 +175,15 @@ public class ObservationCellEditor extends DialogCellEditor {
 				
 			}
 		};		
+	}
+	
+	/**
+	 * Sets available observers
+	 * 
+	 * @param observers
+	 */
+	public void setObservers(List<Employee> observers){
+		this.observers = observers;
 	}
 
 	/**
@@ -427,7 +437,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 		}
 		Waypoint wp = (Waypoint) super.getValue();
 
-		final ObservationWizard wizard = new ObservationWizard(wp);
+		final ObservationWizard wizard = new ObservationWizard(wp, this.observers);
 		if (currentSelection != null){
 			wizard.setInitialCategories(currentSelection);
 		}

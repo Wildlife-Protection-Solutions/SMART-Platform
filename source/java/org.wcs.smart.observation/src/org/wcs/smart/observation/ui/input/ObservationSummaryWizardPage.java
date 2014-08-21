@@ -29,9 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -44,12 +47,14 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -69,6 +74,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 
 	public Font boldFont = null;
 	private ObservationWizardPage nextPage = null;
+	private ComboViewer employeeViewer;
 	
 	protected ObservationSummaryWizardPage(Wizard wizard) {
 		super(PAGE_NAME);
@@ -87,7 +93,55 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	}
 	
 	@Override
-	public void createControl(final Composite parent) {
+	public void createControl(Composite parent) {
+		parent = new Composite(parent, SWT.NONE);
+		parent.setLayout(new GridLayout());
+		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)parent.getLayout()).marginHeight = 0;
+		
+		if (getWizardLocal().getObservationOptions().getTrackObserver()){
+			Composite observerComp = new Composite(parent, SWT.NONE);
+			observerComp.setLayout(new GridLayout(2, false));
+			((GridLayout)observerComp.getLayout()).marginHeight = 0;
+		
+			Label l = new Label(observerComp, SWT.NONE);
+			l.setText(Messages.ObservationSummaryWizardPage_ObserverLabel);
+			l.setFont(boldFont);
+		
+		
+			employeeViewer = new ComboViewer(
+				new Combo(observerComp,SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY));
+			employeeViewer.setContentProvider(ArrayContentProvider.getInstance());
+			employeeViewer.getControl().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+			employeeViewer.setLabelProvider(new LabelProvider(){
+				@Override
+				public String getText(Object element){
+					if (element instanceof Employee){
+						return ((Employee)element).getFullLabel();
+					}
+					return super.getText(element);
+				}
+			});
+			employeeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			
+			List<Object> objects = new ArrayList<Object>();
+			objects.add(""); //$NON-NLS-1$
+			objects.addAll( getWizardLocal().getObservers() );
+			employeeViewer.setInput(objects);
+			Employee em = null;
+			for (WaypointObservation wp : getWizardLocal().getWaypoint().getObservations()){
+				if (wp.getObserver() != null){
+					em = wp.getObserver();
+				}
+			}
+			if (em != null){
+				employeeViewer.setSelection(new StructuredSelection(em));
+			}
+		}
+		
+		
+		
+		
 		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolled.setShowFocusedControl(true);
@@ -98,7 +152,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		HashMap<Category, List<WaypointObservation>> obs = ((ObservationWizard)getWizard()).getAllObservations();
+		HashMap<Category, List<WaypointObservation>> obs = getWizardLocal().getAllObservations();
 		
 		ArrayList<Category> sortedCategories = new ArrayList<Category>();
 		sortedCategories.addAll(obs.keySet());
@@ -193,10 +247,10 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		setTitle(Messages.ObservationSummaryWizardPage_PageTitle);
 		super.setMessage(Messages.ObservationSummaryWizardPage_PageMessage);
 		super.setPageComplete(true);
-		((ObservationWizard)getWizard()).setCanFinish(true);
+		getWizardLocal().setCanFinish(true);
 		
 		scrolled.setContent(main);
-		setControl(scrolled);
+		setControl(parent);
 
 		
 		int width = 400;
@@ -207,6 +261,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		//for scrollbar and wrapping labels
 		final Composite mParent = main;
 		final ScrolledComposite mScrolled = scrolled;
+		final Composite fparent = parent;
 		parent.addListener(SWT.Resize, new Listener(){
 			int width = -1;
 			@Override
@@ -223,12 +278,25 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			public void handleEvent(Event event) {
 				int newWidth = mParent.getSize().x;
 				mScrolled.setMinHeight(mParent.computeSize(newWidth,SWT.DEFAULT).y);
-				parent.removeListener(SWT.Paint, this);
+				fparent.removeListener(SWT.Paint, this);
 			}
 		});
 		parent.layout(true);
 	}
-	
+
+	/**
+	 * 
+	 * @return the selected observer
+	 */
+	public Employee getObserver(){
+		if (employeeViewer != null && employeeViewer.getSelection() != null){
+			Object x = ((IStructuredSelection)employeeViewer.getSelection()).getFirstElement();
+			if ( x instanceof Employee){
+				return (Employee) x;
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Deletes the given cateory and all associated observations
@@ -236,7 +304,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 * @param comp
 	 */
 	private void deleteCategory(Category category, Composite comp){
-		((ObservationWizard)getWizard()).removeObservations(category);
+		getWizardLocal().removeObservations(category);
 		Composite parent = comp.getParent();
 		comp.dispose();
 		parent.layout();
@@ -250,11 +318,11 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	private void editCategory(Category category, WaypointObservation wo){
 		List<Category> cats = new ArrayList<Category>();
 		cats.add(category);
-		ObservationWizard wizard = (ObservationWizard) getWizard();
-		wizard.setCategoriesToProcess(cats);
+		
+		getWizardLocal().setCategoriesToProcess(cats);
 		
 		AttributeWizardPage wizardPage = new AttributeWizardPage((Wizard)getWizard(), 0);
-		wizard.getContainer().showPage( wizardPage );
+		getWizardLocal().getContainer().showPage( wizardPage );
 		if (wo != null){
 			//we have a particular observation to edit
 			wizardPage.editObservation(wo);
@@ -289,8 +357,15 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 */
 	@Override
 	public boolean beforeMoveNext(IWizardPage target) {
+		//update observer
+		if (employeeViewer != null){
+			for (WaypointObservation wo : getWizardLocal().getWaypoint().getObservations()){
+				wo.setObserver(getObserver());
+			}
+		}
+		
 		if (target instanceof ObservationWizardPage){
-			((ObservationWizard)getWizard()).setCategoriesToProcess(new ArrayList<Category>());
+			getWizardLocal().setCategoriesToProcess(new ArrayList<Category>());
 		}
 		return true;
 	}
@@ -300,8 +375,10 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 */
 	@Override
 	public void beforeShow(){
-		((ObservationWizard)getWizard()).setObservations();
+		getWizardLocal().setObservations();
 	}
 	
-	
+	private ObservationWizard getWizardLocal(){
+		return (ObservationWizard)getWizard();
+	}
 }

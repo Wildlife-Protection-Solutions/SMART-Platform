@@ -42,10 +42,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.events.IWaypointEventListener;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.events.WaypointEventManager.EventType;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -72,7 +80,12 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 	private Composite main = null;
 	private TreeViewer filterTreeViewer;
 	private AreaTreeNode areaTreeNode;
-	
+	private IWaypointEventListener optionsModified = new IWaypointEventListener() {
+		@Override
+		public void handleEvent(Waypoint wp) {
+			refreshPanel();
+		}
+	};
 	/*
 	 * listener for refreshing areas
 	 */
@@ -102,18 +115,22 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		main.setLayout(gl);
 		
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_OPTIONS_MODIFIED, optionsModified);
 		main.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+				WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_OPTIONS_MODIFIED, optionsModified);
 			}
 		});
 		
 		
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE}));
+		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters,
+				new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER}));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
+
 		if (!SmartDB.isMultipleAnalysis()){
 			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
 			nodes.add(areaTreeNode);
@@ -170,13 +187,29 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			input.put(OperatorsTreeNode.KEY, ops);
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 
+			if (SmartDB.isMultipleAnalysis()){
+				input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER});	
+			}else{
+				//only add observer if part of options
+				Session session = HibernateManager.openSession();
+				try{
+					ObservationOptions options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+					if (options.getTrackObserver()){
+						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER});
+					}else{
+						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE});
+					}
+				}finally{
+					session.close();
+				}
+			}
+			
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					filterTreeViewer.setInput(input);
 					filterTreeViewer.refresh();
-				}
-				
+				}	
 			});
 			return Status.OK_STATUS;
 		}

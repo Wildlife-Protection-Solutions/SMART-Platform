@@ -30,6 +30,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -63,6 +66,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -396,7 +400,24 @@ public class IncidentSummaryPage extends EditorPart {
 			return sb.toString();
 		  }
 		});
-		tlayout.setColumnData(colAttributes.getColumn(), new ColumnWeightData(90));
+		tlayout.setColumnData(colAttributes.getColumn(), new ColumnWeightData(70));
+		
+		if (editor.getOptions().getTrackObserver()){
+			TableViewerColumn colObserver = new TableViewerColumn(observationTable, SWT.NONE);
+			colObserver.getColumn().setText(Messages.IncidentSummaryPage_ColumnLabel);
+			colObserver.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					WaypointObservation o =  ((WaypointObservation)element);
+					if (o.getObserver() == null){
+						return ""; //$NON-NLS-1$
+					}else{
+						return o.getObserver().getShortLabel();
+					}
+				}
+			});
+			tlayout.setColumnData(colObserver.getColumn(), new ColumnWeightData(15));
+		}
 		
 		TableViewerColumn colAttachments = new TableViewerColumn(observationTable, SWT.NONE);
 		colAttachments.getColumn().setText(Messages.IncidentSummaryPage_AttachmentsColumnName);
@@ -410,7 +431,10 @@ public class IncidentSummaryPage extends EditorPart {
 			  return ""; //$NON-NLS-1$
 		  }
 		});
-		tlayout.setColumnData(colAttachments.getColumn(), new ColumnWeightData(10));
+		tlayout.setColumnData(colAttachments.getColumn(), new ColumnWeightData(15));
+		
+		
+		
 		
 		if (canEdit == null){
 			Button btnEdit = toolkit.createButton(observationTableComp, Messages.IncidentSummaryPage_EditButtonName, SWT.PUSH);
@@ -435,9 +459,45 @@ public class IncidentSummaryPage extends EditorPart {
 	
 	private void editIncident(){
 		ObservationWizardDialog wd = new ObservationWizardDialog(getEditorSite().getShell(),
-				new ObservationWizard(editor.getIncident()));
+				new ObservationWizard(editor.getIncident(), getEmployees()));
 		wd.open();
 	}
+	
+	private List<Employee> employees = null;
+	
+	private List<Employee> getEmployees(){
+		if (employees == null){
+			Job j = new Job(Messages.IncidentSummaryPage_EmployeeLoadJobName){
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					try{
+						employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
+					}finally{
+						s.close();
+					}
+					Collections.sort(employees, new Comparator<Employee>() {
+						@Override
+						public int compare(Employee arg0, Employee arg1) {
+							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+						}
+					});
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+			
+			try {
+				j.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return employees;
+		
+	}
+	
 	private void createEdit(Composite parent, String canEdit, final String panelId){
 		if (canEdit == null){
 			Hyperlink l = toolkit.createHyperlink(parent,DialogConstants.EDIT_LINK_TEXT,SWT.NONE);

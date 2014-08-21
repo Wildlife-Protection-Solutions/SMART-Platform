@@ -18,7 +18,11 @@ import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.events.IWaypointEventListener;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -67,6 +71,13 @@ public class PatrolQueryColumnCache {
 				patrolQueryColumns = null;
 				gridQueryColumns = null;
 				
+			}
+		});
+		
+		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_OPTIONS_MODIFIED, new IWaypointEventListener() {
+			@Override
+			public void handleEvent(Waypoint wp) {
+				queryColumns = null;
 			}
 		});
 	}
@@ -121,6 +132,8 @@ public class PatrolQueryColumnCache {
 						add = false;
 					}else if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
+					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+						add = patrolOps.getTrackObserver();
 					}
 					if (add){
 						cols.add(new FixedQueryColumn(item));
@@ -213,6 +226,8 @@ public class PatrolQueryColumnCache {
 						add = false;
 					}else if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
+					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+						add = patrolOps.getTrackObserver();
 					}
 					if (add){
 						cols.add(new FixedQueryColumn(item));

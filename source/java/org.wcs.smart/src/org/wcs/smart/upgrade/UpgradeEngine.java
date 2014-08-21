@@ -24,6 +24,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.v200.Upgrader112To200;
 import org.wcs.smart.upgrade.v300.Upgrader200To300;
 import org.wcs.smart.upgrade.v300.Upgrader300To302;
+import org.wcs.smart.upgrade.v400.Upgrader302To400;
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -40,7 +41,7 @@ public class UpgradeEngine {
 		V112,
 		V200,
 		V300,
-		V301
+		V302
 	}
 	
 	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
@@ -71,8 +72,10 @@ public class UpgradeEngine {
 					fromVersion = UpgradeFromVersion.V200;
 				} else if ("1.1.2".equals(version)) { //$NON-NLS-1$
 					fromVersion = UpgradeFromVersion.V112;
-				}else if ("3.0.1".equals(version)){ //$NON-NLS-1$
-					fromVersion = UpgradeFromVersion.V301;
+				}else if ("3.0".equals(version)){ //$NON-NLS-1$
+					fromVersion = UpgradeFromVersion.V300;
+				}else if ("3.0.2".equals(version)){ //$NON-NLS-1$
+					fromVersion = UpgradeFromVersion.V302;
 				}
 				
 				if (fromVersion == null) {
@@ -95,6 +98,8 @@ public class UpgradeEngine {
 					Upgrader200To300.upgrade(s, monitor);
 				case V300:
 					Upgrader300To302.upgrade(s, monitor);
+				case V302:
+					Upgrader302To400.upgrade(s, monitor);
 				default:
 					break;
 				}

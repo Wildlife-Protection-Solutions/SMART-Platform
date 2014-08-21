@@ -7,6 +7,7 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;
 	public static String DerbyGridEngine_Progress_RunningQuery;
+	public static String DerbyObservationEngine_Observers;
 	public static String DerbyObservationEngine_Progress_CaInfo;
 	public static String DerbyObservationEngine_Progress_CategoryData;
 	public static String DerbyObservationEngine_Progress_FetchSize;
@@ -28,6 +29,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_CommentColumnName;
 	public static String FixedQueryColumn_DirectionColumnName;
 	public static String FixedQueryColumn_DistanceColumnName;
+	public static String FixedQueryColumn_ObserverColumnName;
 	public static String FixedQueryColumn_WaypointDateColumnName;
 	public static String FixedQueryColumn_WaypointIdColumnName;
 	public static String FixedQueryColumn_WaypointSourceColumnName;
@@ -35,6 +37,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_xColumnName;
 	public static String FixedQueryColumn_yColumnName;
 	public static String GeneralContentProvider_ConservationAreaLabel;
+	public static String GeneralContentProvider_ObserverLabel;
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
@@ -95,6 +98,9 @@ public class Messages extends NLS {
 	public static String ObservationQueryType_QueryName;
 	public static String ObservationSummaryQueryType_QueryName;
 	public static String ObservationWaypointQueryType_QueryName;
+	public static String ObserverDropItem_loadingList;
+	public static String ObserverDropItem_ObserverLabel;
+	public static String ObserverFilter_EmployeeNotFound;
 
 	static {
 		// initialize resource bundle

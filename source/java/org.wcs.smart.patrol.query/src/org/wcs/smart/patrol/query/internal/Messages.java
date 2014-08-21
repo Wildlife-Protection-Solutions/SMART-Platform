@@ -62,6 +62,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_LegStartDateColumnName;
 	public static String FixedQueryColumn_MandateColumnName;
 	public static String FixedQueryColumn_ObjectiveColumnName;
+	public static String FixedQueryColumn_ObserverColumnName;
 	public static String FixedQueryColumn_PatrolEndDateColumnName;
 	public static String FixedQueryColumn_PatrolIdColumnName;
 	public static String FixedQueryColumn_PatrolStartDateColumnName;

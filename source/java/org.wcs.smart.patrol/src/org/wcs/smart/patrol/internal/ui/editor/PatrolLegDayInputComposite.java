@@ -23,14 +23,17 @@ package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Time;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
 import net.refractions.udig.project.ui.ApplicationGIS;
@@ -87,6 +90,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -102,6 +106,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.util.SmartUtils;
@@ -271,6 +276,18 @@ public class PatrolLegDayInputComposite {
 			
 		}
 	
+		//setup employees
+		List<Employee> emps = new ArrayList<Employee>();
+		for (PatrolLegMember m : patrolLegDate.getPatrolLeg().getMembers()){
+			emps.add(m.getMember());
+		}
+		Collections.sort(emps, new Comparator<Employee>() {
+			@Override
+			public int compare(Employee arg0, Employee arg1) {
+				return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+			}
+		});
+		observationEditor.setObservers(emps);
 	}
 
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {

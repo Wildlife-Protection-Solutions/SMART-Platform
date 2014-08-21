@@ -41,6 +41,7 @@ public class Parser implements ParserConstants {
     case DM_KEY:
     case AREA_KEY:
     case WAYPOINT_SOURCE_KEY:
+    case WAYPOINT_OBSERVER_KEY:
       vFilter = QueryFilterInternal();
       break;
     default:
@@ -69,6 +70,7 @@ public class Parser implements ParserConstants {
       case DM_KEY:
       case AREA_KEY:
       case WAYPOINT_SOURCE_KEY:
+      case WAYPOINT_OBSERVER_KEY:
         rFilter = QueryFilterInternal();
         break;
       default:
@@ -113,6 +115,7 @@ public class Parser implements ParserConstants {
     case DM_KEY:
     case AREA_KEY:
     case WAYPOINT_SOURCE_KEY:
+    case WAYPOINT_OBSERVER_KEY:
       valueFilter = QueryFilterInternal();
       break;
     default:
@@ -353,6 +356,7 @@ public class Parser implements ParserConstants {
     case CAT_ATT_TREE_KEY:
     case CAT_ATT_DATE_KEY:
     case WAYPOINT_SOURCE_KEY:
+    case WAYPOINT_OBSERVER_KEY:
       filter = AttributeExpression();
       break;
     case AREA_KEY:
@@ -436,6 +440,7 @@ public class Parser implements ParserConstants {
     case ATT_STR_KEY:
     case CAT_ATT_STR_KEY:
     case WAYPOINT_SOURCE_KEY:
+    case WAYPOINT_OBSERVER_KEY:
       /* String comparison */
               filter = StringExpression();
       break;
@@ -565,6 +570,13 @@ public class Parser implements ParserConstants {
       jj_consume_token(QUOTED_STRING);
                                    value = token.image;
                 filter = WaypointSourceFilter.createFilter(value,op);
+      break;
+    case WAYPOINT_OBSERVER_KEY:
+      jj_consume_token(WAYPOINT_OBSERVER_KEY);
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                  value = token.image;
+                  filter = ObserverFilter.createFilter(value);
       break;
     default:
       jj_la1[18] = jj_gen;
@@ -700,10 +712,10 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x40100,0x40100,0x0,0x40100,0x0,0x0,0x400,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x280,0x4000100,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x243fff,0x243fff,0x20000000,0x243fff,0x2000,0x7c00000,0x0,0x7c00000,0xd0000000,0x0,0xd0000000,0x0,0x0,0x241fff,0x208,0x104,0x201ffe,0x1040,0x200082,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x643fff,0x643fff,0x40000000,0x643fff,0x2000,0xf800000,0x0,0xf800000,0xa0000000,0x0,0xa0000000,0x0,0x0,0x641fff,0x208,0x104,0x601ffe,0x1040,0x600082,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf,0x0,0xf,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1f,0x0,0x1f,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -820,7 +832,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[69];
+    boolean[] la1tokens = new boolean[70];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -840,7 +852,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 69; i++) {
+    for (int i = 0; i < 70; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

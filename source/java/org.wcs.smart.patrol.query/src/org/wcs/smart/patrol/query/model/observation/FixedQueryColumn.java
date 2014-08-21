@@ -67,7 +67,8 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_Y(Messages.FixedQueryColumn_yColumnName, ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
 		WAYPOINT_DIRECTION(Messages.FixedQueryColumn_DirectionColumnName, ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
 		WAYPOINT_DISTANCE(Messages.FixedQueryColumn_DistanceColumnName, ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
-		WAYPOINT_COMMENT(Messages.FixedQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
+		WAYPOINT_COMMENT(Messages.FixedQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
+		WAYPOINT_OBSERVER(Messages.FixedQueryColumn_ObserverColumnName, ColumnType.STRING,"ob:observer");   //$NON-NLS-1$
 		
 		private String guiName;
 		private ColumnType type;
@@ -159,6 +160,8 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getConservationAreaId();
 			case CA_NAME:
 				return item.getConservationAreaName();
+			case WAYPOINT_OBSERVER:
+				return item.getWaypointObserver();
 			}
 		}
 		return ""; //$NON-NLS-1$

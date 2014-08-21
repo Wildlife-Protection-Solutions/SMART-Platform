@@ -240,6 +240,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"ob_observer", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -280,12 +281,13 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			return;
 		}
 
-		
 		monitor.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
 		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		sql.append(" UNION SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
@@ -293,10 +295,13 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		
 		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
 		String q2 = updateSql + "p_pilot = ? where plm_pilot = ?"; //$NON-NLS-1$
+		String q3 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
 		QueryPlugIn.logSql(q1);
 		QueryPlugIn.logSql(q2);
+		QueryPlugIn.logSql(q3);
 		PreparedStatement leaderSt = c.prepareStatement(q1);
 		PreparedStatement pilotSt = c.prepareStatement(q2);
+		PreparedStatement observerSt = c.prepareStatement(q3);
 		int cnt = 0;
 		try {
 			while (rs.next()) {
@@ -311,16 +316,23 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					pilotSt.setString(1, name);
 					pilotSt.setBytes(2, uuid);
 					pilotSt.addBatch();
+					
+					observerSt.setString(1, name);
+					observerSt.setBytes(2, uuid);
+					observerSt.addBatch();
+					
 					cnt++;
 					if (cnt >= 100){
 						pilotSt.executeBatch();
 						leaderSt.executeBatch();
+						observerSt.executeBatch();
 						cnt = 0;
 					}
 				}
 			}
 			pilotSt.executeBatch();
 			leaderSt.executeBatch();
+			observerSt.executeBatch();
 		} finally {
 			rs.close();
 		}
@@ -351,7 +363,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
-		
+				
 		//populating categories
 		monitor.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
 		populateTemporaryTableCategory(c, session);
@@ -479,6 +491,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
 
@@ -516,7 +529,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
-
+		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
 		
@@ -556,7 +569,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
+		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
 		
 		//build categories

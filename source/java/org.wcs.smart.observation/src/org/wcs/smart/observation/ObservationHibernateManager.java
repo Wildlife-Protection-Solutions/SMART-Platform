@@ -29,10 +29,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 
-
-
 /**
- * Extension of the smart hibernate manager for patrol related data.
+ * Extension of the smart hibernate manager for observation related data.
  * 
  * @author Emily
  * @since 1.0.0
@@ -100,6 +98,7 @@ public class ObservationHibernateManager extends HibernateManager{
 		po.setTrackDistanceDirection(false);
 		po.setEditTime(null);
 		po.setUuid(ca.getUuid());
+		po.setTrackObserver(false);
 		s.saveOrUpdate(po);
 		return po;
 	}

@@ -58,6 +58,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -74,6 +75,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	private Text txtEditTime;
 	private ControlDecoration cdEditTime;
 	private Button btnTrackDistanceDirection;
+	private Button btnTrackObserver;
 	private ComboViewer projectionViewer;
 	
 	private Font boldFont;
@@ -105,7 +107,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Group g = new Group(container, SWT.NONE);
-		g.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_OpLabel);
+		g.setText(Messages.ObservationOptionsPropertyPage_WaypointOptionsLbl);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		FontData fd = g.getFont().getFontData()[0];
@@ -124,9 +126,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
-		
-		
-		btnTrackDistanceDirection = new Button(g, SWT.CHECK);
+		btnTrackDistanceDirection = new Button(g, SWT.CHECK | SWT.WRAP);
 		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		btnTrackDistanceDirection.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -134,6 +134,24 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			}
 		});
 		btnTrackDistanceDirection.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
+		
+		lbl = new Label(g, SWT.WRAP);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		lbl = new Label(g, SWT.WRAP);
+		lbl.setText(Messages.ObservationOptionsPropertyPage_ObserverDescription);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 350;
+		
+		btnTrackObserver = new Button(g, SWT.CHECK);
+		btnTrackObserver.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnTrackObserver.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+		});
+		btnTrackObserver.setText(Messages.ObservationOptionsPropertyPage_ObserverLabel);
+		
 		
 		lbl = new Label(container, SWT.NONE);  //spacer
 		
@@ -223,6 +241,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		//init values
 		if (patrolOption != null){
 			btnTrackDistanceDirection.setSelection(patrolOption.getTrackDistanceDirection());
+			btnTrackObserver.setSelection(patrolOption.getTrackObserver());
+			
 			if (patrolOption.getEditTime() != null){
 				txtEditTime.setText(patrolOption.getEditTime().toString());
 			}else{
@@ -294,6 +314,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			return false;
 		}
 		patrolOption.setTrackDistanceDirection(btnTrackDistanceDirection.getSelection());
+		patrolOption.setTrackObserver(btnTrackObserver.getSelection());
 		patrolOption.setEditTime(Integer.parseInt(txtEditTime.getText()));
 		
 		Object prjSelection = ((IStructuredSelection)projectionViewer.getSelection()).getFirstElement();
@@ -307,6 +328,10 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			s.saveOrUpdate(patrolOption);
 			s.getTransaction().commit();
 			setChangesMade(false);
+			
+			//fire event for options modified
+			WaypointEventManager.getInstance().waypointOptionsModified();
+			
 			return true;
 		}catch (Exception ex){
 			s.getTransaction().rollback();

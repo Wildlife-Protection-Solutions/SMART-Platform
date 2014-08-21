@@ -67,7 +67,7 @@ public class ObservationCloner implements IConservationAreaTemplateCloner {
 			ObservationOptions tempOp = ops.get(0);
 			newOp.setEditTime(tempOp.getEditTime());
 			newOp.setTrackDistanceDirection(tempOp.getTrackDistanceDirection());
-			
+			newOp.setTrackObserver(tempOp.getTrackObserver());
 			newOp.setViewProjection((Projection)engine.getNewConservationItem(tempOp.getViewProjection()));
 		}
 		engine.getSession().save(newOp);
