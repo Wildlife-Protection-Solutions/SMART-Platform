@@ -32,6 +32,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -46,6 +47,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.NotExpression;
+import org.wcs.smart.query.model.filter.ObserverFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.SmartUtils;
@@ -85,13 +87,25 @@ public class DerbyFilterToSqlGenerator {
 			return asSql((NotExpression)filter, engine);
 		}else if (filter instanceof DateFilter){
 			return asSql((DateFilter)filter, engine);
+		}else if (filter instanceof ObserverFilter){
+			return asSql((ObserverFilter)filter, engine);
 		}
-		
-		
 		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_FilterTypeNotSupported, new Object[]{filter.getClass().getCanonicalName()}));
-		
 	}
 	
+	
+	/*
+	 * Observer source filter
+	 */
+	protected String asSql(ObserverFilter filter, IQueryEngine engine) throws SQLException{
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(WaypointObservation.class));
+		sb.append(".employee_uuid "); //$NON-NLS-1$
+		sb.append(" = x'"); //$NON-NLS-1$
+		sb.append(filter.getValue());
+		sb.append("'"); //$NON-NLS-1$
+		return sb.toString();
+	}
 	
 	/*
 	 * Area filter

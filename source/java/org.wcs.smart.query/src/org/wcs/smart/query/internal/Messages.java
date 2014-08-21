@@ -383,6 +383,9 @@ public class Messages extends NLS {
 	public static String GriddedTableContent_QueryProperties;
 	public static String GriddedTableContent_RunQueryLink;
 	public static String ObservationQuerySummaryInfo_NAValueLabel;
+	public static String ObserverDropItem_loadingEmployeeJobName;
+	public static String ObserverDropItem_ObserverLabel;
+	public static String ObserverFilter_EmployeeNotFound;
 	public static String QueryEditorTableContent_NaLabel;
 	public static String QueryEditorTableContent_NumberOfIncidentLabel;
 	public static String QueryEditorTableContent_NumberOfRecordsLabel1;
