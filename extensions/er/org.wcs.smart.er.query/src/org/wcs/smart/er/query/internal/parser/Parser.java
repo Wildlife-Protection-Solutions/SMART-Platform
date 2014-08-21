@@ -269,6 +269,7 @@ public class Parser implements ParserConstants {
     case MISSION_ID_GROUPBY_ITEM:
     case MISSION_PROPERTY_GROUPBY_ITEM:
     case SAMPLINGUNIT_GROUPBY_ITEM:
+    case WAYPOINT_OBSERVER_GROUPBY_ITEM:
       item = GroupByItem();
                         items.add(item);
       break;
@@ -332,6 +333,10 @@ public class Parser implements ParserConstants {
     case SAMPLINGUNIT_GROUPBY_ITEM:
       jj_consume_token(SAMPLINGUNIT_GROUPBY_ITEM);
                   item = SamplingUnitGroupBy.createGroupBy(token.image);
+      break;
+    case WAYPOINT_OBSERVER_GROUPBY_ITEM:
+      jj_consume_token(WAYPOINT_OBSERVER_GROUPBY_ITEM);
+                  item = ObserverGroupBy.createGroupBy(token.image);
       break;
     default:
       jj_la1[10] = jj_gen;
@@ -820,7 +825,7 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0x2ff8bffe,0x2ff8bffe,0x0,0x2ff8bffe,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2ff83ffe,0x410,0x1000208,0xff83ffc,0x2080,0xcf80104,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x1,0x1,0x0,0x1,0x0,0x3e,0x0,0x3e,0xff80,0x0,0xff80,0x0,0x0,0x1,0x0,0x0,0x1,0x0,0x1,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x1,0x1,0x0,0x1,0x0,0x3e,0x0,0x3e,0x1ff80,0x0,0x1ff80,0x0,0x0,0x1,0x0,0x0,0x1,0x0,0x1,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -937,7 +942,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[81];
+    boolean[] la1tokens = new boolean[82];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -957,7 +962,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 81; i++) {
+    for (int i = 0; i < 82; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

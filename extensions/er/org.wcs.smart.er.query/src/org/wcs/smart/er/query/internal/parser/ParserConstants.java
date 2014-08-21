@@ -161,7 +161,9 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int SAMPLINGUNIT_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 80;
+  int WAYPOINT_OBSERVER_GROUPBY_ITEM = 80;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 81;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -248,6 +250,7 @@ public interface ParserConstants {
     "<MISSION_ID_GROUPBY_ITEM>",
     "<MISSION_PROPERTY_GROUPBY_ITEM>",
     "<SAMPLINGUNIT_GROUPBY_ITEM>",
+    "<WAYPOINT_OBSERVER_GROUPBY_ITEM>",
     "<QUOTED_STRING>",
   };
 

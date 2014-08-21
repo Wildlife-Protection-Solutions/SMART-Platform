@@ -86,7 +86,8 @@ TOKEN :
 		( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |  < SURVEY_ID_GROUPBY_ITEM : "sgb:survey:id:" (< UUID >)? (":" < UUID > )* > 
 |  < MISSION_ID_GROUPBY_ITEM : "sgb:mission:id:" (< UUID >)? (":" < UUID > )* >
 |  < MISSION_PROPERTY_GROUPBY_ITEM : "sgb:missionproperty:l:" <  DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
-|  < SAMPLINGUNIT_GROUPBY_ITEM : "sgb:samplingunit:" (< UUID >)? (":" < UUID > )* > 
+|  < SAMPLINGUNIT_GROUPBY_ITEM : "sgb:samplingunit:" (< UUID >)? (":" < UUID > )* >
+|  < WAYPOINT_OBSERVER_GROUPBY_ITEM : < WAYPOINT_OBSERVER_KEY > ":" (< UUID >)? (":" < UUID > )* >  
 
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
@@ -327,7 +328,11 @@ IGroupBy GroupByItem() :
 		< SAMPLINGUNIT_GROUPBY_ITEM >
 		{
 		  item = SamplingUnitGroupBy.createGroupBy(token.image);
-		} 
+		}
+	|
+		< WAYPOINT_OBSERVER_GROUPBY_ITEM >
+		{
+		  item = ObserverGroupBy.createGroupBy(token.image);		}   
 	)
 	{
 		 return item;
