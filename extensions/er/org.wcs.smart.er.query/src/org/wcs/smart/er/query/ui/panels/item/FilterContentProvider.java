@@ -168,7 +168,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 		MISSION_ID(Messages.SurveyItemContentProvider_MissionIDLabel),
 		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
 		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel),
-		SAMPLING_UNITS(Messages.FilterContentProvider_SuLabel);
+		SAMPLING_UNITS(Messages.FilterContentProvider_SuLabel),
+		OBSERVER("Observer");
 		public String guiName;
 		
 		private Node(String guiName){
@@ -203,7 +204,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		if (this.design != null){
 			return Node.values();
 		}else{
-			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP};
+			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP, Node.OBSERVER};
 		}
 	}
 

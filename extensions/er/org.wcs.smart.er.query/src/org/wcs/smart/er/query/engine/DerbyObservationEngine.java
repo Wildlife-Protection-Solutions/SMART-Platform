@@ -247,6 +247,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"survey_design_name","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"ob_observer", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -289,6 +290,44 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		
+		//add observers
+		monitor.subTask(Messages.DerbyObservationEngine_populatingObserverProgress);
+		StringBuilder sqla = new StringBuilder();
+		sqla.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
+		sqla.append(queryDataTable);
+		QueryPlugIn.logSql(sqla.toString());
+
+		ResultSet rs = c.createStatement().executeQuery(sqla.toString());
+		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		String q1 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
+		QueryPlugIn.logSql(q1);
+		PreparedStatement observerSt = c.prepareStatement(q1);
+		int cnt = 0;
+		try {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				String name = getEmployeeName(uuid, session);
+
+				if (name != null) {
+					observerSt.setString(1, name);
+					observerSt.setBytes(2, uuid);
+					observerSt.addBatch();
+					cnt++;
+					if (cnt >= 100) {
+						observerSt.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			observerSt.executeBatch();
+		} finally {
+			rs.close();
+		}
+		monitor.worked(12);
+		if (monitor.isCanceled()) {
+			return;
+		}
+				
 		//populating categories
 		monitor.subTask(Messages.DerbyObservationEngine_progress5);
 		populateTemporaryTableCategory(c, session);
@@ -495,6 +534,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
 
 		return sql.toString();
@@ -535,6 +575,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
 		
 		sql.append(")"); //$NON-NLS-1$
@@ -572,7 +613,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
+		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
 		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
 		
 		//build categories

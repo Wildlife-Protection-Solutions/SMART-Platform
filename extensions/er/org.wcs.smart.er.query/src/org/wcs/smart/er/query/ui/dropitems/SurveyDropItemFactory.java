@@ -73,6 +73,7 @@ import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.query.ui.model.impl.ObserverDropItem;
 
 /**
  * Drop item factory for survey queries.
@@ -147,6 +148,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createSurveyIdDropItem()};
 		}else if (source == FilterContentProvider.Node.MISSION_ID){
 			items = new DropItem[]{createMissionIdDropItem()};
+		}else if (source == FilterContentProvider.Node.OBSERVER){
+			items = new DropItem[]{createObserverDropItem()};
 		}else if (source instanceof Survey){
 			items = new DropItem[]{createSurveyUuidIdDropItem((Survey)source)};
 		}else if (source instanceof Mission){
@@ -185,6 +188,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}
 		
 		return items;	
+	}
+	
+	public DropItem createObserverDropItem(){
+		return new ObserverDropItem();
 	}
 	public DropItem createSamplingUnitGroupByDropItem(){
 		return new SamplingUnitGroupByDropItem();

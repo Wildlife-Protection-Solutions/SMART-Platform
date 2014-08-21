@@ -131,7 +131,6 @@ public class SurveyObservationQueryType implements IQueryType {
 		
 		//validate query
 		String queryString = filter;
-		System.out.println(queryString);
 		if (queryString.isEmpty()) return null;
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
