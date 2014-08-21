@@ -19,7 +19,11 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.events.IWaypointEventListener;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
@@ -57,6 +61,12 @@ public class EntityQueryColumnCache {
 
 					}
 				});
+		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_OPTIONS_MODIFIED, new IWaypointEventListener() {
+			@Override
+			public void handleEvent(Waypoint wp) {
+				queryColumns = null;
+			}
+		});
 	}
 
 	/**
@@ -105,6 +115,8 @@ public class EntityQueryColumnCache {
 						} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION
 								|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
 							add = obsOptions.getTrackDistanceDirection();
+						} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+							add = obsOptions.getTrackObserver();
 						}
 						if (add) {
 							cols.add(new FixedQueryColumn(item));
@@ -194,6 +206,8 @@ public class EntityQueryColumnCache {
 						} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION
 								|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
 							add = obsOptions.getTrackDistanceDirection();
+						} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+							add = false;
 						}
 						if (add) {
 							cols.add(new FixedQueryColumn(item));

@@ -169,6 +169,10 @@ public class SightingTable {
 				if (obsOptions.getTrackDistanceDirection()){
 					cols.add(column);
 				}
+			}else if (fixed == FixedColumns.WAYPOINT_OBSERVER){
+				if (obsOptions.getTrackObserver()){
+					cols.add(column);
+				}
 			}else{
 				if (SmartDB.isMultipleAnalysis()){
 					cols.add(column);	

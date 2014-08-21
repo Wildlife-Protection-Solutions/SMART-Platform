@@ -360,6 +360,7 @@ public class Messages extends NLS {
 	public static String SightingQueryColumn_CommentColumnName;
 	public static String SightingQueryColumn_DirectionColumnName;
 	public static String SightingQueryColumn_DistanceColumnName;
+	public static String SightingQueryColumn_ObserverColumnName;
 	public static String SightingQueryColumn_WaypointDateColumnName;
 	public static String SightingQueryColumn_WaypointIdColumnName;
 	public static String SightingQueryColumn_WaypointTimeColumnName;
