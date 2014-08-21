@@ -26,12 +26,9 @@ import java.text.MessageFormat;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
-import org.wcs.smart.query.ui.model.impl.ObserverDropItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -79,7 +76,7 @@ public class ObserverFilter implements IFilter {
 			e.getUuid();
 			e.getFullLabel();
 			
-			di = new ObserverDropItem();
+			di = BasicDropItemFactory.INSTANCE.createObserverDropItem();
 			di.initializeData(e);
 		}
 		return new DropItem[]{di};

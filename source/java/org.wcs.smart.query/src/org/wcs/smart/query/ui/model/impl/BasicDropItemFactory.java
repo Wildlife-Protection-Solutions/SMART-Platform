@@ -70,6 +70,14 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		return new NotDropItem();
 	}
 	
+	public DropItem createObserverDropItem(){
+		return new ObserverDropItem();
+	}
+	
+	public DropItem createObserverGroupByDropItem(){
+		return new ObserverGroupByDropItem();
+	}
+	
 	public DropItem createCategoryDropItem(Category c){
 		return new CategoryDropItem(c);
 	}
