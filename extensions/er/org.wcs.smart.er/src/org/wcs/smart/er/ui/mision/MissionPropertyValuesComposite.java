@@ -63,7 +63,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 
 	private Composite parts;
 	private ScrolledComposite sc;
-	private HashMap<MissionAttribute, Object> controls;
+	private HashMap<MissionAttribute, Object> controls = new HashMap<MissionAttribute, Object>();
 	private HashMap<MissionAttribute, ControlDecoration> decorations;
 	
 	@Override
@@ -83,7 +83,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 
 	@Override
 	public void init(Mission mission, Session session) {
-		controls = new HashMap<MissionAttribute, Object>();
+		controls.clear();
 		decorations = new HashMap<MissionAttribute, ControlDecoration>();
 		for (Control kid : parts.getChildren()){
 			kid.dispose();
