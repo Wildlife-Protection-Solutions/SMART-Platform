@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,6 +48,7 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 
@@ -228,18 +231,11 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			int i = addPage(summaryEditor, getEditorInput());
 			setPageText(i, "Summary");
 			createDayPages();
-//			
-//			mapPage = new PatrolMapPageEditor(PatrolEditor.this);
-//			int mapIndex = addPage(mapPage, getEditorInput());
-//			setPageText(mapIndex, Messages.PatrolEditor_PatrolMapPageName);
-//			
-//			
-//			if (PatrolContributionPageEditor.hasContributions()){
-//				PatrolContributionPageEditor contributionPage = new PatrolContributionPageEditor(PatrolEditor.this);
-//				int index = addPage(contributionPage, getEditorInput());
-//				setPageText(index, Messages.PatrolEditor_OtherPatrolTabName);
-//			}
-//			
+			
+			mapPage = new MissionMapPage();
+			int mapIndex = addPage(mapPage, getEditorInput());
+			setPageText(mapIndex, "Map");
+			
 //			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {
 			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
@@ -274,7 +270,37 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 	
 	
-	public void createDayPages( ) {
+	public void createDayPages() {
+		try {
+			int i = 0;
+			while( i < getPageCount()) {
+				if (getEditor(i) instanceof MissionDayPage) {
+					removePage(i);
+				}else{
+					i++;
+				}
+			}
+			int insertindex = 1;
+			Calendar calStart = SmartUtils.convertDate(getMission().getStartDate());
+			calStart.set(Calendar.HOUR, 0);
+			calStart.set(Calendar.MINUTE, 0);
+			calStart.set(Calendar.SECOND, 0);
+			calStart.set(Calendar.MILLISECOND, 0);
+			
+			Calendar calEnd = SmartUtils.convertDate(getMission().getEndDate());
+			
+			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+				MissionDayPageEditorInput input = new MissionDayPageEditorInput(calStart.getTime());
+				MissionDayPage editor = new MissionDayPage();
+				super.addPage(insertindex, editor, input);
+				super.setPageText(insertindex, DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getDay()));
+				insertindex++;
+				calStart.add(Calendar.DAY_OF_MONTH, 1);
+			}
+
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.displayLog("Error loading editor", ex);
+		}
 		
 	}
 	
