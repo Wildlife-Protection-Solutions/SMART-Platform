@@ -386,6 +386,12 @@ public class Messages extends NLS {
 	public static String ObserverDropItem_loadingEmployeeJobName;
 	public static String ObserverDropItem_ObserverLabel;
 	public static String ObserverFilter_EmployeeNotFound;
+	public static String ObserverGroupBy_ErrorLoadingEmployees;
+	public static String ObserverGroupByDropItem_AllLabel;
+	public static String ObserverGroupByDropItem_ErrorLoadingEmployees;
+	public static String ObserverGroupByDropItem_FiltersLabel;
+	public static String ObserverGroupByDropItem_IncludedLabel;
+	public static String ObserverGroupByDropItem_ObserverLabel;
 	public static String QueryEditorTableContent_NaLabel;
 	public static String QueryEditorTableContent_NumberOfIncidentLabel;
 	public static String QueryEditorTableContent_NumberOfRecordsLabel1;

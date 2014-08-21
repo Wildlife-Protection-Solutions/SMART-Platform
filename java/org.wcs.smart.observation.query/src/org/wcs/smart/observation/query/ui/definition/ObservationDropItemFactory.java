@@ -42,9 +42,9 @@ import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
 import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
+import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
-import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -60,7 +60,6 @@ import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
-import org.wcs.smart.query.ui.model.impl.ObserverDropItem;
 /**
  * Drop item factory for observation queries
  * @author Emily
@@ -136,7 +135,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		if (source == GeneralContentProvider.GeneralItem.WAYPOINT_SOURCE){
 			return new WaypointSourceFilterDropItem();
 		}else if (source == GeneralContentProvider.GeneralItem.OBSERVER){
-			return new ObserverDropItem();
+			return createObserverDropItem();
 		}
 		throw new IllegalStateException(MessageFormat.format(Messages.ObservationDropItemFactory_QueryItemNotSupported, new Object[]{source.guiName}));
 	}
