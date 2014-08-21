@@ -178,7 +178,7 @@ public class SurveySummaryQueryType implements IQueryType {
 			Parser parser = new Parser(is);
 			parser.SumQuery();
 		}catch (Exception ex){
-			ex.printStackTrace();
+			ERQueryPlugIn.log(ex.getMessage(), ex);
 			return ex.getMessage();
 		}finally{
 			try {

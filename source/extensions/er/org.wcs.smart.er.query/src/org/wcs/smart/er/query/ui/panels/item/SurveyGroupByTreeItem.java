@@ -101,6 +101,8 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
 				}else if (node == Node.SAMPLING_UNITS){
 					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ICON);
+				}else if (node == Node.OBSERVER){
+					return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON);
 				}
 			}
 			return super.getImage(element);

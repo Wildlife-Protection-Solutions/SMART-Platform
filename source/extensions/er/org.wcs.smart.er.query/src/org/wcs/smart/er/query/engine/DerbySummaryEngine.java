@@ -51,6 +51,7 @@ import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.observation.model.Waypoint;
@@ -82,6 +83,7 @@ import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.ObserverGroupBy;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
@@ -144,7 +146,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask("Processing Summary Query", query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
+				monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
 
 				SurveyDesignFilter surveyFilter = null;
 				if (query.getSurveyDesign() != null){
@@ -152,7 +154,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				}
 				
 				try {
-					monitor.subTask("Loading column and row headers");
+					monitor.subTask(Messages.DerbySummaryEngine_LoadingTableProgress);
 					getHeaderInfo(query, sumResults, surveyFilter, session);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
@@ -223,7 +225,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					if (monitor.isCanceled()){
 						return;
 					}
-					monitor.subTask("Processing values");
+					monitor.subTask(Messages.DerbySummaryEngine_ProcessingValues1);
 					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					
 					String vFilter = valueFilter.asString();
@@ -244,7 +246,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						if (monitor.isCanceled()){
 							return;
 						}
-						monitor.subTask("Processing values");
+						monitor.subTask(Messages.DerbySummaryEngine_ProcessingValues2);
 						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					}
 					
@@ -1048,12 +1050,16 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				}
 				
 			}else if (gb instanceof SurveyIdGroupBy){
-				groupByInnerSql.append( " temp.survey_uuid as " + "gp_"+ itemcnt);
-				groupBySql.append("gp_" + itemcnt);
+				groupByInnerSql.append( " temp.survey_uuid as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
+			
+			}else if (gb instanceof ObserverGroupBy){
+				groupByInnerSql.append( " temp.ob_observer_uuid as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
 			}else if (gb instanceof MissionIdGroupBy){
-				groupByInnerSql.append( " temp.mission_uuid as " + "gp_"+ itemcnt);
-				groupBySql.append("gp_" + itemcnt);
+				groupByInnerSql.append( " temp.mission_uuid as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 			}else if (gb instanceof MissionAttributeGroupBy){
 				
 				
@@ -1089,13 +1095,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				fromSql.append(tablePrefix(MissionPropertyValue.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".list_element_uuid "); //$NON-NLS-1$
 				
-				String field = tablePrefix(MissionAttributeListItem.class) + "_" + itemcnt + ".keyid";
-				groupByInnerSql.append( field + " as " + "mp_"+ itemcnt);
-				groupBySql.append("mp_" + itemcnt);
+				String field = tablePrefix(MissionAttributeListItem.class) + "_" + itemcnt + ".keyid"; //$NON-NLS-1$ //$NON-NLS-2$
+				groupByInnerSql.append( field + " as " + "mp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("mp_" + itemcnt); //$NON-NLS-1$
 				
 			}else if (gb instanceof SamplingUnitGroupBy){
-				groupByInnerSql.append( " temp.sampling_unit_uuid as " + "gp_"+ itemcnt);
-				groupBySql.append("gp_" + itemcnt);
+				groupByInnerSql.append( " temp.sampling_unit_uuid as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
 //				String prefix = getTablePrefix((PatrolGroupBy) gb);
 //				String name = getFieldName((PatrolGroupBy) gb);
@@ -1332,7 +1338,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		sql.append(tablePrefix(SamplingUnit.class) + ".buffer, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -1362,7 +1369,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		sql.append("sampling_unit_buffer double,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_datetime timestamp,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data"); //$NON-NLS-1$
+		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}

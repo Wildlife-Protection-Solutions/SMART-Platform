@@ -15,6 +15,10 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_progress8;
 	public static String DerbyObservationEngine_SurveyDesignNotFound;
 	public static String DerbyPagedObservationResult_cleanupjobname;
+	public static String DerbySummaryEngine_LoadingTableProgress;
+	public static String DerbySummaryEngine_ProcessingQueryProgress;
+	public static String DerbySummaryEngine_ProcessingValues1;
+	public static String DerbySummaryEngine_ProcessingValues2;
 	public static String ERQueryPlugIn_ErrorDialogTitle;
 	public static String FilterContentProvider_LoadSuJobName;
 	public static String FilterContentProvider_SuLabel;
