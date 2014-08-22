@@ -21,27 +21,21 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 
 /**
@@ -52,233 +46,62 @@ import org.eclipse.ui.part.EditorPart;
  */
 public class MissionDayPage extends EditorPart {
 
+	private ScrolledForm frmSummary; 
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
-	private Composite mainComposite;
-
-	private DateTime dtStartTime;
-	private DateTime dtEndTime;
-	private Text restMinutes;
-	private Label lblTotalHours;
-
-	private TableViewer observationTable;
-	private Text txtDistance;
 	
-	private Font okayFont;
-	private Font errorFont;
-	private Hyperlink lnkImportWaypoints;
+	private MissionDayComposite dayComposite;
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// TODO Auto-generated method stub
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
-	 */
 	@Override
 	public void doSaveAs() {
-		// TODO Auto-generated method stub
-
+		//not supported
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
-	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-		// TODO Auto-generated method stub
-
+		setSite(site);
+		setInput(input);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.EditorPart#isDirty()
-	 */
 	@Override
 	public boolean isDirty() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.EditorPart#isSaveAsAllowed()
-	 */
 	@Override
 	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		mainComposite = toolkit.createComposite(parent);
-		mainComposite.setLayout(new GridLayout(1, false));
-		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		Composite timeInfo = toolkit.createComposite(mainComposite);
-		timeInfo.setLayout(new GridLayout(4, false));
-		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
-		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
-		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
-		 ((GridLayout)timeInfo.getLayout()).marginHeight = 5;
-		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		frmSummary = toolkit.createScrolledForm(parent);
 		
-		Composite c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "StartTime:");
-		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-		toolkit.adapt(dtStartTime);
-		dtStartTime.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateTotalHours();
-			}
-			
-		});
-//		dtStartTime.addFocusListener(new FocusAdapter() {			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				if (timeEqual(SmartUtils.getTime(dtStartTime).getTime(), patrolLegDate.getStartTime().getTime())){
-//					//no changes made
-//					return;
-//				}
-//				editor.getPatrolEditor().save(patrolLegDate);
-//				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-//			}
-//		});
-
-		c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "EndTime:");
-		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-		toolkit.adapt(dtEndTime);
-		dtEndTime.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateTotalHours();
-			}
-			
-		});
-//		dtEndTime.addFocusListener(new FocusAdapter() {			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				if (timeEqual(SmartUtils.getTime(dtEndTime).getTime(), patrolLegDate.getEndTime().getTime())){
-//					//no changes made
-//					return;
-//				}
-//				editor.getPatrolEditor().save(patrolLegDate);
-//				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-//			}
-//		});
-
+		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
-		c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "RestMinutes:");
-		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
-		gd.widthHint = 30;
-		restMinutes.setLayoutData(gd);
-//		restMinutes.addFocusListener(new FocusListener() {
-//			private int oldValue; 
-//			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				try{
-//					int x = Integer.parseInt(restMinutes.getText());
-//					if (patrolLegDate.getRestMinutes() != null && x == patrolLegDate.getRestMinutes()){
-//						return;
-//					}
-//					if (x < 0){
-//						throw new Exception("Rest minutes cannot be negative."); //$NON-NLS-1$
-//					}
-//				}catch (Exception ex){
-//					restMinutes.setText(String.valueOf(oldValue));
-//					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1);
-//					Display.getCurrent().asyncExec(new Runnable() {
-//						@Override
-//						public void run() {
-//							restMinutes.setFocus();
-//						}
-//					});
-//					
-//				}
-//				updateTotalHours();
-//				editor.getPatrolEditor().save(patrolLegDate);
-//				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-//			}
-//			
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				oldValue = Integer.parseInt(restMinutes.getText());
-//			}
-//		});
+		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
+		StringBuilder text = new StringBuilder("Mission:");
+		text.append(" "); //$NON-NLS-1$
+		Date day = ((MissionDayPageEditorInput)getEditorInput()).getDay();
+		text.append(dayFormat.format(day));
+		text.append(", "); //$NON-NLS-1$
+		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(day));
+		frmSummary.setText(text.toString());
+		frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
-		
-		c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "Total Hours:");
-		lblTotalHours = toolkit.createLabel(c, "InvalidTotalHours");
-		okayFont = lblTotalHours.getFont();
-		
-		FontData fd = okayFont.getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		errorFont = new Font(Display.getDefault(), fd);
-		
-		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.widthHint = 30;
-		lblTotalHours.setLayoutData(gd);
-
-		Composite trackComp = toolkit.createComposite(mainComposite);
-		trackComp.setLayout(new GridLayout(4, false));
-		
-		
-		toolkit.createLabel(trackComp, "Distance Travelled (km):");
-		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
-		txtDistance.setEditable(false);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
-		gd.widthHint = 50;
-		txtDistance.setLayoutData(gd);
-		
-		Composite observationHcomp = toolkit.createComposite(mainComposite);
-		observationHcomp.setLayout(new GridLayout(2, false));
-		toolkit.createLabel(observationHcomp, "Observations/Waypoints");
-		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, "Import Waypoints", SWT.NONE);
-		lnkImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
-			public void linkActivated(HyperlinkEvent e) {
-				showImportWaypointWizard();
-			}
-		});
-	}
-
-	protected void showImportWaypointWizard() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	protected void updateTotalHours() {
-		// TODO Auto-generated method stub
+		dayComposite = new MissionDayComposite();
+		dayComposite.createComposite(frmSummary.getBody(), toolkit);
 		
 	}
 
 	@Override
 	public void setFocus() {
-		dtStartTime.setFocus();
+		frmSummary.setFocus();
 	}
 
 }
