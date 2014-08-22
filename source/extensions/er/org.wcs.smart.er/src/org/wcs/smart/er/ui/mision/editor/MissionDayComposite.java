@@ -21,7 +21,24 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.HashMap;
+
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TableViewerEditor;
+import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,6 +46,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
@@ -38,33 +56,84 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.er.ISurveyEventListener;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Composite for editing mission days data.  This includes modifying
+ * the date/time, rest minutes, tracks and waypoints.
+ * 
  * @author elitvin
  * @since 3.0.0
  */
 public class MissionDayComposite {
 
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private MissionDayPage editor;
+	
 	private Composite mainComposite;
 
 	private DateTime dtStartTime;
 	private DateTime dtEndTime;
 	private Text restMinutes;
+	private Text txtDistance;
 	private Label lblTotalHours;
 
 	private TableViewer observationTable;
-	private Text txtDistance;
+	private ObservationOptions observationOptions;
 	
 	private Font okayFont;
 	private Font errorFont;
 	private Hyperlink lnkImportWaypoints;
+
+	private Button btnAddWaypoint;
+	private Button btnDeleteWaypoint;
+	private Button btnMoveWaypoint;
+	
+	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
+	
+	private ISurveyEventListener trackListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+//			updateDistance();
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	private ISurveyEventListener waypointListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+//			refreshObservationTable();
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	
+	protected enum OtColumn {
+		ID("Waypoint ID", 1),
+		EAST("X", 2),
+		NORTH("Y", 2),
+		TIME("Time", 2),
+		DIRECTION("Direction", 1),
+		DISTANCE("Distance", 1),
+		OBSERVATION("Observation", 4),
+		COMMENT("Comment", 3),
+		ATTACHMENTS("Attachment", 3);
+
+		protected String guiName;
+		protected int weight;
+
+		private OtColumn(String name, int weight) {
+			this.guiName = name;
+			this.weight = weight;
+		}
+	}
+
 	
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
 		mainComposite = toolkit.createComposite(parent);
@@ -208,16 +277,143 @@ public class MissionDayComposite {
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
 		observationHcomp.setLayout(new GridLayout(2, false));
 		toolkit.createLabel(observationHcomp, "Observations/Waypoints");
-		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, "Import Waypoints", SWT.NONE);
+		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, "Import Waypoints ...", SWT.NONE);
 		lnkImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showImportWaypointWizard();
 			}
 		});
+
+		
+		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		toolkit.adapt(observationTable.getTable());
+		setupObservationTable();
+//		observationTable.getTable().addPaintListener(new PaintListener() {
+//			boolean called = false;
+//			@Override
+//			public void paintControl(PaintEvent e) {
+//				if (called) return;
+//				called = true;
+//				resize();
+//			}
+//		});
+		
+		Composite buttonComp = toolkit.createComposite(mainComposite);
+		buttonComp.setLayout(new GridLayout(3, false));
+		btnAddWaypoint = toolkit.createButton(buttonComp, "Add Waypoint", SWT.PUSH);
+		btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addWaypoint();
+			}
+		});
+		
+		
+		btnDeleteWaypoint = toolkit.createButton(buttonComp, "Delete Waypoint", SWT.PUSH);
+		btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				deleteSelectedWaypoints();
+			}
+		});
+		
+		btnMoveWaypoint = toolkit.createButton(buttonComp, "Move Waypoint", SWT.PUSH);
+		btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				moveSelectedWaypoints();
+			}
+		});
+		
+		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, trackListener);
+		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, waypointListener);
+		updateTotalHours();
 		
 		return mainComposite;
 	}
 
+	private void setupObservationTable() {
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = observationTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		observationTable.getTable().setLayoutData(gd);
+		observationTable.getTable().setLinesVisible(true);
+		observationTable.getTable().setHeaderVisible(true);
+		observationTable.setContentProvider(new ObservableListContentProvider());
+		
+		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(observationTable, new FocusCellHighlighter(observationTable){});
+		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(observationTable) {
+			protected boolean isEditorActivationEvent(
+					ColumnViewerEditorActivationEvent event) {
+				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+			}
+		};
+		
+		TableViewerEditor.create(observationTable, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
+
+//		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
+//		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
+//		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
+//		timeEditor = new TimeCellEditor(observationTable.getTable());
+//		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
+//		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
+//		observationEditor = new ObservationCellEditor(observationTable.getTable());
+		
+		observationTableColumns = new HashMap<OtColumn, TableViewerColumn>();
+		
+		final WaypointSorter waypointSorter = new WaypointSorter(observationTable);
+		observationTable.setComparator(waypointSorter);
+		for (int i = 0; i < OtColumn.values().length; i++) {
+			final OtColumn columntype = OtColumn.values()[i];
+//			if (!editor.getPatrolEditor().getOptions().getTrackDistanceDirection() && 
+//					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
+//				continue;
+//			}
+			
+			final TableViewerColumn column = new TableViewerColumn(observationTable,SWT.NONE);
+			column.setLabelProvider(new ObsrvationTableLabelProvider(columntype));
+			column.getColumn().setText(columntype.guiName);
+			column.getColumn().setResizable(true);
+			column.getColumn().setMoveable(false);
+			column.getColumn().setWidth(25);
+
+			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH){
+				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
+			}
+			
+			observationTableColumns.put(columntype, column);
+			
+			if (columntype == OtColumn.ID || columntype == OtColumn.TIME){
+				column.getColumn().addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						waypointSorter.setSortColumn(columntype, column.getColumn());
+					}	
+				});
+				if (columntype == OtColumn.TIME){
+					waypointSorter.setSortColumn(columntype, column.getColumn());
+				}
+			}
+		
+		}
+	}
+
+//	private void resize(){
+//		if (observationTableColumns == null){
+//			return ;
+//		}
+//		
+//		GC gc = new GC(observationTable.getTable().getDisplay());
+//		gc.setFont(observationTable.getTable().getFont());
+//		
+//		for (Iterator<Entry<OtColumn, TableViewerColumn>> iterator = observationTableColumns.entrySet().iterator(); iterator.hasNext();) {
+//			Entry<OtColumn, TableViewerColumn> type = iterator.next();
+//			int maxWidth = getMaximumWidth(gc, type.getKey());
+//			type.getValue().getColumn().setWidth(maxWidth);
+//		}
+//		gc.dispose();
+//	}
+	
 	protected void showImportWaypointWizard() {
 		// TODO Auto-generated method stub
 		
@@ -228,4 +424,230 @@ public class MissionDayComposite {
 		
 	}
 
+	protected void addWaypoint() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void deleteSelectedWaypoints() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void moveSelectedWaypoints() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private String getWaypointValueAsString(SurveyWaypoint element, OtColumn column) {
+
+		Waypoint wp = element.getWaypoint();
+		if (column == OtColumn.ID) {
+			return String.valueOf(wp.getId());
+		} else if (column == OtColumn.EAST) {
+			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getX());
+		} else if (column == OtColumn.NORTH) {
+			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getY());
+		} else if (column == OtColumn.TIME) {
+			if (wp.getDateTime() != null) {
+				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
+			}
+			return ""; //$NON-NLS-1$
+		} else if (column == OtColumn.DIRECTION) {
+			if (wp.getDirection() != null) {
+				return String.valueOf(wp.getDirection());
+			}
+			return ""; //$NON-NLS-1$
+		} else if (column == OtColumn.DISTANCE) {
+			if (wp.getDistance() != null) {
+				return String.valueOf(wp.getDistance());
+			}
+			return ""; //$NON-NLS-1$
+		} else if (column == OtColumn.OBSERVATION) {
+			if (wp.getObservations() == null
+					|| wp.getObservations().size() == 0) {
+				return "(None)";
+			} else {
+				return wp.getObservationsAsString();
+			}
+		} else if (column == OtColumn.COMMENT) {
+			if (wp.getComment() == null) {
+				return ""; //$NON-NLS-1$
+			}
+			return wp.getComment();
+		} else if (column == OtColumn.ATTACHMENTS) {
+			int wpCnt = 0;
+			if (wp.getObservations() != null){
+				for (WaypointObservation wo : wp.getObservations()){
+					if (wo.getAttachments() != null){
+						wpCnt += wo.getAttachments().size();
+					}
+				}
+			}
+			if (wp.getAttachments() != null){
+				wpCnt += wp.getAttachments().size();
+			}
+			if (wpCnt == 0 ) {
+				return "(None)";
+			} else {
+				return MessageFormat.format("{0,number,integer} Files", wpCnt);
+			}
+		}
+
+		return ""; //$NON-NLS-1$
+	}
+
+	private Object getWaypointValue(SurveyWaypoint element, OtColumn column) {
+		Waypoint wp = element.getWaypoint();
+		if (column == OtColumn.ID) {
+			return wp.getId();
+		} else if (column == OtColumn.EAST) {
+			return wp.getX();
+		} else if (column == OtColumn.NORTH) {
+			return wp.getY();
+		} else if (column == OtColumn.TIME) {
+			return wp.getDateTime();
+		} else if (column == OtColumn.DIRECTION) {
+			return wp.getDirection();
+		} else if (column == OtColumn.DISTANCE) {
+			return wp.getDistance();
+		} else if (column == OtColumn.OBSERVATION) {
+			return wp;
+		} else if (column == OtColumn.COMMENT) {
+			if (wp.getComment() == null){
+				return ""; //$NON-NLS-1$
+			}
+			return wp.getComment();
+		} else if (column == OtColumn.ATTACHMENTS) {
+			return wp;
+		}
+		return ""; //$NON-NLS-1$
+	}
+
+	private void setWaypointValue(SurveyWaypoint element, OtColumn column, Object value){		
+		Waypoint waypoint = element.getWaypoint();
+		boolean needSave = false;
+		if (column == OtColumn.ID) {
+			waypoint.setId((Integer)value);
+			needSave = true;
+		} else if (column == OtColumn.EAST) {
+			waypoint.setX((Double)value);
+			needSave = true;
+		} else if (column == OtColumn.NORTH) {
+			waypoint.setY((Double)value);
+			needSave = true;
+		} else if (column == OtColumn.TIME) {
+			if (value instanceof Date){
+				//TODO:
+				//waypoint.setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(((Date)value).getTime())));
+				needSave = true;
+			}
+		} else if (column == OtColumn.DIRECTION) {
+			needSave = true;
+			if (value == null){
+				waypoint.setDirection(null);
+			}else{
+				waypoint.setDirection(( (Double)value).floatValue());
+			}
+		} else if (column == OtColumn.DISTANCE) {
+			if (value == null){
+				waypoint.setDistance(null);
+			}else{
+				waypoint.setDistance( ( (Double)value).floatValue());
+			}
+			needSave = true;
+		} else if (column == OtColumn.OBSERVATION) {
+			//updated in cell editor
+			needSave = false;
+		} else if (column == OtColumn.COMMENT) {
+			waypoint.setComment((String)value);
+			needSave = true;
+		} else if (column == OtColumn.ATTACHMENTS) {
+			if (value != null){
+				needSave = true;
+			}
+			//updated in cell editor
+		}
+		//TODO:
+//		if (needSave){
+//			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element));
+//		}
+		observationTable.refresh();
+		
+	}
+	
+	/**
+	 * ColumnLabelProvider
+	 * @author elitvin
+	 * @since 3.0.0
+	 */
+	private class ObsrvationTableLabelProvider extends ColumnLabelProvider {
+
+		private OtColumn column = null;
+
+		public ObsrvationTableLabelProvider(OtColumn column) {
+			this.column = column;
+		}
+
+		public String getText(Object element) {
+			if (element instanceof SurveyWaypoint) {
+				SurveyWaypoint wp = (SurveyWaypoint) element;
+				return getWaypointValueAsString(wp, column);
+			}
+			return super.getText(element);
+		}
+	}
+	
+	
+	private class ObservationTableCellModifier extends EditingSupport{
+		
+		private OtColumn column;
+		
+		public ObservationTableCellModifier(ColumnViewer viewer, OtColumn column){
+			super(viewer);
+			this.column = column;
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			//TODO:
+//			if (column == OtColumn.NORTH || column == OtColumn.EAST ){
+//				return doubleCellEditor;
+//			}else if (column == OtColumn.DIRECTION || column == OtColumn.DISTANCE ){
+//				return nullableDoubleCellEditor;
+//			}else if (column == OtColumn.ID){
+//				return integerCellEditor;
+//			}else if (column == OtColumn.TIME){
+//				return timeEditor;
+//			}else if (column == OtColumn.ATTACHMENTS){
+//				return attachmentEditor;
+//			}else if (column == OtColumn.COMMENT){
+//				return commentEditor;
+//			}else if (column == OtColumn.OBSERVATION){
+//				return observationEditor;
+//			}
+			return null;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			//TODO:
+//			if (MissionDayComposite.this.editor.getPatrolEditor().canEdit() != null){
+//				return false;
+//			}
+//			return true;
+			return false;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return getWaypointValue((SurveyWaypoint)element, column);
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			setWaypointValue((SurveyWaypoint)element, column, value);
+		}
+	}
+	
 }
