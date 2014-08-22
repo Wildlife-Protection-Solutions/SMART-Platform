@@ -83,7 +83,7 @@ public class SurveyDesignSamplingUnitAttribute {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof MissionPropertyValue) {
+		if (o instanceof SurveyDesignSamplingUnitAttribute) {
 			return this.id.equals(((SurveyDesignSamplingUnitAttribute) o).id);
 		}
 		return false;

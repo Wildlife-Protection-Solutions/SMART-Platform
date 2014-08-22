@@ -19,16 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.surveydesign;
+package org.wcs.smart.er.ui.handlers;
+
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.er.ui.samplingunit.SamplingUnitAttributeDialog;
 
 /**
- * Listener for survey design composite
- * gui elements changing.
+ * Handler for displaying available mission attributes;
  * 
  * @author Emily
  *
  */
-public interface ISurveyDesignListener {
+public class ShowSamplingUnitAttributesHandler extends AbstractHandler {
 
-	public void compositeModified();
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		SamplingUnitAttributeDialog dialog = new SamplingUnitAttributeDialog(HandlerUtil.getActiveShell(event));
+		dialog.open();
+		return null;
+	}
+
 }

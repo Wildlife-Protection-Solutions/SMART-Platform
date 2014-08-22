@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.er.model;
 
+import java.util.List;
+
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,6 +33,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -79,6 +83,21 @@ public class SamplingUnit extends UuidItem {
 			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(imageKey);
 		}
 	}
+	
+	public enum State{
+		ACTIVE("Active"),
+		INACTIVE("Inactive");
+		
+		private String guiName;
+		
+		private State(String gui){
+			this.guiName = gui;
+		}
+		
+		public String getGuiName(){
+			return this.guiName;
+		}
+	}
 
 	private byte[] geom;
 	private Geometry geometry;
@@ -86,8 +105,10 @@ public class SamplingUnit extends UuidItem {
 	private Double buffer;
 	private SurveyDesign surveyDesign;
 	private SamplingUnitType type;
+	private List<SamplingUnitAttributeValue> attributes;
+	private State state;
 	
-
+	
 	public SamplingUnit(){
 		
 	}
@@ -176,6 +197,18 @@ public class SamplingUnit extends UuidItem {
 	}
 
 	/**
+	 * associated survey design
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.samplingUnit", orphanRemoval = true, cascade={CascadeType.ALL})
+	public List<SamplingUnitAttributeValue> getAttributes() {
+		return attributes;
+	}
+	public void setAttributes(List<SamplingUnitAttributeValue> attributes) {
+		this.attributes = attributes;
+	}
+	
+	/**
 	 * 
 	 * @return the attribute type
 	 */
@@ -190,5 +223,19 @@ public class SamplingUnit extends UuidItem {
 	 */
 	public void setType(SamplingUnitType type) {
 		this.type = type;
+	}
+	
+	/**
+	 * The sampling unit state
+	 * @return
+	 */
+	@Column(name="state")
+	@Enumerated(EnumType.STRING)
+	public State getState(){
+		return state;
+	}
+	
+	public void setState(State state){
+		this.state = state;
 	}
 }

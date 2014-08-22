@@ -21,30 +21,14 @@
  */
 package org.wcs.smart.er.ui;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
-import org.eclipse.jface.viewers.LabelProvider;
-import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.model.SamplingUnit;
-
 /**
- * Label provider for sampling units.
+ * Listener for survey design composite
+ * gui elements changing.
  * 
  * @author Emily
  *
  */
-public class SamplingUnitLabelProvider extends LabelProvider {
+public interface ISurveyListener {
 
-	
-	public String getText(Object element) {
-		if (element instanceof SamplingUnit){
-			SamplingUnit su = (SamplingUnit)element;
-			return su.getId();
-		}else if (element instanceof MissionTrack){
-			MissionTrack t = (MissionTrack)element;
-			return SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getDate());
-		}
-		return element == null ? "" : element.toString();//$NON-NLS-1$
-	}
+	public void compositeModified();
 }

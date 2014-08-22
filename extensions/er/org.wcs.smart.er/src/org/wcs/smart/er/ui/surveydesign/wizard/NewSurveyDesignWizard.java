@@ -35,10 +35,10 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
 import org.wcs.smart.er.ui.surveydesign.DateComposites;
 import org.wcs.smart.er.ui.surveydesign.DescriptionComposite;
-import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 import org.wcs.smart.er.ui.surveydesign.MissionPropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
 import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
@@ -100,7 +100,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 		}
 		
 		//configure listeners
-    	ISurveyDesignListener updateButtons = new ISurveyDesignListener() {
+    	ISurveyListener updateButtons = new ISurveyListener() {
 			@Override
 			public void compositeModified() {
 				getContainer().updateButtons();

@@ -33,8 +33,8 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.MissionComposite;
-import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -140,7 +140,7 @@ public class MissionEditorDialog extends TitleAreaDialog {
 		composite.createControl(c);
 		composite.init(toUpdate, session);
 		
-		composite.addChangeListener(new ISurveyDesignListener() {
+		composite.addChangeListener(new ISurveyListener() {
 			@Override
 			public void compositeModified() {
 				if (getButton(IDialogConstants.OK_ID) == null) return;

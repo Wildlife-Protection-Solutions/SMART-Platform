@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.ISurveyListener;
 
 /**
  * A GUI component that represents an attribute of
@@ -38,17 +39,17 @@ import org.wcs.smart.er.model.SurveyDesign;
  */
 public abstract class SurveyDesignComposite {
 
-	private List<ISurveyDesignListener> changeListeners;
+	private List<ISurveyListener> changeListeners;
 	
 	public SurveyDesignComposite(){
-		changeListeners = new ArrayList<ISurveyDesignListener>();
+		changeListeners = new ArrayList<ISurveyListener>();
 	}
 	
 	/**
 	 * Adds a change listener
 	 * @param listener
 	 */
-	public void addChangeListener(ISurveyDesignListener listener){
+	public void addChangeListener(ISurveyListener listener){
 		changeListeners.add(listener);
 	}
 	
@@ -57,7 +58,7 @@ public abstract class SurveyDesignComposite {
 	 * this event when any gui element is modified.
 	 */
 	protected void fireChangeListeners(){
-		for (ISurveyDesignListener listener: changeListeners){
+		for (ISurveyListener listener: changeListeners){
 			listener.compositeModified();
 		}
 	}

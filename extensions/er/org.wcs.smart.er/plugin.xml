@@ -155,6 +155,10 @@
                   commandId="org.wcs.smart.er.missionattributes.show"
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.er.su.show"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.er.separator1"
                   visible="true">
@@ -253,6 +257,10 @@
             class="org.wcs.smart.er.ui.handlers.ShowMissionAttributesHandler"
             commandId="org.wcs.smart.er.missionattributes.show">
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.ShowSamplingUnitAttributesHandler"
+            commandId="org.wcs.smart.er.su.show">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -279,6 +287,10 @@
       <command
             id="org.wcs.smart.er.missionattributes.show"
             name="Mission Attributes ...">
+      </command>
+      <command
+            id="org.wcs.smart.er.su.show"
+            name="Sampling Unit Attributes ...">
       </command>
    </extension>
    <extension
@@ -308,6 +320,10 @@
       <image
             commandId="org.wcs.smart.er.mission.new"
             icon="images/icons/obj16/mission_add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.er.su.show"
+            icon="images/icons/obj16/sampling_unit.png">
       </image>
    </extension>
    <extension

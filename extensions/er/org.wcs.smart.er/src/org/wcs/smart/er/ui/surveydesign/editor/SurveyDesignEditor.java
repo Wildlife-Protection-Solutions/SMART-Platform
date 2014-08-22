@@ -46,6 +46,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 
 	private SurveyDesign surveyDesign;
 	private SurveyDesignSummaryEditorPage summaryPage;
+	private SamplingUnitEditorPage suPage;
 	
 	private ISurveyEventListener modifiedListener = new ISurveyEventListener() {
 		@Override
@@ -56,6 +57,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 				if (Arrays.equals(source.getUuid(), uuid)) {
 					surveyDesign = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
 					summaryPage.initValues();
+					suPage.initValues();
 				}
 			}
 		}
@@ -103,6 +105,10 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 			int i = addPage(summaryPage, getEditorInput());
 			setPageText(i, Messages.SurveyDesignEditor_Page_Summary);
 		
+			suPage = new SamplingUnitEditorPage(this);
+			i = addPage(suPage, getEditorInput());
+			setPageText(i, "Sampling Units");
+			
 			super.setPartName(getSurveyDesign().getName());
 		}catch (Exception ex) {
 			EcologicalRecordsPlugIn.log(Messages.SurveyDesignEditor_Error_Pages, ex);

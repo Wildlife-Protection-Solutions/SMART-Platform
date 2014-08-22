@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
+import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -46,7 +46,7 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 	
 	private SurveyDesign surveyDesign;
 
-	ISurveyDesignListener changeListener = new ISurveyDesignListener() {			
+	ISurveyListener changeListener = new ISurveyListener() {			
 		@Override
 		public void compositeModified() {
 			setChangesMade(true);

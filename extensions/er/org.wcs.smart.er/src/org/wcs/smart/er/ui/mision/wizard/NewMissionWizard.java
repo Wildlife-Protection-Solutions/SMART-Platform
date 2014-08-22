@@ -39,6 +39,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.CommentComposite;
 import org.wcs.smart.er.ui.mision.DateComposite;
 import org.wcs.smart.er.ui.mision.IdComposite;
@@ -47,7 +48,6 @@ import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
-import org.wcs.smart.er.ui.surveydesign.ISurveyDesignListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -117,7 +117,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		}
 		
 		//configure listeners
-    	ISurveyDesignListener updateButtons = new ISurveyDesignListener() {
+    	ISurveyListener updateButtons = new ISurveyListener() {
 			@Override
 			public void compositeModified() {
 				getContainer().updateButtons();

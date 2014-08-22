@@ -144,15 +144,17 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 		parts.layout(true);
 		
 		// init controls with values
-		for (MissionPropertyValue mpv : mission.getMissionPropertyValues()){
-			Object control = controls.get(mpv.getMissionAttribute());
-			AttributeType type = mpv.getMissionAttribute().getType();
-			if (type == AttributeType.TEXT){
-				((Text)control).setText(mpv.getStringValue());
-			}else if (type == AttributeType.NUMERIC){
-				((Text)control).setText(mpv.getNumberValue().toString());
-			}else if (type == AttributeType.LIST){
-				((ComboViewer)control).setSelection(new StructuredSelection(mpv.getAttributeListItem()));
+		if (mission.getMissionPropertyValues() != null){
+			for (MissionPropertyValue mpv : mission.getMissionPropertyValues()){
+				Object control = controls.get(mpv.getMissionAttribute());
+				AttributeType type = mpv.getMissionAttribute().getType();
+				if (type == AttributeType.TEXT){
+					((Text)control).setText(mpv.getStringValue());
+				}else if (type == AttributeType.NUMERIC){
+					((Text)control).setText(mpv.getNumberValue().toString());
+				}else if (type == AttributeType.LIST){
+					((ComboViewer)control).setSelection(new StructuredSelection(mpv.getAttributeListItem()));
+				}
 			}
 		}
 		validate();
@@ -173,6 +175,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 	@Override
 	public void updateDesign(Mission mission) {
 		List<MissionPropertyValue> newValues = new ArrayList<MissionPropertyValue>();
+		if (controls != null){
 		for (Entry<MissionAttribute, Object> entry : controls.entrySet()){
 			MissionPropertyValue mpv = new MissionPropertyValue();
 			mpv.setMission(mission);
@@ -208,6 +211,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 			if (add){
 				newValues.add(mpv);
 			}
+		}
 		}
 		
 		

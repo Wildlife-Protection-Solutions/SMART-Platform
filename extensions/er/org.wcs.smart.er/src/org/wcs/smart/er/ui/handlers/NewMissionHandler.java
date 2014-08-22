@@ -75,7 +75,7 @@ public class NewMissionHandler extends AbstractHandler {
 				}else if (item instanceof SurveyListTreeNode&&
 						((SurveyListTreeNode)item).getType() == Type.SURVEY){
 					parentSurvey = ((SurveyListTreeNode)item).getUuid();
-					parentDesign = ((SurveyListTreeNode)item).getParent().getUuid();
+//					parentDesign = ((SurveyListTreeNode)item).getParent().getUuid();
 					break;
 				}
 			}

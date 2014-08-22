@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -79,4 +81,16 @@ public class SurveyDesignEditorInput implements IEditorInput {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
+	public boolean equals(Object other){
+		if (other instanceof SurveyDesignEditorInput){
+			return Arrays.equals(uuid, ((SurveyDesignEditorInput) other).getUuid());
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return Arrays.hashCode(uuid);
+	}
 }

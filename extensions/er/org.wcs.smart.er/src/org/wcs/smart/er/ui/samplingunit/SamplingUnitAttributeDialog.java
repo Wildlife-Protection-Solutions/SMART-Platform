@@ -19,9 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.missionattribute;
+package org.wcs.smart.er.ui.samplingunit;
 
+import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -48,29 +51,29 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Mission attribute dialog for adding/removing mission attributes.
+ * Sampling unit attribute dialog for adding/removing sampling unit attributes.
  * 
  * @author Emily
  *
  */
-public class MissionAttributeDialog extends TitleAreaDialog implements SelectionListener{
+public class SamplingUnitAttributeDialog extends TitleAreaDialog implements SelectionListener{
 
 	private TableViewer lstAttributes;
 	private Button btnAdd;
 	private Button btnDelete;
 	private Button btnEdit;
 	
-	private List<MissionAttribute> attributes;
+	private List<SamplingUnitAttribute> attributes;
 	
 	private Session session;
 	
-	public MissionAttributeDialog(Shell parentShell) {
+	public SamplingUnitAttributeDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
@@ -97,7 +100,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 			return true;
 		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Error saving mission attribute modifications." + " \n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog("Error saving sampling unit attribute modifications." + " \n\n" + ex.getMessage(), ex);
 			return false;
 		}
 	}
@@ -127,7 +130,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		
 		lstAttributes = new TableViewer(main, SWT.BORDER);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(new AttributeLabelProvider());
+		lstAttributes.setLabelProvider(new SamplingUnitAttributeLabelProvider());
 		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -135,6 +138,8 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 				editAttribute();	
 			}
 		});
+		lstAttributes.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		
 		Composite btnComp = new Composite(main, SWT.NONE);
 		btnComp.setLayout(new GridLayout(1, false));
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -164,31 +169,42 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		initData();
 		enableButtons();
 		
-		setTitle("Mission Attributes");
-		setMessage("A list of all possible mission attributes for the Conservation Area");
-		getShell().setText("Mission Attributes");
+		setTitle("Sampling Unit Attributes");
+		setMessage("A list of all possible sampling unit attributes for the Conservation Area");
+		getShell().setText("Sampling Unit Attributes");
 		return main;
 	}
 	
 	private void addAttribute(){
 		
-		MissionAttribute ma = new MissionAttribute();
-		ma.setType(AttributeType.LIST);
+		SamplingUnitAttribute ma = new SamplingUnitAttribute();
+		ma.setType(AttributeType.TEXT);
 		ma.setConservationArea(SmartDB.getCurrentConservationArea());
 		
-		EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(
-				getShell(), ma, attributes, session);
+		EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(
+				getShell(), ma, attributes);
 		if (dialog.open() == OK){
 			attributes.add(ma);
 			session.save(ma);
+			sortAttributes();
 			
-			lstAttributes.refresh();
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		}
 	}
 
+	private void sortAttributes(){
+		Collections.sort(attributes, new Comparator<SamplingUnitAttribute>() {
+			@Override
+			public int compare(SamplingUnitAttribute o1,
+					SamplingUnitAttribute o2) {
+				return Collator.getInstance().compare(o1.getName(), o2.getName());
+			}
+		});
+		lstAttributes.refresh();
+	}
 	
 	private void deleteAttribute(){
-		MissionAttribute ma = (MissionAttribute)((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
+		SamplingUnitAttribute ma = (SamplingUnitAttribute)((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma == null){
 			return;
 		}
@@ -201,7 +217,8 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 			if (DeleteManager.canDelete(ma, session)){
 				attributes.remove(ma);
 				session.delete(ma);
-				lstAttributes.refresh();
+				sortAttributes();
+				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		}catch (Exception ex){
 			MessageDialog.openError(getShell(), "Delete", MessageFormat.format("{0} cannot be removed.", new Object[]{ma.getName()}) + " " + ex.getMessage());
@@ -209,11 +226,12 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 	}
 	
 	private void editAttribute(){
-		MissionAttribute ma = (MissionAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
+		SamplingUnitAttribute ma = (SamplingUnitAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma != null){
-			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes, session);
+			EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(getShell(), ma, attributes);
 			dialog.open();
 			lstAttributes.refresh();
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		}
 	}
 	
@@ -224,11 +242,13 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		btnEdit.setEnabled(!isSelected);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void initData(){
-		attributes = session.createCriteria(MissionAttribute.class)
+		attributes = session.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list(); 
 		lstAttributes.setInput(attributes);
+		sortAttributes();
 	}
 	
 	@Override
@@ -245,7 +265,6 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		}else if (e.widget == btnEdit){
 			editAttribute();
 		}
-		getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
 
 	@Override
