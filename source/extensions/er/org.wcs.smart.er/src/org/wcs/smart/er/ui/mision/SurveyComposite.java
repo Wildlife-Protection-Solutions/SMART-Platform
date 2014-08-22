@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -71,7 +72,16 @@ public class SurveyComposite extends MissionComposite{
 		
 		cmbSurveys = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbSurveys.setContentProvider(ArrayContentProvider.getInstance());
-		cmbSurveys.setLabelProvider(SurveyDesignLabelProvider.getInstance());
+//		cmbSurveys.setLabelProvider(SurveyDesignLabelProvider.getInstance());
+		cmbSurveys.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof Survey){
+					return ((Survey) element).getId() + " [" + ((Survey)element).getSurveyDesign().getName() + "]";
+				}
+				return super.getText(element);
+			}
+		});
 		cmbSurveys.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbSurveys.getControl().getLayoutData()).widthHint = 100;
 		cmbSurveys.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -81,43 +91,43 @@ public class SurveyComposite extends MissionComposite{
 			}
 		});
 		
-		Link lnkCreate = new Link(part, SWT.NONE);
-		lnkCreate.setText("<a>" + Messages.SurveyComposite_NewSurveyLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-		lnkCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
-		lnkCreate.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				createNewSurvey();
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-		});
+//		Link lnkCreate = new Link(part, SWT.NONE);
+//		lnkCreate.setText("<a>" + Messages.SurveyComposite_NewSurveyLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+//		lnkCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
+//		lnkCreate.addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				createNewSurvey();
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				
+//			}
+//		});
 		
 		return part;
 	}
 
 	
-	private void createNewSurvey(){
-		
-		NewSurveyDialog dialog = new NewSurveyDialog(cmbSurveys.getControl().getShell(),
-				parentSurvey.getUuid(), session);
-		dialog.open();
-		
-		refreshSurveys(session);
-		if (dialog.getSurvey() !=  null){
-			cmbSurveys.setSelection(new StructuredSelection(dialog.getSurvey()));
-		}
-	}
+//	private void createNewSurvey(){
+//		
+//		NewSurveyDialog dialog = new NewSurveyDialog(cmbSurveys.getControl().getShell(),
+//				parentSurvey.getUuid(), session);
+//		dialog.open();
+//		
+//		refreshSurveys(session);
+//		if (dialog.getSurvey() !=  null){
+//			cmbSurveys.setSelection(new StructuredSelection(dialog.getSurvey()));
+//		}
+//	}
 	
 	
 	@SuppressWarnings("unchecked")
 	private void refreshSurveys(Session s){
-		Query q = s.createQuery("FROM Survey where surveyDesign.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
-		q.setParameter("uuid", parentSurvey.getUuid()); //$NON-NLS-1$
+		Query q = s.createQuery("FROM Survey ");//where surveyDesign.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
+//		q.setParameter("uuid", parentSurvey.getUuid()); //$NON-NLS-1$
 		List<Survey> kids = q.list();
 		
 		cmbSurveys.setInput(kids);

@@ -190,107 +190,113 @@ public class SurveyDesignListFilter {
 	 * @param s
 	 * @return
 	 */
+//	public Query buildQuery(Session s){ 
+//		StringBuilder str = new StringBuilder();
+//		
+//		str.append("SELECT s.uuid, s.state, s.startDate, s.endDate, lbl.value "); //$NON-NLS-1$
+//		str.append("FROM SurveyDesign s, Label lbl "); //$NON-NLS-1$
+//		str.append("WHERE s.conservationArea = :ca " ); //$NON-NLS-1$
+//		str.append("AND  lbl.id.element.uuid = s.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
+//
+//		
+//		boolean and = true;
+//		boolean or = false;
+//		if (states != null && states.length > 0){
+//			if (and ){
+//				str.append(" AND ("); //$NON-NLS-1$
+//				and = false;
+//			}
+//			or = true;
+//			str.append(" s.state IN (:states) "); //$NON-NLS-1$
+//		}
+//		if (stringComparator != null && surveyNameFilter != null){
+//			if (and){
+//				str.append(" AND ("); //$NON-NLS-1$
+//				and = false;
+//			}
+//			if (or){
+//				str.append(" AND "); //$NON-NLS-1$
+//			}
+//			or = true;
+//			str.append(" lower(lbl.value) like :name "); //$NON-NLS-1$
+//			
+//		}
+//		if (startDateFilter != null){
+//			if (and){
+//				str.append(" AND ("); //$NON-NLS-1$
+//				and = false;
+//			}
+//			if (or){
+//				str.append(" AND "); //$NON-NLS-1$
+//			}
+//			or = true;
+//			str.append(" ( s.startDate >= :date1 and s.startDate <= :date2 ) "); //$NON-NLS-1$
+//		}
+//		
+//		if (endDateFilter != null){
+//			if (and){
+//				str.append(" AND ("); //$NON-NLS-1$
+//				and = false;
+//			}
+//			if (or){
+//				str.append(" AND "); //$NON-NLS-1$
+//			}
+//			or = true;
+//			str.append(" ( s.endDate >= :date3 and s.endDate <= :date4 ) "); //$NON-NLS-1$
+//		}
+//		if (!and){
+//			str.append(")"); //$NON-NLS-1$
+//		}
+//		
+//		str.append("ORDER BY lbl.value desc"); //$NON-NLS-1$
+//		
+//		Query query = s.createQuery(str.toString())
+//				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+//				.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
+//
+//		
+//		if (states != null && states.length > 0){
+//			query.setParameterList("states", this.states); //$NON-NLS-1$
+//		}
+//		if (stringComparator != null && surveyNameFilter != null){
+//			if (stringComparator == StringComparison.CONTAINS){
+//				query.setParameter("name", "%" + this.surveyNameFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//			}else{
+//				query.setParameter("name", this.surveyNameFilter.toLowerCase()); //$NON-NLS-1$
+//			}
+//		}
+//		if (startDateFilter != null) {
+//			Date start = startDateFilter.getStartDate();
+//			if (start == null){
+//				start = sstartDate;
+//			}
+//			Date end = startDateFilter.getEndDate();
+//			if (end == null){
+//				end = sendDate;
+//			}
+//			query.setParameter("date1", start); //$NON-NLS-1$
+//			query.setParameter("date2", end); //$NON-NLS-1$
+//		}
+//		
+//		if (endDateFilter != null) {
+//			Date start = endDateFilter.getStartDate();
+//			if (start == null){
+//				start = estartDate;
+//			}
+//			Date end = endDateFilter.getEndDate();
+//			if (end == null){
+//				end = eendDate;
+//			}
+//			query.setParameter("date3", start); //$NON-NLS-1$
+//			query.setParameter("date4", end); //$NON-NLS-1$
+//		}
+//		return query;
+//	}
+
 	public Query buildQuery(Session s){ 
-		StringBuilder str = new StringBuilder();
+		Query q =  s.createQuery("FROM Survey s WHERE s.surveyDesign.conservationArea = :ca ");
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		return q;
 		
-		str.append("SELECT s.uuid, s.state, s.startDate, s.endDate, lbl.value "); //$NON-NLS-1$
-		str.append("FROM SurveyDesign s, Label lbl "); //$NON-NLS-1$
-		str.append("WHERE s.conservationArea = :ca " ); //$NON-NLS-1$
-		str.append("AND  lbl.id.element.uuid = s.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
-
-		
-		boolean and = true;
-		boolean or = false;
-		if (states != null && states.length > 0){
-			if (and ){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			or = true;
-			str.append(" s.state IN (:states) "); //$NON-NLS-1$
-		}
-		if (stringComparator != null && surveyNameFilter != null){
-			if (and){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			if (or){
-				str.append(" AND "); //$NON-NLS-1$
-			}
-			or = true;
-			str.append(" lower(lbl.value) like :name "); //$NON-NLS-1$
-			
-		}
-		if (startDateFilter != null){
-			if (and){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			if (or){
-				str.append(" AND "); //$NON-NLS-1$
-			}
-			or = true;
-			str.append(" ( s.startDate >= :date1 and s.startDate <= :date2 ) "); //$NON-NLS-1$
-		}
-		
-		if (endDateFilter != null){
-			if (and){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			if (or){
-				str.append(" AND "); //$NON-NLS-1$
-			}
-			or = true;
-			str.append(" ( s.endDate >= :date3 and s.endDate <= :date4 ) "); //$NON-NLS-1$
-		}
-		if (!and){
-			str.append(")"); //$NON-NLS-1$
-		}
-		
-		str.append("ORDER BY lbl.value desc"); //$NON-NLS-1$
-		
-		Query query = s.createQuery(str.toString())
-				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-				.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
-
-		
-		if (states != null && states.length > 0){
-			query.setParameterList("states", this.states); //$NON-NLS-1$
-		}
-		if (stringComparator != null && surveyNameFilter != null){
-			if (stringComparator == StringComparison.CONTAINS){
-				query.setParameter("name", "%" + this.surveyNameFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}else{
-				query.setParameter("name", this.surveyNameFilter.toLowerCase()); //$NON-NLS-1$
-			}
-		}
-		if (startDateFilter != null) {
-			Date start = startDateFilter.getStartDate();
-			if (start == null){
-				start = sstartDate;
-			}
-			Date end = startDateFilter.getEndDate();
-			if (end == null){
-				end = sendDate;
-			}
-			query.setParameter("date1", start); //$NON-NLS-1$
-			query.setParameter("date2", end); //$NON-NLS-1$
-		}
-		
-		if (endDateFilter != null) {
-			Date start = endDateFilter.getStartDate();
-			if (start == null){
-				start = estartDate;
-			}
-			Date end = endDateFilter.getEndDate();
-			if (end == null){
-				end = eendDate;
-			}
-			query.setParameter("date3", start); //$NON-NLS-1$
-			query.setParameter("date4", end); //$NON-NLS-1$
-		}
-		return query;
 	}
-
 }

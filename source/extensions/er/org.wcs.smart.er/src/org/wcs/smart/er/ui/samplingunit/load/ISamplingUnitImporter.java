@@ -19,53 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.model;
+package org.wcs.smart.er.ui.samplingunit.load;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.model.SamplingUnit;
 
 /**
- * A sampling unit attributes.
+ * Sampling unit importer interface.
  * 
  * @author Emily
  *
  */
-@Entity
-@Table(name="smart.sampling_unit_attribute")
-public class SamplingUnitAttribute extends NamedKeyItem{
+public interface ISamplingUnitImporter {
 
-	private AttributeType type;
+	public static final String TYPE_KEY = "SU_TYPE";
+	public static final String ID_FIELD_KEY = "ID_FIELD";
+	public static final String X1_FIELD_KEY = "X1_FIELD";
+	public static final String Y1_FIELD_KEY = "Y1_FIELD";
+	public static final String X2_FIELD_KEY = "X2_FIELD";
+	public static final String Y2_FIELD_KEY = "Y2_FIELD";
+	public static final String PROJECTION_KEY = "PROJECTION";
 	
-	private ConservationArea ca;
+	public static final String BUFFER_KEY = "BUFFER";
 	
-	/**
-	 * 
-	 * @return the attribute type
-	 */
-	@Column(name = "att_type")
-	public AttributeType getType(){
-		return this.type;
-	}
+	public String[] getFieldNames(File f, Map<String, Object> options) throws Exception;
 	
-	public void setType(AttributeType type){
-		this.type = type;
-	}
+	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options) throws Exception;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getConservationArea(){
-		return this.ca;
-	}
-	
-	public void setConservationArea(ConservationArea conservationArea){
-		this.ca = conservationArea;
-	}
 }

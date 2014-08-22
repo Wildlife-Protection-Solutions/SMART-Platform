@@ -88,6 +88,8 @@ public class SurveyDesign extends NamedKeyItem {
 	
 	private List<SurveyDesignProperty> properties;
 	
+	private List<SurveyDesignSamplingUnitAttribute> attributes;
+	
 //	private List<Survey> surveys;
 	
 	public SurveyDesign(){
@@ -180,13 +182,12 @@ public class SurveyDesign extends NamedKeyItem {
 		this.properties = properties;
 	}
 	
-//	@OneToMany(fetch = FetchType.LAZY, mappedBy="survey", cascade={CascadeType.ALL}, orphanRemoval = true)
-//	@OrderBy(clause="start_date")
-//	public List<Survey> getSurveys(){
-//		return this.surveys;
-//	}
-//	public void setSurveys(List<Survey> surveys){
-//		this.surveys = surveys;
-//		
-//	}
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.surveyDesign", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<SurveyDesignSamplingUnitAttribute> getSamplingUnitAttributes() {
+		return this.attributes;
+	}
+	
+	public void setSamplingUnitAttributes(List<SurveyDesignSamplingUnitAttribute> attributes) {
+		this.attributes = attributes;
+	}
 }
