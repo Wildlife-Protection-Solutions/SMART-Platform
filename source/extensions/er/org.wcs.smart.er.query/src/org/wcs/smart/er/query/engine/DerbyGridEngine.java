@@ -56,6 +56,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.observation.model.Waypoint;
@@ -112,7 +113,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask("Running query", 4);
+				monitor.beginTask(Messages.DerbyGridEngine_RunQueryProgress, 4);
 
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
@@ -212,7 +213,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, SurveyDesignFilter sdFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
-		monitor.subTask("creating observation table");
+		monitor.subTask(Messages.DerbyGridEngine_CreateObsTableProgress);
 		
 		if (needsFilter) {
 			try {
@@ -247,7 +248,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				return null;
 			}
 		}
-		monitor.subTask("calculating grid values");
+		monitor.subTask(Messages.DerbyGridEngine_CalcValueProgresss);
 		return getGridResults(c, session, gridDef, value);
 	}
 	/**
@@ -463,7 +464,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				QueryPlugIn.logSql(sql.toString());
 				rs = c.createStatement().executeQuery(sql.toString());
 			}else{
-				throw new SQLException(MessageFormat.format("The value {0} is not supported for survey grid queries.", new Object[]{value.asString()}));	
+				throw new SQLException(MessageFormat.format(Messages.DerbyGridEngine_ValueNotSupported, new Object[]{value.asString()}));	
 			}
 		
 			try {
@@ -488,7 +489,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				rs.close();
 			}
 		}
-		throw new SQLException(MessageFormat.format("The value {0} is not supported for survey grid queries.", new Object[]{value.asString()}));
+		throw new SQLException(MessageFormat.format(Messages.DerbyGridEngine_ValueNotSupported, new Object[]{value.asString()}));
 	}
 
 	private List<GridResultItem> computeMissionExistance(Connection c, Grid gridDef) throws Exception{

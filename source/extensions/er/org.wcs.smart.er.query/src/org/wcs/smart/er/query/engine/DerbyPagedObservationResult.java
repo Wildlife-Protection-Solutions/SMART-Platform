@@ -40,13 +40,19 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.er.query.ui.columns.MissionPropertyQueryColumn;
+import org.wcs.smart.er.query.ui.columns.SurveyAttributeQueryColumn;
+import org.wcs.smart.er.query.ui.columns.SurveyQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -172,119 +178,118 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	}
 	
 	private void updateSortColumn(QueryColumn sortColumn, Session session, Connection c) throws SQLException{
-		//TODO:
-//		if (sortColumn instanceof PatrolAttributeQueryColumn){
-//			if (!hasSortColumns){
-//				//add the sort columns
-//				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
-//				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-//				c.commit();
-//				hasSortColumns = true;
-//			}
-//			String key = sortColumn.getKey();
-//			key = key.split(":")[1]; //$NON-NLS-1$
-//			Attribute attribute = null;
-//			
-//			session.beginTransaction();
-//			try{
-//				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
-//			}finally{
-//				session.getTransaction().rollback();
-//			}
-//			
-//			switch (attribute.getType()) {
-//			case BOOLEAN:
-//			case NUMERIC:
-//				// nullify first
-//				StringBuilder sql = new StringBuilder();
-//				sql.append("UPDATE "); //$NON-NLS-1$
-//				sql.append(queryTempTable);
-//				sql.append(" SET sortKeyDbl = null "); //$NON-NLS-1$
-//				c.createStatement().execute(sql.toString());
-//				break;
-//			case TEXT:
-//			case LIST:
-//			case TREE:
-//			case DATE:
-//				sql = new StringBuilder();
-//				sql.append("UPDATE "); //$NON-NLS-1$
-//				sql.append(queryTempTable);
-//				sql.append(" SET sortKeyTxt = null"); //$NON-NLS-1$
-//				c.createStatement().execute(sql.toString());
-//				break;
-//			}
-//			
-//			switch (attribute.getType()) {
-//			case BOOLEAN:
-//			case NUMERIC:
-//				StringBuilder sql = new StringBuilder();
-//				sql.append("UPDATE "); //$NON-NLS-1$
-//				sql.append(queryTempTable);
-//				sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
-//				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
-//				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
-//				sql.append("and a.keyid = '"); //$NON-NLS-1$
-//				sql.append(key);
-//				sql.append("'"); //$NON-NLS-1$
-//				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-//				sql.append( queryTempTable );
-//				sql.append(".ob_uuid)"); //$NON-NLS-1$
-//				c.createStatement().execute(sql.toString());
-//				break;
-//			case TEXT:
-//			case DATE:
-//				sql = new StringBuilder();
-//				sql.append("UPDATE "); //$NON-NLS-1$
-//				sql.append(queryTempTable);
-//				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-//				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
-//				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
-//				sql.append("and a.keyid = '"); //$NON-NLS-1$
-//				sql.append( key );
-//				sql.append("'"); //$NON-NLS-1$
-//				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-//				sql.append( queryTempTable );
-//				sql.append(".ob_uuid)"); //$NON-NLS-1$
-//				c.createStatement().execute(sql.toString());
-//				break;
-//			case LIST:
-//				sql = new StringBuilder();
-//				sql.append("UPDATE "); //$NON-NLS-1$
-//				sql.append(queryTempTable);
-//				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-//				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$
-//				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-//				sql.append( queryTempTable );
-//				sql.append( "_LIST rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
-//				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-//				sql.append( key );
-//				sql.append("'"); //$NON-NLS-1$
-//				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-//				sql.append( queryTempTable); 
-//				sql.append(".ob_uuid)"); //$NON-NLS-1$
-//				c.createStatement().execute(sql.toString());
-//				
-//				break;
-//			case TREE:
-//				sql = new StringBuilder();
-//				sql.append("UPDATE ");//$NON-NLS-1$
-//				sql.append(queryTempTable);
-//				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
-//				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-//				sql.append( queryTempTable );
-//				sql.append("_TREE rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$
-//				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-//				sql.append( key );
-//				sql.append("'"); //$NON-NLS-1$
-//				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-//				sql.append( queryTempTable );
-//				sql.append( ".ob_uuid)"); //$NON-NLS-1$
-//				c.createStatement().execute(sql.toString());
-//				
-//				break;
-//			}
-//		}
-//		c.commit();
+		if (sortColumn instanceof SurveyAttributeQueryColumn){
+			if (!hasSortColumns){
+				//add the sort columns
+				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
+				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+				c.commit();
+				hasSortColumns = true;
+			}
+			String key = sortColumn.getKey();
+			key = key.split(":")[1]; //$NON-NLS-1$
+			Attribute attribute = null;
+			
+			session.beginTransaction();
+			try{
+				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
+			}finally{
+				session.getTransaction().rollback();
+			}
+			
+			switch (attribute.getType()) {
+			case BOOLEAN:
+			case NUMERIC:
+				// nullify first
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyDbl = null "); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			case TEXT:
+			case LIST:
+			case TREE:
+			case DATE:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = null"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			}
+			
+			switch (attribute.getType()) {
+			case BOOLEAN:
+			case NUMERIC:
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			case TEXT:
+			case DATE:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append( key );
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			case LIST:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append( "_LIST rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append( key );
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable); 
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				
+				break;
+			case TREE:
+				sql = new StringBuilder();
+				sql.append("UPDATE ");//$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
+				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append("_TREE rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append( key );
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append( ".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				
+				break;
+			}
+		}
+		c.commit();
 	}
 		
 		
@@ -354,52 +359,68 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		}		
 	}
 	
+	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
+		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
+		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
+	};
+	
+	
 	private String buildSortSql() {
-		return ""; //$NON-NLS-1$
-//		if (sortColumn == null || direction == SWT.NONE)
-//			return ""; //$NON-NLS-1$
-//		
-//		String result = ""; //$NON-NLS-1$
-//		if (sortColumn instanceof FixedQueryColumn) {
-//			String key = sortColumn.getKey();
-//			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-//			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
-//				key = key.replace(data[0], data[1]);
-//			}
-//			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-//				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
-//			}else if (sortColumn.getType() == ColumnType.STRING){
-//				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
-//			}else{
-//				result = "order by r."+key; //$NON-NLS-1$
-//			}
-//		}
-//		if (sortColumn instanceof PatrolCategoryQueryColumn) {
-//			String key = sortColumn.getKey();
-//			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-//			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-//		}
-//		if (sortColumn instanceof PatrolAttributeQueryColumn) {
-//			String key = sortColumn.getKey();
-//			key = key.split(":")[1]; //$NON-NLS-1$
-//			switch (sortColumn.getType()) {
-//				case BOOLEAN:
-//				case NUMBER:
-//				case INTEGER:
-//					result = "order by sortKeyDbl"; //$NON-NLS-1$
-//					break;
-//				case DATE:
-//					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
-//					break;
-//				default:
-//					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
-//					break;
-//			}
-//		}
-//		if (!result.isEmpty()) {
-//			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
-//		}
-//		return result;
+		if (sortColumn == null || direction == SWT.NONE)
+			return ""; //$NON-NLS-1$
+		
+		String result = ""; //$NON-NLS-1$
+		if (sortColumn instanceof SurveyQueryColumn) {
+			String key = sortColumn.getKey();
+			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
+				key = key.replace(data[0], data[1]);
+			}
+			if (sortColumn.getKey().equals(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
+			}else{
+				result = "order by r."+key; //$NON-NLS-1$
+			}
+		}else if (sortColumn instanceof SurveyAttributeQueryColumn) {
+			String key = sortColumn.getKey();
+			key = key.split(":")[1]; //$NON-NLS-1$
+			switch (sortColumn.getType()) {
+				case BOOLEAN:
+				case NUMBER:
+				case INTEGER:
+					result = "order by sortKeyDbl"; //$NON-NLS-1$
+					break;
+				case DATE:
+					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
+					break;
+				default:
+					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
+					break;
+			}
+		}else if (sortColumn instanceof MissionPropertyQueryColumn){
+			String key = sortColumn.getKey();
+			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+			key = key.replace("missionatt", "ma"); //$NON-NLS-1$ //$NON-NLS-2$
+			switch (sortColumn.getType()) {
+				case BOOLEAN:
+				case NUMBER:
+				case INTEGER:
+					result = "order by r." + key; //$NON-NLS-1$
+					break;
+				case DATE:
+					result = "order by DATE(r." + key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+					break;
+				default:
+					result = "order by UPPER(r." + key +")"; //$NON-NLS-1$ //$NON-NLS-2$
+					break;
+			}
+		}
+		if (!result.isEmpty()) {
+			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return result;
 	}
 	
 	

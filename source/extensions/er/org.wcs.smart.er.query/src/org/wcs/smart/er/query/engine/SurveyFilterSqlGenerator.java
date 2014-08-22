@@ -139,7 +139,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Survey design filter
 	 */
 	protected String asSql(SurveyDesignFilter filter, IQueryEngine engine) throws SQLException{
-		return engine.tablePrefix(SurveyDesign.class) + ".keyId = '" + filter.getKey() + "'";
+		return engine.tablePrefix(SurveyDesign.class) + ".keyId = '" + filter.getKey() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	

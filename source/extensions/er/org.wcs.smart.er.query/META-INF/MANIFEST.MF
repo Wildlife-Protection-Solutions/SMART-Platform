@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.hibernate.libs;bundle-version="3.0.0",
  org.wcs.smart.query;bundle-version="3.0.2",
  org.wcs.smart;bundle-version="3.0.2",
- org.wcs.smart.observation;bundle-version="3.0.2"
+ org.wcs.smart.observation;bundle-version="3.0.2",
+ org.apache.commons.lang;bundle-version="2.4.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.er.query.model
