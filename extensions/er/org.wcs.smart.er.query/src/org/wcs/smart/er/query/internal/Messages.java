@@ -4,6 +4,10 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
+	public static String DerbyGridEngine_CalcValueProgresss;
+	public static String DerbyGridEngine_CreateObsTableProgress;
+	public static String DerbyGridEngine_RunQueryProgress;
+	public static String DerbyGridEngine_ValueNotSupported;
 	public static String DerbyObservationEngine_populatingObserverProgress;
 	public static String DerbyObservationEngine_progress1;
 	public static String DerbyObservationEngine_progress2;
