@@ -291,7 +291,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			
 			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
 				MissionDayPageEditorInput input = new MissionDayPageEditorInput(calStart.getTime());
-				MissionDayPage editor = new MissionDayPage();
+				MissionDayPage editor = new MissionDayPage(this);
 				super.addPage(insertindex, editor, input);
 				super.setPageText(insertindex, DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getDay()));
 				insertindex++;
