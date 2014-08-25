@@ -23,8 +23,11 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -40,10 +43,14 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -60,6 +67,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -68,13 +76,15 @@ import org.wcs.smart.observation.model.WaypointObservation;
 /**
  * Composite for editing mission days data.  This includes modifying
  * the date/time, rest minutes, tracks and waypoints.
+ * A lot of code is copied from PatrolLegDayInputComposite
  * 
  * @author elitvin
  * @since 3.0.0
  */
 public class MissionDayComposite {
 
-	private MissionDayPage editor;
+//	private MissionDayPage editor;
+	private Mission mission;
 	
 	private Composite mainComposite;
 
@@ -288,15 +298,15 @@ public class MissionDayComposite {
 		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		toolkit.adapt(observationTable.getTable());
 		setupObservationTable();
-//		observationTable.getTable().addPaintListener(new PaintListener() {
-//			boolean called = false;
-//			@Override
-//			public void paintControl(PaintEvent e) {
-//				if (called) return;
-//				called = true;
-//				resize();
-//			}
-//		});
+		observationTable.getTable().addPaintListener(new PaintListener() {
+			boolean called = false;
+			@Override
+			public void paintControl(PaintEvent e) {
+				if (called) return;
+				called = true;
+				resize();
+			}
+		});
 		
 		Composite buttonComp = toolkit.createComposite(mainComposite);
 		buttonComp.setLayout(new GridLayout(3, false));
@@ -398,21 +408,114 @@ public class MissionDayComposite {
 		}
 	}
 
-//	private void resize(){
-//		if (observationTableColumns == null){
-//			return ;
+	public void setData(Mission data) {
+		this.mission = data;
+		
+		Calendar cal = Calendar.getInstance();
+		if (data.getStartDate() != null) {
+			cal.setTime(data.getStartDate());
+			dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
+					cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+		}else{
+			dtStartTime.setTime(0,0,0);
+		}
+		if (data.getEndDate() != null) {
+			cal.setTime(data.getEndDate());
+			dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
+					cal.get(Calendar.SECOND));
+		}else{
+			dtEndTime.setTime(23,59,59);
+		}
+		//TODO:
+//		if (data.getRestMinutes() == null) {
+//			restMinutes.setText("0"); //$NON-NLS-1$
+//		} else {
+//			restMinutes.setText(String.valueOf(data.getRestMinutes()));
 //		}
-//		
-//		GC gc = new GC(observationTable.getTable().getDisplay());
-//		gc.setFont(observationTable.getTable().getFont());
-//		
-//		for (Iterator<Entry<OtColumn, TableViewerColumn>> iterator = observationTableColumns.entrySet().iterator(); iterator.hasNext();) {
-//			Entry<OtColumn, TableViewerColumn> type = iterator.next();
-//			int maxWidth = getMaximumWidth(gc, type.getKey());
-//			type.getValue().getColumn().setWidth(maxWidth);
+//
+//		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
+//
+//		if (data.getWaypoints() == null){
+//			data.setWaypoints(new ArrayList<SurveyWaypoint>());
 //		}
-//		gc.dispose();
-//	}
+//		WritableList inputList = new WritableList(data.getWaypoints(), SurveyWaypoint.class);
+//		observationTable.setInput(inputList);
+//		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
+//			
+//			@Override
+//			public void selectionChanged(SelectionChangedEvent event) {
+//				if (editor.getPatrolEditor().canEdit() == null){
+//					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
+//					btnDeleteWaypoint.setEnabled(enabled);
+//					
+//					if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
+//						btnMoveWaypoint.setEnabled(enabled);	
+//					}else{
+//						btnMoveWaypoint.setEnabled(false);
+//					}
+//				}
+//			}
+//		});
+//		
+//		this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
+//				
+//		updateTotalHours();
+//		updateDistance();
+		
+		btnMoveWaypoint.setEnabled(false);
+		btnDeleteWaypoint.setEnabled(false);
+		
+//		if (editor.getPatrolEditor().canEdit() != null){
+//			dtEndTime.setEnabled(false);
+//			dtStartTime.setEnabled(false);
+//			restMinutes.setEditable(false);
+//			restMinutes.setEnabled(false);
+//			
+//			btnAddWaypoint.setVisible(false);
+//			btnDeleteWaypoint.setVisible(false);
+//			btnMoveWaypoint.setVisible(false);
+//			
+//			importTrack.setVisible(false);
+//			lblImportWaypoints.setVisible(false);
+//			
+//		}
+	
+	}
+	
+	private void resize(){
+		if (observationTableColumns == null){
+			return ;
+		}
+		
+		GC gc = new GC(observationTable.getTable().getDisplay());
+		gc.setFont(observationTable.getTable().getFont());
+		
+		for (Iterator<Entry<OtColumn, TableViewerColumn>> iterator = observationTableColumns.entrySet().iterator(); iterator.hasNext();) {
+			Entry<OtColumn, TableViewerColumn> type = iterator.next();
+			int maxWidth = getMaximumWidth(gc, type.getKey());
+			type.getValue().getColumn().setWidth(maxWidth);
+		}
+		gc.dispose();
+	}
+
+	private int getMaximumWidth(GC gc, OtColumn column){ //, Object[] events) {
+		int width = 0;
+		Point extent = gc.textExtent(column.guiName);
+		width = extent.x;
+		for (Iterator<SurveyWaypoint> iterator = mission.getWaypoints().iterator(); iterator.hasNext();) {
+			SurveyWaypoint e = iterator.next();
+			String str = getWaypointValueAsString(e, column);
+			
+			if (str != null){
+				int tmp = gc.textExtent(str).x;
+				if ( tmp > width){
+					width = tmp;
+				}
+			}
+		}
+		width = Math.min(200, width);
+		return width + 20;
+	}
 	
 	protected void showImportWaypointWizard() {
 		// TODO Auto-generated method stub

@@ -46,10 +46,16 @@ import org.eclipse.ui.part.EditorPart;
  */
 public class MissionDayPage extends EditorPart {
 
+	private MissionEditor editor;
+	
 	private ScrolledForm frmSummary; 
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	private MissionDayComposite dayComposite;
+	
+	public MissionDayPage(MissionEditor editor) {
+		this.editor = editor;
+	}
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -96,6 +102,7 @@ public class MissionDayPage extends EditorPart {
 		
 		dayComposite = new MissionDayComposite();
 		dayComposite.createComposite(frmSummary.getBody(), toolkit);
+		dayComposite.setData(editor.getMission());
 		
 	}
 
