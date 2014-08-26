@@ -232,7 +232,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			setPageText(i, "Summary");
 			createDayPages();
 			
-			mapPage = new MissionMapPage();
+			mapPage = new MissionMapPage(this);
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, "Map");
 			
