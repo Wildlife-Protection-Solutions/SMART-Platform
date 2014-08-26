@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.samplingunit.load.CsvSamplingUnitImporter;
 import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
 import org.wcs.smart.er.ui.samplingunit.load.ShpSamplingUnitImporter;
@@ -61,9 +61,12 @@ public class FileWizardPage extends WizardPage {
 	
 	private DelimiterCombo delimiter;
 	private Label dell;
+
+	private String[] fieldsNames = new String[0];
+	private ISamplingUnitImporter importer;
 	
 	public FileWizardPage(){
-		super("FILE_PAGE");
+		super("FILE_PAGE"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -77,7 +80,7 @@ public class FileWizardPage extends WizardPage {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		//file
 		Label l = new Label(c, SWT.NONE);
-		l.setText("File:");
+		l.setText(Messages.FileWizardPage_FileLabel);
 		
 		txtFile = new Text(c, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -89,14 +92,14 @@ public class FileWizardPage extends WizardPage {
 		});
 		
 		Button btnFile = new Button(c, SWT.PUSH);
-		btnFile.setText("...");
+		btnFile.setText("..."); //$NON-NLS-1$
 		btnFile.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell());
 				
-				fd.setFilterExtensions(new String[]{"*.csv;*.shp", "*.csv", "*.shp", "*.*"});
-				fd.setFilterNames(new String[]{"Supported Formats (*.csv, *.shp)", "Comma Seperated Values (*.csv)", "Shapefile (*.shp)", "All Files (*.*)"});
+				fd.setFilterExtensions(new String[]{"*.csv;*.shp", "*.csv", "*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				fd.setFilterNames(new String[]{Messages.FileWizardPage_SupportedFormatLabel, Messages.FileWizardPage_CsvFormatLabel, Messages.FileWizardPage_ShpFormatLabel, Messages.FileWizardPage_AllFilesLabel});
 				String file = fd.open();
 				if(file != null){
 					txtFile.setText(file);
@@ -107,28 +110,26 @@ public class FileWizardPage extends WizardPage {
 		
 		//delimiter
 		dell = new Label(c, SWT.NONE);
-		dell.setText("Delimiter:");
+		dell.setText(Messages.FileWizardPage_DelimiterLabel);
 		
 		delimiter = new DelimiterCombo(c, SWT.BORDER);
 		delimiter.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		enableDelimiter();
+		dell.setEnabled(false);
+		delimiter.getControl().setEnabled(false);
 		
 		setControl(outer);
-		setTitle("Import File");
-		setMessage("Select the file to import from.");
+		setTitle(Messages.FileWizardPage_Title);
+		setMessage(Messages.FileWizardPage_Message);
 	}
 	
 	private void enableDelimiter(){
 		String str = txtFile.getText();
-		boolean enabled = !str.endsWith(".shp");
+		boolean enabled = !str.endsWith(".shp"); //$NON-NLS-1$
 		
 		dell.setEnabled(enabled);
 		delimiter.getControl().setEnabled(enabled);
 	}
-
-	private String[] fieldsNames = new String[0];
-	private ISamplingUnitImporter importer;
 
 	public Character getDelimiter(){
 		return new Character( ((Delimiter) ((IStructuredSelection)delimiter.getSelection()).getFirstElement()).value); 
@@ -141,26 +142,26 @@ public class FileWizardPage extends WizardPage {
 		return new File(txtFile.getText());
 	}
 	
-	public String[] getFieldNames(){
+	public String[] getFieldNames(final HashMap<String, Object> options){
 		fieldsNames = null;
 		final File f = new File(txtFile.getText());
 		final boolean isCsv = delimiter.getControl().getEnabled();
 		if (!f.exists()){
-			MessageDialog.openInformation(getShell(), "Error", 
-					MessageFormat.format("File {0} not found.", new Object[]{f.getAbsolutePath()}));
+			MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
+					MessageFormat.format(Messages.FileWizardPage_FileNotFound, new Object[]{f.getAbsolutePath()}));
 			return null;
 		}
 		
-		final SamplingUnitType type = ((ImportWizard)getWizard()).getSamplingUnitType();
 		try {
 			getWizard().getContainer().run(false, false, new IRunnableWithProgress() {
 				
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Reading file", 2);
+					monitor.beginTask(Messages.FileWizardPage_ReadingFileProgress, 2);
 					
 					HashMap<String, Object> params = new HashMap<String, Object>();
+					params.putAll(options);
 					if (isCsv){
 						importer = new CsvSamplingUnitImporter();
 						DelimiterCombo.Delimiter delimiterfield = (Delimiter) ((IStructuredSelection)delimiter.getSelection()).getFirstElement();
@@ -172,8 +173,8 @@ public class FileWizardPage extends WizardPage {
 					try {
 						fieldsNames = importer.getFieldNames(f, params);
 					} catch (Exception e) {
-						MessageDialog.openInformation(getShell(), "Error", 
-								MessageFormat.format("Error reading file {0}." + "\n\n" + e.getMessage(), new Object[]{f.getAbsolutePath()}));
+						MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
+								MessageFormat.format(Messages.FileWizardPage_ErrorReadingFile + "\n\n" + e.getMessage(), new Object[]{f.getAbsolutePath()})); //$NON-NLS-1$
 					}
 					monitor.worked(1);
 					monitor.done();

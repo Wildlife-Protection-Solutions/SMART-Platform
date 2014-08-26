@@ -25,12 +25,15 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -52,10 +55,10 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 	
 	private boolean canFinish = false;
 	
-	private TypePage page1;
-	private FileWizardPage page2;
-	private AttributePage page3;
-	private BufferPage page4;
+	private TypePage typePage;
+	private FileWizardPage filePage;
+	private AttributePage attributePage;
+	private BufferPage bufferPage;
 	
 	/**
 	 * Creates a new wizard
@@ -88,53 +91,59 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 	
 	@Override
 	public boolean performFinish() {
+		String msg = attributePage.validate();
+		if (msg != null){
+			MessageDialog.openError(getShell(), Messages.ImportWizard_ErrorTitle, msg);
+			return false;
+		}
+		
 		HashMap<Object, Object> params = new HashMap<Object, Object>();
 		
-		ISamplingUnitImporter importer = page2.getImporter();
+		ISamplingUnitImporter importer = filePage.getImporter();
 		
-		params.put(CsvSamplingUnitImporter.DELIMETER_KEY, page2.getDelimiter());
+		params.put(CsvSamplingUnitImporter.DELIMETER_KEY, filePage.getDelimiter());
 		
-		SamplingUnitType type = page1.getType();
-		if (page1.getType() == SamplingUnitType.OPEN_TRANSECT){
-			type = page4.getType();
+		SamplingUnitType type = typePage.getType();
+		if (typePage.getType() == SamplingUnitType.OPEN_TRANSECT){
+			type = bufferPage.getType();
 		}
 		params.put(ISamplingUnitImporter.TYPE_KEY, type);
 		
-		Double buffer = page4.getArea();
+		Double buffer = bufferPage.getArea();
 		params.put(ISamplingUnitImporter.BUFFER_KEY, buffer);
+		params.put(ISamplingUnitImporter.PROJECTION_KEY, attributePage.getProjection());
+		params.put(ISamplingUnitImporter.ID_FIELD_KEY, attributePage.getIdField());
+		params.put(ISamplingUnitImporter.X1_FIELD_KEY, attributePage.getX1Field());
+		params.put(ISamplingUnitImporter.Y1_FIELD_KEY, attributePage.getY1Field());
+		params.put(ISamplingUnitImporter.X2_FIELD_KEY, attributePage.getX2Field());
+		params.put(ISamplingUnitImporter.Y2_FIELD_KEY, attributePage.getY2Field());
 		
-		params.put(ISamplingUnitImporter.PROJECTION_KEY, page3.getProjection());
+		params.putAll(attributePage.getAttributeFields());
 		
-		params.put(ISamplingUnitImporter.ID_FIELD_KEY, page3.getIdField());
-		
-		params.put(ISamplingUnitImporter.X1_FIELD_KEY, page3.getX1Field());
-		params.put(ISamplingUnitImporter.Y1_FIELD_KEY, page3.getY1Field());
-		params.put(ISamplingUnitImporter.X2_FIELD_KEY, page3.getX2Field());
-		params.put(ISamplingUnitImporter.Y2_FIELD_KEY, page3.getY2Field());
-		
-		params.putAll(page3.getAttributeFields());
-		
+		List<SamplingUnit> units = null;
 		try {
-			List<SamplingUnit> units = importer.importFile(page2.getFile(), params);
-			
-			session.beginTransaction();
-			try{
-				for (SamplingUnit su : units){
-					su.setSurveyDesign(surveyDesign);
-					session.save(su);
-				}
-				session.getTransaction().commit();
-				
+			units = importer.importFile(filePage.getFile(), params);
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
+			return false;
+		}
+		
+		if (units == null || units.size() == 0){
+			EcologicalRecordsPlugIn.log(Messages.ImportWizard_NoFeatures, null);
+			return false;
+		}
 
-			}catch (Exception ex){
-				//TODO
-				ex.printStackTrace();
-				session.getTransaction().rollback();
-				return false;
+		session.beginTransaction();
+		try{
+			for (SamplingUnit su : units){
+				su.setSurveyDesign(surveyDesign);
+				session.save(su);
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			session.getTransaction().commit();
+			
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
+			session.getTransaction().rollback();
 			return false;
 		}
 		
@@ -152,47 +161,51 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
      * <code>addPage</code>.
      */
 	public void addPages() {
-    	setWindowTitle("Import Sampling Units");
+    	setWindowTitle(Messages.ImportWizard_WindowTitle);
     	
-    	page1 = new TypePage();
-    	page2 = new FileWizardPage();
-    	page3 = new AttributePage(surveyDesign, HibernateManager.getCaProjectionList(session));
-    	page4 = new BufferPage();
+    	typePage = new TypePage();
+    	filePage = new FileWizardPage();
+    	attributePage = new AttributePage(surveyDesign, HibernateManager.getCaProjectionList(session));
+    	bufferPage = new BufferPage();
     	
-    	super.addPage(page1);
-    	super.addPage(page2);
-    	super.addPage(page3);
-    	super.addPage(page4);
+    	super.addPage(typePage);
+    	super.addPage(bufferPage);
+    	super.addPage(filePage);
+    	super.addPage(attributePage);
+    	
     	
     	((WizardDialog) getContainer()).addPageChangingListener(this);
     }
 
     public SamplingUnitType getSamplingUnitType(){
-    	return page1.getType();
+    	return typePage.getType();
     }
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getTargetPage() == page4){
+		if (event.getCurrentPage() == filePage && 
+				event.getTargetPage() == attributePage){
+			
+			HashMap<String, Object> options = new HashMap<String, Object>();
+			options.put(ISamplingUnitImporter.TYPE_KEY, bufferPage.getType());
+			String[] items = filePage.getFieldNames(options);
+			if (items == null){
+				event.doit = false;
+				return;
+			}
+			
+			attributePage.setFields(filePage.getImporter(), items);
+		}
+		if (event.getTargetPage() == attributePage){
 			canFinish = true;
 		}else{
 			canFinish = false;
 		}
 		
-		if (event.getTargetPage() == page4){
-			page4.setType(getSamplingUnitType());
-		}
-		if (event.getCurrentPage() == page2){
-			String[] items = page2.getFieldNames();
-			if (items == null){
-				event.doit = false;
-				return;
-			}
+		if (event.getTargetPage() == bufferPage){
+			bufferPage.setType(getSamplingUnitType());
 		}
 		
-		if (event.getTargetPage() == page3){
-			page3.setFields(page2.getImporter(), page2.getFieldNames());
-		}
 	}
 
 }

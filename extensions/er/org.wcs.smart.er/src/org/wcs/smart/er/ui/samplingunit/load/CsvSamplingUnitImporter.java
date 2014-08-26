@@ -32,20 +32,18 @@ import java.util.Map;
 import org.geotools.referencing.CRS;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SmartUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * CSV File importer sampling unit.
@@ -55,8 +53,11 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 
-	public static final String DELIMETER_KEY = "delimiter";
+	public static final String DELIMETER_KEY = "DELIMITER"; //$NON-NLS-1$
 
+	/**
+	 * Reads the file names from the csv file.
+	 */
 	@Override
 	public String[] getFieldNames(File f, Map<String, Object> options) throws Exception {
 		Character delim = (Character) options.get(DELIMETER_KEY);
@@ -71,6 +72,22 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		return headers;
 	}
 
+	/**
+	 * Imports sampling units from csv file.
+	 * 
+	 * <p>Required Options: </p>
+	 * <ul>
+	 * <li>BUFFER_KEY - value is a double</li>
+	 * <li>TYPE_KEY - the SamplingUnitType</li>
+	 * <li>PROJECTION_KEY - the projection of the source data</li>
+	 * <li>ID_FIELD_KEY - the id field </li>
+	 * <li>X1_FIELD_KEY - the x1 field </li>
+	 * <li>Y1_FIELD_KEY - the y1 field </li>
+	 * <li>X2_FIELD_KEY - the x2 field (for lines)</li>
+	 * <li>Y2_FIELD_KEY - the y2 field (for lines)</li>
+	 * <li>DELIMETER_KEY - the field delimiter</li>
+	 * 
+	 */
 	@Override
 	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options) throws Exception {
 		
@@ -78,13 +95,13 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		
 		SamplingUnit.SamplingUnitType type = (SamplingUnitType) options.get(TYPE_KEY);
 		if (type == null){
-			throw new Exception("Sampling unit type cannot be determined.");
+			throw new Exception(Messages.CsvSamplingUnitImporter_InvalidType);
 		}
 		
 		Double bufferValue = (Double) options.get(BUFFER_KEY);
 		Projection proj = (Projection)options.get(PROJECTION_KEY);
 		
-		String idField = (String) options.get(ID_FIELD_KEY);
+		String idField = (String)options.get(ID_FIELD_KEY);
 		String x1Field = (String)options.get(X1_FIELD_KEY);
 		String y1Field = (String)options.get(Y1_FIELD_KEY);
 		String x2Field = (String)options.get(X2_FIELD_KEY);
@@ -124,8 +141,13 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 			int cnt = 0;
 			while(true){
 				headers = reader.readNext();
+				cnt++;
 				if (headers == null){
 					break;
+				}
+				if (headers.length == 1 && headers[0].length() == 0){
+					//blank line; skip
+					continue;
 				}
 				
 				SamplingUnit su = new SamplingUnit();
@@ -165,19 +187,17 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 				if (idColumn != null){
 					String id = headers[idColumn];
 					if (id.length() == 0){
-						id = "Unit " + cnt;
+						id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$
 					}
 					su.setId(id);
 				}else{
-					su.setId("Unit " + cnt);
+					su.setId(AUTO_GENERATE_KEY_PREFIX + " " + cnt); //$NON-NLS-1$
 				}
-				cnt++;
 				
 				su.setState(SamplingUnit.State.ACTIVE);
 				su.setType(type);
-//				su.setSurveyDesign(survey);
-				
-				
+
+				//attributes
 				for (SamplingUnitAttribute att : attributes){
 					SamplingUnitAttributeValue suv = new SamplingUnitAttributeValue();
 					suv.setSamplingUnit(su);
@@ -196,15 +216,11 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 						}
 					}else if (att.getType() == AttributeType.NUMERIC){						
 						if (value.trim().length() > 0){
-							try{
-								suv.setDoubleValue(  Double.valueOf(value) );
-								add = true;
-							}catch (Exception ex){
-								//TODO: deal with this
-							}
+							suv.setDoubleValue(  Double.valueOf(value) );
+							add = true;
 						}
 					}else{
-						throw new Exception(MessageFormat.format("Attribute type {0} not supported for sampling unit attributes", new Object[]{att.getType()}));
+						throw new Exception(MessageFormat.format(Messages.CsvSamplingUnitImporter_InvalidAttributeType, new Object[]{att.getType()}));
 					}
 					if (add){
 						su.getAttributes().add(suv);
@@ -213,11 +229,9 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 				}
 				units.add(su);
 			}
-			
 		}finally{
 			reader.close();
 		}
-		
 		return units;
 	}
 

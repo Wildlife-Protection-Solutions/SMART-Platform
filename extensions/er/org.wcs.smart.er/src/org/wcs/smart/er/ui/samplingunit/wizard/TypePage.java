@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 
 /**
@@ -42,7 +43,7 @@ public class TypePage extends WizardPage {
 	private Button btnPlots;
 	
 	public TypePage(){
-		super("TYPE_PAGE");
+		super("TYPE_PAGE"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -55,22 +56,22 @@ public class TypePage extends WizardPage {
 		c.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label l = new Label(c, SWT.NONE);
-		l.setText("Sampling Unit Type:");
+		l.setText(Messages.TypePage_suTypeLabel);
 		
 		Composite ops = new Composite(c, SWT.NONE);
 		ops.setLayout(new GridLayout());
 		((GridLayout)ops.getLayout()).marginWidth = 20;
 		
 		btnTransect = new Button(ops, SWT.RADIO);
-		btnTransect.setText("Transects (Lines)");
+		btnTransect.setText(Messages.TypePage_linesLabel);
 		btnTransect.setSelection(true);
 		
 		btnPlots = new Button(ops, SWT.RADIO);
-		btnPlots.setText("Plots (Points)");
+		btnPlots.setText(Messages.TypePage_pointsLabel);
 		btnPlots.setSelection(false);
 		
-		setTitle("Sampling Unit Type");
-		setMessage("Select the type of sampling units to import.");
+		setTitle(Messages.TypePage_Title);
+		setMessage(Messages.TypePage_Message);
 		
 		setControl(main);
 	}
