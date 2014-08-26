@@ -21,93 +21,106 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.wcs.smart.er.ISurveyEventListener;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.SmartMapEditorPart;
 
-public class MissionMapPage extends EditorPart implements MapPart{
+public class MissionMapPage extends SmartMapEditorPart {
 
-	@Override
-	public Map getMap() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	private MissionEditor parentEditor;
 
-	@Override
-	public void openContextMenu() {
-		// TODO Auto-generated method stub
+	private LoadDefaultLayersJob loadDefaultLayers;
+	
+	private Job addLayerJob = new Job("Add Layers Job") {
 		
+		@SuppressWarnings("unchecked")
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+//			patrolService = new PatrolService(parentEditor.getPatrol());
+//	    	try {
+//	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
+//	    		
+//	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+//	    		getMap().sendCommandASync(command);
+//    		
+//	    		final IViewportModelListener initListener = new IViewportModelListener() {
+//					@Override
+//					public void changed(ViewportModelEvent event) {
+//						if (getMap() != null){
+//							getMap().getViewportModel().removeViewportModelListener(initListener);
+//							getMap().sendCommandASync(new ZoomExtentCommand());
+//						}
+//						
+//					}
+//				};
+//	    		getMap().getViewportModel().addViewportModelListener(initListener);
+//				
+//			} catch (IOException e) {
+//				return new Status(IStatus.ERROR, Messages.PatrolMapPageEditor_UnknownError, IStatus.ERROR, Messages.PatrolMapPageEditor_Error_LoadingMapPage, e);
+//			}
+			return Status.OK_STATUS;
+		}
+	};
+	
+	  
+    /**
+     * Job to refresh the service and map.
+     */
+    private Job refreshJob = new Job("Refresh Mission Layers"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+//			if (patrolService != null){
+//				try {
+//					patrolService.refresh(parentEditor.getPatrol(), null);
+//				} catch (IOException e) {
+//					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
+//				}
+//			}
+//			//clear selection
+//			mapViewer.getRenderManager().refresh(null);
+			return Status.OK_STATUS;
+		}
+    };
+	
+	private ISurveyEventListener missionUpdatedListeners = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			refreshJob.cancel();
+			refreshJob.schedule();
+		}
+	};
+	
+	public MissionMapPage(MissionEditor parent) {
+		this.parentEditor = parent;
 	}
-
-	@Override
-	public void setFont(Control textArea) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setSelectionProvider(
-			IMapEditorSelectionProvider selectionProvider) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public IStatusLineManager getStatusLineManager() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void doSaveAs() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isDirty() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
-		return false;
+	
+	public MultiPageEditorPart getParentEditor() {
+		return this.parentEditor;
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-		
+		super.createPartControl(parent);
+        addLayers();
+        SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionUpdatedListeners );
 	}
 
-	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
+	private void addLayers(){
+		addLayerJob.schedule();
 		
+		if (loadDefaultLayers != null){
+			loadDefaultLayers.cancel();			
+		}
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers.schedule();
 	}
-
+	
 }
