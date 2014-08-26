@@ -23,7 +23,13 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.util.Arrays;
 
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -40,7 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author elitvin
  * @since 3.0.0
  */
-public class SurveyDesignEditor extends MultiPageEditorPart {
+public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 
 	public static final String ID = "org.wcs.smart.er.SurveyDesignEditor"; //$NON-NLS-1$
 
@@ -149,6 +155,32 @@ public class SurveyDesignEditor extends MultiPageEditorPart {
 	@Override
 	public boolean isSaveAsAllowed() {
 		return false;
+	}
+
+	@Override
+	public Map getMap() {
+		return suPage.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		suPage.openContextMenu();
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		suPage.setFont(textArea);
+	}
+
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		suPage.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return suPage.getStatusLineManager();
 	}
 
 }

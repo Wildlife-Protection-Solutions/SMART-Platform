@@ -1,45 +1,55 @@
 package org.wcs.smart.er.ui.surveydesign.editor;
 
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
+import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.render.IViewportModelListener;
+import net.refractions.udig.project.render.ViewportModelEvent;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.forms.widgets.Section;
-import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.samplingunit.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.SmartMapEditorPart;
 
-public class SamplingUnitEditorPage extends EditorPart implements IHyperlinkListener{
+public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyperlinkListener {
 
 	private SurveyDesignEditor editor;
 	
@@ -49,60 +59,101 @@ public class SamplingUnitEditorPage extends EditorPart implements IHyperlinkList
 	private Hyperlink btnExport;
 	private Hyperlink btnAttributes;
 	
+	private LoadDefaultLayersJob loadDefaultLayers;
+	
+	private SamplingUnitService suService;
+	private IViewportModelListener initListener;
+	
+	private Job addLayerJob = new Job("Add Sampling Unit Layers") {
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			suService = new SamplingUnitService(editor.getSurveyDesign());
+	    	try {
+	    		List<IGeoResource> layers = (List<IGeoResource>) suService.resources(monitor);
+	    		
+	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+	    		getMap().sendCommandASync(command);
+    		
+	    		initListener = new IViewportModelListener() {
+					@Override
+					public void changed(ViewportModelEvent event) {
+						if (getMap() != null){
+							getMap().getViewportModel().removeViewportModelListener(initListener);
+							getMap().sendCommandASync(new ZoomExtentCommand());
+						}
+						
+					}
+				};
+	    		getMap().getViewportModel().addViewportModelListener(initListener);
+				
+			} catch (IOException e) {
+				return new Status(IStatus.ERROR, "Unknown Error", IStatus.ERROR, "Error adding sampling unit layers.", e);
+			}
+			return Status.OK_STATUS;
+		}
+	};
+	
+	  
+    /**
+     * Job to refresh the service and map.
+     */
+    private Job refreshJob = new Job("Refreshing sampling unit layers"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (suService != null){
+				try {
+					suService.refresh(editor.getSurveyDesign(), null);
+				} catch (IOException e) {
+					EcologicalRecordsPlugIn.log("Error refreshing sampling unit layers", e); //$NON-NLS-1$
+				}
+			}
+			//clear selection
+			mapViewer.getRenderManager().refresh(null);
+			return Status.OK_STATUS;
+		}
+    };
+    
 	public SamplingUnitEditorPage(SurveyDesignEditor editor){
+		super();
 		this.editor = editor;
 	}
 	
 	
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-	}
-
-	@Override
-	public void doSaveAs() {
-		
-	}
-
-	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-		setSite(site);
-		setInput(input);
-	}
-
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
-
-	@Override
-	public boolean isSaveAsAllowed() {
-		return false;
-	}
-
 	@Override
 	public void createPartControl(Composite parent) {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		form = toolkit.createForm(parent);
 		form.setText("Sampling Units");
 		form.getBody().setLayout(new GridLayout());
-		 
 		
-		Section section = toolkit.createSection(form.getBody(), Section.TWISTIE | Section.EXPANDED | Section.TITLE_BAR);
-		section.setText("Sampling Units");
-		section.setLayout(new GridLayout());
-		section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		SashForm sash = new SashForm(form.getBody(), SWT.HORIZONTAL);
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite suComp = toolkit.createComposite(section, SWT.NONE);
-		suComp.setLayout(new GridLayout(2, false));
+		createUnitsSection(sash, toolkit);
+		createMapsSection(sash,toolkit);
+		
+		initValues();
+	}
+
+
+	private void createUnitsSection(Composite parent, FormToolkit toolkit) {
+//		Section section = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
+//		section.setText("Sampling Units");
+//		section.setLayout(new GridLayout());
+//		section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite suComp = toolkit.createComposite(parent, SWT.NONE);
+		suComp.setLayout(new GridLayout());
 		suComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		section.setClient(suComp);
+//		section.setClient(suComp);
 		
 		createSuTable(suComp);
 		
 		Composite buttonComp = toolkit.createComposite(suComp);
-		buttonComp.setLayout(new GridLayout());
+		buttonComp.setLayout(new GridLayout(3, false));
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		btnImport = toolkit.createHyperlink(buttonComp, "Import...", SWT.PUSH);
@@ -143,11 +194,17 @@ public class SamplingUnitEditorPage extends EditorPart implements IHyperlinkList
 			}
 			
 		});
-		
-		initValues();
-		
 	}
 
+	private void createMapsSection(Composite parent, FormToolkit toolkit) {
+		Composite mapPart = toolkit.createComposite(parent, SWT.BORDER);
+		mapPart.setLayout(new GridLayout(2, false));
+		mapPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		super.createPartControl(mapPart);
+	}
+		
+	
 	public void initValues(){
 		SurveyDesign sd = editor.getSurveyDesign();
 		Session s = HibernateManager.openSession();
@@ -163,13 +220,12 @@ public class SamplingUnitEditorPage extends EditorPart implements IHyperlinkList
 		}finally{
 			s.close();
 		}
-		
-		
+		addLayers();
 	}
 	
 	@Override
 	public void setFocus() {
-//		suTable.getControl().setFocus();
+		suTable.getControl().setFocus();
 	}
 	
 	private void createSuTable(Composite parent){
@@ -229,6 +285,7 @@ public class SamplingUnitEditorPage extends EditorPart implements IHyperlinkList
 	}
 
 
+	
 	@Override
 	public void linkEntered(HyperlinkEvent e) {
 	}
@@ -250,5 +307,27 @@ public class SamplingUnitEditorPage extends EditorPart implements IHyperlinkList
 			wd.open();
 		}
 	}
+
+	private void addLayers(){
+		
+		if (loadDefaultLayers != null){
+			loadDefaultLayers.cancel();			
+		}
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers.schedule();
+		
+		if (suService == null){
+			addLayerJob.schedule();
+		}else{
+			refreshJob.schedule();
+		}
+	}
+
+
+	@Override
+	public MultiPageEditorPart getParentEditor() {
+		return editor;
+	}
+
 
 }
