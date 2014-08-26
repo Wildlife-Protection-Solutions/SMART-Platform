@@ -102,7 +102,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 				for (SurveyDesignSamplingUnitAttribute a : toDelete){
 
 					//we need to delete any sampling unit attribute values
-					Query q = session.createQuery("FROM SamplingUnitAttributeValue sua JOIN sua.id.samplingUnit su WHERE sua.id.samplingUnitAttribute = :sua AND su.surveyDesign = :sd");
+					Query q = session.createQuery("SELECT sua FROM SamplingUnitAttributeValue sua JOIN sua.id.samplingUnit su WHERE sua.id.samplingUnitAttribute = :sua AND su.surveyDesign = :sd");
 					q.setParameter("sua", a.getSamplingUnitAttribute());
 					q.setParameter("sd", this.design);
 					List<SamplingUnitAttributeValue> values = q.list();

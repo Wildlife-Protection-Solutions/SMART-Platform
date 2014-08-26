@@ -92,6 +92,18 @@ public class Messages extends NLS {
 	public static String NewMissionWizard_SaveError;
 	public static String NewMissionWizard_WizardTitle;
 	public static String RemoveERJob_Title;
+	public static String SamplingUnitDataSource_TypeNotSupported;
+	public static String SamplingUnitService_Description;
+	public static String SamplingUnitService_Keyword1;
+	public static String SamplingUnitService_Keyword2;
+	public static String SamplingUnitService_Keyword3;
+	public static String SamplingUnitService_Keyword4;
+	public static String SamplingUnitService_Keyword5;
+	public static String SamplingUnitService_title;
+	public static String SamplingUnitServiceExtension_jobName;
+	public static String SamplingUnitSourceFactory_Description;
+	public static String SamplingUnitSourceFactory_Name;
+	public static String SamplingUnitSourceFactory_SurveyDesignParamName;
 	public static String SaveSurveyDesignJob_Error;
 	public static String SaveSurveyDesignJob_Title;
 	public static String ShpSamplingUnitImporter_AttributeMappingError;

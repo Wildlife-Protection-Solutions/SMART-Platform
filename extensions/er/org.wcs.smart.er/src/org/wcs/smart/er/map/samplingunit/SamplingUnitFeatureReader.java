@@ -1,0 +1,118 @@
+package org.wcs.smart.er.map.samplingunit;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import org.geotools.data.FeatureReader;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.hibernate.HibernateManager;
+
+
+public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
+
+	private SimpleFeatureType ftype;
+	
+	private Session session;
+	private Iterator<SamplingUnit> iterator;
+	/**
+	 * Creates a new feature reader.
+	 * 
+	 * @param query the query
+	 * @param ftype the feature type
+	 */
+	@SuppressWarnings("unchecked")
+	public SamplingUnitFeatureReader(SurveyDesign sd, SimpleFeatureType ftype) {
+		this.ftype = ftype;
+		this.session = HibernateManager.openSession();
+		
+		Criteria c = session.createCriteria(SamplingUnit.class)
+			.add(Restrictions.eq("surveyDesign", sd)); //$NON-NLS-1$
+		if (ftype.getTypeName().equals(SamplingUnitDataSource.PLOT_TYPE)){
+			c = c.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.PLOT)); //$NON-NLS-1$
+		}else{
+			c = c.add(Restrictions.or(
+					Restrictions.eq("type", SamplingUnit.SamplingUnitType.OPEN_TRANSECT),  //$NON-NLS-1$
+					Restrictions.eq("type", SamplingUnit.SamplingUnitType.STRIP_TRANSECT))); //$NON-NLS-1$
+		}
+		
+		iterator = c.list().iterator();
+	}
+	
+
+	/**
+	 * @see org.geotools.data.FeatureReader#close()
+	 */
+	@Override
+	public void close() throws IOException {
+		if (session.isOpen()){
+			session.close();
+		}
+	}
+
+	/**
+	 * @see org.geotools.data.FeatureReader#getFeatureType()
+	 */
+	@Override
+	public SimpleFeatureType getFeatureType() {
+		return ftype;
+	}
+
+	/**
+	 * @see org.geotools.data.FeatureReader#hasNext()
+	 */
+	@Override
+	public boolean hasNext() throws IOException {
+		return iterator.hasNext();
+	}
+
+	/**
+	 * @see org.geotools.data.FeatureReader#next()
+	 */
+	@Override
+	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
+		SamplingUnit su = iterator.next();
+		return createFeature(ftype, su);
+	}
+	
+	
+	public static SimpleFeature createFeature(SimpleFeatureType ftype, SamplingUnit su){
+		
+		Object[] data = new Object[su.getSurveyDesign().getSamplingUnitAttributes().size() + 4];
+		data[0] = su.getId() + "." + System.nanoTime(); //$NON-NLS-1$ 
+	
+		data[1] = su.getId(); 
+		data[2] = su.getBuffer();
+		int i = 3;
+		for (SurveyDesignSamplingUnitAttribute att : su.getSurveyDesign().getSamplingUnitAttributes()){
+
+			for (SamplingUnitAttributeValue v : su.getAttributes()){
+				if (att.getSamplingUnitAttribute().equals(v.getSamplingUnitAttribute())){
+					if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+						data[i] = v.getStringValue();
+					}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+						data[i] = v.getDoubleValue();
+					}else{
+						data[i] = null;
+					}
+					break;
+				}
+			}
+			i++;
+		}
+		
+		data[i] = su.getGeometry();
+	
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+	}
+}
