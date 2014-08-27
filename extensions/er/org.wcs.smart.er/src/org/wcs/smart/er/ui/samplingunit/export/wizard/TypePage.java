@@ -41,8 +41,8 @@ public class TypePage extends WizardPage implements SelectionListener{
 		
 		setControl(main);
 		
-		setTitle(Messages.TypePage_Title);
-		setMessage(Messages.TypePage_Message);
+		setTitle(Messages.TypePage1_Title);
+		setMessage(Messages.TypePage1_Message);
 	}
 	
 	@Override
