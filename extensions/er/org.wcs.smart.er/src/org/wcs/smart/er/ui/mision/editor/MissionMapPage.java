@@ -21,51 +21,66 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.io.IOException;
+import java.util.List;
+
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
+import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.render.IViewportModelListener;
+import net.refractions.udig.project.render.ViewportModelEvent;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
 public class MissionMapPage extends SmartMapEditorPart {
 
 	private MissionEditor parentEditor;
+	
+	private MissionService missionService;
 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
 	private Job addLayerJob = new Job("Add Layers Job") {
 		
+		private IViewportModelListener initListener;
+		
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-//			patrolService = new PatrolService(parentEditor.getPatrol());
-//	    	try {
-//	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
-//	    		
-//	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
-//	    		getMap().sendCommandASync(command);
-//    		
-//	    		final IViewportModelListener initListener = new IViewportModelListener() {
-//					@Override
-//					public void changed(ViewportModelEvent event) {
-//						if (getMap() != null){
-//							getMap().getViewportModel().removeViewportModelListener(initListener);
-//							getMap().sendCommandASync(new ZoomExtentCommand());
-//						}
-//						
-//					}
-//				};
-//	    		getMap().getViewportModel().addViewportModelListener(initListener);
-//				
-//			} catch (IOException e) {
-//				return new Status(IStatus.ERROR, Messages.PatrolMapPageEditor_UnknownError, IStatus.ERROR, Messages.PatrolMapPageEditor_Error_LoadingMapPage, e);
-//			}
+			missionService = new MissionService(parentEditor.getMission());
+	    	try {
+	    		List<IGeoResource> layers = (List<IGeoResource>) missionService.resources(monitor);
+	    		
+	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+	    		getMap().sendCommandASync(command);
+    		
+	    		initListener = new IViewportModelListener() {
+					@Override
+					public void changed(ViewportModelEvent event) {
+						if (getMap() != null){
+							getMap().getViewportModel().removeViewportModelListener(initListener);
+							getMap().sendCommandASync(new ZoomExtentCommand());
+						}
+						
+					}
+				};
+	    		getMap().getViewportModel().addViewportModelListener(initListener);
+				
+			} catch (IOException e) {
+				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, "Error loading pages", e);
+			}
 			return Status.OK_STATUS;
 		}
 	};
@@ -74,18 +89,18 @@ public class MissionMapPage extends SmartMapEditorPart {
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job("Refresh Mission Layers"){
+    private Job refreshJob = new Job("Refresh Mission Layers") {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-//			if (patrolService != null){
-//				try {
-//					patrolService.refresh(parentEditor.getPatrol(), null);
-//				} catch (IOException e) {
-//					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
-//				}
-//			}
-//			//clear selection
-//			mapViewer.getRenderManager().refresh(null);
+			if (missionService != null){
+				try {
+					missionService.refresh(null);
+				} catch (IOException e) {
+					EcologicalRecordsPlugIn.log("Error refreshing map layers", e);
+				}
+			}
+			//clear selection
+			mapViewer.getRenderManager().refresh(null);
 			return Status.OK_STATUS;
 		}
     };
@@ -113,10 +128,10 @@ public class MissionMapPage extends SmartMapEditorPart {
         SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionUpdatedListeners );
 	}
 
-	private void addLayers(){
+	private void addLayers() {
 		addLayerJob.schedule();
 		
-		if (loadDefaultLayers != null){
+		if (loadDefaultLayers != null) {
 			loadDefaultLayers.cancel();			
 		}
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
