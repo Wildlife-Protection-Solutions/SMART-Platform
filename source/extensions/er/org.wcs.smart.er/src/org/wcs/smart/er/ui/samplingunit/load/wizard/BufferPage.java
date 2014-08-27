@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.samplingunit.wizard;
+package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -101,7 +100,7 @@ public class BufferPage extends WizardPage {
 		Composite t = new Composite(main, SWT.NONE);
 		t.setLayout(new GridLayout(2, false));
 		
-		if (type == SamplingUnitType.OPEN_TRANSECT){
+		if (type == SamplingUnitType.TRANSECT){
 			Label l = new Label(t, SWT.NONE);
 			l.setText(Messages.BufferPage_TtLabel);
 			
@@ -116,25 +115,26 @@ public class BufferPage extends WizardPage {
 				}
 				
 			});
-			cmbViewer.setInput(new Object[]{SamplingUnitType.OPEN_TRANSECT, SamplingUnitType.STRIP_TRANSECT});
+			String[] input = new String[]{Messages.BufferPage_OpenTransect, Messages.BufferPage_StripTransect};
+			cmbViewer.setInput(input);
 			
 			final Label ll = new Label(t, SWT.NONE);
 			ll.setText(Messages.BufferPage_BufferLabel);
 			
 			txtArea = new Text(t, SWT.BORDER);
 			txtArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			
 			cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					SamplingUnitType type = (SamplingUnitType) ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
-					txtArea.setEnabled(type == SamplingUnitType.STRIP_TRANSECT);
+					txtArea.setEnabled(cmbViewer.getCombo().getSelectionIndex() == 1);
 				}
 			});
 			if (initSelection != null){
 				cmbViewer.setSelection(initSelection);
 			}else{
-				cmbViewer.setSelection(new StructuredSelection(SamplingUnitType.OPEN_TRANSECT));
+				cmbViewer.setSelection(new StructuredSelection(input[0]));
 			}
 			
 			
@@ -195,7 +195,7 @@ public class BufferPage extends WizardPage {
 		if (cmbViewer == null){
 			return SamplingUnitType.PLOT;
 		}else{
-			return (SamplingUnitType) ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
+			return SamplingUnitType.TRANSECT;
 		}
 	}
 	

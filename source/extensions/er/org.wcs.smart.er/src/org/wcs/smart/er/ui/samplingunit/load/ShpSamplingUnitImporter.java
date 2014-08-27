@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.geotools.data.shapefile.ng.ShapefileDataStore;
 import org.opengis.feature.simple.SimpleFeature;
@@ -78,8 +79,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 				if (!Point.class.isAssignableFrom(type.getGeometryDescriptor().getType().getBinding())){
 					error = true;
 				}
-			}else if (suType == SamplingUnitType.OPEN_TRANSECT 
-					|| suType == SamplingUnitType.STRIP_TRANSECT){
+			}else if (suType == SamplingUnitType.TRANSECT ){
 				if (!LineString.class.isAssignableFrom(type.getGeometryDescriptor().getType().getBinding()) && 
 					!MultiLineString.class.isAssignableFrom(type.getGeometryDescriptor().getType().getBinding())){
 					error = true;
@@ -106,109 +106,142 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 	
 	
 	@Override
-	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options)
+	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor)
 			throws Exception {
 
+		monitor.beginTask(MessageFormat.format("Reading shapefile {0}", new Object[]{f.getAbsolutePath()}), 2);
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
-		try{
-		SamplingUnit.SamplingUnitType type = (SamplingUnitType) options.get(TYPE_KEY);
-		if (type == null){
-			throw new Exception(Messages.ShpSamplingUnitImporter_SamplingUnitTypeError);
-		}
-		
-		Double bufferValue = (Double) options.get(BUFFER_KEY);
-		
-		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
-		for (Object key: options.keySet()){
-			if (key instanceof SamplingUnitAttribute){
-				attributes.add((SamplingUnitAttribute) key);
+		try {
+			SamplingUnit.SamplingUnitType type = (SamplingUnitType) options.get(TYPE_KEY);
+			if (type == null) {
+				throw new Exception(Messages.ShpSamplingUnitImporter_SamplingUnitTypeError);
 			}
-		}
-		
-		for (SamplingUnitAttribute att: attributes){
-			String field = (String) options.get(att);
-			if (field == null) continue;
-			
-			//validate attribute types
-			AttributeDescriptor shapeAtt = store.getSchema().getDescriptor(field);
-			boolean error = false;
-			if (att.getType() == AttributeType.TEXT){
-				if (!shapeAtt.getType().getBinding().equals(String.class)){
-					error = true;
-				}
-			}else if (att.getType() == AttributeType.NUMERIC){
-				if (!Number.class.isAssignableFrom(shapeAtt.getType().getBinding())){
-					error = true;
+
+			Double bufferValue = (Double) options.get(BUFFER_KEY);
+
+			List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
+			for (Object key : options.keySet()) {
+				if (key instanceof SamplingUnitAttribute) {
+					attributes.add((SamplingUnitAttribute) key);
 				}
 			}
-			
-			if (error){
-				throw new Exception(MessageFormat.format(Messages.ShpSamplingUnitImporter_AttributeMappingError, 
-						new Object[]{shapeAtt.getLocalName(),
-							att.getName(),
-							shapeAtt.getType().getBinding().getName(), 
-							att.getType()}));
-			}
-		}
-		
-		String idField = (String)options.get(ID_FIELD_KEY);
-		FeatureReader<SimpleFeatureType, SimpleFeature> reader = store.getFeatureReader();
-		int cnt = 0;
-		try{
-			while(reader.hasNext()){
-				SimpleFeature sf = reader.next();
-				String id = null;
-				cnt++;
-				if (idField != null){
-					id = sf.getAttribute( idField ).toString();
-				}else{
-					id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$
-				}
-				
-				SamplingUnit su = new SamplingUnit();
-				su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
-				su.setBuffer(bufferValue);
-				su.setGeometry((Geometry)sf.getDefaultGeometry());
-				su.setId(id);
-				su.setState(State.ACTIVE);
-				su.setType(type);
-				
-				for(SamplingUnitAttribute att: attributes){
-					String field = (String) options.get(att);
-					if (field == null) continue;
-					
-					SamplingUnitAttributeValue sv = new SamplingUnitAttributeValue();
-					sv.setSamplingUnitAttribute(att);
-					sv.setSamplingUnit(su);
-					
-					
-					boolean add = false;
-					if (att.getType() == AttributeType.NUMERIC){
-						
-						Number d = (Number) sf.getAttribute(field);
-						if (d != null){
-							add = true;
-						}
-						sv.setDoubleValue(d.doubleValue());
-					}else if (att.getType() == AttributeType.TEXT){
-						String s = sf.getAttribute(field).toString();
-						if (s != null){
-							add = true;
-						}
-						sv.setStringValue(s);
+
+			for (SamplingUnitAttribute att : attributes) {
+				String field = (String) options.get(att);
+				if (field == null)
+					continue;
+
+				// validate attribute types
+				AttributeDescriptor shapeAtt = store.getSchema().getDescriptor(field);
+				boolean error = false;
+				if (att.getType() == AttributeType.TEXT) {
+					if (!shapeAtt.getType().getBinding().equals(String.class)) {
+						error = true;
 					}
-					if (add){
-						su.getAttributes().add(sv);
+				} else if (att.getType() == AttributeType.NUMERIC) {
+					if (!Number.class.isAssignableFrom(shapeAtt.getType()
+							.getBinding())) {
+						error = true;
 					}
 				}
-				units.add(su);
+
+				if (error) {
+					throw new Exception(
+							MessageFormat
+									.format(Messages.ShpSamplingUnitImporter_AttributeMappingError,
+											new Object[] {shapeAtt.getLocalName(),att.getName(),shapeAtt.getType().getBinding().getName(),att.getType() }));
+				}
 			}
-		}finally{
-			reader.close();
-		}
-		}finally{
+			monitor.worked(1);
+
+			String idField = (String) options.get(ID_FIELD_KEY);
+			FeatureReader<SimpleFeatureType, SimpleFeature> reader = store
+					.getFeatureReader();
+			int cnt = 0;
+			try {
+				while (reader.hasNext()) {
+					SimpleFeature sf = reader.next();
+					String id = null;
+					cnt++;
+					if (idField != null) {
+						id = sf.getAttribute(idField).toString();
+					} else {
+						id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$
+					}
+
+					SamplingUnit su = new SamplingUnit();
+					su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
+					su.setBuffer(bufferValue);
+
+					Geometry g = (Geometry) sf.getDefaultGeometry();
+					if (type == SamplingUnitType.PLOT) {
+						if (!(g instanceof Point)) {
+							throw new Exception(
+									MessageFormat
+											.format("{0} geometry types not supported for Plot sampling units. Only Point geometry types are supported.",
+													new Object[] { g.getClass().getName() }));
+						}
+					} else if (type == SamplingUnitType.TRANSECT) {
+						if (g instanceof MultiLineString) {
+							if (((MultiLineString) g).getNumGeometries() > 1) {
+								throw new Exception(
+										MessageFormat
+												.format("Multilinestring geometries are not supported for Transect sampling units. Only LineString geometry types are supported.",
+														new Object[] { g.getClass().getName() }));
+							} else {
+								g = g.getGeometryN(0);
+							}
+						}
+						if (!(g instanceof LineString)) {
+							throw new Exception(
+									MessageFormat
+											.format("{0} geometry types not supported for Transect sampling units. Only LineString geometry types are supported.",
+													new Object[] { g.getClass().getName() }));
+						}
+					}
+					su.setGeometry(g);
+					su.setId(id);
+					su.setState(State.ACTIVE);
+					su.setType(type);
+
+					for (SamplingUnitAttribute att : attributes) {
+						String field = (String) options.get(att);
+						if (field == null)
+							continue;
+
+						SamplingUnitAttributeValue sv = new SamplingUnitAttributeValue();
+						sv.setSamplingUnitAttribute(att);
+						sv.setSamplingUnit(su);
+
+						boolean add = false;
+						if (att.getType() == AttributeType.NUMERIC) {
+
+							Number d = (Number) sf.getAttribute(field);
+							if (d != null) {
+								add = true;
+							}
+							sv.setDoubleValue(d.doubleValue());
+						} else if (att.getType() == AttributeType.TEXT) {
+							String s = sf.getAttribute(field).toString();
+							if (s != null) {
+								add = true;
+							}
+							sv.setStringValue(s);
+						}
+						if (add) {
+							su.getAttributes().add(sv);
+						}
+					}
+					units.add(su);
+				}
+				monitor.worked(1);
+			} finally {
+				reader.close();
+			}
+		} finally {
 			store.dispose();
+			monitor.done();
 		}
 		return units;
 	}

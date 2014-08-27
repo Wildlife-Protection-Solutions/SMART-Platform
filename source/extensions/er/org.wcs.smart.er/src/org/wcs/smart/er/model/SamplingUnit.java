@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.model;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -44,6 +45,8 @@ import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
@@ -59,13 +62,17 @@ import com.vividsolutions.jts.io.WKBWriter;
 public class SamplingUnit extends UuidItem {
 
 	/**
+	 * Maximum id length
+	 */
+	public static final int ID_MAX_LENGTH = 128;
+	
+	/**
 	 * Supported sampling unit types
 	 * @author Emily
 	 *
 	 */
 	public enum SamplingUnitType{
-		STRIP_TRANSECT ("Strip Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
-		OPEN_TRANSECT("Open Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
+		TRANSECT ("Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
 		PLOT ("Plot", EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON);
 		
 		private String guiName;
@@ -160,9 +167,14 @@ public class SamplingUnit extends UuidItem {
 			this.geom = null;
 			return;
 		}
-		WKBWriter writer = new WKBWriter(3);
-		this.geom = writer.write(geometry);
-		this.geometry = geometry;
+		
+		if (geometry instanceof Point || geometry instanceof LineString){
+			WKBWriter writer = new WKBWriter(3);
+			this.geom = writer.write(geometry);
+			this.geometry = geometry;
+		}else{
+			throw new RuntimeException(MessageFormat.format("{0} geometries are not supported for sampling units.", new Object[]{geometry.getClass().getName()}));
+		}
 	}
 
 	/**
@@ -172,8 +184,10 @@ public class SamplingUnit extends UuidItem {
 	@Transient
 	public Double getGeometryLengthKm(){
 		Geometry g = getGeometry();
-		if (g != null && g instanceof LineString){
-			return (GeometryUtils.distanceInMeters((LineString)g) / 1000.0);
+		if (g != null){
+			if (g instanceof LineString){
+				return (GeometryUtils.distanceInMeters((LineString)g) / 1000.0);
+			}
 		}
 		return null;
 	}
