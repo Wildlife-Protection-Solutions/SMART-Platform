@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
+import java.text.Collator;
+import java.util.Comparator;
+
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -37,15 +40,133 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 	public static enum FixedColumns{TYPE, ID, BUFFER, LENGTH, STATE};
 	
 	private String key;
+	private AttributeType type;
+	private Comparator<Object> comparator = null;
 	
 	/**
-	 * The column key.  One of the fixed column values or the
-	 * sampling unit attribute key for sampling unit attributes.
+	 * Creates a new label provider for a fixed column.
+	 * Key = One of the fixed column values. For attributes
+	 * use the constructor (String, AttributeType)
 	 * 
 	 * @param key
 	 */
 	public SamplingUnitColumnLabelProvider(String key){
 		this.key = key;
+	}
+	
+	/**
+	 * Creates a new label provider for an attribute column.
+	 * @param key
+	 * @param type
+	 */
+	public SamplingUnitColumnLabelProvider(String key, AttributeType type){
+		this.key = key;
+		this.type = type;
+	}
+	
+	/**
+	 * Compares the two objects; 
+	 * 
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
+	public int compare(Object o1, Object o2){
+		Object v1 = getSortObject(o1);
+		Object v2 = getSortObject(o2);
+		if (v1 == null && v2 == null) return 0;
+		if (v1 == null && v2 != null) return -1;
+		if (v1 != null && v2 == null) return 1;
+		
+		if (comparator == null){
+			findComparator();
+		}
+		return comparator.compare(v1, v2);
+	}
+	
+	private void findComparator(){
+		if ( (type == null &&
+				(key.equals(FixedColumns.TYPE.name()) ||
+				key.equals(FixedColumns.ID.name()) ||
+				key.equals(FixedColumns.STATE.name()))) || 
+			(type == AttributeType.TEXT))  {
+			//string
+				comparator = new Comparator<Object>() {
+					@Override
+					public int compare(Object o1, Object o2) {
+						return Collator.getInstance().compare(o1, o2);
+					}
+				};
+		}else if ( (type == null &&
+				(key.equals(FixedColumns.BUFFER.name()) ||
+				key.equals(FixedColumns.LENGTH.name()))) || 
+				(type == AttributeType.NUMERIC))  { 
+			
+				comparator = new Comparator<Object>() {
+					@Override
+					public int compare(Object o1, Object o2) {
+						return ((Double)o1).compareTo((Double)o2);
+					}
+				};
+			
+		}else{
+			comparator = new Comparator<Object>() {
+				@Override
+				public int compare(Object o1, Object o2) {
+					return Collator.getInstance().compare(o1.toString(), o2.toString());
+				}
+			};
+		}
+	}
+	
+	private Object getSortObject(Object element){
+		if (element instanceof SamplingUnit){
+			SamplingUnit su = (SamplingUnit) element;
+			
+			if (type == null){
+				if (key.equals(FixedColumns.TYPE.name())){
+					return su.getType().getGuiName();
+				}else if(key.equals(FixedColumns.ID.name())){
+					return su.getId();
+				}else if (key.equals(FixedColumns.BUFFER.name())){
+					if (su.getBuffer() == null){
+						return null; 
+					}else{
+						return su.getBuffer();
+					}
+				}else if (key.equals(FixedColumns.LENGTH.name())){
+					if (su.getGeometryLengthKm() == null){
+						return null; 
+					}else{
+						return su.getGeometryLengthKm();
+					}
+				}else if (key.equals(FixedColumns.STATE.name())){
+					return su.getState().getGuiName();
+				}
+			}else{
+				//search attributes
+				for (SamplingUnitAttributeValue sua : su.getAttributes()){
+					if (sua.getSamplingUnitAttribute().getKeyId().equals(key)){
+						if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+							if (sua.getStringValue() == null){
+								return null;
+							}else{
+								return sua.getStringValue();
+							}
+						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+							if (sua.getDoubleValue() == null){
+								return null;
+							}else{
+								return sua.getDoubleValue();
+							}
+						}
+					}
+				}
+				return null;
+			}
+			
+		}
+		return null;
 	}
 	
 	public String getText(Object element){

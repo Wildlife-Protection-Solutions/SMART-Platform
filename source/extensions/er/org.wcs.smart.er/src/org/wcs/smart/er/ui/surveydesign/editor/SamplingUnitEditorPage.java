@@ -56,11 +56,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -594,53 +597,81 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 		
 	}
 	
-	//TODO: add table sorting
+	private SamplingUnitColumnLabelProvider sortColumn = null;
+	private int sortDirection = SWT.DOWN;
+	
+	ViewerSorter viewerComparator = new ViewerSorter(){
+		@Override
+		public int compare(Viewer viewer, Object o1, Object o2){
+			if (sortColumn == null) return 0;
+			if (sortDirection == SWT.DOWN){
+				return -sortColumn.compare(o1, o2);
+			}else{
+				return sortColumn.compare(o1, o2);
+			}
+			
+		}
+	};
+	
 	private void createTableColumns(List<SurveyDesignSamplingUnitAttribute> attributes){
 		//dispose of existing columns
 		for (TableColumn tc : suTable.getTable().getColumns()){
 			tc.dispose();
 		}
+		sortColumn = null;
+		suTable.getTable().setSortColumn(null);
+		suTable.getTable().setSortDirection(SWT.NONE);
 		
 		TableViewerColumn stateColumn = new TableViewerColumn(suTable, SWT.NONE);
-		stateColumn.setLabelProvider(new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.STATE.name()));
+		SamplingUnitColumnLabelProvider labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.STATE.name());
+		stateColumn.setLabelProvider(labelProvider);
 		stateColumn.getColumn().setResizable(true);
 		stateColumn.getColumn().setWidth(60);
 		stateColumn.getColumn().setText(Messages.SamplingUnitEditorPage_StateColumnName);
+		stateColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, stateColumn));
 		
 		TableViewerColumn typeColumn = new TableViewerColumn(suTable, SWT.NONE);
-		typeColumn.setLabelProvider(new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.TYPE.name()));
+		labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.TYPE.name());
+		typeColumn.setLabelProvider(labelProvider);
 		typeColumn.getColumn().setResizable(true);
 		typeColumn.getColumn().setWidth(100);
 		typeColumn.getColumn().setText(Messages.SamplingUnitEditorPage_TypeColumnName);
+		typeColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, typeColumn));
 		
 		TableViewerColumn idColumn = new TableViewerColumn(suTable, SWT.NONE);
-		idColumn.setLabelProvider(new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.ID.name()));
+		labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.ID.name());
+		idColumn.setLabelProvider(labelProvider);
 		idColumn.getColumn().setResizable(true);
 		idColumn.getColumn().setWidth(60);
 		idColumn.getColumn().setText(Messages.SamplingUnitEditorPage_IdColumnName);
+		idColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, idColumn));
 		
 		TableViewerColumn bufferColumn = new TableViewerColumn(suTable, SWT.NONE);
-		bufferColumn.setLabelProvider(new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.BUFFER.name()));
+		labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.BUFFER.name());
+		bufferColumn.setLabelProvider(labelProvider);
 		bufferColumn.getColumn().setResizable(true);
 		bufferColumn.getColumn().setWidth(60);
 		bufferColumn.getColumn().setText(Messages.SamplingUnitEditorPage_BufferColumnName);
+		bufferColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, bufferColumn));
 		
 		TableViewerColumn lengthColumn = new TableViewerColumn(suTable, SWT.NONE);
-		lengthColumn.setLabelProvider(new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.LENGTH.name()));
+		labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.LENGTH.name());
+		lengthColumn.setLabelProvider(labelProvider);
 		lengthColumn.getColumn().setResizable(true);
 		lengthColumn.getColumn().setWidth(100);
 		lengthColumn.getColumn().setText(Messages.SamplingUnitEditorPage_LengthColumnName);
-		
-
+		lengthColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, lengthColumn));
 		
 		GC gc = new GC(suTable.getTable());
 		try{
 			for (SurveyDesignSamplingUnitAttribute att : attributes){
 				TableViewerColumn column = new TableViewerColumn(suTable, SWT.NONE);
-				column.setLabelProvider(new SamplingUnitColumnLabelProvider(att.getSamplingUnitAttribute().getKeyId()));
+				labelProvider = new SamplingUnitColumnLabelProvider(att.getSamplingUnitAttribute().getKeyId(), att.getSamplingUnitAttribute().getType());
+				column.setLabelProvider(labelProvider);
 				column.getColumn().setResizable(true);
 				column.getColumn().setWidth(gc.stringExtent(att.getSamplingUnitAttribute().getName()).x + 20);
 				column.getColumn().setText(att.getSamplingUnitAttribute().getName());
+				column.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, column));
 			}
 		}finally{
 			gc.dispose();
@@ -672,6 +703,34 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 	}
 
 
+	/*
+	 * Creates a selection listener for table columns
+	 */
+	private SelectionListener createTableColumnSelectionListener(final SamplingUnitColumnLabelProvider labelProvider, final TableViewerColumn column){
+		return new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (sortColumn == labelProvider){
+					if (sortDirection == SWT.UP){
+						sortDirection = SWT.DOWN;
+					}else{
+						sortDirection = SWT.UP;
+					}
+				}
+				suTable.getTable().setSortColumn(column.getColumn());
+				suTable.getTable().setSortDirection(sortDirection);
+				sortColumn = labelProvider;
+				suTable.setSorter(viewerComparator);		
+				suTable.refresh();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		};
+	}
 	
 	@Override
 	public void linkEntered(HyperlinkEvent e) {
