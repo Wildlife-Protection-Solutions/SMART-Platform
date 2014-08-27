@@ -102,7 +102,7 @@ public class FiltersTreeNode implements IItemTreeNode{
 					return ((SamplingUnit) element).getType().getImage();
 				}
 				if (element instanceof MissionTrack){
-					return SamplingUnit.SamplingUnitType.OPEN_TRANSECT.getImage();
+					return SamplingUnit.SamplingUnitType.TRANSECT.getImage();
 				}
 				if (element instanceof MissionProperty){
 					element = ((MissionProperty) element).getAttribute();
