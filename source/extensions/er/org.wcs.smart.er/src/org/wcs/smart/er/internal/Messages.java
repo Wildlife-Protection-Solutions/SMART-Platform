@@ -236,12 +236,12 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_Status;
 	public static String TypePage_linesLabel;
 	public static String TypePage_Message;
-	public static String TypePage_Message;
+	public static String TypePage1_Message;
 	public static String TypePage_PlotsOption;
 	public static String TypePage_pointsLabel;
 	public static String TypePage_suTypeLabel;
 	public static String TypePage_Title;
-	public static String TypePage_Title;
+	public static String TypePage1_Title;
 	public static String TypePage_TransectsOption;
 	static {
 		// initialize resource bundle
