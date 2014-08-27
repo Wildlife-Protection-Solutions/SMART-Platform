@@ -19,9 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.samplingunit.wizard;
+package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
+import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -203,7 +207,16 @@ public class AttributePage extends WizardPage {
 		for (int i = 0; i < fields.length; i ++){
 			attFields[i+1] = fields[i];
 		}
-		for (SurveyDesignSamplingUnitAttribute sda: design.getSamplingUnitAttributes()){
+		List<SurveyDesignSamplingUnitAttribute> atts = new ArrayList<SurveyDesignSamplingUnitAttribute>();
+		atts.addAll(design.getSamplingUnitAttributes());
+		Collections.sort(atts, new Comparator<SurveyDesignSamplingUnitAttribute>() {
+			@Override
+			public int compare(SurveyDesignSamplingUnitAttribute o1, SurveyDesignSamplingUnitAttribute o2) {
+				return Collator.getInstance().compare(o1.getSamplingUnitAttribute().getName(), o2.getSamplingUnitAttribute().getName());
+			}
+		});
+		
+		for (SurveyDesignSamplingUnitAttribute sda: atts){
 			l = new Label(g2, SWT.NONE);
 			l.setText(sda.getSamplingUnitAttribute().getName() + ":"); //$NON-NLS-1$
 			

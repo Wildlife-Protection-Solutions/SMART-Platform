@@ -48,6 +48,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -119,7 +120,7 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog {
 		/* Type */
 		Label lblNewLabel_2 = new Label(composite, SWT.NONE);
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel_2.setText("Type:");
+		lblNewLabel_2.setText(Messages.EditSamplingUnitAttributeDialog_TypeLabel);
 		
 		cmbType = new ComboViewer(composite, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
@@ -156,13 +157,13 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog {
 		});
 		
 		if (toUpdate.getKeyId() == null){
-			getShell().setText("New Sampling Unit Attribute");
-			setTitle("New Sampling Unit Attribute");
-			setMessage("Create a new sampling unit attribute");
+			getShell().setText(Messages.EditSamplingUnitAttributeDialog_NewTitle);
+			setTitle(Messages.EditSamplingUnitAttributeDialog_NewTitle);
+			setMessage(Messages.EditSamplingUnitAttributeDialog_NewMessage);
 		}else{
-			getShell().setText("Edit Sampling Unit Attribute");
+			getShell().setText(Messages.EditSamplingUnitAttributeDialog_EditTitle);
 			setTitle(toUpdate.getName());
-			setMessage("Modify the sampling unit attribute.");
+			setMessage(Messages.EditSamplingUnitAttributeDialog_EditMessage);
 		}
 
 		//init fields

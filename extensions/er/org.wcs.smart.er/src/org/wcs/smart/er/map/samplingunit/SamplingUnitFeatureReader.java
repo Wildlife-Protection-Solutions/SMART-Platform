@@ -17,6 +17,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 
 public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
@@ -41,9 +42,7 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 		if (ftype.getTypeName().equals(SamplingUnitDataSource.PLOT_TYPE)){
 			c = c.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.PLOT)); //$NON-NLS-1$
 		}else{
-			c = c.add(Restrictions.or(
-					Restrictions.eq("type", SamplingUnit.SamplingUnitType.OPEN_TRANSECT),  //$NON-NLS-1$
-					Restrictions.eq("type", SamplingUnit.SamplingUnitType.STRIP_TRANSECT))); //$NON-NLS-1$
+			c = c.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.TRANSECT)); //$NON-NLS-1$
 		}
 		
 		iterator = c.list().iterator();
@@ -89,7 +88,7 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 	public static SimpleFeature createFeature(SimpleFeatureType ftype, SamplingUnit su){
 		
 		Object[] data = new Object[su.getSurveyDesign().getSamplingUnitAttributes().size() + 4];
-		data[0] = su.getId() + "." + System.nanoTime(); //$NON-NLS-1$ 
+		data[0] = su.getId() + "." + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ 
 	
 		data[1] = su.getId(); 
 		data[2] = su.getBuffer();

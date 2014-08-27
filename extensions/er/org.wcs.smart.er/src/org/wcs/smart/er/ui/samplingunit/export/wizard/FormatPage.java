@@ -19,31 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.samplingunit.wizard;
+package org.wcs.smart.er.ui.samplingunit.export.wizard;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.export.dialog.DelimiterCombo;
 
 /**
- * Import sampling unit wizard, sampling unit type page.
+ * Import wizard page, attribute field wizard page.
  * 
  * @author Emily
  *
  */
-public class TypePage extends WizardPage {
-
-	private Button btnTransect;
-	private Button btnPlots;
+public class FormatPage extends WizardPage {
 	
-	public TypePage(){
-		super("TYPE_PAGE"); //$NON-NLS-1$
+	private Button opCsv;
+	private Button opShp;
+	private DelimiterCombo cmbDelimiter;
+	private Label lDeleimiter;
+	
+	public FormatPage(){
+		super("FORMAT_PAGE"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -55,34 +61,52 @@ public class TypePage extends WizardPage {
 		c.setLayout(new GridLayout(1, false));
 		c.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		Label l = new Label(c, SWT.NONE);
-		l.setText(Messages.TypePage_suTypeLabel);
+		SelectionListener l = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				enable();
+			}
+		};
+		opShp = new Button(c, SWT.RADIO);
+		opShp.setText(Messages.FormatPage_ShapefileOp);
+		opShp.setEnabled(true);
+		opShp.addSelectionListener(l);
 		
-		Composite ops = new Composite(c, SWT.NONE);
-		ops.setLayout(new GridLayout());
-		((GridLayout)ops.getLayout()).marginWidth = 20;
+		opCsv = new Button(c, SWT.RADIO);
+		opCsv.setText(Messages.FormatPage_DelimitedFileOp);
+		opCsv.addSelectionListener(l);
 		
-		btnTransect = new Button(ops, SWT.RADIO);
-		btnTransect.setText(Messages.TypePage_linesLabel);
-		btnTransect.setSelection(true);
-		
-		btnPlots = new Button(ops, SWT.RADIO);
-		btnPlots.setText(Messages.TypePage_pointsLabel);
-		btnPlots.setSelection(false);
-		
-		setTitle(Messages.TypePage_Title);
-		setMessage(Messages.TypePage_Message);
+		Composite tmp = new Composite(c, SWT.NONE);
+		tmp.setLayout(new GridLayout(2, false));
+		((GridLayout)tmp.getLayout()).marginLeft = 20;
+		lDeleimiter = new Label(tmp, SWT.NONE);
+		lDeleimiter.setText(Messages.FormatPage_DelimiterLabel);
+		cmbDelimiter = new DelimiterCombo(tmp, SWT.NONE);
 		
 		setControl(main);
+		
+		setTitle(Messages.FormatPage_Title);
+		setMessage(Messages.FormatPage_Message);
 	}
 	
-	public SamplingUnitType getType(){
-		if (btnTransect.getSelection()){
-			return SamplingUnitType.OPEN_TRANSECT;
-		}else if (btnPlots.getSelection() ){
-			return SamplingUnitType.PLOT;
+	private void enable(){
+		cmbDelimiter.getControl().setEnabled(!opShp.getSelection());
+		lDeleimiter.setEnabled(!opShp.getSelection());
+	}
+	
+	public boolean isShapefile(){
+		return opShp.getSelection();
+	}
+	
+	public Character getDelimiter(){
+		if (cmbDelimiter.getControl().isEnabled()){
+			try {
+				return cmbDelimiter.getDelimiter();
+			} catch (Exception e) {
+				EcologicalRecordsPlugIn.log(e.getMessage(), e);
+				return ',';
+			}
 		}
 		return null;
 	}
-
 }

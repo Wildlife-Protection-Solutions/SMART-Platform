@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
@@ -50,7 +51,7 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 		@Override
 		public void compositeModified() {
 			setChangesMade(true);
-			EditSurveyDesignItemDialog.this.setErrorMessage(!content.isValid() ? "Error" : null);
+			EditSurveyDesignItemDialog.this.setErrorMessage(!content.isValid() ? Messages.EditSurveyDesignItemDialog_ErrorMsg : null); 
 			if (getButton(IDialogConstants.OK_ID) != null) {
 				getButton(IDialogConstants.OK_ID).setEnabled(content.isValid());
 			}

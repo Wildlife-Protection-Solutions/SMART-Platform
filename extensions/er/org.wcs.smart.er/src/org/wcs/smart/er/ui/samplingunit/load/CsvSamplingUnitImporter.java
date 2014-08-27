@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.referencing.CRS;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -89,10 +90,11 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 	 * 
 	 */
 	@Override
-	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options) throws Exception {
+	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		
+		//get required options
 		SamplingUnit.SamplingUnitType type = (SamplingUnitType) options.get(TYPE_KEY);
 		if (type == null){
 			throw new Exception(Messages.CsvSamplingUnitImporter_InvalidType);
@@ -100,19 +102,31 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		
 		Double bufferValue = (Double) options.get(BUFFER_KEY);
 		Projection proj = (Projection)options.get(PROJECTION_KEY);
-		
 		String idField = (String)options.get(ID_FIELD_KEY);
 		String x1Field = (String)options.get(X1_FIELD_KEY);
 		String y1Field = (String)options.get(Y1_FIELD_KEY);
 		String x2Field = (String)options.get(X2_FIELD_KEY);
 		String y2Field = (String)options.get(Y2_FIELD_KEY);
-		
 		Character delim = (Character) options.get(DELIMETER_KEY);
 		
+		//read file - getting cnt for progress
 		CSVReader reader = new CSVReader(new FileReader(f), delim.charValue());
+		int fileCnt = 0;
+		try{
+			while(reader.readNext() != null){
+				fileCnt++;
+			}
+		}finally{
+			reader.close();
+		}
+		
+		//read file 
+		monitor.beginTask(MessageFormat.format("Reading {0}", new Object[]{f.getAbsoluteFile()}), fileCnt);
+		reader = new CSVReader(new FileReader(f), delim.charValue());
 		try{
 			//read the first line
 			String[] headers = reader.readNext();
+			monitor.worked(1);
 			
 			HashMap<String, Integer> fieldToColumn = new HashMap<String, Integer>();
 			for (int i = 0; i < headers.length; i ++){
@@ -141,6 +155,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 			int cnt = 0;
 			while(true){
 				headers = reader.readNext();
+				monitor.worked(1);
 				cnt++;
 				if (headers == null){
 					break;
@@ -153,9 +168,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 				SamplingUnit su = new SamplingUnit();
 				su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
 								
-				if (type != SamplingUnit.SamplingUnitType.OPEN_TRANSECT){
-					su.setBuffer(bufferValue);
-				}
+				su.setBuffer(bufferValue);
 				
 				if (type == SamplingUnitType.PLOT){
 					//point
@@ -231,6 +244,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 			}
 		}finally{
 			reader.close();
+			monitor.done();
 		}
 		return units;
 	}

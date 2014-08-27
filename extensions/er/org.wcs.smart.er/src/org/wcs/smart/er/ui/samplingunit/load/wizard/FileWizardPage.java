@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.samplingunit.wizard;
+package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;

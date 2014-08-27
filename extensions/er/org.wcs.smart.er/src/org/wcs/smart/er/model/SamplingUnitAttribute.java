@@ -42,6 +42,11 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 @Table(name="smart.sampling_unit_attribute")
 public class SamplingUnitAttribute extends NamedKeyItem{
 
+	/**
+	 * Maximum length of string attribute value
+	 */
+	public static final int MAX_STRING_LENGTH = 1024;
+	
 	private AttributeType type;
 	
 	private ConservationArea ca;

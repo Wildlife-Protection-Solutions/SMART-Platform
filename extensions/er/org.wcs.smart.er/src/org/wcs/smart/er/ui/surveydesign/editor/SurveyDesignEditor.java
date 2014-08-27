@@ -30,6 +30,7 @@ import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -62,8 +63,13 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 				byte[] uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
 				if (Arrays.equals(source.getUuid(), uuid)) {
 					surveyDesign = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
-					summaryPage.initValues();
-					suPage.initValues();
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							summaryPage.initValues();
+							suPage.initValues();		
+						}});
+					
 				}
 			}
 		}

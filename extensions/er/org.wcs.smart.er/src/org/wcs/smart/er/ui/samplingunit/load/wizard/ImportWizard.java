@@ -19,14 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.samplingunit.wizard;
+package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
@@ -88,69 +93,91 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		return false;
 	}
 
+	private boolean finishOk = false;
 	
 	@Override
 	public boolean performFinish() {
+		//validate
 		String msg = attributePage.validate();
 		if (msg != null){
 			MessageDialog.openError(getShell(), Messages.ImportWizard_ErrorTitle, msg);
-			return false;
+			return false ;
 		}
 		
-		HashMap<Object, Object> params = new HashMap<Object, Object>();
-		
-		ISamplingUnitImporter importer = filePage.getImporter();
-		
+		//setup parameters
+		final HashMap<Object, Object> params = new HashMap<Object, Object>();
 		params.put(CsvSamplingUnitImporter.DELIMETER_KEY, filePage.getDelimiter());
-		
-		SamplingUnitType type = typePage.getType();
-		if (typePage.getType() == SamplingUnitType.OPEN_TRANSECT){
-			type = bufferPage.getType();
-		}
-		params.put(ISamplingUnitImporter.TYPE_KEY, type);
-		
-		Double buffer = bufferPage.getArea();
-		params.put(ISamplingUnitImporter.BUFFER_KEY, buffer);
+		params.put(ISamplingUnitImporter.TYPE_KEY, typePage.getType());
+		params.put(ISamplingUnitImporter.BUFFER_KEY, bufferPage.getArea());
 		params.put(ISamplingUnitImporter.PROJECTION_KEY, attributePage.getProjection());
 		params.put(ISamplingUnitImporter.ID_FIELD_KEY, attributePage.getIdField());
 		params.put(ISamplingUnitImporter.X1_FIELD_KEY, attributePage.getX1Field());
 		params.put(ISamplingUnitImporter.Y1_FIELD_KEY, attributePage.getY1Field());
 		params.put(ISamplingUnitImporter.X2_FIELD_KEY, attributePage.getX2Field());
 		params.put(ISamplingUnitImporter.Y2_FIELD_KEY, attributePage.getY2Field());
-		
 		params.putAll(attributePage.getAttributeFields());
 		
-		List<SamplingUnit> units = null;
+		//get importer
+		final ISamplingUnitImporter importer = filePage.getImporter();
+		
+		final File file = filePage.getFile();
+		
 		try {
-			units = importer.importFile(filePage.getFile(), params);
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
-			return false;
-		}
-		
-		if (units == null || units.size() == 0){
-			EcologicalRecordsPlugIn.log(Messages.ImportWizard_NoFeatures, null);
-			return false;
-		}
+			getContainer().run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					
+					monitor.beginTask(Messages.ImportWizard_ProgressLabel1, 2);
+					
+					finishOk = false;
 
-		session.beginTransaction();
-		try{
-			for (SamplingUnit su : units){
-				su.setSurveyDesign(surveyDesign);
-				session.save(su);
-			}
-			session.getTransaction().commit();
-			
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
-			session.getTransaction().rollback();
+					//get units
+					List<SamplingUnit> units = null;
+					monitor.subTask(Messages.ImportWizard_ProgressLabel2);
+					try {
+						units = importer.importFile(file, params, new SubProgressMonitor(monitor, 1));
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
+						return;
+					}
+					if (units == null || units.size() == 0){
+						EcologicalRecordsPlugIn.log(Messages.ImportWizard_NoFeatures, null);
+						return;
+					}
+
+					//save units
+					monitor.subTask(Messages.ImportWizard_ProgressLabel3);
+					if (!session.isOpen()){
+						session = HibernateManager.openSession();
+					}
+					session.beginTransaction();
+					try{
+						for (SamplingUnit su : units){
+							su.setSurveyDesign(surveyDesign);
+							session.save(su);
+						}
+						session.getTransaction().commit();
+						finishOk = true;	
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.displayLog(Messages.ImportWizard_ImportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						session.getTransaction().rollback();
+					}finally{
+						//close session to event manager doesn't conflict
+						session.close();	
+					}
+					
+					//run event manager
+					SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);
+				}
+			});
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.displayLog(Messages.ImportWizard_ImportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return false;
 		}
 		
-		session.close();
-		
-		SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);
-		return true;
+		return finishOk;
 	}
 
 	

@@ -51,6 +51,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -100,14 +101,14 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 			return true;
 		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Error saving sampling unit attribute modifications." + " \n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.SamplingUnitAttributeDialog_SaveError + " \n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return false;
 		}
 	}
 	
 	public boolean close(){
 		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), "Close", "There are unsaved changes.  Would you like to save your changes before closing?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.SamplingUnitAttributeDialog_CloseDialogTitle, Messages.SamplingUnitAttributeDialog_ConfirmExit)){
 				if (!saveChanges()){
 					return false;
 				}
@@ -169,9 +170,9 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 		initData();
 		enableButtons();
 		
-		setTitle("Sampling Unit Attributes");
-		setMessage("A list of all possible sampling unit attributes for the Conservation Area");
-		getShell().setText("Sampling Unit Attributes");
+		setTitle(Messages.SamplingUnitAttributeDialog_Title);
+		setMessage(Messages.SamplingUnitAttributeDialog_Message);
+		getShell().setText(Messages.SamplingUnitAttributeDialog_Title);
 		return main;
 	}
 	
@@ -209,7 +210,7 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 			return;
 		}
 		
-		if (!MessageDialog.openQuestion(getParentShell(), "Delete", MessageFormat.format("Are you sure you want to remove the attribute {0}?", new Object[]{ma.getName()}) )){
+		if (!MessageDialog.openQuestion(getParentShell(), Messages.SamplingUnitAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitAttributeDialog_ConfirmDelete, new Object[]{ma.getName()}) )){
 			//do not delete
 			return;
 		}
@@ -221,7 +222,7 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		}catch (Exception ex){
-			MessageDialog.openError(getShell(), "Delete", MessageFormat.format("{0} cannot be removed.", new Object[]{ma.getName()}) + " " + ex.getMessage());
+			MessageDialog.openError(getShell(), Messages.SamplingUnitAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitAttributeDialog_DeleteError, new Object[]{ma.getName()}) + " " + ex.getMessage()); //$NON-NLS-1$
 		}
 	}
 	

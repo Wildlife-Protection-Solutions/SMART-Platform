@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.text.Collator;
@@ -25,16 +46,24 @@ import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.samplingunit.EditSamplingUnitAttributeDialog;
-import org.wcs.smart.er.ui.samplingunit.SamplingUnitAttributeDialog;
 import org.wcs.smart.er.ui.samplingunit.SamplingUnitLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
+/**
+ * Dialog for selecting the sampling unit attributes to use with 
+ * the given survey design.  This updates the survey design
+ * and fires associated events. 
+ * 
+ * @author Emily
+ *
+ */
 public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 
 	private MultipleSelectComposite<SamplingUnitAttribute> composite;
@@ -46,15 +75,12 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 	
 	public SurveyDesignSamplingUnitAttributeDialog(Shell parentShell, SurveyDesign design) {
 		super(parentShell);
-		
-		
 		session = HibernateManager.openSession();
 		this.design = (SurveyDesign) session.load(SurveyDesign.class, design.getUuid());
 	}
 	
 	public boolean close(){
 		session.close();
-		
 		return super.close();
 	}
 	
@@ -71,17 +97,17 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 		}
 		
 		if (toDelete.size() > 0){
-			String msg = "Are you sure you want to remove the attributes {0}?  This will delete any existing values associated with this attribute.";
+			String msg = Messages.SurveyDesignSamplingUnitAttributeDialog_ConfirmMsg;
 			StringBuilder atts = new StringBuilder();
 			for (SurveyDesignSamplingUnitAttribute a : toDelete){
 				atts.append(a.getSamplingUnitAttribute().getName());
-				atts.append(", ");
+				atts.append(", "); //$NON-NLS-1$
 			}
 			atts.deleteCharAt(atts.length() - 1);
 			atts.deleteCharAt(atts.length() - 1);
 	
 			MessageDialog dialog = new MessageDialog(getShell(), 
-					"Remove Attributes", null, 
+					Messages.SurveyDesignSamplingUnitAttributeDialog_DialogTitle, null, 
 					MessageFormat.format(msg, new Object[]{atts.toString()}),
 					MessageDialog.QUESTION, 
 					new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},
@@ -102,15 +128,10 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 				for (SurveyDesignSamplingUnitAttribute a : toDelete){
 
 					//we need to delete any sampling unit attribute values
-					Query q = session.createQuery("SELECT sua FROM SamplingUnitAttributeValue sua JOIN sua.id.samplingUnit su WHERE sua.id.samplingUnitAttribute = :sua AND su.surveyDesign = :sd");
-					q.setParameter("sua", a.getSamplingUnitAttribute());
-					q.setParameter("sd", this.design);
+					Query q = session.createQuery(Messages.SurveyDesignSamplingUnitAttributeDialog_3);
+					q.setParameter("sua", a.getSamplingUnitAttribute()); //$NON-NLS-1$
+					q.setParameter("sd", this.design); //$NON-NLS-1$
 					List<SamplingUnitAttributeValue> values = q.list();
-					
-//					List<SamplingUnitAttributeValue> values = session.createCriteria(SamplingUnitAttributeValue.class)
-//						.createAlias("id.samplingUnit", "su")
-//						.add(Restrictions.eq("id.samplingUnitAttribute", a.getSamplingUnitAttribute()))
-//						.add(Restrictions.eq("su.surveyDesign", this.design)).list();
 					
 					for (SamplingUnitAttributeValue v : values){
 						session.delete(v);
@@ -131,8 +152,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 
 			session.getTransaction().commit();
 			
-			//TODO: review this
-			//close session
+			//close session so doesn't interfere with handlers
 			session.close();
 			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, design);
 			
@@ -141,24 +161,18 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 			
 		}catch (Exception ex){
 			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog("Error saving changes. Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignSamplingUnitAttributeDialog_ErrorMsg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return ;
 		}
 
 		super.okPressed();
 		
 	}
-
-//	@Override
-//	public void createButtonsForButtonBar(Composite parent){
-//
-//	}
-
 	
 	private void initValues(boolean keepCurrent){
 		List<SamplingUnitAttribute> allAttributes = 
 				session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		
 		List<SamplingUnitAttribute> selectedAttributes = new ArrayList<SamplingUnitAttribute>();
@@ -183,8 +197,8 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		composite = new MultipleSelectComposite<SamplingUnitAttribute>(c, SWT.NONE);
-		composite.setLabelAllText("Sampling Unit Attributes");
-		composite.setLabelSelectedText("Survey Sampling Unit Attributes");
+		composite.setLabelAllText(Messages.SurveyDesignSamplingUnitAttributeDialog_AllSuLAbel);
+		composite.setLabelSelectedText(Messages.SurveyDesignSamplingUnitAttributeDialog_SurveySuLabel);
 		composite.setLabelProvider(SamplingUnitLabelProvider.INSTANCE);
 		composite.setItemComparator(new Comparator<SamplingUnitAttribute>() {
 			@Override
@@ -194,7 +208,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 		});
 		
 		createNew = new Link(c, SWT.NONE);
-		createNew.setText("<a>" + "Create New Attribute..." + "</a>");
+		createNew.setText("<a>" + Messages.SurveyDesignSamplingUnitAttributeDialog_CreateAttributeLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		createNew.addListener(SWT.Selection, new  Listener(){
 			@Override
 			public void handleEvent(Event event) {
@@ -202,7 +216,10 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 				sua.setConservationArea(SmartDB.getCurrentConservationArea());
 				sua.setType(AttributeType.TEXT);
 				
-				List<SamplingUnitAttribute> siblings = session.createCriteria(SamplingUnitAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				List<SamplingUnitAttribute> siblings = session
+						.createCriteria(SamplingUnitAttribute.class)
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+						.list(); 
 				EditSamplingUnitAttributeDialog d = new EditSamplingUnitAttributeDialog(
 						getShell(), sua, siblings);
 				
@@ -214,23 +231,18 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 						session.getTransaction().commit();
 					}catch (Exception ex){
 						session.getTransaction().rollback();
-						EcologicalRecordsPlugIn.displayLog("Could not have new attribute." + "\n\n" + ex.getMessage(), ex);
+						EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignSamplingUnitAttributeDialog_ErrorCreatingNew + "\n\n" + ex.getMessage(), ex); //$NON-NLS-2$
 					}
 					initValues(true);
-					
-				}
-				
-				
+				}		
 			}
-			
 		});
-		
 		
 		initValues(false);
 		
-		setTitle("Sampling Unit Attributes");
-		getShell().setText("Sampling Unit Attributes");
-		setMessage("Select the sampling unit attributes relevant for this survey.");
+		setTitle(Messages.SurveyDesignSamplingUnitAttributeDialog_Title);
+		getShell().setText(Messages.SurveyDesignSamplingUnitAttributeDialog_Title);
+		setMessage(Messages.SurveyDesignSamplingUnitAttributeDialog_Message);
 		
 		return parent;
 	}
