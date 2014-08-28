@@ -34,11 +34,13 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.er.internal.Messages;
 
 /**
  * Core survey object.
@@ -54,8 +56,8 @@ public class SurveyDesign extends NamedKeyItem {
 	 * Survey states.
 	 */
 	public enum State {
-		ACTIVE ("Active"), 
-		INACTIVE ("Inactive");
+		ACTIVE (Messages.SurveyDesign_ActiveStateLabel), 
+		INACTIVE (Messages.SurveyDesign_InActiveStateLabel);
 
 		private String guiName;
 	
@@ -163,6 +165,7 @@ public class SurveyDesign extends NamedKeyItem {
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.surveyDesign", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OrderBy(value="order")
 	public List<MissionProperty> getMissionProperties(){
 		return this.missionProperties;
 	}

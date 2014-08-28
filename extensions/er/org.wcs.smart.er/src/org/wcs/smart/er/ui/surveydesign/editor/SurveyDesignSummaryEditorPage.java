@@ -48,6 +48,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -95,9 +96,15 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 
 		form.getBody().setLayout(new GridLayout(1, true));
 
-		ScrolledForm main = toolkit.createScrolledForm(form.getBody());
+		Section summarySection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
+		summarySection.setLayout(new GridLayout());
+		summarySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		summarySection.setText(Messages.SurveyDesignSummaryEditorPage_DesignSectionLabel);
+		
+		ScrolledForm main = toolkit.createScrolledForm(summarySection);
 		main.getBody().setLayout(new GridLayout(1, true));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		summarySection.setClient(main);
 		
 		Composite content = toolkit.createComposite(main.getBody(), SWT.NONE);
 		GridLayout contentLayout = new GridLayout(6, false);
@@ -139,16 +146,6 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Label emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
-		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Description);
-		txtDescription = toolkit.createText(content, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
-		txtDescription.setEditable(false);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1);
-		gd.heightHint = 40;
-		gd.widthHint = 100;
-		txtDescription.setLayoutData(gd);
-		Hyperlink lnk = createEditLink(content, PanelType.DESCRIPTION);
-		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		
 		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_ConfigurableModel);
 		txtConfigurableModel = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtConfigurableModel.setEditable(false);
@@ -158,22 +155,28 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-		toolkit.createLabel(content, "Mission Properties:");
-		Table missionPropertiesTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
-		missionPropertiesList = new TableViewer(missionPropertiesTable);
-		missionPropertiesList.setContentProvider(ArrayContentProvider.getInstance());
-		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider());
-		missionPropertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
-		Hyperlink locLink = createEditLink(content, PanelType.MISSION_PROPERTIES);
-		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-
-		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
+		
+		Label l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Description);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
+		txtDescription = toolkit.createText(content, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
+		txtDescription.setEditable(false);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1);
+		gd.heightHint = 40;
+		gd.widthHint = 100;
+		txtDescription.setLayoutData(gd);
+		Hyperlink lnk = createEditLink(content, PanelType.DESCRIPTION);
+		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		
+		
+		l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		Composite propertiesTableCmp = new Composite(content, SWT.NONE);
-		TableColumnLayout tableLayout = new TableColumnLayout();
 		propertiesTableCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+		((GridData)propertiesTableCmp.getLayoutData()).widthHint = 60;
+		TableColumnLayout tableLayout = new TableColumnLayout();
 		propertiesTableCmp.setLayout(tableLayout);
-		Table propertiesTable = toolkit.createTable(propertiesTableCmp, SWT.V_SCROLL | SWT.H_SCROLL);
+		Table propertiesTable = toolkit.createTable(propertiesTableCmp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		propertiesTable.setHeaderVisible(true);
 		propertiesTable.setLinesVisible(true);
 		propertiesList = new TableViewer(propertiesTable);
@@ -184,11 +187,32 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Hyperlink pLink = createEditLink(content, PanelType.PROPERTIES);
 		pLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
+		Section missionSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED);
+		missionSection.setText(Messages.SurveyDesignSummaryEditorPage_PropertiesSectionLabel);
+		missionSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite missionComp = toolkit.createComposite(missionSection);
+		missionSection.setClient(missionComp);
+		missionComp.setLayout(new GridLayout(2, false));
+		
+		l = toolkit.createLabel(missionComp, Messages.SurveyDesignSummaryEditorPage_PropertiesDescription, SWT.WRAP);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Table missionPropertiesTable = toolkit.createTable(missionComp, SWT.V_SCROLL | SWT.H_SCROLL);
+		missionPropertiesList = new TableViewer(missionPropertiesTable);
+		missionPropertiesList.setContentProvider(ArrayContentProvider.getInstance());
+		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider());
+		missionPropertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
+		((GridData)missionPropertiesTable.getLayoutData()).widthHint = 60;
+		Hyperlink locLink = createEditLink(missionComp, PanelType.MISSION_PROPERTIES);
+		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		
 		initValues();
 	}
 
 	private void createPropertyColumns(TableViewer viewer) {
-		final TableViewerColumn colName = createTableViewerColumn(viewer, "Name", 180);
+		final TableViewerColumn colName = createTableViewerColumn(viewer, Messages.SurveyDesignSummaryEditorPage_NameColumn, 180);
 		colName.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -200,7 +224,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 			}
 		});
 
-		final TableViewerColumn colValue = createTableViewerColumn(viewer, "Value", 180);
+		final TableViewerColumn colValue = createTableViewerColumn(viewer, Messages.SurveyDesignSummaryEditorPage_ValueColumn, 180);
 		colValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -231,8 +255,8 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	 */
 	public void initValues() {
 		SurveyDesign design = parentEditor.getSurveyDesign();
-		setPartName(design.getName());		
-		form.setText(design.getName());
+		setPartName(design.getName() );		
+		form.setText(design.getName() + ": " + Messages.SurveyDesignSummaryEditorPage_SummaryPageLabel); //$NON-NLS-1$
 		
 		txtName.setText(design.getName());
 		

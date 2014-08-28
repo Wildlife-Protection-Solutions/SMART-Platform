@@ -181,6 +181,9 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 						
 					}
 				};
+				if (monitor.isCanceled() || getMap() == null){
+					return Status.OK_STATUS;
+				}
 	    		getMap().getViewportModel().addViewportModelListener(initListener);
 				
 			} catch (IOException e) {
@@ -284,9 +287,11 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 		addLayerJob.cancel();
 		
 	    // dispose of patrol service
-		CatalogPlugin.getDefault().getLocalCatalog().remove(suService);
-		suService.dispose(null);
-		suService = null;
+		if (suService != null){
+			CatalogPlugin.getDefault().getLocalCatalog().remove(suService);
+			suService.dispose(null);
+			suService = null;
+		}
 
 		refreshJob.cancel();
 		refreshJob = null;
@@ -296,9 +301,15 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 	@Override
 	public void createPartControl(Composite parent) {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		form = toolkit.createForm(parent);
+		
+		Composite container = toolkit.createComposite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(1, false));
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		form = toolkit.createForm(container);
 		form.setText(Messages.SamplingUnitEditorPage_FormName);
 		form.getBody().setLayout(new GridLayout());
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		SashForm sash = new SashForm(form.getBody(), SWT.HORIZONTAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

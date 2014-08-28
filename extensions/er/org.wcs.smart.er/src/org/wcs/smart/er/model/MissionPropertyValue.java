@@ -25,7 +25,8 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
+import javax.persistence.AssociationOverride;
+import javax.persistence.AssociationOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -47,6 +48,11 @@ import org.wcs.smart.ca.datamodel.Attribute;
  */
 @Entity
 @Table(name="smart.mission_property_value")
+@AssociationOverrides({
+	@AssociationOverride(name = "id.mission", 
+		joinColumns = @JoinColumn(name = "mission_uuid")),
+	@AssociationOverride(name = "id.missionAttribute", 
+		joinColumns = @JoinColumn(name = "mission_attribute_uuid")) })
 public class MissionPropertyValue {
 	private MissionPropertyValuePk id = new MissionPropertyValuePk();
 
@@ -312,8 +318,7 @@ public class MissionPropertyValue {
 		public MissionPropertyValuePk() {
 		}
 
-		@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-		@JoinColumn(name = "mission_uuid", referencedColumnName = "uuid")
+		@ManyToOne
 		public Mission getMission() {
 			return mission;
 		}
@@ -322,8 +327,7 @@ public class MissionPropertyValue {
 			this.mission = mission;
 		}
 
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name = "mission_attribute_uuid", referencedColumnName = "uuid")
+		@ManyToOne
 		public MissionAttribute getMissionAttribute() {
 			return attribute;
 		}
