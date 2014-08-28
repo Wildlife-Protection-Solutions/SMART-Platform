@@ -37,6 +37,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 
 /**
  * Mission Day Page. It represents one day within a mission.
@@ -88,6 +93,13 @@ public class MissionDayPage extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+
+		Session session = HibernateManager.openSession();	
+		ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+		if (observationOptions.getViewProjection() != null) {
+			observationOptions.getViewProjection().getDefinition(); //load lazy items
+		}
+
 		frmSummary = toolkit.createScrolledForm(parent);
 		
 		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -101,7 +113,7 @@ public class MissionDayPage extends EditorPart {
 		frmSummary.setText(text.toString());
 		frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
-		dayComposite = new MissionDayComposite(this);
+		dayComposite = new MissionDayComposite(this, observationOptions);
 		dayComposite.createComposite(frmSummary.getBody(), toolkit);
 		dayComposite.setData(editor.getMission());
 		
