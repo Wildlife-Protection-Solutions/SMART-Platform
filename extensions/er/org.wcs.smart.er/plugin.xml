@@ -100,9 +100,9 @@
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.er.ui.SurveyDesignListView"
-            icon="images/icons/obj16/survey_design.png"
+            icon="images/icons/obj16/survey.png"
             id="org.wcs.smart.er.surveyDesignListView"
-            name="Survey Designs"
+            name="Surveys"
             restorable="true">
       </view>
    </extension>
@@ -130,7 +130,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.fielddata.dataseparater">
          <menu
-               icon="images/icons/obj16/survey_design.png"
+               icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.er.menu.survey"
                label="Survey">
             <command
@@ -165,7 +165,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.er.showsurveys"
-                  icon="images/icons/obj16/survey_design.png"
+                  icon="images/icons/obj16/survey.png"
                   label="View Surveys"
                   mnemonic="x"
                   style="push"
@@ -195,13 +195,18 @@
                style="push"
                tooltip="creates a new mission">
          </command>
+         <command
+               commandId="org.wcs.smart.er.filter"
+               style="push"
+               tooltip="Filters the view items">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.er.showsurveys"
-               icon="images/icons/obj16/survey_design.png"
+               icon="images/icons/obj16/survey.png"
                label="View Surveys"
                style="push"
                tooltip="displays list of surveys">
@@ -261,6 +266,10 @@
             class="org.wcs.smart.er.ui.handlers.ShowSamplingUnitAttributesHandler"
             commandId="org.wcs.smart.er.su.show">
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.FilterSurveyListItemsHandler"
+            commandId="org.wcs.smart.er.filter">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -291,6 +300,10 @@
       <command
             id="org.wcs.smart.er.su.show"
             name="Sampling Unit Attributes ...">
+      </command>
+      <command
+            id="org.wcs.smart.er.filter"
+            name="Filter Items">
       </command>
    </extension>
    <extension
@@ -324,6 +337,10 @@
       <image
             commandId="org.wcs.smart.er.su.show"
             icon="images/icons/obj16/sampling_unit.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.er.filter"
+            icon="images/icons/obj16/survey_design_filter.png">
       </image>
    </extension>
    <extension

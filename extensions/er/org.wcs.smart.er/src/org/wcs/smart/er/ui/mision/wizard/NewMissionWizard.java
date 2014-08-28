@@ -35,10 +35,13 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.hibernate.SurveyDesignFilter;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.CommentComposite;
 import org.wcs.smart.er.ui.mision.DateComposite;
@@ -48,6 +51,7 @@ import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -160,19 +164,16 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
      * added before the wizard opens. New pages should be added by calling
      * <code>addPage</code>.
      */
-    @SuppressWarnings("unchecked")
 	public void addPages() {
     	
     	setWindowTitle(Messages.NewMissionWizard_WizardTitle);
 
     	localPages = new ArrayList<MissionComposite>();
     	if (parentDesign == null){
-    		
-        	List<SurveyDesign> others = session.createCriteria(SurveyDesign.class)
-        			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-        			.add(Restrictions.eq("state", SurveyDesign.State.ACTIVE)).list(); //$NON-NLS-1$
-
-    		
+    		//get active surveys
+    		SurveyDesignFilter f = new SurveyDesignFilter();
+    		f.setSurveyStates(new State[]{State.ACTIVE});
+    		List<SurveyDesignEditorInput> others = SurveyHibernateManager.getInstance().getSurveyDesigns(session, f);
     		localPages.add(new SurveyDesignComposite(others));
     	}
     	
@@ -203,7 +204,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 			
 			MissionCompositeWizardPage p = (MissionCompositeWizardPage) event.getCurrentPage();
 			if (p.getComposite() instanceof SurveyDesignComposite){
-				this.parentDesign = ((SurveyDesignComposite)p.getComposite()).getSurveyDesign();
+				this.parentDesign = ((SurveyDesignComposite)p.getComposite()).getSurveyDesign(session);
 			}
 		}
 		

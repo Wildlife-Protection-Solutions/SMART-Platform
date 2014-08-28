@@ -26,6 +26,9 @@ import java.util.Arrays;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesign.State;
 
 /**
  * The Survey Design Editor
@@ -37,13 +40,15 @@ public class SurveyDesignEditorInput implements IEditorInput {
 
 	private byte[] uuid;
 	private String name;
+	private SurveyDesign.State state;
 	
 	/**
 	 * Constructor
 	 */
-	public SurveyDesignEditorInput(String name, byte[] uuid) {
+	public SurveyDesignEditorInput(String name, byte[] uuid, SurveyDesign.State state) {
 		this.uuid = uuid;
 		this.name = name;
+		this.state = state;
 	}
 	
 	public byte[] getUuid() {
@@ -63,7 +68,11 @@ public class SurveyDesignEditorInput implements IEditorInput {
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		return null;
+		if (state == State.INACTIVE){
+			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.SURVEY_DESIGN_INACTIVE_ICON);
+		}else{
+			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.SURVEY_DESIGN_ICON);
+		}
 	}
 
 	@Override

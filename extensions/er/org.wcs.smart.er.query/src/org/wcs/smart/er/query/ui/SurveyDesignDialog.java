@@ -41,6 +41,7 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -71,8 +72,8 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 	@Override
 	public void okPressed(){
 		Object selection =  ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
-		if (selection instanceof SurveyDesign){
-			sd = (SurveyDesign)selection;
+		if (selection instanceof SurveyDesignEditorInput){
+			sd = (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignEditorInput)selection).getUuid());
 		}else{
 			sd = null;
 		}
@@ -108,7 +109,7 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 		cmbViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
-		List<SurveyDesign> sds = SurveyHibernateManager.getInstance().getActiveSurveys(session);
+		List<SurveyDesignEditorInput> sds = SurveyHibernateManager.getInstance().getSurveyDesigns(session, null);
 		List<Object> all = new ArrayList<Object>();
 		all.addAll(sds);
 		all.add(Messages.SurveyDesignDialog_AllDesignsLabel);

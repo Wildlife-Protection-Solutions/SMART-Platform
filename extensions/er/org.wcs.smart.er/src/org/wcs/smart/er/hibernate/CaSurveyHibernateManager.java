@@ -31,8 +31,8 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignListFilter;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -132,25 +132,24 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 * is null with return all survey designs.
 	 */
 	@Override
-	public List<SurveyDesignEditorInput> getSurveys(Session s, SurveyDesignListFilter filter) {
+	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s, SurveyDesignFilter filter) {
 		if (filter == null){
 			//get all
 			List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
 			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			
 			for (SurveyDesign d : ds){
-				SurveyDesignEditorInput ii = new SurveyDesignEditorInput(d.getName(), d.getUuid());
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput(d.getName(), d.getUuid(), d.getState());
 				all.add(ii);
 			}
 			return all;
 				
 		}else{
-//			str.append("SELECT s.uuid, s.state, s.startDate, s.endDate, lbl.value "); //$NON-NLS-1$
 			Query q = filter.buildQuery(s);
 			List<Object[]> data = q.list();
 			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			for (Object[] x : data){
-				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[4], (byte[])x[0]);
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[1], (byte[])x[0], (SurveyDesign.State)x[2]);
 				all.add(ii);
 			}
 			return all;
@@ -158,14 +157,23 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	}
 
 	@Override
-	public List<SurveyDesign> getActiveSurveys(Session s) {
+	public List<Survey> getActiveSurveys(Session s) {
 		//get all
 		@SuppressWarnings("unchecked")
-		List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("state", SurveyDesign.State.ACTIVE)) //$NON-NLS-1$
+		List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
+				.createAlias("s.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("sd.state", SurveyDesign.State.ACTIVE)) //$NON-NLS-1$
 				.list();
 		return ds;
 	}
 	
+	@Override
+	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s){
+		@SuppressWarnings("unchecked")
+		List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
+				.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
+				.list();
+		return ds;
+	}
 }

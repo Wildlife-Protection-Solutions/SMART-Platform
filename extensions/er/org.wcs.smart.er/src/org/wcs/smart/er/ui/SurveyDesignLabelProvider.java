@@ -25,14 +25,16 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
- * Label provider and image provder for survey designs,
+ * Label and image provider for survey designs, missions
+ * survey list tree nodes and surveys.
+ * 
  * surveys and missions.
  * 
  * @author Emily
@@ -84,13 +86,18 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 					((SurveyListTreeNode)element).getType() == Type.MISSION)){
 			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_ICON);
 		}
-		if(element instanceof SurveyDesign || 
-				element instanceof SurveyDesignEditorInput){
-			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_DESIGN_ICON);
-			
+		
+		if(element instanceof SurveyDesign){
+			if (((SurveyDesign) element).getState() == State.ACTIVE){
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_DESIGN_ICON);
+			}else{
+				//inactive
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_DESIGN_INACTIVE_ICON);
+			}
 		}
-		if (element instanceof SurveyListTreeNode && ((SurveyListTreeNode)element).getType() == Type.SURVEY_DESIGN){
-			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_DESIGN_ICON); 
+		if (element instanceof SurveyDesignEditorInput){
+			return ((SurveyDesignEditorInput) element).getImageDescriptor().createImage();
+			
 		}
 			
 		return null;
