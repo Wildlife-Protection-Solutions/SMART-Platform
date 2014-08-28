@@ -21,96 +21,45 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignListFilter;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * Cross conservation area analysis hibernate manager.
+ * To be implemeneted when ccaa analysis implemented for ccaa survey;
  * 
  * @author Emily
  *
  */
 public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 
-	
-	/**
-	 * Gets all sampling units for a survey across all
-	 * conservation areas the survey is applicable for.
-	 * Users the survey key to determine surveys to match.
-	 * 
-	 * This includes all fixed sampling units and reconnaissance
-	 * sampling units (represented as tracks).
-	 *  
-	 *  
-	 * @return all sampling units for the given conservation area
-	 */
-	public List<Object> getSamplingUnits(SurveyDesign survey, Session s){
-		
-		List<Object> units = new ArrayList<Object>();
-		
-		//get fixed sampling units
-				
-		Query q = null;
-		StringBuilder sb = new StringBuilder();
-		sb.append("FROM SamplingUnit a ");
-		sb.append(" WHERE a.survey.conservationArea IN (:ca) ");
-		sb.append(" AND a.survey.keyId = :surveyKey ");
-		
-		q = s.createQuery(sb.toString());
-		q.setParameter("surveyKey", survey.getKeyId());
-		q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas());
-		
-		List<SamplingUnit> unit = q.list();
-		units.addAll(unit);
-
-		//get fixed reconnaissance tracks
-		// get reconnaissance tracks
-		sb = new StringBuilder();
-		sb.append("FROM FieldSurveyTrack ");
-		sb.append(" WHERE fieldSurvey.survey.conservationArea IN (:ca) ");
-		sb.append(" AND fieldSurvey.survey.keyId = :surveyKey ");
-		sb.append(" AND type = :type ");
-		
-		q = s.createQuery(sb.toString());
-		q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas());
-		q.setParameter("surveyKey", survey.getKeyId());
-		q.setParameter("type", MissionTrack.TrackType.RECON);
-
-		List<MissionTrack> tracks = q.list();
-		units.addAll(tracks);
-
-		return units;
-	}
-
-	/**
-	 * This should merge all surveys with the same key into a single survey.
-	 * <p>filter is not applicable and wil be ignored.</p>
-	 * 
-	 */
 	@Override
-	public List<SurveyDesignEditorInput> getSurveys(Session s,
-			SurveyDesignListFilter filter) {
-		
+	public List<Object> getSamplingUnits(SurveyDesign survey, Session s) {
 		// TODO Auto-generated method stub
-		
-		//this should merge all surveys with the same key into a single survey
-		//
 		return null;
 	}
 
 	@Override
-	public List<SurveyDesign> getActiveSurveys(Session s) {
+	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s,
+			SurveyDesignFilter filter) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<Survey> getActiveSurveys(Session s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

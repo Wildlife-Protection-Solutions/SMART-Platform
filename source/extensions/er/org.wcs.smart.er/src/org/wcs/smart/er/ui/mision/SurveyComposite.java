@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
@@ -91,45 +92,16 @@ public class SurveyComposite extends MissionComposite{
 			}
 		});
 		
-//		Link lnkCreate = new Link(part, SWT.NONE);
-//		lnkCreate.setText("<a>" + Messages.SurveyComposite_NewSurveyLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-//		lnkCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
-//		lnkCreate.addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				createNewSurvey();
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				
-//			}
-//		});
-		
 		return part;
 	}
-
 	
-//	private void createNewSurvey(){
-//		
-//		NewSurveyDialog dialog = new NewSurveyDialog(cmbSurveys.getControl().getShell(),
-//				parentSurvey.getUuid(), session);
-//		dialog.open();
-//		
-//		refreshSurveys(session);
-//		if (dialog.getSurvey() !=  null){
-//			cmbSurveys.setSelection(new StructuredSelection(dialog.getSurvey()));
-//		}
-//	}
-	
-	
-	@SuppressWarnings("unchecked")
 	private void refreshSurveys(Session s){
-		Query q = s.createQuery("FROM Survey ");//where surveyDesign.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
-//		q.setParameter("uuid", parentSurvey.getUuid()); //$NON-NLS-1$
-		List<Survey> kids = q.list();
-		
+		List<Survey> kids = null;
+		if (parentSurvey == null){
+			kids = SurveyHibernateManager.getInstance().getActiveSurveys(s);
+		}else{
+			kids = SurveyHibernateManager.getInstance().getActiveSurveys(parentSurvey, s);
+		}
 		cmbSurveys.setInput(kids);
 	}
 	

@@ -62,10 +62,6 @@ public class NewSurveyHandler extends AbstractHandler {
 					parent = ((SurveyDesign) item).getUuid();
 					break;
 				}else if (item instanceof SurveyListTreeNode &&
-						((SurveyListTreeNode)item).getType() == Type.SURVEY_DESIGN){
-					parent = ((SurveyListTreeNode)item).getUuid();
-					break;
-				}else if (item instanceof SurveyListTreeNode &&
 						((SurveyListTreeNode)item).getType() == Type.SURVEY){
 					//parent = ((SurveyListTreeNode)item).getParent().getUuid();
 					//TODO: figure out what parent survey design is 

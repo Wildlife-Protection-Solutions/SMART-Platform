@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.wizard.NewMissionWizard;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
  * Handler for creating new missions.
@@ -63,20 +64,15 @@ public class NewMissionHandler extends AbstractHandler {
 					break;
 				}else if (item instanceof Survey){
 					parentSurvey = ((Survey) item).getUuid();
-					parentDesign = ((Survey) item).getSurveyDesign().getUuid();
 				}else if (item instanceof SurveyListTreeNode &&
-						((SurveyListTreeNode)item).getType() == Type.SURVEY_DESIGN){
-					parentDesign = ((SurveyListTreeNode)item).getUuid();
-					break;
-				}else if (item instanceof SurveyListTreeNode&&
-						((SurveyListTreeNode)item).getType() == Type.SURVEY_DESIGN){
-					parentDesign = ((SurveyListTreeNode)item).getUuid();
-					break;
-				}else if (item instanceof SurveyListTreeNode&&
 						((SurveyListTreeNode)item).getType() == Type.SURVEY){
 					parentSurvey = ((SurveyListTreeNode)item).getUuid();
-//					parentDesign = ((SurveyListTreeNode)item).getParent().getUuid();
 					break;
+				}else if (item instanceof SurveyListTreeNode && 
+					((SurveyListTreeNode)item).getType() == Type.MISSION){
+					parentSurvey = ((SurveyListTreeNode)item).getParent().getUuid();
+				}else if (item instanceof SurveyDesignEditorInput){
+					parentDesign = ((SurveyDesignEditorInput) item).getUuid();
 				}
 			}
 		}

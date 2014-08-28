@@ -24,8 +24,8 @@ package org.wcs.smart.er.hibernate;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignListFilter;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 public interface ISurveyHibernateManager {
@@ -53,14 +53,24 @@ public interface ISurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	public List<SurveyDesignEditorInput> getSurveys(Session s, SurveyDesignListFilter filter);
+	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s, SurveyDesignFilter filter);
 	
 	/**
-	 * Returns all active surveys for the current conservation area.
+	 * Returns all surveys associated with an active survey design
+	 * for the current conservation area.
 	 * 
 	 * @param s
 	 * @return
 	 */
-	public List<SurveyDesign> getActiveSurveys(Session s);
+	public List<Survey> getActiveSurveys(Session s);
+	
+	/**
+	 * Returns all surveys associated with an active survey design
+	 * for the current conservation area and the given survey design
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s);
 	
 }

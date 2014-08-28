@@ -39,6 +39,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
  * Composite for users to select the survey design.
@@ -50,9 +51,9 @@ public class SurveyDesignComposite extends MissionComposite{
 
 	private ComboViewer cmbDesigns;
 	
-	private List<SurveyDesign> surveys;
+	private List<SurveyDesignEditorInput> surveys;
 	
-	public SurveyDesignComposite(List<SurveyDesign> surveys){
+	public SurveyDesignComposite(List<SurveyDesignEditorInput> surveys){
 		this.surveys = surveys;
 	}
 	
@@ -102,10 +103,10 @@ public class SurveyDesignComposite extends MissionComposite{
 	 * 
 	 * @return the selected survey design.
 	 */
-	public SurveyDesign getSurveyDesign(){
+	public SurveyDesign getSurveyDesign(Session session){
 		Object x = ((IStructuredSelection)cmbDesigns.getSelection()).getFirstElement();
-		if (x != null && x instanceof SurveyDesign ){
-			return (SurveyDesign) x;
+		if (x != null && x instanceof SurveyDesignEditorInput ){
+			return (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignEditorInput)x).getUuid());
 		}
 		return null;
 	}
@@ -116,7 +117,7 @@ public class SurveyDesignComposite extends MissionComposite{
 		if (cmbDesigns.getSelection().isEmpty()){
 			return false;
 		}
-		if (((IStructuredSelection)cmbDesigns.getSelection()).getFirstElement() instanceof SurveyDesign ){
+		if (((IStructuredSelection)cmbDesigns.getSelection()).getFirstElement() instanceof SurveyDesignEditorInput ){
 			return true;
 		}
 		return false;

@@ -45,12 +45,14 @@ import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
@@ -63,69 +65,97 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-
-		int designCnt = 0;
-		int surveyCnt = 0;
-		
-		
 		ISelection a = HandlerUtil.getCurrentSelection(event);
 		if (!(a instanceof StructuredSelection)){
 			return null;
 		}
 		
 		final List<SurveyListTreeNode> nodes = new ArrayList<SurveyListTreeNode>();
-		
+		final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
 		StructuredSelection selection = (StructuredSelection)a;
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object delete = (Object) iterator.next();
 			if (delete instanceof SurveyListTreeNode){
-				SurveyListTreeNode.Type type = (((SurveyListTreeNode)delete).getType());
 				nodes.add((SurveyListTreeNode)delete);
-				if (type == Type.SURVEY){
-					surveyCnt++;
-				}else if (type == Type.SURVEY_DESIGN){
-					designCnt++;
-				}
+			}else if (delete instanceof SurveyDesignEditorInput){
+				designs.add((SurveyDesignEditorInput) delete);
 			}
 			
 		}
-		if (nodes.size() == 0) return null;
+
+		if (nodes.size() > 0){
 		
-		StringBuilder warn = new StringBuilder();
-		warn.append("Are you sure you want to delete the {0} selected elements?");
-		if (designCnt > 0 || surveyCnt > 0){
-			warn.append(" All data associated with the selected survey designs and/or missions will also be deleted.");
-		}
-		warn.append("\n\n");
-		warn.append("This action cannot be undone. Are you sure you want to continue?");
+			StringBuilder warn = new StringBuilder();
+			warn.append(Messages.DeleteSurveyElementHandler_ConfirmDelete1);
+			warn.append(Messages.DeleteSurveyElementHandler_ConfirmDelete2);
+			warn.append("\n\n"); //$NON-NLS-1$
+			warn.append(Messages.DeleteSurveyElementHandler_ConfirmDelete3);
 		
-		if (!MessageDialog.openQuestion(HandlerUtil.getActiveShell(event), "Delete", MessageFormat.format(warn.toString(), new Object[]{nodes.size()}))){
-			return null;
-		}
+			if (!MessageDialog.openQuestion(HandlerUtil.getActiveShell(event), Messages.DeleteSurveyElementHandler_DeleteDialogTitle, MessageFormat.format(warn.toString(), new Object[]{nodes.size()}))){
+				return null;
+			}
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
 				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					
-					monitor.beginTask("Deleting selected items.", nodes.size());
-					Session s = HibernateManager.openSession();
-					try{
-						for (SurveyListTreeNode node : nodes){
-							monitor.subTask(MessageFormat.format("Deleting {0}", new Object[]{node.getLabel()}));
-							deleteItem(node,s);
-							monitor.worked(1);
+						monitor.beginTask(Messages.DeleteSurveyElementHandler_ProgressTaskName, nodes.size());
+						Session s = HibernateManager.openSession();
+						try{
+							for (SurveyListTreeNode node : nodes){
+								monitor.subTask(MessageFormat.format(Messages.DeleteSurveyElementHandler_ProgressItem, new Object[]{node.getLabel()}));
+								deleteItem(node,s);
+								monitor.worked(1);
+							}
+						}finally{
+							s.close();
 						}
-					}finally{
-						s.close();
 					}
-				}
-			});
-		} catch (Exception e) {
-			EcologicalRecordsPlugIn.displayLog("Error deleting selected items." + "\n\n" + e.getMessage(), e);
+				});
+			} catch (Exception e) {
+				EcologicalRecordsPlugIn.displayLog(Messages.DeleteSurveyElementHandler_DeleteError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+			}
+		}
+		if (designs.size() > 0){
+
+			StringBuilder warn = new StringBuilder();
+			warn.append(Messages.DeleteSurveyElementHandler_Confirm4);
+			warn.append(Messages.DeleteSurveyElementHandler_Confirm5);
+			warn.append("\n\n"); //$NON-NLS-1$
+			warn.append(Messages.DeleteSurveyElementHandler_Confirm6);
+		
+			if (!MessageDialog.openQuestion(HandlerUtil.getActiveShell(event), Messages.DeleteSurveyElementHandler_DeleteDialogTitle, MessageFormat.format(warn.toString(), new Object[]{designs.size()}))){
+				return null;
+			}
+			
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
+				
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					
+						monitor.beginTask(Messages.DeleteSurveyElementHandler_ProgressTaskName, nodes.size());
+						Session s = HibernateManager.openSession();
+						try{
+							for (SurveyDesignEditorInput design : designs){
+								monitor.subTask(MessageFormat.format(Messages.DeleteSurveyElementHandler_ProgressItem, new Object[]{design.getName()}));
+								deleteSurveyDesign(design.getUuid(), s);
+								monitor.worked(1);
+							}
+						}finally{
+							s.close();
+						}
+					}
+				});
+			} catch (Exception e) {
+				EcologicalRecordsPlugIn.displayLog(Messages.DeleteSurveyElementHandler_DeleteError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+			}
 		}
 		
 		
@@ -133,9 +163,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 	}
 	
 	private void deleteItem(SurveyListTreeNode element, Session session){
-		if (element.getType() == Type.SURVEY_DESIGN){
-			deleteSurveyDesign(element.getUuid(), session);
-		}else if (element.getType() == Type.SURVEY){
+		if (element.getType() == Type.SURVEY){
 			deleteSurvey(element.getUuid(), session);
 		}else if (element.getType() == Type.MISSION){
 			deleteMission(element.getUuid(), session);
@@ -168,7 +196,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			if (DeleteManager.canDelete(design, session)){
 				List<File> dirsToDelete = new ArrayList<File>();
 				
-				List<Survey> surveys = session.createCriteria(Survey.class).add(Restrictions.eq("surveyDesign", design)).list();
+				List<Survey> surveys = session.createCriteria(Survey.class).add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
 				for (Survey survey : surveys){
 				
 				
@@ -196,7 +224,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 							FileUtils.forceDelete(f);
 						}catch(Exception ex){
 							EcologicalRecordsPlugIn.displayLog(
-									"Could not delete the filestore associated with the mission.  This directory should be deleted manually." + f.getAbsolutePath(), ex);
+									Messages.DeleteSurveyElementHandler_FsSurveyDesignDeleteError + f.getAbsolutePath(), ex);
 						}
 					}
 				}
@@ -213,7 +241,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(
-					MessageFormat.format("Error occurred deleting survey {0}", new Object[]{id}) + "\n\n" + ex.getMessage(), ex);
+					MessageFormat.format(Messages.DeleteSurveyElementHandler_SurveyDesignDeleteError, new Object[]{id}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			session.getTransaction().rollback();
 		}
 		return false;
@@ -264,7 +292,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 							FileUtils.forceDelete(f);
 						}catch(Exception ex){
 							EcologicalRecordsPlugIn.displayLog(
-									"Could not delete the filestore associated with the mission.  This directory should be deleted manually." + f.getAbsolutePath(), ex);
+									Messages.DeleteSurveyElementHandler_FsSurveyDeleteError + f.getAbsolutePath(), ex);
 						}
 					}
 				}
@@ -281,7 +309,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(
-					MessageFormat.format("Error occurred deleting survey {0}", new Object[]{id}) + "\n\n" + ex.getMessage(), ex);
+					MessageFormat.format(Messages.DeleteSurveyElementHandler_SurveyDeleteError, new Object[]{id}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			session.getTransaction().rollback();
 		}
 		return false;
@@ -333,7 +361,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 					}
 				}catch(Exception ex){
 					EcologicalRecordsPlugIn.displayLog(
-							"Could not delete the filestore associated with the mission.  This directory should be deleted manually." + fileStore.getAbsolutePath(), ex);
+							Messages.DeleteSurveyElementHandler_FsMissionDeleteError + fileStore.getAbsolutePath(), ex);
 				}
 				
 				//fire events
@@ -349,7 +377,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(
-					MessageFormat.format("Error occurred deleting mission {0}", new Object[]{id}) + "\n\n" + ex.getMessage(), ex);
+					MessageFormat.format(Messages.DeleteSurveyElementHandler_MissionDeleteError, new Object[]{id}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			session.getTransaction().rollback();
 		}
 		return false;

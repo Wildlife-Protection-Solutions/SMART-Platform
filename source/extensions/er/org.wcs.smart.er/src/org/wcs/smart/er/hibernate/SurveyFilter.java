@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui;
+package org.wcs.smart.er.hibernate;
 
 import java.util.Date;
 
@@ -37,7 +37,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class SurveyDesignListFilter {
+public class SurveyFilter {
 
 	private SurveyDesign.State[] states = null;
 	
@@ -60,6 +60,15 @@ public class SurveyDesignListFilter {
 	public DateFilter getStartDateFilter(){
 		return this.startDateFilter;
 	}
+	
+	/**
+	 * 
+	 * @return the start date filter
+	 */
+	public DateFilter getEndDateFilter(){
+		return this.endDateFilter;
+	}
+	
 	/**
 	 * @return the current survey name string comparator
 	 */

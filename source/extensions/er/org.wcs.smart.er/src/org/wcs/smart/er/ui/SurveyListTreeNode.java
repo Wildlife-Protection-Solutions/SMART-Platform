@@ -35,7 +35,7 @@ public class SurveyListTreeNode {
 	 * @author Emily
 	 *
 	 */
-	public enum Type {SURVEY_DESIGN, SURVEY, MISSION};
+	public enum Type {SURVEY, MISSION};
 	
 	private String label;
 	private byte[] uuid;

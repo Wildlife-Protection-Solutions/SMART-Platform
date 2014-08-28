@@ -35,9 +35,13 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -48,33 +52,38 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.hibernate.SurveyDesignFilter;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * View for listing survey designs and associated surveys and missions. 
  * @author Emily
  *
  */
-public class SurveyDesignListView extends ViewPart implements IDoubleClickListener{
+public class SurveyDesignListView extends ViewPart implements IDoubleClickListener, IUpdatableView{
 
 	public static final String ID = "org.wcs.smart.er.surveyDesignListView"; //$NON-NLS-1$
 
-	private SurveyDesignListFilter filter;
+	private SurveyFilter filter;
+	private SurveyDesignFilter designFilter;
 	
 	private TreeViewer lstViewer;
 	private TableViewer designViewer;
+	
+	private TabFolder bar;
 	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
 		@Override
@@ -84,19 +93,19 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		
 		
 	public SurveyDesignListView(){
-		filter = new SurveyDesignListFilter();
+		filter = new SurveyFilter();
+		designFilter = new SurveyDesignFilter();
 	}
 	
 	@Override
 	public void createPartControl(Composite parent) {
-		TabFolder bar = new TabFolder(parent, SWT.NONE);
+		bar = new TabFolder(parent, SWT.NONE);
 
 		lstViewer = new TreeViewer(bar, SWT.NONE);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		lstViewer.setContentProvider(new LazySurveyDesignTreeContentProvider());
 		lstViewer.setInput(null);
-		getSite().setSelectionProvider(lstViewer);
 		lstViewer.addDoubleClickListener(this);
 		
 		TabItem titem = new TabItem(bar, SWT.NONE);
@@ -125,6 +134,32 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_ADDED, listener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_DELETED, listener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, listener);
+
+		
+		getSite().setSelectionProvider(new ISelectionProvider() {
+			@Override
+			public void setSelection(ISelection selection) {
+				getActiveViewer().setSelection(selection);		
+			}
+			
+			@Override
+			public void removeSelectionChangedListener(
+					ISelectionChangedListener listener) {
+				lstViewer.removeSelectionChangedListener(listener);
+				designViewer.removeSelectionChangedListener(listener);
+			}
+			
+			@Override
+			public ISelection getSelection() {
+				return getActiveViewer().getSelection();
+			}
+			
+			@Override
+			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+				lstViewer.addSelectionChangedListener(listener);
+				designViewer.addSelectionChangedListener(listener);
+			}
+		});
 		
 		/* menu */
 		MenuManager menuManager = new MenuManager();
@@ -150,14 +185,14 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<SurveyListTreeNode> ins = new ArrayList<SurveyListTreeNode>();
-			final List<SurveyDesign> designs = new ArrayList<SurveyDesign>();
+			final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
 			
 			Session s = HibernateManager.openSession();
 			try{
 				//surveys
 				List<Survey> items = filter.buildQuery(s).list();
+				
 				Collections.sort(items, new Comparator<Survey>() {
-
 					@Override
 					public int compare(Survey o1, Survey o2) {
 						if (o1.getSurveyDesign().equals(o2.getSurveyDesign())){
@@ -168,11 +203,11 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 					}
 				});
 				for (Survey sv : items){
-					ins.add(new SurveyListTreeNode(sv.getId() + " [" + sv.getSurveyDesign().getName() + "]", sv.getUuid(), Type.SURVEY));
+					ins.add(new SurveyListTreeNode(sv.getId() + " [" + sv.getSurveyDesign().getName() + "]", sv.getUuid(), Type.SURVEY)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				//designs
-				designs.addAll(s.createQuery("FROM SurveyDesign WHERE conservationArea = :ca").setParameter("ca", SmartDB.getCurrentConservationArea()).list());
+				designs.addAll(SurveyHibernateManager.getInstance().getSurveyDesigns(s, designFilter));
 				
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.displayLog("Error loading survey designs." + "\n\n" + ex.getMessage(), ex);
@@ -208,9 +243,6 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 				if (selection instanceof SurveyListTreeNode){
 					SurveyListTreeNode node = (SurveyListTreeNode)selection;
 					switch (node.getType()) {
-						case SURVEY_DESIGN:
-							page.openEditor(new SurveyDesignEditorInput(node.getLabel(), node.getUuid()), SurveyDesignEditor.ID);						
-							break;
 						case SURVEY:
 							//TODO: implement SURVEY
 							break;
@@ -218,12 +250,34 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 							page.openEditor(new MissionEditorInput(node.getLabel(), node.getUuid()), MissionEditor.ID);
 							break;
 					}
-				}else if (selection instanceof SurveyDesign){
-					page.openEditor(new SurveyDesignEditorInput(((SurveyDesign) selection).getName(), ((SurveyDesign) selection).getUuid()), SurveyDesignEditor.ID);
+				}else if (selection instanceof SurveyDesignEditorInput){
+					page.openEditor((SurveyDesignEditorInput)selection, SurveyDesignEditor.ID);
 				}
 			} catch (Throwable t) {
 				EcologicalRecordsPlugIn.displayLog(t.getLocalizedMessage(), t);
 			}
+		}
+	}
+
+	@Override
+	public void updateContent() {
+		refresh();
+	}
+	
+	private Viewer getActiveViewer(){
+		if(bar.getSelectionIndex() == 0){
+			return lstViewer;
+		}else{
+			return designViewer;
+		}
+	}
+	
+	public void showFilterDialog(){
+		if (bar.getSelectionIndex() == 0){
+			
+		}else{
+			SurveyDesignFilterDialog dialog = new SurveyDesignFilterDialog(getSite().getShell(), this, designFilter);
+			dialog.open();
 		}
 	}
 }

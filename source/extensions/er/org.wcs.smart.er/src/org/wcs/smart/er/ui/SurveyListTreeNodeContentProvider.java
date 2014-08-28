@@ -32,7 +32,6 @@ import org.eclipse.ui.progress.IElementCollector;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -45,7 +44,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class SurveyListTreeNodeContentProvider implements
 		IDeferredWorkbenchAdapter {
 
-	public static final SurveyListTreeNodeContentProvider INSTANCE = new SurveyListTreeNodeContentProvider();
+	public static final SurveyListTreeNodeContentProvider INSTANCE 
+		= new SurveyListTreeNodeContentProvider();
 	
 	private SurveyListTreeNodeContentProvider(){
 		
@@ -89,18 +89,7 @@ public class SurveyListTreeNodeContentProvider implements
 		Session s = HibernateManager.openSession();
 		try {
 			s.beginTransaction();
-			if (node.getType() == Type.SURVEY_DESIGN){
-				//get surveys
-				Query q = s.createQuery("FROM Survey where surveyDesign.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
-				q.setParameter("uuid", node.getUuid()); //$NON-NLS-1$
-				List<Survey> kids = q.list();
-				List<SurveyListTreeNode> allKids = new ArrayList<SurveyListTreeNode>();
-				for (Survey survey : kids){
-					SurveyListTreeNode kid = new SurveyListTreeNode(survey.getId(), survey.getUuid(), Type.SURVEY, node);
-					allKids.add(kid);
-				}
-				collector.add(allKids.toArray(), monitor);
-			}else if (node.getType() == Type.SURVEY){
+			if (node.getType() == Type.SURVEY){
 				//get missions
 				//get surveys
 				Query q = s.createQuery("FRom Mission where survey.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
