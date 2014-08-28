@@ -343,5 +343,16 @@
             name="Mission Editor">
       </editor>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.er.delete.MissionAttributeDeleteAdvisor"
+            class="org.wcs.smart.er.model.MissionAttribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.er.delete.MissionAttributeListItemDeleteAdvisor"
+            class="org.wcs.smart.er.model.MissionAttributeListItem">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>

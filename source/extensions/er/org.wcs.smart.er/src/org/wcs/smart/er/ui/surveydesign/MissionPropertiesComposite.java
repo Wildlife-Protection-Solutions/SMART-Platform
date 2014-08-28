@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.ui.surveydesign;
 
 import java.text.Collator;
@@ -10,6 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.common.control.MultipleSelectComposite;
@@ -21,10 +43,16 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.missionattribute.AttributeLabelProvider;
 import org.wcs.smart.hibernate.SmartDB;
 
+/**
+ * Mission properties composite.
+ * @author Emily
+ *
+ */
 public class MissionPropertiesComposite extends SurveyDesignComposite {
 
 	private MultipleSelectComposite<MissionAttribute> attributesComposite; 
 	
+	private Label lblWarn;
 	
 	public MissionPropertiesComposite(){
 		super();
@@ -38,13 +66,19 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 		attributesComposite = new MultipleSelectComposite<MissionAttribute>(part, SWT.NONE);
 		attributesComposite.setLabelAllText(Messages.MissionPropertiesComposite_AllMissionAttributes);
 		attributesComposite.setLabelSelectedText(Messages.MissionPropertiesComposite_SelectedMissionAttributes);
-		
+
+		lblWarn = new Label(part, SWT.WRAP);
+		lblWarn.setText(Messages.MissionPropertiesComposite_DeleteWarning );
+		lblWarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		return part;
 	}
 
 	@Override
 	public void init(SurveyDesign design, Session session) {
+		lblWarn.setVisible(design.getUuid() != null);
+		
 		@SuppressWarnings("unchecked")
 		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 		List<MissionAttribute> selectedAttributes = new ArrayList<MissionAttribute>();
@@ -74,25 +108,43 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 
 	@Override
 	public void updateDesign(SurveyDesign design) {
-		if (design.getMissionProperties() != null){
-			//clear existing properties
-			for (MissionProperty mp : design.getMissionProperties()){
-				mp.setAttribute(null);
-				mp.setSurveyDesign(null);
-			}
-			design.getMissionProperties().clear();
-		}else{
+		if (design.getMissionProperties() == null){
 			design.setMissionProperties(new ArrayList<MissionProperty>());
 		}
-		//add new properties
-		int order = 0;
-		for (MissionAttribute ma : attributesComposite.getSelectedItemsAsList()){
+		
+		List<MissionProperty> toDelete = new ArrayList<MissionProperty>();
+		
+		List<MissionAttribute> items = new ArrayList<MissionAttribute>();
+		items.addAll(attributesComposite.getSelectedItemsAsList());
+		
+		for (MissionProperty mp : design.getMissionProperties()){
+			if (!items.contains(mp.getAttribute())){
+				toDelete.add(mp);
+			}else{
+				items.remove(mp.getAttribute());
+			}
+		}
+		
+		for (MissionProperty mp : toDelete){
+			design.getMissionProperties().remove(mp);
+			mp.setSurveyDesign(null);
+			mp.setAttribute(null);
+		}
+		
+		//new items
+		for (MissionAttribute ma : items){
+			//new
 			MissionProperty mp = new MissionProperty();
 			mp.setAttribute(ma);
 			mp.setSurveyDesign(design);
-			mp.setOrder(order++);
 			design.getMissionProperties().add(mp);
 		}
+		//update order
+		int i = 1;
+		for (MissionProperty mp : design.getMissionProperties()){
+			mp.setOrder(i++);
+		}
+		
 	}
 
 

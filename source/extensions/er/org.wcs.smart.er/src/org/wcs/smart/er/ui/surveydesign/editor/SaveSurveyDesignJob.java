@@ -1,12 +1,18 @@
 package org.wcs.smart.er.ui.surveydesign.editor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 
@@ -29,6 +35,34 @@ public class SaveSurveyDesignJob extends Job {
 		Session session = SmartHibernateManager.openSession();
 		session.beginTransaction();
 		try {
+			
+			//we need to merge mission properties; for some reason the cascade doesn't work in
+			//this case; probably a many to many problem;
+			SurveyDesign db = (SurveyDesign) session.load(SurveyDesign.class, design.getUuid());
+			List<MissionProperty> toRemove = new ArrayList<MissionProperty>();
+			for (MissionProperty mp : db.getMissionProperties()){
+				if (!design.getMissionProperties().contains(mp)){
+					toRemove.add(mp);
+					
+					//remove values associated with the mission property
+					String sqlquery = "SELECT mpv FROM MissionPropertyValue mpv join mpv.id.mission m join m.survey s WHERE mpv.id.missionAttribute = :attribute and s.surveyDesign = :sd"; //$NON-NLS-1$
+					Query query = session.createQuery(sqlquery);
+					query.setParameter("attribute", mp.getAttribute()); //$NON-NLS-1$
+					query.setParameter("sd", db); //$NON-NLS-1$
+					List<MissionPropertyValue> toDelete = query.list();
+					for (MissionPropertyValue v: toDelete){
+						session.delete(v);
+					}
+				}
+			}
+			for (MissionProperty mp : toRemove){
+				session.delete(mp);
+			}
+			db.getMissionProperties().removeAll(toRemove);
+			session.flush();
+			session.clear();
+			
+			// save original design
 			session.saveOrUpdate(design);
 			session.getTransaction().commit();
 			

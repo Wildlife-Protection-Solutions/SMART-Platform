@@ -58,6 +58,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
@@ -157,7 +158,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		/* Type */
 		Label lblNewLabel_2 = new Label(composite, SWT.NONE);
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel_2.setText("Type:");
+		lblNewLabel_2.setText(Messages.EditMissionAttributeDialog_TypeLabel);
 		
 		cmbType = new ComboViewer(composite, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
@@ -212,6 +213,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		lstViewer.setLabelProvider(new AttributeLabelProvider());
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -240,13 +242,13 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		
 		
 		if (toUpdate.getKeyId() == null){
-			getShell().setText("New Mission Attribute");
-			setTitle("New Mission Attribute");
-			setMessage("Create a new attribute for use with survey missions");
+			getShell().setText(Messages.EditMissionAttributeDialog_NewTitle);
+			setTitle(Messages.EditMissionAttributeDialog_NewTitle);
+			setMessage(Messages.EditMissionAttributeDialog_NewMessage);
 		}else{
-			getShell().setText("Edit Mission Attribute");
+			getShell().setText(Messages.EditMissionAttributeDialog_EditTitle);
 			setTitle(toUpdate.getName());
-			setMessage("Modify the mission attribute.");
+			setMessage(Messages.EditMissionAttributeDialog_EditMessage);
 		}
 
 		//init fields
@@ -347,7 +349,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		if (mi == null){
 			return;
 		}
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the list item {0}?", new Object[]{mi.getName()}))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.EditMissionAttributeDialog_DeleteButton, MessageFormat.format(Messages.EditMissionAttributeDialog_DeleteMessage, new Object[]{mi.getName()}))){
 			return;
 		}
 		
@@ -357,7 +359,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 				lstViewer.refresh();		
 			}
 		}catch (Exception ex){
-			MessageDialog.openError(getShell(), "Delete", MessageFormat.format("The list item {0} cannot be removed.", new Object[]{mi.getName()}) + "\n\n" + ex.getMessage());
+			MessageDialog.openError(getShell(), Messages.EditMissionAttributeDialog_DeleteDialotTitle, MessageFormat.format(Messages.EditMissionAttributeDialog_DeleteError, new Object[]{mi.getName()}) + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 		}
 		
 	}

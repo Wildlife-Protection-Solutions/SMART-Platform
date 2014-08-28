@@ -29,7 +29,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -51,15 +50,11 @@ import javax.persistence.Transient;
 		joinColumns = @JoinColumn(name = "mission_attribute_uuid")) })
 public class MissionProperty {
 
-
-	
 	private int order;
 	private PropertyPk id = new PropertyPk();
 	
-	public MissionProperty(){
-		
+	public MissionProperty(){	
 	}
-	
 	
 	@EmbeddedId
 	public PropertyPk getId(){
@@ -117,6 +112,26 @@ public class MissionProperty {
 		this.order = order;
 	}
 	
+	/**
+	 * @param o
+	 * @return
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof MissionProperty) {
+			return this.id.equals(((MissionProperty) o).id);
+		}
+		return false;
+	}
+
+	/**
+	 * @return
+	 */
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+	
 	@Embeddable
 	private static class PropertyPk implements Serializable{
 		/**
@@ -131,8 +146,7 @@ public class MissionProperty {
 		public PropertyPk(){
 		}
 		
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name="survey_design_uuid", referencedColumnName="uuid")
+		@ManyToOne
 		public SurveyDesign getSurveyDesign(){
 			return this.design;
 		}
@@ -140,13 +154,46 @@ public class MissionProperty {
 			this.design = design;
 		}
 		
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name="mission_attribute_uuid", referencedColumnName="uuid")
+		@ManyToOne
 		public MissionAttribute getAttribute(){
 			return this.attribute;
 		}
 		public void setAttribute(MissionAttribute attribute){
 			this.attribute  = attribute;
+		}
+		
+		@Override
+		public boolean equals(Object key) {
+			if (!(key instanceof PropertyPk)) {
+				return false;
+			}
+			PropertyPk p = (PropertyPk) key;
+
+			if (p.design == null || this.design == null
+					|| p.attribute == null || this.attribute == null) {
+
+				if (p.design == null && this.design == null
+						&& p.attribute == null && this.attribute == null) {
+					return true;
+				}
+				return false;
+			}
+
+			return p.design.equals(this.design)
+					&& p.attribute.equals(this.attribute);
+		}
+
+		@Override
+		public int hashCode() {
+			int code = 0;
+			if (design != null) {
+				code += design.hashCode();
+			}
+			code *= 31;
+			if (attribute != null) {
+				code += attribute.hashCode();
+			}
+			return code;
 		}
 	}
 }
