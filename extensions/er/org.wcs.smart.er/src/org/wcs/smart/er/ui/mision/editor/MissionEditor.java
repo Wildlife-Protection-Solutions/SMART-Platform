@@ -310,6 +310,17 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @return null if mission can be edited, otherwise a string
+	 * that described reason why it can't be edited.
+	 */
+	public String canEdit(){
+		//TODO:
+		return null;
+	}
+	
+	
 //	public void save(Mission mission){
 //		savePatrolPart(patrol);
 //	}
