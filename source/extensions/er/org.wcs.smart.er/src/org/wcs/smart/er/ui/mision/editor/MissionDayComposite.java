@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -39,6 +41,9 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -440,32 +445,32 @@ public class MissionDayComposite {
 //		}
 //
 //		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
-//
-//		if (data.getWaypoints() == null){
-//			data.setWaypoints(new ArrayList<SurveyWaypoint>());
-//		}
-//		WritableList inputList = new WritableList(data.getWaypoints(), SurveyWaypoint.class);
-//		observationTable.setInput(inputList);
-//		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
-//			
-//			@Override
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				if (editor.getPatrolEditor().canEdit() == null){
-//					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
-//					btnDeleteWaypoint.setEnabled(enabled);
-//					
+
+		if (data.getWaypoints() == null){
+			data.setWaypoints(new ArrayList<SurveyWaypoint>());
+		}
+		WritableList inputList = new WritableList(data.getWaypoints(), SurveyWaypoint.class);
+		observationTable.setInput(inputList);
+		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (editor.getMissionEditor().canEdit() == null) {
+					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
+					btnDeleteWaypoint.setEnabled(enabled);
+					
 //					if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
 //						btnMoveWaypoint.setEnabled(enabled);	
 //					}else{
 //						btnMoveWaypoint.setEnabled(false);
 //					}
-//				}
-//			}
-//		});
-//		
+				}
+			}
+		});
+		
 //		this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
-//				
-//		updateTotalHours();
+				
+		updateTotalHours();
 //		updateDistance();
 		
 		btnMoveWaypoint.setEnabled(false);
