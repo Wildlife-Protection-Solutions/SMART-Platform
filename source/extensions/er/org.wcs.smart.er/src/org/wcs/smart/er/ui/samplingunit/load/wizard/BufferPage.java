@@ -157,9 +157,15 @@ public class BufferPage extends WizardPage {
 			public void handleEvent(Event event) {
 				try{
 					if (txtArea.getText().trim().length() > 0){
-						Double.parseDouble(txtArea.getText());
+						Double d = Double.parseDouble(txtArea.getText());
+						if (d < 0){
+							cd.show();
+						}else{
+							cd.hide();
+						}
+					}else{
+						cd.hide();
 					}
-					cd.hide();
 				}catch (Exception ex){
 					cd.show();
 				}

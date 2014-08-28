@@ -69,6 +69,7 @@ public class Messages extends NLS {
 	public static String EditSamplingUnitAttributeDialog_NewTitle;
 	public static String EditSamplingUnitAttributeDialog_TypeLabel;
 	public static String EditSamplingUnitDialog_BufferLabel;
+	public static String EditSamplingUnitDialog_BufferValidError;
 	public static String EditSamplingUnitDialog_ErrorSavingChanges;
 	public static String EditSamplingUnitDialog_IdError;
 	public static String EditSamplingUnitDialog_IdLabel;

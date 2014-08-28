@@ -95,6 +95,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.samplingunit.EditSamplingUnitDialog;
+import org.wcs.smart.er.ui.samplingunit.SamplingUnitStateDialog;
 import org.wcs.smart.er.ui.samplingunit.export.wizard.ExportWizard;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -139,6 +140,22 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 	private ToolItem deleteItem;
 	private ToolItem clearItem;
 	private ToolItem zoomItem;
+	
+	private SamplingUnitColumnLabelProvider sortColumn = null;
+	private int sortDirection = SWT.DOWN;
+	
+	private ViewerSorter viewerComparator = new ViewerSorter(){
+		@Override
+		public int compare(Viewer viewer, Object o1, Object o2){
+			if (sortColumn == null) return 0;
+			if (sortDirection == SWT.DOWN){
+				return -sortColumn.compare(o1, o2);
+			}else{
+				return sortColumn.compare(o1, o2);
+			}
+			
+		}
+	};
 	
 	private Job addLayerJob = new Job(Messages.SamplingUnitEditorPage_addLayerJobName) {
 		
@@ -596,23 +613,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 		});
 		
 	}
-	
-	private SamplingUnitColumnLabelProvider sortColumn = null;
-	private int sortDirection = SWT.DOWN;
-	
-	ViewerSorter viewerComparator = new ViewerSorter(){
-		@Override
-		public int compare(Viewer viewer, Object o1, Object o2){
-			if (sortColumn == null) return 0;
-			if (sortDirection == SWT.DOWN){
-				return -sortColumn.compare(o1, o2);
-			}else{
-				return sortColumn.compare(o1, o2);
-			}
-			
-		}
-	};
-	
+		
 	private void createTableColumns(List<SurveyDesignSamplingUnitAttribute> attributes){
 		//dispose of existing columns
 		for (TableColumn tc : suTable.getTable().getColumns()){
