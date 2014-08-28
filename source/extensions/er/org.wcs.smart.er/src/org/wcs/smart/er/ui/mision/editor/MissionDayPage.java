@@ -47,6 +47,7 @@ import org.eclipse.ui.part.EditorPart;
 public class MissionDayPage extends EditorPart {
 
 	private MissionEditor editor;
+	private Date day;
 	
 	private ScrolledForm frmSummary; 
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
@@ -72,6 +73,7 @@ public class MissionDayPage extends EditorPart {
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		setSite(site);
 		setInput(input);
+		day = ((MissionDayPageEditorInput)input).getDay();
 	}
 
 	@Override
@@ -93,14 +95,13 @@ public class MissionDayPage extends EditorPart {
 		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
 		StringBuilder text = new StringBuilder("Mission:");
 		text.append(" "); //$NON-NLS-1$
-		Date day = ((MissionDayPageEditorInput)getEditorInput()).getDay();
 		text.append(dayFormat.format(day));
 		text.append(", "); //$NON-NLS-1$
 		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(day));
 		frmSummary.setText(text.toString());
 		frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
-		dayComposite = new MissionDayComposite();
+		dayComposite = new MissionDayComposite(this);
 		dayComposite.createComposite(frmSummary.getBody(), toolkit);
 		dayComposite.setData(editor.getMission());
 		
@@ -111,4 +112,11 @@ public class MissionDayPage extends EditorPart {
 		frmSummary.setFocus();
 	}
 
+	public MissionEditor getMissionEditor() {
+		return editor;
+	}
+	
+	public Date getDay() {
+		return day;
+	}
 }

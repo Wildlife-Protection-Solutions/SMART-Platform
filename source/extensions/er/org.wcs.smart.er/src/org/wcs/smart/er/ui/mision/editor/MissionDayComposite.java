@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.mision.editor;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,6 +43,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -72,6 +74,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite for editing mission days data.  This includes modifying
@@ -83,7 +86,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
  */
 public class MissionDayComposite {
 
-//	private MissionDayPage editor;
+	private MissionDayPage editor;
 	private Mission mission;
 	
 	private Composite mainComposite;
@@ -144,6 +147,9 @@ public class MissionDayComposite {
 		}
 	}
 
+	public MissionDayComposite(MissionDayPage editor) {
+		this.editor = editor;
+	}
 	
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
 		mainComposite = toolkit.createComposite(parent);
@@ -528,8 +534,38 @@ public class MissionDayComposite {
 	}
 
 	protected void addWaypoint() {
-		// TODO Auto-generated method stub
-		
+		double y = 0, x = 0;
+		int id = -1;
+		Date last = null;
+		for (Iterator<SurveyWaypoint> iterator = mission.getWaypoints().iterator(); iterator.hasNext();) {
+			SurveyWaypoint e = iterator.next();
+			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
+			
+			if(last == null || t.after(last) || t.equals(last)  ){
+				y = (Double) getWaypointValue(e, OtColumn.NORTH);
+				x = (Double) getWaypointValue(e, OtColumn.EAST);
+				id = (Integer) getWaypointValue(e, OtColumn.ID);
+				last = t;
+			}
+		}
+		AddWaypointDialog add;
+	
+		if(x == 0 && y == 0){
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), editor.getMissionEditor().getAvailableProjections());
+		}else{
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1, editor.getMissionEditor().getAvailableProjections());
+		}
+		if (add.open() == Window.OK){
+			SurveyWaypoint wp = add.getWaypoint();
+			wp.setMission(mission);
+			
+			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(editor.getDay(), false));
+			
+			mission.getWaypoints().add(wp);
+			
+			editor.getMissionEditor().save(Collections.singleton(wp));
+			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+		}
 	}
 
 	protected void deleteSelectedWaypoints() {
