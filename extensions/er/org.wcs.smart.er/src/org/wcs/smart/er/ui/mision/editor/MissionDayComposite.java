@@ -152,8 +152,9 @@ public class MissionDayComposite {
 		}
 	}
 
-	public MissionDayComposite(MissionDayPage editor) {
+	public MissionDayComposite(MissionDayPage editor, ObservationOptions observationOptions) {
 		this.editor = editor;
+		this.observationOptions = observationOptions;
 	}
 	
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
