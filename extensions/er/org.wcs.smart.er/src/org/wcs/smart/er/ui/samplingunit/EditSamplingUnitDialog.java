@@ -328,8 +328,14 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		
 		if (txtBuffer.getText().trim().length() != 0){
 			try{
-				Double.valueOf(txtBuffer.getText());
-				cdBuffer.hide();
+				Double d = Double.valueOf(txtBuffer.getText());
+				if (d < 0){
+					error = true;
+					cdBuffer.setDescriptionText(Messages.EditSamplingUnitDialog_BufferValidError);
+					cdBuffer.show();
+				}else{
+					cdBuffer.hide();
+				}
 			}catch (Exception ex){
 				cdBuffer.setDescriptionText(Messages.EditSamplingUnitDialog_NumberError);
 				cdBuffer.show();
