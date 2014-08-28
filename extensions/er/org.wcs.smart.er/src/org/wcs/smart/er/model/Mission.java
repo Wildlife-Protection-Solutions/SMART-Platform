@@ -116,7 +116,7 @@ public class Mission extends UuidItem{
 		this.comment = comment;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.waypoint")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission")
 	public List<SurveyWaypoint> getWaypoints(){
 		return this.waypoints;
 	}
