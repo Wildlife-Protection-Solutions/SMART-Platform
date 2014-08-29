@@ -130,9 +130,7 @@ public class MissionDayComposite {
 	private ISurveyEventListener waypointListener = new ISurveyEventListener() {
 		@Override
 		public void event(Object o) {
-//			refreshObservationTable();
-			// TODO Auto-generated method stub
-			
+			refreshTable();
 		}
 	};
 	
@@ -543,6 +541,10 @@ public class MissionDayComposite {
 		
 	}
 
+	public void refreshTable() {
+		observationTable.refresh();
+	}
+	
 	protected void addWaypoint() {
 		double y = 0, x = 0;
 		int id = -1;
@@ -745,12 +747,10 @@ public class MissionDayComposite {
 			}
 			//updated in cell editor
 		}
-		//TODO:
-//		if (needSave){
-//			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element));
-//		}
+		if (needSave){
+			editor.getMissionEditor().save(Collections.singleton((SurveyWaypoint)element));
+		}
 		observationTable.refresh();
-		
 	}
 	
 	/**
