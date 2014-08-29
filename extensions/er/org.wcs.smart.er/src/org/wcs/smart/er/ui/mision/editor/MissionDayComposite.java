@@ -52,6 +52,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
@@ -75,6 +76,9 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.common.celleditor.DoubleCellEditor;
+import org.wcs.smart.common.celleditor.IntegerCellEditor;
+import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -83,6 +87,8 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.ui.AttachmentCellEditor;
+import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -116,6 +122,14 @@ public class MissionDayComposite {
 	private Button btnAddWaypoint;
 	private Button btnDeleteWaypoint;
 	private Button btnMoveWaypoint;
+
+	private DoubleCellEditor doubleCellEditor;
+	private DoubleCellEditor nullableDoubleCellEditor;
+	private IntegerCellEditor integerCellEditor;
+	private TimeCellEditor timeEditor;
+	private AttachmentCellEditor attachmentEditor;
+	private TextCellEditor commentEditor;
+	private ObservationCellEditor observationEditor;
 	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
 	
@@ -375,13 +389,13 @@ public class MissionDayComposite {
 		
 		TableViewerEditor.create(observationTable, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
-//		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
-//		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
-//		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
-//		timeEditor = new TimeCellEditor(observationTable.getTable());
-//		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
-//		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
-//		observationEditor = new ObservationCellEditor(observationTable.getTable());
+		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
+		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
+		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
+		timeEditor = new TimeCellEditor(observationTable.getTable());
+		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
+		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
+		observationEditor = new ObservationCellEditor(observationTable.getTable());
 		
 		observationTableColumns = new HashMap<OtColumn, TableViewerColumn>();
 		
@@ -776,7 +790,7 @@ public class MissionDayComposite {
 	}
 	
 	
-	private class ObservationTableCellModifier extends EditingSupport{
+	private class ObservationTableCellModifier extends EditingSupport {
 		
 		private OtColumn column;
 		
@@ -787,22 +801,19 @@ public class MissionDayComposite {
 
 		@Override
 		protected CellEditor getCellEditor(Object element) {
-			//TODO:
-//			if (column == OtColumn.NORTH || column == OtColumn.EAST ){
-//				return doubleCellEditor;
-//			}else if (column == OtColumn.DIRECTION || column == OtColumn.DISTANCE ){
-//				return nullableDoubleCellEditor;
-//			}else if (column == OtColumn.ID){
-//				return integerCellEditor;
-//			}else if (column == OtColumn.TIME){
-//				return timeEditor;
-//			}else if (column == OtColumn.ATTACHMENTS){
-//				return attachmentEditor;
-//			}else if (column == OtColumn.COMMENT){
-//				return commentEditor;
-//			}else if (column == OtColumn.OBSERVATION){
-//				return observationEditor;
-//			}
+			switch (column) {
+			case NORTH:			return doubleCellEditor;
+			case EAST:			return doubleCellEditor;
+			case DIRECTION:		return nullableDoubleCellEditor;
+			case DISTANCE:		return nullableDoubleCellEditor;
+			case ID: 			return integerCellEditor;
+			case TIME: 			return timeEditor;
+			case ATTACHMENTS:	return attachmentEditor;
+			case COMMENT:		return commentEditor;
+			case OBSERVATION:	return observationEditor;
+			default:
+				break;
+			}
 			return null;
 		}
 
@@ -812,8 +823,7 @@ public class MissionDayComposite {
 //			if (MissionDayComposite.this.editor.getPatrolEditor().canEdit() != null){
 //				return false;
 //			}
-//			return true;
-			return false;
+			return true;
 		}
 
 		@Override
