@@ -32,7 +32,11 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -575,8 +579,36 @@ public class MissionDayComposite {
 	}
 
 	protected void deleteSelectedWaypoints() {
-		// TODO Auto-generated method stub
+		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Delete Waypoints", "Are you sure you want to delete the selected waypoints? This action cannot be undone.");
+		if (!doDel){
+			return;
+		}
+		IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
+		ArrayList<SurveyWaypoint> deleted = new ArrayList<SurveyWaypoint>();
 		
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			SurveyWaypoint w = (SurveyWaypoint) iterator.next();
+			if (mission.getWaypoints().remove(w)){
+				w.setMission(null);
+				deleted.add(w);
+			}	
+		}
+		
+		//delete waypoints
+		Job j = editor.getMissionEditor().delete(deleted);
+		j.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				//once the job is completed we can fire this event
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+					}
+				});
+			}
+		});
 	}
 
 	protected void moveSelectedWaypoints() {
