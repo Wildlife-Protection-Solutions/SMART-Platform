@@ -80,7 +80,9 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 	}
 	
 	public boolean close(){
-		session.close();
+		if (session.isOpen()){
+			session.close();
+		}
 		return super.close();
 	}
 	
