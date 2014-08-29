@@ -19,38 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.handlers;
+package org.wcs.smart.er.ui.survey.wizard;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.surveydesign.wizard.NewSurveyDesignWizard;
+import org.hibernate.Session;
+import org.wcs.smart.er.model.Survey;
 
 /**
- * Handler for creating new survey design.
+ * Interface for new survey wizard page
+ * 
  * @author Emily
  *
  */
-public class NewSurveyDesignHandler extends AbstractHandler {
+public interface INewSurveyWizardPage {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		showNewDesignWizard(HandlerUtil.getActiveShell(event));
-		return null;
-	}
+	/**
+	 * Updates the controls with the values from the
+	 * survey. 
+	 */
+	public void initControls(Survey survey, Session session);
 	
-	public static SurveyDesign showNewDesignWizard(Shell parent){
-		NewSurveyDesignWizard newWizard = new NewSurveyDesignWizard();
-		WizardDialog wd = new WizardDialog(parent, newWizard);
-		if (wd.open() == WizardDialog.OK){
-			return newWizard.getNewSurveyDesign();
-		}else{
-			return null;
-		}
-	}
-
+	/**
+	 * Updates the surveys with the values from 
+	 * the component
+	 * @return true if update successful; false otherwise
+	 */
+	public boolean updateSurvey(Survey survey, Session session);
 }

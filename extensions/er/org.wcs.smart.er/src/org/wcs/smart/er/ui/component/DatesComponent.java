@@ -234,4 +234,15 @@ public class DatesComponent implements SelectionListener{
 		cd.setShowHover(true);
 		return cd;
 	}
+	
+	/**
+	 * 
+	 * @return the error string or null if no error
+	 */
+	public String getError(){
+		if (cdEnd.isVisible()){
+			return cdEnd.getDescriptionText();
+		}
+		return null;
+	}
 }

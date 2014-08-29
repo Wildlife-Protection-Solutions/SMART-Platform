@@ -29,13 +29,13 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
-import org.wcs.smart.er.ui.survey.NewSurveyDialog;
+import org.wcs.smart.er.ui.survey.wizard.NewSurveyWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
@@ -50,7 +50,8 @@ public class NewSurveyHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		//search for a parent
-		byte[] parent = null;
+		byte[] parentDesign = null;
+		byte[] parentSurvey = null;
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		if (selection != null && selection instanceof StructuredSelection){
 			IStructuredSelection sselection = (IStructuredSelection)selection;
@@ -58,32 +59,36 @@ public class NewSurveyHandler extends AbstractHandler {
 			for (Iterator<?> iterator = sselection.iterator(); iterator.hasNext();) {
 				Object item = (Object) iterator.next();
 				if (item instanceof SurveyDesign){
-					parent = ((SurveyDesign) item).getUuid();
+					parentDesign = ((SurveyDesign) item).getUuid();
+					break;
+				}else if (item instanceof SurveyDesignEditorInput){
+					parentDesign = ((SurveyDesignEditorInput)item).getUuid();
 					break;
 				}else if (item instanceof SurveyListTreeNode &&
 						((SurveyListTreeNode)item).getType() == Type.SURVEY){
-					//parent = ((SurveyListTreeNode)item).getParent().getUuid();
-					//TODO: figure out what parent survey design is 
+					parentSurvey = ((SurveyListTreeNode)item).getUuid();
 					break;
-				}
-			}
-		}
-		if (parent == null){
-			if (HandlerUtil.getActiveEditor(event) != null){
-				IEditorInput in = HandlerUtil.getActiveEditor(event).getEditorInput();
-				if (in instanceof SurveyDesignEditorInput){
-					parent = ((SurveyDesignEditorInput)in).getUuid();
+				}else if (item instanceof SurveyListTreeNode &&
+						((SurveyListTreeNode)item).getType() == Type.MISSION){
+					parentSurvey = ((SurveyListTreeNode)item).getParent().getUuid();
+					break;
 				}
 			}
 		}
 		
-		newSurvey(HandlerUtil.getActiveShell(event), parent);
+		newSurvey(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
 		
 		return null;
 	}
 	
-	public static void newSurvey(Shell parent, byte[] parentDesign){
-		NewSurveyDialog dialog = new NewSurveyDialog(parent, parentDesign);
-		dialog.open();
+	/**
+	 * Opens the new survey wizard handler
+	 * @param parent
+	 * @param parentDesign parent survey design; can be null if unknown
+	 * @param parentSurvey sibling survey; can be null if unknown
+	 */
+	public static void newSurvey(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+		WizardDialog wd = new WizardDialog(parent, new NewSurveyWizard(parentDesign, parentSurvey));
+		wd.open();
 	}
 }
