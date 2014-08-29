@@ -58,6 +58,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	private Session session;
 	
 	private SurveyDesign newDesign;
+	private SurveyDesign savedNewDesign;
 	
 	private boolean canFinish = false;
 	
@@ -81,6 +82,10 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	public void dispose(){
 		super.dispose();
 		session.close();
+	}
+	
+	public SurveyDesign getNewSurveyDesign(){
+		return savedNewDesign;
 	}
 	
 	@Override
@@ -115,6 +120,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	
 	@Override
 	public boolean performFinish() {
+		savedNewDesign = null;
         if (lastPage instanceof SurveyCompositeWizardPage) {
             ((SurveyCompositeWizardPage) lastPage).updateModel(newDesign);
         }
@@ -123,6 +129,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 			session.save(newDesign);
 			session.getTransaction().commit();
 			
+			savedNewDesign = newDesign;
 			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_ADDED, newDesign);
 			return true;
 		}catch (Exception ex){

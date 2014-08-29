@@ -372,7 +372,7 @@ public class SurveyDesignDataPage extends EditorPart {
 	 * opens new survey wizard
 	 */
 	private void newSurvey(){
-		NewSurveyHandler.newSurvey(getSite().getShell(), parentEditor.getSurveyDesign().getUuid());
+		NewSurveyHandler.newSurvey(getSite().getShell(), parentEditor.getSurveyDesign().getUuid(), null);
 	}
 	
 	/*

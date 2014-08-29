@@ -31,23 +31,17 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
-import org.wcs.smart.er.ui.survey.NewSurveyDialog;
 
 /**
  * Allow users to select a survey for the mission.

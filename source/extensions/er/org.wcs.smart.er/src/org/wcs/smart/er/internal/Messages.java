@@ -189,6 +189,8 @@ public class Messages extends NLS {
 	public static String NameIdComposite_Title;
 	public static String NewMissionWizard_SaveError;
 	public static String NewMissionWizard_WizardTitle;
+	public static String NewSurveyWizard_Error;
+	public static String NewSurveyWizard_WizardTitle;
 	public static String RemoveERJob_Title;
 	public static String SamplingUnitAttributeDialog_CloseDialogTitle;
 	public static String SamplingUnitAttributeDialog_ConfirmDelete;
@@ -257,6 +259,8 @@ public class Messages extends NLS {
 	public static String SurveyComposite_NewSurveyLink;
 	public static String SurveyComposite_SurveyLabel;
 	public static String SurveyComposite_Title;
+	public static String SurveyDatePage_Message;
+	public static String SurveyDatePage_Title;
 	public static String SurveyDesign_ActiveStateLabel;
 	public static String SurveyDesign_InActiveStateLabel;
 	public static String SurveyDesignComposite_Description;
@@ -290,6 +294,10 @@ public class Messages extends NLS {
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
 	public static String SurveyDesignListView_SurveysTabName;
+	public static String SurveyDesignPage_Label;
+	public static String SurveyDesignPage_Message;
+	public static String SurveyDesignPage_NewDesignItem;
+	public static String SurveyDesignPage_Title;
 	public static String SurveyDesignSamplingUnitAttributeDialog_3;
 	public static String SurveyDesignSamplingUnitAttributeDialog_AllSuLAbel;
 	public static String SurveyDesignSamplingUnitAttributeDialog_ConfirmMsg;
@@ -325,6 +333,10 @@ public class Messages extends NLS {
 	public static String SurveyFilterDialog_StateOnlyLabel;
 	public static String SurveyFilterDialog_SurveyIdFieldLabel;
 	public static String SurveyFilterDialog_Title;
+	public static String SurveyIdPage_IdError;
+	public static String SurveyIdPage_IdLabel;
+	public static String SurveyIdPage_Message;
+	public static String SurveyIdPage_Title;
 	public static String TypePage_linesLabel;
 	public static String TypePage_Message;
 	public static String TypePage1_Message;
