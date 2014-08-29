@@ -44,15 +44,25 @@ import org.eclipse.swt.widgets.Text;
 public class WarningDialog extends MessageDialog {
 
 	private List<String> warnings;
+	
 	public WarningDialog(Shell parentShell, String dialogTitle,
 			String dialogMessage, List<String> warnings) {
-		
-		
+
 		super(parentShell, dialogTitle, null, dialogMessage,
 				MessageDialog.WARNING, new String[]{IDialogConstants.OK_LABEL}, 0);
+		
 		this.warnings = warnings;
 	}
 
+	public WarningDialog(Shell parentShell, String dialogTitle,
+			String dialogMessage, List<String> warnings, String[] buttonLabels, int index) {
+
+		super(parentShell, dialogTitle, null, dialogMessage,
+				MessageDialog.WARNING, buttonLabels, index);
+		
+		this.warnings = warnings;
+	}
+	
     protected Control createCustomArea(Composite parent) {
     	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.V_SCROLL | SWT.BORDER);
     	txtWarnings.setEditable(false);

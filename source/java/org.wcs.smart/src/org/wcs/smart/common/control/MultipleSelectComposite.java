@@ -177,7 +177,12 @@ public class MultipleSelectComposite<T> extends Composite {
 				updateButtonsState();
 			}
 		});
-
+		selectedItemsListViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				removeItems();
+			}
+		});
 		updateButtonsState();
 	}
 
