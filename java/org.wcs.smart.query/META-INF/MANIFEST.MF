@@ -10,7 +10,8 @@ Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
  org.wcs.smart.observation;bundle-version="3.0.2",
  net.refractions.udig.style.sld,
  net.refractions.udig.render.gridcoverage.basic;bundle-version="1.2.0",
- net.refractions.udig.style;bundle-version="1.2.0"
+ net.refractions.udig.style;bundle-version="1.2.0",
+ org.apache.commons.lang;bundle-version="2.4.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.query,
