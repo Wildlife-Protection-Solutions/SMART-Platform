@@ -66,13 +66,11 @@ public class DeleteWaypointJob extends Job {
 			pnts.addAll(waypoints);
 		}
 		
-		Session saveSession = HibernateManager
-				.openSession(new WaypointAttachmentInterceptor());
+		Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try{
 			saveSession.beginTransaction();
 			for (SurveyWaypoint wp : pnts) {
 				saveSession.delete(wp);
-				saveSession.delete(wp.getWaypoint());					
 			}
 			saveSession.getTransaction().commit();
 		}catch (Exception ex){
