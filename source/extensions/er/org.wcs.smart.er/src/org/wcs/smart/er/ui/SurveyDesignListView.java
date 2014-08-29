@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.er.ui;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,14 +55,15 @@ import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
-import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.hibernate.SurveyFilter;
-import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -109,7 +107,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		lstViewer.addDoubleClickListener(this);
 		
 		TabItem titem = new TabItem(bar, SWT.NONE);
-		titem.setText("Surveys");
+		titem.setText(Messages.SurveyDesignListView_SurveysTabName);
 		titem.setControl(lstViewer.getControl());
 		
 		designViewer = new TableViewer(bar, SWT.MULTI);
@@ -119,7 +117,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		designViewer.addDoubleClickListener(this);
 		
 		TabItem item = new TabItem(bar, SWT.NONE);
-		item.setText("Designs");
+		item.setText(Messages.SurveyDesignListView_DesignsTabName);
 		item.setControl(designViewer.getControl());
 
 		refresh();
@@ -180,7 +178,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		refreshJob.schedule();
 	}
 	
-	Job refreshJob = new Job("Loading Survey Designs"){
+	private Job refreshJob = new Job(Messages.SurveyDesignListView_LoadingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -190,27 +188,17 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 			Session s = HibernateManager.openSession();
 			try{
 				//surveys
-				List<Survey> items = filter.buildQuery(s).list();
+				List<SurveyEditorInput> items = SurveyHibernateManager.getInstance().getSurveys(s, filter);
 				
-				Collections.sort(items, new Comparator<Survey>() {
-					@Override
-					public int compare(Survey o1, Survey o2) {
-						if (o1.getSurveyDesign().equals(o2.getSurveyDesign())){
-							return -o1.getStartDate().compareTo(o2.getStartDate());
-						}else{
-							return Collator.getInstance().compare(o1.getSurveyDesign().getName().toUpperCase(), o2.getSurveyDesign().getName().toUpperCase());
-						}
-					}
-				});
-				for (Survey sv : items){
-					ins.add(new SurveyListTreeNode(sv.getId() + " [" + sv.getSurveyDesign().getName() + "]", sv.getUuid(), Type.SURVEY)); //$NON-NLS-1$ //$NON-NLS-2$
+				for (SurveyEditorInput sv : items){
+					ins.add(new SurveyListTreeNode(sv.getName(), sv.getUuid(), Type.SURVEY)); 
 				}
 				
 				//designs
 				designs.addAll(SurveyHibernateManager.getInstance().getSurveyDesigns(s, designFilter));
 				
 			}catch (Exception ex){
-				EcologicalRecordsPlugIn.displayLog("Error loading survey designs." + "\n\n" + ex.getMessage(), ex);
+				EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignListView_LoadError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}finally{
 				s.close();
 			}
@@ -274,7 +262,8 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 	
 	public void showFilterDialog(){
 		if (bar.getSelectionIndex() == 0){
-			
+			SurveyFilterDialog dialog = new SurveyFilterDialog(getSite().getShell(), this, filter);
+			dialog.open();
 		}else{
 			SurveyDesignFilterDialog dialog = new SurveyDesignFilterDialog(getSite().getShell(), this, designFilter);
 			dialog.open();

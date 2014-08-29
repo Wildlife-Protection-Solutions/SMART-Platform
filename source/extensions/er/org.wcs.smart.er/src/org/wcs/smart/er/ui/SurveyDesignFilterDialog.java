@@ -35,11 +35,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
 
 /**
- * Filter dialog for filtering the patrols displayed in the patrol list view.
+ * Filter dialog for managing a SurveyDesignFilter.
  * 
  * @author Emily
  * @since 1.0.0
@@ -110,7 +111,7 @@ public class SurveyDesignFilterDialog extends SmartFilterDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Group g = new Group(main, SWT.DEFAULT);
-		g.setText("Survey Design State");
+		g.setText(Messages.SurveyDesignFilterDialog_StateLabel);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		chActive = new Button(g, SWT.CHECK);
@@ -119,9 +120,9 @@ public class SurveyDesignFilterDialog extends SmartFilterDialog {
 		chInactive.setText(State.INACTIVE.getGuiName());
 		
 		
-		setTitle("Survey Design Filter");
-		getShell().setText("Survey Design Filter");
-		setMessage("Filters the list of survey design.");
+		setTitle(Messages.SurveyDesignFilterDialog_Title);
+		getShell().setText(Messages.SurveyDesignFilterDialog_Title);
+		setMessage(Messages.SurveyDesignFilterDialog_Message);
 		
 		updateControlsValues();
 		return main;

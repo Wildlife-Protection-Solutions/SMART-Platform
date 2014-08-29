@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 
 public interface ISurveyHibernateManager {
 
@@ -46,7 +47,7 @@ public interface ISurveyHibernateManager {
 	
 
 	/**
-	 * Returns all surveys that match the given filter.  If the filter
+	 * Returns all surveys design that match the given filter.  If the filter
 	 * is not provided all surveys are returned.
 	 * 
 	 * @param s
@@ -54,6 +55,17 @@ public interface ISurveyHibernateManager {
 	 * @return
 	 */
 	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s, SurveyDesignFilter filter);
+	
+	/**
+	 * Returns all surveys that match the given filter.  If the filter
+	 * is not provided all surveys are returned.
+	 * 
+	 * @param s
+	 * @param filter filter or null if not filter should be applied
+	 * @return
+	 */
+	public List<SurveyEditorInput> getSurveys(Session s, SurveyFilter filter);
+	
 	
 	/**
 	 * Returns all surveys associated with an active survey design

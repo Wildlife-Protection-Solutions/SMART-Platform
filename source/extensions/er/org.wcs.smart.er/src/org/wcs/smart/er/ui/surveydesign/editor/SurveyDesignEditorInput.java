@@ -41,18 +41,24 @@ public class SurveyDesignEditorInput implements IEditorInput {
 	private byte[] uuid;
 	private String name;
 	private SurveyDesign.State state;
+	private String key;
 	
 	/**
 	 * Constructor
 	 */
-	public SurveyDesignEditorInput(String name, byte[] uuid, SurveyDesign.State state) {
+	public SurveyDesignEditorInput(String name, byte[] uuid, String key, SurveyDesign.State state) {
 		this.uuid = uuid;
 		this.name = name;
 		this.state = state;
+		this.key = key;
 	}
 	
 	public byte[] getUuid() {
 		return uuid;
+	}
+	
+	public String getSurveyDesignKey(){
+		return this.key;
 	}
 	
 	@SuppressWarnings("rawtypes")

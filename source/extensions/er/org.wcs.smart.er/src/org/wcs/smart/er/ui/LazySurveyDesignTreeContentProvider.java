@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 
 /**
@@ -70,7 +71,7 @@ public class LazySurveyDesignTreeContentProvider extends
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (designs == null){
-			return new Object[]{"Loading..."};
+			return new Object[]{Messages.LazySurveyDesignTreeContentProvider_LoadingLabel};
 		}
 		return designs.toArray();
 	}
@@ -79,6 +80,7 @@ public class LazySurveyDesignTreeContentProvider extends
 	 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
 	 *      java.lang.Object, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.designs = null;
