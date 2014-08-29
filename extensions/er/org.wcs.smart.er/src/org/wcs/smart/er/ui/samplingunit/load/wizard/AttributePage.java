@@ -75,9 +75,13 @@ public class AttributePage extends WizardPage {
 	private Composite main;
 	
 	private ScrolledComposite sc ;
+
+	private boolean attributesOnly;
 	
-	public AttributePage(SurveyDesign design, List<Projection> proj){
+	public AttributePage(boolean attributesOnly,
+			SurveyDesign design, List<Projection> proj){
 		super("ATTRIBUTE_PAGE"); //$NON-NLS-1$
+		this.attributesOnly = attributesOnly;
 		this.proj = proj;
 		this.design = design;
 	}
@@ -125,76 +129,8 @@ public class AttributePage extends WizardPage {
 		idViewer.setContentProvider(ArrayContentProvider.getInstance());
 		idViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		if (importer.getClass().equals(CsvSamplingUnitImporter.class)){
-			
-			if ( ((ImportWizard)getWizard()).getSamplingUnitType() == SamplingUnitType.PLOT ){
-				l = new Label(g, SWT.NONE);
-				l.setText(Messages.AttributePage_xLabel);
-			
-				xViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-				xViewer.setLabelProvider(new LabelProvider());
-				xViewer.setContentProvider(ArrayContentProvider.getInstance());
-				xViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				xViewer.setInput(fields);
-				xViewer.getControl().setData(Messages.AttributePage_xLabel2);
-			
-				l = new Label(g, SWT.NONE);
-				l.setText(Messages.AttributePage_yLabel);
-			
-				yViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-				yViewer.setLabelProvider(new LabelProvider());
-				yViewer.setContentProvider(ArrayContentProvider.getInstance());
-				yViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				yViewer.setInput(fields);
-				yViewer.getControl().setData(Messages.AttributePage_yLabel2);
-			}else{
-				l = new Label(g, SWT.NONE);
-				l.setText(Messages.AttributePage_x1Label);
-			
-				xViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-				xViewer.setLabelProvider(new LabelProvider());
-				xViewer.setContentProvider(ArrayContentProvider.getInstance());
-				xViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				xViewer.setInput(fields);
-				xViewer.getControl().setData(Messages.AttributePage_x1Label2);
-				
-				l = new Label(g, SWT.NONE);
-				l.setText(Messages.AttributePage_y1Label);
-			
-				yViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-				yViewer.setLabelProvider(new LabelProvider());
-				yViewer.setContentProvider(ArrayContentProvider.getInstance());
-				yViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				yViewer.setInput(fields);
-				yViewer.getControl().setData(Messages.AttributePage_y1Label2);
-				
-				l = new Label(g, SWT.NONE);
-				l.setText(Messages.AttributePage_x2Label);
-			
-				x2Viewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-				x2Viewer.setLabelProvider(new LabelProvider());
-				x2Viewer.setContentProvider(ArrayContentProvider.getInstance());
-				x2Viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				x2Viewer.setInput(fields);
-			
-				l = new Label(g, SWT.NONE);
-				l.setText(Messages.AttributePage_y2Label);
-			
-				y2Viewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-				y2Viewer.setLabelProvider(new LabelProvider());
-				y2Viewer.setContentProvider(ArrayContentProvider.getInstance());
-				y2Viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				y2Viewer.setInput(fields);
-			}
-			
-			l = new Label(g, SWT.NONE);
-			l.setText(Messages.AttributePage_ProjectionLabel);
-			
-			projViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-			projViewer.setLabelProvider(ProjectionLabelProvider.getInstance());
-			projViewer.setContentProvider(ArrayContentProvider.getInstance());
-			projViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			projViewer.setInput(proj);
+		if (!attributesOnly){
+			createGeometryAttributeFields(importer, g, fields);
 		}
 		
 		Group g2 = new Group(main, SWT.NONE);
@@ -229,18 +165,107 @@ public class AttributePage extends WizardPage {
 			viewers.put(sda.getSamplingUnitAttribute(), viewer);
 		}
 		
-		String[] idItems = new String[fields.length +1];
-		idItems[0] = Messages.AttributePage_SystemGeneratedKeyLabel;
-		for (int i = 0; i < fields.length; i ++){
-			idItems[i+1] = fields[i];
+		if (attributesOnly){
+			idViewer.setInput(fields);
+			idViewer.setSelection(new StructuredSelection(fields[0]));
+		}else{
+			String[] idItems = new String[fields.length +1];
+			idItems[0] = Messages.AttributePage_SystemGeneratedKeyLabel;
+			for (int i = 0; i < fields.length; i ++){
+				idItems[i+1] = fields[i];
+			}
+			idViewer.setInput(idItems);
+			idViewer.setSelection(new StructuredSelection(idItems[0]));
 		}
-		idViewer.setInput(idItems);
-		idViewer.setSelection(new StructuredSelection(idItems[0]));
 		
 		
 		Point p = main.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 		main.setSize(p);
 		sc.setMinSize(p);
+	}
+		
+	private void createGeometryAttributeFields(ISamplingUnitImporter importer,
+			Composite g, String[] fields) {
+		Label l;
+
+		if (importer.getClass().equals(CsvSamplingUnitImporter.class)) {
+
+			if (((ImportWizard) getWizard()).getSamplingUnitType() == SamplingUnitType.PLOT) {
+				l = new Label(g, SWT.NONE);
+				l.setText(Messages.AttributePage_xLabel);
+
+				xViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+				xViewer.setLabelProvider(new LabelProvider());
+				xViewer.setContentProvider(ArrayContentProvider.getInstance());
+				xViewer.getControl().setLayoutData(
+						new GridData(SWT.FILL, SWT.FILL, true, false));
+				xViewer.setInput(fields);
+				xViewer.getControl().setData(Messages.AttributePage_xLabel2);
+
+				l = new Label(g, SWT.NONE);
+				l.setText(Messages.AttributePage_yLabel);
+
+				yViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+				yViewer.setLabelProvider(new LabelProvider());
+				yViewer.setContentProvider(ArrayContentProvider.getInstance());
+				yViewer.getControl().setLayoutData(
+						new GridData(SWT.FILL, SWT.FILL, true, false));
+				yViewer.setInput(fields);
+				yViewer.getControl().setData(Messages.AttributePage_yLabel2);
+			} else {
+				l = new Label(g, SWT.NONE);
+				l.setText(Messages.AttributePage_x1Label);
+
+				xViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+				xViewer.setLabelProvider(new LabelProvider());
+				xViewer.setContentProvider(ArrayContentProvider.getInstance());
+				xViewer.getControl().setLayoutData(
+						new GridData(SWT.FILL, SWT.FILL, true, false));
+				xViewer.setInput(fields);
+				xViewer.getControl().setData(Messages.AttributePage_x1Label2);
+
+				l = new Label(g, SWT.NONE);
+				l.setText(Messages.AttributePage_y1Label);
+
+				yViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+				yViewer.setLabelProvider(new LabelProvider());
+				yViewer.setContentProvider(ArrayContentProvider.getInstance());
+				yViewer.getControl().setLayoutData(
+						new GridData(SWT.FILL, SWT.FILL, true, false));
+				yViewer.setInput(fields);
+				yViewer.getControl().setData(Messages.AttributePage_y1Label2);
+
+				l = new Label(g, SWT.NONE);
+				l.setText(Messages.AttributePage_x2Label);
+
+				x2Viewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+				x2Viewer.setLabelProvider(new LabelProvider());
+				x2Viewer.setContentProvider(ArrayContentProvider.getInstance());
+				x2Viewer.getControl().setLayoutData(
+						new GridData(SWT.FILL, SWT.FILL, true, false));
+				x2Viewer.setInput(fields);
+
+				l = new Label(g, SWT.NONE);
+				l.setText(Messages.AttributePage_y2Label);
+
+				y2Viewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+				y2Viewer.setLabelProvider(new LabelProvider());
+				y2Viewer.setContentProvider(ArrayContentProvider.getInstance());
+				y2Viewer.getControl().setLayoutData(
+						new GridData(SWT.FILL, SWT.FILL, true, false));
+				y2Viewer.setInput(fields);
+			}
+
+			l = new Label(g, SWT.NONE);
+			l.setText(Messages.AttributePage_ProjectionLabel);
+
+			projViewer = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+			projViewer.setLabelProvider(ProjectionLabelProvider.getInstance());
+			projViewer.setContentProvider(ArrayContentProvider.getInstance());
+			projViewer.getControl().setLayoutData(
+					new GridData(SWT.FILL, SWT.FILL, true, false));
+			projViewer.setInput(proj);
+		}
 	}
 	
 	/**
@@ -282,7 +307,7 @@ public class AttributePage extends WizardPage {
 	 * @return the id field or null if should be system generated
 	 */
 	public String getIdField(){
-		if (idViewer.getCombo().getSelectionIndex() == 0){
+		if (!attributesOnly && idViewer.getCombo().getSelectionIndex() == 0){
 			return null;
 		}
 		return (String) ((IStructuredSelection)idViewer.getSelection()).getFirstElement();

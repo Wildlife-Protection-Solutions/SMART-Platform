@@ -191,8 +191,8 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
     	setWindowTitle(Messages.ImportWizard_WindowTitle);
     	
     	typePage = new TypePage();
-    	filePage = new FileWizardPage();
-    	attributePage = new AttributePage(surveyDesign, HibernateManager.getCaProjectionList(session));
+    	filePage = new FileWizardPage(true);
+    	attributePage = new AttributePage(false, surveyDesign, HibernateManager.getCaProjectionList(session));
     	bufferPage = new BufferPage();
     	
     	super.addPage(typePage);
