@@ -29,15 +29,14 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.survey.NewSurveyDialog;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * New survey handler.
@@ -78,14 +77,13 @@ public class NewSurveyHandler extends AbstractHandler {
 			}
 		}
 		
-		Session s = HibernateManager.openSession();
-		try{
-			NewSurveyDialog dialog = new NewSurveyDialog(HandlerUtil.getActiveShell(event), parent, s);
-			dialog.open();
-		}finally{
-			s.close();
-		}
+		newSurvey(HandlerUtil.getActiveShell(event), parent);
 		
 		return null;
+	}
+	
+	public static void newSurvey(Shell parent, byte[] parentDesign){
+		NewSurveyDialog dialog = new NewSurveyDialog(parent, parentDesign);
+		dialog.open();
 	}
 }

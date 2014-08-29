@@ -54,6 +54,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 	private SurveyDesign surveyDesign;
 	private SurveyDesignSummaryEditorPage summaryPage;
 	private SamplingUnitEditorPage suPage;
+	private SurveyDesignDataPage dataPage;
 	
 	private ISurveyEventListener modifiedListener = new ISurveyEventListener() {
 		@Override
@@ -67,7 +68,8 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 						@Override
 						public void run() {
 							summaryPage.initValues();
-							suPage.initValues();		
+							suPage.initValues();	
+							dataPage.initValues();
 						}});
 					
 				}
@@ -120,6 +122,10 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 			suPage = new SamplingUnitEditorPage(this);
 			i = addPage(suPage, getEditorInput());
 			setPageText(i, "Sampling Units");
+			
+			dataPage = new SurveyDesignDataPage(this);
+			i = addPage(dataPage, getEditorInput());
+			setPageText(i, "Survey Data");
 			
 			super.setPartName(getSurveyDesign().getName());
 		}catch (Exception ex) {

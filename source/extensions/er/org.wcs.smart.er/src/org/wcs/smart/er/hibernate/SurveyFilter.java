@@ -233,7 +233,7 @@ public class SurveyFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY lbl.value asc, s.startDate desc"); //$NON-NLS-1$
+		str.append("ORDER BY  lbl.value asc, s.startDate desc, s.id asc "); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString())
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$

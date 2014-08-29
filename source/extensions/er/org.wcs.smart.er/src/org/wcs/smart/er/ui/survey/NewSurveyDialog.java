@@ -60,6 +60,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -86,9 +87,9 @@ public class NewSurveyDialog extends TitleAreaDialog{
 	private Survey newSurvey;
 	
 	public NewSurveyDialog(Shell parentShell, 
-			byte[] parentSurveyDesignUuid, Session session) {
+			byte[] parentSurveyDesignUuid) {
 		super(parentShell);
-		this.session = session;
+		this.session = HibernateManager.openSession();
 		this.parentSurveyDesignUuid = parentSurveyDesignUuid;
 	}
 	
@@ -99,7 +100,16 @@ public class NewSurveyDialog extends TitleAreaDialog{
 	public Survey getSurvey(){
 		return newSurvey;
 	}
-	
+
+	@Override
+	public boolean close(){
+		try{
+			session.close();
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+		}
+		return super.close();
+	}
 
 	/**
 	 * Saves the new survey then closes the dialog
