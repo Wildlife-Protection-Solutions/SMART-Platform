@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 
 /**
  * To be implemeneted when ccaa analysis implemented for ccaa survey;
@@ -57,6 +58,12 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	@Override
 	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<SurveyEditorInput> getSurveys(Session s, SurveyFilter filter) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.er.hibernate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -34,6 +35,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -106,8 +108,8 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		
 		//get fixed sampling units
 		StringBuilder sb = new StringBuilder();
-		sb.append("FROM SamplingUnit a ");
-		sb.append(" WHERE a.surveyDesign = :survey ");
+		sb.append("FROM SamplingUnit a "); //$NON-NLS-1$
+		sb.append(" WHERE a.surveyDesign = :survey "); //$NON-NLS-1$
 		
 		Query q = s.createQuery(sb.toString());
 		q.setParameter("survey", mission.getSurvey().getSurveyDesign());
@@ -131,6 +133,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 * If the filter
 	 * is null with return all survey designs.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s, SurveyDesignFilter filter) {
 		if (filter == null){
@@ -139,7 +142,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			
 			for (SurveyDesign d : ds){
-				SurveyDesignEditorInput ii = new SurveyDesignEditorInput(d.getName(), d.getUuid(), d.getState());
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput(d.getName(), d.getUuid(), d.getKeyId(), d.getState());
 				all.add(ii);
 			}
 			return all;
@@ -149,13 +152,51 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			List<Object[]> data = q.list();
 			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			for (Object[] x : data){
-				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[1], (byte[])x[0], (SurveyDesign.State)x[2]);
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[1], (byte[])x[0], (String)x[3], (SurveyDesign.State)x[2]);
+				all.add(ii);
+			}
+			return all;
+		}
+	}
+	
+	/**
+	 * Returns all surveys that match the given filter.  If the filter
+	 * is not provided all surveys are returned.
+	 * 
+	 * @param s
+	 * @param filter filter or null if not filter should be applied
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public List<SurveyEditorInput> getSurveys(Session s, SurveyFilter filter){
+		if (filter == null){
+			//get all
+			List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
+					.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+			List<SurveyEditorInput> all = new ArrayList<SurveyEditorInput>();
+			
+			for (Survey d : ds){
+				SurveyEditorInput ii = new SurveyEditorInput(d.getId(), d.getUuid(), d.getStartDate(), d.getSurveyDesign().getName());
+				all.add(ii);
+			}
+			return all;
+				
+		}else{
+			Query q = filter.buildQuery(s);
+			List<Object[]> data = q.list();
+			List<SurveyEditorInput> all = new ArrayList<SurveyEditorInput>();
+			for (Object[] x : data){
+				SurveyEditorInput ii = new SurveyEditorInput((String)x[1], (byte[])x[0], (Date)x[2], (String)x[3]);
 				all.add(ii);
 			}
 			return all;
 		}
 	}
 
+	/**
+	 * Loads all active surveys for the current conservation area
+	 */
 	@Override
 	public List<Survey> getActiveSurveys(Session s) {
 		//get all
@@ -168,6 +209,9 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		return ds;
 	}
 	
+	/**
+	 * Loads all surveys associated with a survey design
+	 */
 	@Override
 	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s){
 		@SuppressWarnings("unchecked")

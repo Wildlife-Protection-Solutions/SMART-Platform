@@ -75,6 +75,7 @@ public class SurveyListTreeNodeContentProvider implements
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void fetchDeferredChildren(Object object,
 			IElementCollector collector, IProgressMonitor monitor) {
