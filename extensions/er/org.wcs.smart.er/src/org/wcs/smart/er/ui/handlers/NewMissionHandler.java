@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -78,9 +79,13 @@ public class NewMissionHandler extends AbstractHandler {
 		}
 		
 	
-		WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event), 
+		newMission(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		return null;
+	}
+	
+	public static void newMission(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+		WizardDialog dialog = new WizardDialog(parent, 
 				new NewMissionWizard(parentDesign, parentSurvey));
 		dialog.open();
-		return null;
 	}
 }

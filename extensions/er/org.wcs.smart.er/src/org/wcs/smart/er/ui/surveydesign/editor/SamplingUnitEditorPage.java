@@ -305,7 +305,9 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 		
 		form = toolkit.createForm(container);
 		form.setText(Messages.SamplingUnitEditorPage_FormName);
-		form.getBody().setLayout(new GridLayout());
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		form.getBody().setLayout(gl);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		SashForm sash = new SashForm(form.getBody(), SWT.HORIZONTAL);
@@ -614,9 +616,10 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 				labelProvider = new SamplingUnitColumnLabelProvider(att.getSamplingUnitAttribute().getKeyId(), att.getSamplingUnitAttribute().getType());
 				column.setLabelProvider(labelProvider);
 				column.getColumn().setResizable(true);
-				column.getColumn().setWidth(gc.stringExtent(att.getSamplingUnitAttribute().getName()).x + 20);
+				column.getColumn().setWidth(gc.stringExtent(att.getSamplingUnitAttribute().getName()).x + 50);
 				column.getColumn().setText(att.getSamplingUnitAttribute().getName());
 				column.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, column));
+				column.getColumn().setImage(att.getSamplingUnitAttribute().getType().getImage());
 			}
 		}finally{
 			gc.dispose();

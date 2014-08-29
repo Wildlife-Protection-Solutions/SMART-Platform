@@ -46,6 +46,8 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String SURVEY_DESIGN_INACTIVE_ICON = "org.wcs.smart.surveydesign.inactive.icon"; //$NON-NLS-1$
 	public static final String MISSION_ICON = "org.wcs.smart.fieldsurvey.icon"; //$NON-NLS-1$
 	public static final String SURVEY_ICON = "org.wcs.smart.survey.icon"; //$NON-NLS-1$
+	public static final String NEW_MISSION_ICON = "org.wcs.smart.fieldsurvey.new.icon"; //$NON-NLS-1$
+	public static final String NEW_SURVEY_ICON = "org.wcs.smart.survey.new.icon"; //$NON-NLS-1$
 	public static final String SAMPLING_UNIT_ICON = "org.wcs.smart.survey.samplingunit"; //$NON-NLS-1$
 	public static final String SAMPLING_UNIT_PLOT_ICON = "org.wcs.smart.survey.samplingunit.plot"; //$NON-NLS-1$
 	public static final String SAMPLING_UNIT_TRANSECT_ICON = "org.wcs.smart.survey.samplingunit.transect"; //$NON-NLS-1$
@@ -110,7 +112,11 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	reg.put(CHANGE_STATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/change_state.png")); //$NON-NLS-1$
      	reg.put(EDIT_SU_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_edit.png")); //$NON-NLS-1$
      	reg.put(ZOOM_SU_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_zoom.png")); //$NON-NLS-1$
+     	
+     	reg.put(NEW_MISSION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_add.png")); //$NON-NLS-1$
+     	reg.put(NEW_SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_add.png")); //$NON-NLS-1$
     }
+    
     
 	/**
 	 * Displays an error message to the user and logs the
