@@ -64,9 +64,16 @@ public class FileWizardPage extends WizardPage {
 
 	private String[] fieldsNames = new String[0];
 	private ISamplingUnitImporter importer;
+	private boolean supportsShp;
 	
-	public FileWizardPage(){
+	/**
+	 * 
+	 * @param supportsShp if shapefiles can be selected, if false
+	 * only deleimited files can be selected
+	 */
+	public FileWizardPage(boolean supportsShp){
 		super("FILE_PAGE"); //$NON-NLS-1$
+		this.supportsShp = supportsShp;
 	}
 	
 	@Override
@@ -97,9 +104,13 @@ public class FileWizardPage extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell());
-				
-				fd.setFilterExtensions(new String[]{"*.csv;*.shp", "*.csv", "*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				fd.setFilterNames(new String[]{Messages.FileWizardPage_SupportedFormatLabel, Messages.FileWizardPage_CsvFormatLabel, Messages.FileWizardPage_ShpFormatLabel, Messages.FileWizardPage_AllFilesLabel});
+				if (supportsShp){
+					fd.setFilterExtensions(new String[]{"*.csv;*.shp", "*.csv", "*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					fd.setFilterNames(new String[]{Messages.FileWizardPage_SupportedFormatLabel, Messages.FileWizardPage_CsvFormatLabel, Messages.FileWizardPage_ShpFormatLabel, Messages.FileWizardPage_AllFilesLabel});
+				}else{
+					fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ 
+					fd.setFilterNames(new String[]{Messages.FileWizardPage_CsvFormatLabel, Messages.FileWizardPage_AllFilesLabel});
+				}
 				String file = fd.open();
 				if(file != null){
 					txtFile.setText(file);
@@ -114,21 +125,27 @@ public class FileWizardPage extends WizardPage {
 		
 		delimiter = new DelimiterCombo(c, SWT.BORDER);
 		delimiter.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		
-		dell.setEnabled(false);
-		delimiter.getControl().setEnabled(false);
+
+		dell.setEnabled(!supportsShp);
+		delimiter.getControl().setEnabled(!supportsShp);
 		
 		setControl(outer);
 		setTitle(Messages.FileWizardPage_Title);
-		setMessage(Messages.FileWizardPage_Message);
+		if (supportsShp){
+			setMessage(Messages.FileWizardPage_Message);
+		}else{
+			setMessage(Messages.FileWizardPage_CsvOnlyMessage);
+		}
 	}
 	
 	private void enableDelimiter(){
-		String str = txtFile.getText();
-		boolean enabled = !str.endsWith(".shp"); //$NON-NLS-1$
+		if (supportsShp){
+			String str = txtFile.getText();
+			boolean enabled = !str.endsWith(".shp"); //$NON-NLS-1$
 		
-		dell.setEnabled(enabled);
-		delimiter.getControl().setEnabled(enabled);
+			dell.setEnabled(enabled);
+			delimiter.getControl().setEnabled(enabled);
+		}
 	}
 
 	public Character getDelimiter(){
@@ -162,7 +179,7 @@ public class FileWizardPage extends WizardPage {
 					
 					HashMap<String, Object> params = new HashMap<String, Object>();
 					params.putAll(options);
-					if (isCsv){
+					if (!supportsShp || isCsv){
 						importer = new CsvSamplingUnitImporter();
 						DelimiterCombo.Delimiter delimiterfield = (Delimiter) ((IStructuredSelection)delimiter.getSelection()).getFirstElement();
 						params.put(CsvSamplingUnitImporter.DELIMETER_KEY, new Character(delimiterfield.value));

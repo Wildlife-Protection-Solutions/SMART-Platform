@@ -58,6 +58,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -97,6 +98,8 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.samplingunit.EditSamplingUnitDialog;
 import org.wcs.smart.er.ui.samplingunit.SamplingUnitStateDialog;
 import org.wcs.smart.er.ui.samplingunit.export.wizard.ExportWizard;
+import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportAttributeWizard;
+import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportOptionDialog;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -690,9 +693,21 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 			SurveyDesignSamplingUnitAttributeDialog d = new SurveyDesignSamplingUnitAttributeDialog(getSite().getShell(), editor.getSurveyDesign());
 			d.open();
 		}else if (e.widget == btnImport){
-			ImportWizard wizard = new ImportWizard(editor.getSurveyDesign());
+			
+			ImportOptionDialog dialog = new ImportOptionDialog(getSite().getShell());
+			if (dialog.open() != ImportOptionDialog.OK){
+				return;
+			}
+			
+			IWizard wizard = null;
+			if (dialog.importNew()){
+				wizard = new ImportWizard(editor.getSurveyDesign());
+			}else{
+				wizard = new ImportAttributeWizard(editor.getSurveyDesign());
+			}
 			WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
 			wd.open();
+			
 		}else if (e.widget == btnExport){
 			ExportWizard wizard = new ExportWizard(editor.getSurveyDesign());
 			WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
