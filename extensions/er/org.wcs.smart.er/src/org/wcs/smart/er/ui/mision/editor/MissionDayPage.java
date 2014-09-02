@@ -124,6 +124,12 @@ public class MissionDayPage extends EditorPart {
 		frmSummary.setFocus();
 	}
 
+	@Override
+	public void dispose() {
+		dayComposite.dispose();
+		super.dispose();
+	}
+	
 	public MissionEditor getMissionEditor() {
 		return editor;
 	}

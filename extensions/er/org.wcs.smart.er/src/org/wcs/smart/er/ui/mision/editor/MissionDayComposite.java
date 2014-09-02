@@ -438,6 +438,11 @@ public class MissionDayComposite {
 		}
 	}
 
+	public void dispose() {
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, trackListener);
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, waypointListener);
+	}
+	
 	public void setData(Mission data, Date date) {
 		this.mission = data;
 		
