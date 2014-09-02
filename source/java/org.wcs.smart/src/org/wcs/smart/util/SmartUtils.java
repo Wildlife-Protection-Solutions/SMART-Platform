@@ -293,6 +293,14 @@ public class SmartUtils {
 
 	}
 
+	public static boolean isSameDate(Date d1, Date d2) {
+		Calendar c1 = convertDate(d1);
+		Calendar c2 = convertDate(d2);
+		return c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH) 
+				&& c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
+				&& c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
+	}
+	
 	public static String getDirectoryPath(byte[] uuid) {
 		return SmartUtils.encodeHex(uuid);
 	}

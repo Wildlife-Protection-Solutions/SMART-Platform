@@ -290,7 +290,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			Calendar calEnd = SmartUtils.convertDate(getMission().getEndDate());
 			
 			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
-				MissionDayPageEditorInput input = new MissionDayPageEditorInput(calStart.getTime());
+				MissionDayPageEditorInput input = new MissionDayPageEditorInput(SmartUtils.getDatePart(calStart.getTime(), false));
 				MissionDayPage editor = new MissionDayPage(this);
 				super.addPage(insertindex, editor, input);
 				super.setPageText(insertindex, DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getDay()));
