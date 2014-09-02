@@ -74,6 +74,9 @@ public class SaveWaypointJob extends Job {
 				wp.getWaypoint().setSourceId(SurveyWaypointSource.KEY);
 				wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 
+				if (wp.getWaypoint().getUuid() == null) {
+					saveSession.saveOrUpdate(wp.getWaypoint());
+				}
 				saveSession.saveOrUpdate(wp);
 				
 				// remove observations with no data
@@ -99,9 +102,8 @@ public class SaveWaypointJob extends Job {
 		} finally {
 			saveSession.close();
 		}
-		for (SurveyWaypoint wp : waypoints){
+		for (SurveyWaypoint wp : waypoints) {
 			try{
-				//TODO:
 				WaypointEventManager.getInstance().waypointModified(wp.getWaypoint());
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
