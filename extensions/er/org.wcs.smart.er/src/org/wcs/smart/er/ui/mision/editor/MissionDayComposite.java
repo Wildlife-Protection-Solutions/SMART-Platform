@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
@@ -114,6 +115,7 @@ public class MissionDayComposite {
 
 	private TableViewer observationTable;
 	private ObservationOptions observationOptions;
+	private List<SurveyWaypoint> input;
 	
 	private Font okayFont;
 	private Font errorFont;
@@ -415,7 +417,7 @@ public class MissionDayComposite {
 			column.getColumn().setMoveable(false);
 			column.getColumn().setWidth(25);
 
-			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH){
+			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH) {
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}
 			
@@ -436,18 +438,18 @@ public class MissionDayComposite {
 		}
 	}
 
-	public void setData(Mission data) {
+	public void setData(Mission data, Date date) {
 		this.mission = data;
 		
 		Calendar cal = Calendar.getInstance();
-		if (data.getStartDate() != null) {
+		if (data.getStartDate() != date) {
 			cal.setTime(data.getStartDate());
 			dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
 					cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 		}else{
 			dtStartTime.setTime(0,0,0);
 		}
-		if (data.getEndDate() != null) {
+		if (data.getEndDate() != date) {
 			cal.setTime(data.getEndDate());
 			dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
 					cal.get(Calendar.SECOND));
@@ -466,7 +468,13 @@ public class MissionDayComposite {
 		if (data.getWaypoints() == null){
 			data.setWaypoints(new ArrayList<SurveyWaypoint>());
 		}
-		WritableList inputList = new WritableList(data.getWaypoints(), SurveyWaypoint.class);
+		input = new ArrayList<SurveyWaypoint>();
+		for (SurveyWaypoint p : data.getWaypoints()) {
+			if (SmartUtils.isSameDate(p.getWaypoint().getDateTime(), date)) {
+				input.add(p);
+			}
+		}
+		WritableList inputList = new WritableList(input, SurveyWaypoint.class);
 		observationTable.setInput(inputList);
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -563,7 +571,7 @@ public class MissionDayComposite {
 		double y = 0, x = 0;
 		int id = -1;
 		Date last = null;
-		for (Iterator<SurveyWaypoint> iterator = mission.getWaypoints().iterator(); iterator.hasNext();) {
+		for (Iterator<SurveyWaypoint> iterator = input.iterator(); iterator.hasNext();) {
 			SurveyWaypoint e = iterator.next();
 			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
 			
@@ -588,6 +596,7 @@ public class MissionDayComposite {
 			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(editor.getDay(), false));
 			
 			mission.getWaypoints().add(wp);
+			input.add(wp);
 			
 			editor.getMissionEditor().save(Collections.singleton(wp));
 			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
@@ -605,6 +614,7 @@ public class MissionDayComposite {
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			SurveyWaypoint w = (SurveyWaypoint) iterator.next();
 			if (mission.getWaypoints().remove(w)){
+				input.remove(w);
 				w.setMission(null);
 				deleted.add(w);
 			}	
