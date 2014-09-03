@@ -489,7 +489,7 @@ public class PatrolScreensUtil {
 			}
 			return nextId;
 		} else {
-			Type value = PatrolType.Type.valueOf(typeOption.getStringValue());
+			Type value = typeOption.getStringValue() != null ? PatrolType.Type.valueOf(typeOption.getStringValue()) : PatrolType.Type.GROUND;
 			String elId = (new CyberTrackerId()).getItemId();
 			ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
 			container.defaultValues.add(createDefaultResultElement(RESULT_PATROL_TYPE, elements, elId));
