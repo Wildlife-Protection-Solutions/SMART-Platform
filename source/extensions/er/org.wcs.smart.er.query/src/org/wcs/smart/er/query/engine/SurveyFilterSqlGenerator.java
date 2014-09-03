@@ -25,6 +25,7 @@ package org.wcs.smart.er.query.engine;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -37,6 +38,7 @@ import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SurveyFilter;
@@ -93,6 +95,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(SurveyDesign.class));
 		}else if (filter instanceof SamplingUnitFilter){
 			return asSql((SamplingUnitFilter)filter, engine);
+		}else if (filter instanceof SamplingUnitAttributeFilter){
+			return asSql((SamplingUnitAttributeFilter)filter, engine);
 		}else if (filter instanceof SurveyDesignFilter){
 			return asSql((SurveyDesignFilter)filter, engine);
 		}else{
@@ -200,6 +204,33 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	}
 	
 	/*
+	 * Sampling unit attribute filter
+	 */
+	protected String asSql(SamplingUnitAttributeFilter filter, IQueryEngine engine) throws SQLException{
+		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (col != null){
+			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		}
+		if (filter.getAttributeType() == AttributeType.NUMERIC){
+			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + String.valueOf((Double)filter.getValue()) + ") ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+		}else if (filter.getAttributeType() == AttributeType.TEXT){
+			String queryStr = ""; //$NON-NLS-1$
+			String val = StringEscapeUtils.escapeSql((String)filter.getValue());
+			
+			if (filter.getOperator() == Operator.STR_CONTAINS || 
+					filter.getOperator() == Operator.STR_NOTCONTAINS){
+				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " '%" + val.toLowerCase() + "%' )";	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}else if (filter.getOperator() == Operator.STR_EQUALS){
+				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " '" + val.toLowerCase() + "' )";      //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+			}
+			return queryStr;
+		}else{
+			throw new IllegalStateException("Only numeric and text sampling unit attribute types are supported."); //$NON-NLS-1$
+		}
+	}
+	
+	/*
 	 * Mission Filter
 	 */
 	protected String asSql(MissionFilter filter, IQueryEngine engine) throws SQLException{
@@ -296,11 +327,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			f = " ( " +field + " >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){ 
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' and cast(" + field + " as date) <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' and cast(" + field + " as date) < '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		return f;

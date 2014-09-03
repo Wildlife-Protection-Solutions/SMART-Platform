@@ -41,7 +41,9 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -113,6 +115,14 @@ public class SurveyQueryColumnManager {
 					add = false;
 				}
 			}
+			if (c == SurveyQueryColumn.FixedColumns.CA_ID || 
+				c == SurveyQueryColumn.FixedColumns.CA_NAME ){
+				
+				if (!SmartDB.isMultipleAnalysis()){
+					add = false;
+				}
+			}
+			
 			if (add){
 				cols.add(new SurveyQueryColumn(c));
 			}
@@ -122,16 +132,25 @@ public class SurveyQueryColumnManager {
 		if (sd == null){
 			Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
 
+				@SuppressWarnings("unchecked")
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
 					try{
-						@SuppressWarnings("unchecked")
+						
 						List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
 								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 						for (MissionAttribute ma : all){
 							cols.add(new MissionPropertyQueryColumn(ma));
 						}
+						
+						List<SamplingUnitAttribute> su = s.createCriteria(SamplingUnitAttribute.class)
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+								.list();
+						for (SamplingUnitAttribute sua : su){
+							cols.add(new SamplingUnitAttributeQueryColumn(sua));
+						}
+						
 					}finally{
 						s.close();
 					}
@@ -153,6 +172,14 @@ public class SurveyQueryColumnManager {
 						SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 						for (MissionProperty mp : sd2.getMissionProperties()){
 							cols.add(new MissionPropertyQueryColumn(mp.getAttribute()));
+						}
+						
+						@SuppressWarnings("unchecked")
+						List<SurveyDesignSamplingUnitAttribute> atts = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
+								.add(Restrictions.eq("id.surveyDesign", sd2)) //$NON-NLS-1$
+								.list();
+						for (SurveyDesignSamplingUnitAttribute a : atts){
+							cols.add(new SamplingUnitAttributeQueryColumn(a.getSamplingUnitAttribute()));
 						}
 					}finally{
 						s.close();

@@ -41,6 +41,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
@@ -313,6 +314,8 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				
 				result.addAll(getResults(lastResultSet, offset, pageSize));
 				attachObservations(result, c, session);
+				attachMissionProperties(result, c, session);
+				attachSamplingUnitAttributes(result, c, session);
 			}
 		});
 		return result;
@@ -321,7 +324,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	private void attachObservations(List<SurveyQueryResultItem> result, Connection c, Session session) throws SQLException {
 		boolean hasObservations = false;
 		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
+		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.ca_uuid FROM "); //$NON-NLS-1$
 		attrSql.append(queryTempTable);
 		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
 		attrSql.append(queryTempTable).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
@@ -359,6 +362,104 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		}		
 	}
 	
+	private void attachMissionProperties(List<SurveyQueryResultItem> result, Connection c, Session session) throws SQLException {
+		
+		StringBuilder attrSql = new StringBuilder();
+		attrSql.append("SELECT mpv.mission_uuid, ma.keyid, mpv.number_value,  mpv.string_value, mpv.list_element_uuid FROM "); //$NON-NLS-1$
+		attrSql.append("smart.mission_attribute ma join smart.mission_property_value mpv on mpv.mission_attribute_uuid = ma.uuid "); //$NON-NLS-1$
+		attrSql.append(" WHERE mpv.mission_uuid IN ("); //$NON-NLS-1$
+
+		boolean hasItem = false;
+		for (SurveyQueryResultItem it : result) {
+			if (it.getMissionUuid() != null){
+				if (hasItem) attrSql.append(","); //$NON-NLS-1$
+				attrSql.append("x'").append(SmartUtils.encodeHex(it.getMissionUuid())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				hasItem = true;
+			}
+		}
+		
+		
+		if (!hasItem) {
+			//no missions
+			return;
+		}
+		attrSql.append(')');
+
+		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
+		try {
+			while(rs.next()){
+				byte[] muuid = rs.getBytes(1);
+				String key = rs.getString(2);
+				Double dvalue = rs.getDouble(3);
+				String svalue = rs.getString(4);
+				
+				for (SurveyQueryResultItem it : result){
+					if (Arrays.equals(muuid,it.getMissionUuid())){
+						if (rs.getObject(3) != null){
+							it.addMissionPropertyValue(key, dvalue);
+						}else if (svalue != null){
+							it.addMissionPropertyValue(key,  svalue);
+						}else if (rs.getObject(5) != null){
+							it.addMissionPropertyValue(key, 
+									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, rs.getBytes(5))).getName());
+						}
+					}
+				}
+				
+			}
+		} finally {
+			rs.close();
+		}		
+	}
+	
+	
+	private void attachSamplingUnitAttributes(List<SurveyQueryResultItem> result, Connection c, Session session) throws SQLException {
+		
+		StringBuilder attrSql = new StringBuilder();
+		attrSql.append("SELECT suav.su_uuid, sua.keyid, suav.number_value, suav.string_value FROM "); //$NON-NLS-1$
+		attrSql.append("smart.sampling_unit_attribute sua join smart.sampling_unit_attribute_value suav"); //$NON-NLS-1$
+		attrSql.append(" on suav.su_attribute_uuid = sua.uuid "); //$NON-NLS-1$
+		attrSql.append(" WHERE suav.su_uuid IN ("); //$NON-NLS-1$
+
+		boolean hasItem = false;
+		for (SurveyQueryResultItem it : result) {
+			if (it.getSamplingUnitUuid() != null){
+				if (hasItem) attrSql.append(","); //$NON-NLS-1$
+				attrSql.append("x'").append(SmartUtils.encodeHex(it.getSamplingUnitUuid())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				hasItem = true;
+			}
+		}
+		
+		
+		if (!hasItem) {
+			//no missions
+			return;
+		}
+		attrSql.append(')');
+
+		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
+		try {
+			while(rs.next()){
+				byte[] muuid = rs.getBytes(1);
+				String key = rs.getString(2);
+				Double dvalue = rs.getDouble(3);
+				String svalue = rs.getString(4);
+				
+				for (SurveyQueryResultItem it : result){
+					if (Arrays.equals(muuid,it.getSamplingUnitUuid())){
+						if (rs.getObject(3) != null){
+							it.addSamplingUnitAttributeValue(key, dvalue);
+						}else if (svalue != null){
+							it.addSamplingUnitAttributeValue(key, svalue);
+						}
+					}
+				}				
+			}
+		} finally {
+			rs.close();
+		}		
+	}
+
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
 		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
 		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$

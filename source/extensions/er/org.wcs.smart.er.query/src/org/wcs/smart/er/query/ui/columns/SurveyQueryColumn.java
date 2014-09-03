@@ -57,7 +57,7 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
 		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
-		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.DATE, "su:buffer"),  //$NON-NLS-1$
+		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.NUMBER, "su:buffer"),  //$NON-NLS-1$
 		
 		WAYPOINT_ID(Messages.SurveyQueryColumn_WaypointIdLabel, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(Messages.SurveyQueryColumn_WpDateLabel, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$

@@ -54,7 +54,9 @@ public class SurveyQueryResultItem implements IResultItem{
 	private String missionId;
 	private Date missionStart;
 	private Date missionEnd;
+	private byte[] missionUuid;
 	
+	private byte[] samplingUnitUuid;
 	private String samplingUnitId;
 	private Double smaplingUnitBuffer;
 	
@@ -71,8 +73,11 @@ public class SurveyQueryResultItem implements IResultItem{
 	private String waypointObserver;
 	
 	private String[] observationCategory;
-	private HashMap<String, Object> properties = new HashMap<String, Object>();
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
+	
+	
+	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
+	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
 	private List<byte[]> tracks = null;
@@ -123,36 +128,51 @@ public class SurveyQueryResultItem implements IResultItem{
 	}
 	
 	/**
-	 * Adds an attribute to the observation results 
-	 * @param key the attribute key
-	 * @param value the attribute value
+	 * Sets the observation attribute values
+	 * @param attributes
 	 */
-	public void addAttribute(String key, Object value){
-		attributes.put(key, value);
-	}
-	
 	public void setAttributes(HashMap<String, Object> attributes){
 		this.attributes = attributes;
 	}
 		
 	/**
-	 * Finds the properties value of the associated attribute
-	 * key.
+	 * Finds the mission property with the associated
+	 * attribute key.
 	 * 
 	 * @param attributeKey the attribute key
 	 * @return the value associated with the attribute given key
 	 */
 	public Object getMissionPropertyValue(String attributeKey){
-		return properties.get(attributeKey);
+		return missionProperties.get(attributeKey);
 	}
 	
 	/**
-	 * Adds an properties to the observation results 
+	 * Adds a mission property to the observation results 
 	 * @param key the attribute key
 	 * @param value the attribute value
 	 */
 	public void addMissionPropertyValue(String key, Object value){
-		properties.put(key, value);
+		missionProperties.put(key, value);
+	}
+	
+	/**
+	 * Finds the properties value of the associated sampling
+	 * unit attribute key.
+	 * 
+	 * @param attributeKey sampling unit attribute key
+	 * @return the value associated with the given key
+	 */
+	public Object getSamplingUnitAttributeValue(String attributeKey){
+		return suAttributes.get(attributeKey);
+	}
+	
+	/**
+	 * Adds an sampling unit property value to the result 
+	 * @param key the attribute key
+	 * @param value the attribute value
+	 */
+	public void addSamplingUnitAttributeValue(String key, Object value){
+		suAttributes.put(key, value);
 	}
 	
 	/**
@@ -168,6 +188,37 @@ public class SurveyQueryResultItem implements IResultItem{
 	 */
 	public byte[] getWaypointUuid(){
 		return this.waypointUuid;
+	}
+	
+	/**
+	 * sets the mission uuid
+	 * @param uuid
+	 */
+	public void setMissionUuid(byte[] uuid){
+		this.missionUuid = uuid;
+	}
+	/**
+	 * 
+	 * @return the mission uuid
+	 */
+	public byte[] getMissionUuid(){
+		return this.missionUuid;
+	}
+	
+	/**
+	 * sets the sampling unit uuid
+	 * @param uuid
+	 */
+	public void setSamplingUnitUuid(byte[] uuid){
+		this.samplingUnitUuid = uuid;
+	}
+	
+	/**
+	 * 
+	 * @return the sampling unit uuid
+	 */
+	public byte[] getSamplingUnitUuid(){
+		return this.samplingUnitUuid;
 	}
 	
 	/**

@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,11 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionProperty;
-import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -69,8 +64,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 
 	private String queryDataTable;
 	private int categoryCount;
-	
-	private List<MissionAttribute> missionAttributes = new ArrayList<MissionAttribute>();
 	
 	public DerbyPagedObservationResult executeDerbyQuery(final SurveyObservationQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
 		
@@ -360,76 +353,76 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		if (monitor.isCanceled()) return;
 		
 		
-		monitor.subTask(Messages.DerbyObservationEngine_progress8);
-		if (query.getSurveyDesign() != null){
-			SurveyDesign sd = null;
-			try{
-				sd = (SurveyDesign) session.load(SurveyDesign.class, query.getSurveyDesignAsObject().getUuid());
-				
-			}catch (Exception ex){
-				throw new SQLException(ex);
-			}
-			if (sd == null){
-				throw new SQLException(MessageFormat.format(Messages.DerbyObservationEngine_SurveyDesignNotFound, new Object[]{query.getSurveyDesign()} ));
-			}
-			for (MissionProperty mp : sd.getMissionProperties()){
-				missionAttributes.add(mp.getAttribute());
-				//add column & populate
-				String sql = ""; //$NON-NLS-1$
-				if (mp.getAttribute().getType() == AttributeType.NUMERIC){
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " double"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-					
-					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".number_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-				}else if (mp.getAttribute().getType() == AttributeType.TEXT){
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-					
-					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".string_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-				}else if (mp.getAttribute().getType() == AttributeType.LIST){						
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  "_lst char(16) for bit data"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-					
-					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-					
-					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + "_lst = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".list_element_uuid FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-					QueryPlugIn.logSql(sql);
-					c.createStatement().execute(sql);
-					
-					populateTemporaryTableNameObjExtra("ma_" + mp.getAttribute().getKeyId(), "ma_" + mp.getAttribute().getKeyId(), c, session);  //$NON-NLS-1$//$NON-NLS-2$
-					monitor.worked(2);
-					if (monitor.isCanceled()){
-						return;
-					}
-//						
-//						sql = "SELECT distinct m.list_element_uuid FROM " + tableName(MissionPropertyValue.class) + " m join " + queryDataTable + " dt on m.mission_uuid = dt.mission_uuid and m.list_element_uuid is not null ";
-//						QueryPlugIn.logSql(sql);
-//						c.createStatement().execute(sql);
-//						
-//						ResultSet rs = c.createStatement().executeQuery(sql);
-//						while(rs.next()){
-//							MissionAttributeListItem item = (MissionAttributeListItem) session.load(MissionAttributeListItem.class, rs.getBytes(1));
-//							if (item != null){
-//								//TODO: prepared statements?
-//								sql = "UPDATE " + queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = '" + item.getName() + "'";
-//								c.createStatement().execute(sql);
-//							}
-//						}	
-				}
-				if (monitor.isCanceled()) return;
-			}
-			monitor.worked(1);
-			if (monitor.isCanceled()) return;
-		}
+//		monitor.subTask(Messages.DerbyObservationEngine_progress8);
+//		if (query.getSurveyDesign() != null){
+//			SurveyDesign sd = null;
+//			try{
+//				sd = (SurveyDesign) session.load(SurveyDesign.class, query.getSurveyDesignAsObject().getUuid());
+//				
+//			}catch (Exception ex){
+//				throw new SQLException(ex);
+//			}
+//			if (sd == null){
+//				throw new SQLException(MessageFormat.format(Messages.DerbyObservationEngine_SurveyDesignNotFound, new Object[]{query.getSurveyDesign()} ));
+//			}
+//			for (MissionProperty mp : sd.getMissionProperties()){
+//				missionAttributes.add(mp.getAttribute());
+//				//add column & populate
+//				String sql = ""; //$NON-NLS-1$
+//				if (mp.getAttribute().getType() == AttributeType.NUMERIC){
+//					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " double"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//					
+//					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".number_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//				}else if (mp.getAttribute().getType() == AttributeType.TEXT){
+//					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//					
+//					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".string_value FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//				}else if (mp.getAttribute().getType() == AttributeType.LIST){						
+//					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  "_lst char(16) for bit data"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//					
+//					sql = "ALTER TABLE " + queryDataTable + " ADD ma_" + mp.getAttribute().getKeyId() +  " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//					
+//					sql = "UPDATE "+ queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + "_lst = (SELECT " + tablePrefix(MissionPropertyValue.class) + ".list_element_uuid FROM " + tableNamePrefix(MissionPropertyValue.class) + " WHERE " + tablePrefix(MissionPropertyValue.class) + ".mission_uuid = " + queryDataTable + ".mission_uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+//					QueryPlugIn.logSql(sql);
+//					c.createStatement().execute(sql);
+//					
+//					populateTemporaryTableNameObjExtra("ma_" + mp.getAttribute().getKeyId(), "ma_" + mp.getAttribute().getKeyId(), c, session);  //$NON-NLS-1$//$NON-NLS-2$
+//					monitor.worked(2);
+//					if (monitor.isCanceled()){
+//						return;
+//					}
+////						
+////						sql = "SELECT distinct m.list_element_uuid FROM " + tableName(MissionPropertyValue.class) + " m join " + queryDataTable + " dt on m.mission_uuid = dt.mission_uuid and m.list_element_uuid is not null ";
+////						QueryPlugIn.logSql(sql);
+////						c.createStatement().execute(sql);
+////						
+////						ResultSet rs = c.createStatement().executeQuery(sql);
+////						while(rs.next()){
+////							MissionAttributeListItem item = (MissionAttributeListItem) session.load(MissionAttributeListItem.class, rs.getBytes(1));
+////							if (item != null){
+////								//TODO: prepared statements?
+////								sql = "UPDATE " + queryDataTable + " set ma_" + mp.getAttribute().getKeyId() + " = '" + item.getName() + "'";
+////								c.createStatement().execute(sql);
+////							}
+////						}	
+//				}
+//				if (monitor.isCanceled()) return;
+//			}
+//			monitor.worked(1);
+//			if (monitor.isCanceled()) return;
+//		}
 		
 		
 		
@@ -588,6 +581,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
+		it.setMissionUuid(rs.getBytes("mission_uuid")); //$NON-NLS-1$
 		it.setMissionEnd(rs.getDate("mission_end")); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionStart(rs.getDate("mission_start")); //$NON-NLS-1$
@@ -600,7 +594,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setSurveyEnd(rs.getDate("survey_end")); //$NON-NLS-1$
 		it.setSurveyStart(rs.getDate("survey_start")); //$NON-NLS-1$
 		
-		it.setSmaplingUnitBuffer(rs.getDouble("sampling_unit_buffer")); //$NON-NLS-1$
+		it.setSamplingUnitUuid(rs.getBytes("sampling_unit_uuid")); //$NON-NLS-1$
+		if (rs.getObject("sampling_unit_buffer") != null){ //$NON-NLS-1$
+			it.setSmaplingUnitBuffer(rs.getDouble("sampling_unit_buffer")); //$NON-NLS-1$
+		}
 		it.setSamplingUnitId(rs.getString("sampling_unit_id")); //$NON-NLS-1$
 		
 		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
@@ -627,11 +624,11 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		}
 		
 		it.setCategory(categories.toArray(new String[categories.size()]));
-		
-		for (MissionAttribute ma : missionAttributes){
-			it.addAttribute(ma.getKeyId(), rs.getObject("ma_" + ma.getKeyId())); //$NON-NLS-1$
-		}
-		
+//		
+//		for (MissionAttribute ma : missionAttributes){
+//			it.addAttribute(ma.getKeyId(), rs.getObject("ma_" + ma.getKeyId())); //$NON-NLS-1$
+//		}
+//		
 		return it;
 	}
 
