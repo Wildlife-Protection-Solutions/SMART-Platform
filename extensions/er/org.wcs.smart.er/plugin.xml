@@ -216,6 +216,15 @@
             allPopups="false"
             locationURI="popup:org.wcs.smart.er.surveyDesignListView">
          <command
+               commandId="org.wcs.smart.er.editItem"
+               style="push"
+               tooltip="edits the selected item">
+         </command>
+         <separator
+               name="org.wcs.smart.er.list.seperator.1"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.er.mission.new"
                style="push"
                tooltip="creates a new mission">
@@ -224,11 +233,10 @@
                commandId="org.wcs.smart.er.survey.new"
                style="push">
          </command>
-         <command
-               commandId="org.wcs.smart.er.surveydesign.new"
-               style="push"
-               tooltip="creates a new survey design">
-         </command>
+         <separator
+               name="org.wcs.smart.er.list.seperator.2"
+               visible="true">
+         </separator>
          <command
                commandId="org.wcs.smart.er.delete"
                style="push"
@@ -270,6 +278,10 @@
             class="org.wcs.smart.er.ui.handlers.FilterSurveyListItemsHandler"
             commandId="org.wcs.smart.er.filter">
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.EditSurveyElementHandler"
+            commandId="org.wcs.smart.er.editItem">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -304,6 +316,10 @@
       <command
             id="org.wcs.smart.er.filter"
             name="Filter Items">
+      </command>
+      <command
+            id="org.wcs.smart.er.editItem"
+            name="Edit...">
       </command>
    </extension>
    <extension

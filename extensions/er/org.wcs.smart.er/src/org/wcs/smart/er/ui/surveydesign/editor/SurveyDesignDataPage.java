@@ -83,11 +83,9 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.handlers.DeleteSurveyElementHandler;
-import org.wcs.smart.er.ui.handlers.EditSurveyHandler;
+import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.handlers.NewMissionHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
-import org.wcs.smart.er.ui.mision.editor.MissionEditor;
-import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -382,14 +380,9 @@ public class SurveyDesignDataPage extends EditorPart {
 	private void editSelection(){
 		TreeNode node = getSelectedItem();
 		if (node.getType() == TreeNode.Type.MISSION){
-			MissionEditorInput mi = new MissionEditorInput(node.getId(), node.getUuid());
-			try {
-				getSite().getPage().openEditor(mi, MissionEditor.ID);
-			} catch (PartInitException e) {
-				EcologicalRecordsPlugIn.displayLog(e.getMessage(), e);
-			}
+			EditSurveyElementHandler.editMission(getSite().getShell(), node.getUuid(), node.getId());
 		}else if (node.getType() == TreeNode.Type.SURVEY){
-			EditSurveyHandler.editSurvey(getSite().getShell(), node.getUuid());
+			EditSurveyElementHandler.editSurvey(getSite().getShell(), node.getUuid());
 		}
 	}
 	
