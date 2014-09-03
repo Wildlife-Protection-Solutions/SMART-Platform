@@ -68,6 +68,7 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	}
 
 	private static String asString(Object value, ColumnType type) {
+		if (value == null) return ""; //$NON-NLS-1$
 		if (type == ColumnType.BOOLEAN) {
 			if ((Boolean) value) {
 				return Attribute.BOOLEAN_TRUE_LABEL;
@@ -75,14 +76,8 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 				return Attribute.BOOLEAN_FALSE_LABEL;
 			}
 		} else if (type == ColumnType.DATE) {
-			if ((Date)value == null){
-				return ""; //$NON-NLS-1$
-			}
 			return DateFormat.getDateInstance().format((Date) value);
 		} else if (type == ColumnType.TIME) {
-			if ((Date)value == null){
-				return ""; //$NON-NLS-1$
-			}
 			return DateFormat.getTimeInstance().format((Date) value);
 		} else if (type == ColumnType.STRING) {
 			return (String) value;

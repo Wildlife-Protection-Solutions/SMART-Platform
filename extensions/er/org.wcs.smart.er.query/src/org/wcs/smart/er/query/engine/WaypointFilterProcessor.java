@@ -38,10 +38,12 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
@@ -403,7 +405,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
 					filter instanceof CategoryAttributeFilter || 
-					filter instanceof MissionPropertyFilter ){						
+					filter instanceof MissionPropertyFilter ||
+					filter instanceof SamplingUnitAttributeFilter){						
 					
 					String colName = engine.createTempTableName();
 					engine.filterTables.put(filter, colName);
@@ -438,6 +441,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				processCategoryAttributeFilter(lfilter, colName, c);
 			}else if (filter instanceof MissionPropertyFilter){
 				processMissionFilter((MissionPropertyFilter)lfilter, colName, c);
+			}else if (filter instanceof SamplingUnitAttributeFilter){
+				processSamplingUnitAttributeFilter((SamplingUnitAttributeFilter)lfilter, colName, c);
 			}
 			
 		}
@@ -652,6 +657,58 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append("'");  //$NON-NLS-1$
 		}
 		
+		
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+	}
+	
+	
+	private void processSamplingUnitAttributeFilter(SamplingUnitAttributeFilter lfilter, String colName, Connection c) throws SQLException{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(colName + " (wp_uuid)"); //$NON-NLS-1$	
+		sql.append(" SELECT distinct ");  //$NON-NLS-1$
+		sql.append(prefix(SurveyWaypoint.class));
+		sql.append(".wp_uuid");  //$NON-NLS-1$
+		
+		sql.append(" FROM ");  //$NON-NLS-1$
+		sql.append(waypointTable);
+		sql.append(" join ");  //$NON-NLS-1$
+		sql.append(namePrefix(SurveyWaypoint.class));
+		sql.append(" on " + waypointTable + ".wp_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
+		sql.append(prefix(SurveyWaypoint.class));
+		sql.append(".wp_uuid"); //$NON-NLS-1$
+
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(namePrefix(SamplingUnit.class));
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnit.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(prefix(SurveyWaypoint.class));
+		sql.append(".sampling_unit_uuid "); //$NON-NLS-1$
+		
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(namePrefix(SamplingUnitAttributeValue.class));
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnitAttributeValue.class) + ".sampling_unit_uuid = "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$
+		
+		sql.append(" WHERE "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnit.class) + ".keyId = '" + lfilter.getSamplingUnitAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" AND "); //$NON-NLS-1$
+		if (lfilter.getAttributeType() == AttributeType.NUMERIC){
+			sql.append(prefix(SamplingUnitAttributeValue.class));
+			sql.append(".double_value "); //$NON-NLS-1$
+			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
+			sql.append(" " + lfilter.getValue().toString()); //$NON-NLS-1$
+		}else if (lfilter.getAttributeType() == AttributeType.TEXT){
+			sql.append(prefix(SamplingUnitAttributeValue.class));
+			sql.append(".string_value "); //$NON-NLS-1$
+			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
+			sql.append(" '"); //$NON-NLS-1$
+			sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+			sql.append("'"); //$NON-NLS-1$
+		}
 		
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());

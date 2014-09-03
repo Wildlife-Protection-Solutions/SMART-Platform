@@ -47,6 +47,8 @@ public class Parser implements ParserConstants {
     case MISSION_PROPERTY_VALUE_KEY:
     case MISSION_PROPERTY_LIST_KEY:
     case SAMPLING_UNIT_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_STR_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY:
     case SAMPLING_UNIT_TRACK_KEY:
     case AREA_KEY:
     case WAYPOINT_OBSERVER_KEY:
@@ -84,6 +86,8 @@ public class Parser implements ParserConstants {
       case MISSION_PROPERTY_VALUE_KEY:
       case MISSION_PROPERTY_LIST_KEY:
       case SAMPLING_UNIT_KEY:
+      case SAMPLING_UNIT_ATTRIBUTE_STR_KEY:
+      case SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY:
       case SAMPLING_UNIT_TRACK_KEY:
       case AREA_KEY:
       case WAYPOINT_OBSERVER_KEY:
@@ -138,6 +142,8 @@ public class Parser implements ParserConstants {
     case MISSION_PROPERTY_VALUE_KEY:
     case MISSION_PROPERTY_LIST_KEY:
     case SAMPLING_UNIT_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_STR_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY:
     case SAMPLING_UNIT_TRACK_KEY:
     case AREA_KEY:
     case WAYPOINT_OBSERVER_KEY:
@@ -408,6 +414,8 @@ public class Parser implements ParserConstants {
     case MISSION_PROPERTY_VALUE_KEY:
     case MISSION_PROPERTY_LIST_KEY:
     case SAMPLING_UNIT_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_STR_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY:
     case SAMPLING_UNIT_TRACK_KEY:
     case WAYPOINT_OBSERVER_KEY:
       filter = AttributeExpression();
@@ -483,6 +491,14 @@ public class Parser implements ParserConstants {
                             value = Double.parseDouble(token.image);
                         filter = CategoryAttributeFilter.createValueFilter(key, op, value);
       break;
+    case SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY:
+      jj_consume_token(SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY);
+                    key = token.image;
+      op = NumberOp();
+      jj_consume_token(NUMBER);
+                    value = Double.parseDouble(token.image);
+                    filter = SamplingUnitAttributeFilter.createFilter(key, op, value);
+      break;
     default:
       jj_la1[15] = jj_gen;
       jj_consume_token(-1);
@@ -506,6 +522,7 @@ public class Parser implements ParserConstants {
     case MISSION_UUID_KEY:
     case MISSION_PROPERTY_STR_KEY:
     case SAMPLING_UNIT_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_STR_KEY:
     case SAMPLING_UNIT_TRACK_KEY:
     case WAYPOINT_OBSERVER_KEY:
       /* String comparison */
@@ -514,6 +531,7 @@ public class Parser implements ParserConstants {
     case ATT_VALUE_KEY:
     case CAT_ATT_VALUE_KEY:
     case MISSION_PROPERTY_VALUE_KEY:
+    case SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY:
       /* Numeric comparison */
               filter = NumberExpression();
       break;
@@ -681,6 +699,14 @@ public class Parser implements ParserConstants {
       jj_consume_token(SAMPLING_UNIT_TRACK_KEY);
                         filter = SamplingUnitFilter.createMissionTrackFilter(token.image);
       break;
+    case SAMPLING_UNIT_ATTRIBUTE_STR_KEY:
+      jj_consume_token(SAMPLING_UNIT_ATTRIBUTE_STR_KEY);
+                    key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                    value = token.image;
+                    filter = SamplingUnitAttributeFilter.createFilter(key, op, value);
+      break;
     case WAYPOINT_OBSERVER_KEY:
       jj_consume_token(WAYPOINT_OBSERVER_KEY);
       op = StringOp();
@@ -822,10 +848,10 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x40100,0x40100,0x8000000,0x40100,0x0,0x0,0x400,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x2ff8bffe,0x2ff8bffe,0x0,0x2ff8bffe,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2ff83ffe,0x410,0x1000208,0xff83ffc,0x2080,0xcf80104,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0xbff8bffe,0xbff8bffe,0x0,0xbff8bffe,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbff83ffe,0x410,0x11000208,0x3ff83ffc,0x2080,0x2cf80104,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x1,0x1,0x0,0x1,0x0,0x3e,0x0,0x3e,0x1ff80,0x0,0x1ff80,0x0,0x0,0x1,0x0,0x0,0x1,0x0,0x1,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x4,0x4,0x0,0x4,0x0,0xf8,0x0,0xf8,0x7fe00,0x0,0x7fe00,0x0,0x0,0x4,0x0,0x0,0x4,0x0,0x4,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -942,7 +968,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[82];
+    boolean[] la1tokens = new boolean[84];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -962,7 +988,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 82; i++) {
+    for (int i = 0; i < 84; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

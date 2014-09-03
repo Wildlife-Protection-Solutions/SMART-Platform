@@ -39,6 +39,8 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -72,12 +74,14 @@ public class FilterProcessor implements IFilterProcessor {
 	private String tableName;
 	private String observationTable;
 	private String missionTable;
+	private String suAttributeTable;
 	
 	private DerbySurveyQueryEngine engine;
 	private SurveyDesignFilter designFilter;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
-	MissionPropertyFilterCollectorVisitor mpcollector = new MissionPropertyFilterCollectorVisitor();
+	private MissionPropertyFilterCollectorVisitor mpcollector = new MissionPropertyFilterCollectorVisitor();
+	private SamplingUnitAttributeFilterCollectorVisitor sucollector = new SamplingUnitAttributeFilterCollectorVisitor();
 	
 	
 	/**
@@ -146,6 +150,11 @@ public class FilterProcessor implements IFilterProcessor {
 		if (mpcollector.getAttributeInfo().size() > 0){
 			this.missionTable = engine.createTempTableName();
 			createMissionTable(c, qFilter, caFilter, dateFilter, monitor);
+		}
+		queryFilter.accept(sucollector);
+		if (sucollector.getAttributeInfo().size() > 0){
+			this.suAttributeTable = engine.createTempTableName();
+			createSamplingUnitAttributeTable(c, qFilter, caFilter, dateFilter, monitor);
 		}
 		
 		monitor.worked(1);
@@ -297,6 +306,14 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(prefix(Mission.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		
+		if (this.suAttributeTable != null){
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(suAttributeTable + " sua"); //$NON-NLS-1$
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(SurveyWaypoint.class));
+			sql.append(".sampling_unit_uuid = sua.sampling_unit_uuid"); //$NON-NLS-1$
+		}
+		
 		if (onlyObservations){
 			sql.append(" inner join "); //$NON-NLS-1$
 		}else{
@@ -360,32 +377,6 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 		}
 
-		//mission property filters
-		MissionPropertyFilterCollectorVisitor missionPropertyCollector = new MissionPropertyFilterCollectorVisitor();
-		queryFilter.accept(missionPropertyCollector);
-		if (missionPropertyCollector.getAttributeInfo().size() > 0){
-			
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(name(MissionPropertyValue.class));
-			sql.append(" "); //$NON-NLS-1$
-			sql.append(prefix(MissionPropertyValue.class));
-			sql.append(" on " + prefix(MissionPropertyValue.class) //$NON-NLS-1$
-					+ ".mission_uuid = " //$NON-NLS-1$
-					+ prefix(Mission.class)
-					+ ".uuid "); //$NON-NLS-1$
-			usedTables.add(MissionPropertyValue.class);	
-			
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(name(MissionAttribute.class));
-			sql.append(" "); //$NON-NLS-1$
-			sql.append(prefix(MissionAttribute.class));
-			sql.append(" on " + prefix(MissionPropertyValue.class) //$NON-NLS-1$
-					+ ".mission_attribute_uuid = " //$NON-NLS-1$
-					+ prefix(MissionAttribute.class)
-					+ ".uuid "); //$NON-NLS-1$
-			usedTables.add(MissionPropertyValue.class);
-		}
-		
 		//do need join mission tracks?
 		final boolean[] needstracks = new boolean[]{false};
 		IFilterVisitor missionTracks = new IFilterVisitor() {
@@ -798,6 +789,152 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" a WHERE NOT EXISTS (SELECT mission_uuid FROM "); //$NON-NLS-1$
 				sql.append(missionTable);
 				sql.append(" b WHERE b.mission_uuid = a.mission_uuid))"); //$NON-NLS-1$
+				QueryPlugIn.logSql(sql.toString());
+				c.createStatement().execute(sql.toString());
+
+			} finally {
+				// -- drop attribute table
+				sql = new StringBuilder();
+				sql.append("DROP TABLE " + lTempTable); //$NON-NLS-1$
+				QueryPlugIn.logSql(sql.toString());
+				c.createStatement().execute(sql.toString());
+			}
+		}
+	}
+	
+	
+	protected void createSamplingUnitAttributeTable(Connection c, 
+			IFilter filter, 
+			ConservationAreaFilter caFilter,
+			DateFilter dateFilter,
+			IProgressMonitor monitor) throws SQLException{
+
+		Set<AttributeInfo> keys = sucollector.getAttributeInfo();
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE "); //$NON-NLS-1$
+		sql.append(suAttributeTable);
+		sql.append("(sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
+		for (AttributeInfo key : keys){
+			sql.append("sua_" + key.getKey() + " " + engine.getDataType(key.getType())); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(",");	 //$NON-NLS-1$
+		}
+		sql.deleteCharAt(sql.length()-1);
+		sql.append(")"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+		
+		
+		String lTempTable = engine.createTempTableName();
+		for (AttributeInfo key : keys){
+			monitor.subTask(Messages.FilterProcessor_progress5  + key.getKey());
+			
+			//create temporary table for attribute observations
+			sql = new StringBuilder();
+			sql.append("CREATE TABLE "); //$NON-NLS-1$
+			sql.append(lTempTable); 
+			sql.append("(sampling_unit_uuid char(16) for bit data, value "); //$NON-NLS-1$
+			sql.append( engine.getDataType(key.getType()) );
+			sql.append( ")"); //$NON-NLS-1$
+			QueryPlugIn.logSql(sql.toString());
+			c.createStatement().execute(sql.toString());
+			try {
+				// -- populate table
+				sql = new StringBuilder();
+				sql.append("INSERT INTO "); //$NON-NLS-1$
+				sql.append(lTempTable);
+				sql.append(" SELECT "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnit.class));
+				sql.append(".uuid, "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
+				sql.append(" as "); //$NON-NLS-1$
+				sql.append(key.getKey());
+				sql.append(" "); //$NON-NLS-1$
+
+				sql.append("FROM "); //$NON-NLS-1$
+				
+				
+				sql.append(namePrefix(SamplingUnitAttributeValue.class));
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(SamplingUnitAttribute.class));
+				sql.append(" ON " + prefix(SamplingUnitAttributeValue.class) + ".su_uuid = ");  //$NON-NLS-1$//$NON-NLS-2$
+				sql.append(prefix(SamplingUnitAttribute.class) + ".uuid AND "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = '" + key.getKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(SamplingUnit.class));
+				sql.append(" on " + prefix(SamplingUnitAttributeValue.class) + ".su_uuid= " + prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(SurveyWaypoint.class));
+				sql.append(" on " + prefix(SurveyWaypoint.class) + ".sampling_unit_uuid= " + prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(Waypoint.class));
+				sql.append(" on " + prefix(SurveyWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+				if (dateFilter != null) {
+					String dfilter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+					if (dfilter.length() > 0) {
+						sql.append(" and "); //$NON-NLS-1$
+						sql.append(dfilter);
+					}
+				}
+				
+				if (caFilter != null) {
+					String cfilter = SurveyFilterSqlGenerator.INSTANCE. asSql(caFilter, prefix(Waypoint.class));
+					if (cfilter.length() > 0) {
+						sql.append(" and "); //$NON-NLS-1$
+						sql.append(cfilter);
+					}
+				}
+				sql.append("WHERE "); //$NON-NLS-1$
+				sql.append(" " + prefix(SamplingUnitAttribute.class) + ".keyid = '"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(key.getKey());
+				sql.append("'"); //$NON-NLS-1$
+
+				QueryPlugIn.logSql(sql.toString());
+				c.createStatement().execute(sql.toString());
+
+				// - create index
+				sql = new StringBuilder();
+				sql.append("create index "); //$NON-NLS-1$
+				sql.append(lTempTable);
+				sql.append("_su_uuid_idx on "); //$NON-NLS-1$
+				sql.append(lTempTable);
+				sql.append("(sampling_unit_uuid)"); //$NON-NLS-1$
+				QueryPlugIn.logSql(sql.toString());
+				c.createStatement().execute(sql.toString());
+
+				// - add observation to main table
+				// join existing readings
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(suAttributeTable);
+				sql.append(" set sua_"); //$NON-NLS-1$
+				sql.append(key.getKey());
+				sql.append(" = "); //$NON-NLS-1$
+				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
+				sql.append(lTempTable);
+				sql.append(" a WHERE a.sampling_unit_uuid = "); //$NON-NLS-1$
+				sql.append(suAttributeTable);
+				sql.append(".sampling_unit_uuid)"); //$NON-NLS-1$
+				QueryPlugIn.logSql(sql.toString());
+				c.createStatement().execute(sql.toString());
+				
+				// add missing observations
+				sql = new StringBuilder();
+				sql.append("INSERT INTO "); //$NON-NLS-1$
+				sql.append(suAttributeTable);
+				sql.append("(sampling_unit_uuid, sua_"); //$NON-NLS-1$
+				sql.append(key.getKey());
+				sql.append(")"); //$NON-NLS-1$
+				sql.append("(SELECT  sampling_unit_uuid, value FROM "); //$NON-NLS-1$
+				sql.append(lTempTable);
+				sql.append(" a WHERE NOT EXISTS (SELECT sampling_unit_uuid FROM "); //$NON-NLS-1$
+				sql.append(suAttributeTable);
+				sql.append(" b WHERE b.sampling_unit_uuid = a.sampling_unit_uuid))"); //$NON-NLS-1$
 				QueryPlugIn.logSql(sql.toString());
 				c.createStatement().execute(sql.toString());
 

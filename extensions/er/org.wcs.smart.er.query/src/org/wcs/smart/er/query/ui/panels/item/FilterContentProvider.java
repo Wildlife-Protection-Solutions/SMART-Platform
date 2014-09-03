@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.er.query.ui.panels.item;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +36,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
@@ -39,8 +44,10 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -61,10 +68,12 @@ public class FilterContentProvider implements ITreeContentProvider{
 	private List<MissionAttribute> allMissionAttributes = null;
 	private List<Survey> allSurveys = null;
 	private List<Object> sunits = null;
+	private List<SamplingUnitAttribute> unitAttributes = null;
 	
 	private boolean triedMission = false;
 	private boolean triedSurveys = false;
 	private boolean triedUnits = false;
+	private boolean triedUnitAttributes = false;
 	
 	private Viewer viewer;
 	
@@ -107,7 +116,10 @@ public class FilterContentProvider implements ITreeContentProvider{
 			try{
 				if (design != null){
 					allSurveys = s.createCriteria(Survey.class)
-							.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
+							.add(Restrictions.eq("surveyDesign", design)) //$NON-NLS-1$
+							.addOrder(Order.desc("startDate")) //$NON-NLS-1$
+							.addOrder(Order.asc("id")) //$NON-NLS-1$
+							.list(); 
 					for (Survey survey : allSurveys){
 						for (Mission m : survey.getMissions()){
 							m.getId();	
@@ -163,12 +175,60 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}
 	};
 	
+	private Job loadSamplingUnitAttributes = new Job("Loading Sampling Unit Attributes"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			Session s = HibernateManager.openSession();
+			try{
+				if (design != null){
+					List<SurveyDesignSamplingUnitAttribute> attributes = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
+							.add(Restrictions.eq("id.surveyDesign", design))
+							.list();
+					
+					unitAttributes = new ArrayList<SamplingUnitAttribute>();
+					for (SurveyDesignSamplingUnitAttribute a : attributes){
+						unitAttributes.add(a.getSamplingUnitAttribute());			
+					}
+				}else{					
+					unitAttributes = s.createCriteria(SamplingUnitAttribute.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+							.list();
+				}
+				
+				for (SamplingUnitAttribute a : unitAttributes){
+					a.getName();
+					a.getType();
+				}
+			}finally{
+				s.close();
+			}
+			
+			Collections.sort(unitAttributes, new Comparator<SamplingUnitAttribute>() {
+				@Override
+				public int compare(SamplingUnitAttribute arg0,
+						SamplingUnitAttribute arg1) {
+					return Collator.getInstance().compare(arg0.getName(), arg1.getName());
+				}
+			});
+			
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNIT_ATTRIBUTE), Node.SAMPLING_UNIT_ATTRIBUTE));
+					
+				}});
+			return Status.OK_STATUS;
+		}
+	};
+	
 	public enum Node{
 		SURVEY_ID(Messages.SurveyItemContentProvider_SurveyIdLabel),
 		MISSION_ID(Messages.SurveyItemContentProvider_MissionIDLabel),
 		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
 		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel),
 		SAMPLING_UNITS(Messages.FilterContentProvider_SuLabel),
+		SAMPLING_UNIT_ATTRIBUTE("Sampling Unit Attributes"),
 		OBSERVER("Observer");
 		public String guiName;
 		
@@ -194,9 +254,12 @@ public class FilterContentProvider implements ITreeContentProvider{
 		triedMission = false;
 		triedSurveys = false;
 		triedUnits = false;
+		triedUnitAttributes = false;
+		
 		allMissionAttributes = null;
 		allSurveys = null;
 		sunits = null;
+		unitAttributes = null;
 	}
 
 	@Override
@@ -204,7 +267,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		if (this.design != null){
 			return Node.values();
 		}else{
-			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP, Node.OBSERVER};
+			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP, Node.SAMPLING_UNIT_ATTRIBUTE, Node.OBSERVER};
 		}
 	}
 
@@ -233,6 +296,17 @@ public class FilterContentProvider implements ITreeContentProvider{
 			}else{
 				triedUnits = true;
 				loadSamplingUnits.schedule();
+				return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
+			}
+		}else if (parentElement == Node.SAMPLING_UNIT_ATTRIBUTE){
+			if (unitAttributes != null){
+				return unitAttributes.toArray();
+			}
+			if(triedUnitAttributes){
+				return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
+			}else{
+				triedUnitAttributes = true;
+				loadSamplingUnitAttributes.schedule();
 				return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
 			}
 		}else if (parentElement == Node.MISSION_ID){
@@ -285,7 +359,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 	public boolean hasChildren(Object element) {
 		if (element == Node.SURVEY_MISSION ||
 				element == Node.MISSION_PROP ||
-				element == Node.SAMPLING_UNITS || 
+				element == Node.SAMPLING_UNITS ||
+				element == Node.SAMPLING_UNIT_ATTRIBUTE || 
 				element instanceof Survey){
 			return true;
 		}

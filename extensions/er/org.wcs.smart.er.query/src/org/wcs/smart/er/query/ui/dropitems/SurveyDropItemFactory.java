@@ -41,6 +41,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
@@ -179,7 +180,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			if (queryItemPanelId.equals(FilterItemPanel.ID)){
 				items = new DropItem[]{createSamplingUnitDropItem((SamplingUnit)source)};
 			}
-			
+		}else if (source instanceof SamplingUnitAttribute){
+			items = new DropItem[]{createSamplingUnitAttributeDropItem((SamplingUnitAttribute) source)};
 		}else if (source instanceof MissionTrack){
 			if (queryItemPanelId.equals(FilterItemPanel.ID)){
 				items = new DropItem[]{createSamplingUnitDropItem((MissionTrack)source)};
@@ -200,6 +202,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	public DropItem createSamplingUnitDropItem(MissionTrack mt){
 		return new SamplingUnitDropItem(mt);
+	}
+	
+	public DropItem createSamplingUnitAttributeDropItem(SamplingUnitAttribute attribute){
+		return new SamplingUnitAttributeDropItem(attribute);
 	}
 	
 	public DropItem createMissionAttributeGroupByDropItem(MissionAttribute attribute){

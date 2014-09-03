@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.hibernate.Session;
-
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -37,6 +36,8 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -70,7 +71,8 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		tablePrefix.put(MissionPropertyValue.class, "mpv"); //$NON-NLS-1$
 		tablePrefix.put(SurveyWaypoint.class, "sw"); //$NON-NLS-1$
 		tablePrefix.put(SamplingUnit.class, "su"); //$NON-NLS-1$
-
+		tablePrefix.put(SamplingUnitAttribute.class, "sua"); //$NON-NLS-1$
+		tablePrefix.put(SamplingUnitAttributeValue.class, "suav"); //$NON-NLS-1$
 	}
 
 	
@@ -89,6 +91,8 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		tableNames.put(MissionPropertyValue.class, "smart.mission_property_value"); //$NON-NLS-1$
 		tableNames.put(SurveyWaypoint.class, "smart.survey_waypoint"); //$NON-NLS-1$
 		tableNames.put(SamplingUnit.class, "smart.sampling_unit"); //$NON-NLS-1$
+		tableNames.put(SamplingUnitAttribute.class, "smart.sampling_unit_attribute"); //$NON-NLS-1$
+		tableNames.put(SamplingUnitAttributeValue.class, "smart.sampling_unit_attribute_value"); //$NON-NLS-1$
 	}
 
 	/**

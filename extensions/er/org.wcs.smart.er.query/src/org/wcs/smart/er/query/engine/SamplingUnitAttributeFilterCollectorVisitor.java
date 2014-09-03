@@ -19,44 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.columns;
+package org.wcs.smart.er.query.engine;
 
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.model.CategoryQueryColumn;
-import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.query.model.QueryColumn;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
+import org.wcs.smart.query.model.filter.AttributeInfo;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Data model query column for survey queries.
+ * Finds all sampling unit attribute filters and combines them
+ * into a set of AttributeInfo classes.  Only one per sampling unit 
+ * attribute is created.
  * 
  * @author Emily
  *
  */
-public class SurveyCategoryQueryColumn extends CategoryQueryColumn {
+public class SamplingUnitAttributeFilterCollectorVisitor implements IFilterVisitor{
 
-	public SurveyCategoryQueryColumn(String name, int level) {
-		super(name, level);
-	}
+	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
 
 	@Override
-	public Object getValue(IResultItem item) {
-		if (item instanceof SurveyQueryResultItem){
-			String[] items = ((SurveyQueryResultItem) item).getCategories();
-			if (items == null){
-				return ""; //$NON-NLS-1$
+	public void visit(IFilter filter) {
+		if (filter instanceof SamplingUnitAttributeFilter){
+			SamplingUnitAttributeFilter f = (SamplingUnitAttributeFilter) filter;
+			AttributeInfo in = new AttributeInfo(f.getSamplingUnitAttributeKey(), f.getAttributeType());
+			if (!filters.contains(in)){
+				filters.add(in);
 			}
-			if (level < items.length){
-				return items[level];
-			}else{
-				return ""; //$NON-NLS-1$
-			}
+			
 		}
-		return null;
 	}
-
-	@Override
-	public QueryColumn clone() {
-		return new SurveyCategoryQueryColumn(getName(), level);
+	
+	/**
+	 * 
+	 * @return list of attribute filters found
+	 */
+	public Set<AttributeInfo> getAttributeInfo(){
+		return this.filters;
 	}
-
 }
+

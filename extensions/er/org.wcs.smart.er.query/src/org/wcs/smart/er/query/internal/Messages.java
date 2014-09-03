@@ -61,6 +61,7 @@ public class Messages extends NLS {
 	public static String MissionIdGroupByDropItem_IncludedLabel;
 	public static String MissionIdGroupByDropItem_Label;
 	public static String MissionStartDateField_Name;
+	public static String SamplingUnitAttributeFilter_AttributeNotFound;
 	public static String SamplingUnitDropItem_Label;
 	public static String SamplingUnitFilter_MissionTrackNotFound;
 	public static String SamplingUnitFilter_SamplingUnitNotFound;

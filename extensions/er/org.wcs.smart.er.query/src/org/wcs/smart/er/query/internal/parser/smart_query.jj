@@ -59,6 +59,8 @@ TOKEN :
  | < MISSION_PROPERTY_VALUE_KEY : "s:missionproperty:n:" <  DM_KEY > >
  | < MISSION_PROPERTY_LIST_KEY : "s:missionproperty:l:" <  DM_KEY > >
  | < SAMPLING_UNIT_KEY : "s:samplingunit:" < UUID > >
+ | < SAMPLING_UNIT_ATTRIBUTE_STR_KEY : "s:suattribute:s:" < DM_KEY > >
+ | < SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY : "s:suattribute:n:" < DM_KEY > >
  | < SAMPLING_UNIT_TRACK_KEY : "s:samplingunittrack:" < UUID > >
  | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
  | < AREA_KEY : "area:" ("wp" | "t") ":" < AREA_TYPE_KEY > ":" < DM_KEY > >
@@ -441,6 +443,17 @@ IFilter NumberExpression():
 		{
   			filter = CategoryAttributeFilter.createValueFilter(key, op, value);
 		}
+	|
+		(
+		  < SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY >
+		  { key = token.image; }
+          op = NumberOp()
+		  <  NUMBER >
+		  { value = Double.parseDouble(token.image); }
+		)
+		{
+		    filter = SamplingUnitAttributeFilter.createFilter(key, op, value);
+		}
 	)
 	{
   		return filter;
@@ -640,6 +653,14 @@ IFilter StringExpression():
 		{
   			filter = SamplingUnitFilter.createMissionTrackFilter(token.image);
 		}
+	|
+		(		  < SAMPLING_UNIT_ATTRIBUTE_STR_KEY >
+		  { key = token.image; }          op = StringOp()
+		  <  QUOTED_STRING >
+		  { value = token.image; }
+		)		{		    filter = SamplingUnitAttributeFilter.createFilter(key, op, value);
+		}	    
+		       
 	|
 		< WAYPOINT_OBSERVER_KEY >
 		op = StringOp()
