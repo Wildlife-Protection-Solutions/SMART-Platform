@@ -59,6 +59,7 @@ import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
+import org.wcs.smart.er.ui.handlers.EditSurveyHandler;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
@@ -232,7 +233,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 					SurveyListTreeNode node = (SurveyListTreeNode)selection;
 					switch (node.getType()) {
 						case SURVEY:
-							//TODO: implement SURVEY
+							EditSurveyHandler.editSurvey(getSite().getShell(), node.getUuid());
 							break;
 						case MISSION:
 							page.openEditor(new MissionEditorInput(node.getLabel(), node.getUuid()), MissionEditor.ID);
