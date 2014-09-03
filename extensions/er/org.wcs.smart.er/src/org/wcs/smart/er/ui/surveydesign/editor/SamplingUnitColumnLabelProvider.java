@@ -154,10 +154,10 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 								return sua.getStringValue();
 							}
 						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-							if (sua.getDoubleValue() == null){
+							if (sua.getNumberValue() == null){
 								return null;
 							}else{
-								return sua.getDoubleValue();
+								return sua.getNumberValue();
 							}
 						}
 					}
@@ -202,10 +202,10 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 								return sua.getStringValue();
 							}
 						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-							if (sua.getDoubleValue() == null){
+							if (sua.getNumberValue() == null){
 								return ""; //$NON-NLS-1$
 							}else{
-								return sua.getDoubleValue().toString();
+								return sua.getNumberValue().toString();
 							}
 						}
 					}

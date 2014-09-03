@@ -221,7 +221,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 							if (d != null) {
 								add = true;
 							}
-							sv.setDoubleValue(d.doubleValue());
+							sv.setNumberValue(d.doubleValue());
 						} else if (att.getType() == AttributeType.TEXT) {
 							String s = sf.getAttribute(field).toString();
 							if (s != null) {

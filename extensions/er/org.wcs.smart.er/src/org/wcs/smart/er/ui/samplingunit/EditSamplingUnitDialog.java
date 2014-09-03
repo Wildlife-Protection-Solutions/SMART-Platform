@@ -63,6 +63,7 @@ import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
 
@@ -103,6 +104,12 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 			p.y = 400;
 		}
 		return p;
+	}
+	
+	@Override
+	public void createButtonsForButtonBar(Composite parent){
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);
 	}
 	
 	@Override
@@ -153,8 +160,10 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 
 					if (sua.getType() == AttributeType.TEXT) {
 						toUpdate.setStringValue(txt.getText().trim());
+						toUpdate.setNumberValue(null);
 					} else if (sua.getType() == AttributeType.NUMERIC) {
-						toUpdate.setDoubleValue(Double.valueOf(txt.getText()));
+						toUpdate.setNumberValue(Double.valueOf(txt.getText()));
+						toUpdate.setStringValue(null);
 					}
 
 				}
@@ -297,7 +306,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 			if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 				txt.setText(v.getStringValue());
 			}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-				txt.setText(v.getDoubleValue().toString());
+				txt.setText(v.getNumberValue().toString());
 			}
 		}
 		

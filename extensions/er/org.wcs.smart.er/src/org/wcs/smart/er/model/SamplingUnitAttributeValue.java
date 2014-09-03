@@ -55,9 +55,9 @@ public class SamplingUnitAttributeValue {
 
 	private SamplingUnitAttributeValuePk id = new SamplingUnitAttributeValuePk();
 	
-	private String stringValue;
+	private String stringValue = null;
 	
-	private double doubleValue;
+	private Double doubleValue = null;
 
 	public SamplingUnitAttributeValue(){
 		
@@ -108,12 +108,12 @@ public class SamplingUnitAttributeValue {
 		this.stringValue = value;
 	}
 	
-	@Column(name = "double_value")
-	public Double getDoubleValue(){
+	@Column(name = "number_value")
+	public Double getNumberValue(){
 		return this.doubleValue;
 	}
 	
-	public void setDoubleValue(Double value){
+	public void setNumberValue(Double value){
 		this.doubleValue = value;
 	}
 	

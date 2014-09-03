@@ -229,7 +229,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 						}
 					}else if (att.getType() == AttributeType.NUMERIC){						
 						if (value.trim().length() > 0){
-							suv.setDoubleValue(  Double.valueOf(value) );
+							suv.setNumberValue(  Double.valueOf(value) );
 							add = true;
 						}
 					}else{
