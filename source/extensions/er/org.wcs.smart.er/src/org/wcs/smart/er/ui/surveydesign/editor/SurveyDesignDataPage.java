@@ -83,6 +83,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.handlers.DeleteSurveyElementHandler;
+import org.wcs.smart.er.ui.handlers.EditSurveyHandler;
 import org.wcs.smart.er.ui.handlers.NewMissionHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
@@ -387,6 +388,8 @@ public class SurveyDesignDataPage extends EditorPart {
 			} catch (PartInitException e) {
 				EcologicalRecordsPlugIn.displayLog(e.getMessage(), e);
 			}
+		}else if (node.getType() == TreeNode.Type.SURVEY){
+			EditSurveyHandler.editSurvey(getSite().getShell(), node.getUuid());
 		}
 	}
 	

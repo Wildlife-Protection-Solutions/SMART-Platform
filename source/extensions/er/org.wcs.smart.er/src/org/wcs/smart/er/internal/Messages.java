@@ -106,6 +106,18 @@ public class Messages extends NLS {
 	public static String EditSamplingUnitDialog_Title;
 	public static String EditSamplingUnitDialog_TypeLabel;
 	public static String EditSurveyDesignItemDialog_ErrorMsg;
+	public static String EditSurveyDialog_DesignLabel;
+	public static String EditSurveyDialog_EndLabel;
+	public static String EditSurveyDialog_Error;
+	public static String EditSurveyDialog_IdLabel;
+	public static String EditSurveyDialog_InvalidId;
+	public static String EditSurveyDialog_InvalidRange;
+	public static String EditSurveyDialog_InvalidStart;
+	public static String EditSurveyDialog_Message;
+	public static String EditSurveyDialog_MissionDateError;
+	public static String EditSurveyDialog_ShellTitle;
+	public static String EditSurveyDialog_StartLabel;
+	public static String EditSurveyDialog_UndefinedDate;
 	public static String ERDatabaseUpgrader_UpgradeTask;
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;
