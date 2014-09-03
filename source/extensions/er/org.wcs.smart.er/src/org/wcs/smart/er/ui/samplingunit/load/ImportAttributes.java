@@ -182,7 +182,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 							}
 						
 							if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.NUMERIC){
-								toUpdate.setDoubleValue(dValue);
+								toUpdate.setNumberValue(dValue);
 							}else{
 								toUpdate.setStringValue(newValue);
 							}

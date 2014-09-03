@@ -153,7 +153,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 							if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 								value = v.getStringValue();
 							}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-								value = v.getDoubleValue().toString();
+								value = v.getNumberValue().toString();
 							}
 						}
 					}

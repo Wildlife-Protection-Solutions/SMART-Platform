@@ -100,7 +100,7 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 					if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 						data[i] = v.getStringValue();
 					}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-						data[i] = v.getDoubleValue();
+						data[i] = v.getNumberValue();
 					}else{
 						data[i] = null;
 					}

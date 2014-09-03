@@ -352,7 +352,7 @@
       </image>
       <image
             commandId="org.wcs.smart.er.su.show"
-            icon="images/icons/obj16/sampling_unit.png">
+            icon="images/icons/obj16/sampling_unit_attribute.png">
       </image>
       <image
             commandId="org.wcs.smart.er.filter"

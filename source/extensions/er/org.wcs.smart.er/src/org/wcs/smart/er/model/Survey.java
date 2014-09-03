@@ -30,6 +30,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
@@ -108,6 +109,7 @@ public class Survey extends UuidItem {
 	 * associated survey design
 	 * @return
 	 */
+	@OrderBy("startDate DESC, id ASC")
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="survey", orphanRemoval = true)
 	public List<Mission> getMissions() {
 		return missions;
