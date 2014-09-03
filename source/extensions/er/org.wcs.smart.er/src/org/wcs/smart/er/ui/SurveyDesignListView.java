@@ -46,7 +46,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.IUpdatableView;
@@ -59,10 +58,7 @@ import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
-import org.wcs.smart.er.ui.handlers.EditSurveyHandler;
-import org.wcs.smart.er.ui.mision.editor.MissionEditor;
-import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
+import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -227,23 +223,18 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		
 		Object selection = ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (selection != null) {
-			try {
-				IWorkbenchPage page = getSite().getPage();
-				if (selection instanceof SurveyListTreeNode){
-					SurveyListTreeNode node = (SurveyListTreeNode)selection;
-					switch (node.getType()) {
-						case SURVEY:
-							EditSurveyHandler.editSurvey(getSite().getShell(), node.getUuid());
-							break;
-						case MISSION:
-							page.openEditor(new MissionEditorInput(node.getLabel(), node.getUuid()), MissionEditor.ID);
-							break;
-					}
-				}else if (selection instanceof SurveyDesignEditorInput){
-					page.openEditor((SurveyDesignEditorInput)selection, SurveyDesignEditor.ID);
+			if (selection instanceof SurveyListTreeNode){
+				SurveyListTreeNode node = (SurveyListTreeNode)selection;
+				switch (node.getType()) {
+					case SURVEY:
+						EditSurveyElementHandler.editSurvey(getSite().getShell(), node.getUuid());
+						break;
+					case MISSION:
+						EditSurveyElementHandler.editMission(getSite().getShell(), node.getUuid(), node.getLabel());
+						break;
 				}
-			} catch (Throwable t) {
-				EcologicalRecordsPlugIn.displayLog(t.getLocalizedMessage(), t);
+			}else if (selection instanceof SurveyDesignEditorInput){
+				EditSurveyElementHandler.editSurveyDesign(getSite().getShell(), (SurveyDesignEditorInput) selection);
 			}
 		}
 	}
