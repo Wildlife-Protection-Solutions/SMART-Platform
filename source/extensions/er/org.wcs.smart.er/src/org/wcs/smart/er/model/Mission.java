@@ -127,6 +127,9 @@ public class Mission extends UuidItem{
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<MissionTrack> getTracks(){
+		if (tracks == null) {
+			tracks = new ArrayList<MissionTrack>();
+		}
 		return this.tracks;
 	}
 	

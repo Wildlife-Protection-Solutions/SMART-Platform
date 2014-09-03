@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -71,6 +72,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -90,6 +92,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
+import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -120,6 +123,9 @@ public class MissionDayComposite {
 	private Font okayFont;
 	private Font errorFont;
 	private Hyperlink lnkImportWaypoints;
+	
+	private TableViewer trackTable;
+	private Hyperlink lnkEditTrack;
 
 	private Button btnAddWaypoint;
 	private Button btnDeleteWaypoint;
@@ -304,15 +310,30 @@ public class MissionDayComposite {
 		lblTotalHours.setLayoutData(gd);
 
 		Composite trackComp = toolkit.createComposite(mainComposite);
-		trackComp.setLayout(new GridLayout(4, false));
+		trackComp.setLayout(new GridLayout(3, false));
 		
 		
 		toolkit.createLabel(trackComp, "Distance Travelled (km):");
 		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
 		txtDistance.setEditable(false);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
+
+		toolkit.createLabel(trackComp, "Tracks:");
+		Table trTable = toolkit.createTable(trackComp, SWT.V_SCROLL | SWT.H_SCROLL);
+		trackTable = new TableViewer(trTable);
+		trackTable.setContentProvider(ArrayContentProvider.getInstance());
+		trackTable.setLabelProvider(new MissionTrackLabelProvider());
+		trTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		((GridData)trTable.getLayoutData()).minimumHeight = 40;
+		((GridData)trTable.getLayoutData()).heightHint = 40;
+		lnkEditTrack = toolkit.createHyperlink(trackComp, "edit", SWT.NONE);
+		lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
+			public void linkActivated(HyperlinkEvent e) {
+				showImportWaypointWizard();
+			}
+		});
 		
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
 		observationHcomp.setLayout(new GridLayout(2, false));
@@ -470,7 +491,9 @@ public class MissionDayComposite {
 //
 //		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
 
-		if (data.getWaypoints() == null){
+		trackTable.setInput(mission.getTracks().toArray());
+		
+		if (data.getWaypoints() == null) {
 			data.setWaypoints(new ArrayList<SurveyWaypoint>());
 		}
 		input = new ArrayList<SurveyWaypoint>();
