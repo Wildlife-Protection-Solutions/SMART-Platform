@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -92,7 +94,6 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
-import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -310,28 +311,30 @@ public class MissionDayComposite {
 		lblTotalHours.setLayoutData(gd);
 
 		Composite trackComp = toolkit.createComposite(mainComposite);
-		trackComp.setLayout(new GridLayout(3, false));
+		trackComp.setLayout(new GridLayout(4, false));
 		
 		
 		toolkit.createLabel(trackComp, "Distance Travelled (km):");
 		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
 		txtDistance.setEditable(false);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
+		toolkit.createLabel(trackComp, "").setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 
 		toolkit.createLabel(trackComp, "Tracks:");
 		Table trTable = toolkit.createTable(trackComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		trackTable = new TableViewer(trTable);
 		trackTable.setContentProvider(ArrayContentProvider.getInstance());
 		trackTable.setLabelProvider(new MissionTrackLabelProvider());
-		trTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		trTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		((GridData)trTable.getLayoutData()).minimumHeight = 40;
 		((GridData)trTable.getLayoutData()).heightHint = 40;
+		((GridData)trTable.getLayoutData()).widthHint = 120;
 		lnkEditTrack = toolkit.createHyperlink(trackComp, "edit", SWT.NONE);
 		lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
-				showImportWaypointWizard();
+				showEditTrackDialog();
 			}
 		});
 		
@@ -579,6 +582,15 @@ public class MissionDayComposite {
 		}
 		width = Math.min(200, width);
 		return width + 20;
+	}
+
+	protected void showEditTrackDialog() {
+		try {
+			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), mission);
+			editDialog.open();
+		} finally {
+			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
+		}
 	}
 	
 	protected void showImportWaypointWizard() {
