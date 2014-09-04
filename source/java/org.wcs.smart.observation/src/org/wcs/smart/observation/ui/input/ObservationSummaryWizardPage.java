@@ -126,9 +126,14 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			
 			List<Object> objects = new ArrayList<Object>();
 			objects.add(""); //$NON-NLS-1$
-			objects.addAll( getWizardLocal().getObservers() );
+			if (getWizardLocal().getObservers() != null){
+				objects.addAll( getWizardLocal().getObservers() );
+			}
 			employeeViewer.setInput(objects);
 			Employee em = null;
+			if (getWizardLocal().getWaypoint().getObservations() == null){
+				getWizardLocal().getWaypoint().setObservations(new ArrayList<WaypointObservation>());
+			}
 			for (WaypointObservation wp : getWizardLocal().getWaypoint().getObservations()){
 				if (wp.getObserver() != null){
 					em = wp.getObserver();

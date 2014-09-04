@@ -286,7 +286,7 @@ public class DerbyFilterToSqlGenerator {
 //		}
 //		
 		if (bits.length == 1){
-			f = " ( cast(" +field + " as date) >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){ 
 			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' and cast(" + field  + " as date) <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
