@@ -163,6 +163,30 @@ public class Mission extends UuidItem{
 	public void setMembers(List<MissionMember> members){
 		this.members = members;
 	}
+
+	@Transient
+	public MissionMember getLeader() {
+		if (this.members == null) {
+			return null;
+		}
+		for (MissionMember m : this.members) {
+			if (m.getIsLeader()) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+	@Transient
+	public void setLeader(MissionMember member) {
+		if (this.members == null) {
+			return;
+		}
+		for (MissionMember m : this.members) {
+			m.setIsLeader(false);
+		}
+		member.setIsLeader(true);
+	}
 	
 	/**
 	 * 
