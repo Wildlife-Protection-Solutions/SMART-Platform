@@ -22,6 +22,8 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.model.Mission;
 
@@ -37,4 +39,15 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		super(shell);
 	}
 
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		Composite comp = (Composite) super.createDialogArea(parent);
+
+		setTitle("Tracks");
+		getShell().setText("Tracks");
+		setMessage("Edit tracks");
+
+		new TracksComposite(comp);
+		return comp;
+	}
 }
