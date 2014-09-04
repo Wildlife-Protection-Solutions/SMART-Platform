@@ -183,11 +183,11 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 				if (dialog.open() == SurveyDesignDialog.OK) {
 					// update query
 					SurveyDesign newDesign = dialog.getSelectedDesign();
-					if ((currentDesign == null && newDesign != null)
-							|| (currentDesign != null && !currentDesign
-									.equals(newDesign))) {
+					if ((currentDesign == null && newDesign != null) || 
+						(currentDesign != null && !currentDesign.equals(newDesign))) {
 						
-						SurveyQueryEventManager.getInstance().fireSurveyDesignChange(newDesign, getQuery());
+						((ISurveyQuery)currentQuery.getQuery()).setSurveyDesign(newDesign);
+						SurveyQueryEventManager.getInstance().fireSurveyDesignChange((ISurveyQuery)currentQuery.getQuery());
 						fireQueryChangedListeners();
 					}
 				}

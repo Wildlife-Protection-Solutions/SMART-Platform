@@ -40,6 +40,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.engine.DerbyObservationEngine;
+import org.wcs.smart.er.query.engine.ISurveyQueryMissionResult;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
@@ -64,9 +65,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 public class SurveyObservationQuery extends ObservationQuery implements ISurveyQuery{
 
 	protected String surveyDesignKey;
-	
 	protected SurveyDesign surveyDesign;
-	
 	
 	private Object LOCK = new Object();
 
@@ -88,7 +87,14 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 				lsession.close();
 			}
 		}
-		
+	}
+	
+	public List<byte[]> getMissions(IProgressMonitor monitor) throws Exception{
+		Object results = getCachedResults(monitor);
+		if (results instanceof ISurveyQueryMissionResult){
+			return ((ISurveyQueryMissionResult)results).getMissionUuids();
+		}
+		return null;
 	}
 	
 	/**

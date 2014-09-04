@@ -101,7 +101,7 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 		MISSION_ID(Messages.SurveyGroupByContentProvider_MissionIdNode),
 		MISSION_PROP(Messages.SurveyGroupByContentProvider_MissionPropertiesNode),
 		SAMPLING_UNITS(Messages.SurveyGroupByContentProvider_SamplingUnitNode),
-		OBSERVER("Observer");
+		OBSERVER(Messages.SurveyGroupByContentProvider_ObserverNode);
 		
 		public String guiName;
 		

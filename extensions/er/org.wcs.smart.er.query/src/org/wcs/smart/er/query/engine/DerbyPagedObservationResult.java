@@ -66,7 +66,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult implements IObservationPagedQueryResultSet{
+public class DerbyPagedObservationResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult{
 	
 	private String queryTempTable;
 
@@ -657,6 +657,25 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		this.wpCount = wpCount;
 	}
 
+	
+	@Override
+	public List<byte[]> getMissionUuids() {
+		final Session session = HibernateManager.openSession();
+		final List<byte[]> uuids = new ArrayList<byte[]>();
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				String sql = "SELECT distinct mission_uuid FROM " + queryTempTable; //$NON-NLS-1$
+				ResultSet rs = c.createStatement().executeQuery(sql);
+				while(rs.next()){
+					uuids.add(rs.getBytes(1));
+				}
+				rs.close();
+			}});
+		
+		return uuids;
+	}
+	
 	/**
 	 * This is a wrapper for byte[] so we can use it as HashMap key.
 	 * The reason for creating this wrapper is that byte[] do not provide required equals and hashCode operations.
@@ -799,6 +818,6 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 			}
 			return Status.OK_STATUS;
 		}
-		
 	}
+
 }

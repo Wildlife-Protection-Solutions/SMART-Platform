@@ -178,10 +178,12 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 				if (dialog.open() == SurveyDesignDialog.OK) {
 					// update query
 					SurveyDesign newDesign = dialog.getSelectedDesign();
-					if ((currentDesign == null && newDesign != null)
-							|| (currentDesign != null && !currentDesign
-									.equals(newDesign))) {
-						SurveyQueryEventManager.getInstance().fireSurveyDesignChange(newDesign, currentQuery.getQuery());
+					
+					if ((currentDesign == null && newDesign != null) || 
+						(currentDesign != null && !currentDesign.equals(newDesign))) {
+						
+						((ISurveyQuery)currentQuery.getQuery()).setSurveyDesign(newDesign);
+						SurveyQueryEventManager.getInstance().fireSurveyDesignChange((ISurveyQuery)currentQuery.getQuery());
 						fireQueryChangedListeners();
 					}
 				}

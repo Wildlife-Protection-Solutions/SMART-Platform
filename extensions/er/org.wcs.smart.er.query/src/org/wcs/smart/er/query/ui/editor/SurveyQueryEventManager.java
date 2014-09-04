@@ -24,8 +24,7 @@ package org.wcs.smart.er.query.ui.editor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.query.model.Query;
+import org.wcs.smart.er.query.model.ISurveyQuery;
 
 /**
  * Survey query event manager.
@@ -72,9 +71,9 @@ public class SurveyQueryEventManager {
 	 * @param newDesign new survey design
 	 * @param query current query
 	 */
-	public void fireSurveyDesignChange(SurveyDesign newDesign, Query query){
+	public void fireSurveyDesignChange(ISurveyQuery query){
 		for (SurveyDesignChangeListener ll : listeners){
-			ll.surveyDesignChange(newDesign, query);
+			ll.surveyDesignChange(query);
 		}
 	}
 	
@@ -87,9 +86,9 @@ public class SurveyQueryEventManager {
 	public interface SurveyDesignChangeListener{
 		/**
 		 * The survey design has changed.
-		 * @param newDesign
-		 * @param query
+		 * @param newDesign new query design
+		 * @param query updated query; note that the query may not be updated with the new survey design at this point
 		 */
-		public void surveyDesignChange(SurveyDesign newDesign, Query query);
+		public void surveyDesignChange(ISurveyQuery query);
 	}
 }

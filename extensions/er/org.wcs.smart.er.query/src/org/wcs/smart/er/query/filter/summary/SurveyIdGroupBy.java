@@ -127,27 +127,28 @@ public class SurveyIdGroupBy implements ISurveyGroupBy {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
 		
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (filter == null){
 			//get all surveys for the current ca
 			
-			List<Survey> surveys = session.createCriteria(Survey.class, "survey")
-					.createAlias("survey.surveyDesign", "sd")
-					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
-					.addOrder(Order.asc("sd.keyId"))
+			List<Survey> surveys = session.createCriteria(Survey.class, "survey") //$NON-NLS-1$
+					.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
 					.list();
 			for (Survey s : surveys){
-				ListItem li = new ListItem(s.getUuid(), s.getId() + " [" + s.getSurveyDesign().getName() + "]");
+				ListItem li = new ListItem(s.getUuid(), s.getId() + " [" + s.getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				items.add(li);
 			}			
 		}else{
-			List<Survey> surveys = session.createCriteria(Survey.class, "survey")
-				.createAlias("survey.surveyDesign", "sd")
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("sd.keyId", filter.getKey()))
-				.addOrder(Order.asc("sd.keyId"))
+			List<Survey> surveys = session.createCriteria(Survey.class, "survey") //$NON-NLS-1$
+				.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
+				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
 				.list();
 			for (Survey s : surveys){
 				ListItem li = new ListItem(s.getUuid(), s.getId() );

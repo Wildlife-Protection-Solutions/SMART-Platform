@@ -32,6 +32,8 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.map.geotools.SurveyObsQueryDataSource;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
@@ -47,7 +49,13 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public QueryGeoResourceInfo( QueryGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.getDataType();
+		if (resource.getDataType().equals(SurveyObsQueryDataSource.WAYPOINT_TYPE)){
+			this.title = Messages.QueryGeoResourceInfo_WaypointLabel;
+		}else if (resource.getDataType().equals(SurveyObsQueryDataSource.TRACKS_TYPE)){
+			this.title = Messages.QueryGeoResourceInfo_TracksLabel;
+		}else{
+			this.title = resource.getDataType();
+		}
 		computeBounds(resource, monitor);
 	}
 	

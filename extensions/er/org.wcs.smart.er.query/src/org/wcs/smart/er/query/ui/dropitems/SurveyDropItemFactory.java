@@ -127,7 +127,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 //			}
 			}
 		}else if (source instanceof AreaType){
-			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+			if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
 				
 //				if (items != null){

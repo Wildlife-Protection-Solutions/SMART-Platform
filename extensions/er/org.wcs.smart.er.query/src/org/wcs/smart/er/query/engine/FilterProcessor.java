@@ -857,7 +857,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(namePrefix(SamplingUnitAttributeValue.class));
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(namePrefix(SamplingUnitAttribute.class));
-				sql.append(" ON " + prefix(SamplingUnitAttributeValue.class) + ".su_uuid = ");  //$NON-NLS-1$//$NON-NLS-2$
+				sql.append(" ON " + prefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = ");  //$NON-NLS-1$//$NON-NLS-2$
 				sql.append(prefix(SamplingUnitAttribute.class) + ".uuid AND "); //$NON-NLS-1$
 				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = '" + key.getKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				

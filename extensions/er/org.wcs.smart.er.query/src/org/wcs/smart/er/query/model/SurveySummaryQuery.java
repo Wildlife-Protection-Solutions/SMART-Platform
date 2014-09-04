@@ -65,7 +65,6 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 	
 	protected SurveyDesign surveyDesign;
 	
-	private Object LOCK = new Object();
 	
 	/**
 	 * Parse the string format of the query

@@ -22,16 +22,21 @@
 package org.wcs.smart.er.query.map.geotools;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.ParseException;
@@ -81,7 +86,36 @@ public class SurveyResultItemFeature {
 		
 	}
 	
-	
+	/**
+	 * Converts a mission to a feature
+	 * 
+	 * @param mission the mission 
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	public static SimpleFeature createObservationFeature(Mission mission, SimpleFeatureType  ftype){
+		//"fid:String,id:String,start:Date,end:Date,comment:String,geom:LineString:srid=4326"
+		
+		Object[] data = new Object[6];
+		data[0] = mission.getId() + "." + SmartUtils.encodeHex(mission.getUuid()); //$NON-NLS-1$
+		data[1] = mission.getId();
+		data[2] = mission.getStartDate();
+		data[3] = mission.getEndDate();
+		data[4] = mission.getComment();
+		
+		if (mission.getTracks().size() > 0){
+			List<LineString> geoms = new ArrayList<LineString>();
+			for (MissionTrack mt : mission.getTracks()){
+				geoms.add(mt.getLineString());
+			}
+			Geometry g = gf.createMultiLineString(geoms.toArray(new LineString[geoms.size()]));
+			//System.out.println(mission.getTracks().size() + ":" + g.toText() + ":" + mission.getId());
+			data[5] = g;
+		}else{
+			data[5] = null;
+		}
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+	}
 	/**
 	 * Converts a query result item track feature.
 	 * 
@@ -123,7 +157,7 @@ public class SurveyResultItemFeature {
 				data[data.length - 1] = gf.createMultiLineString(lss);
 			} catch (ParseException e) {
 				data[data.length - 1] = gf.createLineString((Coordinate[]) null);
-				ERQueryPlugIn.log(MessageFormat.format("Error parsing geometry.", new Object[]{it.getMissionId()}), e);
+				ERQueryPlugIn.log(MessageFormat.format("Error parsing geometry.", new Object[]{it.getMissionId()}), e); //$NON-NLS-1$
 			}
 		}
 
