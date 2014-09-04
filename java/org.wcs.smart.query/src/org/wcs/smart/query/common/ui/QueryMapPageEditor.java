@@ -101,14 +101,13 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 					queryService.refresh(null);
 					List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 					boolean found = false;
-					if (layers.size() > 0){
-						IGeoResource waypointLayer = layers.get(0);
+					for (IGeoResource w : layers){
 						for( ILayer layer : getMap().getLayersInternal() ) {
-		                	if(layer.getID().equals(waypointLayer.getIdentifier())){
-		                		found = true;
-		                		break;
-		                	}
-		                }
+							if(layer.getID().equals(w.getIdentifier())){
+								found = true;
+								break;
+							}
+	                	}
 					}
 					if (!found){
 						addLayerJob.schedule();
