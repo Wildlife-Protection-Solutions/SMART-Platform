@@ -255,7 +255,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		txtSurveyId.setFocus();
 	}
 	
-	private void editCompoent(MissionComposite component){
+	private void editComponent(MissionComposite component){
 		MissionEditorDialog dialog = new MissionEditorDialog(getSite().getShell(), component, missionEditor.getMission());
 		dialog.open();
 	}
@@ -283,7 +283,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		}
 		if (component != null && component instanceof MissionComposite){
-			editCompoent((MissionComposite)component);
+			editComponent((MissionComposite)component);
 		}
 		
 	}
