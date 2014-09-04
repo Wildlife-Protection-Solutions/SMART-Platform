@@ -90,17 +90,12 @@ public class SamplingUnitService extends IService {
 	}
 	
 	/**
-	 * Refreshes the survey design associated with the service
+	 * Refreshes the sampling unit layers associated with the service
 	 * 
 	 * @param monitor
 	 * @throws IOException
 	 */
-	public void refresh(SurveyDesign sd, IProgressMonitor monitor) throws IOException{
-		this.sd= sd;
-		if (this.ds != null){
-			this.ds.update(sd);
-		}
-		
+	public void refresh(IProgressMonitor monitor) throws IOException{
 		for (IGeoResource member : resources(monitor)){
 			((SamplingUnitGeoResourceInfo)member.getInfo(monitor)).computeBounds((SamplingUnitGeoResource)member, monitor);
 		}
