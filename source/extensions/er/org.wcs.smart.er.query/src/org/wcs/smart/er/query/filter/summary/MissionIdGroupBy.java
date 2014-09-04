@@ -129,34 +129,35 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
 		
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (filter == null){
 			//get all surveys for the current ca
 			
-			List<Mission> missions = session.createCriteria(Mission.class, "m")
-					.createAlias("m.survey", "s")
-					.createAlias("survey.surveyDesign", "sd")
-					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
-					.addOrder(Order.asc("sd.keyId"))
-					.addOrder(Order.asc("s.id"))
+			List<Mission> missions = session.createCriteria(Mission.class, "m") //$NON-NLS-1$
+					.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+					.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
+					.addOrder(Order.asc("s.id")) //$NON-NLS-1$
 					.list();
 			for (Mission m : missions){
-				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + " - " + m.getSurvey().getSurveyDesign().getName() + "]");
+				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + " - " + m.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				items.add(li);
 			}			
 		}else{
-			List<Mission> missions = session.createCriteria(Mission.class, "m")
-				.createAlias("m.survey", "s")
-				.createAlias("survey.surveyDesign", "sd")
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("sd.keyId", filter.getKey()))
-				.addOrder(Order.asc("sd.keyId"))
-					.addOrder(Order.asc("s.id"))
+			List<Mission> missions = session.createCriteria(Mission.class, "m") //$NON-NLS-1$
+				.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+				.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
+				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
+					.addOrder(Order.asc("s.id")) //$NON-NLS-1$
 				.list();
 			for (Mission m : missions){
-				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + "]");
+				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				items.add(li);
 			}			
 		}

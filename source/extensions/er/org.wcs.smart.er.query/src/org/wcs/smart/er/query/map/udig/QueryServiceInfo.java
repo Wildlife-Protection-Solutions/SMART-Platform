@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.map.udig;
 
 import net.refractions.udig.catalog.IServiceInfo;
 
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 
 /**
@@ -33,10 +34,10 @@ import org.wcs.smart.query.QueryPlugIn;
 public class QueryServiceInfo extends IServiceInfo{
 
 	public QueryServiceInfo(QueryService service){
-		this.description = "Connects to a SMART-ER query.";
+		this.description = Messages.QueryServiceInfo_Description;
 		this.icon = QueryPlugIn.getDefault().getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
-		this.keywords = new String[]{"Query", "ER", "SMART", "Conservation Area"};
-		this.title = "SMART Query " + service.getQuery().getName();
+		this.keywords = new String[]{Messages.QueryServiceInfo_Keyword1, Messages.QueryServiceInfo_Keyword2, Messages.QueryServiceInfo_Keyword3, Messages.QueryServiceInfo_Keyword4};
+		this.title = Messages.QueryServiceInfo_Title + service.getQuery().getName();
 	}
 	
 }

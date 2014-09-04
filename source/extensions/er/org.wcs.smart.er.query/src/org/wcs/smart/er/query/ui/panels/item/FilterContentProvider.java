@@ -175,7 +175,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}
 	};
 	
-	private Job loadSamplingUnitAttributes = new Job("Loading Sampling Unit Attributes"){
+	private Job loadSamplingUnitAttributes = new Job(Messages.FilterContentProvider_loadingSuAttributeJobName){
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -183,7 +184,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 			try{
 				if (design != null){
 					List<SurveyDesignSamplingUnitAttribute> attributes = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-							.add(Restrictions.eq("id.surveyDesign", design))
+							.add(Restrictions.eq("id.surveyDesign", design)) //$NON-NLS-1$
 							.list();
 					
 					unitAttributes = new ArrayList<SamplingUnitAttribute>();
@@ -192,7 +193,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 					}
 				}else{					
 					unitAttributes = s.createCriteria(SamplingUnitAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list();
 				}
 				
@@ -228,8 +229,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 		SURVEY_MISSION(Messages.SurveyItemContentProvider_AllMissionsAndSurveysLabel),
 		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel),
 		SAMPLING_UNITS(Messages.FilterContentProvider_SuLabel),
-		SAMPLING_UNIT_ATTRIBUTE("Sampling Unit Attributes"),
-		OBSERVER("Observer");
+		SAMPLING_UNIT_ATTRIBUTE(Messages.FilterContentProvider_SamplingUnitAttributesLabel),
+		OBSERVER(Messages.FilterContentProvider_ObserverLabel);
 		public String guiName;
 		
 		private Node(String guiName){

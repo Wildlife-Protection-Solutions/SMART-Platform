@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
@@ -124,11 +125,11 @@ public class GriddedDefinitionPanel extends
 				if (dialog.open() == SurveyDesignDialog.OK) {
 					// update query
 					SurveyDesign newDesign = dialog.getSelectedDesign();
-					if ((currentDesign == null && newDesign != null)
-							|| (currentDesign != null && !currentDesign
-									.equals(newDesign))) {
+					if ((currentDesign == null && newDesign != null) || 
+						(currentDesign != null && !currentDesign.equals(newDesign))) {
 						
-						SurveyQueryEventManager.getInstance().fireSurveyDesignChange(newDesign, getQuery());
+						((ISurveyQuery)currentQuery.getQuery()).setSurveyDesign(newDesign);
+						SurveyQueryEventManager.getInstance().fireSurveyDesignChange((ISurveyQuery)currentQuery.getQuery());
 						fireQueryChangedListeners();
 					}
 				}

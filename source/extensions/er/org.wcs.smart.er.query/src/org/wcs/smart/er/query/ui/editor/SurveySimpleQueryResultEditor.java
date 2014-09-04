@@ -21,9 +21,31 @@
  */
 package org.wcs.smart.er.query.ui.editor;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.ILayer;
+import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.map.udig.QueryService;
+import org.wcs.smart.er.query.model.ISurveyQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
@@ -45,16 +67,20 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	public static final String ID = "org.wcs.smart.er.query.ui.SimpleQueryResultsEditor";  //$NON-NLS-1$
 
-	SurveyQueryEventManager.SurveyDesignChangeListener updateTable = new SurveyQueryEventManager.SurveyDesignChangeListener(){
+	private SurveyQueryEventManager.SurveyDesignChangeListener updateTable = new SurveyQueryEventManager.SurveyDesignChangeListener(){
 		@Override
-		public void surveyDesignChange(SurveyDesign newDesign, Query query) {
+		public void surveyDesignChange(ISurveyQuery query) {
 			if (!getQuery().equals(query)) return;
 			
 			getQueryResultsTable().clearColumns();
 			getQueryResultsTable().initQuery(getQueryInternal());
+			
+			
+			addSuLayer.schedule();
 		}
 	};
 	
+	private SamplingUnitService service = null;
 	
 	/**
 	 * Creates a new results editor
@@ -72,6 +98,12 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	public void dispose(){
 		super.dispose();
 		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(updateTable);
+		
+		if (service != null){
+			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+			service.dispose(null);
+			service = null;
+		}
 	}
 	
 	
@@ -98,4 +130,71 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	public IQueryService createQueryService() {
 		return new QueryService(getQuery());
 	}
+	
+	@Override
+	public void init(IEditorSite site, IEditorInput input)
+			throws PartInitException {
+		super.init(site, input);
+		addSuLayer.schedule();
+	}
+	
+	
+	private Job addSuLayer = new Job(Messages.SurveySimpleQueryResultEditor_LoadSuJobName){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (getQuery() instanceof SurveyObservationQuery){
+				SurveyObservationQuery qq = (SurveyObservationQuery) getQuery();
+				
+				SurveyDesign sd = qq.getSurveyDesignAsObject();
+				if(sd != null){
+					if (service != null &&
+							service.getSurveyDesign().equals(sd)){
+						//we don't have to do anything
+						return Status.OK_STATUS;
+					}
+					disposeService(monitor);
+					service = new SamplingUnitService(sd);
+					try{
+				    	List<IGeoResource> layers = (List<IGeoResource>) service.resources(null);
+				    	AddLayersCommand command = new AddLayersCommand(layers);
+				    	if (getMap() == null) return Status.CANCEL_STATUS;
+			    		getMap().sendCommandASync(command);
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.log("Error adding survey design sampling unit layers.", ex); //$NON-NLS-1$
+					}
+					return Status.OK_STATUS;
+				}
+			}
+			//dispose service
+			disposeService(monitor);
+			return Status.OK_STATUS;
+		}
+		
+		private void disposeService(IProgressMonitor monitor){
+			if (service == null) return;
+			try {
+				List<? extends IGeoResource> resources = service.resources(monitor);
+				List<ILayer> toDelete = new ArrayList<ILayer>();
+				for (IGeoResource r : resources){
+					for( ILayer layer : getMap().getLayersInternal() ) {
+	                	if(layer.getID().equals(r.getIdentifier())){
+	                		toDelete.add(layer);
+	                		break;
+	                	}
+	                }
+				}
+				if (toDelete.size() > 0){
+					DeleteLayersCommand cmd = new DeleteLayersCommand(toDelete.toArray(new ILayer[toDelete.size()]));
+					getMap().sendCommandASync(cmd);
+				}
+			} catch (IOException e) {
+				EcologicalRecordsPlugIn.log("Error disposing survey design sampling unit layers.", e); //$NON-NLS-1$
+			}
+			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+			service.dispose(monitor);
+			service = null;
+		}
+		
+	};
 }

@@ -24,7 +24,10 @@ public class Messages extends NLS {
 	public static String DerbySummaryEngine_ProcessingValues1;
 	public static String DerbySummaryEngine_ProcessingValues2;
 	public static String ERQueryPlugIn_ErrorDialogTitle;
+	public static String FilterContentProvider_loadingSuAttributeJobName;
 	public static String FilterContentProvider_LoadSuJobName;
+	public static String FilterContentProvider_ObserverLabel;
+	public static String FilterContentProvider_SamplingUnitAttributesLabel;
 	public static String FilterContentProvider_SuLabel;
 	public static String FilterProcessor_progress1;
 	public static String FilterProcessor_progress2;
@@ -61,6 +64,14 @@ public class Messages extends NLS {
 	public static String MissionIdGroupByDropItem_IncludedLabel;
 	public static String MissionIdGroupByDropItem_Label;
 	public static String MissionStartDateField_Name;
+	public static String QueryGeoResourceInfo_TracksLabel;
+	public static String QueryGeoResourceInfo_WaypointLabel;
+	public static String QueryServiceInfo_Description;
+	public static String QueryServiceInfo_Keyword1;
+	public static String QueryServiceInfo_Keyword2;
+	public static String QueryServiceInfo_Keyword3;
+	public static String QueryServiceInfo_Keyword4;
+	public static String QueryServiceInfo_Title;
 	public static String SamplingUnitAttributeFilter_AttributeNotFound;
 	public static String SamplingUnitDropItem_Label;
 	public static String SamplingUnitFilter_MissionTrackNotFound;
@@ -94,6 +105,7 @@ public class Messages extends NLS {
 	public static String SurveyGridQueryType_QueryTypeName;
 	public static String SurveyGroupByContentProvider_MissionIdNode;
 	public static String SurveyGroupByContentProvider_MissionPropertiesNode;
+	public static String SurveyGroupByContentProvider_ObserverNode;
 	public static String SurveyGroupByContentProvider_SamplingUnitNode;
 	public static String SurveyGroupByContentProvider_StrataNode;
 	public static String SurveyGroupByContentProvider_SurveyIdNode;
@@ -117,6 +129,7 @@ public class Messages extends NLS {
 	public static String SurveyItemTreeNode_SurveyFiltersNode;
 	public static String SurveyObservationQuery_loadingDesignJobName;
 	public static String SurveyObservationQueryType_QueryTypeName;
+	public static String SurveyObsQueryDataSource_SchemaError;
 	public static String SurveyQueryColumn_CaIdLabel;
 	public static String SurveyQueryColumn_CaNameLabel;
 	public static String SurveyQueryColumn_CommentLabel;
@@ -142,6 +155,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumnManager_datamodelcolumnjobname;
 	public static String SurveyQueryColumnManager_missionattributejobname;
 	public static String SurveyQueryFactory_DefaultQueryName;
+	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryTypeName;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;
 	public static String WaypointFilterProcessor_progress1;

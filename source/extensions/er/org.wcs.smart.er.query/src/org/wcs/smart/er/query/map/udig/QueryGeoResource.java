@@ -68,7 +68,7 @@ public class QueryGeoResource extends IGeoResource {
 				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 			}
 		 } catch (MalformedURLException e) {
-             throw new IllegalArgumentException("The service URL must not contain a #", e);
+             throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }	
 	}
 
@@ -154,7 +154,7 @@ public class QueryGeoResource extends IGeoResource {
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
-				ERQueryPlugIn.log("Query datasource not created.", null);
+				ERQueryPlugIn.log("Query datasource not created.", null); //$NON-NLS-1$
 				return null;
 			}
 		}

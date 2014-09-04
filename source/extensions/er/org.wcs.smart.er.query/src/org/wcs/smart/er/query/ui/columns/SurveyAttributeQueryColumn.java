@@ -53,7 +53,11 @@ public class SurveyAttributeQueryColumn extends AttributeQueryColumn {
 	@Override
 	public Object getValue(IResultItem item) {
 		if (item instanceof SurveyQueryResultItem){
-			return ((SurveyQueryResultItem) item).getAttributeValue(this.attributeKey);
+			Object x = ((SurveyQueryResultItem)item).getAttributeValue(attributeKey);
+			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
+				return Boolean.valueOf((Double)x >= 0.5);
+			}
+			return x;
 		}
 		return null;
 	}

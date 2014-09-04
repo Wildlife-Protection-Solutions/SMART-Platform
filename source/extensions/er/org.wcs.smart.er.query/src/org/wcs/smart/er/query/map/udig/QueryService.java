@@ -100,6 +100,7 @@ public class QueryService extends IQueryService {
 	
 	/**
 	 * Refreshes the bounds for each resource.
+	 * We also need to update the schema.
 	 * 
 	 * @param monitor
 	 * @throws IOException
@@ -107,6 +108,9 @@ public class QueryService extends IQueryService {
 	public void refresh(IProgressMonitor monitor) throws IOException{
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
+		}
+		if (ds instanceof SurveyObsQueryDataSource){
+			((SurveyObsQueryDataSource)ds).resetSchema(SurveyObsQueryDataSource.WAYPOINT_TYPE);
 		}
 	}	
 	
@@ -148,14 +152,16 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getClass().equals(SurveyObservationQueryType.class) || 
-							query.getType().getClass().equals(SurveyObservationQueryType.class) ){
+					if (query.getType().getClass().equals(SurveyObservationQueryType.class) ){
+						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.TRACKS_TYPE));
 						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_TYPE));
+						
 //					}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
 //						members.add(new QueryGeoResource(this, SurveyQueryDataSource.PATROL_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
 //						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
+					
 				}
 			}
 		}

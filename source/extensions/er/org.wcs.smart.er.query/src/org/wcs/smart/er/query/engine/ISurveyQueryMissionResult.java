@@ -19,36 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.panels.definition;
+package org.wcs.smart.er.query.engine;
 
-import org.wcs.smart.er.query.model.ISurveyQuery;
-import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
-import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
+import java.util.List;
+
 
 /**
- * Query survey design change listener for 
- * survey definition panels.  Refreshes the panel
- * when the survey design is changes. 
+ * Interface for providing list of associated missions with 
+ * a query result set.
  * 
  * @author Emily
  *
  */
-public class DefinitionListener implements SurveyQueryEventManager.SurveyDesignChangeListener  {
+public interface ISurveyQueryMissionResult {
 
-	private ISurveyPanel panel;
-	
 	/**
-	 * @param panel Survey panel to refresh
+	 * 
+	 * @return list of mission uuids that are matched by the query
 	 */
-	public DefinitionListener(ISurveyPanel panel){
-		this.panel = panel;
-	}
-	
-	@Override
-	public void surveyDesignChange(ISurveyQuery query) {
-		if (panel.getQuery() == null || panel.getQuery().equals(query)){
-			panel.refreshPanel(query.getSurveyDesignAsObject());
-		}
-	}
-
+	public List<byte[]> getMissionUuids();
 }
