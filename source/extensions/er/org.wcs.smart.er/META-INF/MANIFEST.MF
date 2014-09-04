@@ -18,6 +18,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.er,
  org.wcs.smart.er.hibernate,
+ org.wcs.smart.er.map.samplingunit,
  org.wcs.smart.er.model,
  org.wcs.smart.er.ui,
  org.wcs.smart.er.ui.surveydesign.editor

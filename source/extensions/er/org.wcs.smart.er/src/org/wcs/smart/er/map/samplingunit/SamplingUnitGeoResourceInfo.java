@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.map.samplingunit;
 
+import java.io.IOException;
+
 import net.refractions.udig.catalog.IGeoResourceInfo;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +34,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.model.SurveyDesign;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -44,7 +47,14 @@ public class SamplingUnitGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public SamplingUnitGeoResourceInfo( SamplingUnitGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.getDataType();
+		String title = resource.getDataType();
+		try {
+			SurveyDesign sd = ((SamplingUnitService)resource.service(monitor)).getSurveyDesign();
+			title += " [" + sd.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (IOException e) {
+			EcologicalRecordsPlugIn.log(e.getMessage(), e);
+		}
+		super.title = title;
 		computeBounds(resource, monitor);
 	}
 	

@@ -199,7 +199,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 		protected IStatus run(IProgressMonitor monitor) {
 			if (suService != null){
 				try {
-					suService.refresh(editor.getSurveyDesign(), null);
+					suService.refresh(null);
 				} catch (IOException e) {
 					EcologicalRecordsPlugIn.log("Error refreshing sampling unit layers", e); //$NON-NLS-1$
 				}
