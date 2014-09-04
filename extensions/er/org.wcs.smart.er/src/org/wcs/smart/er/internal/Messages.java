@@ -181,6 +181,7 @@ public class Messages extends NLS {
 	public static String MissionAttributeDeleteAdvisor_InvalidType;
 	public static String MissionEmployeeComposite_AllEmployeesLabel;
 	public static String MissionEmployeeComposite_Description;
+	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
 	public static String MissionEmployeeComposite_Title;
 	public static String MissionPropertiesComposite_AllMissionAttributes;
