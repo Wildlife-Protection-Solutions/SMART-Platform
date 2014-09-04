@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -51,6 +52,7 @@ import org.wcs.smart.ca.Employee;
 public class MissionMember {
 
 	private MissionMemberPk id = new MissionMemberPk();
+	private boolean isLeader;
 	
 	public MissionMember(){
 	}
@@ -79,7 +81,15 @@ public class MissionMember {
 		id.setMission(mission);
 	}
 	
-	
+	@Column(name="is_leader")
+	public boolean getIsLeader() {
+		return isLeader;
+	}
+	public void setIsLeader(boolean isLeader) {
+		this.isLeader = isLeader;
+	}
+
+
 	@Embeddable
 	private static class MissionMemberPk implements Serializable{
 		/**

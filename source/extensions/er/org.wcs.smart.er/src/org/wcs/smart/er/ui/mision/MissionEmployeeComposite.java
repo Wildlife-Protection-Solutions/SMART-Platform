@@ -26,11 +26,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.MultipleSelectComposite;
@@ -51,8 +58,10 @@ import org.wcs.smart.hibernate.SmartDB;
 public class MissionEmployeeComposite extends MissionComposite {
 
 	private MultipleSelectComposite<Employee> composite;
+	private ComboViewer leaderViewer = null;
+
 	
-	public MissionEmployeeComposite(){
+	public MissionEmployeeComposite() {
 	}
 	
 	
@@ -75,28 +84,73 @@ public class MissionEmployeeComposite extends MissionComposite {
 			}
 		});
 		composite.addSelectionChangedListener(new IListChanged<Employee>() {
-
 			@Override
 			public void listChanged(List<Employee> items) {
+				updateLeaderInput(items);
 				fireChangeListeners();
 			}
 		});
+		
+		Composite leaderCmp = new Composite(c, SWT.NONE);
+		GridLayout layout = new GridLayout(2, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		leaderCmp.setLayout(layout);
+		leaderCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Label lbl = new Label(leaderCmp, SWT.NONE);
+		lbl.setText("Mission Leader:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		leaderViewer = new ComboViewer(leaderCmp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		leaderViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		leaderViewer.setContentProvider(new ArrayContentProvider());
+		leaderViewer.setLabelProvider(EmployeeLabelProvider.getInstance());
+		leaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fireChangeListeners();	
+			}
+		});
+		
 		return c;
 	}
 
 	
+	protected void updateLeaderInput(List<Employee> items) {
+		IStructuredSelection selection = (IStructuredSelection)leaderViewer.getSelection();
+		Object element = null;
+		if (selection != null) {
+			element = selection.getFirstElement();
+		}
+		leaderViewer.setInput(items.toArray());
+		leaderViewer.setSelection(items.contains(element) ? new StructuredSelection(element) : null);
+	}
+
+
 	@Override
 	public void init(Mission mission, Session session) {List<Employee> all = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
 		List<Employee> selected = new ArrayList<Employee>();
+		Employee leader = null;
 		
 		if (mission.getMembers() != null){
 			for (MissionMember mm : mission.getMembers()){
 				selected.add(mm.getMember());
 				all.remove(mm.getMember());
+				if (mm.getIsLeader()) {
+					leader = mm.getMember();
+				}
 			}
 		}
 		
 		composite.setItemsData(all, selected);
+		
+		leaderViewer.setInput(selected.toArray());
+		if (leader != null) {
+			leaderViewer.setSelection(new StructuredSelection(leader));
+		}
 	}
 
 	@Override
@@ -121,20 +175,30 @@ public class MissionEmployeeComposite extends MissionComposite {
 		for (MissionMember mm : toDelete){
 			mm.setId(null);
 		}
-		
+
 		//add new members
-		for(Employee e : copy){
+		for(Employee e : copy) {
 			MissionMember mm = new MissionMember();
 			mm.setMember(e);
 			mm.setMission(mission);
 			mission.getMembers().add(mm);
 		}
 
+		
+		IStructuredSelection selection = (IStructuredSelection)leaderViewer.getSelection();
+		Employee leader = selection != null ? (Employee) selection.getFirstElement() : null;
+		for (MissionMember mm : mission.getMembers()) {
+			if (mm.getMember().equals(leader)) {
+				mission.setLeader(mm);
+				break;
+			}
+		}		
 	}
 
 	@Override
 	public boolean isValid() {
-		if (composite.getSelectedItemsAsList().size()> 0){
+		IStructuredSelection selection = (IStructuredSelection)leaderViewer.getSelection();
+		if (composite.getSelectedItemsAsList().size() > 0 && selection != null && selection.getFirstElement() != null) {
 			return true;
 		}
 		return false;
