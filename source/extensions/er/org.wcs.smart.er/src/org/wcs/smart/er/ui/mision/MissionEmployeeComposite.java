@@ -101,7 +101,7 @@ public class MissionEmployeeComposite extends MissionComposite {
 		leaderCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(leaderCmp, SWT.NONE);
-		lbl.setText("Mission Leader:");
+		lbl.setText(Messages.MissionEmployeeComposite_MissionLeader);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		leaderViewer = new ComboViewer(leaderCmp, SWT.DROP_DOWN | SWT.READ_ONLY);
