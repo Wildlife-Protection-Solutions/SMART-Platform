@@ -59,7 +59,6 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 	}
 	
 	private String[] items;
-	private List<ListItem> allItems;
 	
 	private MissionIdGroupBy(String[] items){
 		this.items = items;
@@ -93,11 +92,7 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 
 	@Override
 	public List<ListItem> getItems(Session session) {
-		if (allItems != null){
-			return allItems;
-		}
-		
-		allItems = new ArrayList<ListItem>();
+		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null && items.length > 0){
 			for (String it : items){
 				try{
@@ -109,8 +104,6 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				}
 			}
-		}else{
-			//get all mission ids associated with survey design
 		}
 		return allItems;
 	}
@@ -131,7 +124,9 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
-		
+		if (items != null){
+			return getItems(session);
+		}
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (filter == null){
 			//get all surveys for the current ca

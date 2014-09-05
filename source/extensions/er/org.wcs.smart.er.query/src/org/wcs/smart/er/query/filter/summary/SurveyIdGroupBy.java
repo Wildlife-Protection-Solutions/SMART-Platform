@@ -58,8 +58,7 @@ public class SurveyIdGroupBy implements ISurveyGroupBy {
 		}
 	}
 	
-	private String[] items = null;;
-	private List<ListItem> allItems;
+	private String[] items = null;
 	
 	private SurveyIdGroupBy(String[] items){
 		this.items = items;
@@ -93,11 +92,7 @@ public class SurveyIdGroupBy implements ISurveyGroupBy {
 
 	@Override
 	public List<ListItem> getItems(Session session) {
-		if (allItems != null){
-			return allItems;
-		}
-		
-		allItems = new ArrayList<ListItem>();
+		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null){
 			for (String it : items){
 				try{
@@ -129,6 +124,9 @@ public class SurveyIdGroupBy implements ISurveyGroupBy {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
+		if (items != null){
+			return getItems(session);
+		}
 		
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (filter == null){

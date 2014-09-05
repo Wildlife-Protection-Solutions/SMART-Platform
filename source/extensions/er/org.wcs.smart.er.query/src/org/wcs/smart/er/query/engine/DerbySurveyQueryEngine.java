@@ -42,10 +42,9 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.filter.IFilter;
 
 /**
@@ -114,7 +113,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	 * @return
 	 * @throws SQLException
 	 */
-	protected abstract SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
+	protected abstract IResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
 	
 	/**
 	 * Create the temporary table for hold observation data
@@ -147,10 +146,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	 * @throws SQLException
 	 */
 	protected void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+	
 	}
 	
 	/**

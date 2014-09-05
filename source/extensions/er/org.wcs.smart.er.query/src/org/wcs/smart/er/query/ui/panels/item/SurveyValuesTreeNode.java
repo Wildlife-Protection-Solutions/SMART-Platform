@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
@@ -44,12 +45,14 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 	private LabelProvider labelprovider;
 		
 	public enum Node {
-		MISSION_LENGTH("Mission Length");
+		MISSION_LENGTH(Messages.SurveyValuesTreeNode_MissionTrackLengthItem, ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSION_TRACK_ICON));
 		
 		private String guiName;
+		private Image image;
 		
-		private Node(String name){
+		private Node(String name, Image image){
 			guiName = name;
+			this.image = image;
 		}
 	};
 	/**
@@ -100,6 +103,9 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 			
 			@Override
 			public Image getImage(Object element){
+				if (element instanceof Node){
+					return ((Node)element).image;
+				}
 				return null;
 			}
 		};

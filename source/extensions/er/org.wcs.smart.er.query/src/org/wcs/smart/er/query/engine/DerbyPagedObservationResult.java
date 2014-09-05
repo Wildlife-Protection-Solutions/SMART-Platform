@@ -560,7 +560,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		}
 		for(int x = from; x < to; x++) {
 			rs.next();
-			SurveyQueryResultItem it = engine.asQueryResultItem(rs, null);
+			SurveyQueryResultItem it = (SurveyQueryResultItem) engine.asQueryResultItem(rs, null);
 			items.add(it);
 		}
 		return items;

@@ -56,6 +56,7 @@ import org.wcs.smart.er.query.ui.panels.item.FilterItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.GriddedValueItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.GroupByValueItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
+import org.wcs.smart.er.query.ui.panels.item.SurveyValuesTreeNode;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -191,11 +192,18 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = new DropItem[]{createSamplingUnitDropItem((MissionTrack)source)};
 			}
 			
+		}else if (source instanceof SurveyValuesTreeNode.Node){
+			if (source == SurveyValuesTreeNode.Node.MISSION_LENGTH){
+				items = new DropItem[]{createMissionLengthValueItem()};
+			}
 		}
 		
 		return items;	
 	}
 	
+	public DropItem createMissionLengthValueItem(){
+		return new MissionLegnthValueDropItem();
+	}
 	
 	public DropItem createSamplingUnitGroupByDropItem(){
 		return new SamplingUnitGroupByDropItem();

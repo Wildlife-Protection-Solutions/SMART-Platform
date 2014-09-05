@@ -130,7 +130,11 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return Node.values();
+		if (design != null){
+			return Node.values();
+		}else{
+			return new Node[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP, Node.OBSERVER};
+		}
 	}
 
 	@Override
