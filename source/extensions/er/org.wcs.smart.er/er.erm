@@ -11,7 +11,7 @@
 	</page_setting>
 	<category_index>0</category_index>
 	<zoom>0.8</zoom>
-	<x>-150</x>
+	<x>-176</x>
 	<y>-26</y>
 	<default_color>
 		<r>128</r>
@@ -41,6 +41,7 @@
 		<suspend_validator>false</suspend_validator>
 		<export_setting>
 			<category_name_to_export>All</category_name_to_export>
+			<html_output></html_output>
 			<ddl_output>C:\data\SMART\Source\Version1\trunk\source\extensions\er\org.wcs.smart.er\er2.sql</ddl_output>
 			<excel_output></excel_output>
 			<excel_template></excel_template>
@@ -110,7 +111,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2014-07-02 15:10:46</creation_date>
-			<updated_date>2014-09-04 13:02:17</updated_date>
+			<updated_date>2014-09-05 14:50:38</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -681,7 +682,7 @@
 			<description></description>
 			<logical_name>STATE</logical_name>
 			<physical_name>STATE</physical_name>
-			<type>varbinary(n)</type>
+			<type>varchar(n)</type>
 		</word>
 		<word>
 			<id>36</id>
@@ -1070,7 +1071,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>43</word_id>
+					<word_id>45</word_id>
 					<id>0</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1314,7 +1315,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>25</word_id>
+					<word_id>23</word_id>
 					<id>6</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1413,7 +1414,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>13</word_id>
+					<word_id>14</word_id>
 					<id>9</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1567,22 +1568,8 @@
 				<b>192</b>
 			</color>
 			<connections>
-				<comment_connection>
-					<id>4</id>
-					<source>4</source>
-					<target>7</target>
-						<source_xp>0</source_xp>
-						<source_yp>0</source_yp>
-						<target_xp>0</target_xp>
-						<target_yp>0</target_yp>
-						<color>
-							<r>0</r>
-							<g>0</g>
-							<b>0</b>
-						</color>
-				</comment_connection>
 				<relation>
-					<id>5</id>
+					<id>4</id>
 					<source>8</source>
 					<target>7</target>
 						<source_xp>-1</source_xp>
@@ -1603,6 +1590,20 @@
 					<referenced_column>null</referenced_column>
 					<referenced_complex_unique_key>null</referenced_complex_unique_key>
 				</relation>
+				<comment_connection>
+					<id>5</id>
+					<source>4</source>
+					<target>7</target>
+						<source_xp>0</source_xp>
+						<source_yp>0</source_yp>
+						<target_xp>0</target_xp>
+						<target_yp>0</target_yp>
+						<color>
+							<r>0</r>
+							<g>0</g>
+							<b>0</b>
+						</color>
+				</comment_connection>
 			</connections>
 			<physical_name>MISSION_ATTRIBUTE_LIST</physical_name>
 			<logical_name>MISSION_ATTRIBUTE_LIST</logical_name>
@@ -1647,7 +1648,7 @@
 				<normal_column>
 					<id>14</id>
 					<referenced_column>17</referenced_column>
-					<relation>5</relation>
+					<relation>4</relation>
 					<description>for bit data&#x0D;&#x0A;</description>
 					<unique_key_name></unique_key_name>
 					<logical_name>MISSION_ATTRIBUTE_UUID</logical_name>
@@ -1679,7 +1680,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>24</word_id>
+					<word_id>26</word_id>
 					<id>15</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1809,7 +1810,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>4</word_id>
+					<word_id>6</word_id>
 					<id>18</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1842,7 +1843,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>26</word_id>
+					<word_id>25</word_id>
 					<id>19</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1932,7 +1933,7 @@
 			<connections>
 				<relation>
 					<id>6</id>
-					<source>8</source>
+					<source>6</source>
 					<target>9</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -1954,7 +1955,7 @@
 				</relation>
 				<relation>
 					<id>7</id>
-					<source>6</source>
+					<source>8</source>
 					<target>9</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -1985,7 +1986,7 @@
 				<normal_column>
 					<id>21</id>
 					<referenced_column>4</referenced_column>
-					<relation>7</relation>
+					<relation>6</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>SURVEY_DESIGN_UUID</logical_name>
@@ -2019,7 +2020,7 @@
 				<normal_column>
 					<id>22</id>
 					<referenced_column>17</referenced_column>
-					<relation>6</relation>
+					<relation>7</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>MISSION_ATTRIBUTE_UUID</logical_name>
@@ -2227,7 +2228,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>31</word_id>
+					<word_id>30</word_id>
 					<id>26</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -2348,22 +2349,8 @@
 				<b>192</b>
 			</color>
 			<connections>
-				<comment_connection>
-					<id>10</id>
-					<source>2</source>
-					<target>11</target>
-						<source_xp>0</source_xp>
-						<source_yp>0</source_yp>
-						<target_xp>0</target_xp>
-						<target_yp>0</target_yp>
-						<color>
-							<r>0</r>
-							<g>0</g>
-							<b>0</b>
-						</color>
-				</comment_connection>
 				<relation>
-					<id>11</id>
+					<id>10</id>
 					<source>12</source>
 					<target>11</target>
 						<source_xp>-1</source_xp>
@@ -2384,6 +2371,20 @@
 					<referenced_column>null</referenced_column>
 					<referenced_complex_unique_key>null</referenced_complex_unique_key>
 				</relation>
+				<comment_connection>
+					<id>11</id>
+					<source>2</source>
+					<target>11</target>
+						<source_xp>0</source_xp>
+						<source_yp>0</source_yp>
+						<target_xp>0</target_xp>
+						<target_yp>0</target_yp>
+						<color>
+							<r>0</r>
+							<g>0</g>
+							<b>0</b>
+						</color>
+				</comment_connection>
 			</connections>
 			<physical_name>MISSION_MEMBER</physical_name>
 			<logical_name>MISSION_MEMBER</logical_name>
@@ -2395,7 +2396,7 @@
 				<normal_column>
 					<id>29</id>
 					<referenced_column>32</referenced_column>
-					<relation>11</relation>
+					<relation>10</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>MISSION_UUID</logical_name>
@@ -2546,7 +2547,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>45</word_id>
+					<word_id>44</word_id>
 					<id>32</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -2613,7 +2614,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>21</word_id>
+					<word_id>19</word_id>
 					<id>34</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -2798,7 +2799,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>41</word_id>
+					<word_id>46</word_id>
 					<id>38</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -2865,7 +2866,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>19</word_id>
+					<word_id>21</word_id>
 					<id>40</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -2931,7 +2932,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>14</word_id>
+					<word_id>13</word_id>
 					<id>42</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -2988,28 +2989,6 @@
 			<connections>
 				<relation>
 					<id>14</id>
-					<source>15</source>
-					<target>14</target>
-						<source_xp>-1</source_xp>
-						<source_yp>-1</source_yp>
-						<target_xp>-1</target_xp>
-						<target_yp>-1</target_yp>
-						<color>
-							<r>0</r>
-							<g>0</g>
-							<b>0</b>
-						</color>
-					<child_cardinality>1..n</child_cardinality>
-					<parent_cardinality>1</parent_cardinality>
-					<reference_for_pk>true</reference_for_pk>
-					<name></name>
-					<on_delete_action>RESTRICT</on_delete_action>
-					<on_update_action>RESTRICT</on_update_action>
-					<referenced_column>null</referenced_column>
-					<referenced_complex_unique_key>null</referenced_complex_unique_key>
-				</relation>
-				<relation>
-					<id>15</id>
 					<source>16</source>
 					<target>14</target>
 						<source_xp>-1</source_xp>
@@ -3031,8 +3010,30 @@
 					<referenced_complex_unique_key>null</referenced_complex_unique_key>
 				</relation>
 				<relation>
-					<id>16</id>
+					<id>15</id>
 					<source>12</source>
+					<target>14</target>
+						<source_xp>-1</source_xp>
+						<source_yp>-1</source_yp>
+						<target_xp>-1</target_xp>
+						<target_yp>-1</target_yp>
+						<color>
+							<r>0</r>
+							<g>0</g>
+							<b>0</b>
+						</color>
+					<child_cardinality>1..n</child_cardinality>
+					<parent_cardinality>1</parent_cardinality>
+					<reference_for_pk>true</reference_for_pk>
+					<name></name>
+					<on_delete_action>RESTRICT</on_delete_action>
+					<on_update_action>RESTRICT</on_update_action>
+					<referenced_column>null</referenced_column>
+					<referenced_complex_unique_key>null</referenced_complex_unique_key>
+				</relation>
+				<relation>
+					<id>16</id>
+					<source>15</source>
 					<target>14</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -3096,7 +3097,7 @@
 				<normal_column>
 					<id>44</id>
 					<referenced_column>32</referenced_column>
-					<relation>16</relation>
+					<relation>15</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>MISSION_UUID</logical_name>
@@ -3130,7 +3131,7 @@
 				<normal_column>
 					<id>45</id>
 					<referenced_column>54</referenced_column>
-					<relation>15</relation>
+					<relation>14</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>SAMPLING_UNIT_UUID</logical_name>
@@ -3164,7 +3165,7 @@
 				<normal_column>
 					<id>46</id>
 					<referenced_column>47</referenced_column>
-					<relation>14</relation>
+					<relation>16</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>MISSION_TRACK_UUID</logical_name>
@@ -3271,7 +3272,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>44</word_id>
+					<word_id>43</word_id>
 					<id>47</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -3557,7 +3558,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>44</word_id>
+					<word_id>43</word_id>
 					<id>54</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -3932,7 +3933,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>30</word_id>
+					<word_id>31</word_id>
 					<id>63</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -4020,7 +4021,7 @@
 			<connections>
 				<relation>
 					<id>23</id>
-					<source>6</source>
+					<source>20</source>
 					<target>19</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -4042,7 +4043,7 @@
 				</relation>
 				<relation>
 					<id>24</id>
-					<source>20</source>
+					<source>6</source>
 					<target>19</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -4073,7 +4074,7 @@
 				<normal_column>
 					<id>64</id>
 					<referenced_column>4</referenced_column>
-					<relation>23</relation>
+					<relation>24</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>SURVEY_DESIGN_UUID</logical_name>
@@ -4107,7 +4108,7 @@
 				<normal_column>
 					<id>65</id>
 					<referenced_column>66</referenced_column>
-					<relation>24</relation>
+					<relation>23</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>SU_ATTRIBUTE_UUID</logical_name>
@@ -4170,7 +4171,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>46</word_id>
+					<word_id>41</word_id>
 					<id>66</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -4203,7 +4204,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>6</word_id>
+					<word_id>4</word_id>
 					<id>67</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -4236,7 +4237,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>23</word_id>
+					<word_id>24</word_id>
 					<id>68</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -4308,7 +4309,7 @@
 					<unique_key_name></unique_key_name>
 					<logical_name></logical_name>
 					<physical_name></physical_name>
-					<type>varbinary(n)</type>
+					<type>varchar(n)</type>
 					<constraint></constraint>
 					<default_value></default_value>
 					<auto_increment>false</auto_increment>
