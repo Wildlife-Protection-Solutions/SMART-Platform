@@ -59,7 +59,8 @@ import org.wcs.smart.query.ui.model.IFilterDropItem;
  * @author Emily
  * 
  */
-public class MissionIdDropItem  extends DropItem implements IFilterDropItem, ISurveyDesignDropItem{
+public class MissionIdDropItem extends DropItem 
+		implements IFilterDropItem, ISurveyDesignDropItem{
 
 	private Label lblAttribute;
 	private Combo value;

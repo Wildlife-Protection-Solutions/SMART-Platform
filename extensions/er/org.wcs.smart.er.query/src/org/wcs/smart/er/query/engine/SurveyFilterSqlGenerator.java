@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -36,13 +37,14 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionFilter;
+import org.wcs.smart.er.query.filter.MissionMemberFilter;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SurveyFilter;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -99,6 +101,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return asSql((SamplingUnitAttributeFilter)filter, engine);
 		}else if (filter instanceof SurveyDesignFilter){
 			return asSql((SurveyDesignFilter)filter, engine);
+		}else if (filter instanceof MissionMemberFilter){
+			return asSql((MissionMemberFilter)filter, engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
@@ -146,6 +150,23 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		return engine.tablePrefix(SurveyDesign.class) + ".keyId = '" + filter.getKey() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
+	/*
+	 * Mission member filter
+	 */
+	protected String asSql(MissionMemberFilter filter, IQueryEngine engine) throws SQLException{
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(Mission.class));
+		sb.append(".uuid IN ("); //$NON-NLS-1$
+		sb.append("SELECT mission_uuid FROM "); //$NON-NLS-1$
+		sb.append(engine.tableNamePrefix(MissionMember.class));
+		sb.append(" WHERE "); //$NON-NLS-1$
+		if (filter.isLeader()){
+			sb.append("is_leader AND "); //$NON-NLS-1$
+		}
+		sb.append(" employee_uuid = x'" + SmartUtils.encodeHex(filter.getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(")"); //$NON-NLS-1$
+		return sb.toString();
+	}
 	
 	/*
 	 * Category filter
@@ -274,12 +295,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return " (mt.ma_" + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " " + String.valueOf((Double) filter.getValue()) + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		} else if (filter.getAttributeType() == AttributeType.TEXT) {
 			String queryStr = ""; //$NON-NLS-1$
-			// TODO: look into escape % & _ as these are wild card characters
-			// SELECT a FROM tabA WHERE a LIKE '%=_' ESCAPE '=' (must specify
-			// escape character)
-			String val = (String) filter.getValue();
-			val = val.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 
+			String val = StringEscapeUtils.escapeSql((String) filter.getValue());
 			if (filter.getOperator() == Operator.STR_CONTAINS
 					|| filter.getOperator() == Operator.STR_NOTCONTAINS) {
 				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " '%" + val.toLowerCase() + "%' )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
