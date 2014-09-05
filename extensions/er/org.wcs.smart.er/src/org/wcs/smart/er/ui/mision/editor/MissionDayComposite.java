@@ -47,6 +47,7 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -88,6 +89,7 @@ import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -139,6 +141,7 @@ public class MissionDayComposite {
 	private AttachmentCellEditor attachmentEditor;
 	private TextCellEditor commentEditor;
 	private ObservationCellEditor observationEditor;
+	private SamplingUnitCellEditor samplingUnitEditor;
 	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
 	
@@ -164,6 +167,7 @@ public class MissionDayComposite {
 		TIME("Time", 2),
 		DIRECTION("Direction", 1),
 		DISTANCE("Distance", 1),
+		SAMPLING_UNIT("Sampling Unit", 4),
 		OBSERVATION("Observation", 4),
 		COMMENT("Comment", 3),
 		ATTACHMENTS("Attachment", 3);
@@ -422,6 +426,7 @@ public class MissionDayComposite {
 		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
 		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
 		observationEditor = new ObservationCellEditor(observationTable.getTable());
+		samplingUnitEditor = new SamplingUnitCellEditor(observationTable.getTable());
 		
 		observationTableColumns = new HashMap<OtColumn, TableViewerColumn>();
 		
@@ -523,6 +528,7 @@ public class MissionDayComposite {
 				}
 			}
 		});
+		samplingUnitEditor.setInput(data);
 		
 //		this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
 				
@@ -735,6 +741,9 @@ public class MissionDayComposite {
 			} else {
 				return MessageFormat.format("{0,number,integer} Files", wpCnt);
 			}
+		} else if (column == OtColumn.SAMPLING_UNIT) {
+			SamplingUnit su = element.getSamplingUnit();
+			return su != null ? su.getId() : "(None)";
 		}
 
 		return ""; //$NON-NLS-1$
@@ -763,6 +772,8 @@ public class MissionDayComposite {
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			return wp;
+		} else if (column == OtColumn.SAMPLING_UNIT) {
+			return samplingUnitEditor.getIndex(element.getSamplingUnit());
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -810,7 +821,13 @@ public class MissionDayComposite {
 				needSave = true;
 			}
 			//updated in cell editor
+		} else if (column == OtColumn.SAMPLING_UNIT) {
+			if (value instanceof Integer) {
+				element.setSamplingUnit(samplingUnitEditor.getSamplingUnit((Integer)value));
+				needSave = true;
+			}
 		}
+		
 		if (needSave){
 			editor.getMissionEditor().save(Collections.singleton((SurveyWaypoint)element));
 		}
@@ -861,6 +878,7 @@ public class MissionDayComposite {
 			case ATTACHMENTS:	return attachmentEditor;
 			case COMMENT:		return commentEditor;
 			case OBSERVATION:	return observationEditor;
+			case SAMPLING_UNIT: return samplingUnitEditor;
 			default:
 				break;
 			}
