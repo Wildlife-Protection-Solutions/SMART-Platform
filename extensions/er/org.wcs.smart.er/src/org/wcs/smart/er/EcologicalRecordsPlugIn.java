@@ -59,6 +59,9 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String EDIT_SU_ICON = "org.wcs.smart.er.su.edit"; //$NON-NLS-1$
 	public static final String ZOOM_SU_ICON = "org.wcs.smart.er.su.zoom"; //$NON-NLS-1$
 	
+	public static final String MISSION_LEADER_ICON = "org.wcs.smart.er.mission.leader"; //$NON-NLS-1$
+	public static final String MISSION_MEMBER_ICON = "org.wcs.smart.er.mission.member"; //$NON-NLS-1$
+	
 	/**
 	 * The constructor
 	 */
@@ -117,6 +120,10 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	
      	reg.put(NEW_MISSION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_add.png")); //$NON-NLS-1$
      	reg.put(NEW_SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_add.png")); //$NON-NLS-1$
+     	
+     	reg.put(MISSION_LEADER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_leader.png")); //$NON-NLS-1$
+     	reg.put(MISSION_MEMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_member.png")); //$NON-NLS-1$
+     	
     }
     
     
