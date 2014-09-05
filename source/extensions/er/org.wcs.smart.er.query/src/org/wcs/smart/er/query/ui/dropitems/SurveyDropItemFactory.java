@@ -150,6 +150,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createMissionIdDropItem()};
 		}else if (source == FilterContentProvider.Node.OBSERVER){
 			items = new DropItem[]{createObserverDropItem()};
+		}else if (source == FilterContentProvider.Node.MISSION_LEADER){
+			items = new DropItem[]{createMissionLeaderDropItem()};
+		}else if (source == FilterContentProvider.Node.MISSION_MEMBER){
+			items = new DropItem[]{createMissionMemberDropItem()};
 		}else if (source instanceof Survey){
 			items = new DropItem[]{createSurveyUuidIdDropItem((Survey)source)};
 		}else if (source instanceof Mission){
@@ -279,6 +283,22 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Creates a mission member drop item
+	 * @return
+	 */
+	public DropItem createMissionMemberDropItem(){
+		return new MissionMemberDropItem(false);
+	}
+	
+	/**
+	 * Creates a mission leader drop item
+	 * @return
+	 */
+	public DropItem createMissionLeaderDropItem(){
+		return new MissionMemberDropItem(true);
 	}
 
 	/**

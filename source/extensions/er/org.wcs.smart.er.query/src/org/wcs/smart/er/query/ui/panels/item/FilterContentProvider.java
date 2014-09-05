@@ -230,7 +230,10 @@ public class FilterContentProvider implements ITreeContentProvider{
 		MISSION_PROP(Messages.SurveyItemContentProvider_MissionPropertiesLabel),
 		SAMPLING_UNITS(Messages.FilterContentProvider_SuLabel),
 		SAMPLING_UNIT_ATTRIBUTE(Messages.FilterContentProvider_SamplingUnitAttributesLabel),
-		OBSERVER(Messages.FilterContentProvider_ObserverLabel);
+		OBSERVER(Messages.FilterContentProvider_ObserverLabel),
+		MISSION_MEMBER(Messages.FilterContentProvider_MissionMemberNode),
+		MISSION_LEADER(Messages.FilterContentProvider_MissionLeaderNode);
+		
 		public String guiName;
 		
 		private Node(String guiName){
@@ -266,7 +269,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (this.design != null){
-			return Node.values();
+			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.SURVEY_MISSION, Node.MISSION_PROP, Node.SAMPLING_UNITS, Node.SAMPLING_UNIT_ATTRIBUTE, Node.OBSERVER};
 		}else{
 			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP, Node.SAMPLING_UNIT_ATTRIBUTE, Node.OBSERVER};
 		}
@@ -315,7 +318,11 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}else if (parentElement == Node.MISSION_PROP){
 			if (design != null){
 				try{
-					return design.getMissionProperties().toArray();
+					List<Object> items = new ArrayList<Object>();
+					items.addAll(design.getMissionProperties());
+					items.add(Node.MISSION_LEADER);
+					items.add(Node.MISSION_MEMBER);
+					return items.toArray();
 				}catch (Exception ex){
 					if (triedMission){
 						ERQueryPlugIn.log(ex.getMessage(), ex);
@@ -328,7 +335,12 @@ public class FilterContentProvider implements ITreeContentProvider{
 				}
 			}else{
 				if (allMissionAttributes != null){
-					return allMissionAttributes.toArray();
+					List<Object> items = new ArrayList<Object>();
+					items.addAll(allMissionAttributes);
+					items.add(Node.MISSION_LEADER);
+					items.add(Node.MISSION_MEMBER);
+					return items.toArray();
+					
 				}else{
 					if (triedMission){
 						return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
@@ -349,6 +361,10 @@ public class FilterContentProvider implements ITreeContentProvider{
 	@Override
 	public Object getParent(Object element) {
 		if (element instanceof Node){
+			if (element == Node.MISSION_LEADER ||
+					element == Node.MISSION_MEMBER){
+				return Node.MISSION_PROP;
+			}
 			return rootNode;
 		}else if (element instanceof MissionProperty){
 			return Node.MISSION_PROP;

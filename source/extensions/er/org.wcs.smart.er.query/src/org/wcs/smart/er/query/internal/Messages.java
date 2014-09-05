@@ -26,6 +26,8 @@ public class Messages extends NLS {
 	public static String ERQueryPlugIn_ErrorDialogTitle;
 	public static String FilterContentProvider_loadingSuAttributeJobName;
 	public static String FilterContentProvider_LoadSuJobName;
+	public static String FilterContentProvider_MissionLeaderNode;
+	public static String FilterContentProvider_MissionMemberNode;
 	public static String FilterContentProvider_ObserverLabel;
 	public static String FilterContentProvider_SamplingUnitAttributesLabel;
 	public static String FilterContentProvider_SuLabel;
@@ -63,6 +65,12 @@ public class Messages extends NLS {
 	public static String MissionIdGroupByDropItem_FiltersLabel;
 	public static String MissionIdGroupByDropItem_IncludedLabel;
 	public static String MissionIdGroupByDropItem_Label;
+	public static String MissionMemberDropItem_LeaderLabel;
+	public static String MissionMemberDropItem_LeaderText;
+	public static String MissionMemberDropItem_LoadingEmployeeJob;
+	public static String MissionMemberDropItem_MemberLabel;
+	public static String MissionMemberDropItem_MemberText;
+	public static String MissionMemberFilter_EmployeeNotFound;
 	public static String MissionStartDateField_Name;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;

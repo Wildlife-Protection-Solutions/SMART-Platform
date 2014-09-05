@@ -101,6 +101,10 @@ public class FiltersTreeNode implements IItemTreeNode{
 						return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON);
 					}else if (node == Node.SAMPLING_UNIT_ATTRIBUTE){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ATTRIBUTE_ICON);
+					}else if (node == Node.MISSION_LEADER){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON);
+					}else if (node == Node.MISSION_MEMBER){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_MEMBER_ICON);
 					}
 				}
 				if (element instanceof SamplingUnit){

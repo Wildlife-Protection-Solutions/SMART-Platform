@@ -57,6 +57,8 @@ TOKEN :
  | < MISSION_UUID_KEY : "s:mission:uuid:" < UUID > >
  | < MISSION_PROPERTY_STR_KEY : "s:missionproperty:s:" <  DM_KEY > >
  | < MISSION_PROPERTY_VALUE_KEY : "s:missionproperty:n:" <  DM_KEY > >
+ | < MISSION_MEMBER : "s:missionleader:" <  UUID > >
+ | < MISSION_LEADER : "s:missionmember:" <  UUID > >
  | < MISSION_PROPERTY_LIST_KEY : "s:missionproperty:l:" <  DM_KEY > >
  | < SAMPLING_UNIT_KEY : "s:samplingunit:" < UUID > >
  | < SAMPLING_UNIT_ATTRIBUTE_STR_KEY : "s:suattribute:s:" < DM_KEY > >
@@ -531,8 +533,13 @@ IFilter AttributeExpression():
 	)
 	{
 		filter = MissionPropertyFilter.createFilter(key,op,value);
-	} 	
-	)
+	}
+	|
+	(	  	< MISSION_LEADER > { filter = MissionMemberFilter.createFilter(token.image);}
+	)	|
+	(
+	  	< MISSION_MEMBER > { filter = MissionMemberFilter.createFilter(token.image);}
+	)     )
 	{
 		return filter;
 	}
