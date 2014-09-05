@@ -4,7 +4,7 @@
    <extension
          point="org.wcs.smart.query.queryType">
       <QueryCategory
-            html_description="&lt;b&gt;TODO&lt;/b&gt;"
+            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Survey Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Query survey data providing survey and mission attributes in addition to data model items as filters and summary options.&lt;/p&gt;"
             id="org.wcs.smart.er.query.category.survey"
             name="Survey Queries">
       </QueryCategory>
@@ -35,6 +35,22 @@
                id="org.wcs.smart.query.er.survey.definition.summary"
                itemPanelId="org.wcs.smart.er.query.survey.summaryItemPanel">
          </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.MissionQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.SurveyWaypointQueryType">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
@@ -100,6 +116,17 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/survey_waypoint_query.png"
+                  label="New Survey Incident Query ..."
+                  style="push"
+                  tooltip="creates a new incident query for survey elements">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveywaypoint">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_gridded_query.png"
                   label="New Survey Grid Query"
                   style="push"
@@ -118,6 +145,16 @@
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveysummary">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  label="New Mission Query ..."
+                  style="push"
+                  tooltip="creates a new mission query for survey elements">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveymission">
                </parameter>
             </command>
          </menu>
@@ -139,10 +176,16 @@
             class="org.wcs.smart.er.query.model.SurveyObservationQuery">
       </class>
       <class
+            class="org.wcs.smart.er.query.model.SurveyWaypointQuery">
+      </class>
+      <class
             class="org.wcs.smart.er.query.model.SurveyGriddedQuery">
       </class>
       <class
             class="org.wcs.smart.er.query.model.SurveySummaryQuery">
+      </class>
+      <class
+            class="org.wcs.smart.er.query.model.MissionQuery">
       </class>
    </extension>
    <extension

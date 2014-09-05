@@ -65,6 +65,8 @@ public class Messages extends NLS {
 	public static String MissionIdGroupByDropItem_FiltersLabel;
 	public static String MissionIdGroupByDropItem_IncludedLabel;
 	public static String MissionIdGroupByDropItem_Label;
+	public static String MissionLegnthValueDropItem_TrackLengthLabel;
+	public static String MissionLengthValueItem_Label;
 	public static String MissionMemberDropItem_LeaderLabel;
 	public static String MissionMemberDropItem_LeaderText;
 	public static String MissionMemberDropItem_LoadingEmployeeJob;
@@ -165,6 +167,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryFactory_DefaultQueryName;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryTypeName;
+	public static String SurveyValuesTreeNode_MissionTrackLengthItem;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointFilterProcessor_progress2;

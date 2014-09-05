@@ -25,11 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
-import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
@@ -40,7 +43,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class SamplingUnitGroupBy implements IGroupBy{
+public class SamplingUnitGroupBy implements ISurveyGroupBy{
 	
 	/**
 	 *  s:samplingunit:" (< UUID >)? (":" < UUID > )* > 
@@ -59,9 +62,7 @@ public class SamplingUnitGroupBy implements IGroupBy{
 			return new SamplingUnitGroupBy(null);
 		}
 	}
-	
-	private List<ListItem> allItems;
-	
+		
 	private String[] items;
 	
 	private SamplingUnitGroupBy(String[] items){
@@ -96,23 +97,21 @@ public class SamplingUnitGroupBy implements IGroupBy{
 
 	@Override
 	public List<ListItem> getItems(Session session) {
-		if (allItems != null){
-			return allItems;
-		}
-		
-	
-		allItems = new ArrayList<ListItem>();
+		List<ListItem> listItems = new ArrayList<ListItem>();
 		if (items != null){
 			for (String it : items){
 				try{
 					SamplingUnit su = (SamplingUnit) session.load(SamplingUnit.class, SmartUtils.decodeHex(it));
-					allItems.add(new ListItem(su.getUuid(), su.getId()));
+					listItems.add(new ListItem(su.getUuid(), su.getId()));
 				}catch (Exception ex){
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				}
 			}
+		}else{
+			//all sampling units for associated design
+			return null;
 		}
-		return allItems;
+		return listItems;
 	}
 	
 
@@ -127,6 +126,34 @@ public class SamplingUnitGroupBy implements IGroupBy{
 	@Override
 	public void visit(IGroupByVisitor visitor) {
 		visitor.visit(this);		
+	}
+
+	@Override
+	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
+		if (filter == null){
+			//we don't support this
+			return null;
+		}else{
+			if (items != null){
+				return getItems(session);
+			}
+			
+			List<ListItem> items = new ArrayList<ListItem>();
+			//get all sampling units associated with survey
+			@SuppressWarnings("unchecked")
+			List<SamplingUnit> units = session.createCriteria(SamplingUnit.class, "su") //$NON-NLS-1$
+				.createAlias("su.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
+				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
+				.addOrder(Order.asc("su.id")) //$NON-NLS-1$
+				.list();
+			for (SamplingUnit unit : units){
+				ListItem li = new ListItem(unit.getUuid(), unit.getId());
+				items.add(li);
+			}			
+			return items;
+		}
 	}
 
 }

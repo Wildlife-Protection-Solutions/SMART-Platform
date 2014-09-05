@@ -67,6 +67,10 @@ public class SurveyQueryFactory {
 //			return new PatrolWaypointQuery();
 		}else if (querytype.getClass().equals(SurveySummaryQueryType.class)){
 			return new SurveySummaryQuery();
+		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
+			return new SurveyWaypointQuery();
+		}else if (querytype.getClass().equals(MissionQueryType.class)){
+			return createMissionQuery();
 		}
 		return null;
 	}
@@ -83,12 +87,14 @@ public class SurveyQueryFactory {
 			return createObservationQuery();
 		}else if (querytype.getClass().equals(SurveyGridQueryType.class)){
 			return createGriddedQuery();
-//		}else if (querytype.getClass().equals(PatrolQueryType.class)){
-//			return createPatrolQuery();
+		}else if (querytype.getClass().equals(MissionQueryType.class)){
+			return createMissionQuery();
 //		}else if (querytype.getClass().equals(PatrolWaypointQueryType.class)){
 //			return createWaypointQuery();
 		}else if (querytype.getClass().equals(SurveySummaryQueryType.class)){
 			return createSummaryQuery();
+		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
+			return new SurveyWaypointQuery();
 		}
 		return null;
 	}
@@ -99,6 +105,13 @@ public class SurveyQueryFactory {
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
 		
+		return query;
+	}
+	
+	public static SurveyWaypointQuery createSurveyWaypointQuery(){
+		SurveyWaypointQuery query = new SurveyWaypointQuery();
+		initQuery(query, null);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;
 	}
 	
@@ -119,6 +132,14 @@ public class SurveyQueryFactory {
 //	
 	public static SurveyGriddedQuery createGriddedQuery(){
 		SurveyGriddedQuery query = new SurveyGriddedQuery();
+		initQuery(query, null);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setDateFilter(null);
+		return query;
+	}
+	
+	public static MissionQuery createMissionQuery(){
+		MissionQuery query = new MissionQuery();
 		initQuery(query, null);
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		query.setDateFilter(null);

@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import org.wcs.smart.query.model.IResultItem;
 
@@ -75,12 +73,10 @@ public class SurveyQueryResultItem implements IResultItem{
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
-	
 	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
 	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
-	private List<byte[]> tracks = null;
 	
 	/**
 	 * @param observationUuid the observation uuid
@@ -321,20 +317,6 @@ public class SurveyQueryResultItem implements IResultItem{
 	 */
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
-	}
-	
-	
-	public List<byte[]> getTrack(){
-		return this.tracks;
-	}
-	public void addTrack(byte[] track){
-		if (track == null || track.length == 0){
-			return;
-		}
-		if (this.tracks == null){
-			this.tracks = new ArrayList<byte[]>();
-		}
-		this.tracks.add(track);
 	}
 	
 	/**

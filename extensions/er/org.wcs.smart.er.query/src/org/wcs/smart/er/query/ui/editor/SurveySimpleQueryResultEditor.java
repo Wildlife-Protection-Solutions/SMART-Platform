@@ -45,9 +45,13 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.ISurveyQuery;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
@@ -118,7 +122,14 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions(){
-		return SurveyObservationQueryType.validDateFields();
+		if (getQueryInternal() instanceof SurveyObservationQuery){
+			return SurveyObservationQueryType.validDateFields();
+		}else if (getQueryInternal() instanceof MissionQuery){
+			return MissionQueryType.validDateFields();
+		}else if (getQueryInternal() instanceof SurveyWaypointQuery){
+			return SurveyWaypointQueryType.validDateFields();
+		}
+		return null;
 	}
 	
 	@Override
@@ -128,6 +139,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	@Override
 	public IQueryService createQueryService() {
+		//return null;
 		return new QueryService(getQuery());
 	}
 	
@@ -143,8 +155,8 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (getQuery() instanceof SurveyObservationQuery){
-				SurveyObservationQuery qq = (SurveyObservationQuery) getQuery();
+			if (getQuery() instanceof ISurveyQuery){
+				ISurveyQuery qq = (ISurveyQuery) getQuery();
 				
 				SurveyDesign sd = qq.getSurveyDesignAsObject();
 				if(sd != null){

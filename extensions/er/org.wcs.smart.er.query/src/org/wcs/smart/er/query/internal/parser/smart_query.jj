@@ -92,7 +92,7 @@ TOKEN :
 |  < MISSION_PROPERTY_GROUPBY_ITEM : "sgb:missionproperty:l:" <  DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 |  < SAMPLINGUNIT_GROUPBY_ITEM : "sgb:samplingunit:" (< UUID >)? (":" < UUID > )* >
 |  < WAYPOINT_OBSERVER_GROUPBY_ITEM : < WAYPOINT_OBSERVER_KEY > ":" (< UUID >)? (":" < UUID > )* >  
-
+|  < MISSION_TRACK_LENGTH : "s:missiontracklength" >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
@@ -255,7 +255,11 @@ IValueItem SingleValueItem() :
 		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
 		{
 			item = AttributeValueItem.createCategoryAttributeItem( token.image );
-		} 
+		}
+	|
+		< MISSION_TRACK_LENGTH >
+		{
+		  	item = MissionLengthValueItem.createValueItem();	 	}
 	)
 	{
 		 return item;
