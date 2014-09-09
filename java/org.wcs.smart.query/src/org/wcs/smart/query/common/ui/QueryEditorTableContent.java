@@ -277,9 +277,9 @@ public class QueryEditorTableContent {
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout(1, false));
 		
-		Composite comp = toolkit.createComposite(main);
 		infoSection = createInfoSection();
 		if (infoSection != null){
+			Composite comp = toolkit.createComposite(main);
 			infoSection.createControls(comp, toolkit);
 		}
 		
