@@ -58,7 +58,7 @@ public class MissionQueryType implements IQueryType {
 
 	@Override
 	public Image getImage() {
-		return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.OBSERVATION_ICON);
+		return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSION_ICON);
 	}
 
 	@Override

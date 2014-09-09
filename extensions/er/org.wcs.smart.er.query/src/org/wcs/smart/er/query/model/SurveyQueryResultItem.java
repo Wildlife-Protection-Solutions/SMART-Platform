@@ -21,10 +21,14 @@
  */
 package org.wcs.smart.er.query.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.wcs.smart.query.model.IResultItem;
+
+import com.vividsolutions.jts.geom.LineString;
 
 /**
  * A class to hold the results of a survey waypoint 
@@ -77,6 +81,8 @@ public class SurveyQueryResultItem implements IResultItem{
 	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
+	
+	private List<LineString> tracks;
 	
 	/**
 	 * @param observationUuid the observation uuid
@@ -482,7 +488,7 @@ public class SurveyQueryResultItem implements IResultItem{
 		return smaplingUnitBuffer;
 	}
 
-	public void setSmaplingUnitBuffer(Double smaplingUnitBuffer) {
+	public void setSamplingUnitBuffer(Double smaplingUnitBuffer) {
 		this.smaplingUnitBuffer = smaplingUnitBuffer;
 	}
 	
@@ -497,5 +503,15 @@ public class SurveyQueryResultItem implements IResultItem{
 	
 	public void setWaypointObserver(String observer){
 		this.waypointObserver = observer;
+	}
+	
+	public List<LineString> getTracks(){
+		return this.tracks;
+	}
+	public void addTracks(LineString track){
+		if (this.tracks == null){
+			tracks = new ArrayList<LineString>();
+		}
+		tracks.add(track);
 	}
 }

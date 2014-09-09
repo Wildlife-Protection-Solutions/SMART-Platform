@@ -25,20 +25,22 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
-import org.wcs.smart.er.query.model.MissionResultItem;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -57,19 +59,19 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 
 	private String queryDataTable;
-	private List<MissionResultItem> result;
 	
-	public List<MissionResultItem> executeDerbyQuery(final MissionQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	
+	public DerbyPagedMissionResult executeDerbyQuery(final MissionQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
 		
 		if (query.getDateFilter() == null){
 			return null;
 		}
 		queryDataTable = createTempTableName();
-		
+		final DerbyPagedMissionResult result = new DerbyPagedMissionResult(queryDataTable, this);	
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 70);
+				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 80);
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
@@ -85,14 +87,24 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				try {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
-							true, true, monitor);
+							true, true, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
-					populateTemporaryTableExtra(c, session, query, monitor);
+					
+					populateTemporaryTableExtra(c, session, query, new SubProgressMonitor(monitor, 20));
 					
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_progress2);
-					result = getResults(c, session);
+					//setting result size
+					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
+					try {
+						if (rs.next()) { 
+							result.setItemCount(rs.getInt(1));
+						}
+					} finally {
+						rs.close();
+					}
+					monitor.worked(10);
 					
 				} finally {
 					filterer.dropTemporaryTables(c);
@@ -155,7 +167,9 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 
 	private void populateTemporaryTableExtra(Connection c, Session session, 
 			MissionQuery query, IProgressMonitor monitor) throws SQLException {
-		//NOTE: does 50 worked for monitor in total
+
+		monitor.beginTask("Populating additional data", 2);
+		
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -174,7 +188,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 
 		monitor.subTask(Messages.DerbyObservationEngine_progress3);
 		populateTemporaryTableNameObjExtra("survey_design_uuid", "survey_design_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(2);
+		monitor.worked(1);
 		if (monitor.isCanceled()){
 			return;
 		}
@@ -201,18 +215,17 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
-
-				
-		monitor.worked(3);
+		monitor.worked(1);
 		if (monitor.isCanceled()){
 			return;
 		}
+
 	}
 
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$
@@ -257,8 +270,8 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	}
 	
 	@Override
-	protected MissionResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		MissionResultItem it = new MissionResultItem();
+	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		SurveyQueryResultItem it = new SurveyQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
@@ -275,6 +288,13 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		it.setSurveyEnd(rs.getDate("survey_end")); //$NON-NLS-1$
 		it.setSurveyStart(rs.getDate("survey_start")); //$NON-NLS-1$
 		
+		//need to add the tracks
+		Query q = session.createQuery("FROM MissionTrack WHERE mission.uuid = :uuid");
+		q.setParameter("uuid", rs.getBytes("mission_uuid"));
+		List<MissionTrack> mts = q.list();
+		for (MissionTrack mt : mts){
+			it.addTracks(mt.getLineString());
+		}
 		return it;
 	}
 
@@ -284,93 +304,4 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		super.buildTemporaryTableIndexes(c, tableName);	
 	}
 	
-	/**
-	 * Reads the results from the temporary query table
-	 * and loads them into internal memory store
-	 * 
-	 * @param c database connection 
-	 * @param session hibernate session
-	 * @return list of query results
-	 * 
-	 * @throws SQLException
-	 */
-	protected List<MissionResultItem> getResults(Connection c, Session session)
-			throws SQLException {
-		List<MissionResultItem> items = new ArrayList<MissionResultItem>();
-
-		StringBuilder sql = new StringBuilder();
-		
-		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append(buildSelectClause());
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(buildFromClause());
-		//sql.append(" ORDER BY p_id, pl_uuid, pld_uuid "); //$NON-NLS-1$
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-
-		try {
-//			byte[] lastPlUuid = null;
-//			byte[] lastPldUuid = null;
-//			MissionResultItem lastItem = null;
-			while (rs.next()) {
-//				byte[] pluuid = rs.getBytes("r_pl_uuid"); //$NON-NLS-1$
-//				byte[] plduuid = rs.getBytes("r_pld_uuid"); //$NON-NLS-1$
-//				if (Arrays.equals(pluuid, lastPlUuid)){
-//					if (!Arrays.equals(plduuid, lastPldUuid)){
-//						//same patrol; different leg
-//						lastItem.addTrack(rs.getBytes(20));
-//					}
-//				}else{
-				MissionResultItem it = asQueryResultItem(rs, session);
-				items.add(it);
-//				lastItem = it;
-//				}
-//				lastPlUuid = pluuid;
-//				lastPldUuid = plduuid;
-			}
-		} finally {
-			rs.close();
-		}
-		return items;
-	}
-	
-	/**
-	 * Build select clause 
-	 * 
-	 * @return select clause
-	 */
-	private String buildSelectClause() {
-		String[] ca = {"id", "name"}; //$NON-NLS-1$ //$NON-NLS-2$
-		
-		
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < ca.length; i++) {
-			if (i != 0) {
-				sb.append(","); //$NON-NLS-1$
-			}
-			sb.append(tablePrefix.get(ConservationArea.class) + "." + ca[i] + " as ca_" + ca[i]); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		sb.append(", r.*"); //$NON-NLS-1$
-		return sb.toString();
-	}
-
-
-	/**
-	 * Builds the from clause
-	 */
-	private String buildFromClause() {
-		StringBuilder sql = new StringBuilder();
-		sql.append(queryDataTable);
-		sql.append(" r"); //$NON-NLS-1$
-
-		sql.append(" inner join "); //$NON-NLS-1$
-		sql.append(tableNames.get(ConservationArea.class));
-		sql.append(" "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(ConservationArea.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(tablePrefix.get(ConservationArea.class)); 
-		sql.append(".uuid = r.ca_uuid "); //$NON-NLS-1$
-
-		return sql.toString();
-	}
 }

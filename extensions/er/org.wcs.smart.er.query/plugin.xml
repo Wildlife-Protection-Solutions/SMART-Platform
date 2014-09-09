@@ -149,6 +149,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/survey_mission_query.png"
                   label="New Mission Query ..."
                   style="push"
                   tooltip="creates a new mission query for survey elements">

@@ -33,7 +33,7 @@ import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -53,6 +53,11 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 	/**
 	 * mission tracks query data source
 	 */
+	public static final String WAYPOINT_MISSION_TRACK_TYPE = "WaypointMissionTracks"; //$NON-NLS-1$
+
+	/**
+	 * mission tracks query data source
+	 */
 	public static final String TRACKS_TYPE = "MissionTracks"; //$NON-NLS-1$
 	
 	private SimpleQuery query;
@@ -64,7 +69,7 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public SurveyObsQueryDataSource(SurveyObservationQuery query){
+	public SurveyObsQueryDataSource(SimpleQuery query){
 		this.query = query;
 	}
 
@@ -81,7 +86,11 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public String[] getTypeNames()  {
-		return new String[]{WAYPOINT_TYPE, TRACKS_TYPE};
+		if (query instanceof MissionQuery){
+			return new String[]{TRACKS_TYPE};
+		}else{
+			return new String[]{WAYPOINT_TYPE, WAYPOINT_MISSION_TRACK_TYPE};
+		}
 	}
 	
 	
@@ -92,6 +101,8 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
 		if (typeName.equals(WAYPOINT_TYPE)){
 			return new SurveyFeatureReader(this.query, getSchema(typeName));
+		}else if (typeName.equals(WAYPOINT_MISSION_TRACK_TYPE)){
+			return new MissionFeatureReader(this.query, getSchema(typeName));
 		}else if (typeName.equals(TRACKS_TYPE)){
 			return new MissionFeatureReader(this.query, getSchema(typeName));
 		}
@@ -115,8 +126,10 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 			try {
 				if (typeName.equals(WAYPOINT_TYPE)) {
 					type = createWaypointSchema();
-				}else if (typeName.equals(TRACKS_TYPE)){
+				}else if (typeName.equals(WAYPOINT_MISSION_TRACK_TYPE)){
 					type = createMissionTrackSchema();
+				}else if (typeName.equals(TRACKS_TYPE)){
+					type = createTrackSchema();
 				}
 			}catch(SchemaException ex){
 				throw new IOException(Messages.SurveyObsQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
@@ -139,7 +152,12 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 	}
 	
 	private SimpleFeatureType createMissionTrackSchema() throws SchemaException{
-		SimpleFeatureType type = DataUtilities.createType("smart." + TRACKS_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType("smart." + WAYPOINT_MISSION_TRACK_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
+		return type;
+	}
+	
+	private SimpleFeatureType createTrackSchema() throws SchemaException{
+		SimpleFeatureType type = DataUtilities.createType("smart." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
 		return type;
 	}
 	
@@ -164,6 +182,30 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 			sb.append(columns.get(i).getType().geotoolsType);
 		}
 		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
+		return sb.toString();
+	}
+	
+	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns){
+		StringBuilder sb = new StringBuilder();
+		sb.append("fid:String"); //$NON-NLS-1$
+		HashSet<String> names = new HashSet<String>();
+		for (int i = 0; i < columns.size(); i++){
+			sb.append(","); //$NON-NLS-1$
+			String name = columns.get(i).getName();
+			name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
+			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			String tempname = name;
+			int cnt = 1;
+			while(names.contains(tempname)){
+				tempname = name + "_" + cnt; //$NON-NLS-1$
+				cnt++;
+			}
+			sb.append(tempname);
+			sb.append(":"); //$NON-NLS-1$
+			sb.append(columns.get(i).getType().geotoolsType);
+		}
+		sb.append(",geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	

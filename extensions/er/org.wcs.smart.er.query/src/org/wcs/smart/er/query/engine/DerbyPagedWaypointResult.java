@@ -44,19 +44,12 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
-	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
-		{"patrolleg", "pl"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"patrol", "p"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
-	
+public class DerbyPagedWaypointResult implements IPagedQueryResultSet, ISurveyQueryMissionResult{
+
+
 	private String queryTempTable;
 
 	private int itemCount = 0;
@@ -352,5 +345,26 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 			return Status.OK_STATUS;
 		}
 		
+	}
+
+	/**
+	 * Mission uuids associated with query results
+	 */
+	@Override
+	public List<byte[]> getMissionUuids() {
+		final Session session = HibernateManager.openSession();
+		final List<byte[]> uuids = new ArrayList<byte[]>();
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				String sql = "SELECT distinct mission_uuid FROM " + queryTempTable; //$NON-NLS-1$
+				ResultSet rs = c.createStatement().executeQuery(sql);
+				while(rs.next()){
+					uuids.add(rs.getBytes(1));
+				}
+				rs.close();
+			}});
+		
+		return uuids;
 	}
 }

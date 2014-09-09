@@ -38,6 +38,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -120,13 +121,14 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			boolean includeEmptyObservations,
 			IProgressMonitor monitor) throws SQLException{
 		
-		monitor.subTask(Messages.WaypointFilterProcessor_progress1);
+		monitor.beginTask(Messages.WaypointFilterProcessor_progress1, 3);
 		
 		IFilter qFilter = queryFilter;
-		
 		if (qFilter == null){
 			qFilter = EmptyFilter.INSTANCE;
 		}
+		
+		monitor.subTask("Creating waypoint filter table");
 		createWaypointTable(c, qFilter, dateFilter, caFilter, monitor);
 		monitor.worked(1);
 		if (monitor.isCanceled()){
@@ -135,19 +137,20 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 
 		monitor.subTask(Messages.WaypointFilterProcessor_progress2);
 		createTemporaryTable(c);
-		
 		monitor.worked(1);
 		if (monitor.isCanceled()){
 			return;
 		}
 		
+		monitor.subTask("Populating filter data");
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
-		
 		monitor.worked(1);
 		if (monitor.isCanceled()){
 			return;
 		}
+		
+		monitor.done();
 	}
 	
 	
@@ -330,9 +333,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
 		
-		monitor.subTask(Messages.WaypointFilterProcessor_progress3);
-		//HashMap<IFilter, String> filter2Column = new HashMap<IFilter, String>();
-		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -435,13 +435,13 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 			
-			if ( filter instanceof AttributeFilter ||
-					filter instanceof CategoryFilter  ||	
-					filter instanceof CategoryAttributeFilter){
+			if ( lfilter instanceof AttributeFilter ||
+					lfilter instanceof CategoryFilter  ||	
+					lfilter instanceof CategoryAttributeFilter){
 				processCategoryAttributeFilter(lfilter, colName, c);
-			}else if (filter instanceof MissionPropertyFilter){
+			}else if (lfilter instanceof MissionPropertyFilter){
 				processMissionFilter((MissionPropertyFilter)lfilter, colName, c);
-			}else if (filter instanceof SamplingUnitAttributeFilter){
+			}else if (lfilter instanceof SamplingUnitAttributeFilter){
 				processSamplingUnitAttributeFilter((SamplingUnitAttributeFilter)lfilter, colName, c);
 			}
 			
@@ -690,15 +690,21 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(namePrefix(SamplingUnitAttributeValue.class));
 		sql.append(" on "); //$NON-NLS-1$
-		sql.append(prefix(SamplingUnitAttributeValue.class) + ".sampling_unit_uuid = "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
 		sql.append(prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$
 		
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(namePrefix(SamplingUnitAttribute.class));
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnitAttribute.class) + ".uuid = "); //$NON-NLS-1$
+		sql.append(prefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid "); //$NON-NLS-1$
+		
 		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(prefix(SamplingUnit.class) + ".keyId = '" + lfilter.getSamplingUnitAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(prefix(SamplingUnitAttribute.class) + ".keyId = '" + lfilter.getSamplingUnitAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" AND "); //$NON-NLS-1$
 		if (lfilter.getAttributeType() == AttributeType.NUMERIC){
 			sql.append(prefix(SamplingUnitAttributeValue.class));
-			sql.append(".double_value "); //$NON-NLS-1$
+			sql.append(".number_value "); //$NON-NLS-1$
 			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
 			sql.append(" " + lfilter.getValue().toString()); //$NON-NLS-1$
 		}else if (lfilter.getAttributeType() == AttributeType.TEXT){

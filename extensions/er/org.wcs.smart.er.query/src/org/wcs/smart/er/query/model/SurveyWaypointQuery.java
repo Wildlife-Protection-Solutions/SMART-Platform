@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.DerbyWaypointEngine;
 import org.wcs.smart.er.query.engine.ISurveyQueryMissionResult;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
@@ -71,22 +72,21 @@ public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 	@Transient
 	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
 		
-//		Session lsession = session;
-//		if (session == null){
-//			lsession = HibernateManager.openSession();
-//			lsession.beginTransaction();
-//		}
-//		try {
-//			DerbyObservationEngine engine = new DerbyObservationEngine();
-//			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
-//			return lastResult;
-//		} finally {
-//			if (session == null && lsession.isOpen()){
-//				lsession.getTransaction().commit();
-//				lsession.close();
-//			}
-//		}
-		return null;
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
+		try {
+			DerbyWaypointEngine engine = new DerbyWaypointEngine();
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
+			}
+		}
 	}
 	
 	public List<byte[]> getMissions(IProgressMonitor monitor) throws Exception{

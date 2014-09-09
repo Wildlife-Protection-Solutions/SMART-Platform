@@ -3,7 +3,6 @@ package org.wcs.smart.er.query.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -28,7 +27,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IMemoryQuery;
+import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -37,7 +37,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 
 @Entity
 @Table(name="smart.survey_mission_query")
-public class MissionQuery extends SimpleQuery implements IMemoryQuery, ISurveyQuery{
+public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQuery{
 
 	private List<QueryColumn> queryColumns = null;
 	protected String surveyDesignKey;
@@ -51,6 +51,31 @@ public class MissionQuery extends SimpleQuery implements IMemoryQuery, ISurveyQu
 	 */
 	protected MissionQuery(){
 		super();
+	}
+	
+	@Override
+	public Object executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
+		return getPagedQueryResults(monitor, session);
+	}
+	
+	@Transient
+	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
+		
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
+		try {
+			DerbyMissionEngine engine = new DerbyMissionEngine();
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
+			}
+		}
 	}
 	
 	/**
@@ -122,13 +147,7 @@ public class MissionQuery extends SimpleQuery implements IMemoryQuery, ISurveyQu
 		}
 	}
 	
-	/** public for testing purposes only */
-	@Transient
-	public List<MissionResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
-		DerbyMissionEngine engine = new DerbyMissionEngine();
-		return engine.executeDerbyQuery(this, session, progressMonitor);
-	}
-	
+
 	/**
 	 * 
 	 * @see java.lang.Object#clone()
@@ -161,29 +180,6 @@ public class MissionQuery extends SimpleQuery implements IMemoryQuery, ISurveyQu
 		return QueryTypeManager.getInstance().findQueryType(MissionQueryType.KEY);
 	}
 	
-
-	@Override
-	public Object executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
-		return getQueryResults(monitor, session);
-	}
-	
-	@Transient
-	public Collection<MissionResultItem> getQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
-		Session lsession = session;
-		if (session == null){
-			lsession = HibernateManager.openSession();
-			lsession.beginTransaction();
-		}
-		try{
-			return getQueryResults(lsession, progressMonitor);
-		}finally{
-			if (session == null && lsession.isOpen()){
-				lsession.getTransaction().commit();
-				lsession.close();
-			}
-		}
-	}
-
 	@Override
 	protected QueryFilter parseQueryFilter() throws Exception {
 		if (strQueryFilter == null || strQueryFilter.length() == 0){

@@ -40,9 +40,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.data.DataStore;
 import org.wcs.smart.er.query.map.geotools.SurveyDataSourceFactory;
 import org.wcs.smart.er.query.map.geotools.SurveyObsQueryDataSource;
-import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
+import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.Query;
 
@@ -153,9 +155,13 @@ public class QueryService extends IQueryService {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
 					if (query.getType().getClass().equals(SurveyObservationQueryType.class) ){
-						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.TRACKS_TYPE));
+						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
 						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_TYPE));
-						
+					}else if (query.getType().getClass().equals(SurveyWaypointQueryType.class)){
+						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
+						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_TYPE));
+					}else if (query.getType().getClass().equals(MissionQueryType.class)){
+						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.TRACKS_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
 //						members.add(new QueryGeoResource(this, SurveyQueryDataSource.PATROL_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
@@ -224,8 +230,11 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getType().getClass().equals(SurveyObservationQueryType.class) ){
-                			ds = new SurveyObsQueryDataSource((SurveyObservationQuery)query);
+                		if (query.getType().getClass().equals(SurveyObservationQueryType.class) ||
+                			query.getType().getClass().equals(SurveyWaypointQueryType.class) ||
+                				query.getType().getClass().equals(MissionQueryType.class)){
+                			ds = new SurveyObsQueryDataSource((SimpleQuery)query);
+                		
 //                		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){
 //                    		ds = new SurveyObsQueryDataSource((PatrolWaypointQuery)query);
 //                		}else if (query.getType().getClass().equals(PatrolQueryType.class) ){

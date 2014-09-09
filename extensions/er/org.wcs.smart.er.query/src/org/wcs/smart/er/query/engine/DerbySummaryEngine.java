@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.geotools.util.SubProgressListener;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
@@ -147,7 +149,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
+				monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
 
 				SurveyDesignFilter surveyFilter = null;
 				if (query.getSurveyDesign() != null){
@@ -157,7 +159,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				try {
 					monitor.subTask(Messages.DerbySummaryEngine_LoadingTableProgress);
 					getHeaderInfo(query, sumResults, surveyFilter, session);
-					monitor.worked(1);
+					monitor.worked(10);
 					if (monitor.isCanceled()){
 						return;
 					}
@@ -218,42 +220,50 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, new SubProgressMonitor(monitor, 10));
 					}finally{
 						filterer.dropTemporaryTables(c);
 					}
-					
 					if (monitor.isCanceled()){
 						return;
 					}
-					monitor.subTask(Messages.DerbySummaryEngine_ProcessingValues1);
-					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					
+					monitor.subTask("Processing category keys");
+					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+					monitor.worked(10);
+					if (monitor.isCanceled()){
+						return;
+					}
+					
+					monitor.subTask("Processing rate filter");
 					String vFilter = valueFilter.asString();
 					String rFilter = rateFilter.asString();
 					
 					if (vFilter.equals(rFilter)){
 						rateTable = valueTable;
+						monitor.worked(10);
 					}else{
 						rateTable = createTempTableName();
 						
-						
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, new SubProgressMonitor(monitor, 10));
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
 						if (monitor.isCanceled()){
 							return;
 						}
-						monitor.subTask(Messages.DerbySummaryEngine_ProcessingValues2);
 						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+						if (monitor.isCanceled()){
+							return;
+						}
 					}
 					
+					monitor.subTask("Processing values");
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
-							query.getConservationAreaFilterAsFilter(),monitor);
+							query.getConservationAreaFilterAsFilter(),new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -263,7 +273,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					if (monitor.isCanceled()){
 						return;
 					}
-					monitor.worked(1);
+					monitor.worked(10);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
@@ -346,7 +356,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			GroupByPart groupBy, 
 			ValuePart values, ConservationAreaFilter caFilter,
 			IProgressMonitor monitor) throws SQLException{
-	
+		monitor.beginTask("Computing Values", values.getValueItems().size());
+		
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
@@ -360,6 +371,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				return null;
 			}
 		}
+		monitor.done();
 		return results;
 		
 	}
