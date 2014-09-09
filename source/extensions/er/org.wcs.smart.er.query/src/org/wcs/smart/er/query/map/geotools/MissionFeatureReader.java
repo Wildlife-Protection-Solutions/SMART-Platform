@@ -32,9 +32,11 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.query.engine.ISurveyQueryMissionResult;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 /**
  * Feature reading for mission tracks associated with observation
@@ -46,10 +48,11 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private Iterator<byte[]> fIterator;
-		
+	private Iterator<?> fIterator;
+	private SimpleQuery query;
 	private Session session;
 	
+	private boolean isWaypointMissionTrack= false;
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -61,14 +64,20 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		
 		this.ftype = ftype;
 		this.fIterator = null;
-
+		this.query = query;
+		
 		session = HibernateManager.openSession();
 		
 		Object cachedResults;
 		try {
 			cachedResults = query.getCachedResults(new NullProgressMonitor());
-			if (cachedResults instanceof ISurveyQueryMissionResult){
+			if (ftype.getTypeName().equals(SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE) && 
+			 (cachedResults instanceof ISurveyQueryMissionResult)){
 				fIterator = ((ISurveyQueryMissionResult) cachedResults).getMissionUuids().iterator();
+				isWaypointMissionTrack = true;
+			}else if (ftype.getTypeName().equals(SurveyObsQueryDataSource.TRACKS_TYPE)){
+				fIterator = ((IPagedQueryResultSet)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
+				isWaypointMissionTrack = false;
 			}
 		} catch (Exception e) {
 			QueryPlugIn.log(e.getMessage(), e);
@@ -108,10 +117,16 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	 */
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
-		byte[] next = (byte[]) this.fIterator.next();
-		Mission mission = (Mission) session.load(Mission.class, next);
-		SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
-		return f;
+		if (isWaypointMissionTrack){
+			byte[] next = (byte[]) this.fIterator.next();
+			Mission mission = (Mission) session.load(Mission.class, next);
+			SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
+			return f;
+		}else{
+			SurveyQueryResultItem next = (SurveyQueryResultItem) this.fIterator.next();
+			SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, query.getQueryColumns(), ftype);
+			return f;
+		}
 	}
 
 }

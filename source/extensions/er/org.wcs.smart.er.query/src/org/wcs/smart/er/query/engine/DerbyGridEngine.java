@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -119,7 +120,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyGridEngine_RunQueryProgress, 4);
+				monitor.beginTask(Messages.DerbyGridEngine_RunQueryProgress, 100);
 
 				SurveyDesignFilter dsFilter = null;
 				if (query.getSurveyDesign() != null){
@@ -146,7 +147,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					//get numerator results
 					Collection<GridResultItem> numeratorResults = getItems(
 							gridDef, numerator, query.getQueryDefinition().getValueFilter(), 
-							dsFilter, c, session, monitor, true);
+							dsFilter, c, session, new SubProgressMonitor(monitor, 60), true);
 					
 //					//apply denominator results
 //					if (denominator != null){
@@ -177,6 +178,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 //						}
 //					}
 
+					monitor.subTask("Computing mission track locations.");
 					//combine with the patrol existance value
 					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
 					for (GridResultItem it : numeratorResults){
@@ -194,8 +196,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						}
 					}
 					myResults = items.values();
-					
-					monitor.worked(1);
+					monitor.worked(40);
 				}catch (Exception ex){
 					ERQueryPlugIn.log(ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -220,9 +221,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, SurveyDesignFilter sdFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
-		monitor.subTask(Messages.DerbyGridEngine_CreateObsTableProgress);
+		
+		monitor.beginTask(Messages.DerbyGridEngine_CreateObsTableProgress, 100);
 		
 		if (needsFilter) {
+			monitor.subTask("Processing filters");
 			try {
 				dropTemporaryGridTable(c);
 			} catch (Exception ex) {
@@ -246,7 +249,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, query.getConservationAreaFilterAsFilter(), 
-					needsObservation, false, monitor);
+					needsObservation, false, new SubProgressMonitor(monitor, 90));
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
@@ -256,7 +259,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			}
 		}
 		monitor.subTask(Messages.DerbyGridEngine_CalcValueProgresss);
-		return getGridResults(c, session, gridDef, value);
+		Collection<GridResultItem> results = getGridResults(c, session, gridDef, value);
+		monitor.worked(10);
+		
+		monitor.done();
+		return results;
 	}
 	/**
 	 * Gets results from the temporary query table, grouped by the tile ID

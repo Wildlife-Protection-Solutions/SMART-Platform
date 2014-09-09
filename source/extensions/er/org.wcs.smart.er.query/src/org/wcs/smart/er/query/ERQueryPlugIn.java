@@ -21,6 +21,7 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	public static final String WAYPOINT_ICON = "org.wcs.smart.er.query.waypoint"; //$NON-NLS-1$
 	public static final String GRIDDED_ICON = "org.wcs.smart.er.query.grid"; //$NON-NLS-1$
 	public static final String SUMMARY_ICON = "org.wcs.smart.er.query.summary"; //$NON-NLS-1$
+	public static final String MISSION_ICON = "org.wcs.smart.er.query.mission"; //$NON-NLS-1$
 	public static final String ALL_SURVEY_ICON = "org.wcs.smart.er.query.allsurvey"; //$NON-NLS-1$
 	public static final String MISSION_TRACK_ICON = "org.wcs.smart.er.query.mission.track"; //$NON-NLS-1$
 	
@@ -96,6 +97,7 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
     	reg.put(WAYPOINT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_waypoint_query.png")); //$NON-NLS-1$)
     	reg.put(GRIDDED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_gridded_query.png")); //$NON-NLS-1$)
     	reg.put(SUMMARY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_summary_query.png")); //$NON-NLS-1$)
+    	reg.put(MISSION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_mission_query.png")); //$NON-NLS-1$)
     	reg.put(ALL_SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/all_survey.png")); //$NON-NLS-1$
     	reg.put(MISSION_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/value_distance.png")); //$NON-NLS-1$
     }

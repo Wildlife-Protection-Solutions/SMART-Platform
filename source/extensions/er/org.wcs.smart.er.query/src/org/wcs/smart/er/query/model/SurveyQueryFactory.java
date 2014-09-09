@@ -61,10 +61,6 @@ public class SurveyQueryFactory {
 			return new SurveyObservationQuery();
 		}else if (querytype.getClass().equals(SurveyGridQueryType.class)){
 			return new SurveyGriddedQuery();
-//		}else if (querytype.getClass().equals(PatrolQueryType.class)){
-//			return new PatrolQuery();
-//		}else if (querytype.getClass().equals(PatrolWaypointQueryType.class)){
-//			return new PatrolWaypointQuery();
 		}else if (querytype.getClass().equals(SurveySummaryQueryType.class)){
 			return new SurveySummaryQuery();
 		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
@@ -89,12 +85,10 @@ public class SurveyQueryFactory {
 			return createGriddedQuery();
 		}else if (querytype.getClass().equals(MissionQueryType.class)){
 			return createMissionQuery();
-//		}else if (querytype.getClass().equals(PatrolWaypointQueryType.class)){
-//			return createWaypointQuery();
 		}else if (querytype.getClass().equals(SurveySummaryQueryType.class)){
 			return createSummaryQuery();
 		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
-			return new SurveyWaypointQuery();
+			return createSurveyWaypointQuery();
 		}
 		return null;
 	}
@@ -115,21 +109,6 @@ public class SurveyQueryFactory {
 		return query;
 	}
 	
-//	public static PatrolWaypointQuery createWaypointQuery(){
-//		PatrolWaypointQuery query = new PatrolWaypointQuery();
-//		initQuery(query, null);
-//		query.setConservationAreaFilter(new ConservationAreaFilter(true));
-//		return query;
-//	}
-//	
-//	public static PatrolQuery createPatrolQuery(){
-//		PatrolQuery query = new PatrolQuery();
-//		initQuery(query, null);
-//		query.setConservationAreaFilter(new ConservationAreaFilter(true));
-//		return query;
-//	}
-//	
-//	
 	public static SurveyGriddedQuery createGriddedQuery(){
 		SurveyGriddedQuery query = new SurveyGriddedQuery();
 		initQuery(query, null);

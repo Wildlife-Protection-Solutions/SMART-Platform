@@ -59,6 +59,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Editor for displaying survey query results.  The editor includes two pages
@@ -78,9 +79,10 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 			
 			getQueryResultsTable().clearColumns();
 			getQueryResultsTable().initQuery(getQueryInternal());
-			
-			
-			addSuLayer.schedule();
+		
+			if (!(getQuery() instanceof MissionQuery)){
+				addSuLayer.schedule();
+			}
 		}
 	};
 	
@@ -147,9 +149,12 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		super.init(site, input);
-		addSuLayer.schedule();
+		
+		IQueryType type = ((QueryEditorInput)input).getType();
+		if (!type.getKey().equals(MissionQueryType.KEY)){
+			addSuLayer.schedule();
+		}
 	}
-	
 	
 	private Job addSuLayer = new Job(Messages.SurveySimpleQueryResultEditor_LoadSuJobName){
 

@@ -83,6 +83,43 @@ public class SurveyResultItemFeature {
 	}
 	
 	/**
+	 * Converts a query result item to a feature.
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	public static SimpleFeature createTrackFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+		
+		Object[] data = new Object[columns.size() + 2];
+		data[0] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		for (int i = 0; i < columns.size(); i ++){
+			Object x =  columns.get(i).getValue(it);
+			if (x instanceof Boolean){
+				if ((Boolean)x){
+					x = 0;
+				}else{
+					x = 1;
+				}
+			}
+			data[i + 1] = x;
+		}
+		
+		Geometry g = null;
+		if (it.getTracks() != null && it.getTracks().size() > 0){
+			g = gf.createMultiLineString(it.getTracks().toArray(new LineString[it.getTracks().size()]));
+		}
+		data[data.length -1] = g;
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		
+	}
+	
+	/**
 	 * Converts a mission to a feature
 	 * 
 	 * @param mission the mission 

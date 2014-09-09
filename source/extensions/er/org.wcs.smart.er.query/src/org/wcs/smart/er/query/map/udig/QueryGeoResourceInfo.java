@@ -41,7 +41,8 @@ import org.wcs.smart.query.model.IPagedQueryResultSet;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Georesource Information for a smart area resource 
+ * Georesource information for survey queries
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -51,7 +52,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 	public QueryGeoResourceInfo( QueryGeoResource resource, IProgressMonitor monitor){
 		if (resource.getDataType().equals(SurveyObsQueryDataSource.WAYPOINT_TYPE)){
 			this.title = Messages.QueryGeoResourceInfo_WaypointLabel;
-		}else if (resource.getDataType().equals(SurveyObsQueryDataSource.TRACKS_TYPE)){
+		}else if (resource.getDataType().equals(SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE)){
 			this.title = Messages.QueryGeoResourceInfo_TracksLabel;
 		}else{
 			this.title = resource.getDataType();
@@ -76,8 +77,10 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 				IPagedQueryResultSet rs = (IPagedQueryResultSet) service.getQuery().getCachedResults(monitor);
 				if (rs != null){
 					Envelope local = rs.getEnvelope();
-					env.expandToInclude(local.getMinX(), local.getMinY());
-					env.expandToInclude(local.getMaxX(), local.getMaxY());
+					if (local != null){
+						env.expandToInclude(local.getMinX(), local.getMinY());
+						env.expandToInclude(local.getMaxX(), local.getMaxY());
+					}
 				}
 			}else{
 				fs.getFeatures().accepts(new FeatureVisitor() {

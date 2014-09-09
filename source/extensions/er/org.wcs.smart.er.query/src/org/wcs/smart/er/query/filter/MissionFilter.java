@@ -137,6 +137,7 @@ public class MissionFilter implements IFilter {
 					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionFilter_MissionNotFound, new Object[]{value}))};
 				}
 				mission.getId();
+				mission.getSurvey().getId();
 				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createMissionUuidIdDropItem(mission)};
 			}catch (Exception ex){
 				ERQueryPlugIn.log(ex.getMessage(), ex);
