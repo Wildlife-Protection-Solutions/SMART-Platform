@@ -136,24 +136,10 @@ public class ProgressAreaComposite extends Composite {
 		internalMonitor =  new IProgressMonitor() {
 				private String taskName = null;
 				private boolean isCancelled = false;
+				
 				@Override
-				public void worked(final int work) {
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							if (progresBar.isDisposed()){
-								return;
-							}
-							int newValue = progresBar.getSelection() + work;
-							if (newValue > progresBar.getMaximum()) {
-								newValue = progresBar.getMaximum();
-							}
-							if (newValue < progresBar.getMinimum()) {
-								newValue = progresBar.getMinimum();
-							}
-							progresBar.setSelection(newValue);
-						}
-					});
+				public void worked(int work) {
+					internalWorked(work);
 				}
 
 				@Override
@@ -194,7 +180,23 @@ public class ProgressAreaComposite extends Composite {
 				}
 
 				@Override
-				public void internalWorked(double work) {
+				public void internalWorked(final double work) {
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (progresBar.isDisposed()){
+								return;
+							}
+							int newValue = progresBar.getSelection() + (int)work;
+							if (newValue > progresBar.getMaximum()) {
+								newValue = progresBar.getMaximum();
+							}
+							if (newValue < progresBar.getMinimum()) {
+								newValue = progresBar.getMinimum();
+							}
+							progresBar.setSelection(newValue);
+						}
+					});
 				}
 
 				@Override
