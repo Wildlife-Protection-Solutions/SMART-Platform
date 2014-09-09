@@ -53,7 +53,6 @@ public class StatusComposite extends SurveyDesignComposite {
 		btnActive = new Button(part, SWT.RADIO);
 		btnActive.setText(Messages.StatusComposite_Active);
 		btnActive.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		btnActive.setSelection(true);
 		btnActive.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
