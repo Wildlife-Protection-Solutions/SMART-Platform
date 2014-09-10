@@ -271,7 +271,6 @@ public class Messages extends NLS {
 	public static String StatusComposite_Inactive;
 	public static String StatusComposite_Title;
 	public static String SurveyComposite_Description;
-	public static String SurveyComposite_NewSurveyLink;
 	public static String SurveyComposite_SurveyLabel;
 	public static String SurveyComposite_Title;
 	public static String SurveyDatePage_Message;
