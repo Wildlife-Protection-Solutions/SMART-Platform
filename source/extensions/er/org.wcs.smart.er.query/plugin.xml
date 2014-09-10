@@ -213,5 +213,12 @@
             name="Survey Summary Query Editor">
       </editor>
    </extension>
+   <extension
+         point="org.wcs.smart.query.property">
+      <queryproperty
+            propertyName="Query Columns:"
+            propertyProvider="org.wcs.smart.er.query.ui.ColumnQueryPropertyProvider">
+      </queryproperty>
+   </extension>
 
 </plugin>

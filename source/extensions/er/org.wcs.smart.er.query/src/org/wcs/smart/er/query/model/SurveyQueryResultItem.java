@@ -50,13 +50,16 @@ public class SurveyQueryResultItem implements IResultItem{
 	private String surveyDesign;
 	private Date surveyDesignStart;
 	private Date surveyDesignEnd;
+	
 	private String surveyId;
 	private Date surveyStart;
 	private Date surveyEnd;
+	
 	private String missionId;
 	private Date missionStart;
 	private Date missionEnd;
 	private byte[] missionUuid;
+	private String missionLeader;
 	
 	private byte[] samplingUnitUuid;
 	private String samplingUnitId;
@@ -96,6 +99,24 @@ public class SurveyQueryResultItem implements IResultItem{
 	 */
 	public byte[] getObservationUuid(){
 		return this.observationUuid;
+	}
+	
+	/**
+	 * Sets the mission leader attribute
+	 * 
+	 * @param leader
+	 */
+	public void setMissionLeader(String leader){
+		this.missionLeader = leader;
+	}
+	
+	/**
+	 * Get the mission leader
+	 * 
+	 * @return
+	 */
+	public String getMissionLeader(){
+		return this.missionLeader;
 	}
 	
 	

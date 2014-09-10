@@ -128,7 +128,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			qFilter = EmptyFilter.INSTANCE;
 		}
 		
-		monitor.subTask("Creating waypoint filter table");
+		monitor.subTask(Messages.WaypointFilterProcessor_ProgressWaypointTable);
 		createWaypointTable(c, qFilter, dateFilter, caFilter, monitor);
 		monitor.worked(1);
 		if (monitor.isCanceled()){
@@ -142,7 +142,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			return;
 		}
 		
-		monitor.subTask("Populating filter data");
+		monitor.subTask(Messages.WaypointFilterProcessor_ProgressFilterData);
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
 		monitor.worked(1);

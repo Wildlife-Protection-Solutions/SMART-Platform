@@ -173,7 +173,8 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 					disposeService(monitor);
 					service = new SamplingUnitService(sd);
 					try{
-				    	List<IGeoResource> layers = (List<IGeoResource>) service.resources(null);
+				    	@SuppressWarnings("unchecked")
+						List<IGeoResource> layers = (List<IGeoResource>) service.resources(null);
 				    	AddLayersCommand command = new AddLayersCommand(layers);
 				    	if (getMap() == null) return Status.CANCEL_STATUS;
 			    		getMap().sendCommandASync(command);

@@ -6,8 +6,13 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
 	public static String DerbyGridEngine_CalcValueProgresss;
 	public static String DerbyGridEngine_CreateObsTableProgress;
+	public static String DerbyGridEngine_ProgressFilters;
+	public static String DerbyGridEngine_ProgressTrackLocations;
 	public static String DerbyGridEngine_RunQueryProgress;
 	public static String DerbyGridEngine_ValueNotSupported;
+	public static String DerbyMissionEngine_ProgressAdditionalData;
+	public static String DerbyMissionEngine_ProgressMissionLeader;
+	public static String DerbyMissionEngine_ProgressMissionProperties;
 	public static String DerbyObservationEngine_populatingObserverProgress;
 	public static String DerbyObservationEngine_progress1;
 	public static String DerbyObservationEngine_progress2;
@@ -17,12 +22,24 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_progress6;
 	public static String DerbyObservationEngine_progress7;
 	public static String DerbyObservationEngine_progress8;
+	public static String DerbyObservationEngine_ProgressAdditionalData;
+	public static String DerbyObservationEngine_ProgressLeader;
 	public static String DerbyObservationEngine_SurveyDesignNotFound;
 	public static String DerbyPagedObservationResult_cleanupjobname;
+	public static String DerbyPagedWaypointResult_CleanupJobName;
 	public static String DerbySummaryEngine_LoadingTableProgress;
 	public static String DerbySummaryEngine_ProcessingQueryProgress;
 	public static String DerbySummaryEngine_ProcessingValues1;
 	public static String DerbySummaryEngine_ProcessingValues2;
+	public static String DerbySummaryEngine_ProgressCategoryKeys;
+	public static String DerbySummaryEngine_ProgressRateFilter;
+	public static String DerbySummaryEngine_ProgressValues;
+	public static String DerbySummaryEngine_ProgressValues2;
+	public static String DerbyWaypointEngine_AdditionalDataProgress;
+	public static String DerbyWaypointEngine_CountProgress;
+	public static String DerbyWaypointEngine_LeaderProgress;
+	public static String DerbyWaypointEngine_ProgressMissionProperties;
+	public static String DerbyWaypointEngine_RunQueryProgress;
 	public static String ERQueryPlugIn_ErrorDialogTitle;
 	public static String FilterContentProvider_loadingSuAttributeJobName;
 	public static String FilterContentProvider_LoadSuJobName;
@@ -36,6 +53,10 @@ public class Messages extends NLS {
 	public static String FilterProcessor_progress3;
 	public static String FilterProcessor_progress4;
 	public static String FilterProcessor_progress5;
+	public static String FilterProcessor_ProgressDataTableCreate;
+	public static String FilterProcessor_ProgressDataTablePopulate;
+	public static String FilterProcessor_ProgressMissionFilters;
+	public static String FilterProcessor_ProgressSuFilters;
 	public static String GriddedDefinitionPanel_AllLabel;
 	public static String GriddedDefinitionPanel_Label;
 	public static String GriddedValueItemPanel_ButtonText;
@@ -73,6 +94,7 @@ public class Messages extends NLS {
 	public static String MissionMemberDropItem_MemberLabel;
 	public static String MissionMemberDropItem_MemberText;
 	public static String MissionMemberFilter_EmployeeNotFound;
+	public static String MissionQueryType_MissionQueryName;
 	public static String MissionStartDateField_Name;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;
@@ -97,6 +119,10 @@ public class Messages extends NLS {
 	public static String SummaryDefinitionPanel_Name;
 	public static String SummaryDefinitionPanel_SurveyDesignLabel;
 	public static String SummaryDefinitionPanel_ValueRequiredError;
+	public static String SurveyDataSourceFactory_Description;
+	public static String SurveyDataSourceFactory_DisplayName;
+	public static String SurveyDataSourceFactory_QueryUuidParameterName;
+	public static String SurveyDataSourceFactory_ReadOnlyError;
 	public static String SurveyDesignDialog_AllDesignsLabel;
 	public static String SurveyDesignDialog_DesignLabel;
 	public static String SurveyDesignDialog_Message;
@@ -147,6 +173,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumn_DistanceLabel;
 	public static String SurveyQueryColumn_MissionEndLabel;
 	public static String SurveyQueryColumn_MissionIdLabel;
+	public static String SurveyQueryColumn_MissionLeaderLabel;
 	public static String SurveyQueryColumn_MissionStartLabel;
 	public static String SurveyQueryColumn_SuBufferLabel;
 	public static String SurveyQueryColumn_SuLabel;
@@ -169,10 +196,13 @@ public class Messages extends NLS {
 	public static String SurveySummaryQueryType_QueryTypeName;
 	public static String SurveyValuesTreeNode_MissionTrackLengthItem;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;
+	public static String SurveyWaypointQueryType_IncidentQuery;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointFilterProcessor_progress2;
 	public static String WaypointFilterProcessor_progress3;
 	public static String WaypointFilterProcessor_progress4;
+	public static String WaypointFilterProcessor_ProgressFilterData;
+	public static String WaypointFilterProcessor_ProgressWaypointTable;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

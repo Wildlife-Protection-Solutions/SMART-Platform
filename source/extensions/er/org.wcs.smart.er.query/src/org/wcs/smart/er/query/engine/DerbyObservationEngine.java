@@ -35,7 +35,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -238,12 +241,13 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 	private void populateTemporaryTableExtra(Connection c, Session session, 
 			SurveyObservationQuery query, IProgressMonitor monitor) throws SQLException {
 
-		monitor.beginTask("Populating additional data", 6);
+		monitor.beginTask(Messages.DerbyObservationEngine_ProgressAdditionalData, 8);
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
-				{"survey_design_name","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-				{"ob_observer", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
+				{"surveydesign_name","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"ob_observer", "varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"mission_leader", "varchar(256)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -257,7 +261,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		}
 
 		monitor.subTask(Messages.DerbyObservationEngine_progress3);
-		populateTemporaryTableNameObjExtra("survey_design_uuid", "survey_design_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		monitor.worked(1);
 		if (monitor.isCanceled()){
 			return;
@@ -329,6 +333,59 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			return;
 		}
 		
+		//mission leader
+		monitor.subTask(Messages.DerbyObservationEngine_ProgressLeader);
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionMember.class));
+		sql.append(".employee_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionMember.class));
+		sql.append(".mission_uuid "); //$NON-NLS-1$
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		sql.append(" a join "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(MissionMember.class));
+		sql.append(" on a.mission_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionMember.class));
+		sql.append(".mission_uuid"); //$NON-NLS-1$
+		sql.append(" WHERE "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionMember.class));
+		sql.append(".is_leader"); //$NON-NLS-1$
+
+		QueryPlugIn.logSql(sql.toString());
+
+		rs = c.createStatement().executeQuery(sql.toString());
+		updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		q1 = updateSql + "mission_leader = ? where mission_uuid = ?"; //$NON-NLS-1$
+		QueryPlugIn.logSql(q1);
+		PreparedStatement leaderSt = c.prepareStatement(q1);
+
+		cnt = 0;
+		try {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				String name = getEmployeeName(uuid, session);
+
+				if (name != null) {
+					leaderSt.setString(1, name);
+					leaderSt.setBytes(2, rs.getBytes(2));
+					leaderSt.addBatch();
+
+					cnt++;
+					if (cnt >= 100) {
+						leaderSt.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			leaderSt.executeBatch();
+		} finally {
+			rs.close();
+		}
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			return;
+		}
 				
 		//populating categories
 		monitor.subTask(Messages.DerbyObservationEngine_progress5);
@@ -364,6 +421,19 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			return;
 		}
 		
+		//mission_list
+		monitor.subTask(Messages.DerbyObservationEngine_progress6);
+		WpoaLinkedData mListData = new WpoaLinkedData("_mlist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
+			@Override
+			public String getLabel(Session session, byte[] cauuid, byte[] uuid) {
+				return Label.getDescription(uuid);
+			}
+		};
+		populateAdditionalMissionTable(c, session, mListData);
+		monitor.worked(1);
+		if (monitor.isCanceled()){
+			return;
+		}
 		monitor.done();
 	}
 
@@ -379,6 +449,61 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
 		QueryPlugIn.logSql(sql.toString());
 		PreparedStatement statement = c.prepareStatement(sql);
+		int count = 0;
+		try {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				if (uuid != null) {
+					byte[] cauuid = rs.getBytes(2);
+					String value = linkedData.getLabel(session, cauuid, uuid);
+					statement.setBytes(1, uuid);
+					statement.setString(2, value);
+					statement.addBatch();
+					count++;
+					if (count >= 100){
+						statement.executeBatch();
+						count = 0;
+					}
+				}
+			}
+			statement.executeBatch();
+		} finally {
+			rs.close();
+		}
+	}
+
+	private void populateAdditionalMissionTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE "); //$NON-NLS-1$
+		sql.append(queryDataTable + linkedData.getPostfix());
+		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		sql = new StringBuilder();
+		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionPropertyValue.class));
+		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(MissionPropertyValue.class));
+		sql.append(" inner join "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		sql.append(" r on r.mission_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionPropertyValue.class));
+		sql.append(".mission_uuid WHERE "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionPropertyValue.class));
+		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append(" is not null "); //$NON-NLS-1$
+		
+		QueryPlugIn.logSql(sql.toString());
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append( queryDataTable + linkedData.getPostfix());
+		sql.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql.toString());
+		PreparedStatement statement = c.prepareStatement(sql.toString());
 		int count = 0;
 		try {
 			while (rs.next()) {
@@ -475,23 +600,23 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		
 		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		
-		sql.append("survey_design_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("survey_design_start date,"); //$NON-NLS-1$
-		sql.append("survey_design_end date,"); //$NON-NLS-1$
+		sql.append("surveydesign_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("surveydesign_startdate date,"); //$NON-NLS-1$
+		sql.append("surveydesign_enddate date,"); //$NON-NLS-1$
 		
 		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
-		sql.append("survey_start date,"); //$NON-NLS-1$
-		sql.append("survey_end date,"); //$NON-NLS-1$
+		sql.append("survey_startdate date,"); //$NON-NLS-1$
+		sql.append("survey_enddate date,"); //$NON-NLS-1$
 		
 		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
-		sql.append("mission_start timestamp,"); //$NON-NLS-1$
-		sql.append("mission_end timestamp,"); //$NON-NLS-1$
+		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
+		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
 		
-		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
-		sql.append("sampling_unit_buffer double,"); //$NON-NLS-1$
+		sql.append("samplingunit_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("samplingunit_id varchar(128),"); //$NON-NLS-1$
+		sql.append("samplingunit_buffer double,"); //$NON-NLS-1$
 		
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
@@ -517,23 +642,24 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
 		it.setMissionUuid(rs.getBytes("mission_uuid")); //$NON-NLS-1$
-		it.setMissionEnd(rs.getDate("mission_end")); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate")); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getDate("mission_start")); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate")); //$NON-NLS-1$
+		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
-		it.setSurveyDesign(rs.getString("survey_design_name")); //$NON-NLS-1$
-		it.setSurveyDesignEnd(rs.getDate("survey_design_end")); //$NON-NLS-1$
-		it.setSurveyDesignStart(rs.getDate("survey_design_start")); //$NON-NLS-1$
+		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
+		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate")); //$NON-NLS-1$
+		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate")); //$NON-NLS-1$
 		
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
-		it.setSurveyEnd(rs.getDate("survey_end")); //$NON-NLS-1$
-		it.setSurveyStart(rs.getDate("survey_start")); //$NON-NLS-1$
+		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
+		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
 		
-		it.setSamplingUnitUuid(rs.getBytes("sampling_unit_uuid")); //$NON-NLS-1$
-		if (rs.getObject("sampling_unit_buffer") != null){ //$NON-NLS-1$
-			it.setSamplingUnitBuffer(rs.getDouble("sampling_unit_buffer")); //$NON-NLS-1$
+		it.setSamplingUnitUuid(rs.getBytes("samplingunit_uuid")); //$NON-NLS-1$
+		if (rs.getObject("samplingunit_buffer") != null){ //$NON-NLS-1$
+			it.setSamplingUnitBuffer(rs.getDouble("samplingunit_buffer")); //$NON-NLS-1$
 		}
-		it.setSamplingUnitId(rs.getString("sampling_unit_id")); //$NON-NLS-1$
+		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		
 		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
 		

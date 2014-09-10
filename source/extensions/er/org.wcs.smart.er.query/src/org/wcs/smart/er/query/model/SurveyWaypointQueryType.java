@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
@@ -47,7 +48,7 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 
 /**
- * Survey observation query type.
+ * Survey incident/waypoint query type.
  * 
  * @author Emily
  *
@@ -71,7 +72,7 @@ public class SurveyWaypointQueryType implements IQueryType {
 
 	@Override
 	public String getGuiName() {
-		return "Survey Incident Query";
+		return Messages.SurveyWaypointQueryType_IncidentQuery;
 	}
 
 	@Override
