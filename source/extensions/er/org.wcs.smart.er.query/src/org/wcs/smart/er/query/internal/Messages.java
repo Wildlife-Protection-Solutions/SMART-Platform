@@ -21,16 +21,10 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_progress5;
 	public static String DerbyObservationEngine_progress6;
 	public static String DerbyObservationEngine_progress7;
-	public static String DerbyObservationEngine_progress8;
 	public static String DerbyObservationEngine_ProgressAdditionalData;
 	public static String DerbyObservationEngine_ProgressLeader;
-	public static String DerbyObservationEngine_SurveyDesignNotFound;
-	public static String DerbyPagedObservationResult_cleanupjobname;
-	public static String DerbyPagedWaypointResult_CleanupJobName;
 	public static String DerbySummaryEngine_LoadingTableProgress;
 	public static String DerbySummaryEngine_ProcessingQueryProgress;
-	public static String DerbySummaryEngine_ProcessingValues1;
-	public static String DerbySummaryEngine_ProcessingValues2;
 	public static String DerbySummaryEngine_ProgressCategoryKeys;
 	public static String DerbySummaryEngine_ProgressRateFilter;
 	public static String DerbySummaryEngine_ProgressValues;
@@ -49,7 +43,6 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_SamplingUnitAttributesLabel;
 	public static String FilterContentProvider_SuLabel;
 	public static String FilterProcessor_progress1;
-	public static String FilterProcessor_progress2;
 	public static String FilterProcessor_progress3;
 	public static String FilterProcessor_progress4;
 	public static String FilterProcessor_progress5;
@@ -75,7 +68,6 @@ public class Messages extends NLS {
 	public static String MissionAttributeGroupByDropItem_IncludedLabel;
 	public static String MissionAttributeGroupByDropItem_ListItemLoadError;
 	public static String MissionDropItem_Label;
-	public static String MissionDropItem_MissionLabel;
 	public static String MissionEndDateField_Name;
 	public static String MissionFilter_MissionNotFound;
 	public static String MissionIdDropItem_JobName;
@@ -143,7 +135,6 @@ public class Messages extends NLS {
 	public static String SurveyGroupByContentProvider_MissionPropertiesNode;
 	public static String SurveyGroupByContentProvider_ObserverNode;
 	public static String SurveyGroupByContentProvider_SamplingUnitNode;
-	public static String SurveyGroupByContentProvider_StrataNode;
 	public static String SurveyGroupByContentProvider_SurveyIdNode;
 	public static String SurveyGroupByTreeItem_TreeNodeLabel;
 	public static String SurveyIdDropItem_LoadIdsJobName;
@@ -199,7 +190,6 @@ public class Messages extends NLS {
 	public static String SurveyWaypointQueryType_IncidentQuery;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointFilterProcessor_progress2;
-	public static String WaypointFilterProcessor_progress3;
 	public static String WaypointFilterProcessor_progress4;
 	public static String WaypointFilterProcessor_ProgressFilterData;
 	public static String WaypointFilterProcessor_ProgressWaypointTable;

@@ -150,7 +150,7 @@ public class SurveyWaypointQueryType implements IQueryType {
 
 	@Override
 	public URL getDescription() {
-		IPath path = new Path("src/org/wcs/smart/er/query/model/types/surveyincident.html"); //$NON-NLS-1$
+		IPath path = new Path("src/org/wcs/smart/er/query/model/types/surveywaypoint.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, ERQueryPlugIn.getDefault().getBundle());
 	}
 	

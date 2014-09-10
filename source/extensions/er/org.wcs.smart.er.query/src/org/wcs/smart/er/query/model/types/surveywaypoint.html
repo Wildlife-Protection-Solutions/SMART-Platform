@@ -16,21 +16,22 @@ p{
 }
 </style>
 <body>
-<h1>Survey Observation Query</h1>
+<h1>Survey Incident Query</h1>
 <p>
-Survey queries are used to display details of survey related observations.  Results include sampling unit details, 
-mission details, survey details, as well as the observation details.
+Survey queries are used to display details of survey related observations.  Incident queries limit results
+to waypoints and their associated properties including sampling units, mission and survey properties.  Observation
+details are not included.</p>
 <p>
-Only observations records matching the selected filters are displayed. No summarizing takes place (ie. no totals, amounts, aggregations, etc.).  
+Only waypoint/incident records that match the selected filters are displayed. No summarizing takes place (ie. no totals, amounts, aggregations, etc.).  
 The resulting table
-includes all the survey, mission, sampling unit, details as well as all the data
-model category and attribute information associated with the observation. 
-Results can be viewed in a table or on a map. The map includes an observation layer, a mission track layer and sampling unit layers.
+includes all the survey, mission, and sampling unit details. 
+Results can be viewed in a table or on a map. 
+The map includes an observation layer, a mission track layer and sampling unit layers.
 </p>
 
 <table>
-<tr><td><img style="border: 1px solid" src="./surveyobservation.png"/></td></tr>
-<tr><td><p class="psmall"><b>Example Survey Observation Query with Data Model Attributes</b></p></td></tr>
+<tr><td><img style="border: 1px solid" src="./surveywaypoint.png"/></td></tr>
+<tr><td><p class="psmall"><b>Example Survey Incident Query</b></p></td></tr>
 </table>
 
 <p><b>Incident vs Observation</b></p>
@@ -41,13 +42,13 @@ that occur at the same point and same time (a Waypoint).
 </p>
 <p><b>Incident vs Observation Filters</b></p>
 <p>
-Observation queries support both incident filters and observation filters.  Observation filters only
+Incident queries support both incident filters and observation filters.  Observation filters only
 consider the individual observations when filtering data.  As a result you cannot query across
 categories.
 Incident filters look at all observations at a given incident when filtering data.  This allows you to query across categories.
  </p>
- <p>Observation filters will return only the observations that match the filter.  Incident filters
- will return all observations at any incident that matches the filter.</p>
+ <p>Observation filters will return only incidents where at least one observation matches the given filter. Incident filters
+ will return all waypoints where the set of observations match the filter.</p>
 
 </body>
 </html> 
