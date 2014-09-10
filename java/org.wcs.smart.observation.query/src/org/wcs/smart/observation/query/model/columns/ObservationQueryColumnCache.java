@@ -210,7 +210,7 @@ public class ObservationQueryColumnCache {
 							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
 						add = obsOptions.getTrackDistanceDirection();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-						add = obsOptions.getTrackObserver();
+						add = false; //observer is associated with observation not waypoint
 					}
 					if (add){
 						cols.add(new FixedQueryColumn(item));

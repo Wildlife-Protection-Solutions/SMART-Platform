@@ -5,6 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.query.internal.messages"; //$NON-NLS-1$
 	public static String DerbyFilterToSqlGenerator_FilterTypeNotSupported;
+	public static String AbstractPagedQueryResultSet_CleanupTablesJobName;
 	public static String AttributeFilter_InvalidAttributePrefix;
 	public static String AttributeFilter_InvalidWaypointObservationPrefix;
 	public static String CategoryFilter_InvalidPrefix;

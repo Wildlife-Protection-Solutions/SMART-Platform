@@ -89,11 +89,15 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 	
 	@Override
 	public void dispose() {
-		for (IItemTreeNode n : groupbys){
-			n.getContentProvider().dispose();
+		if(groupbys != null){
+			for (IItemTreeNode n : groupbys){
+				n.getContentProvider().dispose();
+			}
 		}
-		for (IItemTreeNode n : values){
-			n.getContentProvider().dispose();
+		if (values != null){
+			for (IItemTreeNode n : values){
+				n.getContentProvider().dispose();
+			}
 		}
 	}
 

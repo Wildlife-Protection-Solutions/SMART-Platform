@@ -25,31 +25,22 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
@@ -64,7 +55,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult implements IObservationPagedQueryResultSet{
+public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet{
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
 		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
@@ -73,7 +64,6 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	
 	private String queryTempTable;
 
-	private int itemCount = 0;
 	private int wpCount = 0;
 
 	private ResultSet lastResultSet;
@@ -113,29 +103,29 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		return super.equals(obj);
 	}
 	
+	@Override
 	public void destroy() {
 		//simply closing result set and deleting temporary table
 		dropResultSet();
-		Job cleanUpJob = new CleanUpJob();
-		cleanUpJob.setSystem(true); //we don't want this job to be displayed to user
-		cleanUpJob.schedule();
+		super.destroy();
 	}
 	
-	public List<ObservationQueryResultItem> getData(final int offset, final int pageSize) {
+	@Override
+	public List<IResultItem> getData(final int offset, final int pageSize) {
 		final Session session = HibernateManager.openSession();
 		//NOTE: session will not be closed on purpose!!!!
 		//as we want related ResultSet to remain opened for performance reasons
-		List<ObservationQueryResultItem> result = getNextData(session, offset, pageSize);
+		List<IResultItem> result = getNextData(session, offset, pageSize);
 		if (result == null) {
 			result = getData(session, offset, pageSize);
 		}
 		return result;
 	}
 	
-	private List<ObservationQueryResultItem> getNextData(final Session session, final int offset, final int pageSize) {
+	private List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
 		if (lastResultSet == null)
 			return null;
-		final List<ObservationQueryResultItem> result = new ArrayList<ObservationQueryResultItem>();
+		final List<IResultItem> result = new ArrayList<IResultItem>();
 		try {
 			result.addAll(getResults(lastResultSet, offset, pageSize));
 		} catch (SQLException e) {
@@ -296,10 +286,8 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		c.commit();
 	}
 		
-		
-	
-	private List<ObservationQueryResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<ObservationQueryResultItem> result = new ArrayList<ObservationQueryResultItem>();
+	private List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
+		final List<IResultItem> result = new ArrayList<IResultItem>();
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
 		
 		session.doWork(new Work() {
@@ -321,7 +309,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		return result;
 	}
 
-	private void attachObservations(List<ObservationQueryResultItem> result, Connection c, Session session) throws SQLException {
+	private void attachObservations(List<IResultItem> result, Connection c, Session session) throws SQLException {
 		boolean hasObservations = false;
 		StringBuilder attrSql = new StringBuilder();
 		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
@@ -329,7 +317,8 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
 		attrSql.append(queryTempTable).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
 		attrSql.append(queryTempTable).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid in ("); //$NON-NLS-1$
-		for (ObservationQueryResultItem it : result) {
+		for (IResultItem iri : result){
+			ObservationQueryResultItem it  = (ObservationQueryResultItem) iri;
 			if (it.getObservationUuid() != null) {
 				if (hasObservations) {
 					attrSql.append(',');
@@ -349,7 +338,8 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
 		try {
 			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
-			for (ObservationQueryResultItem it : result) {
+			for (IResultItem iri : result){
+				ObservationQueryResultItem it  = (ObservationQueryResultItem) iri;
 				if (it.getObservationUuid() != null) {
 					HashMap<String, Object> attributes = attrMap.get(wrap(it.getObservationUuid()));
 					if (attributes != null) {
@@ -521,22 +511,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		return null;
 	}
 
-	public Iterator<ObservationQueryResultItem> iterator(int pageSize) {
-		return new LazyQueryIterator(pageSize);
-	}
-	
-	private MapByteArrayKey wrap(byte[] array) {
-		return new MapByteArrayKey(array);
-	}
-
-	public int getItemCount() {
-		return itemCount;
-	}
-
-	protected void setItemCount(int itemCount) {
-		this.itemCount = itemCount;
-	}
-
+	@Override
 	public int getWpCount() {
 		return wpCount;
 	}
@@ -544,147 +519,11 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	protected void setWpCount(int wpCount) {
 		this.wpCount = wpCount;
 	}
-
-	/**
-	 * This is a wrapper for byte[] so we can use it as HashMap key.
-	 * The reason for creating this wrapper is that byte[] do not provide required equals and hashCode operations.
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private class MapByteArrayKey {
-		private final byte[] data;
-		
-		public MapByteArrayKey(byte[] data) {
-			this.data = data;
-		}
-
-		@Override
-		public boolean equals(Object arg) {
-			if (arg instanceof MapByteArrayKey)
-				return Arrays.equals(data, ((MapByteArrayKey)arg).data);
-			return super.equals(arg);
-		}
-		
-	    @Override
-	    public int hashCode() {
-	        return Arrays.hashCode(data);
-	    }
-	}
-
-	/**
-	 * Iterator that uses lazy approach
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private class LazyQueryIterator implements Iterator<ObservationQueryResultItem> {
-		
-		private int itOffset = -1; //offset of element at which list begins
-		private int itIndex = 0;
-		private List<ObservationQueryResultItem> data;
-		private int pageSize = 0;
-
-		public LazyQueryIterator(int pageSize){
-			this.pageSize = pageSize;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return itOffset + itIndex + 1 < itemCount;
-		}
-
-		@Override
-		public ObservationQueryResultItem next() {
-			if (!hasNext())
-				throw new NoSuchElementException();
-			if (data == null) {
-				itOffset = 0;
-				itIndex = 0;
-				data = getData(itOffset, pageSize);
-				return data.get(itIndex);
-			}
-			itIndex++;
-			if (itIndex < data.size()) {
-				return data.get(itIndex);
-			}
-			//we need to load new portion of data
-			itOffset += data.size();
-			itIndex = 0;
-			data = getData(itOffset, pageSize);
-			return data.get(itIndex);
-		}
-
-		@Override
-		public void remove() {
-			throw new IllegalStateException("Remove operation is not supported."); //$NON-NLS-1$
-		}
-		
-	}
 	
-	private class CleanUpJob extends Job {
-
-		public CleanUpJob() {
-			super(Messages.DerbyQueryResult_CleanUpJob_Title);
-		}
-		
-		public boolean belongsTo(Object family){
-			return family == SmartWorkbenchWindowAdvisor.SHUTDOWN_JOB_FAMILY;
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			final Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				session.doWork(new Work() {
-					@Override
-					public void execute(Connection c) throws SQLException {
-						//original table
-						try {
-							String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
-							c.createStatement().execute(sql);
-							QueryPlugIn.logSql(sql);
-						} catch (Exception ex) {
-							// eatme
-							ex.printStackTrace();
-						}
-						//list elements value table
-						try {
-							String sql = "DROP TABLE " + queryTempTable + "_LIST"; //$NON-NLS-1$ //$NON-NLS-2$
-							c.createStatement().execute(sql);
-							QueryPlugIn.logSql(sql);
-						} catch (Exception ex) {
-							// eatme
-							ex.printStackTrace();
-						}
-						//tree elements value table
-						try {
-							String sql = "DROP TABLE " + queryTempTable + "_TREE"; //$NON-NLS-1$ //$NON-NLS-2$
-							c.createStatement().execute(sql);
-							QueryPlugIn.logSql(sql);
-						} catch (Exception ex) {
-							// eatme
-							ex.printStackTrace();
-						}
-					}
-				});
-			}catch (Exception ex){
-				QueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
-			} finally {
-				try{
-					session.getTransaction().commit();
-				}catch (Exception ex){
-					SmartPlugIn.log(ex.getMessage(), ex);
-				}
-				try{
-					session.close();
-				}catch (Exception ex){
-					SmartPlugIn.log(ex.getMessage(), ex);
-				}
-			}
-			return Status.OK_STATUS;
-		}
-		
+	public String[] getTemporaryTableNames(){
+		return new String[]{ queryTempTable,
+				queryTempTable + "_LIST", //$NON-NLS-1$
+				queryTempTable + "_TREE"}; //$NON-NLS-1$
 	}
+				
 }
