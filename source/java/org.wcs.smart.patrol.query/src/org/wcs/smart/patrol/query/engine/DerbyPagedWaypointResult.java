@@ -25,32 +25,22 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
+public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet {
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
 		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
@@ -60,19 +50,14 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 	};
 	
 	private String queryTempTable;
-
-	private int itemCount = 0;
-
 	private ResultSet lastResultSet;
-	
 	private Envelope bounds = null;
 
 	//next sort column
 	private QueryColumn sortColumn = null;
-	//current direction
 	private int direction = SWT.UP;
-
 	private DerbyWaypointEngine engine;
+
 	public DerbyPagedWaypointResult(String queryTempTable,DerbyWaypointEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
@@ -95,29 +80,29 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 		return super.equals(obj);
 	}
 	
+	@Override
 	public void destroy() {
 		//simply closing result set and deleting temporary table
 		dropResultSet();
-		Job cleanUpJob = new CleanUpJob();
-		cleanUpJob.setSystem(true); //we don't want this job to be displayed to user
-		cleanUpJob.schedule();
+		super.destroy();
 	}
 	
-	public List<PatrolQueryResultItem> getData(final int offset, final int pageSize) {
+	@Override
+	public List<IResultItem> getData(final int offset, final int pageSize) {
 		final Session session = HibernateManager.openSession();
 		//NOTE: session will not be closed on purpose!!!!
 		//as we want related ResultSet to remain opened for performance reasons
-		List<PatrolQueryResultItem> result = getNextData(session, offset, pageSize);
+		List<IResultItem> result = getNextData(session, offset, pageSize);
 		if (result == null) {
 			result = getData(session, offset, pageSize);
 		}
 		return result;
 	}
 	
-	private List<PatrolQueryResultItem> getNextData(final Session session, final int offset, final int pageSize) {
+	private List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
 		if (lastResultSet == null)
 			return null;
-		final List<PatrolQueryResultItem> result = new ArrayList<PatrolQueryResultItem>();
+		final List<IResultItem> result = new ArrayList<IResultItem>();
 		try {
 			result.addAll(getResults(lastResultSet, offset, pageSize));
 		} catch (SQLException e) {
@@ -150,14 +135,12 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 					}
 				}
 			});
-			
 		}
 		return bounds;
-		
 	}
 	
-	private List<PatrolQueryResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<PatrolQueryResultItem> result = new ArrayList<PatrolQueryResultItem>();
+	private List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
+		final List<IResultItem> result = new ArrayList<IResultItem>();
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
 		
 		session.doWork(new Work() {
@@ -241,117 +224,8 @@ public class DerbyPagedWaypointResult implements IPagedQueryResultSet{
 		return items;
 	}
 
-	public Iterator<PatrolQueryResultItem> iterator(int pageSize) {
-		return new LazyQueryIterator(pageSize);
-	}
-	
-	public int getItemCount() {
-		return itemCount;
-	}
-
-	protected void setItemCount(int itemCount) {
-		this.itemCount = itemCount;
-	}
-
-
-	
-	/**
-	 * Iterator that uses lazy approach
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private class LazyQueryIterator implements Iterator<PatrolQueryResultItem> {
-		
-		private int itOffset = -1; //offset of element at which list begins
-		private int itIndex = 0;
-		private List<PatrolQueryResultItem> data;
-		private int pageSize = 0;
-
-		public LazyQueryIterator(int pageSize){
-			this.pageSize = pageSize;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return itOffset + itIndex + 1 < itemCount;
-		}
-
-		@Override
-		public PatrolQueryResultItem next() {
-			if (!hasNext())
-				throw new NoSuchElementException();
-			if (data == null) {
-				itOffset = 0;
-				itIndex = 0;
-				data = getData(itOffset, pageSize);
-				return data.get(itIndex);
-			}
-			itIndex++;
-			if (itIndex < data.size()) {
-				return data.get(itIndex);
-			}
-			//we need to load new portion of data
-			itOffset += data.size();
-			itIndex = 0;
-			data = getData(itOffset, pageSize);
-			return data.get(itIndex);
-		}
-
-		@Override
-		public void remove() {
-			throw new IllegalStateException("Remove operation is not supported."); //$NON-NLS-1$
-		}
-		
-	}
-	
-	private class CleanUpJob extends Job {
-
-		public CleanUpJob() {
-			super(Messages.DerbyQueryResult_CleanUpJob_Title);
-		}
-
-		
-		@Override
-		public boolean belongsTo(Object family){
-			return family == SmartWorkbenchWindowAdvisor.SHUTDOWN_JOB_FAMILY;
-		}
-		
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			final Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				session.doWork(new Work() {
-					@Override
-					public void execute(Connection c) throws SQLException {
-						//original table
-						try {
-							String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
-							c.createStatement().execute(sql);
-							QueryPlugIn.logSql(sql);
-						} catch (Exception ex) {
-							// eatme
-							ex.printStackTrace();
-						}
-					}
-				});
-			}catch (Exception ex){
-				PatrolQueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
-			} finally {
-				try{
-					session.getTransaction().commit();
-				}catch (Exception ex){
-					SmartPlugIn.log(ex.getMessage(), ex);
-				}
-				try{
-					session.close();
-				}catch (Exception ex){
-					SmartPlugIn.log(ex.getMessage(), ex);
-				}
-			}
-			return Status.OK_STATUS;
-		}
-		
+	@Override
+	public String[] getTemporaryTableNames() {
+		return new String[]{queryTempTable};
 	}
 }

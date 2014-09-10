@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Patrol
 Bundle-SymbolicName: org.wcs.smart.patrol;singleton:=true
-Bundle-Version: 3.0.2
+Bundle-Version: 3.1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
  org.eclipse.jface.databinding,

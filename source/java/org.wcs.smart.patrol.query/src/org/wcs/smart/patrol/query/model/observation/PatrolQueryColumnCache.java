@@ -227,7 +227,7 @@ public class PatrolQueryColumnCache {
 					}else if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-						add = patrolOps.getTrackObserver();
+						add = false;
 					}
 					if (add){
 						cols.add(new FixedQueryColumn(item));
