@@ -36,6 +36,7 @@ import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.SmartUtils;
 
@@ -50,7 +51,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private Iterator<SightingResultItem> fIterator;
+	private Iterator<IResultItem> fIterator;
 	private EntitySightingQuery  query;
 	
 	/**

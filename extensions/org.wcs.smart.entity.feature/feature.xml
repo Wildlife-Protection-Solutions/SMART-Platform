@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.entity.feature"
       label="Core SMART Entity Module (Required)"
-      version="1.0.1"
+      version="1.1.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
       license-feature-version="3.0.0">
