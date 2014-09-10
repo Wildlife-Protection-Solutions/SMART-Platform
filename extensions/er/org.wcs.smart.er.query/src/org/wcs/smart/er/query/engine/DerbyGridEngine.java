@@ -178,7 +178,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 //						}
 //					}
 
-					monitor.subTask("Computing mission track locations.");
+					monitor.subTask(Messages.DerbyGridEngine_ProgressTrackLocations);
 					//combine with the patrol existance value
 					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
 					for (GridResultItem it : numeratorResults){
@@ -225,7 +225,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		monitor.beginTask(Messages.DerbyGridEngine_CreateObsTableProgress, 100);
 		
 		if (needsFilter) {
-			monitor.subTask("Processing filters");
+			monitor.subTask(Messages.DerbyGridEngine_ProgressFilters);
 			try {
 				dropTemporaryGridTable(c);
 			} catch (Exception ex) {

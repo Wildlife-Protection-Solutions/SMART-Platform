@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
+import org.wcs.smart.er.query.internal.Messages;
 
 /**
  * Smart query data source factor.  
@@ -41,7 +42,7 @@ public class SurveyDataSourceFactory implements DataStoreFactorySpi{
 	/**
 	 * query uuid parameter
 	 */
-	public static final Param QUERY_UUID = new Param("queryuuid", byte[].class, "Query Uuid", true);  //$NON-NLS-1$
+	public static final Param QUERY_UUID = new Param("queryuuid", byte[].class, Messages.SurveyDataSourceFactory_QueryUuidParameterName, true);  //$NON-NLS-1$
 	  
 	/**
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -59,7 +60,7 @@ public class SurveyDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "SMART Survey query layers";
+		return Messages.SurveyDataSourceFactory_Description;
 	}
 
 	/**
@@ -67,7 +68,7 @@ public class SurveyDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "SMART Observation Query";
+		return Messages.SurveyDataSourceFactory_DisplayName;
 	}
 
 	/**
@@ -110,7 +111,7 @@ public class SurveyDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("This is a read-only data store.");
+		throw new UnsupportedOperationException(Messages.SurveyDataSourceFactory_ReadOnlyError);
 	}
 
 }

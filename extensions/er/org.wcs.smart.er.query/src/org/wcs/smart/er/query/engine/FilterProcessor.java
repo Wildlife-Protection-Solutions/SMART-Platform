@@ -146,7 +146,7 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 
 		//mission filters
-		monitor.subTask("Processing Mission Filters");
+		monitor.subTask(Messages.FilterProcessor_ProgressMissionFilters);
 		queryFilter.accept(mpcollector);
 		if (mpcollector.getAttributeInfo().size() > 0){
 			this.missionTable = engine.createTempTableName();
@@ -154,7 +154,7 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 		monitor.worked(10);
 		
-		monitor.subTask("Processing Sampling Unit Filters");
+		monitor.subTask(Messages.FilterProcessor_ProgressSuFilters);
 		queryFilter.accept(sucollector);
 		if (sucollector.getAttributeInfo().size() > 0){
 			this.suAttributeTable = engine.createTempTableName();
@@ -165,14 +165,14 @@ public class FilterProcessor implements IFilterProcessor {
 			return;
 		}
 
-		monitor.subTask("Create temporary data tables");
+		monitor.subTask(Messages.FilterProcessor_ProgressDataTableCreate);
 		createTemporaryTable(c);
 		monitor.worked(10);
 		if (monitor.isCanceled()){
 			return;
 		}
 		
-		monitor.subTask("Populating data tables");
+		monitor.subTask(Messages.FilterProcessor_ProgressDataTablePopulate);
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
 		monitor.worked(10);

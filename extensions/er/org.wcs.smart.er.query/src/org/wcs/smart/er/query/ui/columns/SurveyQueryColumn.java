@@ -44,7 +44,7 @@ public class SurveyQueryColumn extends QueryColumn {
 	public enum FixedColumns{
 		CA_ID(Messages.SurveyQueryColumn_CaIdLabel, ColumnType.STRING,"ca:id"),  //$NON-NLS-1$
 		CA_NAME(Messages.SurveyQueryColumn_CaNameLabel, ColumnType.STRING,"ca:name"),  //$NON-NLS-1$
-		SURVEY_DESIGN(Messages.SurveyQueryColumn_SurveyDesignLabel, ColumnType.STRING, "surveydesign:id"),  //$NON-NLS-1$
+		SURVEY_DESIGN(Messages.SurveyQueryColumn_SurveyDesignLabel, ColumnType.STRING, "surveydesign:name"),  //$NON-NLS-1$
 		SURVEY_DESIGN_START(Messages.SurveyQueryColumn_SurveyDesignStartdateLabel, ColumnType.DATE, "surveydesign:startdate"),  //$NON-NLS-1$
 		SURVEY_DESIGN_END(Messages.SurveyQueryColumn_SurveyDesignEnddateLabel, ColumnType.DATE, "surveydesign:enddate"),  //$NON-NLS-1$
 		
@@ -55,6 +55,7 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION(Messages.SurveyQueryColumn_MissionIdLabel, ColumnType.STRING, "mission:id"),  //$NON-NLS-1$
 		MISSION_START(Messages.SurveyQueryColumn_MissionStartLabel, ColumnType.DATE, "mission:startdate"),  //$NON-NLS-1$
 		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
+		MISSION_LEADER(Messages.SurveyQueryColumn_MissionLeaderLabel, ColumnType.STRING, "mission:leader"), //$NON-NLS-1$
 		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
 		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.NUMBER, "su:buffer"),  //$NON-NLS-1$
@@ -115,6 +116,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION: return item.getMissionId();
 				case MISSION_START: return item.getMissionStart();
 				case MISSION_END: return item.getMissionEnd();
+				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case SMAPLING_UNIT_BUFFER: return item.getSmaplingUnitBuffer();
 				case WAYPOINT_ID: return item.getWaypointId();

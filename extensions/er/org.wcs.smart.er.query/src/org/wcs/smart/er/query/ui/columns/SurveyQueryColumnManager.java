@@ -263,7 +263,6 @@ public class SurveyQueryColumnManager {
 							cols.add(new MissionPropertyQueryColumn(mp.getAttribute()));
 						}
 						
-						@SuppressWarnings("unchecked")
 						List<SurveyDesignSamplingUnitAttribute> atts = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
 								.add(Restrictions.eq("id.surveyDesign", sd2)) //$NON-NLS-1$
 								.list();
@@ -383,6 +382,7 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER));
 		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START));

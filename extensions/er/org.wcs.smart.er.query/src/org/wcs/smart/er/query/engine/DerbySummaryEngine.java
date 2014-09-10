@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.geotools.util.SubProgressListener;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
@@ -228,14 +227,14 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						return;
 					}
 					
-					monitor.subTask("Processing category keys");
+					monitor.subTask(Messages.DerbySummaryEngine_ProgressCategoryKeys);
 					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					monitor.worked(10);
 					if (monitor.isCanceled()){
 						return;
 					}
 					
-					monitor.subTask("Processing rate filter");
+					monitor.subTask(Messages.DerbySummaryEngine_ProgressRateFilter);
 					String vFilter = valueFilter.asString();
 					String rFilter = rateFilter.asString();
 					
@@ -260,7 +259,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						}
 					}
 					
-					monitor.subTask("Processing values");
+					monitor.subTask(Messages.DerbySummaryEngine_ProgressValues);
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
 							query.getConservationAreaFilterAsFilter(),new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
@@ -356,7 +355,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			GroupByPart groupBy, 
 			ValuePart values, ConservationAreaFilter caFilter,
 			IProgressMonitor monitor) throws SQLException{
-		monitor.beginTask("Computing Values", values.getValueItems().size());
+		monitor.beginTask(Messages.DerbySummaryEngine_ProgressValues2, values.getValueItems().size());
 		
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
