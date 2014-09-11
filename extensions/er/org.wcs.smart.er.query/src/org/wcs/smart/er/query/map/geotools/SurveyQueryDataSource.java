@@ -43,7 +43,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class SurveyObsQueryDataSource extends AbstractDataStore{
+public class SurveyQueryDataSource extends AbstractDataStore{
 
 	/**
 	 * waypoint query data source
@@ -69,7 +69,7 @@ public class SurveyObsQueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public SurveyObsQueryDataSource(SimpleQuery query){
+	public SurveyQueryDataSource(SimpleQuery query){
 		this.query = query;
 	}
 

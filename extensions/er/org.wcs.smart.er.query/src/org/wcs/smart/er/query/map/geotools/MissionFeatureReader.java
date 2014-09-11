@@ -71,11 +71,11 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		Object cachedResults;
 		try {
 			cachedResults = query.getCachedResults(new NullProgressMonitor());
-			if (ftype.getTypeName().equals(SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE) && 
+			if (ftype.getTypeName().equals(SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE) && 
 			 (cachedResults instanceof ISurveyQueryMissionResult)){
 				fIterator = ((ISurveyQueryMissionResult) cachedResults).getMissionUuids().iterator();
 				isWaypointMissionTrack = true;
-			}else if (ftype.getTypeName().equals(SurveyObsQueryDataSource.TRACKS_TYPE)){
+			}else if (ftype.getTypeName().equals(SurveyQueryDataSource.TRACKS_TYPE)){
 				fIterator = ((IPagedQueryResultSet)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 				isWaypointMissionTrack = false;
 			}
