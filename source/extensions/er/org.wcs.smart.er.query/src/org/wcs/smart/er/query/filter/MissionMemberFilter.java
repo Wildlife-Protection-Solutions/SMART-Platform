@@ -82,6 +82,7 @@ public class MissionMemberFilter implements IFilter {
 		if (e == null){
 			return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionMemberFilter_EmployeeNotFound, new Object[]{SmartUtils.encodeHex(uuid)}))};
 		}
+		e.getFullLabel();
 
 		DropItem di = null;
 		if (isLeader() ){
