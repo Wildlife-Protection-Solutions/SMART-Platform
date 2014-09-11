@@ -35,7 +35,6 @@ import org.eclipse.birt.report.model.api.DataSetHandle;
  */
 public interface IBirtMapLayerManager {
 
-	
 	/**
 	 *  
 	 * @param handle

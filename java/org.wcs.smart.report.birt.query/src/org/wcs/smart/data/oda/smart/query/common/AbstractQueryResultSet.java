@@ -218,6 +218,8 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 			return new Date(((Time) lastObject).getTime());
 		} else if (lastObject instanceof java.util.Date) {
 			return new Date(((java.util.Date) lastObject).getTime());
+		} else if (lastObject == null){
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -238,6 +240,10 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 		lastObject = getCurrentItem(index);
 		if (lastObject instanceof Time) {
 			return (Time) lastObject;
+		}else if (lastObject instanceof Date){
+			return new Time(((Date)lastObject).getTime());
+		}else if (lastObject == null){
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
