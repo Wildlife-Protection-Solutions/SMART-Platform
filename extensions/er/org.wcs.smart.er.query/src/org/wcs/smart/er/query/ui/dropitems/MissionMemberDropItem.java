@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -78,12 +79,12 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 			}
 			
 			final Employee lCurrentValue = currentValue;
+			
 			final List<Employee> data = new ArrayList<Employee>();
 			Session s = HibernateManager.openSession();
 			try {
 				List<Employee> employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
 				data.addAll(employees);
-				
 				Collections.sort(data, new Comparator<Employee>() {
 					@Override
 					public int compare(Employee e0, Employee e1) {
@@ -149,15 +150,26 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		Object x = ((StructuredSelection)value.getSelection()).getFirstElement();
-		if (x instanceof Employee){
-			if (isLeader){
-				return "s:missionleader:" + SmartUtils.encodeHex(((Employee)x).getUuid());  //$NON-NLS-1$
-			}else{
-				return "s:missionmember:" + SmartUtils.encodeHex(((Employee)x).getUuid()); //$NON-NLS-1$
+		Employee e = currentValue;
+		if (currentValue == null){
+			IStructuredSelection sel = (IStructuredSelection) value.getSelection();
+			if (sel != null && !sel.isEmpty()){
+				if (sel.getFirstElement() instanceof Employee){
+					e = (Employee) sel.getFirstElement();
+				}
 			}
 		}
-		return null;
+		
+		String key = ""; //$NON-NLS-1$
+		if (isLeader){
+			key = "s:missionleader:"; //$NON-NLS-1$
+		}else{
+			key = "s:missionmember:"; //$NON-NLS-1$
+		}
+		if (e != null){
+			key += SmartUtils.encodeHex(e.getUuid());
+		}
+		return key;
 	}
 
 	/**
