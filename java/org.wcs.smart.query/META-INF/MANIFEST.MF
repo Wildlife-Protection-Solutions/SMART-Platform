@@ -6,7 +6,7 @@ Bundle-Version: 3.0.2
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
 Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
  org.eclipse.ui.forms,
- net.refractions.udig.catalog.rasterings,
+ net.refractions.udig.catalog.rasterings;visibility:=reexport,
  org.wcs.smart.observation;bundle-version="3.0.2",
  net.refractions.udig.style.sld,
  net.refractions.udig.render.gridcoverage.basic;bundle-version="1.2.0",
