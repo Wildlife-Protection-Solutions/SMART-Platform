@@ -14,4 +14,7 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.lang;bundle-version="2.4.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.wcs.smart.er.query.model
+Export-Package: org.wcs.smart.er.query.engine,
+ org.wcs.smart.er.query.filter,
+ org.wcs.smart.er.query.map.udig,
+ org.wcs.smart.er.query.model

@@ -39,7 +39,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.data.DataStore;
 import org.wcs.smart.er.query.map.geotools.SurveyDataSourceFactory;
-import org.wcs.smart.er.query.map.geotools.SurveyObsQueryDataSource;
+import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
 import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
@@ -111,8 +111,8 @@ public class QueryService extends IQueryService {
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
-		if (ds instanceof SurveyObsQueryDataSource){
-			((SurveyObsQueryDataSource)ds).resetSchema(SurveyObsQueryDataSource.WAYPOINT_TYPE);
+		if (ds instanceof SurveyQueryDataSource){
+			((SurveyQueryDataSource)ds).resetSchema(SurveyQueryDataSource.WAYPOINT_TYPE);
 		}
 	}	
 	
@@ -154,14 +154,12 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getClass().equals(SurveyObservationQueryType.class) ){
-						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
-						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getType().getClass().equals(SurveyWaypointQueryType.class)){
-						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
-						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.WAYPOINT_TYPE));
+					if (query.getType().getKey().equals(SurveyObservationQueryType.KEY) ||
+						query.getType().getKey().equals(SurveyWaypointQueryType.KEY)){
+						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_TYPE));
+						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
 					}else if (query.getType().getClass().equals(MissionQueryType.class)){
-						members.add(new QueryGeoResource(this, SurveyObsQueryDataSource.TRACKS_TYPE));
+						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
 //						members.add(new QueryGeoResource(this, SurveyQueryDataSource.PATROL_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
@@ -233,7 +231,7 @@ public class QueryService extends IQueryService {
                 		if (query.getType().getClass().equals(SurveyObservationQueryType.class) ||
                 			query.getType().getClass().equals(SurveyWaypointQueryType.class) ||
                 				query.getType().getClass().equals(MissionQueryType.class)){
-                			ds = new SurveyObsQueryDataSource((SimpleQuery)query);
+                			ds = new SurveyQueryDataSource((SimpleQuery)query);
                 		
 //                		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){
 //                    		ds = new SurveyObsQueryDataSource((PatrolWaypointQuery)query);
@@ -247,7 +245,7 @@ public class QueryService extends IQueryService {
                 			Map<String, Serializable> paramsLocal = new HashMap<String, Serializable>();
                 			paramsLocal.put(SurveyDataSourceFactory.QUERY_UUID.key, params.get(QueryServiceExtension.QUERY_UUID_KEY));
                 			if (dsf.canProcess(paramsLocal)) {
-                				this.ds = (SurveyObsQueryDataSource) dsf.createDataStore(paramsLocal);
+                				this.ds = (SurveyQueryDataSource) dsf.createDataStore(paramsLocal);
                 			}
                 		} catch (IOException e) {
                 			throw e;
