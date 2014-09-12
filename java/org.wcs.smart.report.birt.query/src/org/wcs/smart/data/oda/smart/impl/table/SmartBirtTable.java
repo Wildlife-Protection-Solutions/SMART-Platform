@@ -24,6 +24,7 @@ package org.wcs.smart.data.oda.smart.impl.table;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 
@@ -37,18 +38,56 @@ import org.wcs.smart.ca.ConservationArea;
  */
 public abstract class SmartBirtTable {
 	
-	private String tableName;
-	private String tableKey;
+	private String fullTableName = null;
+	private String shortTableName = null;
+	private String tableKey = null;
+	protected Image tableImage = null;
 	
 	/**
 	 * Creates a new table with the given name.
 	 * <p>The key must be unique.</p>
-	 * @param tableName display name for table
+	 * @param tableName full and short display name for table
 	 * @param tableKey unique key represent the table
 	 */
-	public SmartBirtTable(String tableName, String tableKey){
-		this.tableName = tableName;
+	public SmartBirtTable(String fullTableName, String tableKey){
+		this(fullTableName, fullTableName, tableKey);
+	}
+	
+	/**
+	 * Creates a new table with the given name.
+	 * <p>The key must be unique.</p>
+	 * @param fullTableName full display name for table
+	 * @param shortTableName short display name for table
+	 * @param tableKey unique key represent the table
+	 */
+	public SmartBirtTable(String fullTableName, String shortTableName, String tableKey){
+		this(fullTableName, shortTableName, tableKey, null);
+	}
+	
+	/**
+	 * Creates a new table with the given name.
+	 * <p>The key must be unique.</p>
+	 * @param tableName full table name display name for table
+	 * @param tableKey unique key represent the table
+	 * @Param image representing table
+	 */
+	public SmartBirtTable(String tableName, String tableKey, Image image){
+		this(tableName, tableName, tableKey, image);
+	}
+	
+	/**
+	 * Creates a new table with the given name.
+	 * <p>The key must be unique.</p>
+	 * @param fullTableName full display name for table
+	 * @param shortTableName short display name for table
+	 * @param tableKey unique key represent the table
+	 * @Param image representing table
+	 */
+	public SmartBirtTable(String fullTableName, String shortTableName,  String tableKey, Image image){
+		this.fullTableName = fullTableName;
+		this.shortTableName = shortTableName;
 		this.tableKey = tableKey;
+		this.tableImage = image;
 	}
 	
 	/**
@@ -66,11 +105,32 @@ public abstract class SmartBirtTable {
 	public abstract String[] getColumnLabels();
 	
 	/**
-	 * @return the table name
+	 * This is used in the BIRT editor.
+	 * 
+	 * @return the full table name
 	 */
-	public String getTableDisplayName(){
-		return this.tableName;
+	public String getTableFullName(){
+		return this.fullTableName;
 	}
+	
+	/**
+	 * This is used in the UI for selecting the table
+	 * under the category.
+	 * 
+	 * @return the short form table name
+	 */
+	public String getTableShortName(){
+		return this.shortTableName;
+	}
+	
+	/**
+	 * 
+	 * @return an image for the table
+	 */
+	public Image getImage(){
+		return tableImage;
+	}
+	
 	/**
 	 * 
 	 * @return the unique fixed table key

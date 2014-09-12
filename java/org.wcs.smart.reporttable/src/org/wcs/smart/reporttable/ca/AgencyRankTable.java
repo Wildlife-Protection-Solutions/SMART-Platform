@@ -155,8 +155,6 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void openQuery() {
-//		session = HibernateManager.openSession();
-//		session.beginTransaction();
 	}
 
 	/**
@@ -164,8 +162,5 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void closeQuery() {
-//		session.getTransaction().commit();
-//		session.close();
 	}
-
 }

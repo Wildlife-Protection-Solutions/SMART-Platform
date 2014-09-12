@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.data.oda.smart.ui.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
@@ -40,11 +43,13 @@ import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -55,6 +60,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTableUtils;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
+import org.wcs.smart.data.oda.smart.impl.table.TableCategory;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 import org.wcs.smart.report.birt.query.Activator;
 
@@ -69,7 +75,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 
 	public static final String DEFAULT_MESSAGE = Messages.SmartTableDataSetWizardPage_PickSmartTable_Message;
 
-	private ListViewer smartTables;
+	private TreeViewer smartTables;
 	/**
 	 * Constructor
 	 * 
@@ -116,36 +122,109 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		Label fieldLabel = new Label(composite, SWT.NONE);
 		fieldLabel.setText(Messages.SmartTableDataSetWizardPage_SelectTableName_Label);
 
-		smartTables = new ListViewer(composite, SWT.BORDER);
+		smartTables = new TreeViewer(composite, SWT.BORDER);
 		smartTables.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
 				if (element instanceof SmartBirtTable){
-					return ((SmartBirtTable)element).getTableDisplayName();
+					return ((SmartBirtTable)element).getTableShortName();
+				}else if (element instanceof TableCategory){
+					return ((TableCategory) element).getName();
 				}
 				return element.toString();
 			}
 			
+			public Image getImage(Object element){
+				if (element instanceof TableCategory){
+					if (((TableCategory)element).getImage() != null){
+						return ((TableCategory) element).getImage().createImage();
+					}
+				}else if (element instanceof SmartBirtTable){
+					Image img = ((SmartBirtTable)element).getImage();
+					if (img == null){
+						return Activator.getDefault().getImageRegistry().get(Activator.TABLE_ICON);
+					}
+					return img;
+				}
+				return null;
+			}
+			
 		});
-		smartTables.setContentProvider(ArrayContentProvider.getInstance());
+		
+		smartTables.setContentProvider(new ITreeContentProvider() {
+			
+			private HashMap<TableCategory, List<SmartBirtTable>> tables;
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+				if (newInput instanceof HashMap){
+					this.tables = (HashMap<TableCategory, List<SmartBirtTable>>) newInput;
+				}else{
+					this.tables = null;
+				}
+			}
+			
+			@Override
+			public void dispose() {
+			}
+			
+			@Override
+			public boolean hasChildren(Object element) {
+				if (element instanceof TableCategory){
+					return true;
+				}
+				return false;
+			}
+			
+			@Override
+			public Object getParent(Object element) {
+				return null;
+			}
+			
+			@Override
+			public Object[] getElements(Object inputElement) {
+				Object[] data = tables.keySet().toArray();
+				Arrays.sort(data, new Comparator<Object>() {
+
+					@Override
+					public int compare(Object o1, Object o2) {
+						return Collator.getInstance().compare(
+								((TableCategory)o1).getName(),
+								((TableCategory)o2).getName());
+					}
+				});
+				return data;
+			}
+			
+			@Override
+			public Object[] getChildren(Object parentElement) {
+				if (parentElement instanceof TableCategory){
+					List<SmartBirtTable> items = tables.get(parentElement);
+					
+					Collections.sort(items, new Comparator<SmartBirtTable>() {
+						@Override
+						public int compare(SmartBirtTable o1, SmartBirtTable o2) {
+							return Collator.getInstance().compare(o1.getTableFullName(), o2.getTableFullName());
+						}
+					});
+					return items.toArray();
+				}
+				return null;
+			}
+		});
 		
 
-		smartTables.getList().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
-		smartTables.getList().addListener(SWT.Selection, new Listener() {
+		smartTables.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)smartTables.getControl().getLayoutData()).heightHint = 400;
+		smartTables.getControl().addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
 				validateData();
 			}
 		});
 		try{
-			List<SmartBirtTable> tables = SmartBirtTableUtils.getInstance().getBirtTables();
-			Collections.sort(tables, new Comparator<SmartBirtTable>(){
-				@Override
-				public int compare(SmartBirtTable t1, SmartBirtTable t2) {
-					return Collator.getInstance().compare(t1.getTableDisplayName(),t2.getTableDisplayName());
-				}});
-			smartTables.setInput(tables.toArray(new SmartBirtTable[tables.size()]));
+			Map<TableCategory, List<SmartBirtTable>> tables = SmartBirtTableUtils.getInstance().getBirtTables();
+			smartTables.setInput(tables);
+			smartTables.expandAll();
 		}catch (Exception ex){
 			Activator.log(ex.getLocalizedMessage(), ex);
 		}
@@ -342,7 +421,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(reportTable.getTableDisplayName());
+		dataSetDesign.setDisplayName(reportTable.getTableFullName());
 		dataSetDesign.setName(reportTable.getTableKey());
 	}
 

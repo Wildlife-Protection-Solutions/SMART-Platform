@@ -29,6 +29,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.reporttable.internal.Messages;
 
@@ -86,7 +87,8 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 * Creates a new patrol mandate table.
 	 */
 	public PatrolMandateTable() {
-		super(Messages.PatrolMandateTable_TableName, "Patrol Mandate"); //$NON-NLS-1$
+		super(Messages.PatrolMandateTable_TableName, "Patrol Mandate", //$NON-NLS-1$
+			SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON));
 		if (SmartDB.isMultipleAnalysis()){
 			this.activeColumns = Column.values();
 		}else{
@@ -152,8 +154,6 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@Override
 	public void openQuery() {
-//		session = HibernateManager.openSession();
-//		session.beginTransaction();
 	}
 
 	/**
@@ -161,9 +161,5 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@Override
 	public void closeQuery() {
-//		session.getTransaction().commit();
-//		session.close();
-
 	}
-
 }

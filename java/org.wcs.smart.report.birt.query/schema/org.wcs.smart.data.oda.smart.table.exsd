@@ -6,7 +6,8 @@
          <meta.schema plugin="org.wcs.smart.report.birt.query" id="org.wcs.smart.data.oda.smart.table" name="smartbirttable"/>
       </appinfo>
       <documentation>
-         An extension point to allow certain smart database tables to be used in queries.
+         An extension point to allow certain smart database tables to be used in queries.  Also supports dynamic tables
+that are not known until runtime.  Tables can belong to categories (for UI purposes).
       </documentation>
    </annotation>
 
@@ -18,7 +19,11 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="class"/>
+            <choice>
+               <element ref="TableCategory"/>
+               <element ref="DynamicTable"/>
+               <element ref="StaticTable"/>
+            </choice>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,15 +52,79 @@
       </complexType>
    </element>
 
-   <element name="class">
+   <element name="StaticTable">
       <complexType>
-         <attribute name="SmartBirtTable" type="string">
+         <attribute name="category" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.data.oda.smart.table/TableCategory/@id"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn="org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable:"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="DynamicTable">
+      <complexType>
+         <attribute name="category" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.data.oda.smart.table/TableCategory/@id"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="TableCategory">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="icon" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
                </appinfo>
             </annotation>
          </attribute>

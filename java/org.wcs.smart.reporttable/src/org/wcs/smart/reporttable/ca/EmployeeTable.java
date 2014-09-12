@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
@@ -114,14 +115,14 @@ public class EmployeeTable extends SmartBirtTable {
 		}
 	}
 	
-//	private Session session = null;
 	private EmployeeColumn[] activeColumns;
 	
 	/**
 	 * Create a new employee table
 	 */
 	public EmployeeTable() {
-		super(Messages.EmployeeTable_TableName, "Employees"); //$NON-NLS-1$
+		super(Messages.EmployeeTable_TableName, "Employees", //$NON-NLS-1$
+			SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON));
 		if (SmartDB.isMultipleAnalysis()){
 			this.activeColumns = EmployeeColumn.values();
 		}else{
@@ -197,8 +198,6 @@ public class EmployeeTable extends SmartBirtTable {
 	 */
 	@Override
 	public void openQuery() {
-//		session = HibernateManager.openSession();
-//		session.beginTransaction();
 	}
 
 	/**
@@ -206,9 +205,5 @@ public class EmployeeTable extends SmartBirtTable {
 	 */
 	@Override
 	public void closeQuery() {
-//		session.getTransaction().commit();
-//		session.close();
-
 	}
-
 }
