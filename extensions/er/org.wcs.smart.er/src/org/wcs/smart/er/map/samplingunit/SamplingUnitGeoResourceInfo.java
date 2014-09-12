@@ -26,6 +26,9 @@ import java.io.IOException;
 import net.refractions.udig.catalog.IGeoResourceInfo;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.Feature;
@@ -63,24 +66,38 @@ public class SamplingUnitGeoResourceInfo extends IGeoResourceInfo {
 	 * 
 	 * @param resource resource source
 	 */
-	public void computeBounds(SamplingUnitGeoResource resource, IProgressMonitor monitor){
+	public void computeBounds(final SamplingUnitGeoResource resource, final IProgressMonitor monitor){
+		Job boundsJob = new Job("Computing bounds for sampling units"){ //$NON-NLS-1$
 
-		try {
-			@SuppressWarnings("unchecked")
-			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			this.bounds = env;
-			fs.getFeatures().accepts(new FeatureVisitor() {
-				@Override
-				public void visit(Feature f) {
-					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					@SuppressWarnings("unchecked")
+					FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
+					final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
+					SamplingUnitGeoResourceInfo.this.bounds = env;
+					fs.getFeatures().accepts(new FeatureVisitor() {
+						@Override
+						public void visit(Feature f) {
+							BoundingBox bb = f.getBounds();
+							env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+						}
+					}, null);
+					
+				} catch (Exception e) {
+					EcologicalRecordsPlugIn.log(e.getMessage(), e);
 				}
-			}, null);
-			
-		} catch (Exception e) {
+				return Status.OK_STATUS;
+			}
+		};
+		boundsJob.setSystem(true);
+		boundsJob.schedule();
+		try {
+			boundsJob.join();
+		} catch (InterruptedException e) {
 			EcologicalRecordsPlugIn.log(e.getMessage(), e);
 		}
+		
 
 	}
 }

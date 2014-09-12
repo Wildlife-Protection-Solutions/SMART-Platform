@@ -52,6 +52,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 
 /**
  * Georesource for a sampling unit.
@@ -189,7 +190,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 		StyleFactory styleFactory = CommonFactoryFinder.getStyleFactory();
 		FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory();
 		
-		if (dataType.equals(SamplingUnitDataSource.PLOT_TYPE) ){
+		if (dataType.equals(SamplingUnitType.PLOT.name()) ){
 			Graphic gr = styleFactory.createDefaultGraphic();
 
 	        Mark mark = styleFactory.getCircleMark();
@@ -219,7 +220,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	        
 	        return style;
 	        
-		}else if (dataType.equals(SamplingUnitDataSource.TRANSECT_TYPE) ){
+		}else if (dataType.equals(SamplingUnitType.TRANSECT.name()) ){
 	        Stroke stroke = styleFactory.createStroke(
 	                filterFactory.literal(Color.RED),
 	                filterFactory.literal(1));

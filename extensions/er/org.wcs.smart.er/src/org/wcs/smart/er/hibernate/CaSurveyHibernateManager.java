@@ -23,7 +23,9 @@ package org.wcs.smart.er.hibernate;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -219,5 +221,22 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 				.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
 				.list();
 		return ds;
+	}
+	
+	
+	/**
+	 * Determines all sampling unit types associated with survey design
+	 */
+	@Override
+	public Set<SamplingUnit.SamplingUnitType> getSamplingUnitTypes(SurveyDesign sd, Session s){
+		
+		HashSet<SamplingUnit.SamplingUnitType> types = new HashSet<SamplingUnit.SamplingUnitType>();
+		
+		for (Object x : getSamplingUnits(sd, s)){
+			if (x instanceof SamplingUnit){
+				types.add(((SamplingUnit) x).getType());
+			}
+		}
+		return types;
 	}
 }

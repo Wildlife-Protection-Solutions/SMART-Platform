@@ -22,8 +22,10 @@
 package org.wcs.smart.er.hibernate;
 
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Session;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
@@ -64,6 +66,12 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	@Override
 	public List<SurveyEditorInput> getSurveys(Session s, SurveyFilter filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<SamplingUnitType> getSamplingUnitTypes(SurveyDesign sd, Session s) {
 		// TODO Auto-generated method stub
 		return null;
 	}

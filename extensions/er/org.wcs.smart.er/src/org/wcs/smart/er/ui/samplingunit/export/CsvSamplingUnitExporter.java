@@ -37,11 +37,11 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKTWriter;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * CSV File importer sampling unit.
