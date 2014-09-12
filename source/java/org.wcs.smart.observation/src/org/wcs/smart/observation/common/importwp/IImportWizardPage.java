@@ -19,48 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.importwp.gpsbabel;
+package org.wcs.smart.observation.common.importwp;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.eclipse.jface.wizard.WizardPage;
 
-import java.io.IOException;
-import java.util.HashMap;
+public interface IImportWizardPage {
 
-import org.junit.Test;
-import org.wcs.smart.observation.common.importwp.gpsbabel.GPSBabel;
-
-/**
- * Test for reading gps babel supported formats.
- * 
- * @author Emily
- * @since 1.0.0
- */
-public class GPSBabelTest {
-
-	@Test
-	public void testGetFormats()  {
-		HashMap<String, String> ops = null;
-		
-		try {
-			ops = GPSBabel.getDeviceOptions();
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-		assertNotNull(ops);
-		assertTrue(ops.size() > 0);
-		
-		boolean garmin = false;
-		for (String val : ops.keySet()){
-			if (val.toLowerCase().contains("garmin")){
-				garmin = true;
-				break;
-			}
-		}
-		if (!garmin){
-			fail("Garmin device not found");
-		}
-	}
-
+	/**
+	 * Called before the page is left for the
+	 * next page.
+	 * @param nextPage the next wizard page to display
+	 * @return <code>true</code> if can move to next page; <code>false</code> if not 
+	 */
+	public boolean beforeMoveNext(WizardPage nextPage);
+	
+	/**
+	 * 
+	 * @return <code>true</code> if page can be displayed,
+	 * <code>false</code> if it should remain on current page
+	 */
+	public boolean init();
 }

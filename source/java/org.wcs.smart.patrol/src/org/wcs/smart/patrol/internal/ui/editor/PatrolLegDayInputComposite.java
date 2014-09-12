@@ -96,6 +96,7 @@ import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -106,8 +107,7 @@ import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
-import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
+import org.wcs.smart.patrol.internal.ui.importwp.PatrolImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -807,7 +807,7 @@ public class PatrolLegDayInputComposite {
 	
 	private void showImportTrackWizard(){
 		//Show Create Patrol Wizard
-		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.TRACK);		
+		final PatrolImportGpsDataWizard wizard = new PatrolImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.TRACK);		
 
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
@@ -831,7 +831,7 @@ public class PatrolLegDayInputComposite {
 
 	private void showImportWaypointWizard(){
 		//Show Create Patrol Wizard
-		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.WAYPOINT);		
+		final PatrolImportGpsDataWizard wizard = new PatrolImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.WAYPOINT);		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
