@@ -25,6 +25,10 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
@@ -33,7 +37,9 @@ import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -49,9 +55,6 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class SamplingUnitDataSource extends AbstractDataStore{
 
-	public static final String TRANSECT_TYPE = "Transect"; //$NON-NLS-1$
-	public static final String PLOT_TYPE = "Plot"; //$NON-NLS-1$
-	
 	private SurveyDesign sd;
 	
 	private SimpleFeatureType tType;
@@ -86,18 +89,18 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	
 	@Override
 	public String[] getTypeNames() throws IOException {
-		return new String[]{TRANSECT_TYPE, PLOT_TYPE};
+		return new String[]{SamplingUnitType.PLOT.name(), SamplingUnitType.TRANSECT.name()};
 	}
 
 	@Override
 	public SimpleFeatureType getSchema(String typeName) throws IOException {
 		try{
-			if (typeName.equals(TRANSECT_TYPE)){
+			if (typeName.equals(SamplingUnitType.TRANSECT.name())){
 				if (tType == null){
 					tType = createType(typeName);
 				}
 				return tType;
-			}else if (typeName.equals(PLOT_TYPE)){
+			}else if (typeName.equals(SamplingUnitType.PLOT.name())){
 				if (pType == null){
 					pType = createType(typeName);
 				}
@@ -119,55 +122,73 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	 * Creates the survey feature type.
 	 */
 	private SimpleFeatureType createType(String typeName) throws SchemaException{
-		Session s = HibernateManager.openSession();
-		try{
-			SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
-			SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, //$NON-NLS-1$ 
-					getFeatureSchemaDef(lDesign, typeName)); 
-			return type;
-		}finally{
-			s.close();
-		}
+		
+		SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, //$NON-NLS-1$ 
+					getFeatureSchemaDef(typeName)); 
+		return type;
 	}
 	
 
-	private String getFeatureSchemaDef(SurveyDesign lDesign, String typeName){
+	private String getFeatureSchemaDef(final String typeName){
 	
-		StringBuilder sb = new StringBuilder();
-		sb.append("fid:String,id:String,buffer:Double"); //$NON-NLS-1$
-		HashSet<String> names = new HashSet<String>();
-		for (SurveyDesignSamplingUnitAttribute sua : lDesign.getSamplingUnitAttributes()){
+		final StringBuilder sb = new StringBuilder();
 		
-			sb.append(","); //$NON-NLS-1$
-			String name = sua.getSamplingUnitAttribute().getName();
-			name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
-			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		
-			String tempname = name;
-			int cnt = 1;
-			while(names.contains(tempname)){
-				tempname = name + "_" + cnt; //$NON-NLS-1$
-				cnt++;
+		Job j = new Job("build feature schema job"){ //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				try{
+					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+					
+					sb.append("fid:String,id:String,buffer:Double"); //$NON-NLS-1$
+					HashSet<String> names = new HashSet<String>();
+					for (SurveyDesignSamplingUnitAttribute sua : lDesign.getSamplingUnitAttributes()){
+					
+						sb.append(","); //$NON-NLS-1$
+						String name = sua.getSamplingUnitAttribute().getName();
+						name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
+						name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					
+						String tempname = name;
+						int cnt = 1;
+						while(names.contains(tempname)){
+							tempname = name + "_" + cnt; //$NON-NLS-1$
+							cnt++;
+						}
+					
+						sb.append(tempname);
+						sb.append(":"); //$NON-NLS-1$
+						if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+							sb.append("Double"); //$NON-NLS-1$
+						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+							sb.append("String"); //$NON-NLS-1$
+						}else{
+							//this is not supported by we can try string
+							sb.append("String"); //$NON-NLS-1$
+						}
+					}
+					sb.append(",geom:"); //$NON-NLS-1$
+					if (typeName.equals(SamplingUnitType.PLOT.name())){
+						sb.append("Point:srid=4326"); //$NON-NLS-1$
+					}else if (typeName.equals(SamplingUnitType.TRANSECT.name())){
+						sb.append("LineString:srid=4326"); //$NON-NLS-1$
+					}
+				}finally{
+					s.close();
+				}
+				return Status.OK_STATUS;
 			}
+			
+		};
 		
-			sb.append(tempname);
-			sb.append(":"); //$NON-NLS-1$
-			if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-				sb.append("Double"); //$NON-NLS-1$
-			}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-				sb.append("String"); //$NON-NLS-1$
-			}else{
-				//this is not supported by we can try string
-				sb.append("String"); //$NON-NLS-1$
-			}
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			EcologicalRecordsPlugIn.log("Error creating feature type for survey design sampling unit: " + sd.getKeyId() + "_" + typeName, e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		sb.append(",geom:"); //$NON-NLS-1$
-		if (typeName.equals(PLOT_TYPE)){
-			sb.append("Point:srid=4326"); //$NON-NLS-1$
-		}else if (typeName.equals(TRANSECT_TYPE)){
-			sb.append("LineString:srid=4326"); //$NON-NLS-1$
-		}
-		
 		return sb.toString();
 	}
 	

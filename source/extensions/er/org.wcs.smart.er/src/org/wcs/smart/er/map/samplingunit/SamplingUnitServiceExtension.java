@@ -73,7 +73,9 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 				protected IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
 					try{
-						sd[0] = (SurveyDesign) s.load(SurveyDesign.class, uuid);
+						SurveyDesign sds = (SurveyDesign) s.load(SurveyDesign.class, uuid);
+						sds.getName();
+						sd[0] = sds;
 					}finally{
 						s.close();
 					}
@@ -86,7 +88,9 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 				EcologicalRecordsPlugIn.displayLog(e.getMessage(), e);
 			}
 			
-        	return new SamplingUnitService(sd[0]);
+			if (sd[0] != null){
+				return new SamplingUnitService(sd[0]);
+			}
         }
         
 		return null;
@@ -115,13 +119,21 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 		int pos = sduuid.lastIndexOf('/');
 		if (pos < 0){
 			pos = 0;
+		}else{
+			pos++;
 		}
 		
-		sduuid = sduuid.substring(pos);
-		byte[] buuid = sduuid.getBytes();
-		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(SamplingUnitSourceFactory.SD_UUID.key, buuid);
-		return params;
+		try{
+			sduuid = sduuid.substring(pos);
+			byte[] buuid = SmartUtils.decodeHex(sduuid);
+			HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+			params.put(SamplingUnitSourceFactory.SD_UUID.key, buuid);
+			return params;
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+		}
+		return null;
+		
 	}
 
 	/**

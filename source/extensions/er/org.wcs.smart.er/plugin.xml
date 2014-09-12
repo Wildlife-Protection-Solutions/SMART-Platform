@@ -387,5 +387,13 @@
             class="org.wcs.smart.er.model.MissionAttributeListItem">
       </DeleteAdvisor>
    </extension>
+   <extension
+         point="net.refractions.udig.catalog.ServiceExtension">
+      <service
+            class="org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension"
+            id="org.wcs.smart.udig.er.catalog.SmartSamplingUnitService"
+            name="Survey Design Sampling Unit Service">
+      </service>
+   </extension>
 
 </plugin>

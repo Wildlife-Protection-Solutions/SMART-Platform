@@ -80,10 +80,9 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 		
 		String typeName = null;
 		if (type == SamplingUnitType.PLOT){
-			typeName = SamplingUnitDataSource.PLOT_TYPE;
-			 	
+			typeName = SamplingUnit.SamplingUnitType.PLOT.name();
 		}else{
-			typeName = SamplingUnitDataSource.TRANSECT_TYPE;
+			typeName = SamplingUnit.SamplingUnitType.TRANSECT.name();
 		}
 		
 		URL shpFileURL = URLUtils.fileToURL(f);
