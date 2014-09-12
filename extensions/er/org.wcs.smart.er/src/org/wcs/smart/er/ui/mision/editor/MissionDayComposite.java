@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -35,11 +36,14 @@ import java.util.Map.Entry;
 import net.refractions.udig.project.ui.ApplicationGIS;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -47,7 +51,6 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -59,6 +62,7 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -85,12 +89,16 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
+import org.wcs.smart.observation.common.importwp.GPSDataImport;
+import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -142,6 +150,8 @@ public class MissionDayComposite {
 	private TextCellEditor commentEditor;
 	private ObservationCellEditor observationEditor;
 	private SamplingUnitCellEditor samplingUnitEditor;
+	
+	private WizardDialog dialog = null;
 	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
 	
@@ -600,7 +610,27 @@ public class MissionDayComposite {
 	}
 	
 	protected void showImportWaypointWizard() {
-		// TODO Auto-generated method stub
+		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(GPSDataImport.ImportType.WAYPOINT);
+		wizard.setDateOption(editor.getDay());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
+		try {
+			pmd.run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.setTaskName("Loading Wizard");
+					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+					
+					if (dialog != null) {
+						monitor.setTaskName("Displaying Input Wizard");
+						dialog.open();
+					}
+				}
+			});
+		} catch (Exception ex) {
+			dialog = null;
+			EcologicalRecordsPlugIn.displayLog("Error launching import waypoint wizard." + ex.getLocalizedMessage(), ex);
+				}
 		
 	}
 
