@@ -29,10 +29,12 @@ import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -237,6 +239,17 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 				types.add(((SamplingUnit) x).getType());
 			}
 		}
+		
+		Long cnt = (Long)s.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
+			.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
+			.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+			.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
+			.add(Restrictions.eq("type", TrackType.RECON)) //$NON-NLS-1$
+			.setProjection(Projections.rowCount()).list().get(0);
+		if (cnt > 0){
+			types.add(SamplingUnitType.RECON);
+		}
+		
 		return types;
 	}
 }

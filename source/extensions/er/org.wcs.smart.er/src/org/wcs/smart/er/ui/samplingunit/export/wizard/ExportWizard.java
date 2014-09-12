@@ -113,6 +113,7 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 		
 		final boolean exportPlots = typePage.exportPlots();
 		final boolean exportTransects = typePage.exportTransect();
+		final boolean exportRecon = typePage.exportRecon();
 		try{
 			getContainer().run(true, false, new IRunnableWithProgress() {
 
@@ -133,6 +134,13 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 							options.put(ISamplingUnitExporter.SU_TYPE_KEY, SamplingUnitType.TRANSECT);
 							File transectFile = new File(dir, surveyDesign.getName() + "_" + "transects" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							exporter.exportFile(transectFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+						}else{
+							monitor.worked(1);
+						}
+						if (exportRecon){
+							options.put(ISamplingUnitExporter.SU_TYPE_KEY, SamplingUnitType.RECON);
+							File reconFile = new File(dir, surveyDesign.getName() + "_" + "reconnaissance" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							exporter.exportFile(reconFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
 						}else{
 							monitor.worked(1);
 						}

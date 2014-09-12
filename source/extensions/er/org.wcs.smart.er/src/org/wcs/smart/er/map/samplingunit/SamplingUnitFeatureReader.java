@@ -33,10 +33,12 @@ import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
@@ -52,7 +54,10 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 	private SimpleFeatureType ftype;
 	
 	private Session session;
-	private Iterator<SamplingUnit> iterator;
+	private Iterator<Object> iterator;
+	
+	private boolean isRecce;
+	
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -64,15 +69,26 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 		this.ftype = ftype;
 		this.session = HibernateManager.openSession();
 		
-		Criteria c = session.createCriteria(SamplingUnit.class)
-			.add(Restrictions.eq("surveyDesign", sd)); //$NON-NLS-1$
+		isRecce = false;
 		if (ftype.getTypeName().equals(SamplingUnitType.PLOT.name())){
-			c = c.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.PLOT)); //$NON-NLS-1$
-		}else{
-			c = c.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.TRANSECT)); //$NON-NLS-1$
+			Criteria c = session.createCriteria(SamplingUnit.class)
+					.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.PLOT)); //$NON-NLS-1$
+			iterator = c.list().iterator();
+		}else if (ftype.getTypeName().equals(SamplingUnitType.TRANSECT.name())){
+			Criteria c = session.createCriteria(SamplingUnit.class)
+					.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", SamplingUnit.SamplingUnitType.TRANSECT)); //$NON-NLS-1$
+			iterator = c.list().iterator();
+		}else if (ftype.getTypeName().equals(SamplingUnitType.RECON.name())){
+			Criteria c = session.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
+					.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
+					.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+					.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", TrackType.RECON)); //$NON-NLS-1$
+			iterator = c.list().iterator();		
+			isRecce = true;	
 		}
-		
-		iterator = c.list().iterator();
 	}
 	
 
@@ -107,13 +123,27 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 	 */
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
-		SamplingUnit su = iterator.next();
-		return createFeature(ftype, su);
+		if (isRecce){
+			MissionTrack su = (MissionTrack) iterator.next();
+			return createFeature(ftype, su);
+		}else{
+			SamplingUnit su = (SamplingUnit) iterator.next();
+			return createFeature(ftype, su);
+		}
 	}
 	
+	public static SimpleFeature createFeature(SimpleFeatureType ftype, MissionTrack su){
+		Object[] data = new Object[6];
+		data[0] = su.getId() + "." + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ 
+		data[1] = su.getId(); 
+		data[2] = su.getMission().getId();
+		data[3] = su.getMission().getSurvey().getId();
+		data[4] = su.getDate();
+		data[5] = su.getLineString();
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);	
+	}
 	
 	public static SimpleFeature createFeature(SimpleFeatureType ftype, SamplingUnit su){
-		
 		Object[] data = new Object[su.getSurveyDesign().getSamplingUnitAttributes().size() + 4];
 		data[0] = su.getId() + "." + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ 
 	
@@ -121,7 +151,6 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 		data[2] = su.getBuffer();
 		int i = 3;
 		for (SurveyDesignSamplingUnitAttribute att : su.getSurveyDesign().getSamplingUnitAttributes()){
-
 			for (SamplingUnitAttributeValue v : su.getAttributes()){
 				if (att.getSamplingUnitAttribute().equals(v.getSamplingUnitAttribute())){
 					if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
@@ -136,9 +165,7 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 			}
 			i++;
 		}
-		
 		data[i] = su.getGeometry();
-	
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);	
 	}
 }

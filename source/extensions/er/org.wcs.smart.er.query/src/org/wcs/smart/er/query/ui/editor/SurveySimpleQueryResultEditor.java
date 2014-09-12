@@ -86,9 +86,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 			getQueryResultsTable().clearColumns();
 			getQueryResultsTable().initQuery(getQueryInternal());
 		
-			if (!(getQuery() instanceof MissionQuery)){
-				addSuLayer.schedule();
-			}
+			addSuLayer.schedule();
 		}
 	};
 	
@@ -155,11 +153,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		super.init(site, input);
-		
-		IQueryType type = ((QueryEditorInput)input).getType();
-		if (!type.getKey().equals(MissionQueryType.KEY)){
-			addSuLayer.schedule();
-		}
+		addSuLayer.schedule();
 	}
 	
 	private Job addSuLayer = new Job(Messages.SurveySimpleQueryResultEditor_LoadSuJobName){

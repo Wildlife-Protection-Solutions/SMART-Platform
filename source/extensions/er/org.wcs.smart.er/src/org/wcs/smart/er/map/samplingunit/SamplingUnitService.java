@@ -143,6 +143,7 @@ public class SamplingUnitService extends IService {
 					//add two types
 					members.add(new SamplingUnitGeoResource(this, SamplingUnitType.PLOT.name()));
 					members.add(new SamplingUnitGeoResource(this, SamplingUnitType.TRANSECT.name()));
+					members.add(new SamplingUnitGeoResource(this, SamplingUnitType.RECON.name()));
 				}
 			}
 		}

@@ -47,15 +47,18 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
@@ -77,6 +80,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	private FiltersTreeNode surveyNode;
 	private SurveyDesign currentDesign;
 	
+	private IQueryType qType;
 	/*
 	 * listener for refreshing areas
 	 */
@@ -96,6 +100,11 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	};
 	
 	public FilterItemPanel() {
+		qType = QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY);
+	}
+	
+	public FilterItemPanel(IQueryType qType) {
+		this.qType = qType;
 	}
 
 	protected Composite createPanel(Composite parent) {
@@ -113,7 +122,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		});
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		surveyNode =  new FiltersTreeNode();
+		surveyNode =  new FiltersTreeNode(qType);
 		nodes.add(surveyNode);
 		
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));

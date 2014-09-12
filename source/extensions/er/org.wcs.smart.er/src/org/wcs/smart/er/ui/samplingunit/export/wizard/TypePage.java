@@ -10,11 +10,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 
 public class TypePage extends WizardPage implements SelectionListener{
 	
 	private Button opPlots;
 	private Button opTransects;
+	private Button opRecon;
 	
 	public TypePage(){
 		super("TYPE_PAGE"); //$NON-NLS-1$
@@ -31,13 +33,18 @@ public class TypePage extends WizardPage implements SelectionListener{
 		
 		opTransects = new Button(c, SWT.CHECK);
 		opTransects.setSelection(true);
-		opTransects.setText(Messages.TypePage_TransectsOption);
+		opTransects.setText(SamplingUnitType.TRANSECT.getGuiName());
 		opTransects.addSelectionListener(this);
 		
 		opPlots = new Button(c, SWT.CHECK);
 		opPlots.setSelection(true);
-		opPlots.setText(Messages.TypePage_PlotsOption);
+		opPlots.setText(SamplingUnitType.PLOT.getGuiName());
 		opPlots.addSelectionListener(this);
+		
+		opRecon = new Button(c, SWT.CHECK);
+		opRecon.setSelection(true);
+		opRecon.setText(SamplingUnitType.RECON.getGuiName());
+		opRecon.addSelectionListener(this);
 		
 		setControl(main);
 		
@@ -47,7 +54,7 @@ public class TypePage extends WizardPage implements SelectionListener{
 	
 	@Override
 	public IWizardPage getNextPage(){
-		if (!exportTransect() && !exportPlots()){
+		if (!exportTransect() && !exportPlots() && !exportRecon()){
 			return null;
 		}
 		return super.getNextPage();
@@ -61,6 +68,10 @@ public class TypePage extends WizardPage implements SelectionListener{
 		return opPlots.getSelection();
 	}
 
+	public boolean exportRecon(){
+		return opRecon.getSelection();
+	}
+	
 	@Override
 	public void widgetSelected(SelectionEvent e) {
 		getWizard().getContainer().updateButtons();

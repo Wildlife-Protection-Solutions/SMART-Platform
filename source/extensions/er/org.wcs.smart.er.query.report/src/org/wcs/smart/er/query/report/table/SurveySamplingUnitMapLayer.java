@@ -125,6 +125,9 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 			}else if (suType == SamplingUnit.SamplingUnitType.TRANSECT && 
 					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.SamplingUnitType.TRANSECT.name()))){
 				resources.add(i);
+			}else if (suType == SamplingUnit.SamplingUnitType.RECON && 
+					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.SamplingUnitType.RECON.name()))){
+				resources.add(i);
 			}
 		}
 		

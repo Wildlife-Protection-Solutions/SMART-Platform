@@ -72,7 +72,8 @@ public class SamplingUnit extends UuidItem {
 	 */
 	public enum SamplingUnitType{
 		TRANSECT ("Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
-		PLOT ("Plot", EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON);
+		PLOT ("Plot", EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON),
+		RECON ("Reconnaissance", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON);
 		
 		private String guiName;
 		private String imageKey;

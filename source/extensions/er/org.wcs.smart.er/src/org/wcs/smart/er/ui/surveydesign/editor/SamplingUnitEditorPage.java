@@ -74,11 +74,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.factory.CommonFactoryFinder;
 import org.hibernate.Session;
@@ -113,7 +110,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author Emily
  *
  */
-public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyperlinkListener {
+public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 
 	private FilterFactory ff = CommonFactoryFinder.getFilterFactory();
 	
@@ -121,10 +118,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 	
 	private TableViewer suTable;
 	private Form form;
-	private Hyperlink btnImport;
-	private Hyperlink btnExport;
-	private Hyperlink btnAttributes;
-	
+
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
 	private SamplingUnitService suService;
@@ -137,6 +131,10 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 	private ToolItem deleteItem;
 	private ToolItem clearItem;
 	private ToolItem zoomItem;
+	
+	private ToolItem importItem;
+	private ToolItem exportItem;
+	private ToolItem attributesItem;
 	
 	private SamplingUnitColumnLabelProvider sortColumn = null;
 	private int sortDirection = SWT.DOWN;
@@ -379,6 +377,40 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 			}
 		});
 		
+		new ToolItem(tb, SWT.SEPARATOR);
+		
+		importItem = new ToolItem(tb, SWT.PUSH );
+		importItem.setToolTipText(Messages.SamplingUnitEditorPage_importTooltip);
+		importItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SUIMPORT_ICON));
+		importItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				importSu();
+			}
+		});
+		
+		exportItem = new ToolItem(tb, SWT.PUSH );
+		exportItem.setToolTipText(Messages.SamplingUnitEditorPage_exportTooltip);
+		exportItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SUEXPORT_ICON));
+		exportItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				exportSu();
+			}
+		});
+		
+		new ToolItem(tb, SWT.SEPARATOR);
+		
+		attributesItem = new ToolItem(tb, SWT.PUSH );
+		attributesItem.setToolTipText(Messages.SamplingUnitEditorPage_attributesTooltip);
+		attributesItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ATTRIBUTE_ICON));
+		attributesItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				configureAttributes();
+			}
+		});
+		
 		toolkit.adapt(tb);
 		
 		createSuTable(suComp);
@@ -388,14 +420,6 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
 		((GridLayout)buttonComp.getLayout()).marginWidth = 0;
 		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
-		
-		btnImport = toolkit.createHyperlink(buttonComp, Messages.SamplingUnitEditorPage_importButton, SWT.PUSH);
-		btnExport = toolkit.createHyperlink(buttonComp, Messages.SamplingUnitEditorPage_exportButton, SWT.PUSH);
-		btnAttributes = toolkit.createHyperlink(buttonComp, Messages.SamplingUnitEditorPage_configAttributesButton, SWT.PUSH);
-		
-		btnAttributes.addHyperlinkListener(this);
-		btnImport.addHyperlinkListener(this);
-		btnExport.addHyperlinkListener(this);
 		
 		updateSelection();
 	}
@@ -679,45 +703,34 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart implements IHyper
 			}
 		};
 	}
+
+	private void configureAttributes(){
+		SurveyDesignSamplingUnitAttributeDialog d = new SurveyDesignSamplingUnitAttributeDialog(getSite().getShell(), editor.getSurveyDesign());
+		d.open();
+	}
 	
-	@Override
-	public void linkEntered(HyperlinkEvent e) {
-	}
-
-
-	@Override
-	public void linkExited(HyperlinkEvent e) {
-	}
-
-
-	@Override
-	public void linkActivated(HyperlinkEvent e) {
-		if (e.widget == btnAttributes){
-			SurveyDesignSamplingUnitAttributeDialog d = new SurveyDesignSamplingUnitAttributeDialog(getSite().getShell(), editor.getSurveyDesign());
-			d.open();
-		}else if (e.widget == btnImport){
-			
-			ImportOptionDialog dialog = new ImportOptionDialog(getSite().getShell());
-			if (dialog.open() != ImportOptionDialog.OK){
-				return;
-			}
-			
-			IWizard wizard = null;
-			if (dialog.importNew()){
-				wizard = new ImportWizard(editor.getSurveyDesign());
-			}else{
-				wizard = new ImportAttributeWizard(editor.getSurveyDesign());
-			}
-			WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
-			wd.open();
-			
-		}else if (e.widget == btnExport){
-			ExportWizard wizard = new ExportWizard(editor.getSurveyDesign());
-			WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
-			wd.open();
+	private void importSu(){
+		ImportOptionDialog dialog = new ImportOptionDialog(getSite().getShell());
+		if (dialog.open() != ImportOptionDialog.OK){
+			return;
 		}
+		
+		IWizard wizard = null;
+		if (dialog.importNew()){
+			wizard = new ImportWizard(editor.getSurveyDesign());
+		}else{
+			wizard = new ImportAttributeWizard(editor.getSurveyDesign());
+		}
+		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		wd.open();
 	}
-
+	
+	private void exportSu(){
+		ExportWizard wizard = new ExportWizard(editor.getSurveyDesign());
+		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		wd.open();
+	}
+	
 	private void addLayers(){
 		
 		if (loadDefaultLayers != null){

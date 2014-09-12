@@ -58,6 +58,8 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String CHANGE_STATE_ICON = "org.wcs.smart.er.su.state"; //$NON-NLS-1$
 	public static final String EDIT_SU_ICON = "org.wcs.smart.er.su.edit"; //$NON-NLS-1$
 	public static final String ZOOM_SU_ICON = "org.wcs.smart.er.su.zoom"; //$NON-NLS-1$
+	public static final String SUEXPORT_ICON = "org.wcs.smart.er.su.export"; //$NON-NLS-1$
+	public static final String SUIMPORT_ICON = "org.wcs.smart.er.su.import"; //$NON-NLS-1$
 	
 	public static final String MISSION_LEADER_ICON = "org.wcs.smart.er.mission.leader"; //$NON-NLS-1$
 	public static final String MISSION_MEMBER_ICON = "org.wcs.smart.er.mission.member"; //$NON-NLS-1$
@@ -117,6 +119,9 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	reg.put(CHANGE_STATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/change_state.png")); //$NON-NLS-1$
      	reg.put(EDIT_SU_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_edit.png")); //$NON-NLS-1$
      	reg.put(ZOOM_SU_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_zoom.png")); //$NON-NLS-1$
+     	
+     	reg.put(SUEXPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_export.png")); //$NON-NLS-1$
+     	reg.put(SUIMPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_import.png")); //$NON-NLS-1$
      	
      	reg.put(NEW_MISSION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_add.png")); //$NON-NLS-1$
      	reg.put(NEW_SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_add.png")); //$NON-NLS-1$
