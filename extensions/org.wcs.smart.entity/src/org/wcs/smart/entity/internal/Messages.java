@@ -125,6 +125,7 @@ public class Messages extends NLS {
 	public static String EntitySightingQuery_QueryName;
 	public static String EntitySightingQueryType_QueryTypeName;
 	public static String EntityTable_EntityTypeTableName;
+	public static String EntityTable_LongName;
 	public static String EntityTemplateCloner_AttributeNotFound;
 	public static String EntityTemplateCloner_ProgressCloning3;
 	public static String EntityTemplateCloner_ProgressCloningTypes;

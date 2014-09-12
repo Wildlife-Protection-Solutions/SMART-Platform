@@ -538,12 +538,6 @@
       </Exporter>
    </extension>
    <extension
-         point="org.wcs.smart.data.oda.smart.table.dynamic">
-      <DynamicTables
-            class="org.wcs.smart.entity.report.DynamicSmartTables">
-      </DynamicTables>
-   </extension>
-   <extension
          point="org.wcs.smart.report.birt.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.entity.report.FixedEntityMapLayer">
@@ -567,6 +561,18 @@
       <dbUpgrader
             upgrader="org.wcs.smart.entity.upgrade.EntityDatabaseUpgrader">
       </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.data.oda.smart.table">
+      <TableCategory
+            icon="images/icons/obj16/entitytype.png"
+            id="org.wcs.smart.entity.tables"
+            name="Entity Types">
+      </TableCategory>
+      <DynamicTable
+            category="org.wcs.smart.entity.tables"
+            class="org.wcs.smart.entity.report.DynamicSmartTables">
+      </DynamicTable>
    </extension>
 
 </plugin>
