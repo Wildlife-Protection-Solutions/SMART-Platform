@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.reporttable.internal.Messages;
@@ -86,7 +87,8 @@ public class CaTable extends SmartBirtTable {
 	 * Creates a new station table
 	 */
 	public CaTable() {
-		super(Messages.CaTable_TableName, "Conservation Areas"); //$NON-NLS-1$
+		super(Messages.CaTable_TableName, "Conservation Areas", //$NON-NLS-1$
+			SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON));
 		this.activeColumns = Column.values();
 	}
 
@@ -158,5 +160,4 @@ public class CaTable extends SmartBirtTable {
 	public void closeQuery() {
 
 	}
-
 }

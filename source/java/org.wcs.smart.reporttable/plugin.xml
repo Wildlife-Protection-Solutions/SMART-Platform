@@ -3,26 +3,40 @@
 <plugin>
    <extension
          point="org.wcs.smart.data.oda.smart.table">
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.ca.EmployeeTable">
-      </class>
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.ca.AgencyRankTable">
-      </class>
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.ca.StationTable"></class>
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.patrol.PatrolMandateTable">
-      </class>
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.patrol.PatrolTransportTable">
-      </class>
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.patrol.TeamTable">
-      </class>
-      <class
-            SmartBirtTable="org.wcs.smart.reporttable.ca.CaTable">
-      </class>
+      <TableCategory
+            category="org.wcs.smart."
+            icon="images/icons/obj16/smart16.gif"
+            id="org.wcs.smart.ca.tables"
+            name="Conservation Area Tables">
+      </TableCategory>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.ca.EmployeeTable">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.ca.AgencyRankTable">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.ca.StationTable">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.patrol.PatrolMandateTable">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.patrol.PatrolTransportTable">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.patrol.TeamTable">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.ca.tables"
+            class="org.wcs.smart.reporttable.ca.CaTable">
+      </StaticTable>
    </extension>
 
 </plugin>

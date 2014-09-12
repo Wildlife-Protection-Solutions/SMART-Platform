@@ -3,7 +3,6 @@
 <plugin>
    <extension-point id="org.wcs.smart.data.oda.smart.table" name="smartbirttable" schema="schema/org.wcs.smart.data.oda.smart.table.exsd"/>
    <extension-point id="org.wcs.smart.report.birt.query.queryDataset" name="QueryType Layer Extension Point" schema="schema/org.wcs.smart.report.birt.query.queryDataset.exsd"/>
-   <extension-point id="org.wcs.smart.data.oda.smart.table.dynamic" name="Dynamic SMART Tables" schema="schema/org.wcs.smart.data.oda.smart.table.dynamic.exsd"/>
 
    <extension
          id="org.wcs.smart.data.oda.smart"

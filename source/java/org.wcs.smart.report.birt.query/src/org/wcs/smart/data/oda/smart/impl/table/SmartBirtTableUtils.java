@@ -23,12 +23,16 @@ package org.wcs.smart.data.oda.smart.impl.table;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.data.oda.smart.internal.Messages;
-import org.wcs.smart.report.birt.query.Activator;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * Utilities for reading extension point information
@@ -46,7 +50,8 @@ public class SmartBirtTableUtils {
 	 */
 	public static final String REPORT_MAPPING_ID = "org.wcs.smart.data.oda.smart.table"; //$NON-NLS-1$
 	
-	private List<IDynamicSmartTables> cachedDynamics = null;
+	private Map<TableCategory, List<SmartBirtTable>> cachedStatic = null;
+	private Map<TableCategory, IDynamicSmartTables> cachedDynamic = null;
 	
 	public static SmartBirtTableUtils getInstance(){
 		if (instance == null){
@@ -58,19 +63,18 @@ public class SmartBirtTableUtils {
 	 * @return list of all SmartBirtTable extension point implementations
 	 * @throws Exception
 	 */
-	public List<SmartBirtTable> getBirtTables() throws Exception{
-		List<SmartBirtTable> items = new ArrayList<SmartBirtTable>();
-		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_MAPPING_ID);
-		for (int i = 0; i < config.length; i ++){
-			items.add((SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable")); //$NON-NLS-1$
+	public Map<TableCategory, List<SmartBirtTable>> getBirtTables() throws Exception{
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyMap();
+		if (cachedDynamic == null){
+			populateCache();
 		}
 		
-		for (IDynamicSmartTables dynamic : getDynamicExtensions()){
-			for(SmartBirtTable t : dynamic.getTables()){
-				items.add(t);
-			}
+		HashMap<TableCategory, List<SmartBirtTable>> items = new HashMap<TableCategory, List<SmartBirtTable>>();
+		for (Entry<TableCategory, IDynamicSmartTables> e : cachedDynamic.entrySet()){
+			items.put(e.getKey(), e.getValue().getTables());
 		}
+		items.putAll(cachedStatic);
+		
 		return items;
 	}
 	
@@ -82,44 +86,69 @@ public class SmartBirtTableUtils {
 	 * @throws Exception
 	 */
 	public SmartBirtTable findTable(String tableName) throws Exception{
-		if (Platform.getExtensionRegistry() == null) return null;
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_MAPPING_ID);
-		for (int i = 0; i < config.length; i ++){
-			
-			SmartBirtTable table = (SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable"); //$NON-NLS-1$
-			if (table.getTableKey().equals(tableName)){
-				return table;
-			}
+		if (cachedDynamic == null){
+			populateCache();
 		}
-		for (IDynamicSmartTables dynamic : getDynamicExtensions()){
-			for(SmartBirtTable t : dynamic.getTables()){
-				if (t.getTableKey().equals(tableName)){
-					return t;
+		
+		for (List<SmartBirtTable> values : cachedStatic.values()){
+			for (SmartBirtTable bt : values){
+				if (bt.getTableKey().equals(tableName)){
+					return bt;
 				}
 			}
 		}
-		
+		for (IDynamicSmartTables dt : cachedDynamic.values()){
+			for (SmartBirtTable bt : dt.getTables()){
+				if (bt.getTableKey().equals(tableName)){
+					return bt;
+				}
+			}
+		}
 		return null;
 		
 	}
 	
-	private List<IDynamicSmartTables> getDynamicExtensions(){
-		if (cachedDynamics == null){
-			if (Platform.getExtensionRegistry() == null) return null;
-			
-			try{
-				cachedDynamics = new ArrayList<IDynamicSmartTables>();
-				IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDynamicSmartTables.EXTENSION_ID);
-				for (int i = 0; i < config.length; i ++){
-					IDynamicSmartTables table = (IDynamicSmartTables)config[i].createExecutableExtension("class"); //$NON-NLS-1$
-					cachedDynamics.add(table);
+	private void populateCache() throws CoreException{
+		// read categories first
+		HashMap<String, TableCategory> categories = new HashMap<String, TableCategory>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(REPORT_MAPPING_ID);
+		for (int i = 0; i < config.length; i++) {
+			if (config[i].getName().equals("TableCategory")) { //$NON-NLS-1$
+				String id = config[i].getAttribute("id"); //$NON-NLS-1$
+				String name = config[i].getAttribute("name"); //$NON-NLS-1$
+				String icon = config[i].getAttribute("icon"); //$NON-NLS-1$
+
+				ImageDescriptor idd  = null;
+				if (icon != null){
+					idd = AbstractUIPlugin.imageDescriptorFromPlugin(config[i].getNamespaceIdentifier(), icon);
 				}
-			}catch (Exception ex){
-				Activator.displayLog(Messages.SmartBirtTableUtils_ErrorReadingTables, ex);
+				TableCategory tc = new TableCategory(id, name, idd);
+				categories.put(id, tc);
 			}
 		}
-		return cachedDynamics;
-		
+
+		// read static and dynamic tables
+		cachedDynamic = new HashMap<TableCategory, IDynamicSmartTables>();
+		cachedStatic = new HashMap<TableCategory, List<SmartBirtTable>>();
+		for (int i = 0; i < config.length; i++) {
+			if (config[i].getName().equals("StaticTable")) { //$NON-NLS-1$
+				TableCategory tc = categories.get(config[i].getAttribute("category")); //$NON-NLS-1$
+				SmartBirtTable table = (SmartBirtTable) config[i].createExecutableExtension("class"); //$NON-NLS-1$
+
+				List<SmartBirtTable> tt = (List<SmartBirtTable>) cachedStatic.get(tc);
+				if (tt == null) {
+					tt = new ArrayList<SmartBirtTable>();
+					cachedStatic.put(tc, tt);
+				}
+				tt.add(table);
+
+			} else if (config[i].getName().equals("DynamicTable")) { //$NON-NLS-1$
+				TableCategory tc = categories.get(config[i].getAttribute("category")); //$NON-NLS-1$
+				IDynamicSmartTables dtables = (IDynamicSmartTables) config[i].createExecutableExtension("class"); //$NON-NLS-1$
+				cachedDynamic.put(tc, dtables);
+			}
+		}
 	}
 	
 }

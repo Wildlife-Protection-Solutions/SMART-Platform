@@ -3,6 +3,7 @@ package org.wcs.smart.report.birt.query;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -15,6 +16,8 @@ public class Activator extends  AbstractUIPlugin{
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.report.birt.query"; //$NON-NLS-1$
 
+	public static final String TABLE_ICON = "org.wcs.smart.report.birt.query.table"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static Activator plugin;
 	
@@ -91,5 +94,11 @@ public class Activator extends  AbstractUIPlugin{
 			}
 		});
 
+	}
+
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
+		reg.put(TABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "icons/obj16/table.png")); //$NON-NLS-1$
 	}
 }

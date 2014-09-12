@@ -24,11 +24,14 @@ package org.wcs.smart.reporttable.patrol;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.reporttable.internal.Messages;
 
@@ -94,7 +97,8 @@ public class TeamTable  extends SmartBirtTable {
 	 * Creates a new patrol team table
 	 */
 	public TeamTable() {
-		super(Messages.TeamTable_TableName, "Patrol Team"); //$NON-NLS-1$
+		super(Messages.TeamTable_TableName, "Patrol Team",  //$NON-NLS-1$
+				SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON)); 
 		if (SmartDB.isMultipleAnalysis()){
 			this.activeColumns = Column.values();
 		}else{
@@ -160,8 +164,6 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void openQuery() {
-//		session = HibernateManager.openSession();
-//		session.beginTransaction();
 	}
 
 	/**
@@ -169,11 +171,7 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@Override
 	public void closeQuery() {
-//		session.getTransaction().commit();
-//		session.close();
-
 	}
-
 }
 
 
