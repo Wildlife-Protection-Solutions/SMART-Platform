@@ -29,6 +29,30 @@
       <MapLayer
             maplayer="org.wcs.smart.er.query.report.map.QueryMapLayer">
       </MapLayer>
+      <MapLayer
+            maplayer="org.wcs.smart.er.query.report.table.SurveySamplingUnitMapLayer">
+      </MapLayer>
+   </extension>
+   <extension
+         point="org.wcs.smart.data.oda.smart.table">
+      <TableCategory
+            icon="images/icons/obj16/sampling_unit.png"
+            id="org.wcs.smart.er.query.report.table.samplingunit"
+            name="Survey Sampling Units">
+      </TableCategory>
+      <TableCategory
+            icon="images/icons/obj16/survey_design.png"
+            id="org.wcs.smart.er.query.report.table.properties"
+            name="Survey Properties">
+      </TableCategory>
+      <DynamicTable
+            category="org.wcs.smart.er.query.report.table.properties"
+            class="org.wcs.smart.er.query.report.table.SurveyPropertyTables">
+      </DynamicTable>
+      <DynamicTable
+            category="org.wcs.smart.er.query.report.table.samplingunit"
+            class="org.wcs.smart.er.query.report.table.SurveySamplingUnitTables">
+      </DynamicTable>
    </extension>
 
 </plugin>
