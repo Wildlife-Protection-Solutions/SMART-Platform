@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.ui.editor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
@@ -39,8 +40,12 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.map.udig.QueryService;
@@ -53,6 +58,7 @@ import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
@@ -172,14 +178,24 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 					}
 					disposeService(monitor);
 					service = new SamplingUnitService(sd);
+					Session s = HibernateManager.openSession();
 					try{
 				    	@SuppressWarnings("unchecked")
 						List<IGeoResource> layers = (List<IGeoResource>) service.resources(null);
-				    	AddLayersCommand command = new AddLayersCommand(layers);
+				    	List<IGeoResource> layersToAdd = new ArrayList<IGeoResource>();
+				    	Set<SamplingUnit.SamplingUnitType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, s);
+				    	for(IGeoResource layer : layers){
+				    		if (types.contains( SamplingUnit.SamplingUnitType.valueOf(  ((SamplingUnitGeoResource) layer  ).getDataType()  ))){
+				    			layersToAdd.add(layer);
+				    		}
+				    	}
+				    	AddLayersCommand command = new AddLayersCommand(layersToAdd);
 				    	if (getMap() == null) return Status.CANCEL_STATUS;
 			    		getMap().sendCommandASync(command);
 					}catch (Exception ex){
 						EcologicalRecordsPlugIn.log("Error adding survey design sampling unit layers.", ex); //$NON-NLS-1$
+					}finally{
+						s.close();
 					}
 					return Status.OK_STATUS;
 				}
