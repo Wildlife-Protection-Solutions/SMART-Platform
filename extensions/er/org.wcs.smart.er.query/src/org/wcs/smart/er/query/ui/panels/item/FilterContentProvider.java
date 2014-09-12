@@ -50,10 +50,12 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNode;
+import org.wcs.smart.query.model.IQueryType;
 
 /**
  * Content provider for the survey filter items tree node.
@@ -78,6 +80,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 	private Viewer viewer;
 	
 	private IItemTreeNode rootNode;
+	
+	private IQueryType qType;
 	
 	@SuppressWarnings("unchecked")
 	private Job loadMissionPropertiesJob = new Job(Messages.SurveyItemContentProvider_loadMissionJobName){
@@ -232,7 +236,9 @@ public class FilterContentProvider implements ITreeContentProvider{
 		SAMPLING_UNIT_ATTRIBUTE(Messages.FilterContentProvider_SamplingUnitAttributesLabel),
 		OBSERVER(Messages.FilterContentProvider_ObserverLabel),
 		MISSION_MEMBER(Messages.FilterContentProvider_MissionMemberNode),
-		MISSION_LEADER(Messages.FilterContentProvider_MissionLeaderNode);
+		MISSION_LEADER(Messages.FilterContentProvider_MissionLeaderNode),
+		TRACKTYPE(Messages.FilterContentProvider_TrackTypeNode);
+		
 		
 		public String guiName;
 		
@@ -241,6 +247,11 @@ public class FilterContentProvider implements ITreeContentProvider{
 		}
 				
 	};
+	
+	public FilterContentProvider(IQueryType type){
+		this.qType = type;
+	}
+	
 	
 	@Override
 	public void dispose() {
@@ -268,10 +279,38 @@ public class FilterContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (this.design != null){
-			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.SURVEY_MISSION, Node.MISSION_PROP, Node.SAMPLING_UNITS, Node.SAMPLING_UNIT_ATTRIBUTE, Node.OBSERVER};
+		if (qType.getKey().equals(MissionTrackQueryType.KEY)){
+			if (this.design != null){
+				return new Object[]{
+						Node.SURVEY_MISSION, 
+						Node.TRACKTYPE, 
+						Node.SAMPLING_UNITS, 
+						Node.SAMPLING_UNIT_ATTRIBUTE, 
+						Node.MISSION_PROP};
+			}else{
+				return new Object[]{
+						Node.TRACKTYPE, 
+						Node.SAMPLING_UNIT_ATTRIBUTE, 
+						Node.MISSION_PROP};
+			}
 		}else{
-			return new Object[]{Node.SURVEY_ID, Node.MISSION_ID, Node.MISSION_PROP, Node.SAMPLING_UNIT_ATTRIBUTE, Node.OBSERVER};
+			if (this.design != null){
+				return new Object[]{
+						Node.SURVEY_ID, 
+						Node.MISSION_ID, 
+						Node.SURVEY_MISSION, 
+						Node.MISSION_PROP, 
+						Node.SAMPLING_UNITS, 
+						Node.SAMPLING_UNIT_ATTRIBUTE, 
+						Node.OBSERVER};
+			}else{
+				return new Object[]{
+						Node.SURVEY_ID, 
+						Node.MISSION_ID, 
+						Node.MISSION_PROP, 
+						Node.SAMPLING_UNIT_ATTRIBUTE, 
+						Node.OBSERVER};
+			}
 		}
 	}
 
@@ -352,6 +391,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 				
 				//get all mission attributes in the system
 			}
+		}else if (parentElement == Node.TRACKTYPE){
+			return MissionTrack.TrackType.values();
 		}else if (parentElement instanceof Survey){
 			return ((Survey) parentElement).getMissions().toArray();
 		}
@@ -366,6 +407,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 				return Node.MISSION_PROP;
 			}
 			return rootNode;
+		}else if (element instanceof MissionTrack.TrackType){
+			return Node.TRACKTYPE;
 		}else if (element instanceof MissionProperty){
 			return Node.MISSION_PROP;
 		}
@@ -378,6 +421,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 				element == Node.MISSION_PROP ||
 				element == Node.SAMPLING_UNITS ||
 				element == Node.SAMPLING_UNIT_ATTRIBUTE || 
+				element == Node.TRACKTYPE ||
 				element instanceof Survey){
 			return true;
 		}

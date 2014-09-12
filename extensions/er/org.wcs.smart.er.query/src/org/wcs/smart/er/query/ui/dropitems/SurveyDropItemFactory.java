@@ -55,6 +55,7 @@ import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.FilterItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.GriddedValueItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.GroupByValueItemPanel;
+import org.wcs.smart.er.query.ui.panels.item.MissionTrackFilterItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.SurveyValuesTreeNode;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -116,6 +117,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}else if (source instanceof Area){
 			if (queryItemPanelId.equals(FilterItemPanel.ID)){
 				items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+			}else if (queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
+				items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 				
@@ -161,14 +164,16 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createMissionUuidIdDropItem((Mission)source)};
 			
 		}else if (source instanceof MissionAttribute){
-			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
+					queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
 				items = new DropItem[]{createMissionAttributeDropItem((MissionAttribute)source)};
 			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createMissionAttributeGroupByDropItem((MissionAttribute)source)};
 			}
 			
 		}else if (source instanceof MissionProperty){
-			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
+					queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
 				items = new DropItem[]{createMissionAttributeDropItem(((MissionProperty)source).getAttribute())};
 			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createMissionAttributeGroupByDropItem(((MissionProperty)source).getAttribute())};
@@ -182,13 +187,15 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}else if (source == SurveyGroupByContentProvider.Node.OBSERVER){
 			items = new DropItem[]{createObserverGroupByDropItem()};
 		}else if (source instanceof SamplingUnit){
-			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
+					queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
 				items = new DropItem[]{createSamplingUnitDropItem((SamplingUnit)source)};
 			}
 		}else if (source instanceof SamplingUnitAttribute){
 			items = new DropItem[]{createSamplingUnitAttributeDropItem((SamplingUnitAttribute) source)};
 		}else if (source instanceof MissionTrack){
-			if (queryItemPanelId.equals(FilterItemPanel.ID)){
+			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
+					queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
 				items = new DropItem[]{createSamplingUnitDropItem((MissionTrack)source)};
 			}
 			

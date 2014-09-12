@@ -57,6 +57,9 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
 		MISSION_LEADER(Messages.SurveyQueryColumn_MissionLeaderLabel, ColumnType.STRING, "mission:leader"), //$NON-NLS-1$
 		
+		MISSION_TRACKTYPE("Track Type", ColumnType.STRING, "mission:tracktype"), //$NON-NLS-1$
+		MISSION_TRACKDATE("Track Date", ColumnType.STRING, "mission:trackdate"), //$NON-NLS-1$
+		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
 		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.NUMBER, "su:buffer"),  //$NON-NLS-1$
 		

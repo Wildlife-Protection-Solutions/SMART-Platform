@@ -40,10 +40,13 @@ public class Messages extends NLS {
 	public static String ConfigurableModelComposite_Description;
 	public static String ConfigurableModelComposite_Title;
 	public static String CsvSamplingUnitExporter_bufferColumnName;
+	public static String CsvSamplingUnitExporter_dateColumnName;
 	public static String CsvSamplingUnitExporter_idColumnName;
 	public static String CsvSamplingUnitExporter_lengthColumnName;
+	public static String CsvSamplingUnitExporter_missionIdColumnName;
 	public static String CsvSamplingUnitExporter_Progress;
 	public static String CsvSamplingUnitExporter_stateColumnName;
+	public static String CsvSamplingUnitExporter_surveyIdColumnName;
 	public static String CsvSamplingUnitExporter_SuTypeError;
 	public static String CsvSamplingUnitExporter_typeColumnName;
 	public static String CsvSamplingUnitExporter_wktColumnName;
@@ -217,6 +220,7 @@ public class Messages extends NLS {
 	public static String SamplingUnitAttributeDialog_Title;
 	public static String SamplingUnitDataSource_TypeNotSupported;
 	public static String SamplingUnitEditorPage_addLayerJobName;
+	public static String SamplingUnitEditorPage_attributesTooltip;
 	public static String SamplingUnitEditorPage_BufferColumnName;
 	public static String SamplingUnitEditorPage_clearTooltip;
 	public static String SamplingUnitEditorPage_configAttributesButton;
@@ -232,9 +236,11 @@ public class Messages extends NLS {
 	public static String SamplingUnitEditorPage_ErrorDeletingSu;
 	public static String SamplingUnitEditorPage_ErrorDeletingSu2;
 	public static String SamplingUnitEditorPage_exportButton;
+	public static String SamplingUnitEditorPage_exportTooltip;
 	public static String SamplingUnitEditorPage_FormName;
 	public static String SamplingUnitEditorPage_IdColumnName;
 	public static String SamplingUnitEditorPage_importButton;
+	public static String SamplingUnitEditorPage_importTooltip;
 	public static String SamplingUnitEditorPage_LengthColumnName;
 	public static String SamplingUnitEditorPage_loadingValuesJobName;
 	public static String SamplingUnitEditorPage_RefreshJobName;

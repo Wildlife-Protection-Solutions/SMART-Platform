@@ -56,6 +56,14 @@
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
          </DefinitionPanel>
       </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.MissionTrackQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack">
+         </DefinitionPanel>
+      </QueryType>
    </extension>
    <extension
          point="org.wcs.smart.query.queryItemPanel">
@@ -70,6 +78,10 @@
       <QueryItemPanel
             id="org.wcs.smart.er.query.survey.summaryItemPanel"
             panel="org.wcs.smart.er.query.ui.panels.item.GroupByValueItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack"
+            panel="org.wcs.smart.er.query.ui.panels.item.MissionTrackFilterItemPanel">
       </QueryItemPanel>
    </extension>
    <extension
@@ -158,6 +170,16 @@
                      value="surveygrid">
                </parameter>
             </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  label="New Mission Track Query"
+                  style="push"
+                  tooltip="queries mission tracks">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveymissiontrack">
+               </parameter>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -187,6 +209,9 @@
       </class>
       <class
             class="org.wcs.smart.er.query.model.MissionQuery">
+      </class>
+      <class
+            class="org.wcs.smart.er.query.model.MissionTrackQuery">
       </class>
    </extension>
    <extension

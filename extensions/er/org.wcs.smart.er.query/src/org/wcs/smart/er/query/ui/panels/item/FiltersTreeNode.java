@@ -38,6 +38,7 @@ import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider.Node;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
+import org.wcs.smart.query.model.IQueryType;
 
 /**
  * Tree node for the filter list that represents the 
@@ -53,13 +54,14 @@ public class FiltersTreeNode implements IItemTreeNode{
 	private ITreeContentProvider provider;
 	private LabelProvider labelprovider;
 		
+	private IQueryType qType;
 	
 	/**
 	 * type of node
 	 * @param type
 	 */
-	public FiltersTreeNode(){
-		provider = new FilterContentProvider();
+	public FiltersTreeNode(IQueryType qType){
+		provider = new FilterContentProvider(qType);
 		labelprovider = new LabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -79,6 +81,8 @@ public class FiltersTreeNode implements IItemTreeNode{
 					return ((MissionTrack) element).getId();
 				}else if (element instanceof SamplingUnitAttribute){
 					return ((SamplingUnitAttribute) element).getName();
+				}else if (element instanceof MissionTrack.TrackType){
+					return ((MissionTrack.TrackType)element).getGuiName();
 				}
 				return super.getText(element);
 			}

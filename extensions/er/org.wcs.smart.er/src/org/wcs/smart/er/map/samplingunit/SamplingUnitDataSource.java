@@ -59,6 +59,7 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	
 	private SimpleFeatureType tType;
 	private SimpleFeatureType pType;
+	private SimpleFeatureType rType;
 	
 	/**
 	 * Creates a new data source for the given survey design.
@@ -89,7 +90,10 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	
 	@Override
 	public String[] getTypeNames() throws IOException {
-		return new String[]{SamplingUnitType.PLOT.name(), SamplingUnitType.TRANSECT.name()};
+		return new String[]{
+				SamplingUnitType.PLOT.name(), 
+				SamplingUnitType.TRANSECT.name(),
+				SamplingUnitType.RECON.name()};
 	}
 
 	@Override
@@ -105,6 +109,11 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 					pType = createType(typeName);
 				}
 				return pType;
+			}else if (typeName.equals(SamplingUnitType.RECON.name())){
+				if (rType == null){
+					rType = createType(typeName);
+				}
+				return rType;
 			}
 		}catch (SchemaException ex){
 			throw new IOException(ex);
@@ -131,7 +140,18 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 
 	private String getFeatureSchemaDef(final String typeName){
 	
+		
 		final StringBuilder sb = new StringBuilder();
+		
+		if (typeName.equals(SamplingUnitType.RECON.name())){
+			sb.append("fid:String,"); //$NON-NLS-1$
+			sb.append("id:String,"); //$NON-NLS-1$
+			sb.append("mission_id:String,"); //$NON-NLS-1$
+			sb.append("survey_id:String,");  //$NON-NLS-1$
+			sb.append("date:Date,"); //$NON-NLS-1$
+			sb.append("geom:LineString:srid=4326"); //$NON-NLS-1$
+			return sb.toString();
+		}
 		
 		Job j = new Job("build feature schema job"){ //$NON-NLS-1$
 

@@ -23,16 +23,20 @@ package org.wcs.smart.er.ui.samplingunit.export;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
@@ -68,33 +72,138 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			throw new Exception(Messages.CsvSamplingUnitExporter_SuTypeError);
 		}
 		
-		List<SamplingUnit> units = session.createCriteria(SamplingUnit.class)
-				.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
-				.list();
-		if (units.size() == 0){
+		Set<SamplingUnitType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, session);
+		if (!types.contains(type)){
 			//nothing to export
 			return;
 		}
-		
-		WKTWriter wktWriter = new WKTWriter();
-		
+				
 		Character delimiter = (Character) options.get(DELIMETER_KEY);
 		if (delimiter == null){
 			delimiter = ',';
 		}
 		
-		int size = 6;
-		if (type != SamplingUnitType.PLOT){
-			size +=4;
-		}
-		
 		sd = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
-		
-		size += sd.getSamplingUnitAttributes().size();
-		
 		CSVWriter writer = new CSVWriter(new FileWriter(f), delimiter);
 		try{
+			if (type == SamplingUnitType.PLOT ||
+					type == SamplingUnitType.TRANSECT){
+				exportPlotsAndTransects(type, writer, sd, session, monitor);
+			}else if (type == SamplingUnitType.RECON){
+				exportRecon(type, writer, sd, session, monitor);
+			}
+		}finally{
+			writer.close();	
+			monitor.done();
+		}
+	}
+	
+	private void exportPlotsAndTransects(SamplingUnitType type, CSVWriter writer, 
+			SurveyDesign sd, Session session, IProgressMonitor monitor){
+		
+		WKTWriter wktWriter = new WKTWriter();
+		
+		//write header
+		String[] headers = getHeaders(type, sd);
+		writer.writeNext(headers);
+
+		@SuppressWarnings("unchecked")
+		List<SamplingUnit> units = session.createCriteria(SamplingUnit.class)
+				.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
+				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
+				.list();
+		
+		monitor.beginTask(Messages.CsvSamplingUnitExporter_Progress, units.size());
+		int index = 0;
+		for (SamplingUnit unit : units){
+			index = 0;
+			String[] data = new String[headers.length];
+				
+			data[index++] = unit.getId();
+			data[index++] = unit.getType().getGuiName();
+			data[index++] = unit.getState().getGuiName();
+			data[index++] = unit.getBuffer() == null ? "" : unit.getBuffer().toString(); //$NON-NLS-1$
+			if (type != SamplingUnitType.PLOT){
+				Double l = unit.getGeometryLengthKm();
+				data[index++] = l == null ? "" : l.toString(); //$NON-NLS-1$
+				LineString ls = (LineString)unit.getGeometry();
+				data[index++] = String.valueOf(ls.getCoordinateN(0).x);
+				data[index++] = String.valueOf(ls.getCoordinateN(0).y);
+				data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
+				data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
+			
+				data[index++] = wktWriter.write(unit.getGeometry());
+			}else{
+				Point p = (Point)unit.getGeometry();
+				data[index++] = String.valueOf(p.getCoordinate().x);
+				data[index++] = String.valueOf(p.getCoordinate().y);
+			}
+			
+			for (SurveyDesignSamplingUnitAttribute a : sd.getSamplingUnitAttributes()){
+				String value = null;
+				for (SamplingUnitAttributeValue v : unit.getAttributes()){
+					if (v.getSamplingUnitAttribute().equals(a.getSamplingUnitAttribute())){
+						if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+							value = v.getStringValue();
+						}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+							value = v.getNumberValue().toString();
+						}
+					}
+				}
+				data[index++] = value;
+			}
+			writer.writeNext(data);
+			monitor.worked(1);
+		}
+	}
+	
+	private void exportRecon(SamplingUnitType type, CSVWriter writer, 
+			SurveyDesign sd, Session session, IProgressMonitor monitor){
+		WKTWriter wktWriter = new WKTWriter();
+		
+		//write header
+		String[] headers = getHeaders(type, sd);
+		writer.writeNext(headers);
+
+		@SuppressWarnings("unchecked")
+		List<MissionTrack> units = session.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
+				.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
+				.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
+				.add(Restrictions.eq("type", MissionTrack.TrackType.RECON)) //$NON-NLS-1$
+				.list();
+		
+		monitor.beginTask(Messages.CsvSamplingUnitExporter_Progress, units.size());
+		int index = 0;
+		for (MissionTrack unit : units){
+			index = 0;
+			String[] data = new String[headers.length];
+				
+			data[index++] = unit.getId();
+			data[index++] = unit.getMission().getId();
+			data[index++] = unit.getMission().getSurvey().getId();
+			data[index++] = DateFormat.getDateInstance().format(unit.getDate());
+			
+			LineString ls = (LineString)unit.getLineString();
+			data[index++] = String.valueOf(ls.getCoordinateN(0).x);
+			data[index++] = String.valueOf(ls.getCoordinateN(0).y);
+			data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
+			data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
+			data[index++] = wktWriter.write(unit.getLineString());
+			writer.writeNext(data);
+		}
+	}
+
+	private String[] getHeaders(SamplingUnitType type, SurveyDesign sd){
+		if (type == SamplingUnitType.TRANSECT ||
+				type == SamplingUnitType.PLOT){
+			
+			int size = 6;
+			if (type != SamplingUnitType.PLOT){
+				size +=4;
+			}
+			size += sd.getSamplingUnitAttributes().size();
+			
 			//write header
 			String[] data = new String[size];
 			int index = 0;
@@ -116,56 +225,20 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			for (SurveyDesignSamplingUnitAttribute a : sd.getSamplingUnitAttributes()){
 				data[index++] = a.getSamplingUnitAttribute().getName();
 			}
-			writer.writeNext(data);
-		
-
-		
-			monitor.beginTask(Messages.CsvSamplingUnitExporter_Progress, units.size());
-		
-			for (SamplingUnit unit : units){
-				index = 0;
-				data = new String[size];
-				
-				data[index++] = unit.getId();
-				data[index++] = unit.getType().getGuiName();
-				data[index++] = unit.getState().getGuiName();
-				data[index++] = unit.getBuffer() == null ? "" : unit.getBuffer().toString(); //$NON-NLS-1$
-				if (type != SamplingUnitType.PLOT){
-					Double l = unit.getGeometryLengthKm();
-					data[index++] = l == null ? "" : l.toString(); //$NON-NLS-1$
-					LineString ls = (LineString)unit.getGeometry();
-					data[index++] = String.valueOf(ls.getCoordinateN(0).x);
-					data[index++] = String.valueOf(ls.getCoordinateN(0).y);
-					data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
-					data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
-				
-					data[index++] = wktWriter.write(unit.getGeometry());
-				}else{
-					Point p = (Point)unit.getGeometry();
-					data[index++] = String.valueOf(p.getCoordinate().x);
-					data[index++] = String.valueOf(p.getCoordinate().y);
-				}
-				
-				for (SurveyDesignSamplingUnitAttribute a : sd.getSamplingUnitAttributes()){
-					String value = null;
-					for (SamplingUnitAttributeValue v : unit.getAttributes()){
-						if (v.getSamplingUnitAttribute().equals(a.getSamplingUnitAttribute())){
-							if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-								value = v.getStringValue();
-							}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-								value = v.getNumberValue().toString();
-							}
-						}
-					}
-					data[index++] = value;
-				}
-				writer.writeNext(data);
-				monitor.worked(1);
-			}
-		}finally{
-			writer.close();	
-			monitor.done();
+			return data;
+		}else if (type == SamplingUnitType.RECON){
+			String[] data = new String[9];
+			data[0] = Messages.CsvSamplingUnitExporter_idColumnName;
+			data[1] = Messages.CsvSamplingUnitExporter_missionIdColumnName;
+			data[2] = Messages.CsvSamplingUnitExporter_surveyIdColumnName;
+			data[3] = Messages.CsvSamplingUnitExporter_dateColumnName;
+			data[4] = Messages.CsvSamplingUnitExporter_x1ColumnName;
+			data[5] = Messages.CsvSamplingUnitExporter_y1ColumnName;
+			data[6] = Messages.CsvSamplingUnitExporter_x2ColumnName;
+			data[7] = Messages.CsvSamplingUnitExporter_y2ColumnName;
+			data[8] = Messages.CsvSamplingUnitExporter_wktColumnName;
+			return data;
 		}
+		return null;
 	}
-
 }

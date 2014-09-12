@@ -66,7 +66,9 @@ public class SurveyQueryFactory {
 		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
 			return new SurveyWaypointQuery();
 		}else if (querytype.getClass().equals(MissionQueryType.class)){
-			return createMissionQuery();
+			new MissionQuery();
+		}else if (querytype.getClass().equals(MissionTrackQueryType.class)){
+			new MissionTrackQuery();
 		}
 		return null;
 	}
@@ -89,6 +91,8 @@ public class SurveyQueryFactory {
 			return createSummaryQuery();
 		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
 			return createSurveyWaypointQuery();
+		}else if (querytype.getClass().equals(MissionTrackQueryType.class)){
+			return createMissionTrackQuery();
 		}
 		return null;
 	}
@@ -128,7 +132,14 @@ public class SurveyQueryFactory {
 	public static SurveySummaryQuery createSummaryQuery(){
 		SurveySummaryQuery query = new SurveySummaryQuery();
 		initQuery(query, null);
-		
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setDateFilter(null);
+		return query;
+	}
+	
+	public static MissionTrackQuery createMissionTrackQuery(){
+		MissionTrackQuery query = new MissionTrackQuery();
+		initQuery(query, null);		
 		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		query.setDateFilter(null);
 		return query;

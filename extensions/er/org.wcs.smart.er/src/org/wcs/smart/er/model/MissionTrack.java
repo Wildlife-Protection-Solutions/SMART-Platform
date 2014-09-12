@@ -57,7 +57,20 @@ public class MissionTrack extends UuidItem{
 
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
-	public enum TrackType {RECON, TRACK};
+	public enum TrackType {
+		RECON ("Reconnisance"), 
+		TRACK ("Track");
+	
+		private String guiName;
+		
+		private TrackType(String guiName){
+			this.guiName = guiName;
+		}
+		
+		public String getGuiName(){
+			return this.guiName;
+		}
+	};
 	
 	private byte[] geom;
 	private Float distance = null;

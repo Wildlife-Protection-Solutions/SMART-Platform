@@ -42,6 +42,7 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_ObserverLabel;
 	public static String FilterContentProvider_SamplingUnitAttributesLabel;
 	public static String FilterContentProvider_SuLabel;
+	public static String FilterContentProvider_TrackTypeNode;
 	public static String FilterProcessor_progress1;
 	public static String FilterProcessor_progress3;
 	public static String FilterProcessor_progress4;

@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.samplingunit.export;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Set;
 
 import net.refractions.udig.catalog.URLUtils;
 
@@ -33,13 +34,11 @@ import org.geotools.data.FeatureStore;
 import org.geotools.data.shapefile.indexed.IndexedShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitDataSource;
-import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SurveyDesign;
 
@@ -68,22 +67,13 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 			throw new Exception(Messages.ShpSamplingUnitExporter_SuTypeError);
 		}
 		
-		Long cnt = (Long) session.createCriteria(SamplingUnit.class)
-				.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.uniqueResult();
-		if (cnt == 0){
+		Set<SamplingUnitType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, session);
+		if (!types.contains(type)){
 			//nothing to export
 			return;
 		}
 		
-		String typeName = null;
-		if (type == SamplingUnitType.PLOT){
-			typeName = SamplingUnit.SamplingUnitType.PLOT.name();
-		}else{
-			typeName = SamplingUnit.SamplingUnitType.TRANSECT.name();
-		}
+		String typeName = type.name();
 		
 		URL shpFileURL = URLUtils.fileToURL(f);
         IndexedShapefileDataStore shapefile = new IndexedShapefileDataStore(shpFileURL);
