@@ -511,7 +511,12 @@ public class CyberTrackerConfExporter {
 				if (boolRqAttrElementIDs == null) {
 					boolRqAttrElementIDs = ElementsUtil.buildBooleanElements(elements);
 				}
-				result.add(ctUtil.createRadioNode(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, boolRqAttrElementIDs, resultElementId.getItemId()));
+				Node node = ctUtil.createRadioNode(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, boolRqAttrElementIDs, resultElementId.getItemId());
+				if (!attribute.getIsRequired()) {
+					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
+				}
+				result.add(node);
 				break;
 			}
 			default:
