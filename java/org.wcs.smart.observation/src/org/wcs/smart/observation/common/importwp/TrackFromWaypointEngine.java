@@ -19,48 +19,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.importwp.gpsbabel;
+package org.wcs.smart.observation.common.importwp;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.util.Date;
+import java.util.List;
 
-import java.io.IOException;
-import java.util.HashMap;
-
-import org.junit.Test;
-import org.wcs.smart.observation.common.importwp.gpsbabel.GPSBabel;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.Waypoint;
 
 /**
- * Test for reading gps babel supported formats.
+ * Import engine for generating tracks
+ * from waypoints.
  * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class GPSBabelTest {
+public abstract class TrackFromWaypointEngine implements IImportEngine {
 
-	@Test
-	public void testGetFormats()  {
-		HashMap<String, String> ops = null;
-		
-		try {
-			ops = GPSBabel.getDeviceOptions();
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-		assertNotNull(ops);
-		assertTrue(ops.size() > 0);
-		
-		boolean garmin = false;
-		for (String val : ops.keySet()){
-			if (val.toLowerCase().contains("garmin")){
-				garmin = true;
-				break;
-			}
-		}
-		if (!garmin){
-			fail("Garmin device not found");
-		}
+	@Override
+	public String getName() {
+		return Messages.ImportWpTypeWizardPage_GenerateWaypointsOp;
+	}
+
+	/**
+	 * Only supports track types
+	 */
+	@Override
+	public boolean supportsType(ImportType type) {
+		return type == ImportType.TRACK;
+	}
+
+	
+	/**
+	 * @returns null as no data is imported
+	 */
+	@Override
+	public List<Waypoint> getWaypoints(ImportOption options, ImportType type,
+			Date currentDate, IProgressMonitor monitor) throws Exception {
+		return null;
+	}
+
+	
+	@Override
+	public IImportWizardPage getFirstWizardPage(ImportGpsDataWizard wizard) {
+		return new ImportFromWaypointWizardPage(wizard);
 	}
 
 }

@@ -6,11 +6,18 @@ Bundle-Version: 3.0.2
 Bundle-Activator: org.wcs.smart.observation.ObservationPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.eclipse.core.databinding.observable;bundle-version="1.4.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation,
+ org.wcs.smart.observation.common.gpx,
+ org.wcs.smart.observation.common.importwp,
+ org.wcs.smart.observation.common.importwp.csv,
+ org.wcs.smart.observation.common.importwp.gpsbabel,
  org.wcs.smart.observation.events,
  org.wcs.smart.observation.model,
  org.wcs.smart.observation.ui,
  org.wcs.smart.observation.ui.input
+Bundle-ClassPath: lib/commons-exec-1.1.jar,
+ .

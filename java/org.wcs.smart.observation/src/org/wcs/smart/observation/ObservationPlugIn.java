@@ -89,6 +89,10 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
 	}
+
+	public static void logInfo(String message){
+		getDefault().getLog().log(new Status(IStatus.OK, PLUGIN_ID, IStatus.INFO, message, null));
+	}
 	
 	/**
 	 * Displays an error message to the user and logs the
