@@ -650,8 +650,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		timeOffset.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
 		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
-		timeOffset.setLabelProvider(new CyberTrackerGTMLabelProvider());
- 		timeOffset.setInput(CyberTrackerProperties.GTM_VALUES);
+		timeOffset.setLabelProvider(new CyberTrackerGMTLabelProvider());
+ 		timeOffset.setInput(CyberTrackerProperties.GMT_VALUES);
 		timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
 		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -969,14 +969,14 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		}
 	}
 
-	private class CyberTrackerGTMLabelProvider extends LabelProvider {
+	private class CyberTrackerGMTLabelProvider extends LabelProvider {
 		@Override
 		public String getText(Object element) {
 			if (element instanceof Integer) {
 				int x = (Integer) element;
 				int val = Math.abs(x);
 				boolean positive = x >= 0;
-				String s = "GTM"; //$NON-NLS-1$
+				String s = "GMT"; //$NON-NLS-1$
 				int hour = val/100;
 				int min = val%100;
 				if (val != 0) {

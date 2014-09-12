@@ -54,7 +54,7 @@ public class CyberTrackerProperties extends UuidItem {
 	public static final int TIME_TRACK_MIN_VALUE = 0;
 	public static final int TIME_TRACK_MAX_VALUE = 1000;
 
-	public static final Integer[] GTM_VALUES = {
+	public static final Integer[] GMT_VALUES = {
 		-1200,
 		-1100,
 		-1000,
