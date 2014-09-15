@@ -52,7 +52,7 @@ import org.wcs.smart.util.SmartUtils;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Class of utilties that support
+ * Class of utilities that support
  * the importing of waypoints and tracks from a variety 
  * of sources 
  * 
@@ -61,26 +61,6 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class PatrolGPSDataImport {
 
-	
-//	/**
-//	 * 
-//	 * Represent the type of data to import.
-//	 * 
-//	 * @author Emily
-//	 * @since 1.0.0
-//	 */
-//	public enum ImportType{
-//		WAYPOINT (Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription), 
-//		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption);
-//		
-//		public String guiName;
-//		public String importDesc;
-//		
-//		private ImportType(String gui, String importDesc){
-//			this.guiName = gui;
-//			this.importDesc = importDesc;
-//		}
-//	};
 	
 	/**
 	 * Saves the generated tracks to the database 
