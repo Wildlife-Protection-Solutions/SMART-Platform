@@ -115,7 +115,7 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 					IImportEngine engine = getImportEngine();
 					try {
 						if (getImportOption() == ImportOption.DATE || getImportOption() == ImportOption.ALL) {
-							List<Waypoint> waypoints = engine.getWaypoints(getImportOption(), type, currentDay.getDate(), monitor);
+							List<Waypoint> waypoints = engine.getWaypoints(getImportOption(), type, getDateOption(), monitor);
 							setImportedData(waypoints);
 						}
 						
