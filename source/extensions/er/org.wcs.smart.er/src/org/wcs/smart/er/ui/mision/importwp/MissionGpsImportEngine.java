@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.er.ui.mision.importwp;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.observation.common.importwp.GpsImportEngine;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.observation.common.importwp.GpsImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -37,12 +42,45 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class MissionGpsImportEngine extends GpsImportEngine {
 
+	private Date date;
+	
+	public MissionGpsImportEngine() {
+	}
+
+	public MissionGpsImportEngine(Date date) {
+		this.date = date;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+
 	@Override
 	public String updateSourceObject(ImportOption option, ImportType type,
-			Object object, List<Waypoint> data, IProgressMonitor monitor)
+			Object object, List<Waypoint> waypoints, IProgressMonitor monitor)
 			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		String message = null;
+		Mission mission = (Mission) object;
+		if (type == ImportType.WAYPOINT) {
+			message = MissionDataImport.saveWaypoints(option, mission, date, waypoints);
+		} else if (type == ImportType.TRACK) {
+			List<MissionTrack> tracks  = new ArrayList<MissionTrack>();
+			if (option == ImportOption.ALL) {
+				tracks = MissionDataImport.convertTracks(waypoints, mission);
+				message = MessageFormat.format("Imported {0} tracks.", new Object[]{tracks.size()});
+			}else{
+				MissionTrack track = MissionDataImport.convertToTrack(waypoints);
+				track.setDate(date);
+				tracks.add(track);
+				message = "Imported track for current day.";
+			}
+			MissionDataImport.saveTracks(mission, tracks);
+		}
+		return message;
 	}
 
 }

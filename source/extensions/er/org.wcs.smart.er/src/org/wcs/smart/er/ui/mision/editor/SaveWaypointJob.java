@@ -65,8 +65,7 @@ public class SaveWaypointJob extends Job {
 		synchronized (this) {
 			pnts.addAll(waypoints);
 		}
-		Session saveSession = HibernateManager
-				.openSession(new WaypointAttachmentInterceptor());
+		Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			saveSession.beginTransaction();
 			for (SurveyWaypoint wp : pnts) {

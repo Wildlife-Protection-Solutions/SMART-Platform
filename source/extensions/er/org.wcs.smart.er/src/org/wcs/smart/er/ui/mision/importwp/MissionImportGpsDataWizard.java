@@ -55,7 +55,7 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 
 	@Override
 	public IImportEngine[] getEngines() {
-		return new IImportEngine[]{new MissionGpsImportEngine(),  new MissionGpxImportEngine(getDateOption()), new MissionCsvImportEngine()};
+		return new IImportEngine[]{new MissionGpsImportEngine(getDateOption()),  new MissionGpxImportEngine(getDateOption()), new MissionCsvImportEngine(getDateOption())};
 	}
 
 	@Override
