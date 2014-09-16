@@ -117,7 +117,10 @@ public class Mission extends UuidItem{
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission")
-	public List<SurveyWaypoint> getWaypoints(){
+	public List<SurveyWaypoint> getWaypoints() {
+		if (waypoints == null) {
+			waypoints = new ArrayList<SurveyWaypoint>();
+		}
 		return this.waypoints;
 	}
 	

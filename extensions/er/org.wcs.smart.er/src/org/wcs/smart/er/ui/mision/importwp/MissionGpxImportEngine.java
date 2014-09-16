@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.er.ui.mision.importwp;
 
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.observation.common.importwp.GpxImportEngine;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.observation.common.importwp.GpxImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -37,15 +39,45 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class MissionGpxImportEngine extends GpxImportEngine {
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.observation.common.importwp.IImportEngine#updatePatrol(org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption, org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType, java.lang.Object, java.util.List, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	private Date date;
+	
+	public MissionGpxImportEngine() {
+		//empty
+	}
+	
+	public MissionGpxImportEngine(Date date) {
+		this.date = date;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+	public void setDate(Date date) {
+		this.date = date;
+	}
+	
 	@Override
 	public String updateSourceObject(ImportOption option, ImportType type,
 			Object object, List<Waypoint> data, IProgressMonitor monitor)
 			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Mission mission = (Mission) object;
+		String message = null;
+		if (type == ImportType.WAYPOINT) {
+			message = MissionDataImport.saveWaypoints(option, mission, date, data);
+		} else if (type == ImportType.TRACK) {
+			//TODO: implement
+//			HashMap<PatrolLegDay, Track> tracks  = new HashMap<PatrolLegDay,Track>();
+//			if (option == ImportOption.ALL){
+//				tracks = PatrolGPSDataImport.convertTracks(waypoints, patrol.getLegs());
+//				message = MessageFormat.format(Messages.GpxImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
+//			}else{
+//				Track track = PatrolGPSDataImport.convertToTrack(waypoints);
+//				tracks.put(currentLeg, track);
+//				message = Messages.GpxImportEngine_ImportSingleTrack;
+//			}
+//			PatrolGPSDataImport.saveTracks(tracks);
+		}
+		return message;
 	}
-
+	
 }

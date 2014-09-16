@@ -21,9 +21,23 @@
  */
 package org.wcs.smart.er.ui.mision.importwp;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.IImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
+import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.observation.model.Waypoint;
 
 /**
  * ImportDataWizard for mission waypoints and tracks
@@ -32,22 +46,103 @@ import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
  */
 public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 
-	/**
-	 * @param type
-	 */
-	public MissionImportGpsDataWizard(ImportType type) {
+	private Mission mission;
+	
+	public MissionImportGpsDataWizard(Mission mission, ImportType type) {
 		super(type);
+		this.mission = mission;
 	}
 
 	@Override
 	public IImportEngine[] getEngines() {
-		return new IImportEngine[]{new MissionGpsImportEngine(),  new MissionGpxImportEngine(), new MissionCsvImportEngine()};
+		return new IImportEngine[]{new MissionGpsImportEngine(),  new MissionGpxImportEngine(getDateOption()), new MissionCsvImportEngine()};
 	}
 
 	@Override
 	public boolean processFinish() {
-		// TODO Auto-generated method stub
-		return false;
+		final ImportType type = getType();
+//		final ImportOption currentOption = getImportOption();
+		if (type == ImportType.TRACK) {
+			//TODO: impl
+//			if (currentOption == ImportOption.DATE || currentOption == ImportOption.SELECT){
+//				if (currentDay.getTrack() != null){
+//					//warn user
+//					if (!MessageDialog.openConfirm(getShell(), "Import", Messages.PatrolLegDayInputComposite_SetTrackDialog_Message)){
+//						return false;
+//					}
+//				}
+//			}
+//			if (currentOption == ImportOption.ALL){
+//				boolean warn = false;
+//				for(PatrolLeg l : currentDay.getPatrolLeg().getPatrol().getLegs()){
+//					for(PatrolLegDay d : l.getPatrolLegDays()){
+//						if (d.getTrack() != null){
+//							warn = true;
+//							break;
+//						}
+//					}
+//					if (warn) break;
+//				}
+//				
+//				if (warn){
+//					//warn user
+//					if (!MessageDialog.openConfirm(getShell(), "Import", Messages.ImportGpsDataWizard_TrackWarningOverwriteNew)){
+//						return false;
+//					}
+//				}
+//			}
+		}
+		
+		final String[] successMessage =  new String[]{null};
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					IImportEngine engine = getImportEngine();
+					try {
+						if (getImportOption() == ImportOption.DATE || getImportOption() == ImportOption.ALL) {
+							List<Waypoint> waypoints = engine.getWaypoints(getImportOption(), type, getDateOption(), monitor);
+							setImportedData(waypoints);
+						}
+						
+						if (getImportedData() != null && getImportedData().size() == 0){
+							//nothing found
+							Display.getDefault().syncExec(new Runnable(){
+
+								@Override
+								public void run() {
+									MessageDialog.openWarning(getShell(), "Import", MessageFormat.format("No {0} were found to import. This could be due to date formats or other GPS issues.  Try importing all {1} and selecting desired waypoints.", new  Object[]{getType().guiName, getType().guiName}));
+								}});
+							return;
+						}
+						
+						String message = engine.updateSourceObject(getImportOption(), getType(), mission, getImportedData(), monitor);
+						successMessage[0] = message;
+					} catch (final Exception e) {
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), e.getMessage(), e);
+							}
+							
+						});
+						successMessage[0] = null;
+					}
+				}
+			});
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.displayLog("Could not import data from gpx " + ex.getLocalizedMessage(), ex);
+			return false;
+		}
+		if (successMessage[0] != null) {
+			MessageDialog.openInformation(getShell(), "Import", "Import Complete." + " " + successMessage[0]);
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 }
