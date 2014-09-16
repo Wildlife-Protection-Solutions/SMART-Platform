@@ -610,7 +610,7 @@ public class MissionDayComposite {
 	}
 	
 	protected void showImportWaypointWizard() {
-		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(GPSDataImport.ImportType.WAYPOINT);
+		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(mission, GPSDataImport.ImportType.WAYPOINT);
 		wizard.setDateOption(editor.getDay());
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
