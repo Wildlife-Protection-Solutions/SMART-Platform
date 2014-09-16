@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.er.ui.mision.importwp;
 
+import java.text.MessageFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.csv.CsvImportEngine;
@@ -37,21 +41,46 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class MissionCsvImportEngine extends CsvImportEngine {
 
-	/**
-	 * 
-	 */
+	private Date date;
+	
 	public MissionCsvImportEngine() {
-		// TODO Auto-generated constructor stub
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.observation.common.importwp.IImportEngine#updatePatrol(org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption, org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType, java.lang.Object, java.util.List, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	public MissionCsvImportEngine(Date date) {
+		this.date = date;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
 	@Override
 	public String updateSourceObject(ImportOption option, ImportType type,
-			Object object, List<Waypoint> data, IProgressMonitor monitor)
+			Object object, List<Waypoint> waypoints, IProgressMonitor monitor)
 			throws Exception {
-		// TODO Auto-generated method stub
+		if(type == ImportType.WAYPOINT) {
+			Mission mission = (Mission) object;
+
+			//if no ID was given, get the largest ID from the patrol 
+			//so far and reset the id's of the points about to be saved. 
+			if (getConfiguration().getIdColumn() == -1) {
+				int max = 0;
+				for(SurveyWaypoint wp : mission.getWaypoints()) {
+					if (wp.getWaypoint().getId() > max){
+						max = wp.getWaypoint().getId();
+					}
+				}
+				for(Waypoint wp : waypoints) {
+					wp.setId(max + 1);
+					max++;
+				}
+			}
+			monitor.setTaskName(MessageFormat.format("Saving {0} waypoints", new Object[]{waypoints.size()}));
+			return MissionDataImport.saveWaypoints(option, mission, date, waypoints);
+		}
 		return null;
 	}
 
