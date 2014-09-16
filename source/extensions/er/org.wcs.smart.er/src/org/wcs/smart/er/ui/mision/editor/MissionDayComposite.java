@@ -166,6 +166,8 @@ public class MissionDayComposite {
 	private ISurveyEventListener waypointListener = new ISurveyEventListener() {
 		@Override
 		public void event(Object o) {
+			input.clear();
+			input.addAll(buildTableInput(mission));
 			refreshTable();
 		}
 	};
@@ -482,8 +484,9 @@ public class MissionDayComposite {
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, waypointListener);
 	}
 	
-	public void setData(Mission data, Date date) {
+	public void setData(Mission data) {
 		this.mission = data;
+		Date date = editor.getDay();
 		
 		Calendar cal = Calendar.getInstance();
 		if (data.getStartDate() != date) {
@@ -514,12 +517,7 @@ public class MissionDayComposite {
 		if (data.getWaypoints() == null) {
 			data.setWaypoints(new ArrayList<SurveyWaypoint>());
 		}
-		input = new ArrayList<SurveyWaypoint>();
-		for (SurveyWaypoint p : data.getWaypoints()) {
-			if (SmartUtils.isSameDate(p.getWaypoint().getDateTime(), date)) {
-				input.add(p);
-			}
-		}
+		input = buildTableInput(data);
 		WritableList inputList = new WritableList(input, SurveyWaypoint.class);
 		observationTable.setInput(inputList);
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -564,7 +562,18 @@ public class MissionDayComposite {
 //		}
 	
 	}
-	
+
+	private List<SurveyWaypoint> buildTableInput(Mission m) {
+		List<SurveyWaypoint> tblInput = new ArrayList<SurveyWaypoint>();
+		Date date = editor.getDay();
+		for (SurveyWaypoint p : m.getWaypoints()) {
+			if (SmartUtils.isSameDate(p.getWaypoint().getDateTime(), date)) {
+				tblInput.add(p);
+			}
+		}
+		return tblInput;
+	}
+
 	private void resize(){
 		if (observationTableColumns == null){
 			return ;

@@ -115,7 +115,7 @@ public class MissionDayPage extends EditorPart {
 		
 		dayComposite = new MissionDayComposite(this, observationOptions);
 		dayComposite.createComposite(frmSummary.getBody(), toolkit);
-		dayComposite.setData(editor.getMission(), day);
+		dayComposite.setData(editor.getMission());
 		
 	}
 
