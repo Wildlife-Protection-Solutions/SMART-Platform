@@ -47,6 +47,7 @@ import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -198,8 +199,6 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 				
 				List<Survey> surveys = session.createCriteria(Survey.class).add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
 				for (Survey survey : surveys){
-				
-				
 					//delete all waypoints
 					if (survey.getMissions() != null){
 						for (Mission m : survey.getMissions()){
@@ -213,10 +212,14 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 					}
 					session.delete(survey);
 				}
+				//delete sampling unit
+				List<SamplingUnit> units = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", design)).list();
+				for (SamplingUnit unit:  units){
+					session.delete(unit);
+				}
+				
 				session.delete(design);
-			
 				session.getTransaction().commit();
-
 				
 				for (File f : dirsToDelete){
 					if (f.exists()){
