@@ -1,0 +1,49 @@
+<html>
+<style>
+h1{
+	font-family:Verdana;
+	font-size:12px;
+	font-weight: bold;
+}
+p{
+	font-family:Verdana;
+	font-size:11px;
+}
+.psmall{
+	font-family:Verdana;
+	font-size:10px;
+	text-align: center;
+}
+</style>
+<body>
+<h1>Survey Mission Track Query</h1>
+<p>
+Display all mission tracks that match the given filters.  Track type, sampling unit, mission
+and area filters are applied directly to the track.  Observation filters are applied to observations
+associated with the mission associated with the track.
+</p>
+<p><b>Mission Track Query vs Mission Query</b></p>
+<ul>
+<li><p>Mission Track Queries generate on one record per track (and include track properties).  Mission queries create
+one record per mission.</p></li>
+<li><p>Mission Track Queries filters are applied to the mission tracks, not the observations.
+Therefore if you filter on a sampling unit, it will return tracks that match the sampling
+unit, not observations.  Mission queries apply the filters to the observations.
+</p>
+</li> 
+</ul>
+
+<table>
+<tr><td><img style="border: 1px solid" src="./missiontrack.png"/></td></tr>
+<tr><td><p class="psmall"><b>Example Mission Track Query</b></p></td></tr>
+</table>
+<p> 
+Results will include one record per mission that matches the given filters.  No
+observation or incident information is included in the results.  Mission details are displayed
+in a tabular window.  Mission tracks are displayed in a map window.
+</p>
+<p> 
+
+</p>
+</body>
+</html>

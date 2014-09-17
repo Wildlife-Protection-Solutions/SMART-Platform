@@ -52,6 +52,8 @@ import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
@@ -65,7 +67,6 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Editor for displaying survey query results.  The editor includes two pages
@@ -134,6 +135,8 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 			return MissionQueryType.validDateFields();
 		}else if (getQueryInternal() instanceof SurveyWaypointQuery){
 			return SurveyWaypointQueryType.validDateFields();
+		}else if (getQueryInternal() instanceof MissionTrackQuery){
+			return MissionTrackQueryType.validDateFields();
 		}
 		return null;
 	}

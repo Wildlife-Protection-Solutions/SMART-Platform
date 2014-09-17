@@ -446,9 +446,13 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		return it;
 	}
 	
-	
 	@Override
 	protected void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
+	}
+	
+	@Override
+	public String getFilterTablesJoinColum(){
+		return "wp_uuid"; //$NON-NLS-1$
 	}
 }

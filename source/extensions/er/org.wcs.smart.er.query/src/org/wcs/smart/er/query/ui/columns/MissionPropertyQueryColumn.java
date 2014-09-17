@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.ui.columns;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -69,6 +70,10 @@ public class MissionPropertyQueryColumn extends QueryColumn {
 	public Object getValue(IResultItem item) {
 		if (item instanceof SurveyQueryResultItem){
 			SurveyQueryResultItem i = (SurveyQueryResultItem) item;			
+			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
+			return i.getMissionPropertyValue(attributeKey);
+		}else if (item instanceof MissionTrackResultItem){
+			MissionTrackResultItem i = (MissionTrackResultItem) item;			
 			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
 			return i.getMissionPropertyValue(attributeKey);
 		}

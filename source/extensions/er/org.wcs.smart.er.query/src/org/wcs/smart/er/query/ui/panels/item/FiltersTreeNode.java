@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.er.query.ui.panels.item;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -32,6 +35,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.ERQueryPlugIn;
@@ -53,8 +57,6 @@ public class FiltersTreeNode implements IItemTreeNode{
 	
 	private ITreeContentProvider provider;
 	private LabelProvider labelprovider;
-		
-	private IQueryType qType;
 	
 	/**
 	 * type of node
@@ -78,7 +80,11 @@ public class FiltersTreeNode implements IItemTreeNode{
 				}else if (element instanceof SamplingUnit){
 					return ((SamplingUnit) element).getId();
 				}else if (element instanceof MissionTrack){
-					return ((MissionTrack) element).getId();
+					String value = ((MissionTrack) element).getId();
+					if (value == null){
+						value = ""; //$NON-NLS-1$
+					}
+					return MessageFormat.format("{0} [{1}]", new Object[]{value, DateFormat.getDateInstance().format(((MissionTrack)element).getDate())});  //$NON-NLS-1$
 				}else if (element instanceof SamplingUnitAttribute){
 					return ((SamplingUnitAttribute) element).getName();
 				}else if (element instanceof MissionTrack.TrackType){
@@ -109,13 +115,15 @@ public class FiltersTreeNode implements IItemTreeNode{
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON);
 					}else if (node == Node.MISSION_MEMBER){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_MEMBER_ICON);
+					}else if (node == Node.TRACKTYPE){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_RECON_ICON);
 					}
 				}
 				if (element instanceof SamplingUnit){
 					return ((SamplingUnit) element).getType().getImage();
 				}
 				if (element instanceof MissionTrack){
-					return SamplingUnit.SamplingUnitType.TRANSECT.getImage();
+					return SamplingUnit.SamplingUnitType.RECON.getImage();
 				}
 				if (element instanceof MissionProperty){
 					element = ((MissionProperty) element).getAttribute();
@@ -131,6 +139,13 @@ public class FiltersTreeNode implements IItemTreeNode{
 				}
 				if (element instanceof SamplingUnitAttribute){
 					return ((SamplingUnitAttribute) element).getType().getImage();
+				}
+				if (element instanceof MissionTrack.TrackType){
+					if (element == MissionTrack.TrackType.TRACK){
+						return SamplingUnitType.TRANSECT.getImage();
+					}else{
+						return SamplingUnitType.RECON.getImage();
+					}
 				}
 				return null;
 			}

@@ -41,6 +41,7 @@ import org.geotools.data.DataStore;
 import org.wcs.smart.er.query.map.geotools.SurveyDataSourceFactory;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
 import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
@@ -160,6 +161,8 @@ public class QueryService extends IQueryService {
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
 					}else if (query.getType().getClass().equals(MissionQueryType.class)){
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
+					}else if (query.getType().getClass().equals(MissionTrackQueryType.class)){
+						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
 //						members.add(new QueryGeoResource(this, SurveyQueryDataSource.PATROL_TYPE));
 //					}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
@@ -230,7 +233,8 @@ public class QueryService extends IQueryService {
                 	if (query != null){
                 		if (query.getType().getClass().equals(SurveyObservationQueryType.class) ||
                 			query.getType().getClass().equals(SurveyWaypointQueryType.class) ||
-                				query.getType().getClass().equals(MissionQueryType.class)){
+                				query.getType().getClass().equals(MissionQueryType.class) || 
+                				query.getType().getClass().equals(MissionTrackQueryType.class)){
                 			ds = new SurveyQueryDataSource((SimpleQuery)query);
                 		
 //                		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){

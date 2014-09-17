@@ -40,11 +40,13 @@ import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.filter.MissionMemberFilter;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.filter.MissionTrackDateField;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SurveyFilter;
+import org.wcs.smart.er.query.filter.TrackTypeFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -103,6 +105,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return asSql((SurveyDesignFilter)filter, engine);
 		}else if (filter instanceof MissionMemberFilter){
 			return asSql((MissionMemberFilter)filter, engine);
+		}else if (filter instanceof TrackTypeFilter){
+			return asSql((TrackTypeFilter) filter, engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
@@ -132,13 +136,20 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	}
 	
 	/*
+	 * Track type filter
+	 */
+	protected String asSql(TrackTypeFilter filter, IQueryEngine engine) throws SQLException{
+		return engine.tablePrefix(MissionTrack.class) + ".track_type = '" + filter.getTrackType().name() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	/*
 	 * Attribute filter
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
 		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -175,7 +186,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
 		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
+			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -187,7 +198,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);	
 	}
@@ -230,7 +241,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(SamplingUnitAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (filter.getAttributeType() == AttributeType.NUMERIC){
 			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + String.valueOf((Double)filter.getValue()) + ") ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -278,7 +289,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			throws SQLException {
 		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		String attprefix = engine.tablePrefix(MissionAttribute.class);
@@ -332,6 +343,9 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
 			table = engine.tablePrefix(Waypoint.class);
 			field = "datetime"; //$NON-NLS-1$
+		}else if (filter.getDateFieldOption() == MissionTrackDateField.INSTANCE){
+			table = engine.tablePrefix(MissionTrack.class);
+			field = "track_date"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.SurveyFilterSqlGenerator_DateFilterNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
 		}

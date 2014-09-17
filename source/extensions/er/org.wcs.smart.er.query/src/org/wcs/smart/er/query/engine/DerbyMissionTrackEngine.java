@@ -35,9 +35,10 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
@@ -46,6 +47,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -77,7 +79,12 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = DerbyMissionTrackEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+				IFilterProcessor filterer = null;
+				if (query.getFilter().getFilterType() == FilterType.OBSERVATION){
+					filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
+				}else{
+					filterer = new WaypointFilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
+				}
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -303,12 +310,13 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".end_datetime "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
 		
-		sql.append(tablePrefix(MissionTrack.class) + ".uuid "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionTrack.class) + ".track_type "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionTrack.class) + ".date "); //$NON-NLS-1$
-		
+		sql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionTrack.class) + ".track_type, "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionTrack.class) + ".track_date, "); //$NON-NLS-1$
+	
+		sql.append(tablePrefix(SamplingUnit.class) + ".id "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -335,7 +343,9 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	
 		sql.append("missiontrack_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("missiontrack_type varchar(32),"); //$NON-NLS-1$
-		sql.append("missiontrack_date date"); //$NON-NLS-1$
+		sql.append("missiontrack_date date,"); //$NON-NLS-1$
+		
+		sql.append("samplingunit_id varchar(128)"); //$NON-NLS-1$
 		
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
@@ -364,15 +374,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setTrackType(TrackType.valueOf(rs.getString("missiontrack_type"))); //$NON-NLS-1$
 		it.setTrackDate(rs.getDate("missiontrack_date")); //$NON-NLS-1$
 		
-		
-		//TODO:  add tracks
-//		//need to add the tracks
-//		Query q = session.createQuery("FROM MissionTrack WHERE mission.uuid = :uuid"); //$NON-NLS-1$
-//		q.setParameter("uuid", rs.getBytes("mission_uuid"));  //$NON-NLS-1$//$NON-NLS-2$
-//		List<MissionTrack> mts = q.list();
-//		for (MissionTrack mt : mts){
-//			it.addTracks(mt.getLineString());
-//		}
+		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		return it;
 	}
 
@@ -382,4 +384,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		super.buildTemporaryTableIndexes(c, tableName);	
 	}
 	
+	@Override
+	public String getFilterTablesJoinColum(){
+		return "missiontrack_uuid"; //$NON-NLS-1$
+	}
 }

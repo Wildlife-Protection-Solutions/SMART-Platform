@@ -153,15 +153,21 @@ public class FilterContentProvider implements ITreeContentProvider{
 			Session s = HibernateManager.openSession();
 			try{
 				if (design != null){
-					sunits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s);
-					for (Object x : sunits){
+					List<Object> allUnits = new ArrayList<Object>();
+					List<Object> units = SurveyHibernateManager.getInstance().getSamplingUnits(design, s);
+					for (Object x : units){
 						if (x instanceof SamplingUnit){
 							((SamplingUnit) x).getId();
 							((SamplingUnit) x).getType();
+							allUnits.add(x);
 						}else if (x instanceof MissionTrack){
 							((MissionTrack) x).getId();
+							if (!qType.getKey().equals(MissionTrackQueryType.KEY)){
+								allUnits.add(x);
+							}
 						}
 					}
+					sunits = allUnits;
 				}else{
 					sunits = null;
 				}

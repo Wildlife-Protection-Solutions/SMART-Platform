@@ -89,6 +89,7 @@ public class Messages extends NLS {
 	public static String MissionMemberFilter_EmployeeNotFound;
 	public static String MissionQueryType_MissionQueryName;
 	public static String MissionStartDateField_Name;
+	public static String MissionTrackDateField_Name;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;
 	public static String QueryServiceInfo_Description;
@@ -175,6 +176,8 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumn_SurveyEndLabel;
 	public static String SurveyQueryColumn_SurveyIdLabel;
 	public static String SurveyQueryColumn_SurveyStartLabel;
+	public static String SurveyQueryColumn_TrackDateLabel;
+	public static String SurveyQueryColumn_TrackTypeLabel;
 	public static String SurveyQueryColumn_WaypointIdLabel;
 	public static String SurveyQueryColumn_WaypointTypeLabel;
 	public static String SurveyQueryColumn_WpDateLabel;
@@ -189,6 +192,7 @@ public class Messages extends NLS {
 	public static String SurveyValuesTreeNode_MissionTrackLengthItem;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;
 	public static String SurveyWaypointQueryType_IncidentQuery;
+	public static String TrackTypeDropItem_TrackTypeLabel;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointFilterProcessor_progress2;
 	public static String WaypointFilterProcessor_progress4;

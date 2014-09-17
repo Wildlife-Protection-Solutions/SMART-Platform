@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.ui.columns;
 
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -57,8 +58,8 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_END(Messages.SurveyQueryColumn_MissionEndLabel, ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
 		MISSION_LEADER(Messages.SurveyQueryColumn_MissionLeaderLabel, ColumnType.STRING, "mission:leader"), //$NON-NLS-1$
 		
-		MISSION_TRACKTYPE("Track Type", ColumnType.STRING, "mission:tracktype"), //$NON-NLS-1$
-		MISSION_TRACKDATE("Track Date", ColumnType.STRING, "mission:trackdate"), //$NON-NLS-1$
+		MISSION_TRACKTYPE(Messages.SurveyQueryColumn_TrackTypeLabel, ColumnType.STRING, "mission:tracktype"),  //$NON-NLS-1$
+		MISSION_TRACKDATE(Messages.SurveyQueryColumn_TrackDateLabel, ColumnType.DATE, "mission:trackdate"),  //$NON-NLS-1$
 		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
 		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.NUMBER, "su:buffer"),  //$NON-NLS-1$
@@ -130,6 +131,26 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
 				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
 				case WAYPOINT_COMMENT: return item.getWaypointComment(); 
+			}
+		}else if (queryResultItem instanceof MissionTrackResultItem){
+			MissionTrackResultItem item = (MissionTrackResultItem)queryResultItem;
+			switch(column){
+				case CA_ID: return item.getConservationAreaId();
+				case CA_NAME: return item.getConservationAreaName();
+				case SURVEY_DESIGN: return item.getSurveyDesign();
+				case SURVEY_DESIGN_START: return item.getSurveyDesignStart();
+				case SURVEY_DESIGN_END: return item.getSurveyDesignEnd();
+				case SURVEY: return item.getSurveyId();
+				case SURVEY_START: return item.getSurveyStart();
+				case SURVEY_END: return item.getSurveyEnd();
+				case MISSION: return item.getMissionId();
+				case MISSION_START: return item.getMissionStart();
+				case MISSION_END: return item.getMissionEnd();
+				case MISSION_TRACKDATE: return item.getTrackDate();
+				case MISSION_TRACKTYPE: return item.getTrackType().getGuiName();
+//				case MISSION_LEADER: return item.getMissionLeader();
+				case SAMPLING_UNIT: return item.getSamplingUnitId();
+				case SMAPLING_UNIT_BUFFER: return item.getSmaplingUnitBuffer(); 
 			}
 		}
 		return ""; //$NON-NLS-1$

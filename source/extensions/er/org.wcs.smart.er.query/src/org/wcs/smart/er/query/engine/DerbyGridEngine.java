@@ -770,5 +770,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		
 	}
 	
+	@Override
+	public String getFilterTablesJoinColum(){
+		return "wp_uuid"; //$NON-NLS-1$
+	}
 	
 }

@@ -26,6 +26,14 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
+            class="org.wcs.smart.er.query.model.MissionTrackQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.query.er.survey.definition.filter"
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.er.query.category.survey"
             class="org.wcs.smart.er.query.model.MissionQueryType">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
@@ -54,14 +62,6 @@
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
-         </DefinitionPanel>
-      </QueryType>
-      <QueryType
-            QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.MissionTrackQueryType">
-         <DefinitionPanel
-               id="org.wcs.smart.query.er.survey.definition.filter"
-               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack">
          </DefinitionPanel>
       </QueryType>
    </extension>
@@ -139,6 +139,17 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
+                  icon="images/icons/obj16/survey_missiontrack_query.png"
+                  label="New Mission Track Query"
+                  style="push"
+                  tooltip="queries mission tracks">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveymissiontrack">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_mission_query.png"
                   label="New Mission Query ..."
                   style="push"
@@ -168,16 +179,6 @@
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveygrid">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
-                  label="New Mission Track Query"
-                  style="push"
-                  tooltip="queries mission tracks">
-               <parameter
-                     name="org.wcs.smart.query.type"
-                     value="surveymissiontrack">
                </parameter>
             </command>
          </menu>
