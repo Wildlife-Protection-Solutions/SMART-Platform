@@ -42,7 +42,6 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -159,7 +158,7 @@ public class MissionQueryType implements IQueryType {
 	 * @return
 	 */
 	public static IDateFieldFilter[] validDateFields(){
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE, MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
+		return new IDateFieldFilter[]{MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
 	}
 
 }
