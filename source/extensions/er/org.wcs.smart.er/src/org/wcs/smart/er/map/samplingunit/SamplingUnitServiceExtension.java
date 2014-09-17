@@ -52,6 +52,14 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	public static final String KEY = "org.wcs.smart.udig.er.catalog.SmartSamplingUnitService"; //$NON-NLS-1$
    
    
+	/**
+	 * SMART service url host
+	 */
+    private static final String HOST = "smartdb"; //$NON-NLS-1$
+    /**
+     * SMART service url protocol
+     */
+	private static final String PROTOCOL = "smart"; //$NON-NLS-1$
 	
     /**
      * @see net.refractions.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
@@ -101,8 +109,25 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	 */
 	@Override
 	public Map<String, Serializable> createParams(URL url) {	
-		return createParamsFromUrl(url);
-
+		if (isValid(url)){
+			return createParamsFromUrl(url);
+		}
+		return null;
+	}
+	
+	/**
+	 * Determine if the url is a valid SMART sampling unit service
+	 * 
+	 * @param url url to test
+	 * @return <code>true</code> if valid, <code>false</code> otherwise
+	 */
+	public static boolean isValid(URL url){
+		if (url.getProtocol().equals(PROTOCOL)){
+			if (url.getHost().equals(HOST) && url.getPath().equals("/")){ //$NON-NLS-1$
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -111,6 +136,10 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	 * @return
 	 */
 	public static Map<String, Serializable> createParamsFromUrl(URL url){
+		if (!isValid(url)){
+			return null;
+		}
+		
 		/* determine survey design uuid */
 		String sduuid = url.getPath();
 		if (sduuid == null){
@@ -143,7 +172,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		String url = "smart://smartdb/er/"; //$NON-NLS-1$
+		String url = PROTOCOL + "://" + HOST + "/er/"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (params.get(SamplingUnitSourceFactory.SD_UUID.key) == null ||
 			!(params.get(SamplingUnitSourceFactory.SD_UUID.key) instanceof byte[])){
 			url += System.nanoTime();

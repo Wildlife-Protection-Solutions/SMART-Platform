@@ -26,8 +26,14 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.wizard.NewSurveyDesignWizard;
 
 /**
@@ -39,7 +45,14 @@ public class NewSurveyDesignHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		showNewDesignWizard(HandlerUtil.getActiveShell(event));
+		SurveyDesign sd = showNewDesignWizard(HandlerUtil.getActiveShell(event));
+		
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState()), SurveyDesignEditor.ID);
+		} catch (PartInitException e) {
+			EcologicalRecordsPlugIn.displayLog(Messages.EditSurveyElementHandler_MissionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+		}
+		
 		return null;
 	}
 	
