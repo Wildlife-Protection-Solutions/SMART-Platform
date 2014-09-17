@@ -40,7 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.engine.DerbyMissionEngine;
+import org.wcs.smart.er.query.engine.DerbyMissionTrackEngine;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
@@ -56,7 +56,7 @@ import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
 /**
- * Mission query object.
+ * Mission track query object.
  * 
  * @author Emily
  *
@@ -87,22 +87,21 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 	@Transient
 	protected IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
 		
-//		Session lsession = session;
-//		if (session == null){
-//			lsession = HibernateManager.openSession();
-//			lsession.beginTransaction();
-//		}
-//		try {
-//			DerbyMissionTrackEngine engine = new DerbyMissionTrackEngine();
-//			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
-//			return lastResult;
-//		} finally {
-//			if (session == null && lsession.isOpen()){
-//				lsession.getTransaction().commit();
-//				lsession.close();
-//			}
-//		}
-		return null;
+		Session lsession = session;
+		if (session == null){
+			lsession = HibernateManager.openSession();
+			lsession.beginTransaction();
+		}
+		try {
+			DerbyMissionTrackEngine engine = new DerbyMissionTrackEngine();
+			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lsession, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session == null && lsession.isOpen()){
+				lsession.getTransaction().commit();
+				lsession.close();
+			}
+		}
 	}
 	
 	/**

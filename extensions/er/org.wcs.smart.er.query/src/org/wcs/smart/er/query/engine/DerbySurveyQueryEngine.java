@@ -124,6 +124,9 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	 */
 	protected abstract String getTemporaryTableCreateClause(String tableName);
 	
+	
+	protected abstract String getFilterTablesJoinColum();
+	
 	/**
 	 * A string to append to the from clause of the select
 	 * statement to create the temporary table.

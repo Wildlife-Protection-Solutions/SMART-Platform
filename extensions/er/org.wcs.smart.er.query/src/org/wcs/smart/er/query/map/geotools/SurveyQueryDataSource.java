@@ -34,6 +34,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -86,7 +87,8 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public String[] getTypeNames()  {
-		if (query instanceof MissionQuery){
+		if (query instanceof MissionQuery || 
+			query instanceof MissionTrackQuery){
 			return new String[]{TRACKS_TYPE};
 		}else{
 			return new String[]{WAYPOINT_TYPE, WAYPOINT_MISSION_TRACK_TYPE};

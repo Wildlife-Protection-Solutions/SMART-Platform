@@ -32,6 +32,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.query.engine.ISurveyQueryMissionResult;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -123,10 +124,18 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 			SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
 			return f;
 		}else{
-			SurveyQueryResultItem next = (SurveyQueryResultItem) this.fIterator.next();
-			SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, query.getQueryColumns(), ftype);
-			return f;
+			Object n = this.fIterator.next();
+			if (n instanceof SurveyQueryResultItem){
+				SurveyQueryResultItem next = (SurveyQueryResultItem) n;
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, query.getQueryColumns(), ftype);
+				return f;
+			}else if (n instanceof MissionTrackResultItem){
+				MissionTrackResultItem next = (MissionTrackResultItem) n;
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, session, query.getQueryColumns(), ftype);
+				return f;
+			}
 		}
+		return null;
 	}
 
 }

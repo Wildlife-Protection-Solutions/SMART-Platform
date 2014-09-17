@@ -45,7 +45,7 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 	private LabelProvider labelprovider;
 		
 	public enum Node {
-		MISSION_LENGTH(Messages.SurveyValuesTreeNode_MissionTrackLengthItem, ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSION_TRACK_ICON));
+		MISSION_LENGTH(Messages.SurveyValuesTreeNode_MissionTrackLengthItem, ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.TRACK_DISTANCE_ICON));
 		
 		private String guiName;
 		private Image image;

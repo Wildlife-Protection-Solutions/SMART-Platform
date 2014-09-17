@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.ui.columns.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.ui.columns.SamplingUnitAttributeQueryColumn;
@@ -500,10 +501,15 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 		boolean hasItem = false;
 		for (IResultItem irt : result) {
-			SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
-			if (it.getMissionUuid() != null){
+			byte[] muuid = null;
+			if (irt instanceof SurveyQueryResultItem){
+				muuid = ((SurveyQueryResultItem) irt).getMissionUuid();
+			}else if (irt instanceof MissionTrackResultItem){
+				muuid = ((MissionTrackResultItem) irt).getMissionUuid();
+			}
+			if (muuid != null){
 				if (hasItem) attrSql.append(","); //$NON-NLS-1$
-				attrSql.append("x'").append(SmartUtils.encodeHex(it.getMissionUuid())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append("x'").append(SmartUtils.encodeHex(muuid)).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
 				hasItem = true;
 			}
 		}
@@ -524,15 +530,29 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				String svalue = rs.getString(4);
 				
 				for (IResultItem irt : result) {
-					SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
-					if (Arrays.equals(muuid,it.getMissionUuid())){
-						if (rs.getObject(3) != null){
-							it.addMissionPropertyValue(key, dvalue);
-						}else if (svalue != null){
-							it.addMissionPropertyValue(key,  svalue);
-						}else if (rs.getObject(5) != null){
-							it.addMissionPropertyValue(key, 
+					if (irt instanceof SurveyQueryResultItem){
+						SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
+						if (Arrays.equals(muuid,it.getMissionUuid())){
+							if (rs.getObject(3) != null){
+								it.addMissionPropertyValue(key, dvalue);
+							}else if (svalue != null){
+								it.addMissionPropertyValue(key,  svalue);
+							}else if (rs.getObject(5) != null){
+								it.addMissionPropertyValue(key, 
 									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, rs.getBytes(5))).getName());
+							}
+						}
+					}else if (irt instanceof MissionTrackResultItem){
+						MissionTrackResultItem it = (MissionTrackResultItem)irt;
+						if (Arrays.equals(muuid,it.getMissionUuid())){
+							if (rs.getObject(3) != null){
+								it.addMissionPropertyValue(key, dvalue);
+							}else if (svalue != null){
+								it.addMissionPropertyValue(key,  svalue);
+							}else if (rs.getObject(5) != null){
+								it.addMissionPropertyValue(key, 
+									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, rs.getBytes(5))).getName());
+							}
 						}
 					}
 				}
@@ -582,7 +602,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					if (Arrays.equals(muuid,it.getSamplingUnitUuid())){
 						if (rs.getObject(3) != null){
 							it.addSamplingUnitAttributeValue(key, dvalue);
-						}else if (svalue != null){
+						}else if (rs.getObject(4) != null && svalue != null){
 							it.addSamplingUnitAttributeValue(key, svalue);
 						}
 					}
@@ -660,8 +680,8 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		return null;
 	}
 	
-	protected List<SurveyQueryResultItem> getResults(ResultSet rs, int from, int pageSize, Session session) throws SQLException {
-		List<SurveyQueryResultItem> items = new ArrayList<SurveyQueryResultItem>();
+	protected List<IResultItem> getResults(ResultSet rs, int from, int pageSize, Session session) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
@@ -669,7 +689,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		}
 		for(int x = from; x < to; x++) {
 			rs.next();
-			SurveyQueryResultItem it = (SurveyQueryResultItem) engine.asQueryResultItem(rs, session);
+			IResultItem it = engine.asQueryResultItem(rs, session);
 			items.add(it);
 		}
 		return items;

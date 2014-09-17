@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
@@ -158,6 +159,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createMissionLeaderDropItem()};
 		}else if (source == FilterContentProvider.Node.MISSION_MEMBER){
 			items = new DropItem[]{createMissionMemberDropItem()};
+		}else if (source instanceof MissionTrack.TrackType){
+			items = new DropItem[]{new TrackTypeDropItem((TrackType) source)};
 		}else if (source instanceof Survey){
 			items = new DropItem[]{createSurveyUuidIdDropItem((Survey)source)};
 		}else if (source instanceof Mission){

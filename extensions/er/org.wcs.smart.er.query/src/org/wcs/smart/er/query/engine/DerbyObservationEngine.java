@@ -708,4 +708,9 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		c.createStatement().execute(sql.toString());
 		
 	}
+	
+	@Override
+	public String getFilterTablesJoinColum(){
+		return "wp_uuid"; //$NON-NLS-1$
+	}
 }

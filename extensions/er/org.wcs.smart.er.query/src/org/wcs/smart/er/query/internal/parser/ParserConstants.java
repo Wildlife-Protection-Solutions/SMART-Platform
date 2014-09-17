@@ -121,59 +121,61 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MISSION_PROPERTY_LIST_KEY = 59;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_KEY = 60;
+  int MISSION_TRACK_TYPE = 60;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_ATTRIBUTE_STR_KEY = 61;
+  int SAMPLING_UNIT_KEY = 61;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY = 62;
+  int SAMPLING_UNIT_ATTRIBUTE_STR_KEY = 62;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_TRACK_KEY = 63;
+  int SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY = 63;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 64;
+  int SAMPLING_UNIT_TRACK_KEY = 64;
   /** RegularExpression Id. */
-  int AREA_KEY = 65;
+  int AREA_TYPE_KEY = 65;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 66;
+  int AREA_KEY = 66;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 67;
+  int OBSERVATION_FILTER_TYPE_KEY = 67;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_KEY = 68;
+  int WAYPOINT_FILTER_TYPE_KEY = 68;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 69;
+  int WAYPOINT_OBSERVER_KEY = 69;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 70;
+  int SUM_CAT_VALUE_KEY = 70;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 71;
+  int SUM_ATTRIBUTE_VALUE_KEY = 71;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 72;
+  int SUM_CAT_ATT_VALUE_KEY = 72;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 73;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 73;
   /** RegularExpression Id. */
-  int AGG = 74;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 74;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 75;
+  int AGG = 75;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 76;
+  int DATE_GROUPBY_ITEM = 76;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 77;
+  int CATEGORY_GROUPBY_ITEM = 77;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 78;
+  int AREA_GROUPBY_ITEM = 78;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 79;
+  int ATTRIBUTE_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int SURVEY_ID_GROUPBY_ITEM = 80;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 80;
   /** RegularExpression Id. */
-  int MISSION_ID_GROUPBY_ITEM = 81;
+  int SURVEY_ID_GROUPBY_ITEM = 81;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_GROUPBY_ITEM = 82;
+  int MISSION_ID_GROUPBY_ITEM = 82;
   /** RegularExpression Id. */
-  int SAMPLINGUNIT_GROUPBY_ITEM = 83;
+  int MISSION_PROPERTY_GROUPBY_ITEM = 83;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_GROUPBY_ITEM = 84;
+  int SAMPLINGUNIT_GROUPBY_ITEM = 84;
   /** RegularExpression Id. */
-  int MISSION_TRACK_LENGTH = 85;
+  int WAYPOINT_OBSERVER_GROUPBY_ITEM = 85;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 86;
+  int MISSION_TRACK_LENGTH = 86;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 87;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -240,6 +242,7 @@ public interface ParserConstants {
     "<MISSION_MEMBER>",
     "<MISSION_LEADER>",
     "<MISSION_PROPERTY_LIST_KEY>",
+    "<MISSION_TRACK_TYPE>",
     "<SAMPLING_UNIT_KEY>",
     "<SAMPLING_UNIT_ATTRIBUTE_STR_KEY>",
     "<SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY>",

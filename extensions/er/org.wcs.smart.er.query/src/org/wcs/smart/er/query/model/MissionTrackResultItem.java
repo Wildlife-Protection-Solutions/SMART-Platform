@@ -22,20 +22,14 @@
 package org.wcs.smart.er.query.model;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.query.model.IResultItem;
 
-import com.vividsolutions.jts.geom.LineString;
-
 /**
- * A class to hold the results of a survey waypoint 
- * query.  Each class contains the results for
- * a single observation.  The observation contains
- * a single category and all attributes. Also
- * included are all mission attributes in the query.
- * 
- * 
+ * A class to hold the results of a mission track 
+ * query.   
  * 
  * @author Emily
  * @since 1.0.0
@@ -57,7 +51,6 @@ public class MissionTrackResultItem implements IResultItem{
 	private Date missionStart;
 	private Date missionEnd;
 	private byte[] missionUuid;
-	private String missionLeader;
 	
 	private byte[] samplingUnitUuid;
 	private String samplingUnitId;
@@ -66,7 +59,28 @@ public class MissionTrackResultItem implements IResultItem{
 	private byte[] trackUuid;
 	private Date trackDate;
 	private MissionTrack.TrackType trackType;
-	private LineString track;
+	
+	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
+
+	/**
+	 * Finds the mission property with the associated
+	 * attribute key.
+	 * 
+	 * @param attributeKey the attribute key
+	 * @return the value associated with the attribute given key
+	 */
+	public Object getMissionPropertyValue(String attributeKey){
+		return missionProperties.get(attributeKey);
+	}
+	
+	/**
+	 * Adds a mission property to the observation results 
+	 * @param key the attribute key
+	 * @param value the attribute value
+	 */
+	public void addMissionPropertyValue(String key, Object value){
+		missionProperties.put(key, value);
+	}
 	
 	/**
 	 * Sets the track uuid
@@ -300,14 +314,6 @@ public class MissionTrackResultItem implements IResultItem{
 
 	public void setSamplingUnitBuffer(Double smaplingUnitBuffer) {
 		this.smaplingUnitBuffer = smaplingUnitBuffer;
-	}
-	
-		
-	public LineString getTrack(){
-		return this.track;
-	}
-	public void setTrack(LineString track){
-		this.track = track;
 	}
 	
 	public MissionTrack.TrackType getTrackType(){

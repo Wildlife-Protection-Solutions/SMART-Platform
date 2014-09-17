@@ -107,27 +107,33 @@ public class SurveyQueryColumnManager {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
 		// survey columns 
-		for (SurveyQueryColumn.FixedColumns c : SurveyQueryColumn.FixedColumns.values()){
-			boolean add = true;
-			if (c == SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-					c == SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-				if (sd != null && !sd.getTrackDistanceDirection()){
-					add = false;
-				}
-			}
-			if (c == SurveyQueryColumn.FixedColumns.CA_ID || 
-				c == SurveyQueryColumn.FixedColumns.CA_NAME ){
-				
-				if (!SmartDB.isMultipleAnalysis()){
-					add = false;
-				}
-			}
-			
-			if (add){
-				cols.add(new SurveyQueryColumn(c));
-			}
+		if (SmartDB.isMultipleAnalysis()){
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME));
 		}
-		
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SMAPLING_UNIT_BUFFER));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_X));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_Y));
+		if (sd == null || !sd.getTrackDistanceDirection()){
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE));
+		}
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT));
+				
 		//mission property columns
 		if (sd == null){
 			Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
@@ -215,27 +221,32 @@ public class SurveyQueryColumnManager {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
 		// survey columns 
-		for (SurveyQueryColumn.FixedColumns c : SurveyQueryColumn.FixedColumns.values()){
-			boolean add = true;
-			if (c == SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-					c == SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-				if (sd != null && !sd.getTrackDistanceDirection()){
-					add = false;
-				}
-			}
-			if (c == SurveyQueryColumn.FixedColumns.CA_ID || 
-				c == SurveyQueryColumn.FixedColumns.CA_NAME ){
-				
-				if (!SmartDB.isMultipleAnalysis()){
-					add = false;
-				}
-			}
-			
-			if (add){
-				cols.add(new SurveyQueryColumn(c));
-			}
+		if (SmartDB.isMultipleAnalysis()){
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME));
 		}
-		
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SMAPLING_UNIT_BUFFER));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_X));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_Y));
+		if (sd == null || !sd.getTrackDistanceDirection()){
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE));
+		}
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT));
+						
 		//mission property columns
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
 
@@ -452,6 +463,9 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END));
+		
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT));
+		
 	
 		//mission property columns
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){

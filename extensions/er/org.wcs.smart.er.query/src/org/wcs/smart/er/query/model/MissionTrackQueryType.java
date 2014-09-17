@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.filter.MissionTrackDateField;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
@@ -42,7 +43,6 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -82,7 +82,7 @@ public class MissionTrackQueryType implements IQueryType {
 
 	@Override
 	public Image getImage() {
-		return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSION_ICON);
+		return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSIONTRACK_ICON);
 	}
 
 	@Override
@@ -159,7 +159,7 @@ public class MissionTrackQueryType implements IQueryType {
 	 * @return
 	 */
 	public static IDateFieldFilter[] validDateFields(){
-		return new IDateFieldFilter[]{MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
+		return new IDateFieldFilter[]{MissionTrackDateField.INSTANCE, MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
 	}
 
 }

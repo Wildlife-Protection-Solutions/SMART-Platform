@@ -1383,5 +1383,10 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			throws SQLException {
 		return null;
 	}
+	
+	@Override
+	public String getFilterTablesJoinColum(){
+		return "wp_uuid"; //$NON-NLS-1$
+	}
 
 }
