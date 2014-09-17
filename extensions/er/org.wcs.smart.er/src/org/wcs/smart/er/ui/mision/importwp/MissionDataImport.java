@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -83,7 +84,7 @@ public class MissionDataImport {
 				swp.getWaypoint().setDateTime(wpdt);
 			}
 		}
-		message = MessageFormat.format("Imported {0} waypoints.", new Object[]{addedWaypoints.size()});
+		message = MessageFormat.format(Messages.MissionDataImport_ResultMessage, new Object[]{addedWaypoints.size()});
 		
 		//start up a save job
 		SaveWaypointJob saveJob = new SaveWaypointJob();
@@ -102,7 +103,6 @@ public class MissionDataImport {
 	}
 
 	public static List<MissionTrack> convertTracks(List<Waypoint> waypoints, Mission mission) {
-		// TODO Auto-generated method stub
 		Date start = SmartUtils.getDatePart(mission.getStartDate(), false);
 		Date end = SmartUtils.getDatePart(mission.getEndDate(), false);
 

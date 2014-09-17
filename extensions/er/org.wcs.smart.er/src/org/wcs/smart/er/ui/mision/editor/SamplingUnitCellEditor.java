@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -64,7 +66,7 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 		try {
 			loadValues.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			EcologicalRecordsPlugIn.log("SamplingUnit load failed.", e); //$NON-NLS-1$
 			e.printStackTrace();
 		}
 		input = loadValues.getUnits();
@@ -82,7 +84,7 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 	}
 
 	public String getStringValue(SamplingUnit unit) {
-		return unit != null ? unit.getId() : "(None)";
+		return unit != null ? unit.getId() : Messages.SamplingUnitCellEditor_None;
 	}
 
 	public Integer getIndex(SamplingUnit unit) {
@@ -95,7 +97,7 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 		private List<SamplingUnit> units;
 		
 		public LoadSamplingUnitJob() {
-			super("loading sampling units");
+			super(Messages.SamplingUnitCellEditor_LoadJobTitle);
 		}
 		
 		public void setSurveyDesign(SurveyDesign surveyDesign) {

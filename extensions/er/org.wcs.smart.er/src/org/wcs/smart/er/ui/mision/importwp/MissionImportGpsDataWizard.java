@@ -32,6 +32,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.IImportEngine;
@@ -61,38 +62,6 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 	@Override
 	public boolean processFinish() {
 		final ImportType type = getType();
-//		final ImportOption currentOption = getImportOption();
-		if (type == ImportType.TRACK) {
-			//TODO: impl
-//			if (currentOption == ImportOption.DATE || currentOption == ImportOption.SELECT){
-//				if (currentDay.getTrack() != null){
-//					//warn user
-//					if (!MessageDialog.openConfirm(getShell(), "Import", Messages.PatrolLegDayInputComposite_SetTrackDialog_Message)){
-//						return false;
-//					}
-//				}
-//			}
-//			if (currentOption == ImportOption.ALL){
-//				boolean warn = false;
-//				for(PatrolLeg l : currentDay.getPatrolLeg().getPatrol().getLegs()){
-//					for(PatrolLegDay d : l.getPatrolLegDays()){
-//						if (d.getTrack() != null){
-//							warn = true;
-//							break;
-//						}
-//					}
-//					if (warn) break;
-//				}
-//				
-//				if (warn){
-//					//warn user
-//					if (!MessageDialog.openConfirm(getShell(), "Import", Messages.ImportGpsDataWizard_TrackWarningOverwriteNew)){
-//						return false;
-//					}
-//				}
-//			}
-		}
-		
 		final String[] successMessage =  new String[]{null};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		
@@ -114,7 +83,7 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 
 								@Override
 								public void run() {
-									MessageDialog.openWarning(getShell(), "Import", MessageFormat.format("No {0} were found to import. This could be due to date formats or other GPS issues.  Try importing all {1} and selecting desired waypoints.", new  Object[]{getType().guiName, getType().guiName}));
+									MessageDialog.openWarning(getShell(), Messages.MissionImportGpsDataWizard_DialogTitle, MessageFormat.format(Messages.MissionImportGpsDataWizard_NoData, new  Object[]{getType().guiName, getType().guiName}));
 								}});
 							return;
 						}
@@ -134,11 +103,11 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 				}
 			});
 		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.displayLog("Could not import data from gpx " + ex.getLocalizedMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionImportGpsDataWizard_ImportError + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		if (successMessage[0] != null) {
-			MessageDialog.openInformation(getShell(), "Import", "Import Complete." + " " + successMessage[0]);
+			MessageDialog.openInformation(getShell(), Messages.MissionImportGpsDataWizard_DialogTitle, Messages.MissionImportGpsDataWizard_SuccessMessage + " " + successMessage[0]); //$NON-NLS-1$
 			return true;
 		}else{
 			return false;

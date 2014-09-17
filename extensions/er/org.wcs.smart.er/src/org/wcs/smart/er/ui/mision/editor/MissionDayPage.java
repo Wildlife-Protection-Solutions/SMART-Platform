@@ -38,6 +38,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -105,7 +106,7 @@ public class MissionDayPage extends EditorPart {
 		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
-		StringBuilder text = new StringBuilder("Mission:");
+		StringBuilder text = new StringBuilder(Messages.MissionDayPage_Mission);
 		text.append(" "); //$NON-NLS-1$
 		text.append(dayFormat.format(day));
 		text.append(", "); //$NON-NLS-1$

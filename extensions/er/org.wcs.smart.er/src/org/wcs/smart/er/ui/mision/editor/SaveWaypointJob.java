@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -49,7 +50,7 @@ public class SaveWaypointJob extends Job {
 	private Collection<SurveyWaypoint> waypoints;
 
 	public SaveWaypointJob() {
-		super("Saving waypoints");
+		super(Messages.SaveWaypointJob_Title);
 	}
 
 	public void setWaypoints(Collection<SurveyWaypoint> points) {
@@ -97,7 +98,7 @@ public class SaveWaypointJob extends Job {
 			if (saveSession.getTransaction().isActive()) {
 				saveSession.getTransaction().rollback();
 			}
-			EcologicalRecordsPlugIn.displayLog("Error saving mission waypoints. " + ex.getLocalizedMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.SaveWaypointJob_Error + ex.getLocalizedMessage(), ex);
 		} finally {
 			saveSession.close();
 		}

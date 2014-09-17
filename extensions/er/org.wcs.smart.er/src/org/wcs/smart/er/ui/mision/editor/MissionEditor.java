@@ -250,7 +250,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 									EcologicalRecordsPlugIn.displayLog("Error occurred while loading editor." + t.getLocalizedMessage(), t);
 								}
 							} catch (Exception ex) {
-								EcologicalRecordsPlugIn.log("Failure",ex); //$NON-NLS-1$
+								EcologicalRecordsPlugIn.log("Failure", ex); //$NON-NLS-1$
 							}
 
 						}
