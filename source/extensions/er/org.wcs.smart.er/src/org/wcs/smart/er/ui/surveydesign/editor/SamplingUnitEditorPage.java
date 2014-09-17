@@ -297,12 +297,8 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	@Override
 	public void createPartControl(Composite parent) {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		form = toolkit.createForm(container);
+
+		form = toolkit.createForm(parent);
 		form.setText(Messages.SamplingUnitEditorPage_FormName);
 		GridLayout gl = new GridLayout();
 		gl.marginWidth = gl.marginHeight = 0;

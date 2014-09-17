@@ -34,6 +34,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
@@ -138,7 +139,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 			}catch (Exception ex2){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex2);
 			}
-			EcologicalRecordsPlugIn.displayLog("Error saving new survey design." + "\n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.NewSurveyDesignWizard_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		return false;
 	}
@@ -153,7 +154,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     @SuppressWarnings("unchecked")
 	public void addPages() {
     	
-    	setWindowTitle("New Survey Design");
+    	setWindowTitle(Messages.NewSurveyDesignWizard_WindowTitle);
     	
     	List<ConfigurableModel> models = session.createCriteria(ConfigurableModel.class)
     			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$

@@ -87,6 +87,7 @@ import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.handlers.NewMissionHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Survey design editor page that displays all the 
@@ -138,12 +139,8 @@ public class SurveyDesignDataPage extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit.setBorderStyle(SWT.BORDER);
-		
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
-		container.setLayout(new GridLayout());
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		form = toolkit.createForm(container);
+
+		form = toolkit.createForm(parent);
 		form.setText(Messages.SamplingUnitEditorPage_FormName);
 		form.getBody().setLayout(new GridLayout());
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

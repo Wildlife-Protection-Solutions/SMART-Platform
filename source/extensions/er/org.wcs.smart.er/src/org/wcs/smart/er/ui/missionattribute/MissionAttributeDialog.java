@@ -48,6 +48,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -97,14 +98,14 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 			return true;
 		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Error saving mission attribute modifications." + " \n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionAttributeDialog_SaveError + " \n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return false;
 		}
 	}
 	
 	public boolean close(){
 		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), "Close", "There are unsaved changes.  Would you like to save your changes before closing?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.MissionAttributeDialog_CloseDialogTitle, Messages.MissionAttributeDialog_CloseMsg)){
 				if (!saveChanges()){
 					return false;
 				}
@@ -125,10 +126,12 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lstAttributes = new TableViewer(main, SWT.BORDER);
+		lstAttributes = new TableViewer(main, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
 		lstAttributes.setLabelProvider(new AttributeLabelProvider());
 		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lstAttributes.getControl().getLayoutData()).heightHint = 200;
+		((GridData)lstAttributes.getControl().getLayoutData()).widthHint = 300;
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -164,9 +167,9 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		initData();
 		enableButtons();
 		
-		setTitle("Mission Attributes");
-		setMessage("A list of all possible mission attributes for the Conservation Area");
-		getShell().setText("Mission Attributes");
+		setTitle(Messages.MissionAttributeDialog_Title);
+		setMessage(Messages.MissionAttributeDialog_Message);
+		getShell().setText(Messages.MissionAttributeDialog_Title);
 		return main;
 	}
 	
@@ -183,6 +186,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 			session.save(ma);
 			
 			lstAttributes.refresh();
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		}
 	}
 
@@ -193,7 +197,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 			return;
 		}
 		
-		if (!MessageDialog.openQuestion(getParentShell(), "Delete", MessageFormat.format("Are you sure you want to remove the attribute {0}?", new Object[]{ma.getName()}) )){
+		if (!MessageDialog.openQuestion(getParentShell(), Messages.MissionAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.MissionAttributeDialog_DeleteMessage, new Object[]{ma.getName()}) )){
 			//do not delete
 			return;
 		}
@@ -202,9 +206,10 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 				attributes.remove(ma);
 				session.delete(ma);
 				lstAttributes.refresh();
+				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		}catch (Exception ex){
-			MessageDialog.openError(getShell(), "Delete", MessageFormat.format("{0} cannot be removed.", new Object[]{ma.getName()}) + " " + ex.getMessage());
+			MessageDialog.openError(getShell(), Messages.MissionAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.MissionAttributeDialog_DeleteError, new Object[]{ma.getName()}) + " " + ex.getMessage()); //$NON-NLS-1$
 		}
 	}
 	
@@ -212,7 +217,9 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		MissionAttribute ma = (MissionAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma != null){
 			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes, session);
-			dialog.open();
+			if (dialog.open() == EditMissionAttributeDialog.OK){
+				getButton(IDialogConstants.OK_ID).setEnabled(true);
+			}
 			lstAttributes.refresh();
 		}
 	}
@@ -224,6 +231,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		btnEdit.setEnabled(!isSelected);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void initData(){
 		attributes = session.createCriteria(MissionAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
@@ -245,7 +253,6 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		}else if (e.widget == btnEdit){
 			editAttribute();
 		}
-		getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
 
 	@Override

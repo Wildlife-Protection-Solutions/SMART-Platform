@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.missionattribute;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -132,11 +134,21 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 				for (org.wcs.smart.ca.Label l : i.getNames()){
 					item.updateName(l.getLanguage(), l.getValue());
 				}
+				item.setUuid(i.getUuid());
 				copyItems.add(item);
 			}
 		}
 		
 		
+	}
+	
+	@Override
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		if (p.x > 600){
+			p.x = 600;
+		}
+		return p;
 	}
 	
 	@Override
@@ -154,7 +166,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		Composite composite = new Composite(myparent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		composite.setLayout(new GridLayout(3, false));
-
+		
 		/* Type */
 		Label lblNewLabel_2 = new Label(composite, SWT.NONE);
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -199,11 +211,9 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 			public void itemModified() {
 				((AttributeLabelProvider)lstViewer.getLabelProvider()).setLanguage(nameKeyControls.getSelectedLanguage());
 				lstViewer.refresh();
-				
 				validate();
 			}
-		});
-		
+		});				
 		listPanel = new Composite(composite, SWT.NONE);
 		listPanel.setLayout(new GridLayout(2, false));
 		listPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
@@ -214,6 +224,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
+		
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -239,7 +250,6 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addSelectionListener(this);
-		
 		
 		if (toUpdate.getKeyId() == null){
 			getShell().setText(Messages.EditMissionAttributeDialog_NewTitle);
@@ -300,27 +310,50 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 	 */
 	private void updateAttribute(){
 		nameKeyControls.updateFields(toUpdate);
-		
 		toUpdate.setType(getType());
-		
-		//remove existing items
-		if (toUpdate.getAttributeList() != null){
-			for (MissionAttributeListItem mi : toUpdate.getAttributeList()){
-				mi.setAttribute(null);
-			}
-			toUpdate.getAttributeList().clear();
-		}
 		
 		if (toUpdate.getType() == AttributeType.LIST){
 			if (toUpdate.getAttributeList() == null){
 				toUpdate.setAttributeList(new ArrayList<MissionAttributeListItem>());
 			}
-			//TODO:: add new items
-			for (MissionAttributeListItem li : copyItems){
-				toUpdate.getAttributeList().add(li);
-				li.setAttribute(toUpdate);
+			
+			List<MissionAttributeListItem> toDelete = new ArrayList<MissionAttributeListItem>();
+		
+			for (MissionAttributeListItem mi : toUpdate.getAttributeList()){
+				MissionAttributeListItem  found = null;
+				for (MissionAttributeListItem copy : copyItems){
+					if (Arrays.equals(mi.getUuid(), copy.getUuid())){
+						found = copy;
+						break;
+					}
+				}
+				if (found == null){
+					toDelete.add(mi);
+				}else{
+					//copy info from copy to found
+					mi.setAttribute(found.getAttribute());
+					mi.setKeyId(found.getKeyId());
+					mi.setListOrder(found.getListOrder());
+					mi.setName(found.getName());
+					
+					for (org.wcs.smart.ca.Label l : found.getNames()){
+						mi.updateName(l.getLanguage(), l.getValue());
+					}
+				}
+				
+			}
+			for (MissionAttributeListItem d : toDelete){
+				toUpdate.getAttributeList().remove(d);
+				d.setAttribute(null);
+			}
+			for (MissionAttributeListItem copy : copyItems){
+				if (copy.getUuid() == null){
+					toUpdate.getAttributeList().add(copy);
+					copy.setAttribute(toUpdate);
+				}
 			}
 		}
+		
 	}
 	
 	@Override

@@ -24,6 +24,8 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 import java.text.DateFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -50,10 +52,13 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -85,17 +90,25 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit.setBorderStyle(SWT.BORDER);
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
-
-		toolkit.paintBordersFor(container);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		form = toolkit.createForm(container);
+		form = toolkit.createForm(parent);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		form.getBody().setLayout(new GridLayout(1, true));
+		GridLayout glayout = new GridLayout();
+		glayout.verticalSpacing = 0;
+		glayout.marginHeight = 0;
+		form.getBody().setLayout(glayout);
 
+//		if (canEdit()) {
+			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.SurveyDesignSummaryEditorPage_TranslateLink, SWT.WRAP);
+			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					translateName();
+				}
+			});
+//		}
+		
 		Section summarySection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
 		summarySection.setLayout(new GridLayout());
 		summarySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -117,7 +130,14 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(content, PanelType.NAME); 
+		Hyperlink editLink = createLink(content);
+		editLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				translateName();
+			}
+		});
+		
 		
 		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Status);
 		txtStatus = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
@@ -282,14 +302,20 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 
 	}
 	
-	private Hyperlink createEditLink(Composite parent, final PanelType panelType) {
+	private Hyperlink createLink(Composite parent){
 		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
 		
-//		if (!this.parentEditor.canEdit()) {
-//			editLink.setEnabled(false);
-//			editLink.setVisible(false);
-//		}
+	//		if (!this.parentEditor.canEdit()) {
+	//			editLink.setEnabled(false);
+	//				editLink.setVisible(false);
+	//			}
 		
+		return editLink;
+	}
+	
+	
+	private Hyperlink createEditLink(Composite parent, final PanelType panelType) {
+		Hyperlink editLink = createLink(parent);
 		if (panelType != null) {
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
@@ -345,5 +371,29 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
+	/*
+	 * Opens the translate names dialog for modifying
+	 * the entity type name.
+	 */
+	private void translateName() {
+//		if (!EntityPermissionManager.canCreateEditDeleteTypes()) return;
+		final SurveyDesign toEdit = parentEditor.getSurveyDesign();
+		
+		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
+				getEditorSite().getShell(), toEdit);
+		
+		if (dialog.open() == IDialogConstants.OK_ID) {
+			SaveSurveyDesignJob saveJob = new SaveSurveyDesignJob(toEdit);    
+	    	saveJob.schedule();
+	    	try {
+				saveJob.join(); //we don't want to close editor if save failed
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
+	    	if (Status.OK_STATUS.equals(saveJob.getResult())) {
+				SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, toEdit);
+	    	}
+		}
+	}
 }
