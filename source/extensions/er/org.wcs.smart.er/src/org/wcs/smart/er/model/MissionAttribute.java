@@ -35,8 +35,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
@@ -101,7 +99,6 @@ public class MissionAttribute extends NamedKeyItem{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
 	@OrderBy(clause = "list_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<MissionAttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}

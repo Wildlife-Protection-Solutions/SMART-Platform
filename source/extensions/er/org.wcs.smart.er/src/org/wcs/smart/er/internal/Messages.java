@@ -106,6 +106,8 @@ public class Messages extends NLS {
 	public static String EditMissionAttributeDialog_DeleteMessage;
 	public static String EditMissionAttributeDialog_EditMessage;
 	public static String EditMissionAttributeDialog_EditTitle;
+	public static String EditMissionAttributeDialog_MoveDownLabel;
+	public static String EditMissionAttributeDialog_MoveUpLabel;
 	public static String EditMissionAttributeDialog_NewMessage;
 	public static String EditMissionAttributeDialog_NewTitle;
 	public static String EditMissionAttributeDialog_TypeLabel;
