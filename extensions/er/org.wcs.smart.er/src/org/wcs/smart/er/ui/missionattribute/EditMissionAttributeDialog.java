@@ -90,6 +90,9 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 	private Button btnEdit;
 	private Button btnDelete;
 	
+	private Button btnUp;
+	private Button btnDown;
+	
 	private Composite listPanel;
 	
 	private HashMap<Language, String> copyNames;
@@ -224,6 +227,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
+		((GridData)lstViewer.getControl().getLayoutData()).widthHint = 300;
 		
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -250,6 +254,19 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addSelectionListener(this);
+		
+		Label ll = new Label(buttonPnl, SWT.SEPARATOR | SWT.HORIZONTAL);
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnUp = new Button(buttonPnl, SWT.PUSH);
+		btnUp.setText(Messages.EditMissionAttributeDialog_MoveUpLabel);
+		btnUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnUp.addSelectionListener(this);
+		
+		btnDown = new Button(buttonPnl, SWT.PUSH);
+		btnDown.setText(Messages.EditMissionAttributeDialog_MoveDownLabel);
+		btnDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnDown.addSelectionListener(this);
 		
 		if (toUpdate.getKeyId() == null){
 			getShell().setText(Messages.EditMissionAttributeDialog_NewTitle);
@@ -372,6 +389,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		MissionAttributeListItem item = new MissionAttributeListItem();
 		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), item, copyItems,nameKeyControls.getSelectedLanguage());
 		if (dialog.open() == OK){
+			item.setListOrder(copyItems.size());
 			copyItems.add(item);
 			lstViewer.refresh();
 		}
@@ -389,12 +407,20 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		try{
 			if (mi.getUuid() == null || DeleteManager.canDelete(mi, session)){
 				copyItems.remove(mi);
+				reorder();
 				lstViewer.refresh();		
 			}
 		}catch (Exception ex){
 			MessageDialog.openError(getShell(), Messages.EditMissionAttributeDialog_DeleteDialotTitle, MessageFormat.format(Messages.EditMissionAttributeDialog_DeleteError, new Object[]{mi.getName()}) + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 		}
 		
+	}
+	
+	private void reorder(){
+		int i = 0;
+		for (MissionAttributeListItem order : copyItems){
+			order.setListOrder(i++);
+		}
 	}
 	
 	private void editListItem(){
@@ -419,6 +445,34 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 			addListItem();
 		}else if (e.getSource() == btnDelete){
 			deleteListItem();
+		}else if (e.getSource() == btnUp){
+			MissionAttributeListItem mi = (MissionAttributeListItem)((IStructuredSelection)lstViewer.getSelection()).getFirstElement();
+			if (mi == null){
+				return;
+			}
+			int index = copyItems.indexOf(mi);
+			index --;
+			if (index < 0) index = 0;
+			copyItems.remove(mi);
+			copyItems.add(index, mi);
+			reorder();
+			lstViewer.refresh();
+			
+		}else if (e.getSource() == btnDown){
+			MissionAttributeListItem mi = (MissionAttributeListItem)((IStructuredSelection)lstViewer.getSelection()).getFirstElement();
+			if (mi == null){
+				return;
+			}
+			int index = copyItems.indexOf(mi);
+			index ++;
+			copyItems.remove(mi);
+			if (index > copyItems.size()){
+				copyItems.add(mi);
+			}else{
+				copyItems.add(index, mi);
+			}
+			reorder();
+			lstViewer.refresh();
 		}
 	}
 
