@@ -66,6 +66,7 @@ public class SamplingUnitService extends IService {
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
 	private SurveyDesign sd = null;
+	private String cachedName = null;
 	
 	private SamplingUnitServiceInfo info = null;
 	
@@ -77,6 +78,7 @@ public class SamplingUnitService extends IService {
 	 */
 	public SamplingUnitService(SurveyDesign sd){
 		this.sd = sd;
+		this.cachedName = sd.getName();
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(SamplingUnitSourceFactory.SD_UUID.key, this.sd.getUuid());
 		this.url = SamplingUnitServiceExtension.createURL(this.params);
@@ -88,6 +90,14 @@ public class SamplingUnitService extends IService {
 	 */
 	public SurveyDesign getSurveyDesign(){
 		return this.sd;
+	}
+	
+	/**
+	 * The cached survey name.
+	 * @return
+	 */
+	public String getCachedName(){
+		return this.cachedName;
 	}
 	
 	/**
