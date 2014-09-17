@@ -93,6 +93,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -132,7 +133,6 @@ public class MissionDayComposite {
 	private List<SurveyWaypoint> input;
 	
 	private Font okayFont;
-	private Font errorFont;
 	private Hyperlink lnkImportWaypoints;
 	
 	private TableViewer trackTable;
@@ -173,16 +173,16 @@ public class MissionDayComposite {
 	};
 	
 	protected enum OtColumn {
-		ID("Waypoint ID", 1),
-		EAST("X", 2),
-		NORTH("Y", 2),
-		TIME("Time", 2),
-		DIRECTION("Direction", 1),
-		DISTANCE("Distance", 1),
-		SAMPLING_UNIT("Sampling Unit", 4),
-		OBSERVATION("Observation", 4),
-		COMMENT("Comment", 3),
-		ATTACHMENTS("Attachment", 3);
+		ID(Messages.MissionDayComposite_WaypointID, 1),
+		EAST(Messages.MissionDayComposite_X, 2),
+		NORTH(Messages.MissionDayComposite_Y, 2),
+		TIME(Messages.MissionDayComposite_Time, 2),
+		DIRECTION(Messages.MissionDayComposite_Direction, 1),
+		DISTANCE(Messages.MissionDayComposite_Distance, 1),
+		SAMPLING_UNIT(Messages.MissionDayComposite_SamplingUnit, 4),
+		OBSERVATION(Messages.MissionDayComposite_Observation, 4),
+		COMMENT(Messages.MissionDayComposite_Comment, 3),
+		ATTACHMENTS(Messages.MissionDayComposite_Attachment, 3);
 
 		protected String guiName;
 		protected int weight;
@@ -215,7 +215,7 @@ public class MissionDayComposite {
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "StartTime:");
+		toolkit.createLabel(c, Messages.MissionDayComposite_StartTime);
 		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtStartTime);
 		dtStartTime.addSelectionListener(new SelectionAdapter() {
@@ -241,7 +241,7 @@ public class MissionDayComposite {
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "EndTime:");
+		toolkit.createLabel(c, Messages.MissionDayComposite_EndTime);
 		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtEndTime);
 		dtEndTime.addSelectionListener(new SelectionAdapter() {
@@ -268,7 +268,7 @@ public class MissionDayComposite {
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "RestMinutes:");
+		toolkit.createLabel(c, Messages.MissionDayComposite_RestMinutes);
 		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gd.widthHint = 30;
@@ -315,12 +315,11 @@ public class MissionDayComposite {
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, "Total Hours:");
-		lblTotalHours = toolkit.createLabel(c, "InvalidTotalHours");
+		lblTotalHours = toolkit.createLabel(c, "Invalid Total Hours");
 		okayFont = lblTotalHours.getFont();
 		
 		FontData fd = okayFont.getFontData()[0];
 		fd.setStyle(SWT.BOLD);
-		errorFont = new Font(Display.getDefault(), fd);
 		
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.widthHint = 30;
@@ -330,15 +329,15 @@ public class MissionDayComposite {
 		trackComp.setLayout(new GridLayout(4, false));
 		
 		
-		toolkit.createLabel(trackComp, "Distance Travelled (km):");
+		toolkit.createLabel(trackComp, Messages.MissionDayComposite_DistanceTraveled);
 		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
 		txtDistance.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
-		toolkit.createLabel(trackComp, "").setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+		toolkit.createLabel(trackComp, "").setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1)); //$NON-NLS-1$
 
-		toolkit.createLabel(trackComp, "Tracks:");
+		toolkit.createLabel(trackComp, Messages.MissionDayComposite_Tracks);
 		Table trTable = toolkit.createTable(trackComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		trackTable = new TableViewer(trTable);
 		trackTable.setContentProvider(ArrayContentProvider.getInstance());
@@ -347,7 +346,7 @@ public class MissionDayComposite {
 		((GridData)trTable.getLayoutData()).minimumHeight = 40;
 		((GridData)trTable.getLayoutData()).heightHint = 40;
 		((GridData)trTable.getLayoutData()).widthHint = 120;
-		lnkEditTrack = toolkit.createHyperlink(trackComp, "edit", SWT.NONE);
+		lnkEditTrack = toolkit.createHyperlink(trackComp, Messages.MissionDayComposite_Link_Edit, SWT.NONE);
 		lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showEditTrackDialog();
@@ -356,8 +355,8 @@ public class MissionDayComposite {
 		
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
 		observationHcomp.setLayout(new GridLayout(2, false));
-		toolkit.createLabel(observationHcomp, "Observations/Waypoints");
-		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, "Import Waypoints ...", SWT.NONE);
+		toolkit.createLabel(observationHcomp, Messages.MissionDayComposite_ObservationsWaypoints);
+		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, Messages.MissionDayComposite_ImportWaypoints, SWT.NONE);
 		lnkImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showImportWaypointWizard();
@@ -380,7 +379,7 @@ public class MissionDayComposite {
 		
 		Composite buttonComp = toolkit.createComposite(mainComposite);
 		buttonComp.setLayout(new GridLayout(3, false));
-		btnAddWaypoint = toolkit.createButton(buttonComp, "Add Waypoint", SWT.PUSH);
+		btnAddWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_AddWaypoint, SWT.PUSH);
 		btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -389,14 +388,14 @@ public class MissionDayComposite {
 		});
 		
 		
-		btnDeleteWaypoint = toolkit.createButton(buttonComp, "Delete Waypoint", SWT.PUSH);
+		btnDeleteWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_DeleteWaypoint, SWT.PUSH);
 		btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				deleteSelectedWaypoints();
 			}
 		});
 		
-		btnMoveWaypoint = toolkit.createButton(buttonComp, "Move Waypoint", SWT.PUSH);
+		btnMoveWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_MoveWaypoint, SWT.PUSH);
 		btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				moveSelectedWaypoints();
@@ -627,18 +626,18 @@ public class MissionDayComposite {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName("Loading Wizard");
+					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
 					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
 					
 					if (dialog != null) {
-						monitor.setTaskName("Displaying Input Wizard");
+						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
 						dialog.open();
 					}
 				}
 			});
 		} catch (Exception ex) {
 			dialog = null;
-			EcologicalRecordsPlugIn.displayLog("Error launching import waypoint wizard." + ex.getLocalizedMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionDayComposite_ImportWizardError + ex.getLocalizedMessage(), ex);
 				}
 		
 	}
@@ -689,7 +688,7 @@ public class MissionDayComposite {
 	}
 
 	protected void deleteSelectedWaypoints() {
-		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Delete Waypoints", "Are you sure you want to delete the selected waypoints? This action cannot be undone.");
+		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.MissionDayComposite_DeleteDialog_Title, Messages.MissionDayComposite_DeleteDialog_Message);
 		if (!doDel){
 			return;
 		}
@@ -754,7 +753,7 @@ public class MissionDayComposite {
 		} else if (column == OtColumn.OBSERVATION) {
 			if (wp.getObservations() == null
 					|| wp.getObservations().size() == 0) {
-				return "(None)";
+				return Messages.MissionDayComposite_None;
 			} else {
 				return wp.getObservationsAsString();
 			}
@@ -776,13 +775,13 @@ public class MissionDayComposite {
 				wpCnt += wp.getAttachments().size();
 			}
 			if (wpCnt == 0 ) {
-				return "(None)";
+				return Messages.MissionDayComposite_None;
 			} else {
-				return MessageFormat.format("{0,number,integer} Files", wpCnt);
+				return MessageFormat.format(Messages.MissionDayComposite_Files, wpCnt);
 			}
 		} else if (column == OtColumn.SAMPLING_UNIT) {
 			SamplingUnit su = element.getSamplingUnit();
-			return su != null ? su.getId() : "(None)";
+			return su != null ? su.getId() : Messages.MissionDayComposite_None;
 		}
 
 		return ""; //$NON-NLS-1$

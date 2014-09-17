@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.ui.map.location.MapComposite;
 
@@ -75,7 +76,7 @@ public class TracksComposite extends Composite {
 				return super.getText(element);
 			}
 		});
-		columnId.getColumn().setText("Track Id");
+		columnId.getColumn().setText(Messages.TracksComposite_TrackId);
 		columnId.getColumn().setResizable(true);
 		columnId.getColumn().setMoveable(false);
 		columnId.getColumn().setWidth(120);
@@ -91,7 +92,7 @@ public class TracksComposite extends Composite {
 				return super.getText(element);
 			}
 		});
-		columnAssoc.getColumn().setText("Association");
+		columnAssoc.getColumn().setText(Messages.TracksComposite_Association);
 		columnAssoc.getColumn().setResizable(true);
 		columnAssoc.getColumn().setMoveable(false);
 		columnAssoc.getColumn().setWidth(120);
@@ -115,7 +116,7 @@ public class TracksComposite extends Composite {
 		linksCmp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		Hyperlink lnk = new Hyperlink(linksCmp, SWT.NONE);
 		lnk.setUnderlined(true);
-		lnk.setText("import");
+		lnk.setText(Messages.TracksComposite_Import);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		lnk.addHyperlinkListener(new IHyperlinkListener() {
 			@Override
@@ -136,7 +137,7 @@ public class TracksComposite extends Composite {
 		
 		lnk = new Hyperlink(linksCmp, SWT.NONE);
 		lnk.setUnderlined(true);
-		lnk.setText("split");
+		lnk.setText(Messages.TracksComposite_Split);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		lnk.addHyperlinkListener(new IHyperlinkListener() {
 			@Override
@@ -157,7 +158,7 @@ public class TracksComposite extends Composite {
 
 		lnk = new Hyperlink(linksCmp, SWT.NONE);
 		lnk.setUnderlined(true);
-		lnk.setText("edit");
+		lnk.setText(Messages.TracksComposite_Edit);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		lnk.addHyperlinkListener(new IHyperlinkListener() {
 			@Override

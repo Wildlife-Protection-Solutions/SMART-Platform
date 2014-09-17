@@ -72,7 +72,7 @@ public class SurveyComposite extends MissionComposite{
 			@Override
 			public String getText(Object element){
 				if (element instanceof Survey){
-					return ((Survey) element).getId() + " [" + ((Survey)element).getSurveyDesign().getName() + "]";
+					return ((Survey) element).getId() + " [" + ((Survey)element).getSurveyDesign().getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
@@ -78,7 +79,7 @@ public class MissionCsvImportEngine extends CsvImportEngine {
 					max++;
 				}
 			}
-			monitor.setTaskName(MessageFormat.format("Saving {0} waypoints", new Object[]{waypoints.size()}));
+			monitor.setTaskName(MessageFormat.format(Messages.MissionCsvImportEngine_SavingWaypoints, new Object[]{waypoints.size()}));
 			return MissionDataImport.saveWaypoints(option, mission, date, waypoints);
 		}
 		return null;

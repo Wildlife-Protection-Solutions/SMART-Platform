@@ -45,6 +45,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
@@ -114,7 +115,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			newWaypoint.getWaypoint().setX(p.getX());
 			newWaypoint.getWaypoint().setY(p.getY());
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Error saving waypoint." + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.AddWaypointDialog_SaveError + ex.getLocalizedMessage(), ex);
 			return;
 		}
 		super.okPressed();
@@ -136,7 +137,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		
 		
 		Label lbl = new Label(waypointComp, SWT.NONE);
-		lbl.setText("Projection:");
+		lbl.setText(Messages.AddWaypointDialog_Projection);
 
 		
 		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN);
@@ -177,7 +178,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		});
 		
 		lbl = new Label(waypointComp, SWT.NONE);
-		lbl.setText("Waypoint ID:");
+		lbl.setText(Messages.AddWaypointDialog_WaypointID);
 		
 		ModifyListener validation = new ModifyListener() {
 			@Override
@@ -201,7 +202,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		});
 		
 		lbl = new Label(waypointComp, SWT.NONE);
-		lbl.setText("X:");
+		lbl.setText(Messages.AddWaypointDialog_X);
 		txtX = new Text(waypointComp, SWT.BORDER);
 		txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if(x != 0)txtX.setText(String.valueOf(x));
@@ -217,7 +218,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		});
 		
 		lbl = new Label(waypointComp, SWT.NONE);
-		lbl.setText("Y:");
+		lbl.setText(Messages.AddWaypointDialog_Y);
 		txtY = new Text(waypointComp, SWT.BORDER);
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if(y != 0)txtY.setText(String.valueOf(y));
@@ -232,9 +233,9 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			}
 		});
 		
-		setMessage("Add a new waypoint.");
-		setTitle("Add Waypoints");
-		super.getShell().setText("Add Waypoints");
+		setMessage(Messages.AddWaypointDialog_Message);
+		setTitle(Messages.AddWaypointDialog_Title);
+		super.getShell().setText(Messages.AddWaypointDialog_Title);
 		return parent;
 	}
 	
@@ -267,47 +268,47 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private String findError(){
 		CoordinateReferenceSystem sourceCrs = null;
 		if (lstProjections.getSelection().isEmpty()){
-			return "Projection must be selected.";
+			return Messages.AddWaypointDialog_EmptyProjectionError;
 		}
 		try{
 			sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs(); 
 		}catch (Exception ex){
-			return "Could not parse CRS: " + ex.getLocalizedMessage();
+			return Messages.AddWaypointDialog_ParseCRSError + ex.getLocalizedMessage();
 		}
 		
 		if (txtWaypointId.getText().trim().length() == 0){
-			return "Waypoint id must be specified.";
+			return Messages.AddWaypointDialog_EmptyWaypointIDError;
 		}
 		try{
 			Integer.parseInt(txtWaypointId.getText());
 		}catch (NumberFormatException ex){
-			return "Invalid Waypoint ID. The Waypoint ID must be an integer.";
+			return Messages.AddWaypointDialog_InvalidWaypointIDError;
 		}
 		
 		if (this.txtX.getText().trim().length() == 0){
-			return "X Coordinate  must be specified.";
+			return Messages.AddWaypointDialog_EmptyXError;
 		}
 
 		try{
 			Double.parseDouble(txtX.getText());
 		}catch (NumberFormatException ex){
-			return "Invalid X coordinate value.";
+			return Messages.AddWaypointDialog_InvalidXError;
 		}
 		
 		if (this.txtY.getText().trim().length() == 0){
-			return "Y Coordinate  must be specified.";
+			return Messages.AddWaypointDialog_EmptyYError;
 		}
 		try{
 			Double.parseDouble(txtY.getText());
 		}catch (NumberFormatException ex){
-			return "Invalid Y coordinate value.";
+			return Messages.AddWaypointDialog_InvalidYError;
 		}
 		
 		try{
 			Point point = gf.createPoint(new Coordinate(x,y));
 			JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 		}catch (Exception ex){
-			return "Invalid x,y values. " + ex.getLocalizedMessage();
+			return Messages.AddWaypointDialog_InvalidXYError + ex.getLocalizedMessage();
 		}
 		
 		return null;

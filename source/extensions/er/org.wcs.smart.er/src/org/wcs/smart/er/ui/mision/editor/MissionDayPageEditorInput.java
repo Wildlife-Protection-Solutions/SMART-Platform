@@ -28,6 +28,7 @@ import java.util.Date;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.wcs.smart.er.internal.Messages;
 
 /**
  * {@link IEditorInput} for {@link MissionDayPage}
@@ -65,7 +66,7 @@ public class MissionDayPageEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
-		return MessageFormat.format("Mission day {0}", DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
+		return MessageFormat.format(Messages.MissionDayPageEditorInput_Name, DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class MissionDayPageEditorInput implements IEditorInput {
 
 	@Override
 	public String getToolTipText() {
-		return MessageFormat.format("edit mission day data for mission day {0}", DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
+		return MessageFormat.format(Messages.MissionDayPageEditorInput_Tooltip, DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
 	}
 
 }

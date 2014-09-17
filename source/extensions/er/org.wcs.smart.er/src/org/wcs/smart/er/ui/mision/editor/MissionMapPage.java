@@ -40,6 +40,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -52,7 +53,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
-	private Job addLayerJob = new Job("Add Layers Job") {
+	private Job addLayerJob = new Job(Messages.MissionMapPage_AddLayersJob_Title) {
 		
 		private IViewportModelListener initListener;
 		
@@ -79,7 +80,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 	    		getMap().getViewportModel().addViewportModelListener(initListener);
 				
 			} catch (IOException e) {
-				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, "Error loading pages", e);
+				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, Messages.MissionMapPage_AddLayersJob_Error, e); //$NON-NLS-1$
 			}
 			return Status.OK_STATUS;
 		}
@@ -89,14 +90,14 @@ public class MissionMapPage extends SmartMapEditorPart {
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job("Refresh Mission Layers") {
+    private Job refreshJob = new Job(Messages.MissionMapPage_RefreshLayersJob_Title) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (missionService != null){
 				try {
 					missionService.refresh(null);
 				} catch (IOException e) {
-					EcologicalRecordsPlugIn.log("Error refreshing map layers", e);
+					EcologicalRecordsPlugIn.log(Messages.MissionMapPage_RefreshLayersJob_Error, e);
 				}
 			}
 			//clear selection

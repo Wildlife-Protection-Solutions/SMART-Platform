@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 
 /**
@@ -43,9 +44,9 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite comp = (Composite) super.createDialogArea(parent);
 
-		setTitle("Tracks");
-		getShell().setText("Tracks");
-		setMessage("Edit tracks");
+		setTitle(Messages.MissionTrackEditDialog_Title);
+		getShell().setText(Messages.MissionTrackEditDialog_Title);
+		setMessage(Messages.MissionTrackEditDialog_Message);
 
 		new TracksComposite(comp);
 		return comp;
