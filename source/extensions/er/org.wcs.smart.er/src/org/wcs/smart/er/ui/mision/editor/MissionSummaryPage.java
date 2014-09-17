@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -29,6 +31,7 @@ import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -66,7 +69,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	private Text txtSurveyId;
 	private Text txtComment;
 	private Text txtId;
-	private ListViewer lstMembers;
+	private TableViewer lstMembers;
 	private TableViewer tblProperties;
 	private Form form;
 	
@@ -152,12 +155,26 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		Label l = toolkit.createLabel(left, "Members:");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		lstMembers = new ListViewer(left, SWT.BORDER);
+		lstMembers = new TableViewer(left, SWT.BORDER);
 		lstMembers.setContentProvider(ArrayContentProvider.getInstance());
 		lstMembers.setLabelProvider(new LabelProvider(){
 			@Override
+			public Image getImage(Object element){
+				if (element instanceof MissionMember){
+					if (((MissionMember) element).getIsLeader()){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON);
+					}
+					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_MEMBER_ICON);
+				}
+				return null;
+			}
+			
+			@Override
 			public String getText(Object element){
 				if (element instanceof MissionMember){
+					if (((MissionMember) element).getIsLeader()){
+						return MessageFormat.format("[Leader] {0}", new Object[]{((MissionMember)element).getMember().getFullLabel()});
+					}
 					return ((MissionMember)element).getMember().getFullLabel();
 				}
 				return super.getText(element);
