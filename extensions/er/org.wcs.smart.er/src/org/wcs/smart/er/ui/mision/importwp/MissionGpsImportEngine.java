@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
@@ -71,12 +72,12 @@ public class MissionGpsImportEngine extends GpsImportEngine {
 			List<MissionTrack> tracks  = new ArrayList<MissionTrack>();
 			if (option == ImportOption.ALL) {
 				tracks = MissionDataImport.convertTracks(waypoints, mission);
-				message = MessageFormat.format("Imported {0} tracks.", new Object[]{tracks.size()});
-			}else{
+				message = MessageFormat.format(Messages.MissionImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
+			} else {
 				MissionTrack track = MissionDataImport.convertToTrack(waypoints);
 				track.setDate(date);
 				tracks.add(track);
-				message = "Imported track for current day.";
+				message = Messages.MissionImportEngine_ImportSingleTrack;
 			}
 			MissionDataImport.saveTracks(mission, tracks);
 		}

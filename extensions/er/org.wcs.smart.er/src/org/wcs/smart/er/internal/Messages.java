@@ -187,6 +187,8 @@ public class Messages extends NLS {
 	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
 	public static String MissionEmployeeComposite_Title;
+	public static String MissionImportEngine_ImportMultiTrack;
+	public static String MissionImportEngine_ImportSingleTrack;
 	public static String MissionPropertiesComposite_AllMissionAttributes;
 	public static String MissionPropertiesComposite_DeleteWarning;
 	public static String MissionPropertiesComposite_Description;
