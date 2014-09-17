@@ -92,12 +92,7 @@ public class MissionEmployeeComposite extends MissionComposite {
 		});
 		
 		Composite leaderCmp = new Composite(c, SWT.NONE);
-		GridLayout layout = new GridLayout(2, false);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		leaderCmp.setLayout(layout);
+		leaderCmp.setLayout(new GridLayout(2, false));
 		leaderCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(leaderCmp, SWT.NONE);

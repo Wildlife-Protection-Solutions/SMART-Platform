@@ -233,7 +233,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 						session.getTransaction().commit();
 					}catch (Exception ex){
 						session.getTransaction().rollback();
-						EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignSamplingUnitAttributeDialog_ErrorCreatingNew + "\n\n" + ex.getMessage(), ex); //$NON-NLS-2$
+						EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignSamplingUnitAttributeDialog_ErrorCreatingNew + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					}
 					initValues(true);
 				}		

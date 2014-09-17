@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
@@ -57,15 +58,15 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 	private List<SurveyDesign> templates;
 	
 	public TemplateWizardPage(List<SurveyDesign> templates){
-		super("TEMPLATE");
+		super("TEMPLATE"); //$NON-NLS-1$
 		this.templates = templates;
 	}
 	
 	@Override
 	public void createControl(Composite parent) {
 		
-		super.setTitle("New Survey");
-		super.setDescription("You can start from scratch or use an existing survey design as a template.");
+		super.setTitle(Messages.TemplateWizardPage_Title);
+		super.setDescription(Messages.TemplateWizardPage_Description);
 		
 		Composite part2 = new Composite(parent, SWT.NONE);
 		part2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -76,11 +77,11 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		part.setLayout(new GridLayout(1, false));
 		
 		opBlank = new Button(part, SWT.RADIO);
-		opBlank.setText("Create a blank survey design");
+		opBlank.setText(Messages.TemplateWizardPage_BlankDesign);
 		opBlank.setSelection(true);
 		
 		opTemplate = new Button(part, SWT.RADIO);
-		opTemplate.setText("Use an existing design as a template");
+		opTemplate.setText(Messages.TemplateWizardPage_TemplateDesign);
 		opTemplate.setSelection(false);
 		
 		cmbDesigns = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);

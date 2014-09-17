@@ -89,15 +89,15 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 	protected boolean performSave() {
 		content.updateDesign(surveyDesign);
 		
-		SaveSurveyDesignJob saveIntelligenceJob = new SaveSurveyDesignJob(surveyDesign);    
-    	saveIntelligenceJob.schedule();
+		SaveSurveyDesignJob saveJob = new SaveSurveyDesignJob(surveyDesign);    
+    	saveJob.schedule();
     	try {
-			saveIntelligenceJob.join(); //we don't want to close editor if save failed
+			saveJob.join(); //we don't want to close editor if save failed
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
-    	if (Status.OK_STATUS.equals(saveIntelligenceJob.getResult())) {
+    	if (Status.OK_STATUS.equals(saveJob.getResult())) {
 			setChangesMade(false);
 			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);
 			return true;

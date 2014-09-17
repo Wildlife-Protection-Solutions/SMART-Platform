@@ -121,11 +121,11 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 		
 			suPage = new SamplingUnitEditorPage(this);
 			i = addPage(suPage, getEditorInput());
-			setPageText(i, "Sampling Units");
+			setPageText(i, Messages.SurveyDesignEditor_SamplingUnitPageName);
 			
 			dataPage = new SurveyDesignDataPage(this);
 			i = addPage(dataPage, getEditorInput());
-			setPageText(i, "Survey Data");
+			setPageText(i, Messages.SurveyDesignEditor_SurveyDataPageName);
 			
 			super.setPartName(getSurveyDesign().getName());
 		}catch (Exception ex) {
@@ -139,7 +139,6 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 			byte[] puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			session.clear(); //for some reason this may be active session with attached old survey design
-			//load patrol items so don't have lazy loading issues later.
 			session.beginTransaction();
 			surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
 			surveyDesign.getNames().size();

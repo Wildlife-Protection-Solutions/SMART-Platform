@@ -200,6 +200,14 @@ public class Messages extends NLS {
 	public static String LocationPage_Title;
 	public static String MissionAttributeDeleteAdvisor_DeleteError;
 	public static String MissionAttributeDeleteAdvisor_InvalidType;
+	public static String MissionAttributeDialog_CloseDialogTitle;
+	public static String MissionAttributeDialog_CloseMsg;
+	public static String MissionAttributeDialog_DeleteDialogTitle;
+	public static String MissionAttributeDialog_DeleteError;
+	public static String MissionAttributeDialog_DeleteMessage;
+	public static String MissionAttributeDialog_Message;
+	public static String MissionAttributeDialog_SaveError;
+	public static String MissionAttributeDialog_Title;
 	public static String MissionCsvImportEngine_SavingWaypoints;
 	public static String MissionDataImport_ResultMessage;
 	public static String MissionDayComposite_AddWaypoint;
@@ -270,6 +278,8 @@ public class Messages extends NLS {
 	public static String NameIdComposite_Title;
 	public static String NewMissionWizard_SaveError;
 	public static String NewMissionWizard_WizardTitle;
+	public static String NewSurveyDesignWizard_SaveError;
+	public static String NewSurveyDesignWizard_WindowTitle;
 	public static String NewSurveyWizard_Error;
 	public static String NewSurveyWizard_WizardTitle;
 	public static String RemoveERJob_Title;
@@ -376,6 +386,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignDataPage_surveyLabel;
 	public static String SurveyDesignEditor_Error_Pages;
 	public static String SurveyDesignEditor_Page_Summary;
+	public static String SurveyDesignEditor_SamplingUnitPageName;
+	public static String SurveyDesignEditor_SurveyDataPageName;
 	public static String SurveyDesignFilterDialog_Message;
 	public static String SurveyDesignFilterDialog_StateLabel;
 	public static String SurveyDesignFilterDialog_Title;
@@ -410,6 +422,7 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_StartDate;
 	public static String SurveyDesignSummaryEditorPage_Status;
 	public static String SurveyDesignSummaryEditorPage_SummaryPageLabel;
+	public static String SurveyDesignSummaryEditorPage_TranslateLink;
 	public static String SurveyDesignSummaryEditorPage_ValueColumn;
 	public static String SurveyFilterDialog_AllDesignsLabel;
 	public static String SurveyFilterDialog_DatesGroup;
@@ -426,6 +439,10 @@ public class Messages extends NLS {
 	public static String SurveyIdPage_IdLabel;
 	public static String SurveyIdPage_Message;
 	public static String SurveyIdPage_Title;
+	public static String TemplateWizardPage_BlankDesign;
+	public static String TemplateWizardPage_Description;
+	public static String TemplateWizardPage_TemplateDesign;
+	public static String TemplateWizardPage_Title;
 	public static String TracksComposite_Association;
 	public static String TracksComposite_Edit;
 	public static String TracksComposite_Import;
