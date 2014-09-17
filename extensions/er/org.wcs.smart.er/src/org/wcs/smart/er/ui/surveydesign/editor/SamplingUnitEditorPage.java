@@ -34,7 +34,7 @@ import java.util.List;
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.command.navigation.ZoomCommand;
+import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.selection.SelectCommand;
@@ -99,6 +99,7 @@ import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportAttributeWizard;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportOptionDialog;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.SmartUtils;
@@ -160,7 +161,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			suService = new SamplingUnitService(editor.getSurveyDesign());
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) suService.resources(monitor);
-	    		
+	    		Collections.reverse(layers);	//switch order 
 	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
 	    		getMap().sendCommandSync(command);
 	    		
@@ -545,9 +546,9 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				}
 			}
 		}
-		
-		ZoomCommand z = new ZoomCommand(env);
-		getMap().sendCommandASync(z);
+			
+		SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, SmartDB.DATABASE_CRS);
+		getMap().sendCommandASync(bbox);
 	}
 	
 	
