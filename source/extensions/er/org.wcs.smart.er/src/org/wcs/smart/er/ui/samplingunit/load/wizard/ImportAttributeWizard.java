@@ -66,9 +66,7 @@ public class ImportAttributeWizard extends Wizard implements IPageChangingListen
 		if (session.isOpen()){
 			session.close();
 		}
-		
 		super.dispose();
-		
 	}
 	
 	@Override

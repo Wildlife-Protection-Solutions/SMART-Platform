@@ -83,6 +83,9 @@ public class SurveyDesignEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
+		if (this.name == null){
+			return ""; //$NON-NLS-1$
+		}
 		return this.name; 
 	}
 

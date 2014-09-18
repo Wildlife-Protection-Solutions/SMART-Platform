@@ -22,7 +22,8 @@
 package org.wcs.smart.er.ui.samplingunit.load;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +64,8 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 	public String[] getFieldNames(File f, Map<String, Object> options) throws Exception {
 		Character delim = (Character) options.get(DELIMETER_KEY);
 		String[] headers = new String[0];
-		CSVReader reader = new CSVReader(new FileReader(f), delim.charValue());
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
 		try{
 			//read the first line
 			headers = reader.readNext();
@@ -110,7 +112,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		Character delim = (Character) options.get(DELIMETER_KEY);
 		
 		//read file - getting cnt for progress
-		CSVReader reader = new CSVReader(new FileReader(f), delim.charValue());
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
 		int fileCnt = 0;
 		try{
 			while(reader.readNext() != null){
@@ -121,8 +123,8 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		}
 		
 		//read file 
-		monitor.beginTask(MessageFormat.format("Reading {0}", new Object[]{f.getAbsoluteFile()}), fileCnt);
-		reader = new CSVReader(new FileReader(f), delim.charValue());
+		monitor.beginTask(MessageFormat.format(Messages.CsvSamplingUnitImporter_Progress1, new Object[]{f.getAbsoluteFile()}), fileCnt);
+		reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
 		try{
 			//read the first line
 			String[] headers = reader.readNext();

@@ -75,6 +75,7 @@ public class Messages extends NLS {
 	public static String CsvSamplingUnitExporter_yColumnName;
 	public static String CsvSamplingUnitImporter_InvalidAttributeType;
 	public static String CsvSamplingUnitImporter_InvalidType;
+	public static String CsvSamplingUnitImporter_Progress1;
 	public static String DateComposite_DateError;
 	public static String DateComposite_Description;
 	public static String DateComposite_Title;
@@ -122,6 +123,7 @@ public class Messages extends NLS {
 	public static String EditSamplingUnitDialog_ErrorSavingChanges;
 	public static String EditSamplingUnitDialog_IdError;
 	public static String EditSamplingUnitDialog_IdLabel;
+	public static String EditSamplingUnitDialog_IdUnique;
 	public static String EditSamplingUnitDialog_Message;
 	public static String EditSamplingUnitDialog_NumberError;
 	public static String EditSamplingUnitDialog_ShellTitle;
@@ -188,6 +190,7 @@ public class Messages extends NLS {
 	public static String ImportOptionDialog_NewLabel;
 	public static String ImportOptionDialog_Title;
 	public static String ImportWizard_ErrorTitle;
+	public static String ImportWizard_IdNoUnique;
 	public static String ImportWizard_ImportError;
 	public static String ImportWizard_NoFeatures;
 	public static String ImportWizard_ProgressLabel1;
@@ -352,7 +355,11 @@ public class Messages extends NLS {
 	public static String ShpSamplingUnitExporter_Progress1;
 	public static String ShpSamplingUnitExporter_SuTypeError;
 	public static String ShpSamplingUnitImporter_AttributeMappingError;
+	public static String ShpSamplingUnitImporter_GeomTypeNotSupported;
+	public static String ShpSamplingUnitImporter_GeomTypeNotSupported2;
+	public static String ShpSamplingUnitImporter_GeomTypeNotSupported3;
 	public static String ShpSamplingUnitImporter_InvalidGeometryType;
+	public static String ShpSamplingUnitImporter_Progress1;
 	public static String ShpSamplingUnitImporter_SamplingUnitTypeError;
 	public static String StatusComposite_Active;
 	public static String StatusComposite_Description;

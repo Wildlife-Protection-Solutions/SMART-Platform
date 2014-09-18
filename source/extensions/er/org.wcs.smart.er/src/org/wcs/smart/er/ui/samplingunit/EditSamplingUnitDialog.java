@@ -91,10 +91,11 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 	private HashMap<SamplingUnitAttribute, Text> attribute2Control;
 	private HashMap<SamplingUnitAttribute, ControlDecoration> attribute2Error;
 	
-	public EditSamplingUnitDialog(Shell parentShell, SamplingUnit su) {
+	private List<SamplingUnit> siblings;
+	public EditSamplingUnitDialog(Shell parentShell, SamplingUnit su, List<SamplingUnit> siblings) {
 		super(parentShell);
+		this.siblings = siblings;
 		this.su = su;
-		
 	}
 	
 	@Override
@@ -290,8 +291,6 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 			
 			attribute2Control.put(a.getSamplingUnitAttribute(), txtAttribute);
 			attribute2Error.put(a.getSamplingUnitAttribute(), cd);
-			
-		
 		}
 		
 		txtType.setText(su.getType().getGuiName());
@@ -326,12 +325,24 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 	private boolean validate(){
 		boolean error = false;
 		
-		if (!SmartUtils.isSimpleString(txtId.getText(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
-			cdId.setDescriptionText(MessageFormat.format(Messages.EditSamplingUnitDialog_IdError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, SamplingUnit.ID_MAX_LENGTH}));
-			cdId.show();
-			error = true;
-		}else{
-			cdId.hide();
+		//look and see if id is unique
+		String id = txtId.getText();
+		for (SamplingUnit s : siblings){
+			if (s.getId().toLowerCase().equals(id.toLowerCase())){
+				error = true;
+				cdId.show();
+				cdId.setDescriptionText(Messages.EditSamplingUnitDialog_IdUnique);
+			}
+		}
+
+		if (!error){
+			if (!SmartUtils.isSimpleString(txtId.getText(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
+				cdId.setDescriptionText(MessageFormat.format(Messages.EditSamplingUnitDialog_IdError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, SamplingUnit.ID_MAX_LENGTH}));
+				cdId.show();
+				error = true;
+			}else{
+				cdId.hide();
+			}
 		}
 		
 		

@@ -109,7 +109,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor)
 			throws Exception {
 
-		monitor.beginTask(MessageFormat.format("Reading shapefile {0}", new Object[]{f.getAbsolutePath()}), 2);
+		monitor.beginTask(MessageFormat.format(Messages.ShpSamplingUnitImporter_Progress1, new Object[]{f.getAbsolutePath()}), 2);
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
 		try {
@@ -179,7 +179,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 						if (!(g instanceof Point)) {
 							throw new Exception(
 									MessageFormat
-											.format("{0} geometry types not supported for Plot sampling units. Only Point geometry types are supported.",
+											.format(Messages.ShpSamplingUnitImporter_GeomTypeNotSupported,
 													new Object[] { g.getClass().getName() }));
 						}
 					} else if (type == SamplingUnitType.TRANSECT) {
@@ -187,7 +187,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 							if (((MultiLineString) g).getNumGeometries() > 1) {
 								throw new Exception(
 										MessageFormat
-												.format("Multilinestring geometries are not supported for Transect sampling units. Only LineString geometry types are supported.",
+												.format(Messages.ShpSamplingUnitImporter_GeomTypeNotSupported2,
 														new Object[] { g.getClass().getName() }));
 							} else {
 								g = g.getGeometryN(0);
@@ -196,7 +196,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 						if (!(g instanceof LineString)) {
 							throw new Exception(
 									MessageFormat
-											.format("{0} geometry types not supported for Transect sampling units. Only LineString geometry types are supported.",
+											.format(Messages.ShpSamplingUnitImporter_GeomTypeNotSupported3,
 													new Object[] { g.getClass().getName() }));
 						}
 					}
