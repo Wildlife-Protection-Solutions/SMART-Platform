@@ -46,7 +46,7 @@ public class AreaFilter implements IFilter {
 	 * Type of geometry the area filter
 	 * should be applied to. 
 	 */
-	public enum AreaFilterGeometryType{
+	public static enum AreaFilterGeometryType{
 		WAYPOINT("wp"), TRACK("t");  //$NON-NLS-1$  //$NON-NLS-2$
 		
 		String key;

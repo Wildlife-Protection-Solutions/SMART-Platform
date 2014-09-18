@@ -22,8 +22,9 @@
 package org.wcs.smart.export;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,143 +94,148 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{file.toString()}));
 		}
 		
-		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
-		
-		int line = 1;
-		if (skipHeader){
-			reader.readNext();
-			line ++;
-		}
-		String[] data ;
 		List<Employee> employees = new ArrayList<Employee>();
-		
-		while( (data = reader.readNext()) != null ){
-			if (monitor.isCanceled()) return false;
-			if (data.length != 9){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InvalidNumberField, new Object[]{line, data.length}));
+		CSVReader reader = new CSVReader(
+				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
+		try{
+			int line = 1;
+			if (skipHeader){
+				reader.readNext();
+				line ++;
 			}
-			Employee e = new Employee();
-			int index = 0;
-			// id
-			String id = data[index++];
-			if (id != null && id.trim().length() > 0){
-				e.setId(id.trim());
-			}
+			String[] data ;
 			
-			// given name
-			String given = data[index++];
-			if (given == null || given.trim().length() == 0){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_NoGivenName, new Object[]{line}));
-			}
-			e.setGivenName(given.trim());
-			
-			//family name
-			String family = data[index++];
-			if (family == null || family.trim().length() == 0){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_NoFamilyName, new Object[]{ line}));
-			}
-			e.setFamilyName(family.trim());
-			
-			//birth date
-			String birth = data[index++];
-			if (birth == null || birth.trim().length() != 10){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDateFormat, new Object[]{DATE_FORMAT,line}));
-			}
-			SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-			format.setLenient(false);
-			try{
-				Date dt = format.parse(birth);
-				e.setBirthDate(dt);
-			}catch (ParseException ex){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDate, new Object[]{line}), ex);
-			}
-			
-			//gender
-			String gender = data[index++];
-			if (gender == null || gender.trim().length() != 1 || 
-					!(gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE || gender.trim().toUpperCase().charAt(0) == Employee.DB_MALE)){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_Gender, Employee.DB_FEMALE, Employee.DB_MALE, line));
-			}
-			if (gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE){
-				e.setGender(Employee.DB_FEMALE);
-			}else{
-				e.setGender(Employee.DB_MALE);
-			}
-			
-			//start employment date
-			String start = data[index++];
-			if (start == null || start.trim().length() != 10){
-				throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
-			}
-			try{
-				Date dt = format.parse(start);
-				e.setStartEmploymentDate(dt);
-			}catch (ParseException ex){
-				throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
-			}
-			if (e.getStartEmploymentDate().before(e.getBirthDate())){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartAfterEmployeeBirthDate, new Object[]{line}));
-			}
+			while( (data = reader.readNext()) != null ){
+				if (monitor.isCanceled()) return false;
+				if (data.length != 9){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InvalidNumberField, new Object[]{line, data.length}));
+				}
+				Employee e = new Employee();
+				int index = 0;
+				// id
+				String id = data[index++];
+				if (id != null && id.trim().length() > 0){
+					e.setId(id.trim());
+				}
 				
-			//start employments
-			String end = data[index++];
-			if (end == null || end.trim().length() == 0){
-				e.setEndEmploymentDate(null);
-			}else {
-				if (end.trim().length() != 10){
-					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
+				// given name
+				String given = data[index++];
+				if (given == null || given.trim().length() == 0){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_NoGivenName, new Object[]{line}));
+				}
+				e.setGivenName(given.trim());
+				
+				//family name
+				String family = data[index++];
+				if (family == null || family.trim().length() == 0){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_NoFamilyName, new Object[]{ line}));
+				}
+				e.setFamilyName(family.trim());
+				
+				//birth date
+				String birth = data[index++];
+				if (birth == null || birth.trim().length() != 10){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDateFormat, new Object[]{DATE_FORMAT,line}));
+				}
+				SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+				format.setLenient(false);
+				try{
+					Date dt = format.parse(birth);
+					e.setBirthDate(dt);
+				}catch (ParseException ex){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDate, new Object[]{line}), ex);
+				}
+				
+				//gender
+				String gender = data[index++];
+				if (gender == null || gender.trim().length() != 1 || 
+						!(gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE || gender.trim().toUpperCase().charAt(0) == Employee.DB_MALE)){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_Gender, Employee.DB_FEMALE, Employee.DB_MALE, line));
+				}
+				if (gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE){
+					e.setGender(Employee.DB_FEMALE);
+				}else{
+					e.setGender(Employee.DB_MALE);
+				}
+				
+				//start employment date
+				String start = data[index++];
+				if (start == null || start.trim().length() != 10){
+					throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
 				}
 				try{
-					Date dt = format.parse(end);
-					e.setEndEmploymentDate(dt);
+					Date dt = format.parse(start);
+					e.setStartEmploymentDate(dt);
 				}catch (ParseException ex){
-					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
+					throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
 				}
-				if (e.getEndEmploymentDate().before(e.getStartEmploymentDate()) || e.getEndEmploymentDate().before(e.getBirthDate())){
-					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndAfterStartDate, new Object[]{line})); 
+				if (e.getStartEmploymentDate().before(e.getBirthDate())){
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartAfterEmployeeBirthDate, new Object[]{line}));
 				}
-			}
-			
-			
-			//agency & rank
-			String agency = data[index++];
-			String rank = data[index++];
-			if (agency == null || agency.trim().length() == 0){
-				e.setAgency(null);
-				e.setRank(null);
-			}else{
-				//look for matching agency
-				Agency ag = findAgency(agency, session);
-				if (ag == null){
-					//warning or something here
-//					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
-					warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
+					
+				//start employments
+				String end = data[index++];
+				if (end == null || end.trim().length() == 0){
+					e.setEndEmploymentDate(null);
+				}else {
+					if (end.trim().length() != 10){
+						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
+					}
+					try{
+						Date dt = format.parse(end);
+						e.setEndEmploymentDate(dt);
+					}catch (ParseException ex){
+						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
+					}
+					if (e.getEndEmploymentDate().before(e.getStartEmploymentDate()) || e.getEndEmploymentDate().before(e.getBirthDate())){
+						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndAfterStartDate, new Object[]{line})); 
+					}
+				}
+				
+				
+				//agency & rank
+				String agency = data[index++];
+				String rank = data[index++];
+				if (agency == null || agency.trim().length() == 0){
 					e.setAgency(null);
+					e.setRank(null);
 				}else{
-					e.setAgency(ag);
-					//look for matching rank
-					if (rank == null || rank.trim().length() == 0){
-						e.setRank(null);
+					//look for matching agency
+					Agency ag = findAgency(agency, session);
+					if (ag == null){
+						//warning or something here
+	//					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
+						warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
+						e.setAgency(null);
 					}else{
-						Rank r = findRank(ag, rank);
-						if (r == null){
-//							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
-							warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
+						e.setAgency(ag);
+						//look for matching rank
+						if (rank == null || rank.trim().length() == 0){
 							e.setRank(null);
 						}else{
-							e.setRank(r);
+							Rank r = findRank(ag, rank);
+							if (r == null){
+	//							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
+								warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
+								e.setRank(null);
+							}else{
+								e.setRank(r);
+							}
 						}
 					}
 				}
+				line++;
+				if (e.getId() == null){
+					HibernateManager.generateEmployeeId(e, session);
+				}
+				e.setConservationArea(SmartDB.getCurrentConservationArea());
+			
+				employees.add(e);
 			}
-			line++;
-			if (e.getId() == null){
-				HibernateManager.generateEmployeeId(e, session);
-			}
-			e.setConservationArea(SmartDB.getCurrentConservationArea());
-		
-			employees.add(e);
+		}finally{
+			reader.close();
 		}
+		
 		if (monitor.isCanceled()) return false;
 		try{
 			session.beginTransaction();

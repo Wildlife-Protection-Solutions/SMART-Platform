@@ -22,8 +22,9 @@
 package org.wcs.smart.patrol.internal.export;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,31 +86,33 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		if (!file.exists()){
 			throw new IOException(MessageFormat.format(Messages.PatrolTransportCsvImporter_ErrorfileNotFound, new Object[]{file.toString()}));
 		}
-
-		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
 		
-		//reading the first line with language codes
-		String[] headerRow = reader.readNext();
-		List<String> langCodes = getLanguageCodes(headerRow);
-		
-		Map<String,Language> code2Language = createCode2Language(langCodes);
-		if (code2Language == null) {
-			return false;
-		}
 		ArrayList<PatrolTransportType> types = new ArrayList<PatrolTransportType>();
-		String[] row;
-		int line = 2;
-		while( (row = reader.readNext()) != null ) {
-			if (monitor.isCanceled()) return false;
-			if (row.length != headerRow.length) {
-				throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidLine, new Object[]{line, row.length, headerRow.length}));
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
+		try{
+			//reading the first line with language codes
+			String[] headerRow = reader.readNext();
+			List<String> langCodes = getLanguageCodes(headerRow);
+			
+			Map<String,Language> code2Language = createCode2Language(langCodes);
+			if (code2Language == null) {
+				return false;
 			}
 			
-			PatrolTransportType type = handleTransportType(row, langCodes, code2Language, line);
-			types.add(type);
-			line++;
+			String[] row;
+			int line = 2;
+			while( (row = reader.readNext()) != null ) {
+				if (monitor.isCanceled()) return false;
+				if (row.length != headerRow.length) {
+					throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidLine, new Object[]{line, row.length, headerRow.length}));
+				}
+				PatrolTransportType type = handleTransportType(row, langCodes, code2Language, line);
+				types.add(type);
+				line++;
+			}
+		}finally{
+			reader.close();
 		}
-
 		if (monitor.isCanceled()) return false;
 		
 		importedData = types;

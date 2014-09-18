@@ -22,7 +22,8 @@
 package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -90,7 +91,10 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 		}
 		
 		//column headers
-		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), delimiter, '"',SmartUtils.LINE_SEPARATOR);
+		CSVWriter writer = new CSVWriter(
+				new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"), //$NON-NLS-1$ 
+				delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+		
 		for (int i = 0; i < results.getColumnHeaders().size(); i ++){
 			String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
 		

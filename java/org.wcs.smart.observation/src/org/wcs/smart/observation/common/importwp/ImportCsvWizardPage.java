@@ -22,7 +22,8 @@
 
 package org.wcs.smart.observation.common.importwp;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -150,8 +151,9 @@ public class ImportCsvWizardPage extends ImportOptionsWizardPage {
 			}
 			// read header fields
 			try {
-				CSVReader reader = new CSVReader(new FileReader(
-						ops.getFileText()), config.getDelimiter());
+				CSVReader reader = new CSVReader(
+						new InputStreamReader(new FileInputStream(ops.getFileText()), "UTF-8"),  //$NON-NLS-1$ 
+						config.getDelimiter());
 				try {
 					String[] headers = reader.readNext();
 					CsvHeader[] columnNames = new CsvHeader[headers.length];

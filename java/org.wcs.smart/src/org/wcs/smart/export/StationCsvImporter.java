@@ -22,8 +22,9 @@
 package org.wcs.smart.export;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -84,32 +85,36 @@ public class StationCsvImporter implements ICsvDataImporter {
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{ file.toString() }));
 		}
 
-		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
-		
-		//reading the first line with language codes
-		String[] headerRow = reader.readNext();
-		List<String> langCodes = getLanguageCodes(headerRow);
-		if (headerRow.length % 2 != 0){
-			throw new Exception(Messages.StationCsvImporter_InvalidStationCsvFileFormat);
-		}
-		Map<String,Language> code2Language = createCode2Language(langCodes);
-		if (code2Language == null) {
-			return false;
-		}
 		ArrayList<Station> stations = new ArrayList<Station>();
-		String[] row;
-		int line = 2;
-		while( (row = reader.readNext()) != null ) {
-			if (monitor.isCanceled()) return false;
-			if (row.length != headerRow.length) {
-				throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, headerRow.length}));
+		CSVReader reader = new CSVReader(
+				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
+		try{
+			//reading the first line with language codes
+			String[] headerRow = reader.readNext();
+			List<String> langCodes = getLanguageCodes(headerRow);
+			if (headerRow.length % 2 != 0){
+				throw new Exception(Messages.StationCsvImporter_InvalidStationCsvFileFormat);
+			}
+			Map<String,Language> code2Language = createCode2Language(langCodes);
+			if (code2Language == null) {
+				return false;
 			}
 			
-			Station station = handleStation(row, langCodes, code2Language);
-			stations.add(station);
-			line++;
+			String[] row;
+			int line = 2;
+			while( (row = reader.readNext()) != null ) {
+				if (monitor.isCanceled()) return false;
+				if (row.length != headerRow.length) {
+					throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, headerRow.length}));
+				}
+				
+				Station station = handleStation(row, langCodes, code2Language);
+				stations.add(station);
+				line++;
+			}
+		}finally{
+			reader.close();
 		}
-
 		if (monitor.isCanceled()) return false;
 		
 		importedData = stations;
