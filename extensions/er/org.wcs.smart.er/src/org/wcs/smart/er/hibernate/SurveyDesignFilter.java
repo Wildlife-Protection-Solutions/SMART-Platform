@@ -80,10 +80,9 @@ public class SurveyDesignFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT s.uuid, lbl.value, s.state, s.keyId "); //$NON-NLS-1$
-		str.append("FROM SurveyDesign s, Label lbl "); //$NON-NLS-1$
+		str.append("SELECT s.uuid, s.name, s.state, s.keyId "); //$NON-NLS-1$
+		str.append("FROM SurveyDesign s "); //$NON-NLS-1$
 		str.append("WHERE s.conservationArea = :ca " ); //$NON-NLS-1$
-		str.append("AND  lbl.id.element.uuid = s.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
 
 		boolean and = true;
 		if (states != null && states.length > 0){
@@ -94,11 +93,10 @@ public class SurveyDesignFilter {
 			str.append(" s.state IN (:states) "); //$NON-NLS-1$
 		}
 		str.append(" ) "); //$NON-NLS-1$
-		str.append("ORDER BY lbl.value asc"); //$NON-NLS-1$
+		str.append("ORDER BY s.name asc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString())
-				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-				.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
+				.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
 		
 		if (states != null && states.length > 0){

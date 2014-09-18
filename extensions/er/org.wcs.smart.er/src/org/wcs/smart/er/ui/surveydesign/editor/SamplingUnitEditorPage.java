@@ -211,6 +211,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
     
     private Job loadValues = new Job(Messages.SamplingUnitEditorPage_loadingValuesJobName){
 
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			SurveyDesign sd = editor.getSurveyDesign();
@@ -242,7 +243,9 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				}
 				
 				//load units
-				units = s.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", sd)).list(); //$NON-NLS-1$
+				units = s.createCriteria(SamplingUnit.class)
+						.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
+						.list(); 
 				for(SamplingUnit u : units){
 					for (SamplingUnitAttributeValue v:  u.getAttributes()){
 						v.getSamplingUnitAttribute().getKeyId();
@@ -459,7 +462,9 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		Object x = ((IStructuredSelection)suTable.getSelection()).getFirstElement();
 		if (x == null) return;
 		if (x instanceof SamplingUnit){
-			EditSamplingUnitDialog d = new EditSamplingUnitDialog(getSite().getShell(), (SamplingUnit)x);
+			List<SamplingUnit> siblings = (List<SamplingUnit>) suTable.getInput();
+			siblings.remove(x);
+			EditSamplingUnitDialog d = new EditSamplingUnitDialog(getSite().getShell(), (SamplingUnit)x, siblings);
 			d.open();
 		}
 	}

@@ -22,8 +22,10 @@
 package org.wcs.smart.er.ui.samplingunit.load;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -102,9 +104,10 @@ public class ImportAttributes implements IRunnableWithProgress {
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
-			reader = new CSVReader(new FileReader(file), delimiter);
 			
+			//read file count for progress
 			int fileCnt = 0;
+			reader = new CSVReader(new FileReader(file), delimiter);
 			while(reader.readNext() != null){
 				fileCnt++;
 			}
@@ -112,7 +115,8 @@ public class ImportAttributes implements IRunnableWithProgress {
 			
 			monitor.beginTask(Messages.ImportAttributes_Progress1, fileCnt);
 			
-			reader = new CSVReader(new FileReader(file), delimiter);
+			reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
+			
 			String[] headers = reader.readNext();
 			monitor.worked(1);
 			int idIndex = -1;

@@ -23,7 +23,9 @@ package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,6 +66,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 	private FileWizardPage filePage;
 	private AttributePage attributePage;
 	private BufferPage bufferPage;
+	private boolean finishOk = false;
 	
 	/**
 	 * Creates a new wizard
@@ -80,9 +83,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		if (session.isOpen()){
 			session.close();
 		}
-		
 		super.dispose();
-		
 	}
 	
 	@Override
@@ -93,8 +94,6 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		return false;
 	}
 
-	private boolean finishOk = false;
-	
 	@Override
 	public boolean performFinish() {
 		//validate
@@ -147,6 +146,17 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 						return;
 					}
 
+					//validate ids
+					HashSet<String> ids = new HashSet<String>();
+					for(SamplingUnit su : units){
+						if (ids.contains(su.getId())){
+							EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.ImportWizard_IdNoUnique, new Object[]{su.getId()}), null);
+							finishOk = false;
+							return;
+						}
+						ids.add(su.getId());
+					}
+					
 					//save units
 					monitor.subTask(Messages.ImportWizard_ProgressLabel3);
 					if (!session.isOpen()){
