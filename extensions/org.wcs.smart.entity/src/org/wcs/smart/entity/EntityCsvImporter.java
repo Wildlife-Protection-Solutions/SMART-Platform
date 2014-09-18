@@ -22,7 +22,8 @@
 package org.wcs.smart.entity;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -117,7 +118,7 @@ public class EntityCsvImporter {
 	 */
 	private String[] readHeaders() throws Exception{
 	
-		FileReader reader = new FileReader(importFile);
+		InputStreamReader reader = new InputStreamReader(new FileInputStream(importFile), "UTF-8"); //$NON-NLS-1$
 		try{
 			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
 			return csvReader.readNext();
@@ -145,7 +146,7 @@ public class EntityCsvImporter {
 		
 		int totalCount = -1;
 		// read all to get the total count
-		FileReader reader = new FileReader(importFile);
+		InputStreamReader reader = new InputStreamReader(new FileInputStream(importFile), "UTF-8"); //$NON-NLS-1$
 		try{
 			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
 			totalCount = csvReader.readAll().size();
@@ -155,10 +156,10 @@ public class EntityCsvImporter {
 		}
 		
 		List<EntityAttributeSelfReference> selfReferenceItems = new ArrayList<EntityAttributeSelfReference>();
-		reader = new FileReader(importFile);
+		reader = new InputStreamReader(new FileInputStream(importFile), "UTF-8"); //$NON-NLS-1$
 		try{
 			int lineCount = 0;
-			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
+			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter()); 
 			if (configuration.getSkipHeader()){
 				csvReader.readNext();
 				lineCount ++;
