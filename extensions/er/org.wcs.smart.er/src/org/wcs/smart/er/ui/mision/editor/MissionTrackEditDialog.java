@@ -35,9 +35,12 @@ import org.wcs.smart.er.model.Mission;
  * @since 3.0.0
  */
 public class MissionTrackEditDialog extends TitleAreaDialog {
+	
+	private Mission mission;
 
 	public MissionTrackEditDialog(Shell shell, Mission mission) {
 		super(shell);
+		this.mission = mission;
 	}
 
 	@Override
@@ -48,7 +51,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		getShell().setText(Messages.MissionTrackEditDialog_Title);
 		setMessage(Messages.MissionTrackEditDialog_Message);
 
-		new TracksComposite(comp);
+		new TracksComposite(comp, mission);
 		return comp;
 	}
 }

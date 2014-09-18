@@ -628,7 +628,7 @@ public class MissionDayComposite {
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
 					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
-					
+
 					if (dialog != null) {
 						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
 						dialog.open();
@@ -638,8 +638,7 @@ public class MissionDayComposite {
 		} catch (Exception ex) {
 			dialog = null;
 			EcologicalRecordsPlugIn.displayLog(Messages.MissionDayComposite_ImportWizardError + ex.getLocalizedMessage(), ex);
-				}
-		
+		}
 	}
 
 	protected void updateTotalHours() {

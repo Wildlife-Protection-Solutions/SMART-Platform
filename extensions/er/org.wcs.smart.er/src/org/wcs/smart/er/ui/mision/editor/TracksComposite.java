@@ -21,10 +21,16 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
@@ -33,8 +39,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
+import org.wcs.smart.observation.common.importwp.GPSDataImport;
+import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.ui.map.location.MapComposite;
 
 /**
@@ -48,12 +59,22 @@ public class TracksComposite extends Composite {
 	private static final int MAP_MIN_WIDTH = 280;
 	
 	private TableViewer trackViewer;
+	private Mission mission;
 
 	public TracksComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		createControls();
 	}
 
+	public TracksComposite(Composite parent, Mission mission) {
+		this(parent);
+		setData(mission);
+	}
+	
+	public void setData(Mission mission) {
+		this.mission = mission;
+	}
+	
 	private void createControls() {
 		setLayout(new GridLayout(3, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -179,8 +200,26 @@ public class TracksComposite extends Composite {
 	}
 
 	protected void importTracks() {
-		// TODO Auto-generated method stub
-		
+		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(mission, GPSDataImport.ImportType.TRACK);
+		wizard.setDateOption(null); //TODO: fix!!!!
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
+					WizardDialog dialog = new WizardDialog(getShell(), wizard);
+
+					if (dialog != null) {
+						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
+						dialog.open();
+					}
+				}
+			});
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionDayComposite_ImportWizardError + ex.getLocalizedMessage(), ex);
+		}
 	}
 	
 	protected void splitTrack() {
