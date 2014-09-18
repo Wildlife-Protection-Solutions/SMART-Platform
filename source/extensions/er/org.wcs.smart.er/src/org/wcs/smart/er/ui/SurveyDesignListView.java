@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -49,6 +50,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.IUpdatableView;
@@ -62,6 +67,9 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
+import org.wcs.smart.er.ui.mision.editor.MissionEditor;
+import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -83,6 +91,50 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 	
 	private TabFolder bar;
 	
+	private IPartListener2 partListener = new IPartListener2() {
+		
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) {
+			if (partRef.getId().equals(SurveyDesignEditor.ID)){
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part instanceof SurveyDesignEditor){
+					designViewer.setSelection(new StructuredSelection( ((SurveyDesignEditor) part).getEditorInput() ));
+					getSite().getPage().bringToTop(getSite().getPart());
+				}
+			}else if (partRef.getId().equals(MissionEditor.ID)){
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part instanceof MissionEditor){
+					lstViewer.setSelection(new StructuredSelection(
+							new SurveyListTreeNode(null, ((MissionEditorInput)((MissionEditor) part).getEditorInput()).getUuid(), Type.MISSION)));
+					getSite().getPage().bringToTop(getSite().getPart());
+				}
+				
+			}
+			
+		}
+	};
+	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
 		@Override
 		public void event(Object o) {
@@ -93,7 +145,14 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 	public SurveyDesignListView(){
 		filter = new SurveyFilter();
 		designFilter = new SurveyDesignFilter();
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
+	
+	public void dispose() {		
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);		
+		super.dispose();
+	}
+	
 	
 	@Override
 	public void createPartControl(Composite parent) {
