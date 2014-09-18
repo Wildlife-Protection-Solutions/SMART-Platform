@@ -107,6 +107,9 @@ public class SamplingUnitService extends IService {
 	 * @throws IOException
 	 */
 	public void refresh(IProgressMonitor monitor) throws IOException{
+		if (ds != null){
+			ds.update(sd);
+		}
 		for (IGeoResource member : resources(monitor)){
 			((SamplingUnitGeoResourceInfo)member.getInfo(monitor)).computeBounds((SamplingUnitGeoResource)member, monitor);
 		}
