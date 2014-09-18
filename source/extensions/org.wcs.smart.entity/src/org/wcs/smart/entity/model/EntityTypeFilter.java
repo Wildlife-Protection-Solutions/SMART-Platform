@@ -136,10 +136,11 @@ public class EntityTypeFilter  {
 		StringBuilder str = new StringBuilder();
 		str.append("SELECT e.uuid, e.keyId, e.name "); //$NON-NLS-1$
 		str.append("FROM EntityType e "); //$NON-NLS-1$
-		str.append(", Label lbl "); //$NON-NLS-1$
-		
+		if (searchField != null){
+			str.append("left join e.names as lbl with lbl.id.language.uuid = :language "); //$NON-NLS-1$
+		}
 		str.append("WHERE e.conservationArea = :ca "); //$NON-NLS-1$
-		str.append("AND  lbl.id.element.uuid = e.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
+
 
 		if (types != null && types.length > 0){
 			str.append(" AND "); //$NON-NLS-1$
@@ -155,11 +156,13 @@ public class EntityTypeFilter  {
 			str.append(" lower(" + searchField.getDbFieldName() + ") like :eid "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
-		str.append(" ORDER BY lbl.value asc"); //$NON-NLS-1$
+		str.append(" ORDER BY e.name asc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString());
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
+		if (searchField != null){
+			query.setParameter("language", SmartDB.getCurrentLanguage().getUuid()); //$NON-NLS-1$
+		}
 		
 		if (types != null && types.length > 0){
 			query.setParameterList("types", this.types); //$NON-NLS-1$

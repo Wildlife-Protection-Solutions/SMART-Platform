@@ -22,8 +22,9 @@
 package org.wcs.smart.entity;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,7 +90,10 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		
 		CSVWriter writer = null;
 		try {
-			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(
+					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+			
 			List<Entity> stations = getEntities(session, activeOnly);
 
 			// WriteHeaders
