@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -41,7 +42,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -235,6 +242,64 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 				editListItem();
 			}
 		});
+		
+		/* drag and drop support */
+		int operations = DND.DROP_MOVE;
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		lstViewer.addDragSupport(operations, transferTypes, new DragSourceListener() {
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				LocalSelectionTransfer.getTransfer().setSelection(lstViewer.getSelection());
+				event.doit = true;
+			}
+			
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (LocalSelectionTransfer.getTransfer()
+						.isSupportedType(event.dataType)) {
+					event.data = lstViewer.getSelection();
+				}
+			}
+			
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				LocalSelectionTransfer.getTransfer().setSelection(null);
+				lstViewer.refresh();
+			}
+		});
+		
+		ViewerDropAdapter dropAdapter = new ViewerDropAdapter(lstViewer) {
+			
+			@Override
+			public boolean validateDrop(Object target, int operation,
+					TransferData transferType) {
+				if (target instanceof MissionAttributeListItem){
+					return true;
+				}
+				return false;
+			}
+			
+			@Override
+			public boolean performDrop(Object data) {
+				StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
+				if (selection == null){
+					return false;
+				}
+				Object obj = selection.getFirstElement();
+				
+				MissionAttributeListItem target = (MissionAttributeListItem)getCurrentTarget();
+				if (target.equals(obj)){
+					return false;
+				}
+				int index = copyItems.indexOf(obj);
+				int toIndex = copyItems.indexOf(target);
+				copyItems.remove(index);
+				copyItems.add(toIndex, (MissionAttributeListItem)obj);		
+				reorder();
+				return true;
+			}
+		};
+		lstViewer.addDropSupport(operations, transferTypes,dropAdapter);
 		
 		Composite buttonPnl = new Composite(listPanel, SWT.NONE);
 		buttonPnl.setLayout(new GridLayout(1, false));
