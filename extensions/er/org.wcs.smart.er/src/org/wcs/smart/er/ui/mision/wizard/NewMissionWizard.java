@@ -171,7 +171,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     		//get active surveys
     		SurveyDesignFilter f = new SurveyDesignFilter();
     		f.setSurveyStates(new State[]{State.ACTIVE});
-    		List<SurveyDesignEditorInput> others = SurveyHibernateManager.getInstance().getSurveyDesigns(session, f);
+    		List<SurveyDesignEditorInput> others = SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, f);
     		localPages.add(new SurveyDesignComposite(others));
     	}
     	

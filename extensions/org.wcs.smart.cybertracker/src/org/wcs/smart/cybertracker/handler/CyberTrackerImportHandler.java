@@ -40,7 +40,6 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
  * @since 1.0.0
  */
 public class CyberTrackerImportHandler extends AbstractHandler {
-	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$

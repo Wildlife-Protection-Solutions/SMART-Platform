@@ -152,6 +152,20 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.er.surveydesignexport"
+                  label="Export Survey Designs"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.er.surveydesignimport"
+                  label="Import Survey Designs"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.er.separator3"
+                  visible="true">
+            </separator>
+            <command
                   commandId="org.wcs.smart.er.missionattributes.show"
                   style="push">
             </command>
@@ -282,6 +296,14 @@
             class="org.wcs.smart.er.ui.handlers.EditSurveyElementHandler"
             commandId="org.wcs.smart.er.editItem">
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.SurveyDesignExportHandler"
+            commandId="org.wcs.smart.er.surveydesignexport">
+      </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.SurveyDesignImportHandler"
+            commandId="org.wcs.smart.er.surveydesignimport">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -320,6 +342,14 @@
       <command
             id="org.wcs.smart.er.editItem"
             name="Edit...">
+      </command>
+      <command
+            id="org.wcs.smart.er.surveydesignexport"
+            name="Export Survey Designs">
+      </command>
+      <command
+            id="org.wcs.smart.er.surveydesignimport"
+            name="Import Survey Designs">
       </command>
    </extension>
    <extension

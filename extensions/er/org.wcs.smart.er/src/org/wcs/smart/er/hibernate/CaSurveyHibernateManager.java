@@ -132,14 +132,14 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	}
 
 	/**
-	 * Gets all the survey designs that match the specific filter for
+	 * Gets an editorInput list all the survey designs that match the specific filter for
 	 * the current conservation area.
 	 * If the filter
 	 * is null with return all survey designs.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s, SurveyDesignFilter filter) {
+	public List<SurveyDesignEditorInput> getSurveyDesignEditorInputs(Session s, SurveyDesignFilter filter) {
 		if (filter == null){
 			//get all
 			List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
@@ -162,6 +162,8 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			return all;
 		}
 	}
+	
+
 	
 	/**
 	 * Returns all surveys that match the given filter.  If the filter

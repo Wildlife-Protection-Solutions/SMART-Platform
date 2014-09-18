@@ -46,7 +46,7 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 	}
 
 	@Override
-	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s,
+	public List<SurveyDesignEditorInput> getSurveyDesignEditorInputs(Session s,
 			SurveyDesignFilter filter) {
 		// TODO Auto-generated method stub
 		return null;

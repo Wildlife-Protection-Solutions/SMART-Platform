@@ -52,7 +52,7 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 			return instance;
 		}
 	}
-	private SurveyDesignLabelProvider(){
+	public SurveyDesignLabelProvider(){
 		
 	}
 	@Override

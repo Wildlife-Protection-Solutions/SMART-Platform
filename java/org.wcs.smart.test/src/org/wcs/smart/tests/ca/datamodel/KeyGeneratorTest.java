@@ -7,7 +7,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 
 public class KeyGeneratorTest  {
