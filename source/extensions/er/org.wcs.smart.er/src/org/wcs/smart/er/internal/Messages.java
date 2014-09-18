@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
+	public static final String SurveyDesignToXmlConverter_Progress1 = "Exporting {} to xml.";
 	public static String AddERJob_Title;
 	public static String AddWaypointDialog_EmptyProjectionError;
 	public static String AddWaypointDialog_EmptyWaypointIDError;

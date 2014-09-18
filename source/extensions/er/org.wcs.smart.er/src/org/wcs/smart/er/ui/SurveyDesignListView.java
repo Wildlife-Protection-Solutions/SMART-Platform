@@ -193,7 +193,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 				}
 				
 				//designs
-				designs.addAll(SurveyHibernateManager.getInstance().getSurveyDesigns(s, designFilter));
+				designs.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter));
 				s.getTransaction().rollback();
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignListView_LoadError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

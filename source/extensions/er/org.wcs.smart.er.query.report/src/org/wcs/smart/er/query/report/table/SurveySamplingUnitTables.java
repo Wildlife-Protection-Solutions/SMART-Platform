@@ -52,7 +52,7 @@ public class SurveySamplingUnitTables implements IDynamicSmartTables {
 		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>();
 		//do not close session; this will be done by the wizard 
 		Session s = HibernateManager.openSession();
-		for (SurveyDesignEditorInput sdi : SurveyHibernateManager.getInstance().getSurveyDesigns(s, null)){
+		for (SurveyDesignEditorInput sdi : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
 			SurveyDesign sd = (SurveyDesign)s.load(SurveyDesign.class, sdi.getUuid());
 			
 			//only add valid types

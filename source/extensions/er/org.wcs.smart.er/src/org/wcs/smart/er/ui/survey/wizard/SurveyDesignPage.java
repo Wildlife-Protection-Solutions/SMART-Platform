@@ -88,7 +88,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		SurveyDesignFilter filter = new SurveyDesignFilter();
 		filter.setSurveyStates(new State[]{SurveyDesign.State.ACTIVE});
 		List<Object> items = new ArrayList<Object>();
-		items.addAll(SurveyHibernateManager.getInstance().getSurveyDesigns(session, filter));
+		items.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, filter));
 		items.add(Messages.SurveyDesignPage_NewDesignItem);
 		cmbViewer.setInput(items);
 

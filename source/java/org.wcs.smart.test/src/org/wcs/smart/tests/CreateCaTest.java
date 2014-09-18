@@ -37,8 +37,6 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;

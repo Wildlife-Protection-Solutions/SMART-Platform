@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/entitytype" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/entitytype" 
+elementFormDefault="qualified">
+
+    <element name="SurveyDesign" type="tns:surveyDesign"></element>
+
+
+
+
+
+
+
+
+
+
+    <complexType name="surveyDesign">
+    	<sequence>
+    		<element name="MissionProperty" type="tns:missionProperty"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="SurveyDesignProperty"
+    			type="tns:surveyDesignProperty" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="SurveyDesignSamplingUnitAttribute"
+    			type="tns:surveyDesignSamplingUnitAttribute"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="SamplingUnitAttribute"
+    			type="tns:samplingUnitAttribute" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="SamplingUnit" type="tns:samplingUnit"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element ref="tns:Names" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="startDate" type="date"></attribute>
+    	<attribute name="endDate" type="date"></attribute>
+    	<attribute name="trackDistanceDirection" type="boolean"></attribute>
+    	<attribute name="description" type="string"></attribute>
+    	<attribute name="state" type="string"></attribute>
+    	<attribute name="configurableModelName" type="string"></attribute>
+    	<attribute name="keyid" type="string"></attribute>
+    </complexType>
+
+
+
+    <complexType name="missionProperty">
+    	<sequence>
+    		<element name="missionAttribute" type="tns:missionAttribute"></element>
+    	</sequence>
+    	<attribute name="order" type="int"></attribute>
+    </complexType>
+
+    <complexType name="surveyDesignProperty">
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+    <complexType name="surveyDesignSamplingUnitAttribute">
+    	<attribute name="name" type="string"></attribute>
+    </complexType>
+
+    
+    <complexType name="missionAttribute">
+    	<sequence>
+    		<element name="Names" type="tns:namesType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="missionAttributeListItem" type="tns:missionAttributeListItem" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="attributeType" type="string"></attribute>
+    	<attribute name="defaultName" type="string"></attribute>
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="keyId" type="string"></attribute>
+    </complexType>
+
+
+
+
+    <complexType name="missionPropertyValue">
+    	<attribute name="stringValue" type="string"></attribute>
+    	<attribute name="doubleValue" type="double"></attribute>
+    	<attribute name="listItemValue" type="string"></attribute>
+    	<attribute name="missionAttributeKeyValue" type="string"></attribute>
+    </complexType>
+
+    <complexType name="missionAttributeListItem">
+    	<sequence>
+    		<element ref="tns:Names" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="keyid" type="string"></attribute>
+    	<attribute name="defaultName" type="string"></attribute>
+    	<attribute name="listOrder" type="int"></attribute>
+    </complexType>
+    
+    <element name="Names" type="tns:namesType"></element>
+    
+    <complexType name="namesType">
+    	<attribute name="language" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+    <complexType name="samplingUnitAttribute">
+    	<sequence>
+    		<element ref="tns:Names" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="attributeType" type="string"></attribute>
+    	<attribute name="defaultName" type="string"></attribute>
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="keyId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="samplingUnitAttributeValue">
+    	<attribute name="stringValue" type="string"></attribute>
+    	<attribute name="doubleValue" type="double"></attribute>
+    	<attribute name="samplingUnitId" type="string"></attribute>
+    </complexType>
+
+
+    <complexType name="samplingUnit">
+    	<sequence>
+    		<element name="SamplingUnitAttributeValue" type="tns:samplingUnitAttributeValue" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="geom" type="hexBinary"></attribute>
+    	<attribute name="Id" type="string"></attribute>
+    	<attribute name="buffer" type="double"></attribute>
+    	<attribute name="type" type="string"></attribute>
+    	<attribute name="state" type="string"></attribute>
+    </complexType>
+</schema>

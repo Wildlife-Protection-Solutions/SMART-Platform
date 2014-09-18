@@ -58,7 +58,7 @@ public interface ISurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	public List<SurveyDesignEditorInput> getSurveyDesigns(Session s, SurveyDesignFilter filter);
+	public List<SurveyDesignEditorInput> getSurveyDesignEditorInputs(Session s, SurveyDesignFilter filter);
 	
 	/**
 	 * Returns all surveys that match the given filter.  If the filter

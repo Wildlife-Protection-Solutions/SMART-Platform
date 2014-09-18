@@ -270,7 +270,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 			final List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>(); 
 			Session s = HibernateManager.openSession();
 			try{
-				all.addAll(SurveyHibernateManager.getInstance().getSurveyDesigns(s, null));
+				all.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
 			}finally{
 				s.close();
 			}

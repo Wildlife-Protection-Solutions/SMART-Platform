@@ -109,7 +109,7 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 		cmbViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
-		List<SurveyDesignEditorInput> sds = SurveyHibernateManager.getInstance().getSurveyDesigns(session, null);
+		List<SurveyDesignEditorInput> sds = SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, null);
 		List<Object> all = new ArrayList<Object>();
 		all.addAll(sds);
 		all.add(Messages.SurveyDesignDialog_AllDesignsLabel);
