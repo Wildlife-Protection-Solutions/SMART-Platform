@@ -416,6 +416,10 @@
             advisor="org.wcs.smart.er.delete.MissionAttributeListItemDeleteAdvisor"
             class="org.wcs.smart.er.model.MissionAttributeListItem">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.er.delete.EmployeeDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="net.refractions.udig.catalog.ServiceExtension">

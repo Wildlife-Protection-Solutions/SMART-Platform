@@ -146,6 +146,8 @@ public class Messages extends NLS {
 	public static String EditSurveyDialog_UndefinedDate;
 	public static String EditSurveyElementHandler_DesignError;
 	public static String EditSurveyElementHandler_MissionError;
+	public static String EmployeeDeleteAdvisor_DeleteError;
+	public static String EmployeeDeleteAdvisor_InvalidObject;
 	public static String ERDatabaseUpgrader_UpgradeTask;
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;
