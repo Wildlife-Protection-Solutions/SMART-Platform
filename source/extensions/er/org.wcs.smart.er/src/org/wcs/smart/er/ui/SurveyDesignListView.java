@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.er.ui;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -194,6 +197,13 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 				
 				//designs
 				designs.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter));
+				Collections.sort(designs, new Comparator<SurveyDesignEditorInput>() {
+					@Override
+					public int compare(SurveyDesignEditorInput o1,
+							SurveyDesignEditorInput o2) {
+						return Collator.getInstance().compare(o1.getName(), o2.getName());
+					}
+				});
 				s.getTransaction().rollback();
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignListView_LoadError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

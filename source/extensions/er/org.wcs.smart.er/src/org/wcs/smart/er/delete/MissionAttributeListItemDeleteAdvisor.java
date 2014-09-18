@@ -27,6 +27,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 
@@ -41,7 +42,7 @@ public class MissionAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof MissionAttributeListItem)){
-			return "Invalid object time";
+			return Messages.MissionAttributeListItemDeleteAdvisor_InvalidObject;
 		}
 		
 		MissionAttributeListItem ma = (MissionAttributeListItem)object;
@@ -60,7 +61,7 @@ public class MissionAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		return  MessageFormat.format(
-				"The mission attribute list item cannot be removed because it is referenced in the following missions: {0}", new Object[]{sb.toString()});
+				Messages.MissionAttributeListItemDeleteAdvisor_DeleteError, new Object[]{sb.toString()});
 		
 	}
 

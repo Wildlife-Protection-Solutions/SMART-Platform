@@ -216,6 +216,8 @@ public class Messages extends NLS {
 	public static String MissionAttributeDialog_Message;
 	public static String MissionAttributeDialog_SaveError;
 	public static String MissionAttributeDialog_Title;
+	public static String MissionAttributeListItemDeleteAdvisor_DeleteError;
+	public static String MissionAttributeListItemDeleteAdvisor_InvalidObject;
 	public static String MissionCsvImportEngine_SavingWaypoints;
 	public static String MissionDataImport_ResultMessage;
 	public static String MissionDayComposite_AddWaypoint;

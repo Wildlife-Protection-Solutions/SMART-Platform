@@ -86,6 +86,7 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 		this.sd = sd;
 		this.tType = null;
 		this.pType = null;
+		this.rType = null;
 	}
 	
 	@Override
