@@ -37,9 +37,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 
 /**
@@ -56,6 +61,9 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 	private Button opTemplate;
 	private ComboViewer cmbDesigns ;
 	private List<SurveyDesign> templates;
+	private Button chCopySu;
+	
+	private List<SamplingUnit> newSamplingUnits = null;
 	
 	public TemplateWizardPage(List<SurveyDesign> templates){
 		super("TEMPLATE"); //$NON-NLS-1$
@@ -99,13 +107,23 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		gd.widthHint = 200;
 		cmbDesigns.getControl().setLayoutData(gd);
 		cmbDesigns.getControl().setEnabled(false);
+	
+		chCopySu = new Button(part, SWT.CHECK);
+		chCopySu.setSelection(false);
+		chCopySu.setEnabled(false);
+		chCopySu.setText(Messages.TemplateWizardPage_CopySuLabels);
+		
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalIndent = 20;
+		chCopySu.setLayoutData(gd);
+		
 		
 		opTemplate.addSelectionListener(this);
 		opBlank.addSelectionListener(this);
 		
 		super.setControl(part2);
 	}
-
+	
 	@Override
 	public boolean isPageComplete() {
 		if (opTemplate.getSelection() && cmbDesigns.getSelection().isEmpty()){
@@ -114,7 +132,9 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		return true;
 	}
 	
-	public void updateModel(SurveyDesign design){
+	
+	
+	public void updateModel(SurveyDesign design, Session session){
 		if (opTemplate.getSelection()){
 			if (((StructuredSelection)cmbDesigns.getSelection()).isEmpty()){
 				return;
@@ -140,6 +160,44 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 				}
 			}
 			
+			//copy sampling unit attributes
+			design.setSamplingUnitAttributes(new ArrayList<SurveyDesignSamplingUnitAttribute>());
+			for (SurveyDesignSamplingUnitAttribute sua : copy.getSamplingUnitAttributes()){
+				SurveyDesignSamplingUnitAttribute a2 = new SurveyDesignSamplingUnitAttribute();
+				a2.setSamplingUnitAttribute(sua.getSamplingUnitAttribute());
+				a2.setSurveyDesign(design);
+				
+				design.getSamplingUnitAttributes().add(a2);
+			}
+			
+			//copy sampling units & associated attributes
+			newSamplingUnits = null;
+			if (chCopySu.getSelection()){
+				newSamplingUnits = new ArrayList<SamplingUnit>();
+				List<SamplingUnit> sus = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", copy)).list(); //$NON-NLS-1$
+				for (SamplingUnit s2: sus){
+					SamplingUnit newsu = new SamplingUnit();
+					newsu.setBuffer(s2.getBuffer());
+					newsu.setGeom(s2.getGeom());
+					newsu.setId(s2.getId());
+					newsu.setState(s2.getState());
+					newsu.setSurveyDesign(design);
+					newsu.setType(s2.getType());
+					newsu.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
+					
+					for (SamplingUnitAttributeValue suav : s2.getAttributes()){
+						SamplingUnitAttributeValue newAv = new SamplingUnitAttributeValue();
+						newAv.setNumberValue(suav.getNumberValue());
+						newAv.setStringValue(suav.getStringValue());
+						newAv.setSamplingUnit(newsu);
+						newAv.setSamplingUnitAttribute(suav.getSamplingUnitAttribute());
+						newsu.getAttributes().add(newAv);
+					}
+					newSamplingUnits.add(newsu);
+				}
+				
+			}
+			
 		}else{
 			//clear
 			design.setStartDate(null);
@@ -151,10 +209,16 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		}
 	}
 	
-
+	public List<SamplingUnit> getClonedSamplingUnits(){
+		return this.newSamplingUnits;
+	}
+	
+	
 	@Override
 	public void widgetSelected(SelectionEvent e) {
 		cmbDesigns.getControl().setEnabled(opTemplate.getSelection());
+		chCopySu.setEnabled(opTemplate.getSelection());
+		
 		getContainer().updateButtons();
 	}
 

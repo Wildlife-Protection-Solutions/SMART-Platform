@@ -442,6 +442,7 @@ public class Messages extends NLS {
 	public static String SurveyIdPage_Message;
 	public static String SurveyIdPage_Title;
 	public static String TemplateWizardPage_BlankDesign;
+	public static String TemplateWizardPage_CopySuLabels;
 	public static String TemplateWizardPage_Description;
 	public static String TemplateWizardPage_TemplateDesign;
 	public static String TemplateWizardPage_Title;
