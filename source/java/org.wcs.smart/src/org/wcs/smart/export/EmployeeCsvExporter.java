@@ -22,8 +22,9 @@
 package org.wcs.smart.export;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.List;
 
@@ -53,7 +54,9 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		CSVWriter writer = null;
 		try {
-			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(
+					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
 			if (headers) {
 				// WriteHeaders
 				//String[] headerCols = {"ID", "Given Name", "Family Name", "Birth Date", "Gender", "Start Employement Date", "End Employement Date", "Agency", "Rank"};

@@ -228,6 +228,7 @@ public class NameKeyComposite {
 		
 		txtName = new Text(parent, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
 		if (!canEdit){
 			txtName.setEditable(false);
 		}else if (createNew){
@@ -244,7 +245,6 @@ public class NameKeyComposite {
 		}
 		txtName.setTextLimit(1024);
 	
-		
 		/* Key */
 		Label lblNewLabel_1 = new Label(parent, SWT.NONE);
 		lblNewLabel_1.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));

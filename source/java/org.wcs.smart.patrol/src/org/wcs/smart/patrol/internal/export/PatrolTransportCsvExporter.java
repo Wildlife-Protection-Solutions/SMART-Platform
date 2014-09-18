@@ -22,8 +22,10 @@
 package org.wcs.smart.patrol.internal.export;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +60,10 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 		CSVWriter writer = null;
 		try {
 			List<Language> languages = new ArrayList<Language>(ca.getLanguages());
-			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(
+					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+			
 			List<PatrolTransportType> types = getTransportTypes(ca, session);
 
 			// WriteHeaders

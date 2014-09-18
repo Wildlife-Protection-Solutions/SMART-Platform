@@ -22,8 +22,9 @@
 package org.wcs.smart.export;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -89,50 +90,53 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{file.toString()}));
 		}
 
-		CSVReader reader = new CSVReader(new FileReader(file), delimiter);
-		
-		//reading the first line with language codes
-		String[] row = reader.readNext();
-		int size = row.length;
-		int langNumber = size/2;
-		List<String> langCodes = getLanguageCodes(row);
+		CSVReader reader = new CSVReader(
+				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
+		try{
+			//reading the first line with language codes
+			String[] row = reader.readNext();
+			int size = row.length;
+			int langNumber = size/2;
+			List<String> langCodes = getLanguageCodes(row);
 
-		code2Language = createCode2Language(langCodes);
-		if (code2Language == null) {
-			return false;
-		}
-		record2Agency = new HashMap<String, Agency>();
-		
-		int line = 2;
-		Agency agency = null;
-		while( (row = reader.readNext()) != null ) {
-			if (monitor.isCanceled()) return false;
-			if (row.length != size) {
-				throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, size}));
+			code2Language = createCode2Language(langCodes);
+			if (code2Language == null) {
+				return false;
 			}
+			record2Agency = new HashMap<String, Agency>();
+		
+			int line = 2;
+			Agency agency = null;
+			while( (row = reader.readNext()) != null ) {
+				if (monitor.isCanceled()) return false;
+				if (row.length != size) {
+					throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, size}));
+				}
 			
-			agency = handleAgency(row, langCodes);
+				agency = handleAgency(row, langCodes);
 			
-			//adding ranks
-			Rank rank = new Rank();
-			boolean hasRecords = false;
-			for (int i = langNumber; i < size; i++) {
-				String value = row[i];
-				if (value != null && !value.isEmpty()) {
-					Language lang = getLanguage(langCodes.get(i-langNumber));
-					if (lang != null) {
-						hasRecords = true;
-						rank.updateName(lang, value);
+				//adding ranks
+				Rank rank = new Rank();
+				boolean hasRecords = false;
+				for (int i = langNumber; i < size; i++) {
+					String value = row[i];
+					if (value != null && !value.isEmpty()) {
+						Language lang = getLanguage(langCodes.get(i-langNumber));
+						if (lang != null) {
+							hasRecords = true;
+							rank.updateName(lang, value);
+						}
 					}
 				}
+				if (hasRecords) {
+					rank.setAgency(agency);
+					agency.getRanks().add(rank);
+				}
+				//adding ranks end
 			}
-			if (hasRecords) {
-				rank.setAgency(agency);
-				agency.getRanks().add(rank);
-			}
-			//adding ranks end
+		}finally{
+			reader.close();
 		}
-
 		if (monitor.isCanceled()) return false;
 		
 		importedData = record2Agency.values();

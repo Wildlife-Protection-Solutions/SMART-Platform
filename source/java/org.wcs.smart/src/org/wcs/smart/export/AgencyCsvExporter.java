@@ -20,9 +20,11 @@
  * SOFTWARE.
  */
 package org.wcs.smart.export;
+
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +67,9 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 		try {
 			this.ca = ca;
 			languages = new ArrayList<Language>(ca.getLanguages());
-			writer = new CSVWriter(new FileWriter(file), delimiter, '"',SmartUtils.LINE_SEPARATOR);
+			writer = new CSVWriter(
+					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
 			List<Agency> agencies = getAgencies(session);
 
 			// WriteHeaders
