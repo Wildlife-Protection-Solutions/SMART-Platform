@@ -97,7 +97,7 @@ public class DayDateGroupBy implements IDateGroupBy {
 		Calendar cale = Calendar.getInstance();
 		cale.setTime(enddate);
 
-		while (cals.before(cale)) {
+		while (cals.before(cale) || (dateFilter.isEndDateInclusive() && cals.equals(cale))) {
 			java.sql.Date dd = new java.sql.Date(cals.getTime().getTime());
 			String key = dd.toString();
 			items.add(new ListItem(null, key, key));

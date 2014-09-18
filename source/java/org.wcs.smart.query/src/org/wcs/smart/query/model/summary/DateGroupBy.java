@@ -46,7 +46,6 @@ public class DateGroupBy implements IGroupBy {
 
 	
 	private static IDateGroupBy[] GROUPBYS = {
-		
 		DayDateGroupBy.INSTANCE,
 		MonthDateGroupBy.INSTANCE,
 		YearDateGroupBy.INSTANCE
