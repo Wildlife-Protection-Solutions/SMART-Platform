@@ -35,6 +35,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
@@ -66,7 +67,8 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	private SurveyDesignComposite[] comps;
 	
 	private Object lastPage;
-	
+	private TemplateWizardPage templatePage;
+		
 	/**
 	 * Creates a new wizard
 	 */
@@ -125,9 +127,19 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
         if (lastPage instanceof SurveyCompositeWizardPage) {
             ((SurveyCompositeWizardPage) lastPage).updateModel(newDesign);
         }
-		session.beginTransaction();
+
+        session.beginTransaction();
 		try{
 			session.save(newDesign);
+			
+			if (templatePage != null){
+				if (templatePage.getClonedSamplingUnits() != null){
+					for (SamplingUnit s : templatePage.getClonedSamplingUnits()){
+						s.setSurveyDesign(newDesign);
+						session.save(s);
+					}
+				}
+			}
 			session.getTransaction().commit();
 			
 			savedNewDesign = newDesign;
@@ -164,8 +176,8 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     	
     	if (others.size() > 0){
     		//only add template option if other survey available
-    		TemplateWizardPage p = new TemplateWizardPage(others);
-    		super.addPage(p);
+    		templatePage = new TemplateWizardPage(others);
+    		super.addPage(templatePage);
     	}
     	
     	comps = new SurveyDesignComposite[]{
@@ -190,7 +202,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 		if (event.getCurrentPage() instanceof SurveyCompositeWizardPage){
 			((SurveyCompositeWizardPage)event.getCurrentPage()).updateModel(newDesign);
 		}else if (event.getCurrentPage() instanceof TemplateWizardPage){
-			((TemplateWizardPage)event.getCurrentPage()).updateModel(newDesign);
+			((TemplateWizardPage)event.getCurrentPage()).updateModel(newDesign, session);
 		}
 		
 		//init target page
