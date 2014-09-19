@@ -34,6 +34,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.er.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -47,7 +48,14 @@ import com.vividsolutions.jts.geom.Envelope;
 public class MissionGeoResourceInfo  extends IGeoResourceInfo {
 	
 	public MissionGeoResourceInfo( MissionGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.dataType;
+		if (resource.dataType.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){
+			this.title = Messages.MissionGeoResourceInfo_WaypointsTitle;
+		}else if (resource.dataType.equals(MissionDataSource.MISSIONTRACK_TYPE)){
+			this.title = Messages.MissionGeoResourceInfo_TracksTitle;
+		}else{
+			this.title = resource.dataType;
+		}
+		
 		computeBounds(resource, monitor);
 	}
 	

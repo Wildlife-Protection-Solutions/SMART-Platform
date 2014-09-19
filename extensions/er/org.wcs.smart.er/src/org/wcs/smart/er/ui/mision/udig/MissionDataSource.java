@@ -30,10 +30,11 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 
 /**
- * Data source for mission record.
+ * Data source for mission observations and tracks.
  * 
  * @author Emily
  * @author elitvin
@@ -41,7 +42,8 @@ import org.wcs.smart.er.model.Mission;
  */
 public class MissionDataSource extends AbstractDataStore{
 
-	public static final String MISSION_TYPE = "MissionPoint"; //$NON-NLS-1$
+	public static final String MISSIONWAYPOINT_TYPE = "MissionPoint"; //$NON-NLS-1$
+	public static final String MISSIONTRACK_TYPE = "MissionTrack"; //$NON-NLS-1$
 	
 	private Mission mission;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
@@ -60,14 +62,19 @@ public class MissionDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public String[] getTypeNames()  {
-		return new String[]{MISSION_TYPE};
+		return new String[]{MISSIONWAYPOINT_TYPE, MISSIONTRACK_TYPE};
 	}
 	/* (non-Javadoc)
 	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new MissionFeatureReader(this.mission, getSchema(typeName));
+		if (typeName.equals(MISSIONWAYPOINT_TYPE)) {
+			return new MissionFeatureReader(this.mission, getSchema(typeName));
+		}else if (typeName.equals(MISSIONTRACK_TYPE)){
+			return new MissionTrackFeatureReader(this.mission, getSchema(typeName));
+		}
+		return null;
 	}
 
 	
@@ -79,11 +86,13 @@ public class MissionDataSource extends AbstractDataStore{
 		SimpleFeatureType type = schemas.get(typeName);
 		if (type == null){
 			try {
-				if (typeName.equals(MISSION_TYPE)) {
+				if (typeName.equals(MISSIONWAYPOINT_TYPE)) {
 					type = createPointSchema();
+				}else if (typeName.equals(MISSIONTRACK_TYPE)){
+					type = createTrackSchema();
 				}
 			}catch(SchemaException ex){
-				throw new IOException("Schema type not supported." + ex.getLocalizedMessage(), ex);
+				throw new IOException(Messages.MissionDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);
 			}
 			schemas.put(typeName, type);
 		}
@@ -91,8 +100,14 @@ public class MissionDataSource extends AbstractDataStore{
 	}
 
 	private SimpleFeatureType createPointSchema() throws SchemaException{
-		String spec = "fid:String,geom:Point:srid=4326"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSION_TYPE, spec); //$NON-NLS-1$
+		String spec = "fid:String,id:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSIONWAYPOINT_TYPE, spec); //$NON-NLS-1$
+		return type;
+	}
+	
+	private SimpleFeatureType createTrackSchema() throws SchemaException{
+		String spec = "fid:String,id:String,tracktype:String,geom:LineString:srid=4326"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSIONTRACK_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}
 }
