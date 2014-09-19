@@ -59,22 +59,20 @@ public class TracksComposite extends Composite {
 	private static final int MAP_MIN_WIDTH = 280;
 	
 	private TableViewer trackViewer;
-	private Mission mission;
+	private MissionTrackEditDialog dialog;
 
-	public TracksComposite(Composite parent) {
+	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
+		this.dialog = dialog;
 		createControls();
+		updateInput();
 	}
 
-	public TracksComposite(Composite parent, Mission mission) {
-		this(parent);
-		setData(mission);
+	private void updateInput() {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	public void setData(Mission mission) {
-		this.mission = mission;
-	}
-	
+
 	private void createControls() {
 		setLayout(new GridLayout(3, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -200,8 +198,8 @@ public class TracksComposite extends Composite {
 	}
 
 	protected void importTracks() {
-		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(mission, GPSDataImport.ImportType.TRACK);
-		wizard.setDateOption(null); //TODO: fix!!!!
+		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMission(), GPSDataImport.ImportType.TRACK);
+		wizard.setDateOption(dialog.getDate());
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
