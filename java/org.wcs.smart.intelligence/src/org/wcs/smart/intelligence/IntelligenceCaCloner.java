@@ -47,9 +47,12 @@ public class IntelligenceCaCloner implements IConservationAreaTemplateCloner {
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.IntelligenceCaCloner_ProgressMessage);
+		monitor.beginTask(Messages.IntelligenceCaCloner_ProgressMessage, 2);
 		cloneSources(engine);
+		monitor.worked(1);
 		clonePrintTemplate(engine);
+		monitor.worked(1);		
+		monitor.done();
 	}
 
 	

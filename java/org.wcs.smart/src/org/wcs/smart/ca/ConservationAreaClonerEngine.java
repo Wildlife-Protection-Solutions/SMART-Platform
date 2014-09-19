@@ -303,7 +303,6 @@ public class ConservationAreaClonerEngine {
 					cnt = 0;
 					c.cloner.cloneTemplateData(this, new SubProgressMonitor(monitor, 10));
 					processed.add(c.id);
-					monitor.worked(10);
 				}
 				if (cnt > cloners.size()){
 					throw new Exception(Messages.ConservationAreaClonerEngine_Error_CircularDependency);
