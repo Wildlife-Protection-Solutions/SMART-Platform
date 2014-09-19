@@ -28,10 +28,6 @@ elementFormDefault="qualified">
     			type="tns:surveyDesignSamplingUnitAttribute"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="SamplingUnitAttribute"
-    			type="tns:samplingUnitAttribute" maxOccurs="unbounded"
-    			minOccurs="0">
-    		</element>
     		<element name="SamplingUnit" type="tns:samplingUnit"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
@@ -61,10 +57,13 @@ elementFormDefault="qualified">
     </complexType>
 
     <complexType name="surveyDesignSamplingUnitAttribute">
+    	<sequence>
+    		<element name="samplingUnitAttributes" type="tns:samplingUnitAttribute" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
     	<attribute name="name" type="string"></attribute>
     </complexType>
 
-    
+
     <complexType name="missionAttribute">
     	<sequence>
     		<element name="Names" type="tns:namesType"
@@ -109,9 +108,11 @@ elementFormDefault="qualified">
 
     <complexType name="samplingUnitAttribute">
     	<sequence>
-    		<element ref="tns:Names" maxOccurs="unbounded"
+    		<element name="samplingUnitAttributeValues"
+    			type="tns:samplingUnitAttributeValue" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
+    		<element name="names" type="tns:namesType" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeType" type="string"></attribute>
     	<attribute name="defaultName" type="string"></attribute>
@@ -123,6 +124,7 @@ elementFormDefault="qualified">
     	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="doubleValue" type="double"></attribute>
     	<attribute name="samplingUnitId" type="string"></attribute>
+    	<attribute name="SamplingUnitAttributeId" type="string"></attribute>
     </complexType>
 
 

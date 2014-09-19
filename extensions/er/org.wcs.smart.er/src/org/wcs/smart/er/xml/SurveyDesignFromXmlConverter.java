@@ -2,15 +2,12 @@ package org.wcs.smart.er.xml;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -22,7 +19,6 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.model.SurveyDesignProperty;
-import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.xml.model.NamesType;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -37,24 +33,11 @@ import org.wcs.smart.hibernate.SmartDB;
 public class SurveyDesignFromXmlConverter {
 	public static SurveyDesign fromXml(org.wcs.smart.er.xml.model.SurveyDesign xml, Session session) throws ParseException{
 		
-		
-		
-		//Read all mission properties and check if they exist, if not load them into the CA
-		for (org.wcs.smart.er.xml.model.MissionProperty xmlprop : xml.getMissionProperty()){
-			org.wcs.smart.er.xml.model.MissionAttribute xmlAttr = xmlprop.getMissionAttribute();
-			//Test if this Mission Attribute exists, if not add it.
-			
-			//Probably should test all the list items as well to ensure they exist.
-		}
-
-		
-		
-
 		//create the Survey Java object 
 		SurveyDesign surveyDesign = new SurveyDesign();
 		 
 		importNames(xml.getNames(), surveyDesign, session, true);
-		//create the survey design properties
+		//add the survey design properties 
 		ArrayList<SurveyDesignProperty> sdProperties = new ArrayList<SurveyDesignProperty>();
 		for (org.wcs.smart.er.xml.model.SurveyDesignProperty xmlSDproperty : xml.getSurveyDesignProperty()){
 			SurveyDesignProperty sdp = new SurveyDesignProperty();
@@ -76,46 +59,55 @@ public class SurveyDesignFromXmlConverter {
 			
 			org.wcs.smart.er.xml.model.MissionAttribute xmlattr = xmlproperty.getMissionAttribute();
 			
-			MissionAttribute attr = new MissionAttribute();
+			//check if the attribute exists already
+			MissionAttribute existingAttr = getAttr(xmlattr, session);
+			if(existingAttr == null){
+			
+				MissionAttribute attr = new MissionAttribute();
 			
 
-			attr.setAttributeList(new ArrayList<MissionAttributeListItem>());
+				attr.setAttributeList(new ArrayList<MissionAttributeListItem>());
 			
-			for(org.wcs.smart.er.xml.model.MissionAttributeListItem xmlmali : xmlattr.getMissionAttributeListItem()){
-				MissionAttributeListItem mali = new MissionAttributeListItem();
-				mali.setAttribute(attr);
-				mali.setKeyId(xmlmali.getKeyid());
-				mali.setListOrder(xmlmali.getListOrder());
-				mali.setName(xmlmali.getName());
-				mali.setUuid(null);
+				for(org.wcs.smart.er.xml.model.MissionAttributeListItem xmlmali : xmlattr.getMissionAttributeListItem()){
+					MissionAttributeListItem mali = new MissionAttributeListItem();
+					mali.setAttribute(attr);
+					mali.setKeyId(xmlmali.getKeyid());
+					mali.setListOrder(xmlmali.getListOrder());
+					mali.setName(xmlmali.getName());
+					mali.setUuid(null);
 				
-				importNames(xmlmali.getNames(), mali, session, false);
+					importNames(xmlmali.getNames(), mali, session, false);
 				
-				attr.getAttributeList().add(mali);
-			}
+					attr.getAttributeList().add(mali);
+				}
 			
-			attr.setConservationArea(SmartDB.getCurrentConservationArea());
-			attr.setKeyId(xmlattr.getKeyId());
-			attr.setName(xmlattr.getName());
+				attr.setConservationArea(SmartDB.getCurrentConservationArea());
+				attr.setKeyId(xmlattr.getKeyId());
+				attr.setName(xmlattr.getName());
 			
-			importNames(xmlattr.getNames(), attr, session, false);
+				importNames(xmlattr.getNames(), attr, session, false);
 			
-			String type = xmlattr.getAttributeType();
-			if( type.equals(AttributeType.DATE.toString()) ){ 
-				attr.setType(AttributeType.DATE);
-			}else if( type.equals(AttributeType.BOOLEAN.toString()) ){
-				attr.setType(AttributeType.BOOLEAN);
-			}else if( type.equals(AttributeType.LIST.toString()) ){
-				attr.setType(AttributeType.LIST);
-			}else if( type.equals(AttributeType.NUMERIC.toString()) ){
-				attr.setType(AttributeType.NUMERIC);
-			}else if( type.equals(AttributeType.TEXT.toString()) ){
-				attr.setType(AttributeType.TEXT);
-			}else if( type.equals(AttributeType.TREE.toString()) ){
-				attr.setType(AttributeType.TREE);
+				String type = xmlattr.getAttributeType();
+				if( type.equals(AttributeType.DATE.toString()) ){ 
+					attr.setType(AttributeType.DATE);
+				}else if( type.equals(AttributeType.BOOLEAN.toString()) ){
+					attr.setType(AttributeType.BOOLEAN);
+				}else if( type.equals(AttributeType.LIST.toString()) ){
+					attr.setType(AttributeType.LIST);
+				}else if( type.equals(AttributeType.NUMERIC.toString()) ){
+					attr.setType(AttributeType.NUMERIC);
+				}else if( type.equals(AttributeType.TEXT.toString()) ){
+					attr.setType(AttributeType.TEXT);
+				}else if( type.equals(AttributeType.TREE.toString()) ){
+					attr.setType(AttributeType.TREE);
+				}
+				mp.setAttribute(attr);
+			}else{
+				//attribute already exists, link it
+				mp.setAttribute(existingAttr);
 			}
 
-			mp.setAttribute(attr);
+			
 			
 		}
 		surveyDesign.setMissionProperties(missionProperties);
@@ -161,23 +153,50 @@ public class SurveyDesignFromXmlConverter {
 			surveyDesign.setState(State.INACTIVE);
 		}
 
-		ArrayList<SurveyDesignSamplingUnitAttribute> suAttributes = new ArrayList<SurveyDesignSamplingUnitAttribute>();
-		for (org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute suAttribute : xml.getSurveyDesignSamplingUnitAttribute()){
-			SurveyDesignSamplingUnitAttribute s = new SurveyDesignSamplingUnitAttribute();
-			suAttributes.add(s);
-		}
-		surveyDesign.setSamplingUnitAttributes(suAttributes);
-		
 		return surveyDesign;
 	}
 	
+	private static MissionAttribute getAttr(org.wcs.smart.er.xml.model.MissionAttribute xmlattr, Session s) {
+		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlattr.getKeyId())).list();
+		if (values.size() > 0){
+			MissionAttribute attr = values.get(0);
+			
+			for(org.wcs.smart.er.xml.model.MissionAttributeListItem xmlMali :xmlattr.getMissionAttributeListItem()){
+				boolean match = false;
+				for(MissionAttributeListItem mali : attr.getAttributeList()){
+					if(xmlMali.getKeyid().equals(mali.getKeyId())){
+						match = true;
+						break;
+					}
+				}
+				if (match == false){
+					//missing list item, add it
+					MissionAttributeListItem newmali = new MissionAttributeListItem();
+					newmali.setAttribute(attr);
+					newmali.setKeyId(xmlMali.getKeyid());
+					newmali.setListOrder(xmlMali.getListOrder());
+					newmali.setName(xmlMali.getName());
+				
+					importNames(xmlMali.getNames(), newmali, s, false);
+				
+					attr.getAttributeList().add(newmali);
+				}
+
+			}
+
+			return attr;
+		}
+		return null;
+	}
+
+
 	/**
-	 * Imports the query names from the xml query type to the SMART query object.
+	 * Imports the i8n names from the xml query type to the SMART query object.
 	 * @param query
 	 * @param qt
 	 * @throws Exception
 	 */
-	private static void importNames(List<NamesType> names, NamedItem toUpdate, Session session, boolean required) {
+	public static void importNames(List<NamesType> names, NamedItem toUpdate, Session session, boolean required) {
 		String xmlDefaultName = null;
 		for (NamesType label : names){
 			List<?> values = session.createCriteria(Language.class).
@@ -195,8 +214,7 @@ public class SurveyDesignFromXmlConverter {
 		String defaultName = toUpdate.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		if (defaultName == null){
 			if (xmlDefaultName != null){
-				toUpdate.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(),
-						xmlDefaultName);
+				toUpdate.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(),xmlDefaultName);
 			}else{
 				if (required){
 					toUpdate.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), 

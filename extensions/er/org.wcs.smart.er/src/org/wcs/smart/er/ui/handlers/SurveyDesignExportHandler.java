@@ -181,7 +181,7 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 						@Override
 						public void run() {
 							MessageDialog.openInformation(pmd.getShell(), "Exporting...", 
-									MessageFormat.format("Export Complete {0}", new Object[]{lExportCnt, types.size()}));		
+									MessageFormat.format("Export Complete. {0} Survey Designs successfully exported.", new Object[]{lExportCnt, types.size()}));		
 							}});
 						
 					

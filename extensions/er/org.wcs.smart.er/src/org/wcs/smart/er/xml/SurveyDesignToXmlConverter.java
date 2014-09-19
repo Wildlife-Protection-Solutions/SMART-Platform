@@ -59,8 +59,9 @@ public class SurveyDesignToXmlConverter {
 		if(start != null){
 			c.setTime(start);
 			xml.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+		}else{
+			xml.setStartDate(null);
 		}
-		xml.setStartDate(null);
 
 		//end date
 		Date end = surveyDesign.getEndDate();
@@ -157,8 +158,10 @@ public class SurveyDesignToXmlConverter {
 		//sampling Unit Attributes
 		for(SurveyDesignSamplingUnitAttribute attr : surveyDesign.getSamplingUnitAttributes()){
 			SamplingUnitAttribute sua = attr.getSamplingUnitAttribute();
-			org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua = new org.wcs.smart.er.xml.model.SamplingUnitAttribute();
 			
+			org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute xmlSDsua = new org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute();
+			org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua = new org.wcs.smart.er.xml.model.SamplingUnitAttribute();
+						
 			xmlsua.setAttributeType(sua.getType().toString());
 			xmlsua.setDefaultName(sua.getDefaultName());
 			xmlsua.setKeyId(sua.getKeyId());
@@ -171,8 +174,9 @@ public class SurveyDesignToXmlConverter {
 				xmlpair.setValue(label.getValue());
 				xmlsua.getNames().add(xmlpair);
 			}
-			
-			
+			xmlSDsua.getSamplingUnitAttributes().add(xmlsua);
+			xml.getSurveyDesignSamplingUnitAttribute().add(xmlSDsua);
+					
 		}
 
 		//All Sampling Units
@@ -192,6 +196,7 @@ public class SurveyDesignToXmlConverter {
 				xmlsuav.setDoubleValue(suav.getNumberValue());
 				xmlsuav.setSamplingUnitId(suav.getSamplingUnit().getId());
 				xmlsuav.setStringValue(suav.getStringValue());
+				xmlsuav.setSamplingUnitAttributeId(suav.getSamplingUnitAttribute().getKeyId());
 				xmlsu.getSamplingUnitAttributeValue().add(xmlsuav);
 			}
 			xml.getSamplingUnit().add(xmlsu);

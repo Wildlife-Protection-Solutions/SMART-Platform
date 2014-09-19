@@ -28,9 +28,8 @@ import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -63,14 +62,17 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnit.State;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.er.model.MissionProperty;
 
 /**
  * Handler for importing entity types.
@@ -135,48 +137,114 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 							errorMessage = MessageFormat.format("The key {0} is already in use, you cannot import a survery design with the same key until you delete or rename the existing one.", new Object[]{sd.getKeyId()});
 							return;
 						}
-						
-						Set<String> processed = new HashSet<String>();
-						
-						/*
-						//is this necessary to trigger the hibernate stuff to create any new keys?
-						for(MissionProperty mp : sd.getMissionProperties() ){
-								mp.getId();	
-								
-								MissionAttribute ma = mp.getAttribute();
-								processed.add(ma.getKeyId() );
-								
-								for(MissionAttributeListItem mali : ma.getAttributeList()){
-									processed.add(mali.getKeyId() );
-								}
-						}
-						*/
-
 						//save to the database
-						session.beginTransaction();
-						try{
+						try{						
+							session.beginTransaction();
+							session.saveOrUpdate(sd);
+						
+
 							for( MissionProperty mp : sd.getMissionProperties()){
 								MissionAttribute ma = mp.getAttribute();
 								if(ma != null){
 									session.saveOrUpdate(ma);
 								}
 							}
-							//these are cascaded 
-//							for (SurveyDesignProperty sdp : sd.getProperties()){
-//								if(sdp != null){
-//									session.saveOrUpdate(sdp);
-//								}
-//							}
-							for (SurveyDesignSamplingUnitAttribute attr : sd.getSamplingUnitAttributes()){
-								if(attr != null){
-									session.saveOrUpdate(attr);
-								}
-							}
-//							for (SurveyDesignSamplingUnitAttribute attr : xmlsd.getSamplingUnit()){
-//								session.saveOrUpdate(attr);
-//							}
+							
 
-							session.saveOrUpdate(sd);
+							//samplingUnitAttributes
+							List<SamplingUnitAttribute> allSamplingUnitsAttributes = new ArrayList();
+							for(org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute xmlsdsua : xmlsd.getSurveyDesignSamplingUnitAttribute()){
+								SurveyDesignSamplingUnitAttribute sdsua = new SurveyDesignSamplingUnitAttribute();
+								for (org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua : xmlsdsua.getSamplingUnitAttributes()){
+									
+									SamplingUnitAttribute existingSua = getSamplingUnitAttribute(xmlsua, session);
+									if(existingSua == null){
+										SamplingUnitAttribute sua = new SamplingUnitAttribute();
+										sdsua.setSamplingUnitAttribute(sua);
+										sdsua.setSurveyDesign(sd);
+									
+										if( xmlsua.getAttributeType().toString().equals(AttributeType.BOOLEAN.toString()) ){
+											sua.setType(AttributeType.BOOLEAN);
+										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.DATE.toString()) ){
+											sua.setType(AttributeType.DATE);
+										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.LIST.toString()) ){
+											sua.setType(AttributeType.LIST);
+										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.NUMERIC.toString()) ){
+											sua.setType(AttributeType.NUMERIC);
+										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.TEXT.toString()) ){
+											sua.setType(AttributeType.TEXT);
+										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.TREE.toString()) ){
+											sua.setType(AttributeType.TREE);
+										}
+									
+										sua.setConservationArea(SmartDB.getCurrentConservationArea());
+										sua.setKeyId(xmlsua.getKeyId());
+										sua.setName(xmlsua.getName());
+										SurveyDesignFromXmlConverter.importNames(xmlsua.getNames(), sua, session, false);
+								
+										session.save(sua);
+										allSamplingUnitsAttributes.add(sua);
+									}else{
+										sdsua.setSamplingUnitAttribute(existingSua);
+										sdsua.setSurveyDesign(sd);
+										allSamplingUnitsAttributes.add(existingSua);
+									}
+									
+								}
+								session.save(sdsua);
+							}
+							
+							
+							//sampling Units
+							for (org.wcs.smart.er.xml.model.SamplingUnit xmlunit : xmlsd.getSamplingUnit()){
+								org.wcs.smart.er.model.SamplingUnit unit = new SamplingUnit();
+								unit.setSurveyDesign(sd);
+								
+								unit.setBuffer(xmlunit.getBuffer());
+								unit.setGeom(xmlunit.getGeom());
+								unit.setId(xmlunit.getId());
+								
+								if(xmlunit.getState().toString().equals(org.wcs.smart.er.model.SamplingUnit.State.INACTIVE)){
+									unit.setState(State.INACTIVE); 
+								}else{
+									unit.setState(State.ACTIVE);
+								}
+								if(xmlunit.getType().toString().equals(SamplingUnit.SamplingUnitType.PLOT.toString())){
+									unit.setType(SamplingUnit.SamplingUnitType.PLOT);
+								}else if(xmlunit.getType().toString().equals(SamplingUnit.SamplingUnitType.RECON.toString())){
+									unit.setType(SamplingUnit.SamplingUnitType.RECON);
+								}else if(xmlunit.getType().toString().equals(SamplingUnit.SamplingUnitType.TRANSECT.toString())){
+									unit.setType(SamplingUnit.SamplingUnitType.TRANSECT);
+								}
+								session.saveOrUpdate(unit);
+								
+								//sampling unit attribute values
+								for(org.wcs.smart.er.xml.model.SamplingUnitAttributeValue xmlsuav : xmlunit.getSamplingUnitAttributeValue()){
+									SamplingUnitAttributeValue suav = new SamplingUnitAttributeValue();
+									suav.setNumberValue(xmlsuav.getDoubleValue());
+									suav.setStringValue(xmlsuav.getStringValue());
+									
+									suav.setSamplingUnit(unit);
+									
+									boolean found = false;
+									for(SamplingUnitAttribute sua : allSamplingUnitsAttributes){
+										
+										if(xmlsuav.getSamplingUnitAttributeId().equals(sua.getKeyId())){
+											suav.setSamplingUnitAttribute(sua);
+											found = true;
+											break;
+										}
+									}
+									if(!found){
+										throw new Exception("Invalid SamplingUnitAttributeValue object with SamplingUnitAttribute : " + xmlsuav.getSamplingUnitAttributeId() + ". Sampling Unit Attribute doesn't exist; You must fix the invalid XML file by removing the offending object or add a matching Sampling Unit Attribute.");
+									}
+									session.save(suav);
+								}
+
+							}
+
+							
+							
 							session.getTransaction().commit();
 							newDesign = sd;
 						}catch (Exception ex){
@@ -333,5 +401,14 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 			return p;
 		}
 		
+	}
+	
+	private static SamplingUnitAttribute getSamplingUnitAttribute(org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua, Session s) {
+		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlsua.getKeyId())).list();
+		if (values.size() > 0){
+			SamplingUnitAttribute attr = values.get(0);
+			return attr;
+		}
+		return null;
 	}
 }
