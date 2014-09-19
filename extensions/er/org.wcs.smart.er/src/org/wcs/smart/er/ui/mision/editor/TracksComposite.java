@@ -22,6 +22,9 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -47,6 +50,7 @@ import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.ui.map.location.MapComposite;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite to display list of tracks.
@@ -68,9 +72,19 @@ public class TracksComposite extends Composite {
 		updateInput();
 	}
 
+	private List<MissionTrack> buildTrackInput(Mission m) {
+		List<MissionTrack> tblInput = new ArrayList<MissionTrack>();
+		Date date = dialog.getDate();
+		for (MissionTrack t : m.getTracks()) {
+			if (SmartUtils.isSameDate(t.getDate(), date)) {
+				tblInput.add(t);
+			}
+		}
+		return tblInput;
+	}
+	
 	private void updateInput() {
-		// TODO Auto-generated method stub
-		
+		trackViewer.setInput(buildTrackInput(dialog.getMission()).toArray());
 	}
 
 	private void createControls() {
