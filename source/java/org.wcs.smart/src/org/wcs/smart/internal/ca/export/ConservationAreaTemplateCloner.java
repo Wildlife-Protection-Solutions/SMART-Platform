@@ -66,7 +66,7 @@ public class ConservationAreaTemplateCloner implements
 		//and all associated labels
 		monitor.beginTask(Messages.ConservationAreaTemplateCloner_Progress_CopyCaInfo, 4);
 		try{
-		//DO NOT CLONE: employees, saved maps, area geometries
+		    //DO NOT CLONE: employees, saved maps, area geometries
 			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyAgencyRank);
 			cloneAgenciesRank(engine);
 			monitor.worked(1);

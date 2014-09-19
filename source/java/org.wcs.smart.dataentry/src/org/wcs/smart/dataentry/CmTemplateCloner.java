@@ -58,7 +58,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		this.engine = engine;
-
+		
 		List<ConfigurableModel> models = DataentryHibernateManager.getConfigurableModels(engine.getTemplateCa(), engine.getSession());
 		monitor.beginTask(Messages.CmTemplateCloner_CopyProgress, models.size());
 		for (ConfigurableModel m : models){
@@ -66,6 +66,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			cloneConfigurableModel(m, engine);
 			monitor.worked(1);
 		}
+		monitor.done();
 	}
 
 	private void cloneConfigurableModel(ConfigurableModel cm, ConservationAreaClonerEngine engine) throws Exception{
@@ -83,7 +84,9 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		cloneCmAttributeTreeItems(cm, clone);
 		
 		engine.getSession().saveOrUpdate(clone);
-		engine.getSession().flush();		
+		engine.getSession().flush();
+		
+		engine.addConservationItemMapping(cm, clone);
 	}
 	
 	private void cloneCmAttributeListItems(ConfigurableModel sourceCm, ConfigurableModel clonedCm) throws Exception{
@@ -94,8 +97,12 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			clone.setConfigurableModel(clonedCm);
 			engine.copyLabels(listItem, clone);
 			clone.setIsActive(listItem.getIsActive());
-			clone.setListItem(findNewAttributeListItem(listItem.getListItem()));
-			engine.getSession().saveOrUpdate(clone);
+			AttributeListItem clonedItem = findNewAttributeListItem(listItem.getListItem());
+			if (clonedItem != null){
+				//if null then nothing from the main db was cloned and we don't want to save it
+				clone.setListItem(clonedItem);
+				engine.getSession().saveOrUpdate(clone);
+			}
 		}
 		engine.getSession().flush();
 	}
@@ -208,7 +215,10 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		if (items.size() == 1){
 			return (AttributeListItem) items.get(0);
 		}
-		throw new Exception(MessageFormat.format(Messages.CmTemplateCloner_ListItemNotFoundError,new Object[]{oldListItem.getKeyId()}));
+		//this may be an entity list item that is not cloned
+		return null;
+		
+		
 	}
 	
 	private AttributeTreeNode findNewAttributeTreeNode(AttributeTreeNode oldTreeNode) throws Exception{
@@ -227,6 +237,10 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		//search list nodes
 		AttributeListItem li = (AttributeListItem) engine.getSession().get(AttributeListItem.class, oldUuidItem);
 		if (li != null){
+			AttributeListItem f = findNewAttributeListItem(li);
+			if (f == null){
+				return null;
+			}
 			return findNewAttributeListItem(li).getUuid();
 		}
 		

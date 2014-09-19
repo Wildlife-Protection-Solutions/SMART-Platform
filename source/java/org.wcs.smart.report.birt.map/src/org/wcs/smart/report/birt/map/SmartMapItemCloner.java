@@ -55,15 +55,19 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
+		
 		//the report files have already been cloned
 		//here we just need to update the 
 		//query text in the BIRT smart
 		//report item
 		List<Report> newReports = engine.getSession().createCriteria(Report.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).list(); //$NON-NLS-1$
+		monitor.beginTask("Copying Report Map Items", newReports.size());
 		for (Report r : newReports){
 			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR), r.getFilename());
 			updateReportFile(r, reportFile, engine);
+			monitor.worked(1);
 		}
+		monitor.done();
 	}
 	
 	/**
