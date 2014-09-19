@@ -95,6 +95,7 @@ import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
@@ -165,7 +166,7 @@ public class MissionDayComposite {
 		@Override
 		public void event(Object o) {
 			input.clear();
-			input.addAll(buildTableInput(mission));
+			input.addAll(buildWaypointInput(mission));
 			refreshTable();
 		}
 	};
@@ -509,12 +510,12 @@ public class MissionDayComposite {
 //
 //		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
 
-		trackTable.setInput(mission.getTracks().toArray());
+		trackTable.setInput(buildTrackInput(mission).toArray());
 		
 		if (data.getWaypoints() == null) {
 			data.setWaypoints(new ArrayList<SurveyWaypoint>());
 		}
-		input = buildTableInput(data);
+		input = buildWaypointInput(data);
 		WritableList inputList = new WritableList(input, SurveyWaypoint.class);
 		observationTable.setInput(inputList);
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -560,7 +561,7 @@ public class MissionDayComposite {
 	
 	}
 
-	private List<SurveyWaypoint> buildTableInput(Mission m) {
+	private List<SurveyWaypoint> buildWaypointInput(Mission m) {
 		List<SurveyWaypoint> tblInput = new ArrayList<SurveyWaypoint>();
 		Date date = editor.getDay();
 		for (SurveyWaypoint p : m.getWaypoints()) {
@@ -571,6 +572,17 @@ public class MissionDayComposite {
 		return tblInput;
 	}
 
+	private List<MissionTrack> buildTrackInput(Mission m) {
+		List<MissionTrack> tblInput = new ArrayList<MissionTrack>();
+		Date date = editor.getDay();
+		for (MissionTrack t : m.getTracks()) {
+			if (SmartUtils.isSameDate(t.getDate(), date)) {
+				tblInput.add(t);
+			}
+		}
+		return tblInput;
+	}
+	
 	private void resize(){
 		if (observationTableColumns == null){
 			return ;
