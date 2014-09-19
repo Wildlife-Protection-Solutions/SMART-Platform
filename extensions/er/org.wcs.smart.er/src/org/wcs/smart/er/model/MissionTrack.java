@@ -40,6 +40,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.util.GeometryUtils;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
@@ -185,5 +186,14 @@ public class MissionTrack extends UuidItem{
 		WKBWriter writer = new WKBWriter(3);
 		this.geom = writer.write(ls);
 		this.ls = ls;
+	}
+	
+	/**
+	 * @return the geometry length only if geometry represents a linestring; otherwise
+	 * null is returned
+	 */
+	@Transient
+	public Double getGeometryLengthKm(){
+		return (GeometryUtils.distanceInMeters((LineString)getLineString()) / 1000.0);
 	}
 }

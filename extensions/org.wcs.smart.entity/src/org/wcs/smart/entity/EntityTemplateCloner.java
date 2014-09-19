@@ -57,8 +57,7 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 		this.engine = engine;
 		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes, 10);
 		try{
-			cloneEntityTypes(monitor);
-			monitor.worked(10);
+			cloneEntityTypes(new SubProgressMonitor(monitor, 10));
 		}finally{
 			monitor.done();
 		}
@@ -67,10 +66,9 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 	@SuppressWarnings("unchecked")
 	private void cloneEntityTypes(IProgressMonitor monitor) throws Exception{
 		List<EntityType> toClone = engine.getSession().createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 10);
-		subMonitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes2, toClone.size());
+		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes2, toClone.size());
 		for (EntityType et : toClone){
-			subMonitor.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
+			monitor.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
 			EntityType clone = new EntityType();
 			
 			clone.setConservationArea(engine.getNewCa());
@@ -109,9 +107,9 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 			}
 			
 			engine.getSession().save(clone);
-			subMonitor.worked(1);
+			monitor.worked(1);
 		}
-		subMonitor.done();
+		monitor.done();
 		
 	}
 

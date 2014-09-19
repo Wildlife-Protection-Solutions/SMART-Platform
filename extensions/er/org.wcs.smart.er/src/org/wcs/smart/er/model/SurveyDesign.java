@@ -174,7 +174,7 @@ public class SurveyDesign extends NamedKeyItem {
 		this.missionProperties = properties;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="design", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="surveyDesign", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<SurveyDesignProperty> getProperties() {
 		if (properties == null) {
 			properties = new ArrayList<SurveyDesignProperty>();

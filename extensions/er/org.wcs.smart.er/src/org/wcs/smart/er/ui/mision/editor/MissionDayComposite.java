@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -85,6 +86,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
@@ -95,6 +97,7 @@ import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -559,6 +562,11 @@ public class MissionDayComposite {
 //			
 //		}
 	
+		List<Employee> emps = new ArrayList<Employee>();
+		for (MissionMember mm : mission.getMembers()){
+			emps.add(mm.getMember());
+		}
+		observationEditor.setObservers(emps);
 	}
 
 	private List<SurveyWaypoint> buildWaypointInput(Mission m) {
@@ -839,7 +847,7 @@ public class MissionDayComposite {
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){
 				//TODO:
-				//waypoint.setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(((Date)value).getTime())));
+				waypoint.setDateTime(SmartUtils.combineDateTime(editor.getDay(), new Time(((Date)value).getTime())));
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {

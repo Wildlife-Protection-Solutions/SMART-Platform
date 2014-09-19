@@ -4,7 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
-	public static final String SurveyDesignToXmlConverter_Progress1 = "Exporting {} to xml.";
+
 	public static String AddERJob_Title;
 	public static String AddWaypointDialog_EmptyProjectionError;
 	public static String AddWaypointDialog_EmptyWaypointIDError;
@@ -49,6 +49,7 @@ public class Messages extends NLS {
 	public static String BufferPage_StripTransect;
 	public static String BufferPage_Title;
 	public static String BufferPage_TtLabel;
+	public static String CaTemplateCloner_CopySurveyElement;
 	public static String CommentComposite_CommentLabel;
 	public static String CommentComposite_Description;
 	public static String CommentComposite_Title;
@@ -320,7 +321,6 @@ public class Messages extends NLS {
 	public static String SamplingUnitEditorPage_attributesTooltip;
 	public static String SamplingUnitEditorPage_BufferColumnName;
 	public static String SamplingUnitEditorPage_clearTooltip;
-	public static String SamplingUnitEditorPage_configAttributesButton;
 	public static String SamplingUnitEditorPage_DeleteDialogTitle;
 	public static String SamplingUnitEditorPage_DeleteMenuLabel;
 	public static String SamplingUnitEditorPage_DeleteMessage;
@@ -332,11 +332,9 @@ public class Messages extends NLS {
 	public static String SamplingUnitEditorPage_EditMenuLabel;
 	public static String SamplingUnitEditorPage_ErrorDeletingSu;
 	public static String SamplingUnitEditorPage_ErrorDeletingSu2;
-	public static String SamplingUnitEditorPage_exportButton;
 	public static String SamplingUnitEditorPage_exportTooltip;
 	public static String SamplingUnitEditorPage_FormName;
 	public static String SamplingUnitEditorPage_IdColumnName;
-	public static String SamplingUnitEditorPage_importButton;
 	public static String SamplingUnitEditorPage_importTooltip;
 	public static String SamplingUnitEditorPage_LengthColumnName;
 	public static String SamplingUnitEditorPage_loadingValuesJobName;
@@ -387,6 +385,11 @@ public class Messages extends NLS {
 	public static String SurveyComposite_Title;
 	public static String SurveyDatePage_Message;
 	public static String SurveyDatePage_Title;
+	public static String SurveyDeleteCaHandler_deleteMissionProp;
+	public static String SurveyDeleteCaHandler_deleteMissions;
+	public static String SurveyDeleteCaHandler_deleteSuAttriutes;
+	public static String SurveyDeleteCaHandler_deleteSurveyDesigns;
+	public static String SurveyDeleteCaHandler_deleteSurveys;
 	public static String SurveyDesign_ActiveStateLabel;
 	public static String SurveyDesign_InActiveStateLabel;
 	public static String SurveyDesignComposite_Description;
@@ -479,12 +482,10 @@ public class Messages extends NLS {
 	public static String TypePage_linesLabel;
 	public static String TypePage_Message;
 	public static String TypePage1_Message;
-	public static String TypePage_PlotsOption;
 	public static String TypePage_pointsLabel;
 	public static String TypePage_suTypeLabel;
 	public static String TypePage_Title;
 	public static String TypePage1_Title;
-	public static String TypePage_TransectsOption;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

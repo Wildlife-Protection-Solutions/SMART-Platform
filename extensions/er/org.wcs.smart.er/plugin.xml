@@ -429,5 +429,18 @@
             name="Survey Design Sampling Unit Service">
       </service>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.er.internal.CaTemplateCloner"
+            id="org.wcs.smart.er.SurveyCloner">
+         <require
+               id="org.wcs.smart.conservationAreaCloner">
+         </require>
+         <require
+               id="org.wcs.smart.dataentry.cmTemplateCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>

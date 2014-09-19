@@ -226,7 +226,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 	public void updateDesign(SurveyDesign design) {
 		design.getProperties().clear();
 		for (SurveyDesignProperty p : input) {
-			p.setDesign(design);
+			p.setSurveyDesign(design);
 			design.getProperties().add(p);
 		}
 	}

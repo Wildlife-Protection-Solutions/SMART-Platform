@@ -28,6 +28,8 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.er.internal.SurveyDeleteCaHandler;
 /**
  * The activator class controls the plug-in life cycle
  */
@@ -78,6 +80,9 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		SurveyDeleteCaHandler deleteCaHandler = new SurveyDeleteCaHandler();
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteCaHandler,SurveyDeleteCaHandler.EXECUTE_ORDER);
 	}
 
 	/*

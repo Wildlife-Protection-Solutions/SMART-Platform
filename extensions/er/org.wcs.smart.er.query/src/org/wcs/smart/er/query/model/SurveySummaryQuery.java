@@ -130,6 +130,7 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 		q.setDateFilter(getDateFilter());
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQuery(getQuery());
+		q.setSurveyDesign(getSurveyDesign());
 		return q;
 	}
 	

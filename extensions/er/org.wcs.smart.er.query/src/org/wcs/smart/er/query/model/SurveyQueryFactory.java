@@ -66,9 +66,9 @@ public class SurveyQueryFactory {
 		}else if (querytype.getClass().equals(SurveyWaypointQueryType.class)){
 			return new SurveyWaypointQuery();
 		}else if (querytype.getClass().equals(MissionQueryType.class)){
-			new MissionQuery();
+			return new MissionQuery();
 		}else if (querytype.getClass().equals(MissionTrackQueryType.class)){
-			new MissionTrackQuery();
+			return new MissionTrackQuery();
 		}
 		return null;
 	}
