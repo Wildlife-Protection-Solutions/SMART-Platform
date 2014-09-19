@@ -364,6 +364,7 @@ public class Messages extends NLS {
 	public static String SamplingUnitStateDialog_Title;
 	public static String SaveMissionJob_Error;
 	public static String SaveMissionJob_Title;
+	public static String SaveMissionTracksJob_Title;
 	public static String SaveSurveyDesignJob_Error;
 	public static String SaveSurveyDesignJob_Title;
 	public static String SaveWaypointJob_Error;

@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.GpxImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
@@ -79,6 +80,11 @@ public class MissionGpxImportEngine extends GpxImportEngine {
 				tracks.add(track);
 				message = Messages.MissionImportEngine_ImportSingleTrack;
 			}
+			
+			for (MissionTrack t : tracks) {
+				t.setType(TrackType.TRACK);
+			}
+			
 			MissionDataImport.saveTracks(mission, tracks);
 		}
 		return message;

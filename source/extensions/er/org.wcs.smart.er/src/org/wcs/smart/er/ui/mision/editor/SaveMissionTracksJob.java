@@ -21,52 +21,50 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.util.Date;
+import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
- * Dialog for editing mission tracks.
+ * Job for saving {@link MissionTrack} objects
  * 
  * @author elitvin
  * @since 3.0.0
  */
-public class MissionTrackEditDialog extends TitleAreaDialog {
+public class SaveMissionTracksJob extends Job {
+
+	private List<MissionTrack> tracks;
 	
-	private Mission mission;
-	private Date date;
+    public SaveMissionTracksJob(List<MissionTrack> tracks) {
+        super(Messages.SaveMissionTracksJob_Title);
+        this.tracks = tracks;
+    }
 
-	public MissionTrackEditDialog(Shell shell, Mission mission, Date date) {
-		super(shell);
-		this.mission = mission;
-		this.date = date;
-	}
-
-	public Mission getMission() {
-		return mission;
-	}
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+		Session session = SmartHibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			for (MissionTrack t : tracks) {
+				session.saveOrUpdate(t);
+			}
+			session.getTransaction().commit();
+        	return Status.OK_STATUS;
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			EcologicalRecordsPlugIn.displayLog(Messages.SaveMissionJob_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+	        return Status.CANCEL_STATUS;
+		} finally {
+			session.close();
+		}
+    }
 	
-	public Date getDate() {
-		return date;
-	}
-	
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		Composite comp = (Composite) super.createDialogArea(parent);
-
-		String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, mission.getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
-		setTitle(title);
-		getShell().setText(title);
-		setMessage(Messages.MissionTrackEditDialog_Message);
-
-		new TracksComposite(comp, this);
-		return comp;
-	}
 }

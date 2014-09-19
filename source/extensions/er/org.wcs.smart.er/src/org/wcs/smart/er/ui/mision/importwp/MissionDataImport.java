@@ -39,6 +39,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.editor.SaveMissionJob;
+import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
@@ -161,7 +162,7 @@ public class MissionDataImport {
 			mission.getTracks().add(track);
 		}
 		
-		SaveMissionJob saveJob = new SaveMissionJob(mission);
+		SaveMissionTracksJob saveJob = new SaveMissionTracksJob(tracks);
 		saveJob.schedule();
 		saveJob.join();
 		

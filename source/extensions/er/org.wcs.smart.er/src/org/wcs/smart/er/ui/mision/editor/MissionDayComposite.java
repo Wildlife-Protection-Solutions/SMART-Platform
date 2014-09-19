@@ -151,8 +151,6 @@ public class MissionDayComposite {
 	private ObservationCellEditor observationEditor;
 	private SamplingUnitCellEditor samplingUnitEditor;
 	
-	private WizardDialog dialog = null;
-	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
 	
 	private ISurveyEventListener trackListener = new ISurveyEventListener() {
@@ -610,7 +608,7 @@ public class MissionDayComposite {
 
 	protected void showEditTrackDialog() {
 		try {
-			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), mission);
+			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), mission, editor.getDay());
 			editDialog.open();
 		} finally {
 			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
@@ -627,7 +625,7 @@ public class MissionDayComposite {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
-					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+					WizardDialog dialog = new WizardDialog(editor.getSite().getShell(), wizard);
 
 					if (dialog != null) {
 						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
@@ -636,7 +634,6 @@ public class MissionDayComposite {
 				}
 			});
 		} catch (Exception ex) {
-			dialog = null;
 			EcologicalRecordsPlugIn.displayLog(Messages.MissionDayComposite_ImportWizardError + ex.getLocalizedMessage(), ex);
 		}
 	}
