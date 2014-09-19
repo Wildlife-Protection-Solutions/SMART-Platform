@@ -30,6 +30,7 @@ import java.util.Map;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
@@ -44,7 +45,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class MissionDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param MISSION_UUID = new Param("missionuuid", String.class, "Mission UUID", true);  //$NON-NLS-1$
+	public static final Param MISSION_UUID = new Param("missionuuid", String.class, Messages.MissionDataSourceFactory_ParameterName, true);  //$NON-NLS-1$
 	  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -62,7 +63,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "Mission points location data source";
+		return Messages.MissionDataSourceFactory_Description;
 	}
 
 	/* (non-Javadoc)
@@ -70,7 +71,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Mission";
+		return Messages.MissionDataSourceFactory_Name;
 	}
 
 	/* (non-Javadoc)
@@ -130,7 +131,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("This is a read-only data source");
+		throw new UnsupportedOperationException(Messages.MissionDataSourceFactory_ReadOnlySource);
 	}
 
 }

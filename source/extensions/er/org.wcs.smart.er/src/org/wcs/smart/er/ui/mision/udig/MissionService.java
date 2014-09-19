@@ -131,7 +131,8 @@ public class MissionService extends IService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<MissionGeoResource>();
-					members.add(new MissionGeoResource(this));
+					members.add(new MissionGeoResource(this, MissionDataSource.MISSIONWAYPOINT_TYPE));
+					members.add(new MissionGeoResource(this, MissionDataSource.MISSIONTRACK_TYPE));
 				}
 			}
 		}

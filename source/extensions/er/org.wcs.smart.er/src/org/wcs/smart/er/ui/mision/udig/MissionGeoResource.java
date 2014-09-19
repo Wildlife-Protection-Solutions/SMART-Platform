@@ -45,7 +45,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 
 /**
- * Mission point geo resource
+ * Mission observation and track GeoResource
  * 
  * @author Emily
  * @author elitvin
@@ -56,9 +56,9 @@ public class MissionGeoResource extends IGeoResource {
 	private URL url = null;
 	protected String dataType;
 	
-	public MissionGeoResource(MissionService service){
+	public MissionGeoResource(MissionService service, String dataType){
 		this.service = service;
-		this.dataType = MissionDataSource.MISSION_TYPE;
+		this.dataType = dataType;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
@@ -153,7 +153,12 @@ public class MissionGeoResource extends IGeoResource {
         }
         
         if (adaptee.isAssignableFrom(Style.class)){
-        	Style s = createStyle();
+        	Style s = null;
+        	if (dataType.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){
+        		s = createPointStyle();
+        	}else if (dataType.equals(MissionDataSource.MISSIONTRACK_TYPE)){
+        		s = createLineStyle();
+        	}
         	if (s != null){
         		return adaptee.cast(s);
         	}
@@ -161,7 +166,7 @@ public class MissionGeoResource extends IGeoResource {
         return super.resolve(adaptee, monitor);
     }
     
-    private Style createStyle(){
+    private Style createPointStyle(){
     	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " //$NON-NLS-1$
     			+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
     			+ "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$
@@ -208,4 +213,42 @@ public class MissionGeoResource extends IGeoResource {
 		}
     }
 
+    private Style createLineStyle(){
+    	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " //$NON-NLS-1$
+    			+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
+    			+ "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:UserLayer&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:FeatureTypeConstraint/&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:UserStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Name&gt;MissionPoint&lt;/sld:Name&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Title/&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Name&gt;group 0&lt;/sld:Name&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Rule&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Name&gt;default rule&lt;/sld:Name&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:LineSymbolizer&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:Stroke&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:CssParameter name=\"stroke\"&gt;#0080FF&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
+		    	+ "&lt;sld:CssParameter name=\"stroke-width\"&gt;2.0&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:Stroke&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:LineSymbolizer&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:Rule&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:UserStyle&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:UserLayer&gt;" //$NON-NLS-1$
+		    	+ "&lt;/sld:StyledLayerDescriptor&gt;" //$NON-NLS-1$
+    			+ "</styleEntry>"; //$NON-NLS-1$
+
+		try {
+			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
+			SLDContent c = new SLDContent();
+			Style style = (Style) c.load(memento);
+			return style;
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.log("Error generating smart style", ex); //$NON-NLS-1$
+			return null;
+		}
+    }
 }

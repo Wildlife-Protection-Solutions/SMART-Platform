@@ -220,6 +220,11 @@ public class Messages extends NLS {
 	public static String MissionAttributeListItemDeleteAdvisor_InvalidObject;
 	public static String MissionCsvImportEngine_SavingWaypoints;
 	public static String MissionDataImport_ResultMessage;
+	public static String MissionDataSource_SchemaNotSupported;
+	public static String MissionDataSourceFactory_Description;
+	public static String MissionDataSourceFactory_Name;
+	public static String MissionDataSourceFactory_ParameterName;
+	public static String MissionDataSourceFactory_ReadOnlySource;
 	public static String MissionDayComposite_AddWaypoint;
 	public static String MissionDayComposite_Attachment;
 	public static String MissionDayComposite_Comment;
@@ -256,6 +261,8 @@ public class Messages extends NLS {
 	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
 	public static String MissionEmployeeComposite_Title;
+	public static String MissionGeoResourceInfo_TracksTitle;
+	public static String MissionGeoResourceInfo_WaypointsTitle;
 	public static String MissionImportEngine_ImportMultiTrack;
 	public static String MissionImportEngine_ImportSingleTrack;
 	public static String MissionImportGpsDataWizard_DialogTitle;
@@ -274,6 +281,11 @@ public class Messages extends NLS {
 	public static String MissionPropertyValuesComposite_Description;
 	public static String MissionPropertyValuesComposite_InvalidNumber;
 	public static String MissionPropertyValuesComposite_Title;
+	public static String MissionServiceInfo_Description;
+	public static String MissionServiceInfo_Keyword1;
+	public static String MissionServiceInfo_Keyword2;
+	public static String MissionServiceInfo_Keyword3;
+	public static String MissionServiceInfo_Keyword4;
 	public static String MissionTrackEditDialog_Message;
 	public static String MissionTrackEditDialog_Title;
 	public static String NameIdComposite_Button_Change;

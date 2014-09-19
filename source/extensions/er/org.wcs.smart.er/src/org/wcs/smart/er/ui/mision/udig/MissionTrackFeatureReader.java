@@ -29,28 +29,22 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.util.SmartUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-
 /**
- * Feature reader for mission observation points.
+ * Feature reader for mission tracks.
  * 
  * @author Emily
- * @author elitvin
  *
  */
-public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
+public class MissionTrackFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private Mission mission;
 	private SimpleFeatureType featureType;
 	private int cnt;
-	private GeometryFactory gf = new GeometryFactory();
 	
-	public MissionFeatureReader(Mission mission, SimpleFeatureType type){
+	public MissionTrackFeatureReader(Mission mission, SimpleFeatureType type){
 		this.mission = mission;
 		this.featureType = type;
 	}
@@ -63,23 +57,22 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
-		SimpleFeature feature = createFeature(mission.getWaypoints().get(cnt));
+		SimpleFeature feature = createFeature(mission.getTracks().get(cnt));
 		cnt++;
 		return feature;
 	}
 
 	@Override
 	public boolean hasNext() throws IOException {
-		return cnt < mission.getWaypoints().size();
+		return cnt < mission.getTracks().size();
 	}
 
 	@Override
 	public void close() throws IOException {
 	}
 	
-	private SimpleFeature createFeature(SurveyWaypoint point){
-		String fid = SmartUtils.encodeHex(point.getWaypoint().getUuid());
-		Point pnt = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));
-		return SimpleFeatureBuilder.build(featureType, new Object[]{fid,point.getWaypoint().getId(),pnt},fid);
+	private SimpleFeature createFeature(MissionTrack point){
+		String fid = SmartUtils.encodeHex(point.getUuid());
+		return SimpleFeatureBuilder.build(featureType, new Object[]{fid,point.getId(), point.getDate(), point.getLineString()},fid);
 	}
 }

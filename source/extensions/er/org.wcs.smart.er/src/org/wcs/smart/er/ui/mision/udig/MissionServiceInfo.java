@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.mision.udig;
 import net.refractions.udig.catalog.IServiceInfo;
 
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 
 /**
  * Mission service info
@@ -34,9 +35,9 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 public class MissionServiceInfo extends IServiceInfo{
 
 	public MissionServiceInfo(MissionService service){
-		this.description = "Service for providing mission location points";
+		this.description = Messages.MissionServiceInfo_Description;
 		this.icon = EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.MISSION_ICON);
-		this.keywords = new String[]{"SMART", "mission"};
+		this.keywords = new String[]{Messages.MissionServiceInfo_Keyword1, Messages.MissionServiceInfo_Keyword2, Messages.MissionServiceInfo_Keyword3, Messages.MissionServiceInfo_Keyword4};
 		this.title = service.getMissionRecord().getId();
 	}
 	
