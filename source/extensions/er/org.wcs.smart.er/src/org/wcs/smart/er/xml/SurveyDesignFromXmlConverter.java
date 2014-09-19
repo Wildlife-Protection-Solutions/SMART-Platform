@@ -43,7 +43,7 @@ public class SurveyDesignFromXmlConverter {
 			SurveyDesignProperty sdp = new SurveyDesignProperty();
 			sdp.setName(xmlSDproperty.getName());
 			sdp.setValue(xmlSDproperty.getValue());
-			sdp.setDesign(surveyDesign);
+			sdp.setSurveyDesign(surveyDesign);
 			sdProperties.add(sdp);
 		}
 		surveyDesign.setProperties(sdProperties); //survey design properties		

@@ -246,5 +246,15 @@
             propertyProvider="org.wcs.smart.er.query.ui.ColumnQueryPropertyProvider">
       </queryproperty>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.er.query.internal.SurveyQueryCloner"
+            id="org.wcs.smart.er.query.SurveyQueryCloner">
+         <require
+               id="org.wcs.smart.er.SurveyCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>

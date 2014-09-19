@@ -159,6 +159,13 @@ public class Messages extends NLS {
 	public static String SurveyObservationQuery_loadingDesignJobName;
 	public static String SurveyObservationQueryType_QueryTypeName;
 	public static String SurveyObsQueryDataSource_SchemaError;
+	public static String SurveyQueryCloner_CopyQueryProgress;
+	public static String SurveyQueryCloner_GriddedTask;
+	public static String SurveyQueryCloner_IncidentTask;
+	public static String SurveyQueryCloner_MissionTask;
+	public static String SurveyQueryCloner_MissionTrackTask;
+	public static String SurveyQueryCloner_ObservationTask;
+	public static String SurveyQueryCloner_SummaryTask;
 	public static String SurveyQueryColumn_CaIdLabel;
 	public static String SurveyQueryColumn_CaNameLabel;
 	public static String SurveyQueryColumn_CommentLabel;

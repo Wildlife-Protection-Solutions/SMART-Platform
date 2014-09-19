@@ -67,10 +67,17 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == SamplingUnitType.PLOT || 
 				type == SamplingUnitType.TRANSECT){ 
-			names = new String[sd.getSamplingUnitAttributes().size() + 3];
+			int length = sd.getSamplingUnitAttributes().size() + 3;
+			if (type == SamplingUnitType.TRANSECT){
+				length ++;
+			}
+			names = new String[length];
 			names[i++] = "sd:su:id"; //$NON-NLS-1$
 			names[i++] = "sd:su:buffer"; //$NON-NLS-1$
 			names[i++] = "sd:su:state"; //$NON-NLS-1$
+			if (type == SamplingUnitType.TRANSECT){
+				names[i++] = "sd:su:length"; //$NON-NLS-1$
+			}
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				names[i++] = sua.getSamplingUnitAttribute().getKeyId();
 			}
@@ -80,6 +87,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			names[i++] = "sd:su:missionid"; //$NON-NLS-1$
 			names[i++] = "sd:su:surveyid"; //$NON-NLS-1$
 			names[i++] = "sd:su:date"; //$NON-NLS-1$
+			names[i++] = "sd:su:length"; //$NON-NLS-1$
 		}
 		return names;
 	}
@@ -90,11 +98,18 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == SamplingUnitType.PLOT || 
 				type == SamplingUnitType.TRANSECT){ 
-			names = new String[sd.getSamplingUnitAttributes().size() + 3];
-		
+			int length = sd.getSamplingUnitAttributes().size() + 3;
+			if (type == SamplingUnitType.TRANSECT){
+				length ++;
+			}
+			names = new String[length];
+			
 			names[i++] = Messages.SurveySamplingUnitTable_IDColumnLabel;
 			names[i++] = Messages.SurveySamplingUnitTable_BufferColumnLabel;
 			names[i++] = Messages.SurveySamplingUnitTable_StateColumnLabel;
+			if (type == SamplingUnitType.TRANSECT){
+				names[i++] = "Length (km)";	
+			}
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				names[i++] = sua.getSamplingUnitAttribute().getName();
 			}
@@ -104,6 +119,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			names[i++] = "Mission ID"; //$NON-NLS-1$
 			names[i++] = "Survey ID"; //$NON-NLS-1$
 			names[i++] = "Date"; //$NON-NLS-1$
+			names[i++] = "Length"; //$NON-NLS-1$
 		}
 		return names;
 	}
@@ -114,11 +130,18 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == SamplingUnitType.PLOT || 
 				type == SamplingUnitType.TRANSECT){
-			names = new int[sd.getSamplingUnitAttributes().size() + 3];
+			int length = sd.getSamplingUnitAttributes().size() + 3;
+			if (type == SamplingUnitType.TRANSECT){
+				length ++;
+			}
+			names = new int[length];
 		
 			names[i++] = java.sql.Types.VARCHAR;
 			names[i++] = java.sql.Types.DOUBLE;
 			names[i++] = java.sql.Types.VARCHAR;
+			if (type == SamplingUnitType.TRANSECT){
+				names[i++] = java.sql.Types.DOUBLE;
+			}
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 					names[i++] = java.sql.Types.VARCHAR;
@@ -132,6 +155,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			names[i++] = java.sql.Types.VARCHAR;
 			names[i++] = java.sql.Types.VARCHAR;
 			names[i++] = java.sql.Types.DATE;
+			names[i++] = java.sql.Types.DOUBLE;
 		}
 		return names;
 	}
@@ -172,6 +196,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			}else if (index == 2){
 				return e.getState().getGuiName();
 			}else{
+				if (type == SamplingUnitType.TRANSECT){
+					if (index == 3){
+						return e.getGeometryLengthKm();
+					}
+					index--;
+				}
 				SamplingUnitAttribute sua = sd.getSamplingUnitAttributes().get(index - 3).getSamplingUnitAttribute();
 				for (SamplingUnitAttributeValue suav : e.getAttributes()){
 					if (suav.getSamplingUnitAttribute().equals(sua)){
@@ -193,6 +223,8 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 				return mt.getMission().getSurvey().getId();
 			}else if (index == 3){
 				return mt.getDate();
+			}else if (index == 4){
+				return mt.getGeometryLengthKm();
 			}
 		}
 		return null;

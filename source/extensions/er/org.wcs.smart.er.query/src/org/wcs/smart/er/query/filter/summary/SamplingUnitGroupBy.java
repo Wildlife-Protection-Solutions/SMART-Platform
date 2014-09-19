@@ -119,7 +119,9 @@ public class SamplingUnitGroupBy implements ISurveyGroupBy{
 	public DropItem asDropItem(Session session) throws Exception {
 		DropItem di = SurveyDropItemFactory.INSTANCE.createSamplingUnitGroupByDropItem();
 		List<ListItem> it = getItems(session);
-		di.initializeData(it.toArray(new ListItem[it.size()]));
+		if (it != null){
+			di.initializeData(it.toArray(new ListItem[it.size()]));
+		}
 		return di;
 	}
 

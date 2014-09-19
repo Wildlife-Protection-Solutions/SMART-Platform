@@ -44,6 +44,7 @@ public class CybertrackerTemplateCloner implements
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
 
+		monitor.beginTask("Copying Cybertracker Options", 1);
 		@SuppressWarnings("unchecked")
 		List<CyberTrackerPropertiesOption> list = engine.getSession().createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		for (CyberTrackerPropertiesOption templateOption : list) {
@@ -57,6 +58,7 @@ public class CybertrackerTemplateCloner implements
 			engine.getSession().save(newOption);
 			engine.getSession().flush();
 		}
+		monitor.done();
 	}
 	
 }

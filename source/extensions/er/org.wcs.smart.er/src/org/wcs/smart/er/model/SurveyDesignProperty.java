@@ -47,10 +47,10 @@ public class SurveyDesignProperty extends UuidItem {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="survey_design_uuid", referencedColumnName="uuid")
-	public SurveyDesign getDesign() {
+	public SurveyDesign getSurveyDesign() {
 		return design;
 	}
-	public void setDesign(SurveyDesign design) {
+	public void setSurveyDesign(SurveyDesign design) {
 		this.design = design;
 	}
 	
