@@ -152,7 +152,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>15</NextId>
+            <NextId>16</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -172,7 +172,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(15);
+		data.setNextId(16);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -944,6 +944,22 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+    <Control>
+    	<Type>{FD691F38-4527-4A7F-9DA3-E58418F9FE24}</Type>
+    	<Id>15</Id>
+    	<Translate__DateId>{0D099EF8-F8E7-4892-807E-7C162F6A9273}</Translate__DateId>
+    	<Translate__TimeId>{7BDEC9BB-D5CE-424A-9C7C-37677CD36A48}</Translate__TimeId>
+	</Control>
+	 */
+	public Controls.Control createSnapDateTimeControl15(String dateResultElement, String timeResultElement) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{FD691F38-4527-4A7F-9DA3-E58418F9FE24}"); //$NON-NLS-1$
+		control.setId(15);
+		control.setTranslateDateId(dateResultElement);
+		control.setTranslateTimeId(timeResultElement);
+		return control;
+	}
 	
 	//Util methods
 	public static Controls.Control getNavigationControl(Node node) {

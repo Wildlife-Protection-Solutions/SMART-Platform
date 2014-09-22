@@ -76,6 +76,8 @@ public class PatrolScreensUtil {
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
 	public static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
+	public static final String RESULT_PATROL_START_DATE = "#PatrolStartDate"; //$NON-NLS-1$
+	public static final String RESULT_PATROL_START_TIME = "#PatrolStartTime"; //$NON-NLS-1$
 	public static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
 	public static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
 	public static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$
@@ -410,8 +412,13 @@ public class PatrolScreensUtil {
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		addUniqueAttrubute(node, resultId);
 		addGpsConfiguration(node, 0);
+		String resultDateId = createResultElement(RESULT_PATROL_START_DATE, elements);
+		String resultTimeId = createResultElement(RESULT_PATROL_START_TIME, elements);
+		addStartTimeAttrubute(node, resultDateId, resultTimeId);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
+		container.resultElements.add(new IdNamePair(resultDateId, RESULT_PATROL_START_DATE));
+		container.resultElements.add(new IdNamePair(resultTimeId, RESULT_PATROL_START_TIME));
 
 		Node pwdNode = screensFactory.createNodePassword(ids.get(1).getNodeId(), Messages.PatrolScreens_Exit_Title);
 		container.screenNodes.add(pwdNode);
@@ -688,6 +695,11 @@ public class PatrolScreensUtil {
 	private void addUniqueAttrubute(Node node, String resultElementId) {
 		Control uniqueAttr = screensFactory.createAttrubuteControl14(resultElementId, true, null);
 		ScreensObjectFactory.addControlToNode(node, uniqueAttr);
+	}
+
+	private void addStartTimeAttrubute(Node node, String resultDateId, String resultTimeId) {
+		Control dtAttr = screensFactory.createSnapDateTimeControl15(resultDateId, resultTimeId);
+		ScreensObjectFactory.addControlToNode(node, dtAttr);
 	}
 	
 }
