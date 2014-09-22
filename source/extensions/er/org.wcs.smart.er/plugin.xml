@@ -388,6 +388,18 @@
             commandId="org.wcs.smart.er.filter"
             icon="images/icons/obj16/survey_design_filter.png">
       </image>
+      <image
+            commandId="org.wcs.smart.er.missionattributes.show"
+            icon="images/icons/obj16/mission_attributes.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.er.surveydesignexport"
+            icon="images/icons/obj16/survey_design_export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.er.surveydesignimport"
+            icon="images/icons/obj16/survey_design_import.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
