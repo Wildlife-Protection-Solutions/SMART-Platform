@@ -235,6 +235,8 @@ public class CyberTrackerImporter {
 		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
 		Date date = null;
 		Time time = null;
+		Date start_date = null;
+		Time start_time = null;
 		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
 		
 		for (S.A a : s.getA()) {
@@ -252,6 +254,14 @@ public class CyberTrackerImporter {
 				time = Time.valueOf(v);
 			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
 				ctPatrol.setId(v);
+			} else if (PatrolScreensUtil.RESULT_PATROL_START_DATE.equals(n)) {
+				try {
+					start_date = formatter.parse(v);
+				} catch (ParseException e) {
+					CyberTrackerPlugIn.log(e.getMessage(), e);
+				}
+			} else if (PatrolScreensUtil.RESULT_PATROL_START_TIME.equals(n)) {
+				start_time = Time.valueOf(v);
 			} else {
 				E ei = eMap.get(i);
 				if (ei != null) {
@@ -262,7 +272,22 @@ public class CyberTrackerImporter {
 			}
 		}
 		
-		ctPatrol.setStartDate(SmartImporter.combine(date, time));
+		date = SmartImporter.combine(date, time);
+		start_date = SmartImporter.combine(start_date, start_time);
+		if (date != null && start_date != null) {
+			if (start_date.before(date)) {
+				ctPatrol.setStartDate(start_date);
+			} else {
+				ctPatrol.setStartDate(date);
+			}
+		} else {
+			if (date == null) {
+				ctPatrol.setStartDate(start_date);
+			} else {
+				ctPatrol.setStartDate(date);
+			}
+		}
+		
 		date = null;
 		time = null;
 		
