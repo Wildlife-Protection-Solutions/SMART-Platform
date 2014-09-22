@@ -137,6 +137,8 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="Value" />
 						<xs:element type="xs:string" name="NumberChecks" />
 						<xs:element type="xs:string" name="RadioBlockNext" />
+						<xs:element type="xs:string" name="Translate__DateId" />
+						<xs:element type="xs:string" name="Translate__TimeId" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
