@@ -315,7 +315,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionTrack.class) + ".track_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionTrack.class) + ".track_date, "); //$NON-NLS-1$
-	
+		sql.append(tablePrefix(MissionTrack.class) + ".id, "); //$NON-NLS-1$
+		sql.append("smart.distanceInMeter(" + tablePrefix(MissionTrack.class) + ".geometry) / 1000.0, "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(SamplingUnit.class) + ".id "); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -344,6 +345,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append("missiontrack_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("missiontrack_type varchar(32),"); //$NON-NLS-1$
 		sql.append("missiontrack_date date,"); //$NON-NLS-1$
+		sql.append("missiontrack_id varchar(128),"); //$NON-NLS-1$
+		sql.append("missiontrack_length double,"); //$NON-NLS-1$
 		
 		sql.append("samplingunit_id varchar(128)"); //$NON-NLS-1$
 		
@@ -373,6 +376,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setTrackUuid(rs.getBytes("missiontrack_uuid")); //$NON-NLS-1$
 		it.setTrackType(TrackType.valueOf(rs.getString("missiontrack_type"))); //$NON-NLS-1$
 		it.setTrackDate(rs.getDate("missiontrack_date")); //$NON-NLS-1$
+		it.setTrackId(rs.getString("missiontrack_id")); //$NON-NLS-1$
+		it.setTrackLength(rs.getDouble("missiontrack_length")); //$NON-NLS-1$
 		
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		return it;

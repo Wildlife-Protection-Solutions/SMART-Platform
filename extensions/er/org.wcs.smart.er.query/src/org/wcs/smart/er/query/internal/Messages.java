@@ -184,6 +184,8 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumn_SurveyIdLabel;
 	public static String SurveyQueryColumn_SurveyStartLabel;
 	public static String SurveyQueryColumn_TrackDateLabel;
+	public static String SurveyQueryColumn_TrackIdLabel;
+	public static String SurveyQueryColumn_TrackLengthLabel;
 	public static String SurveyQueryColumn_TrackTypeLabel;
 	public static String SurveyQueryColumn_WaypointIdLabel;
 	public static String SurveyQueryColumn_WaypointTypeLabel;

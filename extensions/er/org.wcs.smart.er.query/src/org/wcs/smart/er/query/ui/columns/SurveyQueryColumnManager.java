@@ -448,6 +448,9 @@ public class SurveyQueryColumnManager {
 		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION));
 		
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKID));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKLENGTH));
+		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKTYPE));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE));
 		
