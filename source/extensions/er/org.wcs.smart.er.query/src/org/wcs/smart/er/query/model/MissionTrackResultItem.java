@@ -59,6 +59,8 @@ public class MissionTrackResultItem implements IResultItem{
 	private byte[] trackUuid;
 	private Date trackDate;
 	private MissionTrack.TrackType trackType;
+	private String trackId;
+	private Double trackLength;
 	
 	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
 
@@ -322,5 +324,20 @@ public class MissionTrackResultItem implements IResultItem{
 	
 	public void setTrackType(MissionTrack.TrackType trackType){
 		this.trackType = trackType;
+	}
+	
+	public String getTrackId(){
+		return this.trackId;
+	}
+	
+	public void setTrackId(String trackId){
+		this.trackId = trackId;
+	}
+	
+	public Double getTrackLength(){
+		return this.trackLength;
+	}
+	public void setTrackLength(Double length){
+		this.trackLength = length;
 	}
 }

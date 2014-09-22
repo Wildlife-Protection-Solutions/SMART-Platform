@@ -61,6 +61,9 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_TRACKTYPE(Messages.SurveyQueryColumn_TrackTypeLabel, ColumnType.STRING, "mission:tracktype"),  //$NON-NLS-1$
 		MISSION_TRACKDATE(Messages.SurveyQueryColumn_TrackDateLabel, ColumnType.DATE, "mission:trackdate"),  //$NON-NLS-1$
 		
+		MISSION_TRACKID(Messages.SurveyQueryColumn_TrackIdLabel, ColumnType.STRING, "mission:trackid"),  //$NON-NLS-1$
+		MISSION_TRACKLENGTH(Messages.SurveyQueryColumn_TrackLengthLabel, ColumnType.NUMBER, "mission:tracklength"), //$NON-NLS-1$
+		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
 		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.NUMBER, "su:buffer"),  //$NON-NLS-1$
 		
@@ -148,6 +151,9 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_END: return item.getMissionEnd();
 				case MISSION_TRACKDATE: return item.getTrackDate();
 				case MISSION_TRACKTYPE: return item.getTrackType().getGuiName();
+				case MISSION_TRACKID: return item.getTrackId();
+				case MISSION_TRACKLENGTH: return item.getTrackLength();
+					
 //				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case SMAPLING_UNIT_BUFFER: return item.getSmaplingUnitBuffer(); 
