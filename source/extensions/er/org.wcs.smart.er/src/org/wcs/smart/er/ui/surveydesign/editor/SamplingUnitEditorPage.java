@@ -87,8 +87,10 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
@@ -160,9 +162,16 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		protected IStatus run(IProgressMonitor monitor) {
 			suService = new SamplingUnitService(editor.getSurveyDesign());
 	    	try {
-	    		List<IGeoResource> layers = (List<IGeoResource>) suService.resources(monitor);
-	    		Collections.reverse(layers);	//switch order 
-	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+	    		List<SamplingUnitGeoResource> layers = (List<SamplingUnitGeoResource>) suService.resources(monitor);
+	    		List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
+	    		for (SamplingUnitGeoResource r : layers){
+	    			if (r.getDataType().equals(SamplingUnitType.PLOT.name()) ||
+	    				r.getDataType().equals(SamplingUnitType.TRANSECT.name())){
+	    				toAdd.add(r);
+	    			}
+				}
+	    		Collections.reverse(toAdd);	//switch order 
+	    		AddLayersCommand command = new AddLayersCommand(toAdd, 0);
 	    		getMap().sendCommandSync(command);
 	    		
 	    		suLayers = command.getLayers();
