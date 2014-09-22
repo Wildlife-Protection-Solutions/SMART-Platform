@@ -23,6 +23,8 @@ package org.wcs.smart.er.model;
 
 import java.io.Serializable;
 
+import javax.persistence.AssociationOverride;
+import javax.persistence.AssociationOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -40,6 +42,12 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="smart.survey_design_sampling_unit")
+@AssociationOverrides({
+	@AssociationOverride(name = "id.samplingUnitAttribute", 
+		joinColumns = @JoinColumn(name = "su_attribute_uuid")),
+		@AssociationOverride(name = "id.surveyDesign", 
+		joinColumns = @JoinColumn(name = "survey_design_uuid"))})
+
 public class SurveyDesignSamplingUnitAttribute {
 	
 	private SurveyDesignSamplingUnitAttributePk id = 

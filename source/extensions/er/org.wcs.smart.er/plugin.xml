@@ -31,10 +31,11 @@
             class="org.wcs.smart.er.model.SurveyDesign">
       </class>
       <class
+            ca_property=".surveyDesign.conservationArea"
             class="org.wcs.smart.er.model.SamplingUnit">
       </class>
       <class
-            ca_property=".waypoint.conservationArea"
+            ca_property=".id.waypoint.conservationArea"
             class="org.wcs.smart.er.model.SurveyWaypoint">
       </class>
       <class
@@ -76,11 +77,11 @@
             class="org.wcs.smart.er.model.SamplingUnitAttribute">
       </class>
       <class
-            ca_property=".id.attribute.conservationArea"
+            ca_property=".id.samplingUnitAttribute.conservationArea"
             class="org.wcs.smart.er.model.SamplingUnitAttributeValue">
       </class>
       <class
-            ca_property=".id.attribute.conservationArea"
+            ca_property=".id.samplingUnitAttribute.conservationArea"
             class="org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute">
       </class>
    </extension>
@@ -453,6 +454,12 @@
                id="org.wcs.smart.dataentry.cmTemplateCloner">
          </require>
       </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="survey">
+      </FilestoreDirectory>
    </extension>
 
 </plugin>
