@@ -30,9 +30,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -46,6 +49,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
@@ -60,6 +64,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class TracksComposite extends Composite {
 
+	private List<ISurveyListener> changeListeners = new ArrayList<ISurveyListener>();
+	
 	private static final int MAP_MIN_WIDTH = 280;
 	
 	private TableViewer trackViewer;
@@ -113,6 +119,7 @@ public class TracksComposite extends Composite {
 		columnId.getColumn().setResizable(true);
 		columnId.getColumn().setMoveable(false);
 		columnId.getColumn().setWidth(120);
+		columnId.setEditingSupport(new IdTableEditor(trackViewer));
 		
 		final TableViewerColumn columnAssoc = new TableViewerColumn(trackViewer, SWT.NONE);
 		columnAssoc.setLabelProvider(new ColumnLabelProvider() {
@@ -211,6 +218,16 @@ public class TracksComposite extends Composite {
 		});
 	}
 
+	public void addChangeListener(ISurveyListener listener){
+		changeListeners.add(listener);
+	}
+	
+	protected void fireChangeListeners() {
+		for (ISurveyListener listener: changeListeners) {
+			listener.compositeModified();
+		}
+	}
+	
 	protected void importTracks() {
 		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMission(), GPSDataImport.ImportType.TRACK);
 		wizard.setDateOption(dialog.getDate());
@@ -242,6 +259,50 @@ public class TracksComposite extends Composite {
 	protected void editTrack() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	/**
+	 * Cell editor for track id
+	 */
+	private class IdTableEditor extends EditingSupport {
+		private TableViewer viewer;
+
+		private CellEditor editor;
+		
+		IdTableEditor(TableViewer viewer) {
+			super(viewer);
+			this.viewer = viewer;
+			this.editor = new TextCellEditor(viewer.getTable());	
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			if (element instanceof MissionTrack) {
+				MissionTrack t = (MissionTrack) element;
+				t.setId((String)value);
+				viewer.refresh();
+				fireChangeListeners();
+			}
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			if (element instanceof MissionTrack) {
+				MissionTrack t = (MissionTrack) element;
+				return t.getId() != null ? t.getId() : ""; //$NON-NLS-1$
+			}
+			return ""; //$NON-NLS-1$
+		}
+
+		@Override
+		protected CellEditor getCellEditor(final Object element) {
+			return editor;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
 	}
 	
 }
