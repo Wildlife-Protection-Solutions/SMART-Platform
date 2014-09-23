@@ -35,8 +35,6 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.model.summary.IValueItem;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IValueDropItem;
 
 /**
  * Drop item that represents counting items from
@@ -45,7 +43,7 @@ import org.wcs.smart.query.ui.model.IValueDropItem;
  * @author Emily
  *
  */
-public class AttributeListValueDropItem extends DropItem implements IValueDropItem{
+public class AttributeListValueDropItem extends AbstractValueDropItem {
 
 	private AttributeListItem item = null;
 	private Category category = null; 
@@ -54,13 +52,14 @@ public class AttributeListValueDropItem extends DropItem implements IValueDropIt
 	private Font smallerFont = null;
 	private int defaultSelection = 0;
 	
-	public AttributeListValueDropItem(AttributeListItem item, Category category){
+	public AttributeListValueDropItem(boolean hasEncounter,
+			AttributeListItem item, Category category){
+		super(hasEncounter);
 		this.item = item;
 		this.category = category;
 	}
-	public AttributeListValueDropItem(AttributeListItem item){
-		this.item = item;
-		this.category = null;
+	public AttributeListValueDropItem(boolean hasEncounter,AttributeListItem item){
+		this(hasEncounter, item, null);
 	}
 	
 	/**
@@ -75,7 +74,7 @@ public class AttributeListValueDropItem extends DropItem implements IValueDropIt
 	}
 	
 	@Override
-	public String asQueryPart() {
+	protected String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null){
 			sb.append("category:"); //$NON-NLS-1$
@@ -100,7 +99,7 @@ public class AttributeListValueDropItem extends DropItem implements IValueDropIt
 	}
 
 	@Override
-	public String getText() {
+	protected String getValueText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(combo.getItem(combo.getSelectionIndex()));
 		sb.append(" "); //$NON-NLS-1$
@@ -116,7 +115,7 @@ public class AttributeListValueDropItem extends DropItem implements IValueDropIt
 	}
 
 	@Override
-	protected void createComposite(Composite parent) {
+	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 
 		GridLayout gl = new GridLayout(2, false);
@@ -171,7 +170,7 @@ public class AttributeListValueDropItem extends DropItem implements IValueDropIt
 	}
 
 	@Override
-	public void initializeData(Object data) {
+	protected void initializeValueData(Object data) {
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
 			if (((String)data).equals(values[i].key)){

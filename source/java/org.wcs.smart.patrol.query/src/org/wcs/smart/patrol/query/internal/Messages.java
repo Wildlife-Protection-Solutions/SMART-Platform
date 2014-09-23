@@ -37,12 +37,6 @@ public class Messages extends NLS {
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
 	public static String DerbySummaryEngine_Progress_ProcessingValue;
 	public static String DerbySummaryEngine_Progress_RunningQuery;
-	public static String EncounterRateDialog_DialogMessage;
-	public static String EncounterRateDialog_EncounterRateLabel;
-	public static String EncounterRateDialog_Error_NoSelection;
-	public static String EncounterRateDialog_ErrorDialogTitle;
-	public static String EncounterRateDialog_RateValueInfo;
-	public static String EncounterRateDialog_RateValueLabel;
 	public static String FilterValidator_PatrolFilter_EmployeeError;
 	public static String FilterValidator_PatrolFilter_UnqiueIdMatchingError;
 	public static String FilterValidator_PatrolFilter_ValueMatchingError;

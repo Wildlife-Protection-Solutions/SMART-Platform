@@ -41,7 +41,6 @@ import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
 import org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
@@ -53,6 +52,7 @@ import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Patrol Query Type
@@ -138,7 +138,7 @@ public class PatrolGridQueryType implements IQueryType {
 					if (items != null){
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] instanceof AbstractValueDropItem){
-								((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
+								((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_DROP_OPTIONS);
 							}
 						}
 					}

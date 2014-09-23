@@ -83,30 +83,15 @@ public interface IValueItem {
 	 * @return
 	 */
 	public DropItem asDropItem(Session session) throws Exception;
-//	
-//	/**
-//	 * @return <code>true</code> if value item includes category
-//	 */
-//	public boolean hasCategory();
-//	
-//	/**
-//	 * @return <code>true</code> if value item includes a datamodel attribute
-//	 */
-//	public boolean hasAttribute();
-//	
-//	/**
-//	 * Validates the current value item against the database.  This includes
-//	 * ensuring that any keys/uuids exist in the database.
-//	 *  
-//	 * @param session
-//	 * @throws Exception if the item cannot be validated
-//	 */
-//	public void validateDatabase(Session session) throws Exception;
-//	
+
 	/**
 	 * @return the object used to initailize the drop item
 	 */
 	public Object getDropItemInitializeData();
-	
+
+	/**
+	 * process the given visitor
+	 * @param visitor
+	 */
 	public void accept(IValueVisitor visitor);
 }

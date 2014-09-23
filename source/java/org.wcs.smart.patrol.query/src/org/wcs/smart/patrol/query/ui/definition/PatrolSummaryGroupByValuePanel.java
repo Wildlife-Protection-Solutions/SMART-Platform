@@ -22,10 +22,10 @@
 package org.wcs.smart.patrol.query.ui.definition;
 
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
 import org.wcs.smart.query.ui.definition.AbstractSummaryGroupByValuePanel;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Summary patrol query definition panel. This panel allows

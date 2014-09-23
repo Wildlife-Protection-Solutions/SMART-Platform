@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.ui.definition.dropItems;
+package org.wcs.smart.query.common.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -35,8 +35,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.IValueDropItem;
 
 /**
  * Dialog for selecting encourter rate variables.
@@ -49,15 +51,15 @@ public class EncounterRateDialog extends TitleAreaDialog{
 	private Composite main = null;
 	private ComboViewer viewer;
 	
-	private PatrolValueOption selectedRate;
+	private IValueDropItem selectedRate;
 	
-	private PatrolValueOption[] encounterRateOptions;
+	private IValueDropItem[] encounterRateOptions;
 	
 	/**
 	 * Creates new dialog
 	 * @param parent
 	 */
-	public EncounterRateDialog(Shell parent, PatrolValueOption[] encounterRateOptions) {
+	public EncounterRateDialog(Shell parent, IValueDropItem[] encounterRateOptions) {
 		super(parent);
 		this.encounterRateOptions  = encounterRateOptions;
 	}
@@ -75,7 +77,7 @@ public class EncounterRateDialog extends TitleAreaDialog{
 				MessageDialog.openError(getShell(), Messages.EncounterRateDialog_ErrorDialogTitle, Messages.EncounterRateDialog_Error_NoSelection);
 				return;
 			}
-			selectedRate = (PatrolValueOption) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+			selectedRate = (IValueDropItem) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		}
 		
 		super.buttonPressed(buttonId);
@@ -85,7 +87,7 @@ public class EncounterRateDialog extends TitleAreaDialog{
 	 * @return the patrol value option selected for the encounter rate
 	 * 
 	 */
-	public PatrolValueOption getSelectedItems(){
+	public IValueDropItem getSelectedItems(){
 		return this.selectedRate;
 	}
 	
@@ -113,8 +115,8 @@ public class EncounterRateDialog extends TitleAreaDialog{
 			 * <code>toString</code> string. Subclasses may override.
 			 */
 			public String getText(Object element) {
-				if (element instanceof PatrolValueOption){
-					return ((PatrolValueOption) element).getGuiName();
+				if (element instanceof DropItem){
+					return ((DropItem) element).getText();
 				}
 				return super.getText(element);
 			}

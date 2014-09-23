@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser.internal.summary;
+package org.wcs.smart.query.model.summary;
 
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.model.filter.IValueVisitor;
-import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Represents an encounter rate value item which currently only supports
@@ -37,7 +37,7 @@ import org.wcs.smart.query.ui.model.DropItem;
  */
 public class CombinedValueItem implements IValueItem {
 
-	private static final String PER_LABEL = Messages.CombinedValueItem_PER_LABEL;
+	public static final String PER_LABEL = AbstractValueDropItem.PER_LABEL;
 
 	/**
 	 * Creates a new combined value item from two
@@ -53,6 +53,7 @@ public class CombinedValueItem implements IValueItem {
 	
 	private IValueItem part1;
 	private IValueItem part2;
+	private IValueDropItem part2Item;
 	
 	/**
 	 * Creates a new combined value item from two other value items
@@ -62,7 +63,6 @@ public class CombinedValueItem implements IValueItem {
 	 */
 	protected CombinedValueItem(IValueItem part1, IValueItem part2){
 		this.part1 = part1;
-		assert(part2 instanceof PatrolValueItem);
 		this.part2 = part2;
 	}
 	
@@ -117,7 +117,9 @@ public class CombinedValueItem implements IValueItem {
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
 		DropItem di = part1.asDropItem(session);
+		part2Item = (IValueDropItem) part2.asDropItem(session);
 		di.initializeData(getDropItemInitializeData());
+		
 		return di;
 	}
 
@@ -127,9 +129,7 @@ public class CombinedValueItem implements IValueItem {
 	public Object getDropItemInitializeData(){
 		Object[] data = new Object[2];
 		data[0] = part1.getDropItemInitializeData();
-		if (part2 instanceof PatrolValueItem){
-			data[1] = ((PatrolValueItem)part2).getOption() ;
-		}
+		data[1] = part2Item;
 		return data;
 	}
 	

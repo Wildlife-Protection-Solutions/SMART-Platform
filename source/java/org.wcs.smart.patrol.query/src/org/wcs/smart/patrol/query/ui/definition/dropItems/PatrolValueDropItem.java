@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Patrol value drop item
@@ -41,6 +42,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	 * @param item
 	 */
 	public PatrolValueDropItem(PatrolValueOption item){
+		super(true);
 		this.item = item;
 	}
 	

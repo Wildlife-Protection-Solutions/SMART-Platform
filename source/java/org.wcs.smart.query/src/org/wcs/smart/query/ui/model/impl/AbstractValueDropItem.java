@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.ui.definition.dropItems;
+package org.wcs.smart.query.ui.model.impl;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.common.ui.EncounterRateDialog;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IValueDropItem;
 
@@ -48,13 +48,18 @@ import org.wcs.smart.query.ui.model.IValueDropItem;
  */
 public abstract class AbstractValueDropItem extends DropItem implements IValueDropItem{
 
-	private static final String PER_LABEL = Messages.AbstractValueDropItem_RateofChangePerLabel;
+	public static final String PER_LABEL = Messages.AbstractValueDropItem_EncounterRatePerRatio;
 	
-	protected PatrolValueOption encounterRatio;
+	protected IValueDropItem encounterRatio;
 	private Font smallerFont;
 	private Composite main;
-	private PatrolValueOption[] encounterRateOptions;
+	private IValueDropItem[] encounterRateOptions;
 		
+	protected boolean isEncounter;
+	
+	protected AbstractValueDropItem(boolean isEncounter){
+		this.isEncounter = isEncounter;
+	}
 	/**
 	 * @return the value query part
 	 */
@@ -77,7 +82,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	 * @param dropItem the patrol value option to be used as the 
 	 * encounter rate 
 	 */
-	public void setEncounterRatio(PatrolValueOption dropItem){
+	public void setEncounterRatio(IValueDropItem dropItem){
 		this.encounterRatio = dropItem;
 	}
 	
@@ -94,8 +99,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	 * @param options the patrol value options to be used as the 
 	 * encounter rate choices
 	 */
-	public void setEncounterRateOptions(PatrolValueOption[] options){
-		
+	public void setEncounterRateOptions(IValueDropItem[] options){
 		encounterRateOptions = options;
 	}
 	
@@ -104,11 +108,14 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	 */
 	@Override
 	public String getText() {
+		if (isEncounter){
+			return getValueText();
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(getValueText());
 		if (hasEncounterRatio()){
 			sb.append( " " + PER_LABEL + " "); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(encounterRatio.getGuiName());
+			sb.append(((DropItem)encounterRatio).getText());
 		}
 		
 		return sb.toString();
@@ -127,9 +134,12 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	}
 	
 	/**
-	 * @param data - must be an object array where the first element is
+	 * @param data - if a single object, the single object
+	 * is passed to the underlying value item.
+	 * If an array object, then the first element is
 	 * any data to be passed to underlying value item and the second item
-	 * is null or the enconterRatio patrolvalueoption
+	 * is null or the enconterRatio drop item
+	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
 	 */
 	@Override
@@ -137,9 +147,14 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 		if (data == null){
 			return;
 		}
-		Object[] d = (Object[])data;
-		initializeValueData(d[0]);
-		this.encounterRatio = (PatrolValueOption)d[1];		
+		if (data.getClass().isArray()){
+			isEncounter = true;
+			Object[] d = (Object[])data;
+			initializeValueData(d[0]);
+			this.encounterRatio = (IValueDropItem)d[1];
+		}else{
+			initializeValueData(data);
+		}
 	}
 	
 	/**
@@ -151,8 +166,8 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 		sb.append(getValueQueryPart());
 		
 		if (encounterRatio != null){
-			sb.append("/patrol:sum:"); //$NON-NLS-1$
-			sb.append(encounterRatio.getKeyPart());
+			sb.append("/"); //$NON-NLS-1$
+			sb.append(((DropItem)encounterRatio).asQueryPart());
 		}
 		return sb.toString();
 	}
@@ -176,12 +191,12 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 			initDrag(lbl);
 			
 			Label lbl2 = new Label(main, SWT.NONE);
-			lbl2.setText( formatStringForLabel(encounterRatio.getGuiName()));
+			lbl2.setText( formatStringForLabel(((DropItem)encounterRatio).getText()));
 			
-			createRateLink(main, Messages.AbstractValueDropItem_ChangeRankLink);
+			createRateLink(main, Messages.AbstractValueDropItem_ChangeRate);
 		}else{
 			main.setLayout(new GridLayout(2, false));
-			createRateLink(main, Messages.AbstractValueDropItem_ComputeRateLink);
+			createRateLink(main, Messages.AbstractValueDropItem_ComputeRate);
 		}
 		
 		main.layout();
@@ -237,6 +252,11 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	public void createComposite(Composite parent){
 		main = new Composite(parent, SWT.NONE);
 		initDrag(main);
-		updateUi();
+		if (isEncounter){
+			updateUi();
+		}else{
+			main.setLayout(new GridLayout());
+			createValueComposite(main);
+		}
 	}
 }

@@ -40,8 +40,7 @@ import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.query.internal.Messages;
 
 
 /**
@@ -51,7 +50,7 @@ import org.wcs.smart.query.ui.model.IValueDropItem;
  * @author egouge
  * @since 1.0.0
  */
-public class AttributeValueDropItem extends DropItem implements IValueDropItem{
+public class AttributeValueDropItem extends AbstractValueDropItem {
 
 	private Attribute attribute = null;
 	private Category category = null; 
@@ -61,7 +60,9 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 	
 	private Font smallerFont;
 	
-	public AttributeValueDropItem(Attribute attribute){
+	public AttributeValueDropItem(boolean hasEncounter, Attribute attribute){
+		super(hasEncounter);
+		
 		this.attribute = attribute;
 		if (this.attribute.getAggregations().size() > 0){
 			selectedAggregation = this.attribute.getAggregations().get(0);
@@ -69,8 +70,8 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 		selectedAggregation = null;
 	}
 	
-	public AttributeValueDropItem(CategoryAttribute categoryAttribute){
-		this(categoryAttribute.getAttribute());
+	public AttributeValueDropItem(boolean hasEncounter, CategoryAttribute categoryAttribute){
+		this(hasEncounter, categoryAttribute.getAttribute());
 		this.category = categoryAttribute.getCategory();
 	}
 	
@@ -90,7 +91,7 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
 	 */
 	@Override
-	public String getText() {
+	public String getValueText() {
 		StringBuilder sb = new StringBuilder();
 		if (selectedAggregation != null){
 			sb.append(selectedAggregation.getGuiName());
@@ -106,7 +107,7 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
 	 */
 	@Override
-	public String asQueryPart() {
+	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null){
 			sb.append("category:"); //$NON-NLS-1$
@@ -130,7 +131,7 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
 	 */
 	@Override
-	public void initializeData(Object data) {
+	public void initializeValueData(Object data) {
 		selectedAggregation = (Aggregation)data;
 	}
 
@@ -138,7 +139,7 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	protected void createComposite(Composite parent) {
+	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		if (attribute.getAggregations().size() == 0){
 			GridLayout gl = new GridLayout(2, false);
@@ -226,7 +227,7 @@ public class AttributeValueDropItem extends DropItem implements IValueDropItem{
 	@Override
 	public boolean isAllowed() {
 		if (attribute.getAggregations() == null || attribute.getAggregations().isEmpty()) {
-			setNotAllowedMessage(org.wcs.smart.query.internal.Messages.AttributeValueDropItem_NoAggregationOptionFound);
+			setNotAllowedMessage(Messages.AttributeValueDropItem_NoAggregationOptionFound);
 			return false;
 		}
 		return super.isAllowed();

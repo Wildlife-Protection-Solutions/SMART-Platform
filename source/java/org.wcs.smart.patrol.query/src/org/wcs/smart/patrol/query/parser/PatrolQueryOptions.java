@@ -57,11 +57,13 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.hibernate.MultiCaPatrolQueryHibernateManagerImpl;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
+import org.wcs.smart.query.ui.model.IValueDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
@@ -264,6 +266,16 @@ public class PatrolQueryOptions {
 		PatrolValueOption.NUM_PATROLS
 	};
 
+	public final static IValueDropItem[] SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS;
+	static{
+		IValueDropItem[] ditems = new IValueDropItem[PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS.length];
+		int i = 0;
+		for (PatrolValueOption op : PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS){
+			ditems[i++] = (IValueDropItem) PatrolDropItemFactory.INSTANCE.createPatrolValueDropItem(op);
+		}	
+		SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS = ditems;
+	}
+	
 	/**
 	 * Options for computing encounter rates
 	 */
@@ -273,6 +285,17 @@ public class PatrolQueryOptions {
 		PatrolValueOption.NUM_DAYS
 	};
 
+	public final static IValueDropItem[] GRID_ENCOUNTER_RATE_DROP_OPTIONS;
+	static{
+		IValueDropItem[] ditems = new IValueDropItem[PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS.length];
+		int i = 0;
+		for (PatrolValueOption op : PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS){
+			ditems[i++] = (IValueDropItem) PatrolDropItemFactory.INSTANCE.createPatrolValueDropItem(op);
+		}	
+		GRID_ENCOUNTER_RATE_DROP_OPTIONS = ditems;
+	}
+	
+	
 	/**
 	 * Represents the possible patrol values for summary
 	 * queries.

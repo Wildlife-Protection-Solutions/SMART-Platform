@@ -6,6 +6,9 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.query.internal.messages"; //$NON-NLS-1$
 	public static String DerbyFilterToSqlGenerator_FilterTypeNotSupported;
 	public static String AbstractPagedQueryResultSet_CleanupTablesJobName;
+	public static String AbstractValueDropItem_ChangeRate;
+	public static String AbstractValueDropItem_ComputeRate;
+	public static String AbstractValueDropItem_EncounterRatePerRatio;
 	public static String AttributeFilter_InvalidAttributePrefix;
 	public static String AttributeFilter_InvalidWaypointObservationPrefix;
 	public static String CategoryFilter_InvalidPrefix;
@@ -101,6 +104,12 @@ public class Messages extends NLS {
 	public static String EmployeeDeleteAdvisor_ErrorOwnsFolders;
 	public static String EmployeeDeleteAdvisor_ErrorOwnsQueries;
 	public static String EmployeeDeleteAdvisor_InvalidTypeError;
+	public static String EncounterRateDialog_DialogMessage;
+	public static String EncounterRateDialog_EncounterRateLabel;
+	public static String EncounterRateDialog_Error_NoSelection;
+	public static String EncounterRateDialog_ErrorDialogTitle;
+	public static String EncounterRateDialog_RateValueInfo;
+	public static String EncounterRateDialog_RateValueLabel;
 	public static String ExportQueryListPage_DirDialogMessage;
 	public static String ExportQueryListPage_DirDialogText;
 	public static String ExportQueryListPage_OutputFolderLabel;

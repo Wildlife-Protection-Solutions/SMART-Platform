@@ -36,8 +36,6 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IValueDropItem;
 
 /**
  * A drop item for a category value item.
@@ -45,7 +43,7 @@ import org.wcs.smart.query.ui.model.IValueDropItem;
  * @author egouge
  * @since 1.0.0
  */
-public class CategoryValueDropItem extends DropItem implements IValueDropItem {
+public class CategoryValueDropItem extends AbstractValueDropItem {
 
 	private Category category = null;
 
@@ -53,7 +51,9 @@ public class CategoryValueDropItem extends DropItem implements IValueDropItem {
 	private Font smallerFont = null;
 	private int defaultSelection = 0;
 	
-	public CategoryValueDropItem(Category category) {
+	public CategoryValueDropItem(boolean hasEnounter, 
+			Category category) {
+		super(hasEnounter);
 		this.category = category;
 	}
 	
@@ -61,8 +61,8 @@ public class CategoryValueDropItem extends DropItem implements IValueDropItem {
 	 * In this case no category is supplied so it
 	 * is assume all categories are to be included
 	 */
-	public CategoryValueDropItem(){
-		this.category = null;
+	public CategoryValueDropItem(boolean hasEncounter){
+		this(hasEncounter, null);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class CategoryValueDropItem extends DropItem implements IValueDropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
 	 */
 	@Override
-	public String getText() {
+	public String getValueText() {
 		String x = combo.getItem(combo.getSelectionIndex()) + " "; //$NON-NLS-1$
 		if (category != null){
 			x += category.getFullCategoryName();
@@ -94,7 +94,7 @@ public class CategoryValueDropItem extends DropItem implements IValueDropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
 	 */
 	@Override
-	public String asQueryPart() {
+	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("category:sum:"); //$NON-NLS-1$
 		ValueType[] values = ValueType.values();
@@ -118,7 +118,7 @@ public class CategoryValueDropItem extends DropItem implements IValueDropItem {
 	 * .swt.widgets.Composite)
 	 */
 	@Override
-	protected void createComposite(Composite parent) {
+	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 
 		GridLayout gl = new GridLayout(2, false);
@@ -166,7 +166,8 @@ public class CategoryValueDropItem extends DropItem implements IValueDropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
 	 */
 	@Override
-	public void initializeData(Object data) {		
+	protected void initializeValueData(Object data) {
+		
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
 			if (((String)data).equals(values[i].key)){

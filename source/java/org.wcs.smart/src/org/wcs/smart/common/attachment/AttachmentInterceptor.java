@@ -92,6 +92,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     /**
 	 * When a object is saved it also saves the file on disk.
 	 */
+	@Override
     public boolean onSave(Object entity,
             Serializable id,
             Object[] state,
