@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.wcs.smart.er.xml;
 
 import java.text.ParseException;
@@ -6,6 +28,8 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Language;
@@ -23,6 +47,7 @@ import org.wcs.smart.er.xml.model.NamesType;
 import org.wcs.smart.hibernate.SmartDB;
 
 
+
 /**
  * Converts an xml Survey Design schema to an SMART SurveyDesign object.
  * 
@@ -31,6 +56,9 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 
 public class SurveyDesignFromXmlConverter {
+	private static Object r;
+
+
 	public static SurveyDesign fromXml(org.wcs.smart.er.xml.model.SurveyDesign xml, Session session) throws ParseException{
 		
 		//create the Survey Java object 
@@ -142,14 +170,14 @@ public class SurveyDesignFromXmlConverter {
 			}
 		}
 		if(success == false){
-			//TODO
-			//no CM model was found, show a list and use the one the user selects.
+			//no config model found
+			throw new ParseException(Messages.SurveyDesignFromXmlConverter_0, 0);
 		}
 		
 		
-		if(xml.getState().equals("Active")){
+		if(xml.getState().equals("Active")){ //$NON-NLS-1$
 			surveyDesign.setState(State.ACTIVE);
-		}else if(xml.getState().equals("Inactive") ){
+		}else if(xml.getState().equals("Inactive") ){ //$NON-NLS-1$
 			surveyDesign.setState(State.INACTIVE);
 		}
 
@@ -157,7 +185,7 @@ public class SurveyDesignFromXmlConverter {
 	}
 	
 	private static MissionAttribute getAttr(org.wcs.smart.er.xml.model.MissionAttribute xmlattr, Session s) {
-		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlattr.getKeyId())).list();
+		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlattr.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		if (values.size() > 0){
 			MissionAttribute attr = values.get(0);
 			
