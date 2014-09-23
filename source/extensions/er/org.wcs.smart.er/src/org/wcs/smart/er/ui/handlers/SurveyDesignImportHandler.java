@@ -60,17 +60,17 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
-import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -107,9 +107,9 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Importing Survey Designs", 100);
+					monitor.beginTask(Messages.SurveyDesignImportHandler_0, 100);
 					
-					monitor.subTask("Reading XML file");
+					monitor.subTask(Messages.SurveyDesignImportHandler_1);
 					org.wcs.smart.er.xml.model.SurveyDesign xmlsd = null;
 					try{
 						FileInputStream fin = new FileInputStream(importFile);
@@ -119,13 +119,13 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 							fin.close();
 						}
 					}catch (Exception ex){
-						errorMessage = "Error parsing Survey Design XML";
+						errorMessage = Messages.SurveyDesignImportHandler_2;
 						exception = ex;
 						return;
 					}
 					monitor.worked(50);
 					
-					monitor.subTask("Creating Survey Design Database Entries");
+					monitor.subTask(Messages.SurveyDesignImportHandler_3);
 				
 					Session session = HibernateManager.openSession();
 					try{
@@ -134,7 +134,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 						//ensure key doesn't already exist
 						List<?> existingDesigns = session.createCriteria(SurveyDesign.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("keyId", sd.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
 						if (existingDesigns.size() > 0){
-							errorMessage = MessageFormat.format("The key {0} is already in use, you cannot import a survery design with the same key until you delete or rename the existing one.", new Object[]{sd.getKeyId()});
+							errorMessage = MessageFormat.format(Messages.SurveyDesignImportHandler_4, new Object[]{sd.getKeyId()});
 							return;
 						}
 						//save to the database
@@ -236,7 +236,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 										}
 									}
 									if(!found){
-										throw new Exception("Invalid SamplingUnitAttributeValue object with SamplingUnitAttribute : " + xmlsuav.getSamplingUnitAttributeId() + ". Sampling Unit Attribute doesn't exist; You must fix the invalid XML file by removing the offending object or add a matching Sampling Unit Attribute.");
+										throw new Exception(Messages.SurveyDesignImportHandler_5 + xmlsuav.getSamplingUnitAttributeId() + Messages.SurveyDesignImportHandler_6);
 									}
 									session.save(suav);
 								}
@@ -259,7 +259,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 						exception = parse;
 						return;
 					}catch(Exception ex){
-						errorMessage = "An Error occured when loading Survey Design: " + "\n\n" + ex.getMessage(); //$NON-NLS-1$
+						errorMessage = "An Error occured when loading Survey Design: " + "\n\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$
 						exception = ex;
 						return;
 					}finally{
@@ -272,23 +272,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 
 							@Override
 							public void run() {
-								
-//TODO fire any events we need for ER objects
-								/*
-								//fire events
-								EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newDesign);
-								//fire data model modified events
-								DataModelManager.getInstance().fireChangeListeners();
-								
-								//open 
-								EntityTypeEditorInput input = new EntityTypeEditorInput(newDesign.getUuid(), newDesign.getKeyId(), newDesign.getName());
-								FieldDataPerspective.openPerspective(EntityTypeListView.ID);
-								try {
-									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityTypeEditor.ID);
-								} catch (Throwable t) {
-									EntityPlugIn.displayLog(t.getLocalizedMessage(), t);
-								}
-								*/
+								SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.SURVEY_DESIGN_ADDED, newDesign);
 						}});
 					}
 				}
@@ -328,8 +312,8 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 			file = new File(txtFile.getText());
 
 			if (!file.exists()){
-				MessageDialog.openError(getShell(), "Error", 
-						MessageFormat.format("File not found: {0}, please specify a valid Survey Design XML file.", new Object[]{file.toString()}));
+				MessageDialog.openError(getShell(), Messages.SurveyDesignImportHandler_8, 
+						MessageFormat.format(Messages.SurveyDesignImportHandler_9, new Object[]{file.toString()}));
 				return;
 			}
 			EcologicalRecordsPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, file.toString());
@@ -339,9 +323,9 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 		
 		protected Control createDialogArea(Composite parent) {
 			
-			setTitle("Import file");
-			setMessage("Select Survey Design XML file to import");
-			getShell().setText("Select Survey Design XML file to import");
+			setTitle(Messages.SurveyDesignImportHandler_10);
+			setMessage(Messages.SurveyDesignImportHandler_11);
+			getShell().setText(Messages.SurveyDesignImportHandler_12);
 			
 			Composite p = (Composite) super.createDialogArea(parent);
 			
@@ -350,7 +334,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 			contents.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Label l = new Label(contents, SWT.NONE);
-			l.setText("Filename");
+			l.setText(Messages.SurveyDesignImportHandler_13);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			
 			txtFile = new Text(contents, SWT.BORDER);
@@ -372,17 +356,17 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 			});
 			
 			Button btnBrowse = new Button(contents, SWT.NONE);
-			btnBrowse.setText("Browse");
+			btnBrowse.setText(Messages.SurveyDesignImportHandler_14);
 			btnBrowse.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 					
 					String ext = "xml"; //$NON-NLS-1$
-					String name= "File Type";
+					String name= Messages.SurveyDesignImportHandler_15;
 					
 					String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-					String[] names = new String[]{name + " (*." + ext + ")", "All files"}; //$NON-NLS-1$ //$NON-NLS-2$
+					String[] names = new String[]{name + " (*." + ext + ")", Messages.SurveyDesignImportHandler_16}; //$NON-NLS-1$ //$NON-NLS-2$
 					
 					fd.setFilterExtensions(extensions);
 					fd.setFilterNames(names);
@@ -404,7 +388,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 	}
 	
 	private static SamplingUnitAttribute getSamplingUnitAttribute(org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua, Session s) {
-		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlsua.getKeyId())).list();
+		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlsua.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		if (values.size() > 0){
 			SamplingUnitAttribute attr = values.get(0);
 			return attr;
