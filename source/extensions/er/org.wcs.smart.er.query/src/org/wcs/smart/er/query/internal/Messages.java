@@ -23,6 +23,7 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_progress7;
 	public static String DerbyObservationEngine_ProgressAdditionalData;
 	public static String DerbyObservationEngine_ProgressLeader;
+	public static String DerbySummaryEngine_InvalidRateFilterValues;
 	public static String DerbySummaryEngine_LoadingTableProgress;
 	public static String DerbySummaryEngine_ProcessingQueryProgress;
 	public static String DerbySummaryEngine_ProgressCategoryKeys;
@@ -90,6 +91,8 @@ public class Messages extends NLS {
 	public static String MissionQueryType_MissionQueryName;
 	public static String MissionStartDateField_Name;
 	public static String MissionTrackDateField_Name;
+	public static String MissionValueItem_NumberOfMissionsLabel;
+	public static String MissionValueItem_ValueItemNotSupported;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;
 	public static String QueryServiceInfo_Description;
@@ -108,6 +111,7 @@ public class Messages extends NLS {
 	public static String SamplingUnitGroupByDropItem_Label;
 	public static String SamplingUnitGroupByDropItem_LoadingError;
 	public static String SamplingUnitGroupByDropItem_Text;
+	public static String SimpleValueRateFilterPanel_CopyError;
 	public static String SummaryDefinitionPanel_AllLabels;
 	public static String SummaryDefinitionPanel_GroupByLabel;
 	public static String SummaryDefinitionPanel_Name;

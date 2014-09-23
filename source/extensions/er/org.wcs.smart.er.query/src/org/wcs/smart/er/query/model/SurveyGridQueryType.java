@@ -38,8 +38,8 @@ import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveyGriddedEditor;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
-import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -134,7 +134,7 @@ public class SurveyGridQueryType implements IQueryType {
 		String definition = ""; //$NON-NLS-1$
 		
 		for (IDefinitionPanel p : components){
-			if (p.getId().equals(FilterDefintionPanel.ID)){
+			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(GriddedDefinitionPanel.ID)){
 				definition = p.getQueryPart();
@@ -167,7 +167,7 @@ public class SurveyGridQueryType implements IQueryType {
 				return panelError;
 			}
 			
-			if (p.getId().equals(FilterDefintionPanel.ID)){
+			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(GriddedDefinitionPanel.ID)){
 				definition = p.getQueryPart();

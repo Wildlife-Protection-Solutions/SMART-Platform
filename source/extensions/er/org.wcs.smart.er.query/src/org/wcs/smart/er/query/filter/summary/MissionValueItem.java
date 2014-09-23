@@ -27,6 +27,7 @@ import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
  * Total mission track length value item.
@@ -34,22 +35,64 @@ import org.wcs.smart.query.ui.model.DropItem;
  * @author Emily
  *
  */
-public class MissionLengthValueItem implements IValueItem {
+public class MissionValueItem implements IValueItem {
 
+	public enum ValueItem{
+		TRACK_LENGTH(Messages.MissionLegnthValueDropItem_TrackLengthLabel, "s:missiontracklength"), //$NON-NLS-1$
+		MISSION_COUNT(Messages.MissionValueItem_NumberOfMissionsLabel, "s:missioncount"), //$NON-NLS-1$
+		SURVEY_COUNT("Number of Surveys", "s:surveycount");
+		
+		public String guiName;
+		public String key;
+		
+		private ValueItem(String name, String key){
+			this.guiName = name;
+			this.key = key;
+		}
+	};
 
-	public static final MissionLengthValueItem createValueItem(){
-		return new MissionLengthValueItem();
+	/**
+	 * Create new mission length item
+	 * @return
+	 */
+	public static MissionValueItem createTrackLengthItem(){
+		return new MissionValueItem(ValueItem.TRACK_LENGTH);
 	}
 	
+	/**
+	 * Create new mission count item
+	 * @return
+	 */
+	public static MissionValueItem createMissionCountItem(){
+		return new MissionValueItem(ValueItem.MISSION_COUNT);
+	}
+	
+	/**
+	 * Create new survey count item
+	 * @return
+	 */
+	public static MissionValueItem createSurveyCountItem(){
+		return new MissionValueItem(ValueItem.SURVEY_COUNT);
+	}
+	
+	private MissionValueItem.ValueItem item;
+	
+	public MissionValueItem(ValueItem item){
+		this.item = item;
+	}
+	
+	public MissionValueItem.ValueItem getValueItem(){
+		return this.item;
+	}
 	
 	@Override
 	public String asString() {
-		return "s:missiontracklength"; //$NON-NLS-1$
+		return item.key;
 	}
 
 	@Override
 	public String getName(Session session) {
-		return Messages.MissionLengthValueItem_Label;
+		return item.guiName;
 	}
 
 	@Override
@@ -59,7 +102,14 @@ public class MissionLengthValueItem implements IValueItem {
 
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
-		return SurveyDropItemFactory.INSTANCE.createMissionLengthValueItem();
+		if (item == ValueItem.TRACK_LENGTH){
+			return SurveyDropItemFactory.INSTANCE.createMissionLengthValueItem();
+		}else if (item == ValueItem.MISSION_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionCountValueItem();
+		}else if (item == ValueItem.SURVEY_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createSurveyCountValueItem();
+		}
+		return new ErrorDropItem(Messages.MissionValueItem_ValueItemNotSupported + item.guiName);
 	}
 
 	@Override

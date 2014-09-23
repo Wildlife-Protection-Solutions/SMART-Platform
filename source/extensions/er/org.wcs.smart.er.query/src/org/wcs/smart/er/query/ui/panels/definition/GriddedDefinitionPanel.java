@@ -44,6 +44,7 @@ import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Gridded patrol query definition panel.
@@ -80,6 +81,13 @@ public class GriddedDefinitionPanel extends
 	@Override
 	public String getId() {
 		return ID;
+	}
+	
+	@Override
+	public String validate() {
+		//update the simple value rate filter panel
+		((SimpleValueRateFilterPanel)currentQuery.getQueryDefinitionPanel().findQueryDefinitionPanel(SimpleValueRateFilterPanel.ID)).updateFilterPanel(hasRate());
+		return super.validate();
 	}
 	
 	@Override
@@ -153,6 +161,12 @@ public class GriddedDefinitionPanel extends
 	 * @return true if one of the values has an encounter rate
 	 */
 	public boolean hasRate(){
+		for (DropItem it : lstValues.getItems()){
+			if (it instanceof AbstractValueDropItem 
+					&& ((AbstractValueDropItem)it).hasEncounterRatio()){
+				return true;
+			}
+		}
 		return false;
 	}
 

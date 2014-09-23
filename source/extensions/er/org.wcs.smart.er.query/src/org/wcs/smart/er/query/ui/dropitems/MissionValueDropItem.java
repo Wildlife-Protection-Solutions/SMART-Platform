@@ -24,7 +24,7 @@ package org.wcs.smart.er.query.ui.dropitems;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.query.ui.model.IValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
@@ -34,20 +34,23 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  * @author Emily
  *
  */
-public class MissionLegnthValueDropItem extends AbstractValueDropItem implements IValueDropItem{
+public class MissionValueDropItem extends AbstractValueDropItem implements IValueDropItem{
 
-	public MissionLegnthValueDropItem(){
+	private MissionValueItem.ValueItem item;
+	
+	public MissionValueDropItem(MissionValueItem.ValueItem item){
 		super(true);
+		this.item = item;
 	}
 	
 	@Override
 	protected String getValueQueryPart() {
-		return "s:missiontracklength"; //$NON-NLS-1$
+		return item.key;
 	}
 
 	@Override
 	protected String getValueText() {
-		return Messages.MissionLegnthValueDropItem_TrackLengthLabel;
+		return item.guiName;
 	}
 
 	@Override
@@ -61,7 +64,4 @@ public class MissionLegnthValueDropItem extends AbstractValueDropItem implements
 	protected void initializeValueData(Object data) {
 
 	}
-
-
-
 }

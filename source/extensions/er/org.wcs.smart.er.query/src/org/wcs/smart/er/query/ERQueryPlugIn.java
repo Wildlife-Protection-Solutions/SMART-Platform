@@ -25,6 +25,8 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	public static final String MISSIONTRACK_ICON = "org.wcs.smart.er.query.missiontrack"; //$NON-NLS-1$
 	public static final String ALL_SURVEY_ICON = "org.wcs.smart.er.query.allsurvey"; //$NON-NLS-1$
 	public static final String TRACK_DISTANCE_ICON = "org.wcs.smart.er.query.mission.track"; //$NON-NLS-1$
+	public static final String MISSION_COUNT_ICON = "org.wcs.smart.er.query.mission.count"; //$NON-NLS-1$
+	public static final String SURVEY_COUNT_ICON = "org.wcs.smart.er.query.survey.count"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static ERQueryPlugIn plugin;
@@ -102,6 +104,8 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
     	reg.put(MISSIONTRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_missiontrack_query.png")); //$NON-NLS-1$)
     	reg.put(ALL_SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/all_survey.png")); //$NON-NLS-1$
     	reg.put(TRACK_DISTANCE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/value_distance.png")); //$NON-NLS-1$
+    	reg.put(MISSION_COUNT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/value_missioncnt.png")); //$NON-NLS-1$
+    	reg.put(SURVEY_COUNT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/value_surveycnt.png")); //$NON-NLS-1$
     }
     
 

@@ -37,6 +37,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -59,7 +60,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
-import org.wcs.smart.er.query.filter.summary.MissionLengthValueItem;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
@@ -72,6 +73,7 @@ import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
@@ -84,6 +86,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
+import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
@@ -137,46 +140,48 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();
 					IValueItem numerator = valueItem;
-//					IValueItem denominator = null;
-//					if (valueItem instanceof CombinedValueItem){
-//						numerator = ((CombinedValueItem)valueItem).getPart1();
-//						denominator = ((CombinedValueItem)valueItem).getPart2();
-//					}
+					IValueItem denominator = null;
+					if (valueItem instanceof CombinedValueItem){
+						numerator = ((CombinedValueItem)valueItem).getPart1();
+						denominator = ((CombinedValueItem)valueItem).getPart2();
+					}
 					
 					
 					//get numerator results
 					Collection<GridResultItem> numeratorResults = getItems(
 							gridDef, numerator, query.getQueryDefinition().getValueFilter(), 
-							dsFilter, c, session, new SubProgressMonitor(monitor, 60), true);
+							dsFilter, c, session, new SubProgressMonitor(monitor, 30), true);
 					
-//					//apply denominator results
-//					if (denominator != null){
-//						boolean isSame = false;
-//						if (query.getQueryDefinition().getRateFilter() != null && query.getQueryDefinition().getValueFilter() != null){
-//							isSame = (query.getQueryDefinition().getRateFilter().asString().equals(query.getQueryDefinition().getValueFilter().asString()));	
-//						}else if (query.getQueryDefinition().getRateFilter() == null && query.getQueryDefinition().getValueFilter() == null){
-//							isSame = true;
-//						}
-//						//computer denominator results
-//						//only recompute filter if filter is different
-//						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), c, session, monitor, !isSame);
-//						HashMap<String, Double> items = new HashMap<String, Double>();
-//						for (GridResultItem it : denominatorResults){
-//							items.put(it.getTileId(), it.getValue());
-//						}
-//						
-//						//compute value
-//						for (GridResultItem i : numeratorResults){
-//							Double v = items.get(i.getTileId());
-//							if (v == null){
-//								i.setValue(0);
-//							}else if (v == 0){
-//								i.setValue(0);
-//							}else{
-//								i.setValue(i.getValue() / v);
-//							}
-//						}
-//					}
+					//apply denominator results
+					if (denominator != null){
+						boolean isSame = false;
+						if (query.getQueryDefinition().getRateFilter() != null && query.getQueryDefinition().getValueFilter() != null){
+							isSame = (query.getQueryDefinition().getRateFilter().asString().equals(query.getQueryDefinition().getValueFilter().asString()));	
+						}else if (query.getQueryDefinition().getRateFilter() == null && query.getQueryDefinition().getValueFilter() == null){
+							isSame = true;
+						}
+						//computer denominator results
+						//only recompute filter if filter is different
+						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, c, session, new SubProgressMonitor(monitor, 30), !isSame);
+						HashMap<String, Double> items = new HashMap<String, Double>();
+						for (GridResultItem it : denominatorResults){
+							items.put(it.getTileId(), it.getValue());
+						}
+						
+						//compute value
+						for (GridResultItem i : numeratorResults){
+							Double v = items.get(i.getTileId());
+							if (v == null){
+								i.setValue(0);
+							}else if (v == 0){
+								i.setValue(0);
+							}else{
+								i.setValue(i.getValue() / v);
+							}
+						}
+					}else{
+						monitor.worked(30);
+					}
 
 					monitor.subTask(Messages.DerbyGridEngine_ProgressTrackLocations);
 					//combine with the patrol existance value
@@ -282,8 +287,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		String strAgg =""; //$NON-NLS-1$
 		ResultSet rs;
 
-		if(value instanceof MissionLengthValueItem ){
-			MissionLengthValueItem vi = (MissionLengthValueItem)value;
+		if(value instanceof MissionValueItem ){
+			MissionValueItem vi = (MissionValueItem)value;
 			return computeSurveyValue(c, vi, gridDef);
 		}else if(value instanceof AttributeValueItem ){
 			AttributeValueItem tmp = (AttributeValueItem)value;
@@ -686,15 +691,30 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	private Collection<GridResultItem> computeSurveyValue(Connection c,
-			MissionLengthValueItem item, 
+			MissionValueItem item, 
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		String dataField[] = null;
 		
-		AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
-		DistanceValueComputer valueComputer = new DistanceValueComputer();
-		engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
-		return computeMissionTrack(c, engine, dataField);
+		if (item.getValueItem() == MissionValueItem.ValueItem.TRACK_LENGTH){
+			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
+			DistanceValueComputer valueComputer = new DistanceValueComputer();
+			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
+			return computeMissionTrack(c, engine, dataField);
+		}else if (item.getValueItem() == MissionValueItem.ValueItem.MISSION_COUNT){
+			dataField = new String[]{"mission_uuid"}; //$NON-NLS-1$
+			UuidCellMerger cellMerger = new UuidCellMerger();
+			SurveyCntValueComputer valueComputer = new SurveyCntValueComputer();
+			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
+			return computeMissionTrack(c, engine, dataField);
+		}else if (item.getValueItem() == MissionValueItem.ValueItem.SURVEY_COUNT){	
+			dataField = new String[]{"survey_uuid"}; //$NON-NLS-1$ 
+			UuidCellMerger cellMerger = new UuidCellMerger();
+			SurveyCntValueComputer valueComputer = new SurveyCntValueComputer();
+			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
+			return computeMissionTrack(c, engine, dataField);
+		}
+		return null;
 	}
 	
 	private Collection<GridResultItem> computeMissionTrack(Connection c, 
@@ -711,7 +731,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(MissionTrack.class));
 		sql.append(", ("); //$NON-NLS-1$
-		sql.append("SELECT distinct mission_uuid "); //$NON-NLS-1$
+		sql.append("SELECT distinct mission_uuid as unqid"); //$NON-NLS-1$
 		if (dataField != null){
 			//additional data required for rasterization
 			for (int i = 0; i < dataField.length; i ++){
@@ -723,7 +743,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(") tmp "); //$NON-NLS-1$
 		sql.append("WHERE " ); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionTrack.class) + ".mission_uuid = "); //$NON-NLS-1$
-		sql.append("tmp.mission_uuid"); //$NON-NLS-1$
+		sql.append("tmp.unqid"); //$NON-NLS-1$
 
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());

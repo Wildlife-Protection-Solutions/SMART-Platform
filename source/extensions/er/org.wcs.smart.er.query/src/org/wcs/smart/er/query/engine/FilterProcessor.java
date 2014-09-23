@@ -409,12 +409,27 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		sql.append(engine.appendFromClause(usedTables));
 		
+		boolean where = true;
 		// ---- WHERE CLAUSE -----
 		if (queryFilter != EmptyFilter.INSTANCE) {
 			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(queryFilter, engine);
 			if (filter != null && filter.length() > 0) {
 				sql.append(" WHERE "); //$NON-NLS-1$
+				where = false;
 			    sql.append(filter);
+			}
+		}
+		
+		if (dateFilter != null) {
+			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				if (where){
+					sql.append(" WHERE "); //$NON-NLS-1$
+					where = false;
+				}else{
+					sql.append(" and "); //$NON-NLS-1$
+				}
+				sql.append(filter);
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());

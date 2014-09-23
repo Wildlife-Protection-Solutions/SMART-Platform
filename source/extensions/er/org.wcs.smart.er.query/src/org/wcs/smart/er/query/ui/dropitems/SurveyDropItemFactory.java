@@ -44,6 +44,7 @@ import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
@@ -92,7 +93,9 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	public final static IValueDropItem[] ENCOUNTER_RATE_DROP_ITEMS;
 	static{
 		ENCOUNTER_RATE_DROP_ITEMS =  new IValueDropItem[] {
-				(IValueDropItem)INSTANCE.createMissionLengthValueItem()
+				(IValueDropItem)INSTANCE.createMissionLengthValueItem(),
+				(IValueDropItem)INSTANCE.createMissionCountValueItem(),
+				(IValueDropItem)INSTANCE.createSurveyCountValueItem()
 		};
 	}
 	
@@ -192,6 +195,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}else if (source instanceof SurveyValuesTreeNode.Node){
 			if (source == SurveyValuesTreeNode.Node.MISSION_LENGTH){
 				items = new DropItem[]{createMissionLengthValueItem()};
+			}else if (source == SurveyValuesTreeNode.Node.MISSION_COUNT){
+				items = new DropItem[]{createMissionCountValueItem()};
+			}else if (source == SurveyValuesTreeNode.Node.SURVEY_COUNT){
+				items = new DropItem[]{createSurveyCountValueItem()};
 			}
 		}
 		
@@ -206,7 +213,15 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	}
 	
 	public DropItem createMissionLengthValueItem(){
-		return new MissionLegnthValueDropItem();
+		return new MissionValueDropItem(MissionValueItem.ValueItem.TRACK_LENGTH);
+	}
+	
+	public DropItem createMissionCountValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.MISSION_COUNT);
+	}
+	
+	public DropItem createSurveyCountValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.SURVEY_COUNT);
 	}
 	
 	public DropItem createSamplingUnitGroupByDropItem(){

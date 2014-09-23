@@ -46,6 +46,7 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Summary patrol query definition panel. This panel allows
@@ -100,7 +101,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 	@Override
 	public String validate() {
 		//update the simple value rate filter panel
-//		((SimpleValueRateFilterPanel)currentQuery.getQueryDefinitionPanel().findQueryDefinitionPanel(SimpleValueRateFilterPanel.ID)).updateFilterPanel(hasRate());
+		((SimpleValueRateFilterPanel)currentQuery.getQueryDefinitionPanel().findQueryDefinitionPanel(SimpleValueRateFilterPanel.ID)).updateFilterPanel(hasRate());
 		
 		String error = super.lstColumnGroupBy.validate();
 		if (error != null) return error;
@@ -212,12 +213,12 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 	 * @return true if one of the values has an encounter rate
 	 */
 	public boolean hasRate(){
-//		for (DropItem it : lstValues.getItems()){
-//			if (it instanceof AbstractValueDropItem && ((AbstractValueDropItem)it).hasEncounterRatio()){
-//				return true;
-//			}
-//		}
-//		return false;
+		for (DropItem it : lstValues.getItems()){
+			if (it instanceof AbstractValueDropItem 
+					&& ((AbstractValueDropItem)it).hasEncounterRatio()){
+				return true;
+			}
+		}
 		return false;
 	}
 
