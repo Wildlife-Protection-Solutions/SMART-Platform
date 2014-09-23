@@ -59,7 +59,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.engine.grids.PatrolCntCellMerger;
 import org.wcs.smart.patrol.query.engine.grids.PatrolCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
@@ -74,6 +73,7 @@ import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
@@ -514,12 +514,12 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
 		}else if (item.getOption() == PatrolValueOption.NUM_DAYS){	
 			dataField = new String[]{"p_uuid", "pld_patrol_day"}; //$NON-NLS-1$ //$NON-NLS-2$
-			PatrolCntCellMerger cellMerger = new PatrolCntCellMerger();
+			UuidCellMerger cellMerger = new UuidCellMerger();
 			PatrolDayCntValueComputer valueComputer = new PatrolDayCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 		}else if (item.getOption() == PatrolValueOption.NUM_PATROLS){
 			dataField = new String[]{"p_uuid"}; //$NON-NLS-1$
-			PatrolCntCellMerger cellMerger = new PatrolCntCellMerger();
+			UuidCellMerger cellMerger = new UuidCellMerger();
 			PatrolCntValueComputer valueComputer = new PatrolCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 			

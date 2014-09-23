@@ -19,22 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine.grids;
+package org.wcs.smart.query.common.engine;
 
 import java.util.HashSet;
 
 import org.wcs.smart.query.common.engine.ICellMerger;
 
 /**
- * Merges together hashsets of hashcodes
- * of patrol uuids.
+ * Merges together hashsets of objects.  Returns a count of the 
+ * number of unique items.
  * 
  * @author egouge
  *
  * @param <T> must be hashset
  */
 
-public class PatrolCntCellMerger implements ICellMerger<HashSet<Object>> {
+public class UuidCellMerger implements ICellMerger<HashSet<Object>> {
 
 	/**
 	 * @see org.wcs.smart.query.common.engine.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
