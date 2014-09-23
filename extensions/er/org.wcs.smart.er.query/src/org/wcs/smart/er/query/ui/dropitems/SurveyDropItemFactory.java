@@ -71,6 +71,8 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
@@ -87,10 +89,15 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 
 	public static SurveyDropItemFactory INSTANCE = new SurveyDropItemFactory();
 	
-	protected SurveyDropItemFactory(){
-		
+	public final static IValueDropItem[] ENCOUNTER_RATE_DROP_ITEMS;
+	static{
+		ENCOUNTER_RATE_DROP_ITEMS =  new IValueDropItem[] {
+				(IValueDropItem)INSTANCE.createMissionLengthValueItem()
+		};
 	}
 	
+	protected SurveyDropItemFactory(){
+	}
 	
 	/**
 	 * Generates a drop item for the given source object from
@@ -108,11 +115,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		
 		if (source instanceof Operator) {
 			items = createOtherDropItem((Operator)source);
-		
 		} else if (source instanceof IDateGroupBy) {
-			items = new DropItem[]{createDateGroupByDropItem(
-							(IDateGroupBy) source)};
-		
+			items = new DropItem[]{createDateGroupByDropItem((IDateGroupBy) source)};		
 		} else if (source instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 		}else if (source instanceof Area){
@@ -122,28 +126,11 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
-				
-//				if (items != null){
-//				for (int i = 0; i < items.length; i ++){
-//					if (items[i] instanceof AbstractValueDropItem){
-//						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
-//					}
-//				}
-//			}
 			}
 		}else if (source instanceof AreaType){
 			if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
-				
-//				if (items != null){
-//				for (int i = 0; i < items.length; i ++){
-//					if (items[i] instanceof AbstractValueDropItem){
-//						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
-//					}
-//				}
-//			}
 			}
-
 		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
 			if (queryItemPanelId.equals(GroupByValueItemPanel.ID) ||
 					queryItemPanelId.equals(GriddedValueItemPanel.ID)){
@@ -208,6 +195,13 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			}
 		}
 		
+		if (items != null){
+			for (int i = 0; i < items.length; i ++){
+				if (items[i] instanceof AbstractValueDropItem){
+					((AbstractValueDropItem)items[i]).setEncounterRateOptions(ENCOUNTER_RATE_DROP_ITEMS);
+				}
+			}
+		}
 		return items;	
 	}
 	
@@ -360,7 +354,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeValueDropItem(Attribute att){
-		return new AttributeValueDropItem(att);
+		return new AttributeValueDropItem(true, att);
 	}
 	
 	/**
@@ -370,7 +364,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
-		return new AttributeValueDropItem(catatt);
+		return new AttributeValueDropItem(true, catatt);
 	}
 	
 	/**
@@ -380,7 +374,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
-		return new AttributeListValueDropItem(item);
+		return new AttributeListValueDropItem(true, item);
 	}
 	
 	/**
@@ -391,7 +385,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
-		return new AttributeListValueDropItem(item,cat);
+		return new AttributeListValueDropItem(true, item,cat);
 	}
 	
 	/**
@@ -401,7 +395,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
-		return new AttributeTreeValueDropItem(item);
+		return new AttributeTreeValueDropItem(true, item);
 	}
 	
 	/**
@@ -412,7 +406,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
-		return new AttributeTreeValueDropItem(item,cat);
+		return new AttributeTreeValueDropItem(true, item,cat);
 	}
 	
 	/**
@@ -423,9 +417,9 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	@Override
 	public DropItem createCategoryValueDropItem(Category cat){
 		if (cat == null){
-			return new CategoryValueDropItem();
+			return new CategoryValueDropItem(true);
 		}
-		return new CategoryValueDropItem(cat);
+		return new CategoryValueDropItem(true, cat);
 	}
 	
 	/**
@@ -460,14 +454,14 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 
 			//values
 			List<DropItem> items = null;
-//			if (def != null && def.getValuePart() != null){
+			if (def != null && def.getValuePart() != null){
 				items = def.getValuePart().getDropItems(session);
-//				for (DropItem i : items){
-//					if (i instanceof AbstractValueDropItem){
-//						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
-//					}
-//				}
-//			}
+				for (DropItem i : items){
+					if (i instanceof AbstractValueDropItem){
+						((AbstractValueDropItem)i).setEncounterRateOptions(ENCOUNTER_RATE_DROP_ITEMS);
+					}
+				}
+			}
 			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
 					
 //			
@@ -483,9 +477,9 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			DropItem valueItem = null;
 			try{
 				valueItem = def.getValuePart().asDropItem(session);
-//				if (valueItem instanceof AbstractValueDropItem){
-//					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
-//				}
+				if (valueItem instanceof AbstractValueDropItem){
+					((AbstractValueDropItem)valueItem).setEncounterRateOptions(ENCOUNTER_RATE_DROP_ITEMS);
+				}
 			}catch(Exception ex){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				valueItem = new ErrorDropItem(ex.getMessage());
