@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.patrol.query.ui.definition;
 
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Gridded patrol query definition panel.

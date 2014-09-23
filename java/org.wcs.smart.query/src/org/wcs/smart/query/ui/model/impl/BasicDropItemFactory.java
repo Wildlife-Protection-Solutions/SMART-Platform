@@ -189,7 +189,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * @return
 	 */
 	public DropItem createAttributeValueDropItem(Attribute att){
-		return new AttributeValueDropItem(att);
+		return new AttributeValueDropItem(false, att);
 	}
 	
 	/**
@@ -198,7 +198,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * @return
 	 */
 	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
-		return new AttributeValueDropItem(catatt);
+		return new AttributeValueDropItem(false, catatt);
 	}
 	
 	/**
@@ -207,7 +207,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * @return
 	 */
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
-		return new AttributeListValueDropItem(item);
+		return new AttributeListValueDropItem(false, item);
 	}
 	
 	/**
@@ -217,7 +217,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * @return
 	 */
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
-		return new AttributeListValueDropItem(item,cat);
+		return new AttributeListValueDropItem(false, item,cat);
 	}
 	
 	/**
@@ -226,7 +226,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * @return
 	 */
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
-		return new AttributeTreeValueDropItem(item);
+		return new AttributeTreeValueDropItem(false, item);
 	}
 	
 	/**
@@ -236,7 +236,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * @return
 	 */
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
-		return new AttributeTreeValueDropItem(item,cat);
+		return new AttributeTreeValueDropItem(false, item,cat);
 	}
 	
 	/**
@@ -246,9 +246,9 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 */
 	public DropItem createCategoryValueDropItem(Category cat){
 		if (cat == null){
-			return new CategoryValueDropItem();
+			return new CategoryValueDropItem(false);
 		}
-		return new CategoryValueDropItem(cat);
+		return new CategoryValueDropItem(false, cat);
 	}
 	
 	

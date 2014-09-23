@@ -46,12 +46,7 @@ import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AbstractValueDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeListValueDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeTreeValueDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.AttributeValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
-import org.wcs.smart.patrol.query.ui.definition.dropItems.CategoryValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
@@ -72,7 +67,12 @@ import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
@@ -270,7 +270,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeValueDropItem(Attribute att){
-		return new AttributeValueDropItem(att);
+		return new AttributeValueDropItem(true, att);
 	}
 	
 	/**
@@ -280,7 +280,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
-		return new AttributeValueDropItem(catatt);
+		return new AttributeValueDropItem(true, catatt);
 	}
 	
 	/**
@@ -290,7 +290,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
-		return new AttributeListValueDropItem(item);
+		return new AttributeListValueDropItem(true, item);
 	}
 	
 	/**
@@ -301,7 +301,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
-		return new AttributeListValueDropItem(item,cat);
+		return new AttributeListValueDropItem(true, item,cat);
 	}
 	
 	/**
@@ -311,7 +311,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
-		return new AttributeTreeValueDropItem(item);
+		return new AttributeTreeValueDropItem(true, item);
 	}
 	
 	/**
@@ -322,7 +322,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
-		return new AttributeTreeValueDropItem(item,cat);
+		return new AttributeTreeValueDropItem(true, item,cat);
 	}
 	
 	/**
@@ -333,9 +333,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	@Override
 	public DropItem createCategoryValueDropItem(Category cat){
 		if (cat == null){
-			return new CategoryValueDropItem();
+			return new CategoryValueDropItem(true);
 		}
-		return new CategoryValueDropItem(cat);
+		return new CategoryValueDropItem(true, cat);
 	}
 	
 	/**
@@ -374,7 +374,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = def.getValuePart().getDropItems(session);
 				for (DropItem i : items){
 					if (i instanceof AbstractValueDropItem){
-						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS);
 					}
 				}
 			}
@@ -393,7 +393,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			try{
 				valueItem = def.getValuePart().asDropItem(session);
 				if (valueItem instanceof AbstractValueDropItem){
-					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
+					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_DROP_OPTIONS);
 				}
 			}catch(Exception ex){
 				QueryPlugIn.log(ex.getMessage(), ex);
