@@ -48,7 +48,7 @@
                itemPanelId="org.wcs.smart.er.query.survey.summaryItemPanel">
          </DefinitionPanel>
          <DefinitionPanel
-               id="org.wcs.smart.query.er.survey.definition.filter"
+               id="org.wcs.smart.er.survey.definition.filter.valuerate"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
          </DefinitionPanel>
       </QueryType>
@@ -60,7 +60,7 @@
                itemPanelId="org.wcs.smart.er.query.survey.gridValueItemPanel">
          </DefinitionPanel>
          <DefinitionPanel
-               id="org.wcs.smart.query.er.survey.definition.filter"
+               id="org.wcs.smart.er.survey.definition.filter.valuerate"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
          </DefinitionPanel>
       </QueryType>
@@ -103,6 +103,12 @@
             isMultiCa="true"
             isSingleCa="true"
             panel="org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.er.survey.definition.filter.valuerate"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel">
       </QueryDefinitionPanel>
    </extension>
    <extension

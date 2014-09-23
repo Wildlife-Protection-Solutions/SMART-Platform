@@ -38,7 +38,7 @@ import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySummaryEditor;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
-import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
@@ -133,7 +133,7 @@ public class SurveySummaryQueryType implements IQueryType {
 		String definition = ""; //$NON-NLS-1$
 		
 		for (IDefinitionPanel p : components){
-			if (p.getId().equals(FilterDefintionPanel.ID)){
+			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(SummaryDefinitionPanel.ID)){
 				definition = p.getQueryPart();
@@ -163,7 +163,7 @@ public class SurveySummaryQueryType implements IQueryType {
 				return panelError;
 			}
 			
-			if (p.getId().equals(FilterDefintionPanel.ID)){
+			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(SummaryDefinitionPanel.ID)){
 				definition = p.getQueryPart();

@@ -94,6 +94,8 @@ TOKEN :
 |  < SAMPLINGUNIT_GROUPBY_ITEM : "sgb:samplingunit:" (< UUID >)? (":" < UUID > )* >
 |  < WAYPOINT_OBSERVER_GROUPBY_ITEM : < WAYPOINT_OBSERVER_KEY > ":" (< UUID >)? (":" < UUID > )* >  
 |  < MISSION_TRACK_LENGTH : "s:missiontracklength" >
+|  < MISSION_COUNT : "s:missioncount" >
+|  < SURVEY_COUNT : "s:surveycount" >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
@@ -140,10 +142,10 @@ GridQueryDefinition GridQuery() :
 	(
 	  valueFilter = QueryFilterInternal()
 	)?
-	//< QUERY_SPLITTER > 
-	//(
-	//  rateFilter = QueryFilterInternal()
-	//)?
+	< QUERY_SPLITTER > 
+	(
+	  rateFilter = QueryFilterInternal()
+	)?
 	< EOF >
 	{
     	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, null);
@@ -260,7 +262,17 @@ IValueItem SingleValueItem() :
 	|
 		< MISSION_TRACK_LENGTH >
 		{
-		  	item = MissionLengthValueItem.createValueItem();	 	}
+		  	item = MissionValueItem.createTrackLengthItem();	 	}
+	|
+		< MISSION_COUNT >
+		{
+		  	item = MissionValueItem.createMissionCountItem();
+	 	}
+	|
+		< SURVEY_COUNT >
+		{
+		  	item = MissionValueItem.createSurveyCountItem();
+	 	}		 	
 	)
 	{
 		 return item;

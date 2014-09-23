@@ -59,6 +59,8 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	private Link surveyDesignLabel;
 	private SurveyDesign currentDesign;
 
+	private boolean showSurveyDesignLabel = true;
+	
 	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
 	
 	/**
@@ -66,11 +68,20 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	 * 
 	 */
 	public FilterDefintionPanel() {
+		this(true);
+	}
+
+	/**
+	 * Creates a new drop target panel.
+	 * 
+	 */
+	public FilterDefintionPanel(boolean showSurveyDesign) {
 		super();
+		this.showSurveyDesignLabel = showSurveyDesign;
 		listener = new DefinitionListener(this);
 		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(listener);
 	}
-
+	
 	@Override
 	public void dispose(){
 		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(listener);
@@ -137,12 +148,14 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	}
 
 	private void updateDesignLabel() {
-		String text = Messages.SurveyFilterDefintionPanel_AllSurveyLabel;
-		if (currentDesign != null) {
-			text = currentDesign.getName();
+		if (showSurveyDesignLabel){
+			String text = Messages.SurveyFilterDefintionPanel_AllSurveyLabel;
+			if (currentDesign != null) {
+				text = currentDesign.getName();
+			}
+			surveyDesignLabel.setText("<a>" + text + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			surveyDesignLabel.getParent().getParent().layout(true);
 		}
-		surveyDesignLabel.setText("<a>" + text + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-		surveyDesignLabel.getParent().getParent().layout(true);
 	}
 
 	@Override
@@ -155,41 +168,43 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 
 		super.createFilterTypeComposite(outer);
 
-		Composite right = new Composite(outer, SWT.NONE);
-		gl = new GridLayout(2, false);
-		gl.horizontalSpacing = 5;
-		gl.verticalSpacing = 0;
-		gl.marginWidth = 5;
-		gl.marginHeight = 3;
+		if (showSurveyDesignLabel){
+			Composite right = new Composite(outer, SWT.NONE);
+			gl = new GridLayout(2, false);
+			gl.horizontalSpacing = 5;
+			gl.verticalSpacing = 0;
+			gl.marginWidth = 5;
+			gl.marginHeight = 3;
 		
-		right.setLayout(gl);
-		right.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+			right.setLayout(gl);
+			right.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 
-		Label l = new Label(right, SWT.NONE);
-		l.setText(Messages.SurveyFilterDefintionPanel_SurveyDesignLabel);
-		surveyDesignLabel = new Link(right, SWT.NONE);
+			Label l = new Label(right, SWT.NONE);
+			l.setText(Messages.SurveyFilterDefintionPanel_SurveyDesignLabel);
+			surveyDesignLabel = new Link(right, SWT.NONE);
 
-		surveyDesignLabel.addSelectionListener(new SelectionAdapter() {
+			surveyDesignLabel.addSelectionListener(new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				SurveyDesignDialog dialog = new SurveyDesignDialog(outer
-						.getShell());
-				if (dialog.open() == SurveyDesignDialog.OK) {
-					// update query
-					SurveyDesign newDesign = dialog.getSelectedDesign();
-					
-					if ((currentDesign == null && newDesign != null) || 
-						(currentDesign != null && !currentDesign.equals(newDesign))) {
-						
-						((ISurveyQuery)currentQuery.getQuery()).setSurveyDesign(newDesign);
-						SurveyQueryEventManager.getInstance().fireSurveyDesignChange((ISurveyQuery)currentQuery.getQuery());
-						fireQueryChangedListeners();
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					SurveyDesignDialog dialog = new SurveyDesignDialog(outer
+							.getShell());
+					if (dialog.open() == SurveyDesignDialog.OK) {
+						// update query
+						SurveyDesign newDesign = dialog.getSelectedDesign();
+
+						if ((currentDesign == null && newDesign != null)
+								|| (currentDesign != null 
+								&& !currentDesign.equals(newDesign))) {
+							((ISurveyQuery) currentQuery.getQuery()).setSurveyDesign(newDesign);
+							SurveyQueryEventManager.getInstance().fireSurveyDesignChange((ISurveyQuery) currentQuery.getQuery());
+							fireQueryChangedListeners();
+						}
 					}
 				}
-			}
-		});
-		updateDesignLabel();
+			});
+			updateDesignLabel();
+		}
 	}
 
 

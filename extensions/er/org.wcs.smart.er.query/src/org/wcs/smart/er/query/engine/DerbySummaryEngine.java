@@ -52,9 +52,10 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.ISurveyGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
-import org.wcs.smart.er.query.filter.summary.MissionLengthValueItem;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
@@ -407,8 +408,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
 		}else if (it instanceof CombinedValueItem){
 			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
-		}else if (it instanceof MissionLengthValueItem){
-			results = getSurveySummaryValue(dataTable, c, s, groupBy, (MissionLengthValueItem)it, caFilter);
+		}else if (it instanceof MissionValueItem){
+			results = getSurveySummaryValue(dataTable, c, s, groupBy, (MissionValueItem)it, caFilter);
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -430,14 +431,14 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			MissionLengthValueItem valueItem, ConservationAreaFilter caFilter) throws SQLException{
+			MissionValueItem valueItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder fromSql = new StringBuilder();
 		
 		fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
 		
-		selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
+		
 		
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
@@ -455,31 +456,44 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			}
 		}
 
-		if (!hasAreaGroupBy){
-			valueSql.append( "smart.distanceInMeter(" + tablePrefix(MissionTrack.class) + ".geometry) / 1000.0 as distance"); //$NON-NLS-1$ //$NON-NLS-2$
-		}else{
-			StringBuilder append = new StringBuilder();
-			valueSql.append("smart.distanceInMeter("); //$NON-NLS-1$
-			for(String prefix : areaGroupByPrefix){
-				valueSql.append("smart.intersection("); //$NON-NLS-1$
-				valueSql.append(prefix);
-				valueSql.append(".geom,"); //$NON-NLS-1$
-				append.append(")"); //$NON-NLS-1$
+		if (valueItem.getValueItem() == ValueItem.TRACK_LENGTH){
+			if (!hasAreaGroupBy){
+				valueSql.append( "smart.distanceInMeter(" + tablePrefix(MissionTrack.class) + ".geometry) / 1000.0 as distance"); //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				StringBuilder append = new StringBuilder();
+				valueSql.append("smart.distanceInMeter("); //$NON-NLS-1$
+				for(String prefix : areaGroupByPrefix){
+					valueSql.append("smart.intersection("); //$NON-NLS-1$
+					valueSql.append(prefix);
+					valueSql.append(".geom,"); //$NON-NLS-1$
+					append.append(")"); //$NON-NLS-1$
+				}
+				valueSql.append(tablePrefix(MissionTrack.class));
+				valueSql.append(".geometry"); //$NON-NLS-1$
+				valueSql.append(append);
+				valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
 			}
-			valueSql.append(tablePrefix(MissionTrack.class));
-			valueSql.append(".geometry"); //$NON-NLS-1$
-			valueSql.append(append);
-			valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
-		}
 
-		valueAggSql.append("sum(distance)"); //$NON-NLS-1$
-
-		if (!hasAreaGroupBy){
-			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNamePrefix(MissionTrack.class));
-			fromSql.append( " on temp.mission_uuid = "); //$NON-NLS-1$ 
-			fromSql.append(tablePrefix(MissionTrack.class));
-			fromSql.append(".mission_uuid " ); //$NON-NLS-1$
+			valueAggSql.append("sum(distance)"); //$NON-NLS-1$
+			
+			if (!hasAreaGroupBy){
+				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(MissionTrack.class));
+				fromSql.append( " on temp.mission_uuid = "); //$NON-NLS-1$ 
+				fromSql.append(tablePrefix(MissionTrack.class));
+				fromSql.append(".mission_uuid " ); //$NON-NLS-1$
+			}
+			
+			selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
+			
+		}else if (valueItem.getValueItem() == ValueItem.MISSION_COUNT){
+			valueSql.append("temp.mission_uuid"); //$NON-NLS-1$
+			valueAggSql.append("count(mission_uuid)"); //$NON-NLS-1$
+			selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
+		}else if (valueItem.getValueItem() == ValueItem.SURVEY_COUNT){
+			selectSql.append("temp.survey_uuid as uniqueid, "); //$NON-NLS-1$
+			valueSql.append("temp.survey_uuid"); //$NON-NLS-1$
+			valueAggSql.append("count(survey_uuid)"); //$NON-NLS-1$
 		}
 		
 		StringBuilder sql = new StringBuilder();
@@ -864,7 +878,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
 		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
 		if (values2.values().size() != 1){
-			throw new SQLException("Invalid Rate Filter");
+			throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterValues);
 		}
 		Double denominator = values2.values().iterator().next();
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();

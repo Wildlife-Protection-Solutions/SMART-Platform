@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.er.query.ui.editor;
 
+import net.refractions.udig.project.internal.Map;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.ui.GriddedEditor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -39,7 +46,56 @@ public class SurveyGriddedEditor extends GriddedEditor  {
 
 	public static final String ID = "org.wcs.smart.er.query.ui.GriddedEditor";  //$NON-NLS-1$
 
+	private SurveyQueryEventManager.SurveyDesignChangeListener updateTable = new SurveyQueryEventManager.SurveyDesignChangeListener(){
+		@Override
+		public void surveyDesignChange(ISurveyQuery query) {
+			if (!getQuery().equals(query)) return;
+			
+			getQueryResultsTable().clearColumns();
+			getQueryResultsTable().initQuery(getQueryInternal());
+		
+			addSuLayer.schedule();
+		}
+	};
+	
+	private AddSamplingUnitLayersJob addSuLayer = null;
 
+	/**
+	 * Creates a new results editor
+	 */
+	public SurveyGriddedEditor(){
+		super();
+		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(updateTable);	
+	}
+	
+	
+	/**
+	 * Disposes editor
+	 */
+	@Override
+	public void dispose(){
+		super.dispose();
+		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(updateTable);
+		addSuLayer.dispose();
+	}
+	
+	@Override
+	public void init(IEditorSite site, IEditorInput input)
+			throws PartInitException {
+		super.init(site, input);
+		
+		addSuLayer = new AddSamplingUnitLayersJob(){
+			@Override
+			public Query getQuery() {
+				return SurveyGriddedEditor.this.getQuery();
+			}
+			@Override
+			public Map getMap() {
+				return SurveyGriddedEditor.this.getMap();
+			}};
+		addSuLayer.schedule();
+	}
+	
 	/**
 	 * Loads the query for the editor
 	 * @param session
