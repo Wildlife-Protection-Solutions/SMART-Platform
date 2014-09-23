@@ -163,7 +163,7 @@ public class MissionDayComposite {
 //			input.clear();
 //			input.addAll(buildWaypointInput(mission));
 //			refreshTable();
-			setData(mission);
+			setData(editor.getMissionEditor().getMission());
 		}
 	};
 	
