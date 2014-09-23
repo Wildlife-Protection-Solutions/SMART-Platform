@@ -25,12 +25,22 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.ui.ISurveyListener;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for editing mission tracks.
@@ -39,21 +49,28 @@ import org.wcs.smart.er.model.Mission;
  * @since 3.0.0
  */
 public class MissionTrackEditDialog extends TitleAreaDialog {
+
+	private Session session;
+	
+	private boolean isChanged = false;
 	
 	private Mission mission;
 	private Date date;
 
 	public MissionTrackEditDialog(Shell shell, Mission mission, Date date) {
 		super(shell);
-		this.mission = mission;
 		this.date = date;
+
+		session = HibernateManager.openSession();
+		session.beginTransaction();
+		this.mission = (Mission) session.load(Mission.class, mission.getUuid());
 	}
 
-	public Mission getMission() {
+	Mission getMission() {
 		return mission;
 	}
 	
-	public Date getDate() {
+	Date getDate() {
 		return date;
 	}
 	
@@ -66,7 +83,70 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		getShell().setText(title);
 		setMessage(Messages.MissionTrackEditDialog_Message);
 
-		new TracksComposite(comp, this);
+		TracksComposite cmp = new TracksComposite(comp, this);
+		cmp.addChangeListener(new ISurveyListener() {
+			@Override
+			public void compositeModified() {
+				if (getButton(IDialogConstants.OK_ID) == null) return;
+				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				isChanged = true;
+			}
+		});
+		
 		return comp;
 	}
+	
+	protected void createButtonsForButtonBar(Composite parent) {
+		Button ok = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		ok.setEnabled(false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
+	}
+
+	protected void okPressed() {
+		saveChanges();
+	}
+	
+	public boolean close() {
+		if (isChanged) {
+			MessageDialog md = new MessageDialog(getShell(), 
+					"Edit Mission Tracks", 
+					null, 
+					"There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			int ret = md.open();
+			if (ret == 2) {
+				//cancel
+				return false;
+			}else if (ret == 0){
+				//yes
+				if (!saveChanges()){
+					return false;
+				}else{
+					setReturnCode(IDialogConstants.OK_ID);
+				}
+			}
+		}
+		if (session.getTransaction().isActive()){
+			session.getTransaction().rollback();
+		}
+		session.close();
+		
+		return super.close();
+	}
+
+	private boolean saveChanges() {
+		try {
+			session.getTransaction().commit();
+			isChanged = false;
+			
+			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+			
+			//start a new transaction
+			session.beginTransaction();
+			return true;
+		} catch (Exception ex) {
+			EcologicalRecordsPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
+			return false;
+		}
+	}
+	
 }
