@@ -26,7 +26,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -81,6 +83,7 @@ import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
+import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
@@ -402,8 +405,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
 		}else if (it instanceof CategoryValueItem){
 			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
-//		}else if (it instanceof CombinedValueItem){
-//			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
+		}else if (it instanceof CombinedValueItem){
+			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
 		}else if (it instanceof MissionLengthValueItem){
 			results = getSurveySummaryValue(dataTable, c, s, groupBy, (MissionLengthValueItem)it, caFilter);
 		}
@@ -841,47 +844,46 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		return results;
 	}
 	
-//	/**
-//	 * Computes a value that is consists of performing divide by
-//	 * on two values.  It computes both values, then combines the results
-//	 * into a new value set.
-//	 * 
-//	 * @param c database connection
-//	 * @param s hibernate session 
-//	 * @param groupBy query group by options
-//	 * @param patrolItem patrol value to computer  
-//	 * @return query results
-//	 * @throws SQLException
-//	 */
-//	private HashMap<SummaryResultKey, Double> getCombinedValue(
-//			Connection c, Session s, 
-//			GroupByPart groupBy, 
-//			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
-//		
-//		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
-//		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
-//		if (values2.values().size() != 1){
-//			throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterComputation);
-//		}
-//		Double denominator = values2.values().iterator().next();
-//		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
-//
-//		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
-//			Entry<SummaryResultKey, Double> type = iterator.next();			
-//			SummaryResultKey key = new SummaryResultKey(type.getKey());
-//			key.setValueKey(item.asString());
-//			
-//			Double value = type.getValue();
-//			if (denominator == 0){
-//				value = Double.NaN;
-//			}else{
-//				value = value / denominator;
-//			}
-//			results.put(key, value);
-//		}
-//		return results;
-//		
-//	}
+	/**
+	 * Computes a value that is consists of performing divide by
+	 * on two values.  It computes both values, then combines the results
+	 * into a new value set.
+	 * 
+	 * @param c database connection
+	 * @param s hibernate session 
+	 * @param groupBy query group by options
+	 * @param patrolItem patrol value to computer  
+	 * @return query results
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> getCombinedValue(
+			Connection c, Session s, 
+			GroupByPart groupBy, 
+			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
+		
+		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
+		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
+		if (values2.values().size() != 1){
+			throw new SQLException("Invalid Rate Filter");
+		}
+		Double denominator = values2.values().iterator().next();
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+
+		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+			Entry<SummaryResultKey, Double> type = iterator.next();			
+			SummaryResultKey key = new SummaryResultKey(type.getKey());
+			key.setValueKey(item.asString());
+			
+			Double value = type.getValue();
+			if (denominator == 0){
+				value = Double.NaN;
+			}else{
+				value = value / denominator;
+			}
+			results.put(key, value);
+		}
+		return results;
+	}
 	
 	
 	/**

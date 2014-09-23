@@ -22,12 +22,11 @@
 package org.wcs.smart.er.query.ui.dropitems;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Total mission track length drop item.
@@ -35,57 +34,34 @@ import org.wcs.smart.query.ui.model.IValueDropItem;
  * @author Emily
  *
  */
-public class MissionLegnthValueDropItem extends DropItem implements IValueDropItem{
+public class MissionLegnthValueDropItem extends AbstractValueDropItem implements IValueDropItem{
 
 	public MissionLegnthValueDropItem(){
-
+		super(true);
 	}
 	
-	/**
-	 * @see org.eclipse.swt.widgets.Widget#dispose()
-	 */
 	@Override
-	public void dispose(){
-		super.dispose();
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
-	 */
-	@Override
-	public String getText() {
-		return Messages.MissionLegnthValueDropItem_TrackLengthLabel;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
-	 */
-	@Override
-	public String asQueryPart() {
+	protected String getValueQueryPart() {
 		return "s:missiontracklength"; //$NON-NLS-1$
 	}
 
-	/**
-	 * Nothing to initialize
-	 */
 	@Override
-	public void initializeData(Object data) {
+	protected String getValueText() {
+		return Messages.MissionLegnthValueDropItem_TrackLengthLabel;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
-	protected void createComposite(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout());
-		
-		Label lblText = new Label(main, SWT.NONE);
+	protected void createValueComposite(Composite parent) {
+		Label lblText = new Label(parent, SWT.NONE);
 		lblText.setText( formatStringForLabel(getText()));
-				
-		initDrag(main);
 		initDrag(lblText);
+	}
+
+	@Override
+	protected void initializeValueData(Object data) {
 
 	}
+
+
 
 }
