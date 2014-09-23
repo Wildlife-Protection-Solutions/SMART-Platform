@@ -157,20 +157,13 @@ public class MissionDayComposite {
 	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
 	
-	private ISurveyEventListener trackListener = new ISurveyEventListener() {
+	private ISurveyEventListener missionChangeListener = new ISurveyEventListener() {
 		@Override
 		public void event(Object o) {
-//			updateDistance();
-			// TODO Auto-generated method stub
-			
-		}
-	};
-	private ISurveyEventListener waypointListener = new ISurveyEventListener() {
-		@Override
-		public void event(Object o) {
-			input.clear();
-			input.addAll(buildWaypointInput(mission));
-			refreshTable();
+//			input.clear();
+//			input.addAll(buildWaypointInput(mission));
+//			refreshTable();
+			setData(mission);
 		}
 	};
 	
@@ -404,8 +397,7 @@ public class MissionDayComposite {
 			}
 		});
 		
-		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, trackListener);
-		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, waypointListener);
+		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionChangeListener);
 		updateTotalHours();
 		
 		return mainComposite;
@@ -481,8 +473,7 @@ public class MissionDayComposite {
 	}
 
 	public void dispose() {
-		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, trackListener);
-		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, waypointListener);
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionChangeListener);
 	}
 	
 	public void setData(Mission data) {
