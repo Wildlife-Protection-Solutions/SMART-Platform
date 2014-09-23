@@ -104,6 +104,7 @@ elementFormDefault="qualified">
     <complexType name="namesType">
     	<attribute name="language" type="string"></attribute>
     	<attribute name="value" type="string"></attribute>
+    	<attribute name="isDefault" type="boolean"></attribute>
     </complexType>
 
     <complexType name="samplingUnitAttribute">

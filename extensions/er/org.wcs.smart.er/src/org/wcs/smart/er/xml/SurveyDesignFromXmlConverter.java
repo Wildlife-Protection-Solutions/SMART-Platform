@@ -283,6 +283,9 @@ public class SurveyDesignFromXmlConverter {
 	public static void importNames(List<NamesType> names, NamedItem toUpdate, Session session, boolean required) {
 		String xmlDefaultName = null;
 		for (NamesType label : names){
+			if (label.isIsDefault()){
+				xmlDefaultName = label.getValue();
+			}
 			List<?> values = session.createCriteria(Language.class).
 				add(Restrictions.eq("ca", SmartDB.getCurrentConservationArea())). //$NON-NLS-1$ 
 				add(Restrictions.eq("code",label.getLanguage()) ).list(); //$NON-NLS-1$
