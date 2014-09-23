@@ -21,6 +21,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.hibernate.SmartDB;
 
 
 /**
@@ -51,6 +52,7 @@ public class SurveyDesignToXmlConverter {
 			
 			xmlpair.setLanguage( label.getId().getLanguage().getCode() );
 			xmlpair.setValue(label.getValue());
+			xmlpair.setIsDefault(label.getLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 			xml.getNames().add(xmlpair);
 		}
 
@@ -125,6 +127,7 @@ public class SurveyDesignToXmlConverter {
 				
 				xmlpair.setLanguage( label.getId().getLanguage().getCode() );
 				xmlpair.setValue(label.getValue());
+				xmlpair.setIsDefault(label.getLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				xmlma.getNames().add(xmlpair);
 			}
 			
@@ -144,6 +147,7 @@ public class SurveyDesignToXmlConverter {
 					
 					xmlpair.setLanguage(label.getId().getLanguage().getCode());
 					xmlpair.setValue(label.getValue());
+					xmlpair.setIsDefault(label.getLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 					xmlmali.getNames().add(xmlpair);
 				}
 				
@@ -173,6 +177,7 @@ public class SurveyDesignToXmlConverter {
 				
 				xmlpair.setLanguage( label.getId().getLanguage().getCode() );
 				xmlpair.setValue(label.getValue());
+				xmlpair.setIsDefault(label.getLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				xmlsua.getNames().add(xmlpair);
 			}
 			xmlSDsua.getSamplingUnitAttributes().add(xmlsua);
