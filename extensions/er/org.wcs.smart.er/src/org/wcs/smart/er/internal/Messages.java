@@ -418,9 +418,61 @@ public class Messages extends NLS {
 	public static String SurveyDesignEditor_Page_Summary;
 	public static String SurveyDesignEditor_SamplingUnitPageName;
 	public static String SurveyDesignEditor_SurveyDataPageName;
+	public static String SurveyDesignExportHandler_BrowseLabel;
+
+	public static String SurveyDesignExportHandler_DestinationLabel;
+
+	public static String SurveyDesignExportHandler_DialogSelectionMessage;
+
+	public static String SurveyDesignExportHandler_DialogSelectionText;
+
+	public static String SurveyDesignExportHandler_DialogTitle;
+
+	public static String SurveyDesignExportHandler_DirectoryMission;
+
+	public static String SurveyDesignExportHandler_ExportComplete;
+
+	public static String SurveyDesignExportHandler_ExportError;
+
+	public static String SurveyDesignExportHandler_InvalidDirectory;
+
+	public static String SurveyDesignExportHandler_LoadingLabel;
+
+	public static String SurveyDesignExportHandler_Message;
+
+	public static String SurveyDesignExportHandler_NoItemsSelected;
+
+	public static String SurveyDesignExportHandler_OverwriteMessage;
+
+	public static String SurveyDesignExportHandler_OverwriteTitle;
+
+	public static String SurveyDesignExportHandler_Progress1;
+
+	public static String SurveyDesignExportHandler_Progress2;
+
+	public static String SurveyDesignExportHandler_SurveyDesignsLabels;
+
+	public static String SurveyDesignExportHandler_Title;
+	public static String SurveyDesignFromXmlConverter_0;
 	public static String SurveyDesignFilterDialog_Message;
 	public static String SurveyDesignFilterDialog_StateLabel;
 	public static String SurveyDesignFilterDialog_Title;
+	public static String SurveyDesignImportHandler_0;
+	public static String SurveyDesignImportHandler_1;
+	public static String SurveyDesignImportHandler_10;
+	public static String SurveyDesignImportHandler_11;
+	public static String SurveyDesignImportHandler_12;
+	public static String SurveyDesignImportHandler_13;
+	public static String SurveyDesignImportHandler_14;
+	public static String SurveyDesignImportHandler_15;
+	public static String SurveyDesignImportHandler_16;
+	public static String SurveyDesignImportHandler_2;
+	public static String SurveyDesignImportHandler_3;
+	public static String SurveyDesignImportHandler_4;
+	public static String SurveyDesignImportHandler_5;
+	public static String SurveyDesignImportHandler_6;
+	public static String SurveyDesignImportHandler_8;
+	public static String SurveyDesignImportHandler_9;
 	public static String SurveyDesignListView_DesignsTabName;
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
@@ -454,6 +506,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_SummaryPageLabel;
 	public static String SurveyDesignSummaryEditorPage_TranslateLink;
 	public static String SurveyDesignSummaryEditorPage_ValueColumn;
+
+	public static String SurveyDesignToXmlConverter_TaskName;
 	public static String SurveyFilterDialog_AllDesignsLabel;
 	public static String SurveyFilterDialog_DatesGroup;
 	public static String SurveyFilterDialog_DesignGroup;

@@ -46,7 +46,9 @@ public class NewSurveyDesignHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		SurveyDesign sd = showNewDesignWizard(HandlerUtil.getActiveShell(event));
-		
+		if (sd == null){
+			return null;
+		}
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState()), SurveyDesignEditor.ID);
 		} catch (PartInitException e) {

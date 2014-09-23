@@ -21,14 +21,11 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -55,20 +52,20 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
-import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.State;
-import org.wcs.smart.er.model.SamplingUnitAttribute;
-import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -89,7 +86,6 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
-		
 		ImportEntityTypeDialog dialog = new ImportEntityTypeDialog(HandlerUtil.getActiveShell(event));
 		if (dialog.open() != Window.OK){
 			return null;
@@ -132,7 +128,9 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 						SurveyDesign sd = SurveyDesignFromXmlConverter.fromXml(xmlsd, session);
 						
 						//ensure key doesn't already exist
-						List<?> existingDesigns = session.createCriteria(SurveyDesign.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("keyId", sd.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+						List<?> existingDesigns = session.createCriteria(SurveyDesign.class)
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))  //$NON-NLS-1$
+								.add(Restrictions.eq("keyId", sd.getKeyId())).list(); //$NON-NLS-1$
 						if (existingDesigns.size() > 0){
 							errorMessage = MessageFormat.format(Messages.SurveyDesignImportHandler_4, new Object[]{sd.getKeyId()});
 							return;
@@ -140,120 +138,33 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 						//save to the database
 						try{						
 							session.beginTransaction();
-							session.saveOrUpdate(sd);
-						
-
+												
+							//update/add new mission properties	
 							for( MissionProperty mp : sd.getMissionProperties()){
-								MissionAttribute ma = mp.getAttribute();
-								if(ma != null){
-									session.saveOrUpdate(ma);
-								}
+								session.saveOrUpdate(mp.getAttribute());
 							}
 							
 
-							//samplingUnitAttributes
-							List<SamplingUnitAttribute> allSamplingUnitsAttributes = new ArrayList();
-							for(org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute xmlsdsua : xmlsd.getSurveyDesignSamplingUnitAttribute()){
-								SurveyDesignSamplingUnitAttribute sdsua = new SurveyDesignSamplingUnitAttribute();
-								for (org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua : xmlsdsua.getSamplingUnitAttributes()){
-									
-									SamplingUnitAttribute existingSua = getSamplingUnitAttribute(xmlsua, session);
-									if(existingSua == null){
-										SamplingUnitAttribute sua = new SamplingUnitAttribute();
-										sdsua.setSamplingUnitAttribute(sua);
-										sdsua.setSurveyDesign(sd);
-									
-										if( xmlsua.getAttributeType().toString().equals(AttributeType.BOOLEAN.toString()) ){
-											sua.setType(AttributeType.BOOLEAN);
-										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.DATE.toString()) ){
-											sua.setType(AttributeType.DATE);
-										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.LIST.toString()) ){
-											sua.setType(AttributeType.LIST);
-										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.NUMERIC.toString()) ){
-											sua.setType(AttributeType.NUMERIC);
-										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.TEXT.toString()) ){
-											sua.setType(AttributeType.TEXT);
-										}else if(xmlsua.getAttributeType().toString().equals(AttributeType.TREE.toString()) ){
-											sua.setType(AttributeType.TREE);
-										}
-									
-										sua.setConservationArea(SmartDB.getCurrentConservationArea());
-										sua.setKeyId(xmlsua.getKeyId());
-										sua.setName(xmlsua.getName());
-										SurveyDesignFromXmlConverter.importNames(xmlsua.getNames(), sua, session, false);
-								
-										session.save(sua);
-										allSamplingUnitsAttributes.add(sua);
-									}else{
-										sdsua.setSamplingUnitAttribute(existingSua);
-										sdsua.setSurveyDesign(sd);
-										allSamplingUnitsAttributes.add(existingSua);
-									}
-									
-								}
-								session.save(sdsua);
+							//update/add new sampling unit attributes
+							for (SurveyDesignSamplingUnitAttribute sdua: sd.getSamplingUnitAttributes()){
+								session.saveOrUpdate(sdua.getSamplingUnitAttribute());
 							}
 							
+							//save survey design
+							session.saveOrUpdate(sd);
 							
-							//sampling Units
-							for (org.wcs.smart.er.xml.model.SamplingUnit xmlunit : xmlsd.getSamplingUnit()){
-								org.wcs.smart.er.model.SamplingUnit unit = new SamplingUnit();
-								unit.setSurveyDesign(sd);
-								
-								unit.setBuffer(xmlunit.getBuffer());
-								unit.setGeom(xmlunit.getGeom());
-								unit.setId(xmlunit.getId());
-								
-								if(xmlunit.getState().toString().equals(org.wcs.smart.er.model.SamplingUnit.State.INACTIVE)){
-									unit.setState(State.INACTIVE); 
-								}else{
-									unit.setState(State.ACTIVE);
-								}
-								if(xmlunit.getType().toString().equals(SamplingUnit.SamplingUnitType.PLOT.toString())){
-									unit.setType(SamplingUnit.SamplingUnitType.PLOT);
-								}else if(xmlunit.getType().toString().equals(SamplingUnit.SamplingUnitType.RECON.toString())){
-									unit.setType(SamplingUnit.SamplingUnitType.RECON);
-								}else if(xmlunit.getType().toString().equals(SamplingUnit.SamplingUnitType.TRANSECT.toString())){
-									unit.setType(SamplingUnit.SamplingUnitType.TRANSECT);
-								}
-								session.saveOrUpdate(unit);
-								
-								//sampling unit attribute values
-								for(org.wcs.smart.er.xml.model.SamplingUnitAttributeValue xmlsuav : xmlunit.getSamplingUnitAttributeValue()){
-									SamplingUnitAttributeValue suav = new SamplingUnitAttributeValue();
-									suav.setNumberValue(xmlsuav.getDoubleValue());
-									suav.setStringValue(xmlsuav.getStringValue());
-									
-									suav.setSamplingUnit(unit);
-									
-									boolean found = false;
-									for(SamplingUnitAttribute sua : allSamplingUnitsAttributes){
-										
-										if(xmlsuav.getSamplingUnitAttributeId().equals(sua.getKeyId())){
-											suav.setSamplingUnitAttribute(sua);
-											found = true;
-											break;
-										}
-									}
-									if(!found){
-										throw new Exception(Messages.SurveyDesignImportHandler_5 + xmlsuav.getSamplingUnitAttributeId() + Messages.SurveyDesignImportHandler_6);
-									}
-									session.save(suav);
-								}
-
+							//save sampling Units
+							List<SamplingUnit> units =  SurveyDesignFromXmlConverter.getSamplingUnits(xmlsd, sd, session);
+							for (SamplingUnit su : units){
+								session.saveOrUpdate(su);
 							}
 
-							
-							
 							session.getTransaction().commit();
 							newDesign = sd;
 						}catch (Exception ex){
 							session.getTransaction().rollback();
 							throw ex;
 						}
-
-						
-						
 					}catch(ParseException parse){
 						errorMessage = parse.getMessage();
 						exception = parse;
@@ -268,12 +179,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 					
 					
 					if (newDesign != null){
-						pmd.getShell().getDisplay().syncExec(new Runnable(){
-
-							@Override
-							public void run() {
-								SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.SURVEY_DESIGN_ADDED, newDesign);
-						}});
+						SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.SURVEY_DESIGN_ADDED, newDesign);
 					}
 				}
 			});
@@ -284,11 +190,15 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 		
 		if (errorMessage != null || exception != null){
 			EcologicalRecordsPlugIn.displayLog(errorMessage != null ? errorMessage : exception.getMessage(), exception);
-			return null;
+		}else if (newDesign != null){
+			//open editor
+			try {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(newDesign.getName(), newDesign.getUuid(), newDesign.getKeyId(), newDesign.getState()), SurveyDesignEditor.ID);
+			} catch (PartInitException e) {
+
+			}
+			
 		}
-		
-		
-		
 		return null;
 	}
 	
@@ -308,16 +218,14 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 		}
 		
 		protected void okPressed() {
-			
 			file = new File(txtFile.getText());
-
-			if (!file.exists()){
+			if (!file.exists()) {
 				MessageDialog.openError(getShell(), Messages.SurveyDesignImportHandler_8, 
-						MessageFormat.format(Messages.SurveyDesignImportHandler_9, new Object[]{file.toString()}));
+						MessageFormat.format(Messages.SurveyDesignImportHandler_9,new Object[] { file.toString() }));
 				return;
 			}
 			EcologicalRecordsPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, file.toString());
-			
+
 			super.okPressed();
 		}
 		
@@ -325,7 +233,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 			
 			setTitle(Messages.SurveyDesignImportHandler_10);
 			setMessage(Messages.SurveyDesignImportHandler_11);
-			getShell().setText(Messages.SurveyDesignImportHandler_12);
+			getShell().setText(Messages.SurveyDesignImportHandler_10);
 			
 			Composite p = (Composite) super.createDialogArea(parent);
 			
@@ -387,12 +295,5 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 		
 	}
 	
-	private static SamplingUnitAttribute getSamplingUnitAttribute(org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua, Session s) {
-		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ).add(Restrictions.eq("keyId", xmlsua.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
-		if (values.size() > 0){
-			SamplingUnitAttribute attr = values.get(0);
-			return attr;
-		}
-		return null;
-	}
+
 }
