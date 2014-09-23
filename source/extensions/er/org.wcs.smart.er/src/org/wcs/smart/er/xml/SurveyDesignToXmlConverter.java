@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -40,7 +41,7 @@ public class SurveyDesignToXmlConverter {
 	 * @throws DatatypeConfigurationException 
 	 */
 	public static org.wcs.smart.er.xml.model.SurveyDesign toXml(SurveyDesign surveyDesign, Session s, IProgressMonitor monitor) throws DatatypeConfigurationException{
-		monitor.beginTask(MessageFormat.format("Exporting {0} to xml.", new Object[]{surveyDesign.getName()}), surveyDesign.getProperties().size() + 1);
+		monitor.beginTask(MessageFormat.format(Messages.SurveyDesignToXmlConverter_TaskName, new Object[]{surveyDesign.getName()}), surveyDesign.getProperties().size() + 1);
 		org.wcs.smart.er.xml.model.SurveyDesign xml = new org.wcs.smart.er.xml.model.SurveyDesign();
 
 		
@@ -89,7 +90,7 @@ public class SurveyDesignToXmlConverter {
 		if(cm != null){
 			xml.setConfigurableModelName(cm.getName());
 		}else{
-			xml.setConfigurableModelName("");
+			xml.setConfigurableModelName(""); //$NON-NLS-1$
 		}
 		
 
@@ -180,7 +181,7 @@ public class SurveyDesignToXmlConverter {
 		}
 
 		//All Sampling Units
-		List<SamplingUnit> units = s.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", surveyDesign )).list();
+		List<SamplingUnit> units = s.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", surveyDesign )).list(); //$NON-NLS-1$
 		for(SamplingUnit su :  units) {
 			org.wcs.smart.er.xml.model.SamplingUnit xmlsu = new org.wcs.smart.er.xml.model.SamplingUnit();
 			xmlsu.setBuffer(su.getBuffer());

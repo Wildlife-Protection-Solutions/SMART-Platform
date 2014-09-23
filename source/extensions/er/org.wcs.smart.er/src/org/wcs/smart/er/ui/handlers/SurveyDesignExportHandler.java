@@ -1,4 +1,3 @@
-
 /*
 * Copyright (C) 2012 Wildlife Conservation Society
 *
@@ -21,7 +20,6 @@
 * SOFTWARE.
 */
 package org.wcs.smart.er.ui.handlers;
-
 
 
 import java.io.File;
@@ -79,6 +77,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
@@ -114,7 +113,7 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 			
 		final File exportDir = dialog.getDirectory();
 		final List<SurveyDesignEditorInput> types = dialog.getTypes();
-			
+		
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -122,15 +121,14 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Exporting Survey Designs", types.size() * 4);
+					monitor.beginTask(Messages.SurveyDesignExportHandler_Progress1, types.size() * 4);
 					int exportedCnt = 0;
 					Session s = HibernateManager.openSession();
 					final boolean[] overwriteall = new boolean[]{false};
 					try{
 						for (SurveyDesignEditorInput sdei : types){
 							SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdei.getUuid());
-							monitor.subTask(MessageFormat.format("Exporting Survey Design: {0}", new Object[]{sd.getName()}));
-							monitor.worked(1);
+							monitor.subTask(MessageFormat.format(Messages.SurveyDesignExportHandler_Progress2, new Object[]{sd.getName()}));
 							final File exportFile = new File(exportDir, URLUtils.cleanFilename(sd.getName()) + ".xml"); //$NON-NLS-1$
 							
 							if (!overwriteall[0] && exportFile.exists()){
@@ -140,9 +138,9 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 									@Override
 									public void run() {
 							
-										MessageDialog md = new MessageDialog(pmd.getShell(), "Overwrite File?",
+										MessageDialog md = new MessageDialog(pmd.getShell(), Messages.SurveyDesignExportHandler_OverwriteTitle,
 												MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
-												MessageFormat.format("The file alreasy exists, do you want to overwrite the existing file: {0}", new Object[]{exportFile.toString()}), 
+												MessageFormat.format(Messages.SurveyDesignExportHandler_OverwriteMessage, new Object[]{exportFile.toString()}), 
 												MessageDialog.INFORMATION,
 												new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.SKIP_LABEL},
 												0);
@@ -169,9 +167,9 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 									fout.close();
 								}
 							}catch (Exception ex){
-								EcologicalRecordsPlugIn.displayLog("Error exporting Survey Designs:  {0}" + "\n\n" + ex.getMessage(), ex);
+								EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignExportHandler_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 							}
-							
+							monitor.worked(1);
 						}
 					}finally{
 						s.close();
@@ -180,8 +178,8 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 					pmd.getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(pmd.getShell(), "Exporting...", 
-									MessageFormat.format("Export Complete. {0} Survey Designs successfully exported.", new Object[]{lExportCnt, types.size()}));		
+							MessageDialog.openInformation(pmd.getShell(), Messages.SurveyDesignExportHandler_DialogTitle, 
+									MessageFormat.format(Messages.SurveyDesignExportHandler_ExportComplete, new Object[]{lExportCnt, types.size()}));		
 							}});
 						
 					
@@ -225,17 +223,21 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 					types.add( ((SurveyDesignEditorInput)x) );
 				}
 			}
+			if (types.size() == 0){
+				MessageDialog.openError(getShell(), Messages.SurveyDesignExportHandler_DialogTitle, Messages.SurveyDesignExportHandler_NoItemsSelected);
+				return;
+			}
 			if (!file.exists()){
-				if (!MessageDialog.openConfirm(getShell(), "Directory does not exist.", 
-						MessageFormat.format("The selected directory does not exist: {0}", new Object[]{file.toString()}))){
+				if (!MessageDialog.openConfirm(getShell(), Messages.SurveyDesignExportHandler_DialogTitle, 
+						MessageFormat.format(Messages.SurveyDesignExportHandler_DirectoryMission, new Object[]{file.toString()}))){
 					return;
 				}else{
 					SmartUtils.createDirectory(file);
 				}
 			}
 			if (!file.isDirectory()){
-				MessageDialog.openError(getShell(), "Invalid Filename", 
-						MessageFormat.format("The file name is already in use as a directory name, please select a different file name.", new Object[]{file.toString()}));
+				MessageDialog.openError(getShell(), Messages.SurveyDesignExportHandler_DialogTitle, 
+						MessageFormat.format(Messages.SurveyDesignExportHandler_InvalidDirectory, new Object[]{file.toString()}));
 				return;
 				
 			}
@@ -248,9 +250,9 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 		
 		protected Control createDialogArea(Composite parent) {
 			
-			setTitle("Survey Design Export");
-			setMessage("Select which Survery Designs you would like to export below.");
-			getShell().setText("use the checkboxes below");
+			setTitle(Messages.SurveyDesignExportHandler_Title);
+			setMessage(Messages.SurveyDesignExportHandler_Message);
+			getShell().setText(Messages.SurveyDesignExportHandler_Title);
 			
 			Composite p = (Composite) super.createDialogArea(parent);
 			
@@ -259,7 +261,7 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 			contents.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Label l = new Label(contents, SWT.NONE);
-			l.setText("File to export to :");
+			l.setText(Messages.SurveyDesignExportHandler_DestinationLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			
 			txtFile = new Text(contents, SWT.BORDER);
@@ -280,14 +282,14 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 			});
 			
 			Button btnBrowse = new Button(contents, SWT.NONE);
-			btnBrowse.setText("Browse:");
+			btnBrowse.setText(Messages.SurveyDesignExportHandler_BrowseLabel);
 			btnBrowse.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					DirectoryDialog dd = new DirectoryDialog(getShell());
 					dd.setFilterPath(txtFile.getText());
-					dd.setMessage("Select Output Directory");
-					dd.setText("Directory:");
+					dd.setMessage(Messages.SurveyDesignExportHandler_DialogSelectionMessage);
+					dd.setText(Messages.SurveyDesignExportHandler_DialogSelectionText);
 					
 					String f = dd.open();
 					if (f != null){
@@ -297,7 +299,7 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 			});
 			
 			l = new Label(contents, SWT.NONE);
-			l.setText("Survey Design List:");
+			l.setText(Messages.SurveyDesignExportHandler_SurveyDesignsLabels);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 			
 			tblEntities = CheckboxTableViewer.newCheckList(contents, SWT.BORDER | SWT.MULTI);
@@ -305,7 +307,7 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 			((GridData)tblEntities.getTable().getLayoutData()).heightHint = 300;
 			tblEntities.setContentProvider(ArrayContentProvider.getInstance());
 			tblEntities.setLabelProvider(new SurveyDesignLabelProvider());
-			tblEntities.setInput(new Object[]{"temporary messages with {0} results"});
+			tblEntities.setInput(new Object[]{Messages.SurveyDesignExportHandler_LoadingLabel});
 			tblEntities.addCheckStateListener(new ICheckStateListener() {
 				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
@@ -333,8 +335,8 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 					
 				}
 			});
-			
-			Job j = new Job("loadentities"){ //$NON-NLS-1$
+						
+			Job j = new Job("loadsurveydesigns"){ //$NON-NLS-1$
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -357,6 +359,8 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 
 						@Override
 						public void run() {
+							if(tblEntities.getTable().isDisposed()) return;
+							
 							tblEntities.setInput(items);
 							if (sd != null){
 								tblEntities.setChecked(sd, true);

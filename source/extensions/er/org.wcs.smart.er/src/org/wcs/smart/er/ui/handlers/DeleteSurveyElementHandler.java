@@ -213,7 +213,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 					session.delete(survey);
 				}
 				//delete sampling unit
-				List<SamplingUnit> units = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", design)).list();
+				List<SamplingUnit> units = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
 				for (SamplingUnit unit:  units){
 					session.delete(unit);
 				}
