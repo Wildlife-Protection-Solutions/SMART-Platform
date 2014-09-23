@@ -37,8 +37,8 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.ui.mision.editor.SaveMissionJob;
 import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
@@ -158,6 +158,9 @@ public class MissionDataImport {
 
 	public static void saveTracks(final Mission mission, List<MissionTrack> tracks) throws InterruptedException {
 		for (MissionTrack track : tracks) {
+			if (track.getType() == null) {
+				track.setType(TrackType.RECON);
+			}
 			track.setMission(mission);
 			mission.getTracks().add(track);
 		}
