@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -42,6 +43,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -257,8 +259,13 @@ public class TracksComposite extends Composite {
 	}
 
 	protected void editTrack() {
-		// TODO Auto-generated method stub
-		
+		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
+		if (sel != null && !sel.isEmpty()) {
+			MissionTrack track = (MissionTrack) sel.getFirstElement();
+			MissionTrackPointDialog tpd = new MissionTrackPointDialog(Display.getCurrent().getActiveShell(), track);
+			tpd.open();
+//			ApplicationGIS.getToolManager().setCurrentEditor(dialog.getMissionEditor());
+		}
 	}
 
 	/**
