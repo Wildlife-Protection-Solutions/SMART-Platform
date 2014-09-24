@@ -1014,6 +1014,22 @@
             onToolbar="false"
             tooltip="%zoomout.tool.tooltip">
       </actionTool>
+      <modalTool
+            categoryId="org.wcs.smart.location.maptools"
+            class="org.wcs.smart.ui.map.tool.TrackPointSelectionTool"
+            icon="images/icons/etool16/select_points_tool.png"
+            id="org.wcs.smart.ui.map.tool.TrackPointSelector"
+            name="Track Point Selector"
+            onToolbar="true"
+            toolCursorId="org.wcs.smart.patrol.udig.selectTrackPoint"
+            tooltip="selects track points for deletion">
+      </modalTool>
+      <toolCursor
+            hotspotX="10"
+            hotspotY="10"
+            id="org.wcs.smart.patrol.udig.selectTrackPoint"
+            image="images/pointers/selectpoint_cursor.png">
+      </toolCursor>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">

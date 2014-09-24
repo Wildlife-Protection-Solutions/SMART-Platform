@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.editor;
+package org.wcs.smart.ui.map.tool;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -41,12 +41,12 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author Emily
  *
  */
-public class PointSelectionTool  extends SimpleTool implements ModalTool {
+public class TrackPointSelectionTool  extends SimpleTool implements ModalTool {
     
     /**
      * Comment for <code>ID</code>
      */
-    public static final String ID = "org.wcs.smart.patrol.ui.map.tool.TrackSelector"; //$NON-NLS-1$
+    public static final String ID = "org.wcs.smart.ui.map.tool.TrackPointSelector"; //$NON-NLS-1$
     
     private Point start;
 
@@ -59,7 +59,7 @@ public class PointSelectionTool  extends SimpleTool implements ModalTool {
 	/**
 	 * Creates a new instance of BBoxSelection
 	 */
-	public PointSelectionTool() {
+	public TrackPointSelectionTool() {
 		super(MOUSE | MOTION);
 	}
 	

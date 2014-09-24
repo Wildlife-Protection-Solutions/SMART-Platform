@@ -376,6 +376,22 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		}
 		MessageDialog.openError(currentShell, Messages.SmartPlugIn_Error_Dialog_Title, message);
 	}
+
+	/**
+	 * Displays an error message to the user and logs the message.
+	 * 
+	 * @param message  Error message to display
+	 * @param t exception to log
+	 */
+	public static void displayLog(final String message, Throwable t){
+		log(message, t);
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.SmartPlugIn_Error_Dialog_Title, message);
+			}
+		});
+	}
 	
 	/**
 	 * Displays an error message to the user, logs the error and
