@@ -222,7 +222,7 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		}catch (Exception ex){
-			MessageDialog.openError(getShell(), Messages.SamplingUnitAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitAttributeDialog_DeleteError, new Object[]{ma.getName()}) + " " + ex.getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), Messages.SamplingUnitAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitAttributeDialog_DeleteError, new Object[]{ma.getName()}) + "\n" + ex.getMessage()); //$NON-NLS-1$
 		}
 	}
 	

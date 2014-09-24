@@ -433,6 +433,10 @@
             advisor="org.wcs.smart.er.delete.EmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.er.delete.SamplingUnitAttributeDeleteAdvisor"
+            class="org.wcs.smart.er.model.SamplingUnitAttribute">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="net.refractions.udig.catalog.ServiceExtension">
