@@ -342,11 +342,11 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
 		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
 	
-		sql.append("missiontrack_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("missiontrack_type varchar(32),"); //$NON-NLS-1$
-		sql.append("missiontrack_date date,"); //$NON-NLS-1$
-		sql.append("missiontrack_id varchar(128),"); //$NON-NLS-1$
-		sql.append("missiontrack_length double,"); //$NON-NLS-1$
+		sql.append("mission_trackuuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_tracktype varchar(32),"); //$NON-NLS-1$
+		sql.append("mission_trackdate date,"); //$NON-NLS-1$
+		sql.append("mission_trackid varchar(128),"); //$NON-NLS-1$
+		sql.append("mission_tracklength double,"); //$NON-NLS-1$
 		
 		sql.append("samplingunit_id varchar(128)"); //$NON-NLS-1$
 		
@@ -373,11 +373,11 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
 		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
 		
-		it.setTrackUuid(rs.getBytes("missiontrack_uuid")); //$NON-NLS-1$
-		it.setTrackType(TrackType.valueOf(rs.getString("missiontrack_type"))); //$NON-NLS-1$
-		it.setTrackDate(rs.getDate("missiontrack_date")); //$NON-NLS-1$
-		it.setTrackId(rs.getString("missiontrack_id")); //$NON-NLS-1$
-		it.setTrackLength(rs.getDouble("missiontrack_length")); //$NON-NLS-1$
+		it.setTrackUuid(rs.getBytes("mission_trackuuid")); //$NON-NLS-1$
+		it.setTrackType(TrackType.valueOf(rs.getString("mission_tracktype"))); //$NON-NLS-1$
+		it.setTrackDate(rs.getDate("mission_trackdate")); //$NON-NLS-1$
+		it.setTrackId(rs.getString("mission_trackid")); //$NON-NLS-1$
+		it.setTrackLength(rs.getDouble("mission_tracklength")); //$NON-NLS-1$
 		
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		return it;

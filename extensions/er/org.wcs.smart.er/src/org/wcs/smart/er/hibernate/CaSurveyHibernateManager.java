@@ -254,4 +254,22 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		
 		return types;
 	}
+	
+	
+	/**
+	 * Find the survey design with the given key
+	 * @param key
+	 * @param session
+	 * @return
+	 */
+	public SurveyDesign getSurveyDesign(String key, Session session){
+		List<SurveyDesign> designs = session.createCriteria(SurveyDesign.class)
+				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+		if (designs.size() > 0){
+			return designs.get(0);
+		}
+		return null;
+	}
 }

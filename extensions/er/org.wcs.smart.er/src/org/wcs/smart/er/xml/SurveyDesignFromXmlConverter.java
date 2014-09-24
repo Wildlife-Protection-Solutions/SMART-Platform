@@ -97,7 +97,6 @@ public class SurveyDesignFromXmlConverter {
 		//import mission properties
 		//if property is found, we use that property otherwise
 		//we import the property as a new property
-		//TODO: validate list properties (ie the existing list may be different from the new list)
 		surveyDesign.setMissionProperties(new ArrayList<MissionProperty>());
 		for (org.wcs.smart.er.xml.model.MissionProperty xmlproperty : xml.getMissionProperty()){
 			MissionProperty mp = new MissionProperty();

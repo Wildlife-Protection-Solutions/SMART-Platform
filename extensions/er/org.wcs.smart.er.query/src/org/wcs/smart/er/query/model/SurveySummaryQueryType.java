@@ -33,6 +33,9 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
+import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
@@ -41,10 +44,16 @@ import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.IGroupByVisitor;
+import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -174,9 +183,10 @@ public class SurveySummaryQueryType implements IQueryType {
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
+		SumQueryDefinition def = null;
 		try{
 			Parser parser = new Parser(is);
-			parser.SumQuery();
+			def = parser.SumQuery();
 		}catch (Exception ex){
 			ERQueryPlugIn.log(ex.getMessage(), ex);
 			return ex.getMessage();
@@ -186,6 +196,63 @@ public class SurveySummaryQueryType implements IQueryType {
 			} catch (IOException e) {
 				//eatme
 			}
+		}
+		
+		//CANNOT GROUP BY DataModelItem (Category, Attribute) 
+		//and sampling Unit and compute track length
+		if (def != null){
+			final boolean[] gbSu = {false};
+			boolean gbDm = false;
+			
+			HasObservationGroupByVisitor gg = new HasObservationGroupByVisitor();
+			IGroupByVisitor vv = new IGroupByVisitor() {
+				
+				@Override
+				public void visit(IGroupBy groupBy) {
+					if (gbSu[0]) return;
+					if (groupBy instanceof SamplingUnitGroupBy){
+						gbSu[0] = true;
+					}
+				}
+			};
+			
+			if (def.getRowGroupByPart() != null){
+				def.getRowGroupByPart().visit(gg);
+				def.getRowGroupByPart().visit(vv);
+				gbDm = gg.hasAttribute() || gg.hasCategory();
+			}
+			if (def.getColumnGroupByPart() != null){
+				if (!gbDm){
+					def.getColumnGroupByPart().visit(gg);
+					gbDm = gg.hasAttribute() || gg.hasCategory();
+				}
+				if (!gbSu[0]){
+					def.getColumnGroupByPart().visit(vv);
+				}
+			}
+			
+			if (def.getValuePart() != null){
+				final boolean[] isTrack = {false};
+				IValueVisitor ivv = new IValueVisitor() {
+					
+					@Override
+					public void visit(IValueItem item) {
+						if (item instanceof MissionValueItem
+								&& ((MissionValueItem)item).getValueItem() == ValueItem.TRACK_LENGTH){
+							isTrack[0] = true;
+						}
+					}
+				};
+				def.getValuePart().visit(ivv);
+				
+				if (isTrack[0] && gbDm && gbSu[0]){
+					return "Cannot compute track length when grouping by both sampling units and data model elements";
+				}
+			}
+
+			
+			
+			
 		}
 		return null;
 	}

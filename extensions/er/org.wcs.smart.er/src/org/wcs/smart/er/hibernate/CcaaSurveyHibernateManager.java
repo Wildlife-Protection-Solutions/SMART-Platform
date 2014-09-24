@@ -76,5 +76,11 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 		return null;
 	}
 
+	@Override
+	public SurveyDesign getSurveyDesign(String key, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

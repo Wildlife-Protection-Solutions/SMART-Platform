@@ -92,6 +92,7 @@ public class Messages extends NLS {
 	public static String MissionStartDateField_Name;
 	public static String MissionTrackDateField_Name;
 	public static String MissionValueItem_NumberOfMissionsLabel;
+	public static String MissionValueItem_NumberOfSurveyLabel;
 	public static String MissionValueItem_ValueItemNotSupported;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;

@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
@@ -66,7 +68,8 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 
 	private ToolTip toolTip;
 	private Font smallerFont;
-
+	private Label lblText;
+	
 	/**
 	 * Creates a new attribute list group by drop item for a attribute.
 	 * 
@@ -136,9 +139,23 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 	 */
 	@Override
 	public String getText() {
-		return attribute.getName();
+		StringBuilder sb = new StringBuilder();
+		sb.append (attribute.getName() + "\n");  //$NON-NLS-1$ 
+		int cnt = 0;
+		if (filters != null){
+			for (ListItem it : filters){
+				if (cnt >= 3){
+					sb.append("..."); //$NON-NLS-1$
+					break;
+				}
+				sb.append("   " + it.getName()); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
+				cnt ++;
+			}
+		}
+		return sb.toString();
 	}
-
+	
 	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
 	 */
@@ -186,9 +203,9 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 
-		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText(formatStringForLabel(attribute.getName()));
-		initDrag(lbl);
+		lblText = new Label(comp, SWT.NONE);
+		lblText.setText(formatStringForLabel(attribute.getName()));
+		initDrag(lblText);
 
 		final Link link = new Link(comp, SWT.NONE);
 		link.setText("<a>" + Messages.MissionAttributeGroupByDropItem_FiltersLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -216,8 +233,9 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 							filters.add(dialog.getSelectedItems()[i]);
 						}
 					}
-					updateToolTipMessage();
+					updateLabel();
 					queryChanged();
+					getTargetPanel().redraw();
 				}
 			}
 		});
@@ -225,18 +243,16 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
 		toolTip.setText(Messages.MissionAttributeGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
-		updateToolTipMessage();
-		link.addListener(SWT.MouseHover, new Listener() {
+		updateLabel();
+		link.addMouseTrackListener(new MouseTrackAdapter() {			
 			@Override
-			public void handleEvent(Event event) {
-				toolTip.setVisible(true);
-			}
-		});
-
-		link.addListener(SWT.MouseExit, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
+			public void mouseExit(MouseEvent e) {
 				toolTip.setVisible(false);
+			}
+			
+			@Override
+			public void mouseEnter(MouseEvent e) {
+				toolTip.setVisible(true);
 			}
 		});
 	}
@@ -253,4 +269,11 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 		toolTip.setMessage(tipStr.toString());
 	}
 
+	/**
+	 * Updates the text label
+	 */
+	private void updateLabel(){
+		lblText.setText( formatStringForLabel(getText()));
+		updateToolTipMessage();
+	}
 }
