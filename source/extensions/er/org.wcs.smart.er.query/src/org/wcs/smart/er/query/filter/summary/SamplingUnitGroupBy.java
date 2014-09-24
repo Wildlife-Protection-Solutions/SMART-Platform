@@ -25,13 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -101,8 +101,16 @@ public class SamplingUnitGroupBy implements ISurveyGroupBy{
 		if (items != null){
 			for (String it : items){
 				try{
-					SamplingUnit su = (SamplingUnit) session.load(SamplingUnit.class, SmartUtils.decodeHex(it));
-					listItems.add(new ListItem(su.getUuid(), su.getId()));
+					SamplingUnit su = (SamplingUnit) session.get(SamplingUnit.class, SmartUtils.decodeHex(it));
+					if (su == null){
+						//search mission tracks
+						MissionTrack mt = (MissionTrack)session.get(MissionTrack.class, SmartUtils.decodeHex(it));
+						if (mt != null){
+							listItems.add(new ListItem(mt.getUuid(), mt.getId()));
+						}
+					}else{
+						listItems.add(new ListItem(su.getUuid(), su.getId()));
+					}
 				}catch (Exception ex){
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				}
@@ -141,19 +149,24 @@ public class SamplingUnitGroupBy implements ISurveyGroupBy{
 			}
 			
 			List<ListItem> items = new ArrayList<ListItem>();
-			//get all sampling units associated with survey
-			@SuppressWarnings("unchecked")
-			List<SamplingUnit> units = session.createCriteria(SamplingUnit.class, "su") //$NON-NLS-1$
-				.createAlias("su.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
-				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-				.addOrder(Order.asc("su.id")) //$NON-NLS-1$
-				.list();
-			for (SamplingUnit unit : units){
-				ListItem li = new ListItem(unit.getUuid(), unit.getId());
-				items.add(li);
-			}			
+			//get all sampling units associated with survey design
+			
+	
+			SurveyDesign filterDesign = SurveyHibernateManager.getInstance().getSurveyDesign(filter.getKey(), session);
+			if (filterDesign == null){
+				return null;
+			}
+			List<Object> objects = SurveyHibernateManager.getInstance()
+						.getSamplingUnits(filterDesign, session);
+			for (Object o : objects){
+				if (o instanceof SamplingUnit){
+					SamplingUnit su = (SamplingUnit) o;
+					items.add(new ListItem(su.getUuid(), su.getId(), null));
+				}else if (o instanceof MissionTrack){
+					MissionTrack su = (MissionTrack)o;
+					items.add(new ListItem(su.getUuid(), su.getId(), null));
+				}
+			}
 			return items;
 		}
 	}

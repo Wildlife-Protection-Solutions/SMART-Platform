@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -48,6 +49,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.ISurveyGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
@@ -108,6 +110,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	
 	private String rateTable;
 	private String valueTable;
+	
+	private HashSet<Class<?>> usedTables;
+	
 	/**
 	 * Executes the given summary query.
 	 * 
@@ -145,7 +150,6 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		valueTable = createTempTableName();
 		rateTable = createTempTableName();
 		
-
 		sumResults = new SummaryQueryResult();
 		cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 		
@@ -397,6 +401,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			ConservationAreaFilter caFilter,
 			String dataTable) throws SQLException {
 		
+		usedTables = new HashSet<Class<?>>();
+		
 		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
 		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(cacheKey); 
 		if (results != null){
@@ -476,12 +482,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 
 			valueAggSql.append("sum(distance)"); //$NON-NLS-1$
 			
-			if (!hasAreaGroupBy){
+			if (!usedTables.contains(MissionTrack.class)) {
 				fromSql.append(" left join "); //$NON-NLS-1$
 				fromSql.append(tableNamePrefix(MissionTrack.class));
 				fromSql.append( " on temp.mission_uuid = "); //$NON-NLS-1$ 
 				fromSql.append(tablePrefix(MissionTrack.class));
 				fromSql.append(".mission_uuid " ); //$NON-NLS-1$
+				usedTables.add(MissionTrack.class);
 			}
 			
 			selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
@@ -997,12 +1004,19 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		
 		int itemcnt = 1;
 		boolean waypointAdd = false;
-		boolean trackAdd = false;
+		
+		boolean hasObservation = false;
+		HasObservationGroupByVisitor visitor = new HasObservationGroupByVisitor();
+		for (IGroupBy gb : groupBy.getGroupBys()){
+			visitor.visit(gb);
+		}
+		hasObservation = visitor.hasAttribute() || visitor.hasCategory();
 		
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
-						|| value instanceof AttributeValueItem) {
+						|| value instanceof AttributeValueItem
+						|| hasObservation) {
 					//category and attribute value area group bys use the waypoint location
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
@@ -1012,7 +1026,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
 
 					if (!waypointAdd) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" left join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Waypoint.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(Waypoint.class));
@@ -1046,13 +1060,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
 					areaGroupByPrefix.add(areaPrefix);
 					
-					if (!trackAdd) {
+					if (!usedTables.contains(MissionTrack.class)) {
 						fromSql.append("left join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(MissionTrack.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(MissionTrack.class));
 						fromSql.append(" on temp.mission_uuid = " + tablePrefix(MissionTrack.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-						trackAdd = true;
+						usedTables.add(MissionTrack.class);
 					}
 					fromSql.append(" left join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Area.class));
@@ -1123,8 +1137,60 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				groupBySql.append("mp_" + itemcnt); //$NON-NLS-1$
 				
 			}else if (gb instanceof SamplingUnitGroupBy){
-				groupByInnerSql.append( " temp.sampling_unit_uuid as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
-				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
+				if (value instanceof MissionValueItem){
+
+					if (!usedTables.contains(MissionTrack.class)) {
+						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(MissionTrack.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(MissionTrack.class));
+						fromSql.append(" on temp.mission_uuid = " + tablePrefix(MissionTrack.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						usedTables.add(MissionTrack.class);
+					}
+					if (((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH){
+						//sampling unit link must come from track 
+						groupByInnerSql.append( " case when "); //$NON-NLS-1$
+						groupByInnerSql.append(tablePrefix(MissionTrack.class));
+						groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.RECON + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+						groupByInnerSql.append( " then "); //$NON-NLS-1$
+						groupByInnerSql.append(tablePrefix(MissionTrack.class));
+						groupByInnerSql.append( ".uuid else "); //$NON-NLS-1$
+						groupByInnerSql.append(tablePrefix(MissionTrack.class));
+						groupByInnerSql.append( ".sampling_unit_uuid end "); //$NON-NLS-1$
+						groupByInnerSql.append( " as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+						
+						groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
+						itemcnt ++;
+					}else{
+						//sampling unit link can come from track or waypoint; here we use the survey waypoint
+						//first then the track.  Ideally we would use both at once, but that doesn't work
+						//well with group by statement
+						groupByInnerSql.append( "case when temp.sampling_unit_uuid is not null then "); //$NON-NLS-1$
+						groupByInnerSql.append(" temp.sampling_unit_uuid "); //$NON-NLS-1$
+						groupByInnerSql.append(" else "); //$NON-NLS-1$
+							groupByInnerSql.append(" case when temp.wp_mission_track_uuid is not null then "); //$NON-NLS-1$
+							groupByInnerSql.append(" temp.wp_mission_track_uuid "); //$NON-NLS-1$
+							groupByInnerSql.append(" else "); //$NON-NLS-1$
+								groupByInnerSql.append( " case when "); //$NON-NLS-1$
+								groupByInnerSql.append(tablePrefix(MissionTrack.class));
+								groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.RECON + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+								groupByInnerSql.append( " then "); //$NON-NLS-1$
+								groupByInnerSql.append(tablePrefix(MissionTrack.class));
+								groupByInnerSql.append( ".uuid else "); //$NON-NLS-1$
+								groupByInnerSql.append(tablePrefix(MissionTrack.class));
+								groupByInnerSql.append( ".sampling_unit_uuid "); //$NON-NLS-1$
+								groupByInnerSql.append( "end "); //$NON-NLS-1$
+							groupByInnerSql.append(" end "); //$NON-NLS-1$
+						groupByInnerSql.append(" end "); //$NON-NLS-1$
+						groupByInnerSql.append( " as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+					
+						groupBySql.append(" gp_" + itemcnt); //$NON-NLS-1$
+						itemcnt ++;
+					}
+				}else{
+					groupByInnerSql.append( " case when temp.sampling_unit_uuid is null then temp.wp_mission_track_uuid else temp.sampling_unit_uuid end as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+					groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
+				}
 				
 //				String prefix = getTablePrefix((PatrolGroupBy) gb);
 //				String name = getFieldName((PatrolGroupBy) gb);
@@ -1152,16 +1218,26 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 //				}
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
-				if (op.getClass().equals(DayDateGroupBy.class)){
-					groupByInnerSql.append("temp.wp_datetime  as wpdt_" + itemcnt); //$NON-NLS-1$
-					groupBySql.append("wpdt_" + itemcnt); //$NON-NLS-1$
-				}else if (op.getClass().equals(MonthDateGroupBy.class)){
-					groupByInnerSql.append("trim(cast(month(temp.wp_datetime) as char(2))) || '/' || cast(year(temp.wp_datetime) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
-					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-				}else if (op.getClass().equals(YearDateGroupBy.class)){
-					groupByInnerSql.append("YEAR(temp.wp_datetime) as datePart_" + itemcnt); //$NON-NLS-1$
-					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+			
+				String groupByString = "temp.wp_datetime"; //$NON-NLS-1$
+				if (value instanceof MissionValueItem){
+					if (((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH){
+						//user track length
+						groupByString = tablePrefix(MissionTrack.class) + ".track_date"; //$NON-NLS-1$
+					}
+					//TODO: validate this works mission value items
 				}
+				
+				//data model value item; therefore we use the waypoint date
+				if (op.getClass().equals(DayDateGroupBy.class)){
+					groupByInnerSql.append(groupByString + " as datePart_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(MonthDateGroupBy.class)){
+					groupByInnerSql.append("trim(cast(month(" + groupByString + ") as char(2))) || '/' || cast(year(" + groupByString + ") as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}else if (op.getClass().equals(YearDateGroupBy.class)){
+					groupByInnerSql.append("YEAR(" + groupByString + ") as datePart_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+				
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);
 
@@ -1334,18 +1410,26 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".buffer, "); //$NON-NLS-1$
+
+		
 		
 		if (includeObservations){
+			sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
+			sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
+			sql.append(tablePrefix(SamplingUnit.class) + ".buffer, "); //$NON-NLS-1$
+			
+			sql.append(tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid "); //$NON-NLS-1$
 		}else{
 			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as timestamp),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as char),");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as double),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as timestamp),");	//wpob_uuid //$NON-NLS-1$
 			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
 			sql.append("cast(null as char for bit data)");	//wpob_uuid //$NON-NLS-1$
 		}
@@ -1376,6 +1460,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
 		sql.append("sampling_unit_buffer double,"); //$NON-NLS-1$
+		
+		sql.append("wp_mission_track_uuid char(16) for bit data,"); //$NON-NLS-1$
+		
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_datetime timestamp,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$

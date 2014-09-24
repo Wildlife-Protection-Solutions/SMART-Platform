@@ -40,7 +40,7 @@ public class MissionValueItem implements IValueItem {
 	public enum ValueItem{
 		TRACK_LENGTH(Messages.MissionLegnthValueDropItem_TrackLengthLabel, "s:missiontracklength"), //$NON-NLS-1$
 		MISSION_COUNT(Messages.MissionValueItem_NumberOfMissionsLabel, "s:missioncount"), //$NON-NLS-1$
-		SURVEY_COUNT("Number of Surveys", "s:surveycount");
+		SURVEY_COUNT(Messages.MissionValueItem_NumberOfSurveyLabel, "s:surveycount"); //$NON-NLS-1$
 		
 		public String guiName;
 		public String key;

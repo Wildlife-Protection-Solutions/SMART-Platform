@@ -94,4 +94,12 @@ public interface ISurveyHibernateManager {
 	 * for the given survey design 
 	 */
 	public Set<SamplingUnit.SamplingUnitType> getSamplingUnitTypes(SurveyDesign sd, Session s);
+	
+	/**
+	 * Finds the survey design with the given key.
+	 * @param key survey design key
+	 * @param session
+	 * @return the associated survey design or null
+	 */
+	public SurveyDesign getSurveyDesign(String key, Session session);
 }
