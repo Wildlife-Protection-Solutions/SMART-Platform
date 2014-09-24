@@ -306,6 +306,8 @@ public class Messages extends NLS {
 	public static String NewSurveyWizard_Error;
 	public static String NewSurveyWizard_WizardTitle;
 	public static String RemoveERJob_Title;
+	public static String SamplingUnitAttributeDeleteAdvisor_CannotDeleteAttribute;
+
 	public static String SamplingUnitAttributeDialog_CloseDialogTitle;
 	public static String SamplingUnitAttributeDialog_ConfirmDelete;
 	public static String SamplingUnitAttributeDialog_ConfirmExit;
