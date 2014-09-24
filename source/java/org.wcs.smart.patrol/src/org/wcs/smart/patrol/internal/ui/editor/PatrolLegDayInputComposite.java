@@ -446,7 +446,7 @@ public class PatrolLegDayInputComposite {
 		viewTrackPoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				//showImportWizard();
-				TrackPointDialog tpd = new TrackPointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getTrack());
+				PatrolTrackPointDialog tpd = new PatrolTrackPointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getTrack());
 				tpd.open();
 				ApplicationGIS.getToolManager().setCurrentEditor(editor.getPatrolEditor());
 			}

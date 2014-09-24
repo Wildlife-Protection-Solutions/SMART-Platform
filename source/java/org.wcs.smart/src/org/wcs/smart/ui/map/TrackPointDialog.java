@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.editor;
+package org.wcs.smart.ui.map;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
@@ -111,18 +112,10 @@ import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.Envelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.ui.SavePatrolPartJob;
-import org.wcs.smart.ui.map.LoadDefaultLayersJob;
-import org.wcs.smart.ui.map.MapInfoAreaComposite;
-import org.wcs.smart.ui.map.MapToolComposite;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.tool.PanTool;
+import org.wcs.smart.ui.map.tool.TrackPointSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -138,12 +131,8 @@ import com.vividsolutions.jts.geom.LineString;
  * @author Emily
  * @since 1.0.0
  */
-public class TrackPointDialog extends TitleAreaDialog implements MapPart{
+public abstract class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	private final static FilterFactory2 FACTORY = CommonFactoryFinder.getFilterFactory2(null);
-	private final static DateFormat DATEFORMAT = new SimpleDateFormat( ((SimpleDateFormat)DateFormat.getTimeInstance()).toPattern() + "   (" + ((SimpleDateFormat)DateFormat.getDateInstance()).toPattern() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-	static{
-		DATEFORMAT.setTimeZone(Track.ZTIMEZONE);
-	}
 
 	private final static String SELECTED_FIELD = "selected"; //$NON-NLS-1$
 	private final static String X_FIELD = "x"; //$NON-NLS-1$
@@ -151,9 +140,8 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	private final static String DATETIME_FIELD = "datetime"; //$NON-NLS-1$
 	private final static String GEOM_FIELD = "geom"; //$NON-NLS-1$
 	private final static String INDEX_FIELD = "index"; //$NON-NLS-1$
-	
-	private Track track;
-	private Track editTrack;	//copy of track for editing
+
+	private final DateFormat DATEFORMAT = new SimpleDateFormat( ((SimpleDateFormat)DateFormat.getTimeInstance()).toPattern() + "   (" + ((SimpleDateFormat)DateFormat.getDateInstance()).toPattern() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private TableViewer trackviewer;
 	private MapViewer mapViewer;
@@ -173,14 +161,16 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	 * @param parentShell parent shell
 	 * @param t the track to display
 	 */
-	public TrackPointDialog(Shell parentShell, Track t) {
+	public TrackPointDialog(Shell parentShell) {
 		super(parentShell);
-		this.track = t;
+		DATEFORMAT.setTimeZone(getTrackZTimezone());
 		
-		editTrack = new Track();
-		editTrack.setLineString(t.getLineString());
-		editTrack.setUuid(track.getUuid());
 	}
+
+	protected abstract TimeZone getTrackZTimezone();
+	protected abstract byte[] getEditTrackUUid();
+	protected abstract LineString getEditTrackLineString();
+	protected abstract void setEditTrackLineString(LineString ls);
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
@@ -351,7 +341,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					//select items
 					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), true, FACTORY.id(ids));
 				} catch (IOException e) {
-					SmartPatrolPlugIn.log(e.getMessage(), e);
+					SmartPlugIn.log(e.getMessage(), e);
 				}
 				if (pointLayer != null){
 					pointLayer.refresh(null);
@@ -392,9 +382,9 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		List<Coordinate> toAdd = undo.remove(undo.size() - 1);
 	
 		List<Coordinate> allC = new ArrayList<Coordinate>();
-		boolean isUpdate = editTrack.getLineString() != null;
-		if (editTrack.getLineString() != null){
-			for (Coordinate c : editTrack.getLineString().getCoordinates()){
+		boolean isUpdate = getEditTrackLineString() != null;
+		if (getEditTrackLineString() != null){
+			for (Coordinate c : getEditTrackLineString().getCoordinates()){
 				allC.add(c);
 			}
 		}
@@ -408,7 +398,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		
 		GeometryFactory gf = new GeometryFactory();
 		LineString ls = gf.createLineString(allC.toArray(new Coordinate[allC.size()]));
-		editTrack.setLineString(ls);
+		setEditTrackLineString(ls);
 		
 		//update track and point layers
 		try {
@@ -421,7 +411,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			}
 			trackLayer.refresh(null);
 		} catch (IOException e1) {
-			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
 		}
 		try {
 			pointStore.removeFeatures(Filter.INCLUDE);
@@ -430,7 +420,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			
 			trackviewer.setInput(pointStore.getFeatures().toArray());
 		} catch (IOException e1) {
-			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1);  //$NON-NLS-1$
 		}
 		
 		btnUndo.setEnabled(undo.size() > 0);
@@ -450,7 +440,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		if (toDelete.size() == 0) return;
 		
 		
-		Coordinate[] oldc = editTrack.getLineString().getCoordinates();
+		Coordinate[] oldc = getEditTrackLineString().getCoordinates();
 		Coordinate[] newc = new Coordinate[oldc.length - toDelete.size()];
 		
 		int newindex = 0;
@@ -470,12 +460,12 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		if (newc.length == 0){
 			//remove track entirely
 			isModified = true;
-			editTrack.setLineString(null);
+			setEditTrackLineString(null);
 			try{
 				trackStore.removeFeatures(Filter.INCLUDE);
 				pointStore.removeFeatures(Filter.INCLUDE);
 			}catch(Exception ex){
-				SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				SmartPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}					
 			trackLayer.refresh(null);
 			pointLayer.refresh(null);
@@ -491,7 +481,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		isModified = true;
 		GeometryFactory gf = new GeometryFactory();
 		LineString ls = gf.createLineString(newc);
-		editTrack.setLineString(ls);
+		setEditTrackLineString(ls);
 		
 		//update track and point layers
 		try {
@@ -499,7 +489,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					ls, Filter.INCLUDE);
 			trackLayer.refresh(null);
 		} catch (IOException e1) {
-			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1);  //$NON-NLS-1$
 		}
 		try {
 			pointStore.removeFeatures(Filter.INCLUDE);
@@ -508,7 +498,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			
 			trackviewer.setInput(pointStore.getFeatures().toArray());
 		} catch (IOException e1) {
-			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1);  //$NON-NLS-1$
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
@@ -574,7 +564,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 				MapToolComposite.UDIG_ZOOM_ID,
 				MapToolComposite.UDIG_ZOOM_IN_ID,
 				MapToolComposite.UDIG_ZOOM_OUT_ID,
-				PointSelectionTool.ID};
+				TrackPointSelectionTool.ID};
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(mapComp);
@@ -582,8 +572,8 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		tools.selectTool(PanTool.ID);
-		PointSelectionTool tool = (PointSelectionTool) ApplicationGIS.getToolManager().findTool(PointSelectionTool.ID);
-		tool.addListener(new PointSelectionTool.PointSelectionListener() {
+		TrackPointSelectionTool tool = (TrackPointSelectionTool) ApplicationGIS.getToolManager().findTool(TrackPointSelectionTool.ID);
+		tool.addListener(new TrackPointSelectionTool.PointSelectionListener() {
 			@Override
 			public void selection(ReferencedEnvelope bbox) {
 				try {
@@ -617,7 +607,7 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					
 					
 				} catch (Exception e) {
-					SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_SelectionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+					SmartPlugIn.displayLog(Messages.TrackPointDialog_SelectionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 				}
 			}
 		});
@@ -678,15 +668,15 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 			getMap().sendCommandASync(command);
 						
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingTrackLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingTrackLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	    
 	}
 	
 	private void createTrackFeatures(SimpleFeatureType featureType) throws IOException{
 		Object[] data = new Object[2];
-		data[0] = SmartUtils.encodeHex(editTrack.getUuid());
-		data[1] = editTrack.getLineString();
+		data[0] = SmartUtils.encodeHex(getEditTrackUUid());
+		data[1] = getEditTrackLineString();
 		List<SimpleFeature> features = new ArrayList<SimpleFeature>(1);
 		features.add(SimpleFeatureBuilder.build(featureType, data, (String)data[0]));
 		ListFeatureCollection featureCollection = new ListFeatureCollection(featureType);
@@ -700,11 +690,11 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 	private void createTrackPointFeatures(SimpleFeatureType featureType) throws IOException{
 		final List<SimpleFeature> features = new ArrayList<SimpleFeature>(1);
 		
-		for (int i = 0; i < editTrack.getLineString().getCoordinates().length; i ++){
-			Coordinate c = editTrack.getLineString().getCoordinates()[i];
+		for (int i = 0; i < getEditTrackLineString().getCoordinates().length; i ++){
+			Coordinate c = getEditTrackLineString().getCoordinates()[i];
 		
 			Object[] data = new Object[7];
-			data[0] = SmartUtils.encodeHex(editTrack.getUuid()) + "." + i; //$NON-NLS-1$
+			data[0] = SmartUtils.encodeHex(getEditTrackUUid()) + "." + i; //$NON-NLS-1$
 			data[1] = c.x;
 			data[2] = c.y;
 			data[3] = DATEFORMAT.format(new Date( (long) ((Coordinate)c).z ));
@@ -768,12 +758,12 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 					try{
 						trackviewer.setInput(pointStore.getFeatures().toArray());
 					}catch(Exception ex){
-						SmartPatrolPlugIn.log(ex.getMessage(), ex);
+						SmartPlugIn.log(ex.getMessage(), ex);
 					}
 				}});
 			
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingPointLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.TrackPointDialog_ErrorAddingPointLayer + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	    
 	}
@@ -798,38 +788,13 @@ public class TrackPointDialog extends TitleAreaDialog implements MapPart{
 		}
 		super.cancelPressed();
 	}
-	
-	@Override
-	/*
-	 * Saves changes to track
-	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
-	 */
-	protected void okPressed(){
-		Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
-		PatrolLegDay pld = track.getPatrolLegDay();
-		
-		//save then close
-		if (editTrack.getLineString() == null){
-			//delete track
-			track.getPatrolLegDay().setTrack(null);
-			track.setPatrolLegDay(null);
-		}else{
-			track.setLineString(editTrack.getLineString());
-		}
-		
-		//save and fire
-		SavePatrolPartJob saveJob = new SavePatrolPartJob(p,pld); 		
-		saveJob.schedule();
-		try{
-			saveJob.join();
-			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pld);
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			isModified = false;
-		}catch (InterruptedException ex){
-			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
-		}
+
+	public boolean isModified() {
+		return isModified;
 	}
-	
+	protected void setModified(boolean isModified) {
+		this.isModified = isModified;
+	}
 	
 	/**
 	 * Dialog is resizable

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.editor;
+package org.wcs.smart.ui.map;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Display;
  * @author Emily
  *
  */
+@SuppressWarnings("deprecation")
 public class LayerListComposite extends Composite implements IDropTargetProvider {
 
 	private CheckboxTreeViewer viewer;
@@ -68,7 +69,6 @@ public class LayerListComposite extends Composite implements IDropTargetProvider
 	 private Adapter checkboxContextListener = new AdapterImpl(){
 		 
 		 private boolean requiresRefresh = false;
-	        @SuppressWarnings("unchecked")
 	        public void notifyChanged( final Notification msg ) {
 
 	            if (msg.getNotifier() instanceof ContextModel) {
@@ -144,6 +144,7 @@ public class LayerListComposite extends Composite implements IDropTargetProvider
 
 		viewer.setContentProvider(new ITreeContentProvider() {
 			private Collection<Object> objects; 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 				if (newInput instanceof Collection){
