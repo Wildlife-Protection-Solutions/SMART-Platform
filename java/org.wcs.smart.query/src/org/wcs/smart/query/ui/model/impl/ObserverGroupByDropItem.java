@@ -29,6 +29,8 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -37,10 +39,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolTip;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
@@ -64,6 +64,7 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 	private List<ListItem> selectedItems = new ArrayList<ListItem>();;
 	private Font smallerFont = null;
 	private ToolTip toolTip;
+	private Label lblText;
 	
 	@Override
 	public List<ListItem> getListItem() {
@@ -102,13 +103,27 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 
 	@Override
 	public String getText() {
-		return Messages.ObserverGroupByDropItem_ObserverLabel;
+		StringBuilder sb = new StringBuilder();
+		sb.append (Messages.ObserverGroupByDropItem_ObserverLabel + "\n");  //$NON-NLS-1$ 
+		int cnt = 0;
+		if (selectedItems != null){
+			for (ListItem it : selectedItems){
+				if (cnt >= 3){
+					sb.append("..."); //$NON-NLS-1$
+					break;
+				}
+				sb.append("   " + it.getName()); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
+				cnt ++;
+			}
+		}
+		return sb.toString();
 	}
 
 	@Override
 	public String asQueryPart() {
 		StringBuilder sql = new StringBuilder();
-		sql.append("wpnobs:observer:"); //$NON-NLS-1$
+		sql.append(ObserverDropItem.KEY_PART); 
 		if (selectedItems != null && selectedItems.size() > 0){
 			for (ListItem li : selectedItems){
 				sql.append(SmartUtils.encodeHex(li.getUuid()) + ":"); //$NON-NLS-1$
@@ -136,9 +151,9 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 		
-		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText( formatStringForLabel(getText()));
-		initDrag(lbl);
+		lblText = new Label(comp, SWT.NONE);
+		lblText.setText( formatStringForLabel(getText()));
+		initDrag(lblText);
 		
 		final Link link = new Link(comp,  SWT.NONE);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
@@ -163,8 +178,9 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 							selectedItems.add(dialog.getSelectedItems()[i]);
 						}
 					}
-					updateToolTipMessage();
+					updateLabel();
 					ObserverGroupByDropItem.this.queryChanged();
+					getTargetPanel().redraw();
 				}
 			}
 			
@@ -173,19 +189,18 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
 		toolTip.setText(Messages.ObserverGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
-		updateToolTipMessage();
-		link.addListener(SWT.MouseHover, new Listener(){
+		updateLabel();
+		link.addMouseTrackListener(new MouseTrackAdapter() {			
 			@Override
-			public void handleEvent(Event event) {
+			public void mouseExit(MouseEvent e) {
+				toolTip.setVisible(false);
+			}
+			
+			@Override
+			public void mouseEnter(MouseEvent e) {
 				toolTip.setVisible(true);
 			}
 		});
-		
-		link.addListener(SWT.MouseExit, new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				toolTip.setVisible(false);
-			}});
 	}
 	
 	private void updateToolTipMessage(){
@@ -201,4 +216,11 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 	}
 
 
+	/**
+	 * Updates the text label
+	 */
+	private void updateLabel(){
+		lblText.setText( formatStringForLabel(getText()));
+		updateToolTipMessage();
+	}
 }

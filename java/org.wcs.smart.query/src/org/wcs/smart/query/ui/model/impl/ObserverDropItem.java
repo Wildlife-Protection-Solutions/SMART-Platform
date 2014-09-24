@@ -63,6 +63,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ObserverDropItem extends DropItem implements IFilterDropItem{
 
+	public static final String KEY_PART = "wpnobs:observer"; //$NON-NLS-1$
+	
 	private ComboViewer listViewer;
 	
 	private Font smallerFont;
@@ -140,7 +142,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public String getText() {
-		return "wpnobs:observer = " + listViewer.getCombo().getText(); //$NON-NLS-1$
+		return KEY_PART + " = " + listViewer.getCombo().getText(); //$NON-NLS-1$
 	}
 
 	/**
@@ -148,7 +150,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public String asQueryPart() {
-		StringBuilder query = new StringBuilder("wpnobs:observer"); //$NON-NLS-1$
+		StringBuilder query = new StringBuilder(KEY_PART);
 		query.append(" equals "); //$NON-NLS-1$
 		
 		Employee it = null;
