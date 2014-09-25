@@ -48,7 +48,6 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
@@ -403,8 +402,7 @@ public class FilterProcessor implements IFilterProcessor {
 			@Override
 			public void visit(IFilter filter) {
 				if (needstracks[0]) return;
-				if (filter instanceof SamplingUnitFilter &&
-						((SamplingUnitFilter) filter).getType() == Type.TRACK){
+				if (filter instanceof SamplingUnitFilter){
 					needstracks[0] = true;
 				}
 				

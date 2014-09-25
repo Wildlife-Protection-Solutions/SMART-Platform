@@ -89,6 +89,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
+				s.beginTransaction();
 				if (design != null){
 					s.update(design);
 					for (MissionProperty p : design.getMissionProperties()){
@@ -99,6 +100,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list();
 				}
+				s.getTransaction().rollback();
 			}finally{
 				s.close();
 			}

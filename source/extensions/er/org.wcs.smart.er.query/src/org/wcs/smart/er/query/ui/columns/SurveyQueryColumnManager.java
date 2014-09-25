@@ -370,16 +370,7 @@ public class SurveyQueryColumnManager {
 	 * @return
 	 */
 	public static ColumnLabelProvider getLabelProvider(QueryColumn column){
-//		if (column instanceof SurveyQueryColumn){
-			return new FixedColumnLabelProvider(column);
-//		}else if (column instanceof SurveyAttributeQueryColumn){
-//			return new AttributeColumnLabelProvider(column);
-//		}else if (column instanceof SurveyCategoryQueryColumn){
-//			return new CategoryColumnLabelProvider(column);
-//		}else if (column instanceof GridQueryColumn){
-//			return new GridColumnLabelProvider(column);
-//		}
-//		return null;
+		return new FixedColumnLabelProvider(column);
 	}
 	
 	public  QueryColumn[] getMissionQueryColumns(final SurveyDesign sd) {
@@ -395,6 +386,16 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER));
 		
+		//mission property columns
+		LoadMissionPropertiesJob j = new LoadMissionPropertiesJob(sd);
+		j.schedule();
+		try {
+			j.join();
+		} catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+		cols.addAll(j.getColumns());
+		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END));
@@ -403,38 +404,7 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END));
 	
-		//mission property columns
-		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
-
-			@SuppressWarnings("unchecked")
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
-					if (sd == null){
-						List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-						for (MissionAttribute ma : all){
-							cols.add(new MissionPropertyQueryColumn(ma));
-						}
-					}else{
-						SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
-						for (MissionProperty mp : sd2.getMissionProperties()){
-							cols.add(new MissionPropertyQueryColumn(mp.getAttribute()));
-						}
-					}
-				}finally{
-					s.close();
-				}
-				return Status.OK_STATUS;
-			}};
 		
-		j.schedule();
-		try{
-			j.join();
-		}catch (Exception ex){
-			throw new IllegalStateException(ex);
-		}		
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
@@ -461,40 +431,14 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
 		
 		//mission property columns
-		Job j = new Job(
-				Messages.SurveyQueryColumnManager_missionattributejobname) {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try {
-					if (sd == null) {
-						List<MissionAttribute> all = s
-								.createCriteria(MissionAttribute.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-						for (MissionAttribute ma : all) {
-							cols.add(new MissionPropertyQueryColumn(ma));
-						}
-					} else {
-						SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
-						for (MissionProperty mp : sd2.getMissionProperties()) {
-							cols.add(new MissionPropertyQueryColumn(mp.getAttribute()));
-						}
-					}
-				} finally {
-					s.close();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-
+		LoadMissionPropertiesJob j = new LoadMissionPropertiesJob(sd);
 		j.schedule();
 		try {
 			j.join();
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
+		cols.addAll(j.getColumns());
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START));
@@ -505,5 +449,46 @@ public class SurveyQueryColumnManager {
 		
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
+	}
+	
+		
+	private class LoadMissionPropertiesJob extends Job{
+
+		private SurveyDesign sd;
+		private List<MissionPropertyQueryColumn> columns;
+		
+		public LoadMissionPropertiesJob(SurveyDesign sd) {
+			super(Messages.SurveyQueryColumnManager_LoadMissionPropJobName);
+			this.sd = sd;
+		}
+
+		public List<MissionPropertyQueryColumn> getColumns(){
+			return this.columns;
+		}
+		
+		@Override
+		@SuppressWarnings("unchecked")
+		protected IStatus run(IProgressMonitor monitor) {
+			columns = new ArrayList<MissionPropertyQueryColumn>();
+			Session s = HibernateManager.openSession();
+			try{
+				if (sd == null){
+					List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+					for (MissionAttribute ma : all){
+						columns.add(new MissionPropertyQueryColumn(ma));
+					}
+				}else{
+					SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+					for (MissionProperty mp : sd2.getMissionProperties()){
+						columns.add(new MissionPropertyQueryColumn(mp.getAttribute()));
+					}
+				}
+			}finally{
+				s.close();
+			}
+			return Status.OK_STATUS;
+		}
+		
 	}
 }

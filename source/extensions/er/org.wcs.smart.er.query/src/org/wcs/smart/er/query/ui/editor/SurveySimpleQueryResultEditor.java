@@ -29,14 +29,10 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.ISurveyQuery;
-import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionQueryType;
-import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
-import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -101,15 +97,19 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 		return SurveyQueryFactory.createQuery(type);
 	}
 	
+	private boolean isQueryType(String typeKey){
+		return (getQueryInternal().getType().getKey().equals(typeKey));
+	}
+	
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions(){
-		if (getQueryInternal() instanceof SurveyObservationQuery){
+		if (isQueryType(SurveyObservationQueryType.KEY)){
 			return SurveyObservationQueryType.validDateFields();
-		}else if (getQueryInternal() instanceof MissionQuery){
+		}else if (isQueryType(MissionQueryType.KEY)){
 			return MissionQueryType.validDateFields();
-		}else if (getQueryInternal() instanceof SurveyWaypointQuery){
+		}else if (isQueryType(SurveyWaypointQueryType.KEY)){
 			return SurveyWaypointQueryType.validDateFields();
-		}else if (getQueryInternal() instanceof MissionTrackQuery){
+		}else if (isQueryType(MissionTrackQueryType.KEY)){
 			return MissionTrackQueryType.validDateFields();
 		}
 		return null;
@@ -145,8 +145,10 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	@Override
 	protected ISummaryInfo createInfoSection(){
-		if (getQueryInternal() instanceof MissionTrackQuery){
+		if (isQueryType(MissionTrackQueryType.KEY)){
 			return new MissionTrackInfoSection();
+		}else if (isQueryType(MissionQueryType.KEY)){
+			return new MissionInfoSection();
 		}else{
 			return super.createInfoSection();
 		}
