@@ -41,14 +41,14 @@ public class SurveyDesignToXmlConverter {
 	 * @return
 	 * @throws DatatypeConfigurationException 
 	 */
-	public static org.wcs.smart.er.xml.model.SurveyDesign toXml(SurveyDesign surveyDesign, Session s, IProgressMonitor monitor) throws DatatypeConfigurationException{
+	public static org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign toXml(SurveyDesign surveyDesign, Session s, IProgressMonitor monitor) throws DatatypeConfigurationException{
 		monitor.beginTask(MessageFormat.format(Messages.SurveyDesignToXmlConverter_TaskName, new Object[]{surveyDesign.getName()}), surveyDesign.getProperties().size() + 1);
-		org.wcs.smart.er.xml.model.SurveyDesign xml = new org.wcs.smart.er.xml.model.SurveyDesign();
+		org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign xml = new org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign();
 
 		
 		//Names
 		for (org.wcs.smart.ca.Label label : surveyDesign.getNames() ){ 
-			org.wcs.smart.er.xml.model.NamesType xmlpair = new org.wcs.smart.er.xml.model.NamesType();
+			org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
 			
 			xmlpair.setLanguage( label.getId().getLanguage().getCode() );
 			xmlpair.setValue(label.getValue());
@@ -98,7 +98,7 @@ public class SurveyDesignToXmlConverter {
 
 		//Survey design properties 
 		for (SurveyDesignProperty sdp : surveyDesign.getProperties() ){
-			org.wcs.smart.er.xml.model.SurveyDesignProperty xmlsdp = new org.wcs.smart.er.xml.model.SurveyDesignProperty();
+			org.wcs.smart.er.xml.model.surveyDesign.SurveyDesignProperty xmlsdp = new org.wcs.smart.er.xml.model.surveyDesign.SurveyDesignProperty();
 			xmlsdp.setName(sdp.getName());
 			xmlsdp.setValue(sdp.getValue());
 			
@@ -109,12 +109,12 @@ public class SurveyDesignToXmlConverter {
 		
 		//mission attributes and their attribteListItems
 		for(MissionProperty mp : surveyDesign.getMissionProperties()){
-			org.wcs.smart.er.xml.model.MissionProperty xmlmp = new org.wcs.smart.er.xml.model.MissionProperty();
+			org.wcs.smart.er.xml.model.surveyDesign.MissionProperty xmlmp = new org.wcs.smart.er.xml.model.surveyDesign.MissionProperty();
 		
 			xmlmp.setOrder(mp.getOrder());
 		
 			org.wcs.smart.er.model.MissionAttribute attr = mp.getAttribute(); 
-			org.wcs.smart.er.xml.model.MissionAttribute xmlma = new org.wcs.smart.er.xml.model.MissionAttribute();
+			org.wcs.smart.er.xml.model.surveyDesign.MissionAttribute xmlma = new org.wcs.smart.er.xml.model.surveyDesign.MissionAttribute();
 
 			xmlma.setAttributeType(attr.getType().toString());
 			xmlma.setDefaultName(attr.getDefaultName());
@@ -123,7 +123,7 @@ public class SurveyDesignToXmlConverter {
 			 
 			//all the names for a mission_Attribute
 			for (org.wcs.smart.ca.Label label : attr.getNames() ){ 
-				org.wcs.smart.er.xml.model.NamesType xmlpair = new org.wcs.smart.er.xml.model.NamesType();
+				org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
 				
 				xmlpair.setLanguage( label.getId().getLanguage().getCode() );
 				xmlpair.setValue(label.getValue());
@@ -133,7 +133,7 @@ public class SurveyDesignToXmlConverter {
 			
 			//All the missionAttributeListItems
 			for(MissionAttributeListItem mali : attr.getAttributeList()){
-				org.wcs.smart.er.xml.model.MissionAttributeListItem xmlmali = new org.wcs.smart.er.xml.model.MissionAttributeListItem();
+				org.wcs.smart.er.xml.model.surveyDesign.MissionAttributeListItem xmlmali = new org.wcs.smart.er.xml.model.surveyDesign.MissionAttributeListItem();
 				
 				xmlmali.setDefaultName(mali.getDefaultName());
 				xmlmali.setKeyid(mali.getKeyId());
@@ -143,7 +143,7 @@ public class SurveyDesignToXmlConverter {
 				
 				//all the names for a single mission_Attribute list item
 				for (org.wcs.smart.ca.Label label : mali.getNames() ){ 
-					org.wcs.smart.er.xml.model.NamesType xmlpair = new org.wcs.smart.er.xml.model.NamesType();
+					org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
 					
 					xmlpair.setLanguage(label.getId().getLanguage().getCode());
 					xmlpair.setValue(label.getValue());
@@ -164,8 +164,8 @@ public class SurveyDesignToXmlConverter {
 		for(SurveyDesignSamplingUnitAttribute attr : surveyDesign.getSamplingUnitAttributes()){
 			SamplingUnitAttribute sua = attr.getSamplingUnitAttribute();
 			
-			org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute xmlSDsua = new org.wcs.smart.er.xml.model.SurveyDesignSamplingUnitAttribute();
-			org.wcs.smart.er.xml.model.SamplingUnitAttribute xmlsua = new org.wcs.smart.er.xml.model.SamplingUnitAttribute();
+			org.wcs.smart.er.xml.model.surveyDesign.SurveyDesignSamplingUnitAttribute xmlSDsua = new org.wcs.smart.er.xml.model.surveyDesign.SurveyDesignSamplingUnitAttribute();
+			org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttribute xmlsua = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttribute();
 						
 			xmlsua.setAttributeType(sua.getType().toString());
 			xmlsua.setDefaultName(sua.getDefaultName());
@@ -173,7 +173,7 @@ public class SurveyDesignToXmlConverter {
 			xmlsua.setName(sua.getName());
 			//all the names for the Attribute
 			for (org.wcs.smart.ca.Label label : sua.getNames() ){ 
-				org.wcs.smart.er.xml.model.NamesType xmlpair = new org.wcs.smart.er.xml.model.NamesType();
+				org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
 				
 				xmlpair.setLanguage( label.getId().getLanguage().getCode() );
 				xmlpair.setValue(label.getValue());
@@ -188,7 +188,7 @@ public class SurveyDesignToXmlConverter {
 		//All Sampling Units
 		List<SamplingUnit> units = s.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", surveyDesign )).list(); //$NON-NLS-1$
 		for(SamplingUnit su :  units) {
-			org.wcs.smart.er.xml.model.SamplingUnit xmlsu = new org.wcs.smart.er.xml.model.SamplingUnit();
+			org.wcs.smart.er.xml.model.surveyDesign.SamplingUnit xmlsu = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnit();
 			xmlsu.setBuffer(su.getBuffer());
 			xmlsu.setGeom(su.getGeom());
 			xmlsu.setId(su.getId());
@@ -197,7 +197,7 @@ public class SurveyDesignToXmlConverter {
 			
 			//All sampling unit attribute values for this sampling unit 
 			for(SamplingUnitAttributeValue suav : su.getAttributes()){
-				org.wcs.smart.er.xml.model.SamplingUnitAttributeValue xmlsuav = new org.wcs.smart.er.xml.model.SamplingUnitAttributeValue();
+				org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue xmlsuav = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue();
 				
 				xmlsuav.setDoubleValue(suav.getNumberValue());
 				xmlsuav.setSamplingUnitId(suav.getSamplingUnit().getId());

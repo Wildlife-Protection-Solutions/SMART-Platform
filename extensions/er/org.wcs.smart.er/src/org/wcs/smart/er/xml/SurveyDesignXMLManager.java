@@ -10,7 +10,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.wcs.smart.er.xml.model.ObjectFactory;
+import org.wcs.smart.er.xml.model.surveyDesign.ObjectFactory;
 
 public class SurveyDesignXMLManager {
 	
@@ -26,12 +26,12 @@ public class SurveyDesignXMLManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static org.wcs.smart.er.xml.model.SurveyDesign readDataModel(InputStream file) throws JAXBException{
+	public static org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign readDataModel(InputStream file) throws JAXBException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
 		@SuppressWarnings("unchecked")
-		JAXBElement<org.wcs.smart.er.xml.model.SurveyDesign> o = (JAXBElement<org.wcs.smart.er.xml.model.SurveyDesign>) un.unmarshal(file);
-		org.wcs.smart.er.xml.model.SurveyDesign x = o.getValue();
+		JAXBElement<org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign> o = (JAXBElement<org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign>) un.unmarshal(file);
+		org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign x = o.getValue();
 		return x;
 	}
 	
@@ -45,14 +45,14 @@ public class SurveyDesignXMLManager {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	public static void writeDataModel(org.wcs.smart.er.xml.model.SurveyDesign surveydesign, OutputStream file) throws JAXBException, IOException{
+	public static void writeDataModel(org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign surveydesign, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
 		
 		ObjectFactory objFactor = new ObjectFactory();
 		
-		JAXBElement<org.wcs.smart.er.xml.model.SurveyDesign> element = objFactor.createSurveyDesign(surveydesign);
+		JAXBElement<org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign> element = objFactor.createSurveyDesign(surveydesign);
 		marshaller.marshal(element, file);
 	}
 }

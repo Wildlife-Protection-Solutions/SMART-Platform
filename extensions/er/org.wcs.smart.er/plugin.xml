@@ -162,6 +162,11 @@
                   label="Import Survey Designs"
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.er.missionExportHandler"
+                  label="Export Missions"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.er.separator3"
                   visible="true">
@@ -305,6 +310,10 @@
             class="org.wcs.smart.er.ui.handlers.SurveyDesignImportHandler"
             commandId="org.wcs.smart.er.surveydesignimport">
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.MissionExportHandler"
+            commandId="org.wcs.smart.er.missionExportHandler">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -351,6 +360,10 @@
       <command
             id="org.wcs.smart.er.surveydesignimport"
             name="Import Survey Designs">
+      </command>
+      <command
+            id="org.wcs.smart.er.missionExportHandler"
+            name="Export Missions">
       </command>
    </extension>
    <extension
