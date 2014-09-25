@@ -93,7 +93,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				try {			
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
-							false, true, new SubProgressMonitor(monitor, 50));
+							true, true, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
 					populateTemporaryTableExtra(c, session,  new SubProgressMonitor(monitor, 20));

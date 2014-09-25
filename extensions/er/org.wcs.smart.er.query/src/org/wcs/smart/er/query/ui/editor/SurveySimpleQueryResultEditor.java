@@ -40,6 +40,7 @@ import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.ui.ISummaryInfo;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -87,9 +88,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	public void dispose(){
 		super.dispose();
 		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(updateTable);
-		
-		addSuLayer.dispose();
-		
+		addSuLayer.dispose();	
 	}
 	
 	
@@ -143,5 +142,13 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 			}};
 		addSuLayer.schedule();
 	}
-	
+
+	@Override
+	protected ISummaryInfo createInfoSection(){
+		if (getQueryInternal() instanceof MissionTrackQuery){
+			return new MissionTrackInfoSection();
+		}else{
+			return super.createInfoSection();
+		}
+	}
 }

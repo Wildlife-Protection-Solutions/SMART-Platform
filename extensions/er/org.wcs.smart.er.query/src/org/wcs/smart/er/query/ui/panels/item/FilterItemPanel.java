@@ -47,6 +47,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -125,7 +126,9 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		surveyNode =  new FiltersTreeNode(qType);
 		nodes.add(surveyNode);
 		
-		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
+		if (!qType.getKey().equals(MissionTrackQueryType.KEY)){
+			nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));	
+		}
 		
 		if (!SmartDB.isMultipleAnalysis()){
 			areaNode = new AreaTreeNode(Messages.SurveyFilterItemPanel_AreaFilterTreeNode);

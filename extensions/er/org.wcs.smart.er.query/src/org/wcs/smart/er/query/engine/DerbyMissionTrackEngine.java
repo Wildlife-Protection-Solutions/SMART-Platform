@@ -47,7 +47,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -79,12 +78,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = null;
-				if (query.getFilter().getFilterType() == FilterType.OBSERVATION){
-					filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
-				}else{
-					filterer = new WaypointFilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
-				}
+				IFilterProcessor filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
+				
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -95,7 +90,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				try {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
-							true, true, new SubProgressMonitor(monitor, 50));
+							false, false, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
 					
@@ -108,6 +103,14 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 					try {
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
+						}
+					} finally {
+						rs.close();
+					}
+					rs = c.createStatement().executeQuery("select count(distinct(mission_uuid)) from " + queryDataTable); //$NON-NLS-1$
+					try {
+						if (rs.next()) { 
+							result.setMissionCnt(rs.getInt(1));
 						}
 					} finally {
 						rs.close();

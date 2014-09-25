@@ -45,6 +45,8 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 
+	private int missionCnt;
+	
 	public DerbyPagedMissionResult(String queryTempTable, DerbySurveyQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
@@ -54,6 +56,22 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.engine = engine;
+	}
+	
+	/**
+	 * Sets the unique mission cnt
+	 * @param cnt
+	 */
+	public void setMissionCnt(int cnt){
+		this.missionCnt = cnt;
+	}
+	
+	/**
+	 * 
+	 * @return the unique mission cnt
+	 */
+	public int getMissionCnt(){
+		return this.missionCnt;
 	}
 	
 	@Override

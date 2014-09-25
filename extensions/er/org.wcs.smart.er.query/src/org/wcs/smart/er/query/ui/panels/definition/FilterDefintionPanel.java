@@ -60,6 +60,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	private SurveyDesign currentDesign;
 
 	private boolean showSurveyDesignLabel = true;
+	private boolean includeFilterTypeOp = true;
 	
 	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
 	
@@ -76,8 +77,17 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	 * 
 	 */
 	public FilterDefintionPanel(boolean showSurveyDesign) {
+		this(showSurveyDesign, true);
+	}
+	
+	/**
+	 * Creates a new drop target panel.
+	 * 
+	 */
+	public FilterDefintionPanel(boolean showSurveyDesign, boolean includeFilterTypeOp) {
 		super();
 		this.showSurveyDesignLabel = showSurveyDesign;
+		this.includeFilterTypeOp = includeFilterTypeOp;
 		listener = new DefinitionListener(this);
 		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(listener);
 	}
@@ -166,7 +176,12 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 		outer.setLayout(gl);
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		super.createFilterTypeComposite(outer);
+		if (includeFilterTypeOp){
+			super.createFilterTypeComposite(outer);
+		}else{
+			Label spacer = new Label(outer, SWT.NONE);
+			spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		}
 
 		if (showSurveyDesignLabel){
 			Composite right = new Composite(outer, SWT.NONE);

@@ -46,6 +46,7 @@ import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
@@ -53,6 +54,7 @@ import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.TrackFilterDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.FilterItemPanel;
 import org.wcs.smart.er.query.ui.panels.item.GriddedValueItemPanel;
@@ -448,7 +450,12 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		if (proxy.getQuery() instanceof SimpleQuery){
 			
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-			proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(queryFilter, session));
+			
+			if (proxy.getQuery().getType().getKey().equals(MissionTrackQueryType.KEY)){
+				proxy.setDropItems(TrackFilterDefinitionPanel.ID, asDropItems(queryFilter, session));
+			}else{
+				proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(queryFilter, session));	
+			}
 					
 		}else if (proxy.getQuery().getType().getKey().equals(SurveySummaryQueryType.KEY)){
 			SurveySummaryQuery q = (SurveySummaryQuery) proxy.getQuery();
