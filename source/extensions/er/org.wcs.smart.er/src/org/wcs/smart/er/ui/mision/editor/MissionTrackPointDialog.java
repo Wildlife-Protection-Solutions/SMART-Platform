@@ -23,8 +23,12 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.util.TimeZone;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.ui.map.TrackPointDialog;
 
@@ -77,29 +81,29 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 
 	@Override
 	protected void okPressed() {
-//		Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
-//		PatrolLegDay pld = track.getPatrolLegDay();
-//		
-//		//save then close
-//		if (editTrack.getLineString() == null){
-//			//delete track
-//			track.getPatrolLegDay().setTrack(null);
-//			track.setPatrolLegDay(null);
-//		}else{
-//			track.setLineString(editTrack.getLineString());
-//		}
-//		
-//		//save and fire
-//		SavePatrolPartJob saveJob = new SavePatrolPartJob(p,pld); 		
-//		saveJob.schedule();
-//		try{
-//			saveJob.join();
-//			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pld);
-//			getButton(IDialogConstants.OK_ID).setEnabled(false);
-//			setModified(false);
-//		}catch (InterruptedException ex){
-//			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
-//		}
+		Job job = null;
+		Mission m = track.getMission();
+		//save then close
+		if (editTrack.getLineString() == null){
+			//delete track
+			m.getTracks().remove(track);
+			track.setMission(null);
+			job = new DeleteMissionTracksJob(track);
+		}else{
+			track.setLineString(editTrack.getLineString());
+			job = new SaveMissionTracksJob(track);
+		}
+
+		//save and fire
+		try {
+			job.schedule();
+			job.join();
+			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, m);
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			setModified(false);
+		}catch (InterruptedException ex){
+			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
+		}
 	}
 	
 }

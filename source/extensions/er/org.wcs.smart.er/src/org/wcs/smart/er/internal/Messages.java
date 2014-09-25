@@ -82,6 +82,10 @@ public class Messages extends NLS {
 	public static String DateComposite_Title;
 	public static String DateComposites_Description;
 	public static String DateComposites_Title;
+	public static String DeleteMissionTracksJob_Error;
+
+	public static String DeleteMissionTracksJob_Title;
+
 	public static String DeleteSurveyElementHandler_Confirm4;
 	public static String DeleteSurveyElementHandler_Confirm5;
 	public static String DeleteSurveyElementHandler_Confirm6;
