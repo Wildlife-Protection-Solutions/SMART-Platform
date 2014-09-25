@@ -37,6 +37,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
@@ -45,6 +46,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
@@ -259,6 +261,35 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(Mission.class));
 		sql.append(".survey_uuid "); //$NON-NLS-1$
+		
+
+		if (engine instanceof DerbyMissionEngine){
+			//do need join mission tracks?
+			final boolean[] needstracks = new boolean[]{false};
+			IFilterVisitor missionTracks = new IFilterVisitor() {
+				@Override
+				public void visit(IFilter filter) {
+					if (needstracks[0]) return;
+					if (filter instanceof SamplingUnitFilter){
+						needstracks[0] = true;
+					}
+					
+				}
+			};
+			queryFilter.accept(missionTracks);
+			if (needstracks[0]){
+				sql.append(" inner join "); //$NON-NLS-1$
+				sql.append(namePrefix(MissionTrack.class));
+				sql.append(" on ");  //$NON-NLS-1$
+				sql.append(prefix(Mission.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
+				sql.append(prefix(MissionTrack.class));
+				sql.append(".mission_uuid "); //$NON-NLS-1$	
+				
+				usedTables.add(MissionTrack.class);
+			}
+			
+		}
 		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(SurveyWaypoint.class));
@@ -644,12 +675,21 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
 			sql.append(" " + lfilter.getValue().toString()); //$NON-NLS-1$
 		}else if (lfilter.getAttributeType() == AttributeType.TEXT){
+			sql.append(" LOWER("); //$NON-NLS-1$
 			sql.append(prefix(MissionPropertyValue.class));
-			sql.append(".string_value "); //$NON-NLS-1$
+			sql.append(".string_value) "); //$NON-NLS-1$
 			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
-			sql.append(" '"); //$NON-NLS-1$
-			sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
-			sql.append("'"); //$NON-NLS-1$
+			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
+					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
+				sql.append(" '%"); //$NON-NLS-1$
+				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append("%' "); //$NON-NLS-1$
+			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
+				sql.append(" '"); //$NON-NLS-1$
+				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append("'"); //$NON-NLS-1$
+			}
+			
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
 			sql.append(prefix(MissionAttributeListItem.class));
 			sql.append(".keyid = '"); //$NON-NLS-1$
@@ -708,12 +748,23 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
 			sql.append(" " + lfilter.getValue().toString()); //$NON-NLS-1$
 		}else if (lfilter.getAttributeType() == AttributeType.TEXT){
+			sql.append(" LOWER("); //$NON-NLS-1$
 			sql.append(prefix(SamplingUnitAttributeValue.class));
-			sql.append(".string_value "); //$NON-NLS-1$
+			sql.append(".string_value ) "); //$NON-NLS-1$
 			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
-			sql.append(" '"); //$NON-NLS-1$
-			sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
-			sql.append("'"); //$NON-NLS-1$
+			
+			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
+					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
+				sql.append(" '%"); //$NON-NLS-1$
+				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append("%' "); //$NON-NLS-1$
+			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
+				sql.append(" '"); //$NON-NLS-1$
+				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append("'"); //$NON-NLS-1$
+			}
+			
+			
 		}
 		
 		QueryPlugIn.logSql(sql.toString());

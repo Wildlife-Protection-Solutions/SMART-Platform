@@ -235,6 +235,14 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			}else if (filter.getType() == Type.TRACK){
 				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
 			}
+		}else if (engine instanceof DerbyMissionEngine){
+			//survey waypoint su or track  
+			if (filter.getType() == Type.SAMPLINGUNIT){
+				return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						+ " OR " + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}else if (filter.getType() == Type.TRACK){
+				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}else{
 			if (filter.getType() == Type.SAMPLINGUNIT){
 				return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$

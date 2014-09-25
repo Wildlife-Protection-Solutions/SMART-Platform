@@ -80,6 +80,8 @@ public class Messages extends NLS {
 	public static String MissionIdGroupByDropItem_FiltersLabel;
 	public static String MissionIdGroupByDropItem_IncludedLabel;
 	public static String MissionIdGroupByDropItem_Label;
+	public static String MissionInfoSection_NA;
+	public static String MissionInfoSection_NumMissions;
 	public static String MissionLegnthValueDropItem_TrackLengthLabel;
 	public static String MissionLengthValueItem_Label;
 	public static String MissionMemberDropItem_LeaderLabel;
@@ -88,6 +90,7 @@ public class Messages extends NLS {
 	public static String MissionMemberDropItem_MemberLabel;
 	public static String MissionMemberDropItem_MemberText;
 	public static String MissionMemberFilter_EmployeeNotFound;
+	public static String MissionPropertyQueryColumn_MissionPropertyColumnLabel;
 	public static String MissionQueryType_MissionQueryName;
 	public static String MissionStartDateField_Name;
 	public static String MissionTrackDateField_Name;
@@ -106,6 +109,7 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_Keyword4;
 	public static String QueryServiceInfo_Title;
 	public static String SamplingUnitAttributeFilter_AttributeNotFound;
+	public static String SamplingUnitAttributeQueryColumn_SuLabel;
 	public static String SamplingUnitDropItem_Label;
 	public static String SamplingUnitFilter_MissionTrackNotFound;
 	public static String SamplingUnitFilter_SamplingUnitNotFound;
@@ -202,6 +206,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumn_YLabel;
 	public static String SurveyQueryColumnManager_CategoryColumnLabel;
 	public static String SurveyQueryColumnManager_datamodelcolumnjobname;
+	public static String SurveyQueryColumnManager_LoadMissionPropJobName;
 	public static String SurveyQueryColumnManager_missionattributejobname;
 	public static String SurveyQueryFactory_DefaultQueryName;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
