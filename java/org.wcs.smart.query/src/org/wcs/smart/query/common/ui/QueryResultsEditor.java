@@ -48,7 +48,9 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
@@ -228,25 +230,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		QueryEventManager.getInstance().addListener(qListener);
 	}
 	
-	/**
-	 * Creates a new query of the given type
-	 * @param type
-	 * @return
-	 */
-	public abstract Query createNewQuery(IQueryType type);
-	
-	/**
-	 * Creates a query service for the map 
-	 * @return
-	 */
-	public abstract IQueryService createQueryService();
-	/**
-	 * 
-	 * @return valid date filters
-	 */
-	protected abstract IDateFieldFilter[] getDateFilterOptions();
-	
-	protected abstract CellLabelProvider getColumnLabelProvider(QueryColumn column);
 	/**
 	 * @return the query results display table
 	 */
@@ -547,4 +530,46 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				
 		QueryEventManager.getInstance().fireRefreshQuery(getQuery());
 	}
+	
+	/**
+	 * Creates info section which appears above the table; can be null 
+	 * or overwritten by subclasses.
+	 * 
+	 * @return
+	 */
+	protected ISummaryInfo createInfoSection(){
+		if (getQuery() instanceof ObservationQuery){
+			return new ObservationQuerySummaryInfo();
+		}else if (getQuery() instanceof WaypointQuery){
+			return new WaypointQuerySummaryInfo();
+		}
+		return null;
+	}
+
+	/**
+	 * Creates a new query of the given type
+	 * @param type
+	 * @return
+	 */
+	public abstract Query createNewQuery(IQueryType type);
+	
+	/**
+	 * Creates a query service for the map 
+	 * @return
+	 */
+	public abstract IQueryService createQueryService();
+	/**
+	 * 
+	 * @return valid date filters for query
+	 */
+	protected abstract IDateFieldFilter[] getDateFilterOptions();
+	
+	/**
+	 * Column label provider 
+	 * @param column
+	 * @return
+	 */
+	protected abstract CellLabelProvider getColumnLabelProvider(QueryColumn column);
+	
+	
 }
