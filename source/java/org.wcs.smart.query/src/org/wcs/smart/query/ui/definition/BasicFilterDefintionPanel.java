@@ -186,14 +186,16 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	public String getQueryPart(){
 		StringBuilder query = new StringBuilder();
 		
-		if (items.size() > 0){
-			//if non-empty filter then include filter type
-			if (btnWaypoint.getSelection()){
-				query.append(IFilter.FilterType.WAYPOINT.getKey());
-			}else{
-				query.append(IFilter.FilterType.OBSERVATION.getKey());
+		if (btnWaypoint != null){
+			if (items.size() > 0){
+				//if non-empty filter then include filter type
+				if (btnWaypoint.getSelection()){
+					query.append(IFilter.FilterType.WAYPOINT.getKey());
+				}else{
+					query.append(IFilter.FilterType.OBSERVATION.getKey());
+				}
+				query.append("|"); //$NON-NLS-1$
 			}
-			query.append("|"); //$NON-NLS-1$
 		}
 		
 		for (Object item : items){

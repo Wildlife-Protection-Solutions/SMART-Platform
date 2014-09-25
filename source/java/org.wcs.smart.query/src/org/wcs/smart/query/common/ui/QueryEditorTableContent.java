@@ -38,9 +38,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
@@ -299,13 +297,9 @@ public class QueryEditorTableContent {
 	}
 	
 	private ISummaryInfo createInfoSection(){
-		if (editor.getQuery() instanceof ObservationQuery){
-			return new ObservationQuerySummaryInfo();
-		}else if (editor.getQuery() instanceof WaypointQuery){
-			return new WaypointQuerySummaryInfo();
-		}
-		return null;
+		return editor.createInfoSection();
 	}
+	
 	/**
 	 * Creates the initial composite that prompts users
 	 * to run query.
