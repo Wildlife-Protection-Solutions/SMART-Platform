@@ -79,7 +79,7 @@ public class TracksComposite extends Composite {
 		createControls();
 		updateInput();
 	}
-
+	
 	private List<MissionTrack> buildTrackInput(Mission m) {
 		List<MissionTrack> tblInput = new ArrayList<MissionTrack>();
 		Date date = dialog.getDate();
@@ -91,7 +91,7 @@ public class TracksComposite extends Composite {
 		return tblInput;
 	}
 	
-	private void updateInput() {
+	public void updateInput() {
 		trackViewer.setInput(buildTrackInput(dialog.getMission()).toArray());
 	}
 

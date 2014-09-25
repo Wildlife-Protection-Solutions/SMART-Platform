@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
@@ -48,7 +49,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 3.0.0
  */
-public class MissionTrackEditDialog extends TitleAreaDialog {
+public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEventListener {
 
 	private Session session;
 	
@@ -56,14 +57,24 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 	
 	private Mission mission;
 	private Date date;
+	
+	private TracksComposite cmp;
 
 	public MissionTrackEditDialog(Shell shell, Mission mission, Date date) {
 		super(shell);
 		this.date = date;
+		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, this);
 
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		this.mission = (Mission) session.load(Mission.class, mission.getUuid());
+	}
+
+	@Override
+	//ISurveyEventListener handler
+	public void event(Object o) {
+		this.mission = (Mission) session.load(Mission.class, mission.getUuid());
+		cmp.updateInput();
 	}
 
 	Mission getMission() {
@@ -83,7 +94,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		getShell().setText(title);
 		setMessage(Messages.MissionTrackEditDialog_Message);
 
-		TracksComposite cmp = new TracksComposite(comp, this);
+		cmp = new TracksComposite(comp, this);
 		cmp.addChangeListener(new ISurveyListener() {
 			@Override
 			public void compositeModified() {
@@ -129,6 +140,8 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 			session.getTransaction().rollback();
 		}
 		session.close();
+
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, this);
 		
 		return super.close();
 	}
