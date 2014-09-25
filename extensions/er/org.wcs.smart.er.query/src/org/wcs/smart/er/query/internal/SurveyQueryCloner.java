@@ -284,7 +284,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setIsShared(query.getIsShared());
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
-			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
+			clone.setQueryFilter(cloneMissionTrackQueryFilter(query.getQueryFilter(), engine));
 			clone.setSurveyDesign(query.getSurveyDesign());
 			
 			engine.getSession().save(clone);
@@ -311,6 +311,22 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		}
 	}
 	
+	/*
+	 * Updates the uuid references in the query filter to reference
+	 * the new conservation area uuid items 
+	 */
+	private String cloneMissionTrackQueryFilter(String strFilter, ConservationAreaClonerEngine engine){
+		if (strFilter.length() == 0){
+			return strFilter;
+		}
+		try{
+			Parser parser = new Parser(new ByteArrayInputStream(strFilter.getBytes()));
+			return parser.ExpressionPart().asString();
+		}catch (Throwable t){
+			QueryPlugIn.log("Error cloning query definition: " + strFilter, t); //$NON-NLS-1$
+			return strFilter;
+		}
+	}
 	
 	/*
 	 * Updates the gridded query definitions so that uuid references in the query 
