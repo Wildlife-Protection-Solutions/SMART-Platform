@@ -40,17 +40,17 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
  * @author elitvin
  * @since 3.0.0
  */
-public class SaveMissionTracksJob extends Job {
+public class DeleteMissionTracksJob extends Job {
 
 	private List<MissionTrack> tracks;
 	
-    public SaveMissionTracksJob(List<MissionTrack> tracks) {
-        super(Messages.SaveMissionTracksJob_Title);
+    public DeleteMissionTracksJob(List<MissionTrack> tracks) {
+        super(Messages.DeleteMissionTracksJob_Title);
         this.tracks = tracks;
     }
 
-    public SaveMissionTracksJob(MissionTrack track) {
-        super(Messages.SaveMissionTracksJob_Title);
+    public DeleteMissionTracksJob(MissionTrack track) {
+        super(Messages.DeleteMissionTracksJob_Title);
         this.tracks = new ArrayList<MissionTrack>();
         this.tracks.add(track);
     }
@@ -61,13 +61,13 @@ public class SaveMissionTracksJob extends Job {
 		session.beginTransaction();
 		try {
 			for (MissionTrack t : tracks) {
-				session.saveOrUpdate(t);
+				session.delete(t);
 			}
 			session.getTransaction().commit();
         	return Status.OK_STATUS;
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog(Messages.SaveMissionJob_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			EcologicalRecordsPlugIn.displayLog(Messages.DeleteMissionTracksJob_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 	        return Status.CANCEL_STATUS;
 		} finally {
 			session.close();
