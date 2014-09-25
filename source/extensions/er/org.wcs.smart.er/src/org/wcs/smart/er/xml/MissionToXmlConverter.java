@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.patrol.xml;
+package org.wcs.smart.er.xml;
 
+	
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -30,152 +31,101 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.xml.model.missions.MembersType;
+import org.wcs.smart.er.xml.model.missions.MissionType;
+import org.wcs.smart.er.xml.model.missions.SurveyWaypointsType;
+import org.wcs.smart.er.xml.model.missions.TracksType;
+import org.wcs.smart.er.xml.model.missions.WaypointObservationAttributeType;
+import org.wcs.smart.er.xml.model.missions.WaypointObservationType;
+import org.wcs.smart.er.xml.model.missions.WaypointType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.xml.model.LabelType;
-import org.wcs.smart.patrol.xml.model.ObjectiveType;
-import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
-import org.wcs.smart.patrol.xml.model.PatrolLegType;
-import org.wcs.smart.patrol.xml.model.PatrolMemberType;
-import org.wcs.smart.patrol.xml.model.PatrolType;
-import org.wcs.smart.patrol.xml.model.TrackType;
-import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
-import org.wcs.smart.patrol.xml.model.WaypointObservationType;
-import org.wcs.smart.patrol.xml.model.WaypointType;
 import org.wcs.smart.util.SmartUtils;
 
-public class PatrolToXmlConverter {
-
+public class MissionToXmlConverter {
 	/**
 	 * Exports a patrol to xml. The patrol must be entire loaded
 	 * or associated with an active session.
 	 * 
-	 * @param p the patrol convert
+	 * @param m the patrol convert
 	 * @return the patrol converted to xml model
 	 * 
 	 * @throws DatatypeConfigurationException
 	 */
-	public static PatrolType toXml(Patrol p ) throws DatatypeConfigurationException{
+	public static MissionType toXml(Mission m ) throws DatatypeConfigurationException{
 		
-		PatrolType xml = new PatrolType();
+		MissionType xml = new MissionType();
 		
-		/* patrol id */
-		xml.setId(p.getId());
+		/* mission id */
+		xml.setId(m.getId());
 		
 		/* start & end dates */
-		xml.setEndDate(SmartUtils.toXmlDate(p.getEndDate()));
-		xml.setStartDate(SmartUtils.toXmlDate(p.getStartDate()));
-		
-		/* armed */
-		xml.setIsArmed(p.isArmed());
-		
-		/* objective */
-		ObjectiveType obj = new ObjectiveType();
-		obj.setDescription(p.getObjective());
-//		obj.setRating(p.getObjectiveRating());
-		xml.setObjective(obj);
-		
-		/* patrol type */
-		xml.setPatrolType(p.getPatrolType().name());
-		
-		/* station */
-		xml.setStation(createLabel(p, p.getStation()));
-		
-		/* team */
-		xml.setTeam(createLabel(p, p.getTeam()));
-
-		/* mandate */
-		xml.setMandate(createLabel(p, p.getMandate()));
-
-		/* legs */
-		for (PatrolLeg leg: p.getLegs()){
-			xml.getLegs().add(convertPatrolLeg(leg));
-		}
+		xml.setEndDate(SmartUtils.toXmlDate(m.getEndDate()));
+		xml.setStartDate(SmartUtils.toXmlDate(m.getStartDate()));
 		
 		/* comment */
-		xml.setComment(p.getComment());
+		xml.setComment(m.getComment() );
+
+		/* survey id */
+		xml.setSurveyId(m.getSurvey().getId());
+		
+		// members
+		for(MissionMember member : m.getMembers()){
+			xml.getMembers().add( convertMissionMember(member) );
+		}
+
+		// survey waypoints
+		for(SurveyWaypoint swp : m.getWaypoints()){
+			xml.getSurveyWaypoints().add(convertSurveyWaypoint(swp));
+		}
+		
+		//tracks
+		for(MissionTrack mt : m.getTracks()){
+			xml.getTracks().add(convertMissionTrack(mt));
+		}
 		
 		return xml;
 		
 	}
 	
-	private static LabelType createLabel(Patrol p, NamedItem object){
-		if (object == null){
-			return null;
-		}
-		
-		LabelType lbl = new LabelType();
-		lbl.setLanguageCode(p.getConservationArea().getDefaultLanguage().getCode());
-		lbl.setValue(object.findName(p.getConservationArea().getDefaultLanguage()));
-		return lbl;
-	}
 	
-	private static PatrolLegType convertPatrolLeg(PatrolLeg leg) throws DatatypeConfigurationException{
-		PatrolLegType xml = new PatrolLegType();
-		xml.setEndDate(SmartUtils.toXmlDate(leg.getEndDate()));
-		xml.setStartDate(SmartUtils.toXmlDate(leg.getStartDate()));
-		xml.setId(leg.getId());
-		xml.setTransportType(createLabel(leg.getPatrol(), leg.getType()));
-		
-		for (PatrolLegMember member : leg.getMembers()){
-			xml.getMembers().add(convertPatrolMemeber(member));
-		}
-		for (PatrolLegDay legday : leg.getPatrolLegDays()){
-			xml.getDays().add(convertPatrolLegDay(legday));
-		}
-		return xml;
-		
+	private static TracksType convertMissionTrack(MissionTrack mt) throws DatatypeConfigurationException{
+		TracksType track = new TracksType();
+		track.setDate(toXmlTime(mt.getDate()));
+		track.setGeom(mt.getGeom());
+		track.setId(mt.getId());
+		track.setSamplingUnitId(mt.getSamplingUnit().getId());
+		track.setTrackType(mt.getType().toString());
+		return null;
 	}
 
-	private static PatrolMemberType convertPatrolMemeber(PatrolLegMember member){
-		PatrolMemberType xml = new PatrolMemberType();
-		xml.setIsPilot(member.getIsPilot());
-		xml.setIsLeader(member.getIsLeader());
-		xml.setGivenName(member.getMember().getGivenName());
-		xml.setFamilyName(member.getMember().getFamilyName());
+
+	private static SurveyWaypointsType convertSurveyWaypoint(SurveyWaypoint swp)throws DatatypeConfigurationException {
+		SurveyWaypointsType xml = new SurveyWaypointsType();
+		xml.setMissionTrackId(swp.getMissionTrack().getId());
+		xml.setSamplingUnitId(swp.getSamplingUnit().getId());
+		xml.setWaypoints(convertWaypoint(swp));
+		
+		return null;
+	}
+
+
+	private static MembersType convertMissionMember(MissionMember member){
+		MembersType xml = new MembersType();
 		xml.setEmployeeId(member.getMember().getId());
-		
+		xml.setIsLeader(member.getIsLeader());
 		return xml;
 	}
 	
-	private static PatrolLegDayType convertPatrolLegDay(PatrolLegDay legDay) throws DatatypeConfigurationException{
-		
-		PatrolLegDayType xml = new PatrolLegDayType();
-		xml.setDate(SmartUtils.toXmlDate(legDay.getDate()));
-		
-		xml.setEndTime(toXmlTime(legDay.getEndTime()));
-		xml.setStartTime(toXmlTime(legDay.getStartTime()));
-		
-		if (legDay.getRestMinutes() ==  null){
-			xml.setRestMinutes(0.0);
-		}else{
-			xml.setRestMinutes((double)legDay.getRestMinutes());
-		}
-		
-		if (legDay.getTrack() != null){
-			TrackType track = new TrackType();
-			track.setDistance((double)legDay.getTrack().getDistance());
-			
-			track.setGeom(SmartUtils.encodeHex(legDay.getTrack().getGeom()) );
-			xml.setTrack(track);
-		}
-		
-		for (PatrolWaypoint wp  : legDay.getWaypoints()){
-			xml.getWaypoints().add(convertWaypoint(wp));
-		}
-		return xml;
-	}
-	
-	private static WaypointType convertWaypoint(PatrolWaypoint wp) throws DatatypeConfigurationException{
+
+	private static WaypointType convertWaypoint(SurveyWaypoint wp) throws DatatypeConfigurationException{
 		WaypointType xml = new WaypointType();
 		xml.setComment(wp.getWaypoint().getComment());
 		xml.setDirection(wp.getWaypoint().getDirection());
@@ -266,3 +216,5 @@ public class PatrolToXmlConverter {
 	}
 	
 }
+
+

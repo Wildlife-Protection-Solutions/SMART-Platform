@@ -106,7 +106,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 					monitor.beginTask(Messages.SurveyDesignImportHandler_0, 100);
 					
 					monitor.subTask(Messages.SurveyDesignImportHandler_1);
-					org.wcs.smart.er.xml.model.SurveyDesign xmlsd = null;
+					org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign xmlsd = null;
 					try{
 						FileInputStream fin = new FileInputStream(importFile);
 						try{

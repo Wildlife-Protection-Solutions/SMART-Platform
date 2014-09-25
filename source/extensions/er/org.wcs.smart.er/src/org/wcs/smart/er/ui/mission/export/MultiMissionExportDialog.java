@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.patrol.xml.export;
+
+package org.wcs.smart.er.ui.mission.export;
 
 import java.io.File;
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,14 +41,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.common.control.XmlMultiExportDialog;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
-import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
-import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -57,21 +52,23 @@ import org.wcs.smart.util.SmartUtils;
  * This code performs validation to ensure at least one patrol is selected
  * and that the output directory is a valid directory.
  * 
- * @author egouge
+ * @author Jeff
  *
  */
-public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPatrolFilteringView {
+
+public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog implements IMissionFilteringView{
+		
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
-	private static final String EXPORT_DIALOGTITLE = Messages.ExportPatrolHandler_ExportDialog_Title;
+	private static final String EXPORT_DIALOGTITLE = "Export Missions to XML";
 
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog"); //$NON-NLS-1$
 	static{
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
 
-	private PatrolViewFilter currentFilter = new PatrolViewFilter();
+	private MissionViewFilter currentFilter = new MissionViewFilter();
 	
 	/**
 	 * Creates a new dialog.
@@ -79,16 +76,17 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	 * @param parentShell parent shell
 	 * @param patrol patrol to export
 	 */
-	public MultiPatrolExportDialog(Shell parentShell) {
-		super(parentShell, Messages.MultiPatrolExportDialog_ChangeFilter);
+	public MultiMissionExportDialog(Shell parentShell) {
+		super(parentShell, "The missiosn below have been filtered.  Click <a>here</a> to change filter.");
 		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle(Messages.MultiPatrolExportDialog_PageTitle);
-		setMessage(Messages.MultiPatrolExportDialog_Message);
-		getShell().setText(Messages.MultiPatrolExportDialog_Title);
+		setTitle("Export Missions");
+		setMessage("Select the Missions you wish to export");
+		getShell().setText("Export Missions");
+		loadObjectData();
 		return super.createDialogArea(parent);
 	}
 	/**
@@ -107,22 +105,22 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	
 	private boolean validate(){
 		
-		if (super.getTableViewer().getCheckedElements().length == 0) {
-			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, Messages.ExportPatrolHandler_Error_NothingToExport);
+		if (super.getTreeViewer().getCheckedElements().length == 0) {
+			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, "You much select at least 1 mission to export.");
 			return false;
 		}
 		
 		File dir = new File(txtFile.getText());
 		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.ExportPatrolHandler_Warning_DirNotExist, new Object[]{dir.getAbsolutePath()}))) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format("The selected directory does not exist: {0}", new Object[]{dir.getAbsolutePath()}))) {
 				return false;
 			}
 			if (!SmartUtils.createDirectory(dir)){
-				SmartPatrolPlugIn.displayLog(Messages.MultiPatrolExportDialog_CouldNotCreateDirectory, null);
+				EcologicalRecordsPlugIn.displayLog("Could not created selected directory.", null);
 				return false;
 			}
 		}else if (!dir.isDirectory()){
-			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.MultiPatrolExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
+			EcologicalRecordsPlugIn.displayLog(MessageFormat.format("{0} is not a valid directory.", new Object[]{dir.toString()}),null);
 			return false;
 		}
 		return true;
@@ -140,35 +138,61 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	
 	@Override
 	protected void handleFilterLinkClicked() {
-		PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), MultiPatrolExportDialog.this);
+		MissionFilterDialog pfd = new MissionFilterDialog(getShell(), MultiMissionExportDialog.this);
 		pfd.open();
 	}
 
 	@Override
 	protected void loadObjectData() {
-		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
+		Job loadMissions = new Job("Loading Mission List"){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
-					Query q = currentFilter.buildQuery(s);
+					Query q = currentFilter.buildQuery(s); 
 					List<?> results = q.list();
-					final Object[][] data = new Object[results.size()][2];
-					int counter = 0;
+					List<SurveyTreeItem> dataList = new ArrayList<SurveyTreeItem>();
+					
+					SurveyTreeItem prevSurvey = null;
+					
 					for(Object x : results){
 						Object[] row = (Object[])x;
-						
-						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						Object[] thisdata = {pname, (byte[])row[0], row[1]};
-						data[counter++] = thisdata;
+						String surveyName = (String) row[4];
+
+						if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
+							MissionTreeItem mti = new MissionTreeItem();
+							mti.setName(row[1] + " [" + row[2] + " - " + row[3] + "]");
+							mti.setUuid((byte[]) row[0]);
+							prevSurvey.getChildren().add(mti);
+						}else{
+							SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
+							surveyTreeItem.setName(surveyName);
+							surveyTreeItem.setUuid((byte[]) row[5]);
+							
+							MissionTreeItem mti = new MissionTreeItem();
+							mti.setName(row[1] + " [" + row[2] + " - " + row[3] + "]");
+							mti.setUuid((byte[]) row[0]);
+							surveyTreeItem.getChildren().add(mti);
+							
+							prevSurvey = surveyTreeItem;
+							dataList.add(surveyTreeItem);
+
+						}
+					}
+					final Object[] data = new Object[dataList.size()];
+					
+					int counter = 0;
+					for(SurveyTreeItem si : dataList){
+						data[counter] = si;
+						counter++;
 					}
 					
 					getShell().getDisplay().asyncExec(new Runnable(){
 						@Override
 						public void run() {
-							getTableViewer().setInput(data);
-							getTableViewer().refresh();
+							getTreeViewer().setInput(data);
+							getTreeViewer().refresh();
 						}
 					});
 					
@@ -182,7 +206,9 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 			}
 			
 		};
-		loadPatrols.schedule();
+		loadMissions.schedule();
+	
+		
 		
 	}
 
@@ -196,8 +222,7 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 		loadObjectData();
 	}
 
-	@Override
-	public PatrolViewFilter getFilter() {
+	public MissionViewFilter getFilter() {
 		return currentFilter;
 	}
 
