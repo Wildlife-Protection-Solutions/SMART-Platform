@@ -357,7 +357,7 @@ public class FilterProcessor implements IFilterProcessor {
 					sql.append(filter);
 				}
 			}
-			if (populateObservation){
+			
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(SamplingUnit.class));
 			sql.append(" on "); //$NON-NLS-1$
@@ -366,31 +366,32 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(prefix(SamplingUnit.class));
 			sql.append(".uuid "); //$NON-NLS-1$
 				
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservation.class));
-			usedTables.add(WaypointObservation.class);
-			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(Waypoint.class));
-			sql.append(".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservation.class));
-			sql.append(".wp_uuid "); //$NON-NLS-1$
-				
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(name(Category.class));
-			usedTables.add(Category.class);
-			sql.append(" "); //$NON-NLS-1$
-			sql.append(prefix(Category.class));
-			
-			sql.append(" on " + prefix(Category.class) //$NON-NLS-1$
-				+ ".uuid = " //$NON-NLS-1$
-				+ prefix(WaypointObservation.class)
-				+ ".category_uuid "); //$NON-NLS-1$
-				
-			if (observationFilterVisitor.hasAttributeFilter()){
+			if (populateObservation){
 				sql.append(" left join "); //$NON-NLS-1$
-				sql.append(observationTable + " qa on qa.observation_uuid = "); //$NON-NLS-1$
-				sql.append(prefix(WaypointObservation.class) + ".uuid"); //$NON-NLS-1$
-			}
+				sql.append(namePrefix(WaypointObservation.class));
+				usedTables.add(WaypointObservation.class);
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(Waypoint.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservation.class));
+				sql.append(".wp_uuid "); //$NON-NLS-1$
+					
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(name(Category.class));
+				usedTables.add(Category.class);
+				sql.append(" "); //$NON-NLS-1$
+				sql.append(prefix(Category.class));
+				
+				sql.append(" on " + prefix(Category.class) //$NON-NLS-1$
+					+ ".uuid = " //$NON-NLS-1$
+					+ prefix(WaypointObservation.class)
+					+ ".category_uuid "); //$NON-NLS-1$
+					
+				if (observationFilterVisitor.hasAttributeFilter()){
+					sql.append(" left join "); //$NON-NLS-1$
+					sql.append(observationTable + " qa on qa.observation_uuid = "); //$NON-NLS-1$
+					sql.append(prefix(WaypointObservation.class) + ".uuid"); //$NON-NLS-1$
+				}
 			}
 
 		}

@@ -38,7 +38,7 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
-import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.TrackFilterDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -105,9 +105,9 @@ public class MissionTrackQueryType implements IQueryType {
 			List<IDefinitionPanel> components) {
 		MissionTrackQuery squery = (MissionTrackQuery)query;
 		for (IDefinitionPanel panel : components){
-			if (panel.getId().equals(FilterDefintionPanel.ID)){
-				squery.setSurveyDesign(  ((FilterDefintionPanel)panel).getSurveyDesign()  );
-				squery.setQueryFilter(  ((FilterDefintionPanel)panel).getQueryPart()  );
+			if (panel.getId().equals(TrackFilterDefinitionPanel.ID)){
+				squery.setSurveyDesign(  ((TrackFilterDefinitionPanel)panel).getSurveyDesign()  );
+				squery.setQueryFilter(  ((TrackFilterDefinitionPanel)panel).getQueryPart()  );
 			}else if (panel.getId().equals(ConservationAreaFilterPanel.ID)){
 				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter() );
 			}
@@ -124,7 +124,7 @@ public class MissionTrackQueryType implements IQueryType {
 				return msg;
 			}
 			
-			if (panel.getId().equals(FilterDefintionPanel.ID)){
+			if (panel.getId().equals(TrackFilterDefinitionPanel.ID)){
 				filter = panel.getQueryPart();
 			}	
 		}
@@ -135,7 +135,7 @@ public class MissionTrackQueryType implements IQueryType {
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
 			Parser parser = new Parser(is);
-			parser.QueryFilter();
+			parser.ExpressionPart();
 		}catch (Throwable ex){
 			return ex.getMessage();
 		}finally{

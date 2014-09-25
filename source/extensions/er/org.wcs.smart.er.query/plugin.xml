@@ -28,7 +28,7 @@
             QueryCategory="org.wcs.smart.er.query.category.survey"
             class="org.wcs.smart.er.query.model.MissionTrackQueryType">
          <DefinitionPanel
-               id="org.wcs.smart.query.er.survey.definition.filter"
+               id="org.wcs.smart.query.er.survey.definition.filter.track"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack">
          </DefinitionPanel>
       </QueryType>
@@ -109,6 +109,12 @@
             isMultiCa="true"
             isSingleCa="true"
             panel="org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.er.survey.definition.filter.track"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.er.query.ui.panels.definition.TrackFilterDefinitionPanel">
       </QueryDefinitionPanel>
    </extension>
    <extension

@@ -35,6 +35,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.filter.MissionMemberFilter;
@@ -227,10 +228,19 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Sampling unit filter
 	 */
 	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{
-		if (filter.getType() == Type.SAMPLINGUNIT){
-			return engine.tablePrefix(SamplingUnit.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-		}else if (filter.getType() == Type.TRACK){
-			return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
+		//TODO: this works for waypoint filters but not track filters
+		if (engine instanceof DerbyMissionTrackEngine){
+			if (filter.getType() == Type.SAMPLINGUNIT){
+				return engine.tablePrefix(SamplingUnit.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (filter.getType() == Type.TRACK){
+				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}else{
+			if (filter.getType() == Type.SAMPLINGUNIT){
+				return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (filter.getType() == Type.TRACK){
+				return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
+			}
 		}
 		return ""; //$NON-NLS-1$
 	}

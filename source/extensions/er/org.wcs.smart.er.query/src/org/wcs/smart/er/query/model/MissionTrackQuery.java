@@ -216,7 +216,7 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 		}
 		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
 		Parser parser = new Parser(is);
-		QueryFilter myQuery = parser.QueryFilter();
+		QueryFilter myQuery = new QueryFilter(parser.ExpressionPart());
 		is.close();
 		queryFilter = myQuery;
 		return myQuery;

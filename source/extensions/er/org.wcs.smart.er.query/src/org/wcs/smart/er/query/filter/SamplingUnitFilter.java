@@ -51,17 +51,17 @@ public class SamplingUnitFilter implements IFilter {
 	}
 	
 	private String uuid;
-	private Type type;
+	private Type unitType;
 	
 	public enum Type {SAMPLINGUNIT, TRACK};
 	
 	public SamplingUnitFilter(String uuid, Type type){
 		this.uuid = uuid;
-		this.type = type;
+		this.unitType = type;
 	}
 	
 	public Type getType(){
-		return this.type;
+		return this.unitType;
 	}
 	
 	public String getUuid(){
@@ -69,9 +69,9 @@ public class SamplingUnitFilter implements IFilter {
 	}
 	@Override
 	public String asString() {
-		if (type == Type.SAMPLINGUNIT){
+		if (unitType == Type.SAMPLINGUNIT){
 			return "s:samplingunit:" + uuid; //$NON-NLS-1$
-		}else if (type == Type.TRACK){
+		}else if (unitType == Type.TRACK){
 			return "s:samplingunittrack:" + uuid; //$NON-NLS-1$
 		}
 		return null;
@@ -85,7 +85,7 @@ public class SamplingUnitFilter implements IFilter {
 
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
-		if (type == Type.SAMPLINGUNIT){
+		if (unitType == Type.SAMPLINGUNIT){
 			SamplingUnit su = (SamplingUnit) session.load(SamplingUnit.class, SmartUtils.decodeHex(uuid));
 			if (su != null){
 				su.getId();
@@ -94,7 +94,7 @@ public class SamplingUnitFilter implements IFilter {
 				return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitFilter_SamplingUnitNotFound, new Object[]{uuid}))}; 
 			}
 		}
-		if (type == Type.TRACK){
+		if (unitType == Type.TRACK){
 			MissionTrack su = (MissionTrack) session.load(MissionTrack.class, SmartUtils.decodeHex(uuid));
 			if (su != null){
 				su.getId();

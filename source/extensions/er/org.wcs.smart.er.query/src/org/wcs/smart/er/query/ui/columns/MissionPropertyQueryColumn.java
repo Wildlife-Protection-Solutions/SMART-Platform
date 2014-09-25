@@ -44,7 +44,7 @@ public class MissionPropertyQueryColumn extends QueryColumn {
 	 * @param mp
 	 */
 	public MissionPropertyQueryColumn(MissionAttribute mp){
-		super(mp.getName(), KEY_PREFIX + ":" + mp.getKeyId(), null); //$NON-NLS-1$
+		super("Mission:" + mp.getName(), KEY_PREFIX + ":" + mp.getKeyId(), null); //$NON-NLS-1$
 		
 		if (mp.getType() == AttributeType.NUMERIC){
 			super.setType(ColumnType.NUMBER);
