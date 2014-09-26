@@ -51,8 +51,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEventListener {
 
-	private Session session;
-	
 	private boolean isChanged = false;
 	
 	private Mission mission;
@@ -65,16 +63,21 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 		this.date = date;
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, this);
 
-		session = HibernateManager.openSession();
-		session.beginTransaction();
-		this.mission = (Mission) session.load(Mission.class, mission.getUuid());
+		this.mission = mission;
 	}
 
 	@Override
 	//ISurveyEventListener handler
 	public void event(Object o) {
-		this.mission = (Mission) session.load(Mission.class, mission.getUuid());
-		cmp.updateInput();
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			this.mission = (Mission) session.load(Mission.class, mission.getUuid());
+			cmp.updateInput();
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
 	}
 
 	Mission getMission() {
@@ -89,22 +92,31 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 	protected Control createDialogArea(Composite parent) {
 		Composite comp = (Composite) super.createDialogArea(parent);
 
-		String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, mission.getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
-		setTitle(title);
-		getShell().setText(title);
-		setMessage(Messages.MissionTrackEditDialog_Message);
-
-		cmp = new TracksComposite(comp, this);
-		cmp.addChangeListener(new ISurveyListener() {
-			@Override
-			public void compositeModified() {
-				if (getButton(IDialogConstants.OK_ID) == null) return;
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
-				isChanged = true;
-			}
-		});
 		
-		return comp;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			this.mission = (Mission) session.load(Mission.class, mission.getUuid());
+
+			String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, mission.getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
+			setTitle(title);
+			getShell().setText(title);
+			setMessage(Messages.MissionTrackEditDialog_Message);
+
+			cmp = new TracksComposite(comp, this);
+			cmp.addChangeListener(new ISurveyListener() {
+				@Override
+				public void compositeModified() {
+					if (getButton(IDialogConstants.OK_ID) == null) return;
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
+					isChanged = true;
+				}
+			});
+			return comp;
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -136,10 +148,6 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 				}
 			}
 		}
-		if (session.getTransaction().isActive()){
-			session.getTransaction().rollback();
-		}
-		session.close();
 
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, this);
 		
@@ -147,19 +155,22 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 	}
 
 	private boolean saveChanges() {
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try {
+			session.saveOrUpdate(mission);
 			session.getTransaction().commit();
-			isChanged = false;
-			
-			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
-			
-			//start a new transaction
-			session.beginTransaction();
-			return true;
 		} catch (Exception ex) {
 			EcologicalRecordsPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
 			return false;
+		} finally {
+			session.close();
 		}
+
+		isChanged = false;
+		
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+		return true;
 	}
 	
 }

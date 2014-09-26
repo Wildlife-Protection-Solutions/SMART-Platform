@@ -86,6 +86,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
@@ -102,6 +103,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -163,7 +165,7 @@ public class MissionDayComposite {
 //			input.clear();
 //			input.addAll(buildWaypointInput(mission));
 //			refreshTable();
-			setData(editor.getMissionEditor().getMission());
+			initData();
 		}
 	};
 	
@@ -476,88 +478,98 @@ public class MissionDayComposite {
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionChangeListener);
 	}
 	
-	public void setData(Mission data) {
-		this.mission = data;
-		Date date = editor.getDay();
+	public void initData() {
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			this.mission = editor.getMissionEditor().getMission();
+			session.update(mission);
 		
-		Calendar cal = Calendar.getInstance();
-		if (data.getStartDate() != date) {
-			cal.setTime(data.getStartDate());
-			dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
-					cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-		}else{
-			dtStartTime.setTime(0,0,0);
-		}
-		if (data.getEndDate() != date) {
-			cal.setTime(data.getEndDate());
-			dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
-					cal.get(Calendar.SECOND));
-		}else{
-			dtEndTime.setTime(23,59,59);
-		}
-		//TODO:
-//		if (data.getRestMinutes() == null) {
-//			restMinutes.setText("0"); //$NON-NLS-1$
-//		} else {
-//			restMinutes.setText(String.valueOf(data.getRestMinutes()));
-//		}
-//
-//		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
-
-		trackTable.setInput(buildTrackInput(mission).toArray());
-		
-		if (data.getWaypoints() == null) {
-			data.setWaypoints(new ArrayList<SurveyWaypoint>());
-		}
-		input = buildWaypointInput(data);
-		WritableList inputList = new WritableList(input, SurveyWaypoint.class);
-		observationTable.setInput(inputList);
-		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			Date date = editor.getDay();
 			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (editor.getMissionEditor().canEdit() == null) {
-					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
-					btnDeleteWaypoint.setEnabled(enabled);
-					
-//					if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
-//						btnMoveWaypoint.setEnabled(enabled);	
-//					}else{
-//						btnMoveWaypoint.setEnabled(false);
-//					}
-				}
+			Calendar cal = Calendar.getInstance();
+			if (mission.getStartDate() != date) {
+				cal.setTime(mission.getStartDate());
+				dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
+						cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+			}else{
+				dtStartTime.setTime(0,0,0);
 			}
-		});
-		samplingUnitEditor.setInput(data);
-		
-//		this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
+			if (mission.getEndDate() != date) {
+				cal.setTime(mission.getEndDate());
+				dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
+						cal.get(Calendar.SECOND));
+			}else{
+				dtEndTime.setTime(23,59,59);
+			}
+			//TODO:
+//			if (data.getRestMinutes() == null) {
+//				restMinutes.setText("0"); //$NON-NLS-1$
+//			} else {
+//				restMinutes.setText(String.valueOf(data.getRestMinutes()));
+//			}
+	//
+//			this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
+
+			trackTable.setInput(buildTrackInput(mission).toArray());
+			
+			if (mission.getWaypoints() == null) {
+				mission.setWaypoints(new ArrayList<SurveyWaypoint>());
+			}
+			input = buildWaypointInput(mission);
+			WritableList inputList = new WritableList(input, SurveyWaypoint.class);
+			observationTable.setInput(inputList);
+			observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 				
-		updateTotalHours();
-//		updateDistance();
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (editor.getMissionEditor().canEdit() == null) {
+						boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
+						btnDeleteWaypoint.setEnabled(enabled);
+						
+//						if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
+//							btnMoveWaypoint.setEnabled(enabled);	
+//						}else{
+//							btnMoveWaypoint.setEnabled(false);
+//						}
+					}
+				}
+			});
+			samplingUnitEditor.setInput(mission);
+			
+//			this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
+					
+			updateTotalHours();
+//			updateDistance();
+			
+			btnMoveWaypoint.setEnabled(false);
+			btnDeleteWaypoint.setEnabled(false);
+			
+//			if (editor.getPatrolEditor().canEdit() != null){
+//				dtEndTime.setEnabled(false);
+//				dtStartTime.setEnabled(false);
+//				restMinutes.setEditable(false);
+//				restMinutes.setEnabled(false);
+//				
+//				btnAddWaypoint.setVisible(false);
+//				btnDeleteWaypoint.setVisible(false);
+//				btnMoveWaypoint.setVisible(false);
+//				
+//				importTrack.setVisible(false);
+//				lblImportWaypoints.setVisible(false);
+//				
+//			}
 		
-		btnMoveWaypoint.setEnabled(false);
-		btnDeleteWaypoint.setEnabled(false);
-		
-//		if (editor.getPatrolEditor().canEdit() != null){
-//			dtEndTime.setEnabled(false);
-//			dtStartTime.setEnabled(false);
-//			restMinutes.setEditable(false);
-//			restMinutes.setEnabled(false);
-//			
-//			btnAddWaypoint.setVisible(false);
-//			btnDeleteWaypoint.setVisible(false);
-//			btnMoveWaypoint.setVisible(false);
-//			
-//			importTrack.setVisible(false);
-//			lblImportWaypoints.setVisible(false);
-//			
-//		}
-	
-		List<Employee> emps = new ArrayList<Employee>();
-		for (MissionMember mm : mission.getMembers()){
-			emps.add(mm.getMember());
+			List<Employee> emps = new ArrayList<Employee>();
+			for (MissionMember mm : mission.getMembers()){
+				emps.add(mm.getMember());
+			}
+			observationEditor.setObservers(emps);
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
 		}
-		observationEditor.setObservers(emps);
+		
 	}
 
 	private List<SurveyWaypoint> buildWaypointInput(Mission m) {
