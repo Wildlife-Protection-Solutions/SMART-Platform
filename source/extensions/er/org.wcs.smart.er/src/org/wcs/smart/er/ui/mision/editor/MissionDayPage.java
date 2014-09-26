@@ -95,10 +95,17 @@ public class MissionDayPage extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 
-		Session session = HibernateManager.openSession();	
-		ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-		if (observationOptions.getViewProjection() != null) {
-			observationOptions.getViewProjection().getDefinition(); //load lazy items
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		ObservationOptions observationOptions = null;
+		try {
+			observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			if (observationOptions.getViewProjection() != null) {
+				observationOptions.getViewProjection().getDefinition(); //load lazy items
+			}
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
 		}
 
 		frmSummary = toolkit.createScrolledForm(parent);
@@ -116,8 +123,7 @@ public class MissionDayPage extends EditorPart {
 		
 		dayComposite = new MissionDayComposite(this, observationOptions);
 		dayComposite.createComposite(frmSummary.getBody(), toolkit);
-		dayComposite.setData(editor.getMission());
-		
+		dayComposite.initData();
 	}
 
 	@Override

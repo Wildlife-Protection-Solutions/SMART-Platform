@@ -34,10 +34,13 @@ import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
@@ -131,11 +134,29 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		@Override
 		public void event(Object o) {
-			if (o instanceof Mission){
-				if ( Arrays.equals(((Mission)o).getUuid(), mission.getUuid())){
-					mission = null;
-					getMission();
-					summaryEditor.initControls(mission);
+			if (o instanceof Mission) {
+				if ( Arrays.equals(((Mission)o).getUuid(), mission.getUuid())) {
+					try {
+						Job j = new Job("Reloading mission") {
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								mission = null;
+								getMission(); //to avoid nested transactions exception
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										summaryEditor.initControls();
+									}});
+								return Status.OK_STATUS;
+							}					
+						};
+						j.setSystem(true);
+						j.schedule();
+						j.join();
+					} catch (InterruptedException e) {
+						EcologicalRecordsPlugIn.log("Reload mission job interrupted", e);
+					}
+
 				}
 			}
 		}
@@ -201,13 +222,16 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			
 			byte[] muuid = ((MissionEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
-			//load patrol items so don't have lazy loading issues later.
+			//load mission items so don't have lazy loading issues later.
+			session.beginTransaction();
 			
 			this.mission = (Mission) session.load(Mission.class, muuid);
 
 			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 			this.projections = tmp.toArray(new Projection[tmp.size()]);
 			
+			session.getTransaction().commit();
+			session.close();
 		}
 		return this.mission;
 	}
@@ -225,8 +249,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		showBusy(true);
 		try {
 			
-			getMission();
-			
+			getMission(); //to avoid nested transactions exception
+
 			summaryEditor = new MissionSummaryPage(this);
 			int i = addPage(summaryEditor, getEditorInput());
 			setPageText(i, "Summary");

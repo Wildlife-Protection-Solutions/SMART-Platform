@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -47,6 +46,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
@@ -56,6 +56,7 @@ import org.wcs.smart.er.ui.mision.IdComposite;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Mission editor summary page.
@@ -254,17 +255,27 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		edit.setData(MissionPropertyValuesComposite.class);
 		edit.addHyperlinkListener(this);
 		
-		initControls(missionEditor.getMission());
+		initControls();
 	}
 	
 	
-	public void initControls(Mission mission){
-		form.setText("Mission: " + mission.getId());
-		txtSurveyId.setText(mission.getSurvey().getId());
-		txtComment.setText(mission.getComment() == null ? "" : mission.getComment());
-		txtId.setText(mission.getId());
-		lstMembers.setInput(mission.getMembers());
-		tblProperties.setInput(mission.getMissionPropertyValues());
+	public void initControls() {
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			Mission mission = missionEditor.getMission();
+			session.update(mission);
+
+			form.setText("Mission: " + mission.getId());
+			txtSurveyId.setText(mission.getSurvey().getId());
+			txtComment.setText(mission.getComment() == null ? "" : mission.getComment()); //$NON-NLS-1$
+			txtId.setText(mission.getId());
+			lstMembers.setInput(mission.getMembers());
+			tblProperties.setInput(mission.getMissionPropertyValues());
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
 	}
 
 	@Override
