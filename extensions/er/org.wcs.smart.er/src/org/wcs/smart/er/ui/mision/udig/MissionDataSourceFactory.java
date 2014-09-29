@@ -115,6 +115,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 				if (mission != null ){
 					//load lazy items
 					mission.getWaypoints().size();
+					mission.getTracks().size();
 				}
 			}
 		}catch (Exception ex){
