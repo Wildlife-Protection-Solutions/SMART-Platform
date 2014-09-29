@@ -482,8 +482,7 @@ public class MissionDayComposite {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			this.mission = editor.getMissionEditor().getMission();
-			session.update(mission);
+			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
 		
 			Date date = editor.getDay();
 			
@@ -519,6 +518,7 @@ public class MissionDayComposite {
 			input = buildWaypointInput(mission);
 			WritableList inputList = new WritableList(input, SurveyWaypoint.class);
 			observationTable.setInput(inputList);
+			observationTable.refresh();
 			observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 				
 				@Override
@@ -527,11 +527,11 @@ public class MissionDayComposite {
 						boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 						btnDeleteWaypoint.setEnabled(enabled);
 						
-//						if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
-//							btnMoveWaypoint.setEnabled(enabled);	
-//						}else{
-//							btnMoveWaypoint.setEnabled(false);
-//						}
+						if (!SmartUtils.isSameDate(mission.getStartDate(), mission.getEndDate())) {
+							btnMoveWaypoint.setEnabled(enabled);	
+						} else {
+							btnMoveWaypoint.setEnabled(false);
+						}
 					}
 				}
 			});
@@ -614,19 +614,29 @@ public class MissionDayComposite {
 		int width = 0;
 		Point extent = gc.textExtent(column.guiName);
 		width = extent.x;
-		for (Iterator<SurveyWaypoint> iterator = mission.getWaypoints().iterator(); iterator.hasNext();) {
-			SurveyWaypoint e = iterator.next();
-			String str = getWaypointValueAsString(e, column);
-			
-			if (str != null){
-				int tmp = gc.textExtent(str).x;
-				if ( tmp > width){
-					width = tmp;
+
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
+
+			for (Iterator<SurveyWaypoint> iterator = mission.getWaypoints().iterator(); iterator.hasNext();) {
+				SurveyWaypoint e = iterator.next();
+				String str = getWaypointValueAsString(e, column);
+				
+				if (str != null){
+					int tmp = gc.textExtent(str).x;
+					if ( tmp > width){
+						width = tmp;
+					}
 				}
 			}
+			width = Math.min(200, width);
+			return width + 20;
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
 		}
-		width = Math.min(200, width);
-		return width + 20;
 	}
 
 	protected void showEditTrackDialog() {
@@ -741,8 +751,22 @@ public class MissionDayComposite {
 	}
 
 	protected void moveSelectedWaypoints() {
-		// TODO Auto-generated method stub
-		
+		MoveWaypointDialog dialog = new MoveWaypointDialog(Display.getCurrent().getActiveShell(), mission, editor.getDay());
+		if (dialog.open() == Window.OK && !SmartUtils.isSameDate(editor.getDay(), dialog.getMoveToDate())) {
+			
+			IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
+			
+			List<SurveyWaypoint> toUpdate = new ArrayList<SurveyWaypoint>();
+			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+				SurveyWaypoint w = (SurveyWaypoint) iterator.next();
+				toUpdate.add(w);
+				Waypoint wp = w.getWaypoint();
+				wp.setDateTime(SmartUtils.combineDateTime(dialog.getMoveToDate(), wp.getDateTime()));
+			}
+
+			editor.getMissionEditor().save(toUpdate);
+			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+		}
 	}
 	
 	private String getWaypointValueAsString(SurveyWaypoint element, OtColumn column) {
