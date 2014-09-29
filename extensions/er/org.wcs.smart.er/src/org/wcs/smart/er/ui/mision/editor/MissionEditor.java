@@ -222,10 +222,12 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			
 			byte[] muuid = ((MissionEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
-			//load mission items so don't have lazy loading issues later.
 			session.beginTransaction();
 			
 			this.mission = (Mission) session.load(Mission.class, muuid);
+			//load mission items so don't have lazy loading issues later.
+			this.mission.getWaypoints().size();
+			this.mission.getTracks().size();
 
 			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 			this.projections = tmp.toArray(new Projection[tmp.size()]);
@@ -431,6 +433,11 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
 		saveWaypointJob.setWaypoints(waypoints);
 		saveWaypointJob.schedule();
+		try {
+			saveWaypointJob.join();
+		} catch (InterruptedException e) {
+			EcologicalRecordsPlugIn.log("InterruptedException while saving waypoints", e);
+		}
 		return saveWaypointJob;
 	}
 	
