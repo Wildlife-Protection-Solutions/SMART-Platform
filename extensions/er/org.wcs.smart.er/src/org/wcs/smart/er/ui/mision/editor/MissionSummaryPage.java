@@ -80,14 +80,11 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void doSaveAs() {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
@@ -100,13 +97,11 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 
 	@Override
 	public boolean isDirty() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -117,6 +112,12 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		form = toolkit.createForm(parent);
 		form.getBody().setLayout(new GridLayout());
+		
+		String errorMsg = missionEditor.canEdit();
+		boolean canEdit = errorMsg == null;
+		if (!canEdit){
+			missionEditor.createEditWarning(errorMsg, form.getBody(), toolkit);
+		}
 		
 		Section section = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
 		section.setText("Summary");
@@ -137,18 +138,20 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		txtId = toolkit.createText(left, "");
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtId.setEditable(false);
-		Hyperlink edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
-		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		edit.setData(IdComposite.class);
-		edit.addHyperlinkListener(this);
+		if (canEdit){
+			Hyperlink edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
+			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			edit.setData(IdComposite.class);
+			edit.addHyperlinkListener(this);
+		}else{
+			new Label(left, SWT.NONE);
+		}
 		
 		//survey id
 		toolkit.createLabel(left, "Survey ID:");
 		txtSurveyId = toolkit.createText(left, "");
 		txtSurveyId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtSurveyId.setEditable(false);
-		//edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
-		//edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		new Label(left, SWT.NONE);
 		
 		
@@ -183,10 +186,14 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		});
 		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
-		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		edit.setData(MissionEmployeeComposite.class);
-		edit.addHyperlinkListener(this);
+		if (canEdit){
+			Hyperlink edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
+			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			edit.setData(MissionEmployeeComposite.class);
+			edit.addHyperlinkListener(this);
+		}else{
+			new Label(left, SWT.NONE);
+		}
 		
 		Composite right = toolkit.createComposite(comp, SWT.NONE);
 		right.setLayout(new GridLayout(3, false));
@@ -198,11 +205,15 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		txtComment = toolkit.createText(right, "", SWT.MULTI);
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtComment.setEditable(false);
-		edit = toolkit.createHyperlink(right, "edit...", SWT.NONE);
-		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		edit.setData(CommentComposite.class);
-		edit.addHyperlinkListener(this);
-
+		if (canEdit){
+			Hyperlink edit = toolkit.createHyperlink(right, "edit...", SWT.NONE);
+			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			edit.setData(CommentComposite.class);
+			edit.addHyperlinkListener(this);
+		}else{
+			new Label(right, SWT.NONE);
+		}
+		
 		//mission properties
 		Section propSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
 		propSection.setText("Properties");
@@ -249,11 +260,14 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 				return super.getText(element);
 			}
 		});
-		
-		edit = toolkit.createHyperlink(prop, "edit...", SWT.NONE);
-		edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		edit.setData(MissionPropertyValuesComposite.class);
-		edit.addHyperlinkListener(this);
+		if (canEdit){
+			Hyperlink edit = toolkit.createHyperlink(prop, "edit...", SWT.NONE);
+			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			edit.setData(MissionPropertyValuesComposite.class);
+			edit.addHyperlinkListener(this);
+		}else{
+			new Label(prop, SWT.NONE);
+		}
 		
 		initControls();
 	}

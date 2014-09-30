@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -110,6 +111,13 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, modifiedListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_DELETED, deleteListener);
 		super.dispose();
+	}
+	
+	public String getEditMessage(){
+		return SurveyPermissionManager.INSTANCE.canEditSurveyDesign();
+	}
+	public boolean canEdit(){
+		return SurveyPermissionManager.INSTANCE.canEditSurveyDesign() == null;
 	}
 	
 	@Override

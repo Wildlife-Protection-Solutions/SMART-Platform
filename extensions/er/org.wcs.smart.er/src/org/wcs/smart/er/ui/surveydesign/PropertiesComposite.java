@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -138,7 +139,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 	}
 
 	private void createColumns(TableViewer viewer) {
-		final TableViewerColumn colName = createTableViewerColumn(viewer, "Name", 180);
+		final TableViewerColumn colName = createTableViewerColumn(viewer, Messages.PropertiesComposite_NameColumn, 180);
 		colName.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -161,7 +162,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 			}
 		});
 
-		final TableViewerColumn colValue = createTableViewerColumn(viewer, "Value", 180);
+		final TableViewerColumn colValue = createTableViewerColumn(viewer, Messages.PropertiesComposite_ValueColumn, 180);
 		colValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -200,8 +201,8 @@ public class PropertiesComposite extends SurveyDesignComposite {
 
 	protected void addProperty() {
 		SurveyDesignProperty p = new SurveyDesignProperty();
-		p.setName("Name");
-		p.setValue("Value");
+		p.setName(Messages.PropertiesComposite_DefaultName);
+		p.setValue(Messages.PropertiesComposite_DefaultValue);
 		input.add(p);
 		tableViewer.refresh();
 		fireChangeListeners();
@@ -238,12 +239,12 @@ public class PropertiesComposite extends SurveyDesignComposite {
 
 	@Override
 	public String getTitle() {
-		return "Survey Properties";
+		return Messages.PropertiesComposite_Title;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Properties that will be associated with this survey design. Double click to edit.";
+		return Messages.PropertiesComposite_Description;
 	}
 
 	private abstract class PropertyEditingSupport extends EditingSupport {

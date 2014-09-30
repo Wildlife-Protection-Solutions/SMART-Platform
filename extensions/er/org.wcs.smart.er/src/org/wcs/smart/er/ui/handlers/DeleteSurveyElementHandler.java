@@ -44,6 +44,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -55,6 +56,9 @@ import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -188,6 +192,11 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 		String id = SmartUtils.encodeHex(uuid);
 		session.beginTransaction();
 		try{
+			
+			String error = SurveyPermissionManager.INSTANCE.canDeleteSurveyDesign();
+			if (error != null){
+				throw new Exception(error);
+			}
 			SurveyDesign design = (SurveyDesign) session.load(SurveyDesign.class, uuid);
 			if (design == null){
 				session.getTransaction().rollback();
@@ -197,7 +206,8 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			if (DeleteManager.canDelete(design, session)){
 				List<File> dirsToDelete = new ArrayList<File>();
 				
-				List<Survey> surveys = session.createCriteria(Survey.class).add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
+				List<Survey> surveys = session.createCriteria(Survey.class)
+						.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
 				for (Survey survey : surveys){
 					//delete all waypoints
 					if (survey.getMissions() != null){
@@ -213,7 +223,8 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 					session.delete(survey);
 				}
 				//delete sampling unit
-				List<SamplingUnit> units = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
+				List<SamplingUnit> units = session.createCriteria(SamplingUnit.class)
+						.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
 				for (SamplingUnit unit:  units){
 					session.delete(unit);
 				}
@@ -270,7 +281,14 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 				session.getTransaction().rollback();
 				return false;
 			}
-		
+			id = survey.getId();
+			
+			ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			String error = SurveyPermissionManager.INSTANCE.canEditSurvey(survey, ops);
+			if (error != null){
+				throw new Exception(error);
+			}
+			
 			if (DeleteManager.canDelete(survey, session)){
 				List<File> dirsToDelete = new ArrayList<File>();
 				//delete all waypoints
@@ -341,9 +359,14 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 				return false;
 			}
 			id = mission.getId();
-
-			File fileStore = mission.getFilestoreLocation();
 			
+			ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			String error = SurveyPermissionManager.INSTANCE.canEditMission(mission, ops);
+			if (error != null){
+				throw new Exception(error);
+			}
+			
+			File fileStore = mission.getFilestoreLocation();
 			if (DeleteManager.canDelete(mission, session)){
 				
 				//waypoint delete not cascaded so we need to delete

@@ -101,7 +101,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		glayout.marginHeight = 0;
 		form.getBody().setLayout(glayout);
 
-//		if (canEdit()) {
+		if (parentEditor.canEdit()) {
 			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.SurveyDesignSummaryEditorPage_TranslateLink, SWT.WRAP);
 			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -110,7 +110,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 					translateName();
 				}
 			});
-//		}
+		}
 		
 		Section summarySection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
 		summarySection.setLayout(new GridLayout());
@@ -134,12 +134,14 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		Hyperlink editLink = createLink(content);
-		editLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				translateName();
-			}
-		});
+		if (editLink != null){
+			editLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					translateName();				
+				}
+			});
+		}
 		
 		
 		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Status);
@@ -197,7 +199,9 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		gd.widthHint = 100;
 		txtDescription.setLayoutData(gd);
 		Hyperlink lnk = createEditLink(content, PanelType.DESCRIPTION);
-		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		if (lnk != null){
+			lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		}
 		
 		
 		l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
@@ -216,7 +220,9 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		propertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)propertiesTable.getLayoutData()).minimumHeight = 60;
 		Hyperlink pLink = createEditLink(content, PanelType.PROPERTIES);
-		pLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		if (pLink != null){
+			pLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		}
 		
 		Section missionSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED);
 		missionSection.setText(Messages.SurveyDesignSummaryEditorPage_PropertiesSectionLabel);
@@ -237,7 +243,9 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
 		((GridData)missionPropertiesTable.getLayoutData()).widthHint = 60;
 		Hyperlink locLink = createEditLink(missionComp, PanelType.MISSION_PROPERTIES);
-		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		if (locLink != null){
+			locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		}
 		
 		initValues();
 	}
@@ -315,18 +323,20 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	}
 	
 	private Hyperlink createLink(Composite parent){
+		if (!parentEditor.canEdit()){
+			new Label(parent, SWT.NONE);
+			return null;
+		}
 		Hyperlink editLink = toolkit.createHyperlink(parent, DialogConstants.EDIT_LINK_TEXT, SWT.WRAP);
-		
-	//		if (!this.parentEditor.canEdit()) {
-	//			editLink.setEnabled(false);
-	//				editLink.setVisible(false);
-	//			}
-		
 		return editLink;
 	}
 	
 	
 	private Hyperlink createEditLink(Composite parent, final PanelType panelType) {
+		if (!parentEditor.canEdit()){
+			new Label(parent, SWT.NONE);
+			return null;
+		}
 		Hyperlink editLink = createLink(parent);
 		if (panelType != null) {
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {

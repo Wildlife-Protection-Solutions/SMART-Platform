@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -38,19 +39,30 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.SmartUtils;
 
 public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
@@ -67,6 +79,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private Projection[] projections;
 	
 	private Boolean trackDistanceDirection = null;
+	private ObservationOptions options;
 	
 //	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
@@ -210,15 +223,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 	}
 	
-//	/**
-//	 * 
-//	 * @return null if the patrol can be editted, otherwise a string
-//	 * that described reason why can't be edited.
-//	 */
-//	public String canEdit(){
-//		return PatrolManager.getInstance().canEdit(patrol, ops);
-//	}
-	
 	public Mission getMission(){
 		if (this.mission == null){
 			
@@ -236,6 +240,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 				this.projections = tmp.toArray(new Projection[tmp.size()]);
 			
+				this.options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+				if (options.getViewProjection() != null) {
+					options.getViewProjection().getDefinition(); //load lazy items
+				}
 				session.getTransaction().commit();
 			}finally{
 				session.close();
@@ -244,6 +252,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return this.mission;
 	}
 
+	public ObservationOptions getOptions(){
+		return this.options;
+	}
+	
 	/**
 	 * 
 	 * @return if the mission should record distance and direction
@@ -360,10 +372,18 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * that described reason why it can't be edited.
 	 */
 	public String canEdit(){
-		//TODO:
-		return null;
+		return SurveyPermissionManager.INSTANCE.canEditMission(mission, this.options);
 	}
 	
+	public void createEditWarning(String editError, Composite parent, FormToolkit toolkit){
+		Composite warning = toolkit.createComposite(parent);
+		warning.setLayout(new GridLayout(2, false));
+		Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+		Image x = getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+		lblImage.setImage(x);
+		Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+		lblWarning.setText(MessageFormat.format("This mission cannot be modified: {0}. Please contact administrator if editing is required.", new Object[]{editError})) ;
+	}
 	
 //	public void save(Mission mission){
 //		savePatrolPart(patrol);
